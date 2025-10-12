@@ -6,7 +6,6 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
-import AlertPopUp from './../components/AlertPopUp.vue'
 const router = useRouter()
 const showHomePage = ref(false)
 const scanResult = ref('')
