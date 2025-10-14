@@ -7,6 +7,7 @@ import Quagga from 'quagga'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
+import AlertPopUp from './AlertPopUp.vue'
 const router = useRouter()
 const showHomePage = ref(false)
 const scanResult = ref('')
@@ -479,6 +480,17 @@ function closeGreenPopup() {
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
+          <!-- Alert Popup -->
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp
+              v-if="greenPopup.add.state"
+              :titles="'Success!!'"
+              message="Successfully Added."
+              styleType="green"
+              :operate="'add'"
+              @closePopUp="closeGreenPopup"
+            />
+          </div>
           <!-- Section Header -->
           <!-- <div
             class="bg-blue-700 text-white px-6 py-3 text-xl font-semibold flex items-center space-x-2"
