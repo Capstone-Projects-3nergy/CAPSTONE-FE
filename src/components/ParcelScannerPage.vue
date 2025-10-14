@@ -515,14 +515,14 @@ function closeGreenPopup() {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div id="reader" class="w-full h-full">
-                    <ButtonWeb
-                      label=" Cancel"
-                      color="red"
-                      class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                      @click="stopScan"
-                    />
-                  </div>
+                  <div id="reader" class="w-full h-full"></div>
+                  <ButtonWeb
+                    label=" Cancel"
+                    color="red"
+                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                    @click="stopScan"
+                  />
+
                   <!-- <button
                     @click="stopScan"
                     class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
