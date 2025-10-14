@@ -12,10 +12,14 @@ const emit = defineEmits(['click'])
 
 // Map สีพื้นหลังและ hover
 const bgClass = computed(() => {
-  if (props.color === 'green') return 'bg-green-600 hover:bg-green-700'
-  if (props.color === 'red') return 'bg-red-500 hover:bg-red-600'
-  if (props.color === 'blue') return 'bg-blue-500 hover:bg-blue-600'
-  if (props.color === 'yellow') return 'bg-yellow-500 hover:bg-yellow-600'
+  if (props.color === 'green')
+    return 'bg-green-600 hover:bg-green-700 disabled:bg-gray-400'
+  if (props.color === 'red')
+    return 'bg-red-600 hover:bg-red-700 disabled:bg-gray-400'
+  if (props.color === 'blue')
+    return 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400'
+  if (props.color === 'yellow')
+    return 'bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400'
   return 'bg-gray-500 hover:bg-gray-600'
 })
 </script>

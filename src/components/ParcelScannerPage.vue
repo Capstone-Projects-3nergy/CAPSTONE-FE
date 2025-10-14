@@ -544,20 +544,32 @@ function closeGreenPopup() {
 
               <!-- Buttons -->
               <div class="flex flex-wrap justify-center gap-3">
-                <button
+                <ButtonWeb
+                  label="Scan QR"
+                  color="blue"
+                  @click="startScan('qr')"
+                  :disabled="scanningMode || videoStream"
+                />
+                <!-- <button
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                   class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   Scan QR
-                </button>
-                <button
+                </button> -->
+                <ButtonWeb
+                  label="  Scan Barcode"
+                  color="green"
+                  @click="startScan('barcode')"
+                  :disabled="scanningMode || videoStream"
+                />
+                <!-- <button
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                   class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
                 >
                   Scan Barcode
-                </button>
+                </button> -->
                 <button
                   @click="startCamera"
                   :disabled="scanningMode || videoStream"
