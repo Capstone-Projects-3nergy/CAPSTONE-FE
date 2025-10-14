@@ -1,11 +1,12 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePage.vue'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
+import ButtonWeb from './ButtonWeb.vue'
 const router = useRouter()
 const showHomePage = ref(false)
 const scanResult = ref('')
@@ -600,7 +601,7 @@ function closeGreenPopup() {
 
               <!-- Save/Cancel -->
               <div class="flex justify-end space-x-3">
-                <button
+                <!-- <button
                   @click="saveParcel"
                   class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
                 >
@@ -611,7 +612,9 @@ function closeGreenPopup() {
                   class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600"
                 >
                   Cancel
-                </button>
+                </button> -->
+                <ButtonWeb label="Save" color="green" @click="saveParcel" />
+                <ButtonWeb label="Cancel" color="red" @click="cancelParcel" />
               </div>
             </div>
 
