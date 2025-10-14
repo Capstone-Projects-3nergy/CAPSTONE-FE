@@ -20,6 +20,8 @@ const bgClass = computed(() => {
     return 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400'
   if (props.color === 'yellow')
     return 'bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400'
+  if (props.color === 'orange')
+    return 'bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400'
   return 'bg-gray-500 hover:bg-gray-600'
 })
 </script>
