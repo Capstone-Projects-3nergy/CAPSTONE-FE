@@ -515,13 +515,20 @@ function closeGreenPopup() {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div id="reader" class="w-full h-full"></div>
-                  <button
+                  <div id="reader" class="w-full h-full">
+                    <ButtonWeb
+                      label=" Cancel"
+                      color="red"
+                      class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                      @click="stopScan"
+                    />
+                  </div>
+                  <!-- <button
                     @click="stopScan"
                     class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                   >
                     Cancel
-                  </button>
+                  </button> -->
                 </div>
 
                 <!-- Video Preview -->
@@ -533,13 +540,20 @@ function closeGreenPopup() {
                       : 'hidden'
                   "
                 ></video>
-                <button
+                <ButtonWeb
+                  label=" Close Camera"
+                  color="red"
+                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                  v-if="videoStream"
+                  @click="stopCameraOnly"
+                />
+                <!-- <button
                   @click="stopCameraOnly"
                   v-if="videoStream"
                   class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                 >
                   Close Camera
-                </button>
+                </button> -->
               </div>
 
               <!-- Buttons -->
