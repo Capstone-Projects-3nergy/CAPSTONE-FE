@@ -9,6 +9,7 @@ import {
   useAuthGuard,
   refreshToken
 } from '@/stores/UserManager'
+import ButtonWeb from './ButtonWeb.vue'
 const isPasswordVisible = ref(false)
 const router = useRouter()
 const isEmailOverLimit = ref(false)
@@ -320,8 +321,26 @@ const showRegisterPageWeb = async function () {
               >Forgot password?</a
             >
           </div>
-
-          <button
+          <ButtonWeb
+            label="Sign In"
+            type="submit"
+            color="blue"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            @click="loginHomePageWeb"
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+                trimmedEmail.length === 0 || trimmedPassword.length === 0,
+              'bg-blue-500 hover:bg-blue-600 text-white':
+                trimmedEmail.length > 0 && trimmedPassword.length > 0
+            }"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit
+            "
+          />
+          <!-- <button
             @click="loginHomePageWeb"
             type="submit"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
@@ -332,11 +351,14 @@ const showRegisterPageWeb = async function () {
                 trimmedEmail.length > 0 && trimmedPassword.length > 0
             }"
             :disabled="
-              trimmedEmail.length === 0 || trimmedPassword.length === 0
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit
             "
           >
             Sign In
-          </button>
+          </button> -->
         </form>
 
         <!-- Sign Up -->

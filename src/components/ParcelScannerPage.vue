@@ -558,7 +558,7 @@ function closeGreenPopup() {
                   Scan QR
                 </button> -->
                 <ButtonWeb
-                  label="  Scan Barcode"
+                  label="Scan Barcode"
                   color="green"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
@@ -637,8 +637,28 @@ function closeGreenPopup() {
                 >
                   Cancel
                 </button> -->
-                <ButtonWeb label="Save" color="green" @click="saveParcel" />
-                <ButtonWeb label="Cancel" color="red" @click="cancelParcel" />
+                <ButtonWeb
+                  label="Save"
+                  color="green"
+                  :disabled="
+                    form.field1.length == 0 &&
+                    form.field2.length == 0 &&
+                    form.field3.length == 0 &&
+                    form.notes.length == 0
+                  "
+                  @click="saveParcel"
+                />
+                <ButtonWeb
+                  label="Cancel"
+                  color="red"
+                  :disabled="
+                    form.field1.length == 0 &&
+                    form.field2.length == 0 &&
+                    form.field3.length == 0 &&
+                    form.notes.length == 0
+                  "
+                  @click="cancelParcel"
+                />
               </div>
             </div>
 

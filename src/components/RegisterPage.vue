@@ -3,6 +3,7 @@ import { reactive, ref, computed } from 'vue'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import RegisterAccount from '@/stores/RegisterAccount.js'
+import ButtonWeb from './ButtonWeb.vue'
 const {
   fullName,
   email,
@@ -40,6 +41,7 @@ const isStaffIdOverLimit = ref(false)
 const trimmedEmail = computed(() => form.email.trim())
 const trimmedPassword = computed(() => form.password.trim())
 const trimmedStaffID = computed(() => form.staffId.trim())
+const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 
 function submitForm() {
   alert(`Account created for ${userType.value.toUpperCase()} ✅`)
@@ -237,7 +239,6 @@ const checkInputLength = (field) => {
               type="text"
               placeholder="Full Name"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              required
             />
           </div>
 
@@ -604,8 +605,36 @@ const checkInputLength = (field) => {
               </div>
             </div>
           </transition>
-
-          <button
+          <ButtonWeb
+            label="Sign Up"
+            type="submit"
+            color="blue"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            @click="loginHomePageWeb"
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedStaffID.length === 0 ||
+                trimmedConfirmPassword.length === 0,
+              'bg-blue-500 hover:bg-blue-600 text-white':
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedStaffID.length > 0 &&
+                trimmedConfirmPassword.length > 0
+            }"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedStaffID.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit ||
+              isStaffIdOverLimit ||
+              isConfirmPasswordOverLimit
+            "
+          />
+          <!-- <button
             type="submit"
             class="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
             :class="{
@@ -616,9 +645,18 @@ const checkInputLength = (field) => {
               'bg-blue-500 hover:bg-blue-600 text-white':
                 trimmedStaffID.length > 0 && trimmedStaffID.length > 0
             }"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedStaffID.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit ||
+              isStaffIdOverLimit ||
+              isConfirmPasswordOverLimit
+            " 
           >
             Sign Up
-          </button>
+          </button> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-4">
