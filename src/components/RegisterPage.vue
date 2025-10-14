@@ -196,7 +196,7 @@ const checkInputLength = (field) => {
               />
             </defs>
           </svg>
-          <h1 class="text-xl font-semibold">Tractify</h1>
+          <!-- <h1 class="text-xl font-semibold">Tractify</h1> -->
         </div>
 
         <h2 class="text-2xl font-bold mb-1">Create your account</h2>
