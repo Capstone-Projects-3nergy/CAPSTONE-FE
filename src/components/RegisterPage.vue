@@ -606,6 +606,7 @@ const checkInputLength = (field) => {
             </div>
           </transition>
           <ButtonWeb
+            v-if="userType === 'resident'"
             label="Sign Up"
             type="submit"
             color="blue"
@@ -618,12 +619,42 @@ const checkInputLength = (field) => {
                 trimmedConfirmPassword.length === 0,
               'bg-blue-500 hover:bg-blue-600 text-white':
                 trimmedEmail.length > 0 &&
-                (trimmedPassword.length > 0) &
-                  (trimmedConfirmPassword.length > 0)
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0
             }"
             :disabled="
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit ||
+              isStaffIdOverLimit ||
+              isConfirmPasswordOverLimit
+            "
+          />
+          <ButtonWeb
+            v-if="userType === 'staff'"
+            label="Sign Up"
+            type="submit"
+            color="blue"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            @click=""
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedStaffID.length === 0 ||
+                trimmedConfirmPassword.length === 0,
+              'bg-blue-500 hover:bg-blue-600 text-white':
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedStaffID.length > 0 &&
+                trimmedConfirmPassword.length > 0
+            }"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedStaffID.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
@@ -683,4 +714,3 @@ const checkInputLength = (field) => {
   opacity: 0;
 }
 </style>
-x
