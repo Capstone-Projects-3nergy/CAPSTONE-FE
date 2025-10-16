@@ -7,6 +7,8 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/StaffParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
+import SidebarItem from './SidebarItem.vue'
+
 const router = useRouter()
 const route = useRoute()
 const slides = ['Package 1', 'Package 2', 'Package 3', 'Package 4', 'Package 5']
@@ -135,7 +137,28 @@ const returnLoginPage = async function () {
       <aside class="w-56 bg-blue-500 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <!-- Profile -->
-          <a
+          <SidebarItem
+            title="Profile"
+            @click="() => console.log('Profile Clicked')"
+          >
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
           >
@@ -154,10 +177,26 @@ const returnLoginPage = async function () {
               />
             </svg>
             <span>Profile</span>
-          </a>
+          </a> -->
 
           <!-- My Parcel -->
-          <a
+          <SidebarItem title="My parcel" @click="showResidentParcelPage">
+            <template #icon>
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="showResidentParcelPage"
@@ -176,10 +215,26 @@ const returnLoginPage = async function () {
             </svg>
 
             <span>My parcel</span>
-          </a>
+          </a> -->
 
           <!-- Announcements -->
-          <a
+          <SidebarItem title="Announcements" @click="showAnnouncementPage">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="showAnnouncementPage"
@@ -198,10 +253,25 @@ const returnLoginPage = async function () {
             </svg>
 
             <span>Announcements</span>
-          </a>
-
+          </a> -->
           <!-- Dashboard -->
-          <a
+          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="showDashBoardPage"
@@ -220,10 +290,26 @@ const returnLoginPage = async function () {
             </svg>
 
             <span>Dashboard</span>
-          </a>
+          </a> -->
 
           <!-- 🟢 Scarn Parcel -->
-          <a
+          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="25"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="showParcelScannerPage"
@@ -241,10 +327,26 @@ const returnLoginPage = async function () {
               />
             </svg>
             <span>Scarn parcel</span>
-          </a>
+          </a> -->
 
           <!-- Staff -->
-          <a
+          <SidebarItem title="Staff" @click="showStaffParcelPage">
+            <template #icon>
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16.667 11.4584C18.3962 11.4584 19.7816 10.0625 19.7816 8.33337C19.7816 6.60421 18.3962 5.20837 16.667 5.20837C14.9378 5.20837 13.542 6.60421 13.542 8.33337C13.542 10.0625 14.9378 11.4584 16.667 11.4584ZM8.33366 11.4584C10.0628 11.4584 11.4482 10.0625 11.4482 8.33337C11.4482 6.60421 10.0628 5.20837 8.33366 5.20837C6.60449 5.20837 5.20866 6.60421 5.20866 8.33337C5.20866 10.0625 6.60449 11.4584 8.33366 11.4584ZM8.33366 13.5417C5.90658 13.5417 1.04199 14.7605 1.04199 17.1875V18.75C1.04199 19.323 1.51074 19.7917 2.08366 19.7917H14.5837C15.1566 19.7917 15.6253 19.323 15.6253 18.75V17.1875C15.6253 14.7605 10.7607 13.5417 8.33366 13.5417ZM16.667 13.5417C16.3649 13.5417 16.0212 13.5625 15.6566 13.5938C15.6774 13.6042 15.6878 13.625 15.6982 13.6355C16.8857 14.5 17.7087 15.6563 17.7087 17.1875V18.75C17.7087 19.1146 17.6357 19.4688 17.5212 19.7917H22.917C23.4899 19.7917 23.9587 19.323 23.9587 18.75V17.1875C23.9587 14.7605 19.0941 13.5417 16.667 13.5417Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="showStaffParcelPage"
@@ -263,10 +365,34 @@ const returnLoginPage = async function () {
             </svg>
 
             <span>Staff</span>
-          </a>
+          </a> -->
 
           <!-- Log Out -->
-          <a
+          <SidebarItem title="Log Out" @click="returnLoginPage">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler-logout"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+                />
+                <path d="M9 12h12l-3 -3" />
+                <path d="M18 15l3 -3" />
+              </svg>
+            </template>
+          </SidebarItem>
+
+          <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
             @click="returnLoginPage"
@@ -291,7 +417,7 @@ const returnLoginPage = async function () {
               <path d="M18 15l3 -3" />
             </svg>
             <span>Log Out</span>
-          </a>
+          </a> -->
         </nav>
       </aside>
 
