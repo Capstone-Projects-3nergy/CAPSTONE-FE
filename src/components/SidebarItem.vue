@@ -8,7 +8,7 @@ const emit = defineEmits(['click'])
 <template>
   <a
     href="#"
-    class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
+    class="flex items-center gap-3 p-4 hover:bg-blue-400 rounded"
     @click.prevent="emit('click')"
   >
     <!-- slot สำหรับ icon -->

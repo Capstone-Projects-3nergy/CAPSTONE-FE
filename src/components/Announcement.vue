@@ -19,7 +19,7 @@ const currentSlide = ref(1)
   <div class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
     <!-- 🔵 Top Blue Bar -->
     <header
-      class="h-14 bg-blue-800 flex items-center justify-between px-6 text-white shadow"
+      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow"
     >
       <div class="flex items-center gap-2">
         <svg
@@ -91,7 +91,7 @@ const currentSlide = ref(1)
     <!-- 🔷 Body Section -->
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <aside class="w-56 bg-blue-500 text-white flex flex-col">
+      <aside class="w-56 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <SidebarItem title="Home" @click="showHomePageWeb">
             <template #icon>

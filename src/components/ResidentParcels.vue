@@ -52,7 +52,7 @@ const showHomePageWeb = async function () {
   <div class="min-h-screen bg-gray-100 flex flex-col">
     <!-- Header -->
     <header
-      class="h-14 bg-blue-800 flex items-center justify-between px-6 text-white shadow-md"
+      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow-md"
     >
       <!-- <button
         @click="showHomePageWeb"
@@ -72,7 +72,7 @@ const showHomePageWeb = async function () {
           />
         </svg>
       </button> -->
-      <div class="p-2 inline-block rounded bg-blue-800">
+      <div class="p-2 inline-block rounded bg-blue-900">
         <svg
           width="152"
           height="51"
@@ -141,7 +141,7 @@ const showHomePageWeb = async function () {
 
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <aside class="w-56 bg-blue-500 text-white flex flex-col">
+      <aside class="w-56 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <SidebarItem title="Home" @click="showHomePageWeb">
             <template #icon>

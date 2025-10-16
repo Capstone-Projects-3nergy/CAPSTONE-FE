@@ -308,9 +308,9 @@ function closeGreenPopup() {
   <div class="flex flex-col min-h-screen bg-gray-100">
     <!-- 🔵 Top Bar -->
     <header
-      class="h-14 bg-blue-800 flex items-center justify-between px-6 text-white shadow-md w-full"
+      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow-md w-full"
     >
-      <div class="p-2 inline-block rounded bg-blue-800">
+      <div class="p-2 inline-block rounded bg-blue-900">
         <svg
           width="152"
           height="51"
@@ -382,8 +382,8 @@ function closeGreenPopup() {
     <!-- 🔷 Main Layout (Sidebar + Content) -->
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <aside class="w-56 bg-blue-800 text-white flex flex-col">
-        <nav class="flex-1 divide-y bg-blue-500 divide-blue-700 space-y-1">
+      <aside class="w-56 bg-blue-900 text-white flex flex-col">
+        <nav class="flex-1 divide-y bg-blue-900 divide-blue-700 space-y-1">
           <SidebarItem title="Home" @click="showHomePageWeb">
             <template #icon>
               <svg

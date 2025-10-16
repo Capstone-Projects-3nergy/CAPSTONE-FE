@@ -56,7 +56,7 @@ const returnLoginPage = async function () {
   <div class="min-h-screen flex flex-col bg-gray-100">
     <!-- Header -->
     <header
-      class="h-14 bg-blue-800 flex items-center justify-between px-4 text-white shadow"
+      class="h-14 bg-blue-900 flex items-center justify-between px-4 text-white shadow"
     >
       <svg
         width="152"
