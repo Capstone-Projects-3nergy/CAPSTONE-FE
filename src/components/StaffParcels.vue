@@ -203,7 +203,23 @@ const showHomePageWeb = async () => {
       <!-- Sidebar -->
       <aside class="w-60 bg-blue-500 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
-          <a
+          <SidebarItem title="Home" @click="showHomePageWeb">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a
             href="#"
             class="flex items-center p-2 rounded hover:bg-blue-700"
             @click="showHomePageWeb"
@@ -222,8 +238,29 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Home</a
+          > -->
+          <SidebarItem
+            title="Profile"
+            @click="() => console.log('Profile Clicked')"
           >
-          <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
                 width="24"
@@ -241,9 +278,25 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Profile</a
-          >
-          <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
-            ><span class="mr-2"
+          > -->
+          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
               ><svg
                 width="24"
                 height="24"
@@ -258,8 +311,24 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Dashboard</a
-          >
-          <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+          > -->
+          <SidebarItem title=" Manage Parcel" @click="">
+            <template #icon>
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
                 width="25"
@@ -275,8 +344,24 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Manage Parcel</a
-          >
-          <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+          > -->
+          <SidebarItem title="Manage Residents" @click="">
+            <template #icon>
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
                 width="25"
@@ -292,8 +377,24 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Manage Residents</a
-          >
-          <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
+          > -->
+          <SidebarItem title="Manage Announcements" @click="">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
                 width="24"
@@ -309,7 +410,7 @@ const showHomePageWeb = async () => {
               </svg>
             </span>
             Manage Announcements</a
-          >
+          > -->
         </nav>
       </aside>
 
