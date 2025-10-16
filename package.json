@@ -19,6 +19,7 @@
     "@zxing/library": "^0.21.3",
     "axios": "^1.12.2",
     "chart.js": "^4.5.0",
+    "firebase": "^12.4.0",
     "onscan.js": "^1.5.2",
     "quagga": "^0.12.1",
     "tesseract.js": "^6.0.1",
