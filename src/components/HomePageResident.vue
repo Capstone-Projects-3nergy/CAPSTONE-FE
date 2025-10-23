@@ -26,26 +26,26 @@ function prevSlide() {
 function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parceldcanner' })
-  showParcelScanner.value = true
-}
+// const showParcelScannerPage = async function () {
+//   router.replace({ name: 'parceldcanner' })
+//   showParcelScanner.value = true
+// }
 const showResidentParcelPage = async function () {
   router.replace({ name: 'residentparcels' })
   showResidentParcels.value = true
 }
-const showStaffParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
-}
+// const showStaffParcelPage = async function () {
+//   router.replace({ name: 'staffparcels' })
+//   showStaffParcels.value = true
+// }
 const showAnnouncementPage = async function () {
   router.replace({ name: 'announcement' })
   showAnnouncement.value = true
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+// const showDashBoardPage = async function () {
+//   router.replace({ name: 'dashboard' })
+//   showDashBoard.value = true
+// }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
