@@ -429,6 +429,23 @@ const returnLoginPage = async function () {
             </span>
             Manage Announcements</a
           > -->
+          <!-- 🟢 Scarn Parcel -->
+          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="25"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
         </nav>
         <!-- Log Out -->
         <SidebarItem
