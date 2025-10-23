@@ -331,56 +331,14 @@ const returnLoginPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showParcelScannerPage"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="25"
-              height="25"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <path
-                d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
-                fill="white"
-              />
-            </svg>
-            <span>Scarn parcel</span>
-          </a> -->
-
-          <!-- Log Out -->
-          <SidebarItem title="Log Out" @click="returnLoginPage">
-            <template #icon>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-tabler-logout"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
-                />
-                <path d="M9 12h12l-3 -3" />
-                <path d="M18 15l3 -3" />
-              </svg>
-            </template>
-          </SidebarItem>
-
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="returnLoginPage"
-          >
+        </nav>
+        <!-- Log Out -->
+        <SidebarItem
+          title="Log Out"
+          class="flex justify-center mt-auto"
+          @click="returnLoginPage"
+        >
+          <template #icon>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -400,9 +358,8 @@ const returnLoginPage = async function () {
               <path d="M9 12h12l-3 -3" />
               <path d="M18 15l3 -3" />
             </svg>
-            <span>Log Out</span>
-          </a> -->
-        </nav>
+          </template>
+        </SidebarItem>
       </aside>
 
       <!-- Main Content -->
