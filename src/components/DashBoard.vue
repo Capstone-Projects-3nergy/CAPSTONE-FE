@@ -7,6 +7,8 @@ import LoginPage from './LoginPage.vue'
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
+const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
 // ข้อมูลตัวอย่าง — แก้เป็นข้อมูลจริงของคุณได้
 const monthsTH = [
   'ม.ค.',
@@ -125,6 +127,14 @@ const showHomePageStaffWeb = async function () {
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
+}
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parceldcanner' })
+  showParcelScanner.value = true
+}
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
 }
 </script>
 <template>
@@ -330,7 +340,7 @@ const returnLoginPage = async function () {
               </svg> </span
             >Dashboard
           </a> -->
-          <SidebarItem title=" Manage Parcel" @click="">
+          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
             <template #icon>
               <svg
                 width="25"
