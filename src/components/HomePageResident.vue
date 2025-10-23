@@ -238,7 +238,7 @@ const returnLoginPage = async function () {
         <!-- Log Out -->
         <SidebarItem
           title="Log Out"
-          class="bottom-auto"
+          class="flex justify-center mt-auto"
           @click="returnLoginPage"
         >
           <template #icon>

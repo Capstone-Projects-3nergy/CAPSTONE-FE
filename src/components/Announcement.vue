@@ -3,12 +3,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import LoginPage from './LoginPage.vue'
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
 const currentSlide = ref(1)
 const showResidentParcels = ref(false)
-
+const returnLogin = ref(false)
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
@@ -16,6 +17,10 @@ const showHomePageResidentWeb = async function () {
 const showResidentParcelPage = async function () {
   router.replace({ name: 'residentparcels' })
   showResidentParcels.value = true
+}
+const returnLoginPage = async function () {
+  router.replace({ name: 'login' })
+  returnLogin.value = true
 }
 </script>
 
@@ -188,6 +193,34 @@ const showResidentParcelPage = async function () {
             <span>Announcements</span>
           </a> -->
         </nav>
+        <!-- Log Out -->
+        <SidebarItem
+          title="Log Out"
+          class="flex justify-center mt-auto"
+          @click="returnLoginPage"
+        >
+          <template #icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler-logout"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+              />
+              <path d="M9 12h12l-3 -3" />
+              <path d="M18 15l3 -3" />
+            </svg>
+          </template>
+        </SidebarItem>
       </aside>
 
       <!-- Main Content -->
@@ -333,4 +366,7 @@ const showResidentParcelPage = async function () {
   <Teleport to="body" v-if="showHomePageResident"
     ><HomePageResident
   /></Teleport>
+  <Teleport to="body" v-if="returnLogin">
+    <LoginPage> </LoginPage>
+  </Teleport>
 </template>
