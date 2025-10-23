@@ -7,6 +7,7 @@ import LoginPage from '@/components/LoginPage.vue'
 import RegisterPage from '@/components/RegisterPage.vue'
 import Announcement from '@/components/Announcement.vue'
 import DashBoard from '@/components/DashBoard.vue'
+import HomePageStaff from '@/components/HomePageStaff.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -28,7 +29,11 @@ const routes = [
     name: 'home',
     component: HomePage
   },
-  ,
+  {
+    path: '/homepage/staff/:id',
+    name: 'home',
+    component: HomePageStaff
+  },
   {
     path: '/announcement',
     name: 'announcement',
