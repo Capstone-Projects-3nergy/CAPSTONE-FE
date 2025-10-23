@@ -54,7 +54,7 @@ const routes = [
         component: ManageResident
       },
       {
-        path: '/homepage/staff/staffparcelspage',
+        path: '/homepage/staff/manageparcel',
         name: 'staffparcels',
         component: StaffParcelsPage
       },
