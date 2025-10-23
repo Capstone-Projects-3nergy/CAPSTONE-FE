@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/components/HomePage.vue'
+import HomePage from '@/components/HomePageResident.vue'
 import ParcelScannerPage from '@/components/ParcelScannerPage.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/StaffParcels.vue'

@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import HomePage from '@/components/HomePage.vue'
+import HomePage from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 const router = useRouter()
 const showHomePage = ref(false)
