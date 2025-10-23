@@ -31,7 +31,7 @@ const routes = [
   },
   {
     path: '/homepage/staff',
-    name: 'home',
+    name: 'homestaff',
     component: HomePageStaff
   },
   {
