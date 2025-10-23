@@ -5,7 +5,7 @@ import Chart from 'chart.js/auto' // ✅ ต้อง import chart.js ก่อ�
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 const router = useRouter()
-const showHomePage = ref(false)
+const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 // ข้อมูลตัวอย่าง — แก้เป็นข้อมูลจริงของคุณได้
 const monthsTH = [
@@ -118,9 +118,9 @@ onMounted(() => {
   totalEl.innerText = total.toLocaleString()
 })
 
-const showHomePageWeb = async function () {
-  router.replace({ name: 'home' })
-  showHomePage.value = true
+const showHomePageStaffWeb = async function () {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -222,7 +222,7 @@ const returnLoginPage = async function () {
       <!-- Sidebar -->
       <aside class="w-56 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
-          <SidebarItem title="Home" @click="showHomePageWeb">
+          <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
                 width="24"
@@ -258,38 +258,6 @@ const returnLoginPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
-            <template #icon>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                  fill="white"
-                />
-              </svg>
-            </template>
-          </SidebarItem>
-          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-            <span class="mr-2"
-              ><svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                  fill="white"
-                />
-              </svg> </span
-            >Dashboard
-          </a> -->
           <SidebarItem
             title="Profile"
             @click="() => console.log('Profile Clicked')"
@@ -330,6 +298,38 @@ const returnLoginPage = async function () {
             </span>
             Profile</a
           > -->
+          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg> </span
+            >Dashboard
+          </a> -->
           <SidebarItem title=" Manage Parcel" @click="">
             <template #icon>
               <svg
