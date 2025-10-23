@@ -8,6 +8,8 @@ import RegisterPage from '@/components/RegisterPage.vue'
 import Announcement from '@/components/Announcement.vue'
 import DashBoard from '@/components/DashBoard.vue'
 import HomePageStaff from '@/components/HomePageStaff.vue'
+import ManageResident from '@/components/ManageResident.vue'
+import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -27,37 +29,51 @@ const routes = [
   {
     path: '/homepage/resident',
     name: 'home',
-    component: HomePageResident
+    component: HomePageResident,
+    children: [
+      {
+        path: '/homepage/resident/parcelspage',
+        name: 'residentparcels',
+        component: ResidentParcelsPage
+      },
+      {
+        path: '/homepage/resident/announcement',
+        name: 'announcement',
+        component: Announcement
+      }
+    ]
   },
   {
     path: '/homepage/staff',
     name: 'homestaff',
-    component: HomePageStaff
-  },
-  {
-    path: '/announcement',
-    name: 'announcement',
-    component: Announcement
-  },
-  {
-    path: '/parcelscannerpage',
-    name: 'parceldcanner',
-    component: ParcelScannerPage
-  },
-  {
-    path: '/residentparcelspage',
-    name: 'residentparcels',
-    component: ResidentParcelsPage
-  },
-  {
-    path: '/staffparcelspage',
-    name: 'staffparcels',
-    component: StaffParcelsPage
-  },
-  {
-    path: '/dashBoardpage',
-    name: 'dashboard',
-    component: DashBoard
+    component: HomePageStaff,
+    children: [
+      {
+        path: '/homepage/staff/manageresident',
+        name: 'manageresident',
+        component: ManageResident
+      },
+      {
+        path: '/homepage/staff/staffparcelspage',
+        name: 'staffparcels',
+        component: StaffParcelsPage
+      },
+      {
+        path: '/homepage/staff/manageannouncement',
+        name: 'manageannouncement ',
+        component: ManageAnnouncement
+      },
+      {
+        path: '/homepage/staff/parcelscannerpage',
+        name: 'parceldcanner',
+        component: ParcelScannerPage
+      },
+      {
+        path: '/homepage/staff/dashBoardpage',
+        name: 'dashboard',
+        component: DashBoard
+      }
+    ]
   }
 ]
 
