@@ -430,7 +430,7 @@ const returnLoginPage = async function () {
               />
             </svg>
 
-            Home Page
+            Staff Home Page
           </h1>
 
           <!-- Slider -->

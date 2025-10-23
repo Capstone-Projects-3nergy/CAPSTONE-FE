@@ -255,7 +255,7 @@ const returnLoginPage = async function () {
             <span>Announcements</span>
           </a> -->
           <!-- Dashboard -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -270,7 +270,7 @@ const returnLoginPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -293,7 +293,7 @@ const returnLoginPage = async function () {
           </a> -->
 
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -308,7 +308,7 @@ const returnLoginPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -330,7 +330,7 @@ const returnLoginPage = async function () {
           </a> -->
 
           <!-- Staff -->
-          <SidebarItem title="Staff" @click="showStaffParcelPage">
+          <!-- <SidebarItem title="Staff" @click="showStaffParcelPage">
             <template #icon>
               <svg
                 width="25"
@@ -345,7 +345,7 @@ const returnLoginPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -446,7 +446,7 @@ const returnLoginPage = async function () {
               />
             </svg>
 
-            Home Page
+            Resident Home Page
           </h1>
 
           <!-- Slider -->
