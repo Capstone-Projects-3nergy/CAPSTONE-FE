@@ -27,13 +27,13 @@ function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parceldcanner' })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-const showResidentParcelPage = async function () {
-  router.replace({ name: 'residentparcels' })
-  showResidentParcels.value = true
-}
+// const showResidentParcelPage = async function () {
+//   router.replace({ name: 'residentparcels' })
+//   showResidentParcels.value = true
+// }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
