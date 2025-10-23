@@ -34,7 +34,7 @@ const showResidentParcelPage = async function () {
   router.replace({ name: 'residentparcels' })
   showResidentParcels.value = true
 }
-const showStaffParcelPage = async function () {
+const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
@@ -215,7 +215,7 @@ const returnLoginPage = async function () {
 
             <span>Dashboard</span>
           </a> -->
-          <SidebarItem title=" Manage Parcel" @click="">
+          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
             <template #icon>
               <svg
                 width="25"

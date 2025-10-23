@@ -1,11 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import HomePage from '@/components/HomePageResident.vue'
+import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 const router = useRouter()
-const showHomePage = ref(false)
-
+const showHomePageStaff = ref(false)
+const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
+const returnLogin = ref(false)
+const showDashBoard = ref(false)
 const parcels = ref([
   {
     id: 1,
@@ -99,9 +102,27 @@ const parcels = ref([
   }
 ])
 
-const showHomePageWeb = async () => {
-  router.replace({ name: 'home' })
-  showHomePage.value = true
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parceldcanner' })
+  showParcelScanner.value = true
+}
+
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
+
+const returnLoginPage = async function () {
+  router.replace({ name: 'login' })
+  returnLogin.value = true
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
 }
 </script>
 
@@ -203,7 +224,7 @@ const showHomePageWeb = async () => {
       <!-- Sidebar -->
       <aside class="w-60 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
-          <SidebarItem title="Home" @click="showHomePageWeb">
+          <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
                 width="24"
@@ -312,7 +333,7 @@ const showHomePageWeb = async () => {
             </span>
             Dashboard</a
           > -->
-          <SidebarItem title=" Manage Parcel" @click="">
+          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
             <template #icon>
               <svg
                 width="25"
@@ -411,7 +432,52 @@ const showHomePageWeb = async () => {
             </span>
             Manage Announcements</a
           > -->
+          <!-- 🟢 Scarn Parcel -->
+          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="25"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
         </nav>
+        <!-- Log Out -->
+        <SidebarItem
+          title="Log Out"
+          class="flex justify-center mt-auto"
+          @click="returnLoginPage"
+        >
+          <template #icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler-logout"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+              />
+              <path d="M9 12h12l-3 -3" />
+              <path d="M18 15l3 -3" />
+            </svg>
+          </template>
+        </SidebarItem>
       </aside>
 
       <!-- Main Content -->
@@ -546,7 +612,22 @@ const showHomePageWeb = async () => {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage">
-    <HomePage />
+  <Teleport to="body" v-if="showHomePageStaff">
+    <HomePageStaff />
+  </Teleport>
+  <Teleport to="body" v-if="showParcelScanner">
+    <ParcelScanner> </ParcelScanner>
+  </Teleport>
+  <Teleport to="body" v-if="showResidentParcels">
+    <ResidentParcelsPage> </ResidentParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="showStaffParcels">
+    <StaffParcelsPage> </StaffParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="returnLogin">
+    <LoginPage> </LoginPage>
+  </Teleport>
+  <Teleport to="body" v-if="showDashBoard">
+    <DashBoard> </DashBoard>
   </Teleport>
 </template>

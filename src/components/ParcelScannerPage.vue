@@ -15,6 +15,7 @@ const router = useRouter()
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
 const previewUrl = ref(null)
+const showStaffParcels = ref(false)
 // ฟอร์มปัจจุบัน
 const form = reactive({
   field1: '', // ชื่อผู้รับ
@@ -312,6 +313,14 @@ const greenPopup = reactive({
 function closeGreenPopup() {
   greenPopup.add.state = false
 }
+const returnLoginPage = async function () {
+  router.replace({ name: 'login' })
+  returnLogin.value = true
+}
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
 </script>
 
 <template>
@@ -509,7 +518,7 @@ function closeGreenPopup() {
 
             <span>Dashboard</span>
           </a> -->
-          <SidebarItem title=" Manage Parcel" @click="">
+          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
             <template #icon>
               <svg
                 width="25"
@@ -626,6 +635,34 @@ function closeGreenPopup() {
             </template>
           </SidebarItem>
         </nav>
+        <!-- Log Out -->
+        <SidebarItem
+          title="Log Out"
+          class="flex justify-center mt-auto"
+          @click="returnLoginPage"
+        >
+          <template #icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler-logout"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+              />
+              <path d="M9 12h12l-3 -3" />
+              <path d="M18 15l3 -3" />
+            </svg>
+          </template>
+        </SidebarItem>
       </aside>
 
       <!-- Content -->
@@ -929,6 +966,21 @@ function closeGreenPopup() {
       </main>
     </div>
   </div>
+  <Teleport to="body" v-if="showParcelScanner">
+    <ParcelScanner> </ParcelScanner>
+  </Teleport>
+  <Teleport to="body" v-if="showResidentParcels">
+    <ResidentParcelsPage> </ResidentParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="showStaffParcels">
+    <StaffParcelsPage> </StaffParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="returnLogin">
+    <LoginPage> </LoginPage>
+  </Teleport>
+  <Teleport to="body" v-if="showDashBoard">
+    <DashBoard> </DashBoard>
+  </Teleport>
 </template>
 
 <style scoped>
