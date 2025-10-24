@@ -351,7 +351,10 @@ const showDashBoardPage = async function () {
             </span>
             Dashboard</a
           > -->
-          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+          <SidebarItem
+            title=" Manage Parcel"
+            class="bg-blue-400 cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"

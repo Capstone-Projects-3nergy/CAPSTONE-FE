@@ -340,7 +340,7 @@ const showDashBoardPage = async function () {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="">
+          <SidebarItem title="Dashboard" class="bg-blue-400 cursor-default">
             <template #icon>
               <svg
                 width="24"

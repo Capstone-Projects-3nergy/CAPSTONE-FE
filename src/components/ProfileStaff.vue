@@ -278,10 +278,7 @@ const showDashBoardPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" class="bg-blue-400 cursor-default">
             <template #icon>
               <svg
                 width="24"

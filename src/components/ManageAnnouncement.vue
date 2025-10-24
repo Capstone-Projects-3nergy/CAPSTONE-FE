@@ -421,7 +421,7 @@ const showDashBoardPage = async function () {
           > -->
           <SidebarItem
             title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
+            class="bg-blue-400 cursor-default"
           >
             <template #icon>
               <svg

@@ -385,7 +385,10 @@ const showDashBoardPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem
+            title="Manage Residents"
+            class="bg-blue-400 cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"

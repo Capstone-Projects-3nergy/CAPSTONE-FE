@@ -180,7 +180,7 @@ const returnLoginPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <SidebarItem title="Announcements">
+          <SidebarItem title="Announcements" class="bg-blue-400 cursor-default">
             <template #icon>
               <svg
                 width="24"

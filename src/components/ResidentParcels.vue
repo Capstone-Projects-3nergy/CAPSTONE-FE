@@ -234,7 +234,7 @@ const returnLoginPage = async function () {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="My parcel">
+          <SidebarItem title="My parcel" class="bg-blue-400 cursor-default">
             <template #icon>
               <svg
                 width="25"

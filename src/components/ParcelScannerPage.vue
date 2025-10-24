@@ -664,7 +664,7 @@ const returnLoginPage = async function () {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <SidebarItem title="Scarn parcel" class="bg-blue-400 cursor-default">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
