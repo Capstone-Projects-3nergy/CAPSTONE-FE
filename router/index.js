@@ -10,6 +10,8 @@ import DashBoard from '@/components/DashBoard.vue'
 import HomePageStaff from '@/components/HomePageStaff.vue'
 import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
+import ProfileResident from '@/components/ProfileResident.vue'
+import ProfileStaff from '@/components/ProfileStaff.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -46,6 +48,12 @@ const routes = [
     name: 'announcement',
     component: Announcement
   },
+  ,
+  {
+    path: '/homepage/resident/profile',
+    name: 'profileresident',
+    component: ProfileResident
+  },
 
   // Staff
   {
@@ -81,7 +89,7 @@ const routes = [
   {
     path: '/homepage/staff/profile',
     name: 'profilestaff',
-    component: DashBoard
+    component: ProfileStaff
   }
 ]
 
