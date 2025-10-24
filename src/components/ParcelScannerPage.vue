@@ -1,7 +1,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import HomePageStaff from '@/components/HomePageStaff.vue'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
 import axios from 'axios'
@@ -9,8 +8,9 @@ import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import SidebarItem from './SidebarItem.vue'
-import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
@@ -1011,8 +1011,9 @@ const returnLoginPage = async function () {
       </main>
     </div>
   </div>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>

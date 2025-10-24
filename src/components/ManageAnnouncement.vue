@@ -1,8 +1,12 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
+import LoginPage from './LoginPage.vue'
+import DashBoard from './DashBoard.vue'
+import HomePageStaff from './HomePageStaff.vue'
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -382,7 +386,7 @@ const showDashBoardPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -415,7 +419,10 @@ const showDashBoardPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements" @click="">
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
+          >
             <template #icon>
               <svg
                 width="24"
@@ -630,11 +637,9 @@ const showDashBoardPage = async function () {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePageStaff">
-    <HomePageStaff />
-  </Teleport>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>

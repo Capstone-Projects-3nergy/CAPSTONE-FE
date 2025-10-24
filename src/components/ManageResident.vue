@@ -3,6 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
+import LoginPage from './LoginPage.vue'
+import DashBoard from './DashBoard.vue'
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -630,11 +634,9 @@ const showDashBoardPage = async function () {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePageStaff">
-    <HomePageStaff />
-  </Teleport>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>
