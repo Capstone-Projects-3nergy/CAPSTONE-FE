@@ -16,98 +16,27 @@ const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
+const staff = ref({
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '081-234-5678',
+  position: 'Support Staff'
+})
+
+const saveProfile = () => {
+  console.log('Saving profile...', staff.value)
+  alert('Profile updated successfully!')
+}
+
+const cancelEdit = () => {
+  // ตัวอย่างรีเซ็ตกลับค่าเดิม
+  staff.value = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    phone: '081-234-5678',
+    position: 'Support Staff'
   }
-])
+}
 
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
@@ -499,8 +428,9 @@ const showDashBoardPage = async function () {
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
-        <div class="flex space-x-1">
+      <main class="flex-1 p-6 bg-gray-50">
+        <!-- Header -->
+        <div class="flex items-center space-x-2 mb-6">
           <svg
             width="25"
             height="25"
@@ -514,117 +444,88 @@ const showDashBoardPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Profile Staff</h2>
-        </div>
-        <!-- Date Tabs -->
-        <div class="flex space-x-2 mb-4">
-          <!-- <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Month
-          </button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Year
-          </button> -->
+          <h2 class="text-2xl font-bold text-gray-800">Profile Staff</h2>
         </div>
 
-        <!-- Parcel Table -->
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
-          <!-- <table class="min-w-full text-left border-collapse">
-            <thead class="bg-gray-100">
-              <tr>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Tracking
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Name
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Room Number
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Contact
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Date in
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Operation
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.tracking }}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.recipient }}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
-                <td class="px-4 py-3">
-                  <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                    :class="{
-                      'bg-yellow-400': p.status === 'Pending',
-                      'bg-green-400': p.status === 'Picked Up',
-                      'bg-red-400': p.status === 'Unclaimed'
-                    }"
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <button class="text-blue-600 hover:text-blue-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
-                      />
-                    </svg>
-                  </button>
-                  <button class="text-red-600 hover:text-red-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table> -->
-        </div>
+        <!-- Profile Card -->
+        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
+          <!-- รูปโปรไฟล์ -->
+          <div class="flex items-center space-x-4 mb-6">
+            <img
+              src="https://via.placeholder.com/100"
+              alt="Staff Avatar"
+              class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover"
+            />
+            <div>
+              <h3 class="text-xl font-semibold text-gray-800">
+                {{ staff.name }}
+              </h3>
+              <p class="text-gray-500">{{ staff.position }}</p>
+            </div>
+          </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <!-- <button class="px-3 py-1 rounded hover:bg-gray-200">
-            &lt; Previous
-          </button>
-          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
-          <span class="px-2 py-1">...</span>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button> -->
+          <!-- ฟอร์มแก้ไขข้อมูล -->
+          <form class="space-y-4" @submit.prevent="saveProfile">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Full Name</label
+              >
+              <input
+                v-model="staff.name"
+                type="text"
+                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Email</label
+              >
+              <input
+                v-model="staff.email"
+                type="email"
+                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Phone Number</label
+              >
+              <input
+                v-model="staff.phone"
+                type="text"
+                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Position</label
+              >
+              <input
+                v-model="staff.position"
+                type="text"
+                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-4">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                @click="cancelEdit"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </div>
