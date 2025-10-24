@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto' // ✅ ต้อง import chart.js ก่อนใช้
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
+import HomePageStaff from './HomePageStaff.vue'
+import ParcelScannerPage from './ParcelScannerPage.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
@@ -597,9 +601,9 @@ const showDashBoardPage = async function () {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <ParcelScannerPage> </ParcelScannerPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>
