@@ -16,7 +16,8 @@ const currentIndex = ref(0)
 const showParcelScanner = ref(false)
 const showResidentParcels = ref(false)
 const showStaffParcels = ref(false)
-const showAnnouncement = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
 function prevSlide() {
@@ -38,9 +39,13 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
-  showAnnouncement.value = true
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -248,7 +253,7 @@ const returnLoginPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -281,7 +286,10 @@ const returnLoginPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements" @click="">
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
+          >
             <template #icon>
               <svg
                 width="24"

@@ -129,9 +129,7 @@ const showDashBoardPage = async function () {
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
     <!-- Header -->
-    <header
-      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow-md"
-    >
+    <header class="flex items-center w-full h-16">
       <!-- <button
         @click="showHomePageWeb"
         class="flex items-center hover:text-blue-300 transition mr-4 cursor-pointer"
@@ -150,7 +148,9 @@ const showDashBoardPage = async function () {
           />
         </svg>
       </button> -->
-      <div class="p-2 inline-block rounded bg-blue-900">
+      <div
+        class="w-60 bg-blue-900 text-blue-500 flex items-center justify-center h-full"
+      >
         <svg
           width="152"
           height="51"
@@ -187,7 +187,7 @@ const showDashBoardPage = async function () {
         </svg>
       </div>
       <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
-      <div class="flex items-center space-x-2">
+      <div class="flex-1 bg-white flex justify-end items-center px-4 shadow">
         <svg
           width="14"
           height="14"
@@ -214,8 +214,8 @@ const showDashBoardPage = async function () {
           </defs>
         </svg>
         <div class="flex flex-col">
-          <span class="font-medium">👤 John Demon</span>
-          <span class="text-gray-400 text-sm">Dormitory Admin</span>
+          <span class="font-medium text-blue-500">👤 John Demon</span>
+          <span class="text-blue-500 text-sm">Dormitory Admin</span>
         </div>
       </div>
     </header>
@@ -502,18 +502,18 @@ const showDashBoardPage = async function () {
         </div>
         <!-- Date Tabs -->
         <div class="flex space-x-2 mb-4">
-          <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
+          <!-- <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
           <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
             Month
           </button>
           <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
             Year
-          </button>
+          </button> -->
         </div>
 
         <!-- Parcel Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
-          <table class="min-w-full text-left border-collapse">
+          <!-- <table class="min-w-full text-left border-collapse">
             <thead class="bg-gray-100">
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-700">
@@ -596,19 +596,19 @@ const showDashBoardPage = async function () {
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table> -->
         </div>
 
         <!-- Pagination -->
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button class="px-3 py-1 rounded hover:bg-gray-200">
+          <!-- <button class="px-3 py-1 rounded hover:bg-gray-200">
             &lt; Previous
           </button>
           <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
           <span class="px-2 py-1">...</span>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button> -->
         </div>
       </main>
     </div>
