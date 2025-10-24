@@ -9,6 +9,9 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
 const showDashBoard = ref(false)
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
 const parcels = ref([
   {
     id: 1,
@@ -107,13 +110,21 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parceldcanner' })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
 }
 
 const returnLoginPage = async function () {
@@ -369,7 +380,7 @@ const showDashBoardPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -402,7 +413,10 @@ const showDashBoardPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements" @click="">
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
+          >
             <template #icon>
               <svg
                 width="24"
@@ -614,10 +628,7 @@ const showDashBoardPage = async function () {
       </main>
     </div>
   </div>
-
-  <Teleport to="body" v-if="showHomePageStaff">
-    <HomePageStaff />
-  </Teleport>
+  <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
     <ParcelScanner> </ParcelScanner>
   </Teleport>

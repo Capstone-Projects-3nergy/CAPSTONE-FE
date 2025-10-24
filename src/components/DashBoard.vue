@@ -597,9 +597,21 @@ const showDashBoardPage = async function () {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>
+  <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>>
+  <Teleport to="body" v-if="showParcelScanner">
+    <ParcelScanner> </ParcelScanner>
+  </Teleport>
+  <Teleport to="body" v-if="showResidentParcels">
+    <ResidentParcelsPage> </ResidentParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="showStaffParcels">
+    <StaffParcelsPage> </StaffParcelsPage>
+  </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
+  </Teleport>
+  <Teleport to="body" v-if="showDashBoard">
+    <DashBoard> </DashBoard>
   </Teleport>
 </template>
 
