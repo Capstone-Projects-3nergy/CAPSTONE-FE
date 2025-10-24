@@ -27,10 +27,29 @@ const returnLoginPage = async function () {
 <template>
   <div class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
     <!-- 🔵 Top Blue Bar -->
-    <header
-      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow"
-    >
-      <div class="flex items-center gap-2">
+    <!-- Header -->
+    <header class="flex items-center w-full h-16">
+      <!-- <button
+        @click="showHomePageWeb"
+        class="flex items-center hover:text-blue-300 transition mr-4 cursor-pointer"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 19.5L8.25 12l7.5-7.5"
+          />
+        </svg>
+      </button> -->
+      <div
+        class="w-56 bg-blue-900 text-blue-500 flex items-center justify-center h-full"
+      >
         <svg
           width="152"
           height="51"
@@ -66,8 +85,10 @@ const returnLoginPage = async function () {
           </defs>
         </svg>
       </div>
-
-      <div class="flex items-center gap-3">
+      <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
+      <div
+        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
+      >
         <svg
           width="14"
           height="14"
@@ -93,7 +114,10 @@ const returnLoginPage = async function () {
             </clipPath>
           </defs>
         </svg>
-        <span>👤 Janny Don</span>
+        <div class="flex flex-col">
+          <span class="font-medium text-blue-500">👤 John Demon</span>
+          <span class="text-blue-500 text-sm">Dormitory Admin</span>
+        </div>
       </div>
     </header>
 

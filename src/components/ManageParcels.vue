@@ -129,9 +129,8 @@ const showDashBoardPage = async function () {
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
     <!-- Header -->
-    <header
-      class="h-14 bg-blue-900 flex items-center justify-between px-6 text-white shadow-md"
-    >
+    <!-- Header -->
+    <header class="flex items-center w-full h-16">
       <!-- <button
         @click="showHomePageWeb"
         class="flex items-center hover:text-blue-300 transition mr-4 cursor-pointer"
@@ -150,7 +149,9 @@ const showDashBoardPage = async function () {
           />
         </svg>
       </button> -->
-      <div class="p-2 inline-block rounded bg-blue-900">
+      <div
+        class="w-56 bg-blue-900 text-blue-500 flex items-center justify-center h-full"
+      >
         <svg
           width="152"
           height="51"
@@ -187,7 +188,9 @@ const showDashBoardPage = async function () {
         </svg>
       </div>
       <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
-      <div class="flex items-center space-x-2">
+      <div
+        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
+      >
         <svg
           width="14"
           height="14"
@@ -214,8 +217,8 @@ const showDashBoardPage = async function () {
           </defs>
         </svg>
         <div class="flex flex-col">
-          <span class="font-medium">👤 John Demon</span>
-          <span class="text-gray-400 text-sm">Dormitory Admin</span>
+          <span class="font-medium text-blue-500">👤 John Demon</span>
+          <span class="text-blue-500 text-sm">Dormitory Admin</span>
         </div>
       </div>
     </header>
