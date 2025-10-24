@@ -77,6 +77,11 @@ const routes = [
     path: '/homepage/staff/dashboardpage',
     name: 'dashboard',
     component: DashBoard
+  },
+  {
+    path: '/homepage/staff/profile',
+    name: 'profilestaff',
+    component: DashBoard
   }
 ]
 
