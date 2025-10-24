@@ -283,130 +283,61 @@ const returnLoginPage = async function () {
           >
             <path
               d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
+              fill="#0EA5E9"
             />
           </svg>
-
           <h2 class="text-2xl font-bold text-gray-800">Profile Resident</h2>
         </div>
 
         <!-- Profile Card -->
-        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
-          <!-- รูปโปรไฟล์ -->
-          <div class="flex items-center space-x-4 mb-6">
-            <img
-              src="https://via.placeholder.com/100"
-              alt="Resident Avatar"
-              class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover"
-            />
-            <div>
-              <h3 class="text-xl font-semibold text-gray-800">
-                {{ resident.name }}
-              </h3>
-              <p class="text-gray-500">
-                Room {{ resident.room }} | Building {{ resident.building }}
-              </p>
+        <div class="bg-white rounded-2xl shadow p-6 max-w-3xl mx-auto">
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start md:space-x-6"
+          >
+            <!-- Profile Image -->
+            <div
+              class="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-500 mb-4 md:mb-0"
+            >
+              <img
+                src="https://i.pravatar.cc/150?img=12"
+                alt="Profile"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <!-- Profile Info -->
+            <div class="flex-1 space-y-3 text-gray-700 w-full">
+              <div>
+                <p class="text-sm text-gray-500">Full Name</p>
+                <p class="text-lg font-semibold">Krittapas Jaruburanasak</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Room</p>
+                <p class="text-lg font-semibold">B-305</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Building</p>
+                <p class="text-lg font-semibold">Building B</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Email</p>
+                <p class="text-lg font-semibold">krittapas@example.com</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Phone</p>
+                <p class="text-lg font-semibold">098-765-4321</p>
+              </div>
+
+              <!-- Edit Button -->
+              <div class="pt-4 flex space-x-3">
+                <button
+                  class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition"
+                >
+                  Edit Profile
+                </button>
+              </div>
             </div>
           </div>
-
-          <!-- ฟอร์มแก้ไขข้อมูล -->
-          <form class="space-y-4" @submit.prevent="saveProfile">
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Full Name</label
-              >
-              <input
-                v-model="resident.name"
-                type="text"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Email</label
-              >
-              <input
-                v-model="resident.email"
-                type="email"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700"
-                  >Phone Number</label
-                >
-                <input
-                  v-model="resident.phone"
-                  type="text"
-                  class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700"
-                  >National ID</label
-                >
-                <input
-                  v-model="resident.idCard"
-                  type="text"
-                  class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700"
-                  >Room Number</label
-                >
-                <input
-                  v-model="resident.room"
-                  type="text"
-                  class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700"
-                  >Building</label
-                >
-                <input
-                  v-model="resident.building"
-                  type="text"
-                  class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Address</label
-              >
-              <textarea
-                v-model="resident.address"
-                rows="3"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-              ></textarea>
-            </div>
-
-            <!-- ปุ่มบันทึก / ยกเลิก -->
-            <div class="flex justify-end space-x-2 pt-4">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
-                @click="cancelEdit"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
         </div>
       </main>
     </div>

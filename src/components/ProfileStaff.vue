@@ -16,27 +16,27 @@ const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const staff = ref({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '081-234-5678',
-  position: 'Support Staff'
-})
+// const staff = ref({
+//   name: 'John Doe',
+//   email: 'john.doe@example.com',
+//   phone: '081-234-5678',
+//   position: 'Support Staff'
+// })
 
-const saveProfile = () => {
-  console.log('Saving profile...', staff.value)
-  alert('Profile updated successfully!')
-}
+// const saveProfile = () => {
+//   console.log('Saving profile...', staff.value)
+//   alert('Profile updated successfully!')
+// }
 
-const cancelEdit = () => {
-  // ตัวอย่างรีเซ็ตกลับค่าเดิม
-  staff.value = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '081-234-5678',
-    position: 'Support Staff'
-  }
-}
+// const cancelEdit = () => {
+//   // ตัวอย่างรีเซ็ตกลับค่าเดิม
+//   staff.value = {
+//     name: 'John Doe',
+//     email: 'john.doe@example.com',
+//     phone: '081-234-5678',
+//     position: 'Support Staff'
+//   }
+// }
 
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
@@ -443,89 +443,54 @@ const showDashBoardPage = async function () {
               fill="#185DC0"
             />
           </svg>
-
           <h2 class="text-2xl font-bold text-gray-800">Profile Staff</h2>
         </div>
 
         <!-- Profile Card -->
-        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
-          <!-- รูปโปรไฟล์ -->
-          <div class="flex items-center space-x-4 mb-6">
-            <img
-              src="https://via.placeholder.com/100"
-              alt="Staff Avatar"
-              class="w-24 h-24 rounded-full border-4 border-blue-500 object-cover"
-            />
-            <div>
-              <h3 class="text-xl font-semibold text-gray-800">
-                {{ staff.name }}
-              </h3>
-              <p class="text-gray-500">{{ staff.position }}</p>
+        <div class="bg-white rounded-2xl shadow p-6 max-w-3xl mx-auto">
+          <div
+            class="flex flex-col md:flex-row items-center md:items-start md:space-x-6"
+          >
+            <!-- Profile Image -->
+            <div
+              class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-600 mb-4 md:mb-0"
+            >
+              <img
+                src="https://i.pravatar.cc/150?img=8"
+                alt="Profile"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <!-- Profile Info -->
+            <div class="flex-1 space-y-3 text-gray-700 w-full">
+              <div>
+                <p class="text-sm text-gray-500">Full Name</p>
+                <p class="text-lg font-semibold">Somchai Phonprasert</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Position</p>
+                <p class="text-lg font-semibold">Building Staff</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Email</p>
+                <p class="text-lg font-semibold">somchai@building.com</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Phone</p>
+                <p class="text-lg font-semibold">081-234-5678</p>
+              </div>
+
+              <!-- Edit Button -->
+              <div class="pt-4">
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Edit Profile
+                </button>
+              </div>
             </div>
           </div>
-
-          <!-- ฟอร์มแก้ไขข้อมูล -->
-          <form class="space-y-4" @submit.prevent="saveProfile">
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Full Name</label
-              >
-              <input
-                v-model="staff.name"
-                type="text"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Email</label
-              >
-              <input
-                v-model="staff.email"
-                type="email"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Phone Number</label
-              >
-              <input
-                v-model="staff.phone"
-                type="text"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700"
-                >Position</label
-              >
-              <input
-                v-model="staff.position"
-                type="text"
-                class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div class="flex justify-end space-x-2 pt-4">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
-                @click="cancelEdit"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
         </div>
       </main>
     </div>
