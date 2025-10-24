@@ -9,6 +9,10 @@ const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
+const showDashBoard = ref(false)
 // ข้อมูลตัวอย่าง — แก้เป็นข้อมูลจริงของคุณได้
 const monthsTH = [
   'ม.ค.',
@@ -129,12 +133,29 @@ const returnLoginPage = async function () {
   returnLogin.value = true
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parceldcanner' })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
+}
+// const showResidentParcelPage = async function () {
+//   router.replace({ name: 'residentparcels' })
+//   showResidentParcels.value = true
+// }
+
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
 }
 </script>
 <template>
@@ -379,7 +400,7 @@ const showManageParcelPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -412,7 +433,10 @@ const showManageParcelPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements" @click="">
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
+          >
             <template #icon>
               <svg
                 width="24"
