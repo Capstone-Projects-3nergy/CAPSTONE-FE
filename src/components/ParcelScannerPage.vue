@@ -1012,7 +1012,7 @@ const returnLoginPage = async function () {
       </main>
     </div>
   </div>
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

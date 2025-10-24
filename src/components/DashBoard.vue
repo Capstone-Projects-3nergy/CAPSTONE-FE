@@ -602,7 +602,7 @@ const showDashBoardPage = async function () {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
