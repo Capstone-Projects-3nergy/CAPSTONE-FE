@@ -7,6 +7,7 @@ import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
 
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -339,7 +340,7 @@ const showDashBoardPage = async function () {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard" @click="">
             <template #icon>
               <svg
                 width="24"
@@ -603,13 +604,10 @@ const showDashBoardPage = async function () {
 
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScannerPage> </ParcelScannerPage>
+    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="showStaffParcels">
-    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
