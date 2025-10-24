@@ -150,7 +150,7 @@ const showDashBoardPage = async function () {
         </svg>
       </button> -->
       <div
-        class="w-56 bg-blue-900 text-blue-500 flex items-center justify-center h-full"
+        class="w-60 bg-blue-900 text-blue-500 flex items-center justify-center h-full"
       >
         <svg
           width="152"
