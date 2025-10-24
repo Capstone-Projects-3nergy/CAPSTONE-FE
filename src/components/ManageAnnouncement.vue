@@ -187,7 +187,9 @@ const showDashBoardPage = async function () {
         </svg>
       </div>
       <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
-      <div class="flex-1 bg-white flex justify-end items-center px-4 shadow">
+      <div
+        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
+      >
         <svg
           width="14"
           height="14"
