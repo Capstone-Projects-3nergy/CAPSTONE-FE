@@ -8,6 +8,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
+import ProfileStaff from './ProfileStaff.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -20,6 +21,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
+const showProfileStaff = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }
@@ -50,6 +52,10 @@ const ShowManageResidentPage = async function () {
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -159,10 +165,7 @@ const returnLoginPage = async function () {
       <aside class="w-56 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <!-- Profile -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -494,6 +497,9 @@ const returnLoginPage = async function () {
   </Teleport>
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
+  </Teleport>
+  <Teleport to="body" v-if="showProfileStaff">
+    <ProfileStaff> </ProfileStaff>
   </Teleport>
 </template>
 

@@ -8,6 +8,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
+import ProfileResident from './ProfileResident.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -19,6 +20,7 @@ const showStaffParcels = ref(false)
 const showAnnouncement = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
+const showProfileResident = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }
@@ -46,6 +48,10 @@ const showAnnouncementPage = async function () {
 //   router.replace({ name: 'dashboard' })
 //   showDashBoard.value = true
 // }
+const showProfileResidentPage = async function () {
+  router.replace({ name: 'profileresident' })
+  showProfileResident.value = true
+}
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
@@ -113,7 +119,9 @@ const returnLoginPage = async function () {
         </svg>
       </div>
       <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
-      <div class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full">
+      <div
+        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
+      >
         <svg
           width="14"
           height="14"
@@ -152,10 +160,7 @@ const returnLoginPage = async function () {
       <aside class="w-56 bg-blue-900 text-white flex flex-col">
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <!-- Profile -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileResidentPage">
             <template #icon>
               <svg
                 width="24"
@@ -387,6 +392,9 @@ const returnLoginPage = async function () {
   </Teleport>
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
+  </Teleport>
+  <Teleport to="body" v-if="showProfileStaff">
+    <ProfileResident> </ProfileResident>
   </Teleport>
 </template>
 
