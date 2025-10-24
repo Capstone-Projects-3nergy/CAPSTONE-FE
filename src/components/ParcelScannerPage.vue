@@ -16,6 +16,12 @@ const showHomePageStaff = ref(false)
 const scanResult = ref('')
 const previewUrl = ref(null)
 const showStaffParcels = ref(false)
+const showParcelScanner = ref(false)
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
+const showDashBoard = ref(false)
+const returnLogin = ref(false)
 // ฟอร์มปัจจุบัน
 const form = reactive({
   field1: '', // ชื่อผู้รับ
@@ -75,10 +81,7 @@ function deleteSaveInformation(index) {
 const deletePreview = () => {
   previewUrl.value = null
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parceldcanner' })
-  showParcelScanner.value = true
-}
+
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
@@ -313,13 +316,30 @@ const greenPopup = reactive({
 function closeGreenPopup() {
   greenPopup.add.state = false
 }
-const returnLoginPage = async function () {
-  router.replace({ name: 'login' })
-  returnLogin.value = true
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
 }
+// const showResidentParcelPage = async function () {
+//   router.replace({ name: 'residentparcels' })
+//   showResidentParcels.value = true
+// }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+
+const returnLoginPage = async function () {
+  router.replace({ name: 'login' })
+  returnLogin.value = true
 }
 </script>
 
@@ -573,7 +593,7 @@ const showManageParcelPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -606,7 +626,10 @@ const showManageParcelPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements" @click="">
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
+          >
             <template #icon>
               <svg
                 width="24"
