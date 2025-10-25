@@ -56,6 +56,10 @@ const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
 }
+const isCollapsed = ref(false)
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <template>
@@ -165,11 +169,45 @@ const returnLoginPage = async function () {
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <aside class="w-56 bg-blue-900 text-white flex flex-col">
+      <aside
+        :class="[
+          'bg-blue-900 text-white flex flex-col transition-all duration-300',
+          isCollapsed ? 'w-16' : 'w-56'
+        ]"
+      >
+        <!-- ปุ่มเปิด/ปิด -->
+        <div class="flex justify-end p-3">
+          <button @click="toggleSidebar" class="text-white focus:outline-none">
+            <!-- ไอคอน Hamburger -->
+            <svg
+              class="w-6 h-6 text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18 6H6m12 4H6m12 4H6m12 4H6"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- เนื้อหาใน Sidebar -->
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
-          <!-- Profile -->
-          <SidebarItem title="Profile" @click="showProfileResidentPage">
+          <SidebarItem
+            title="Profile"
+            :collapsed="isCollapsed"
+            @click="showProfileResidentPage"
+          >
             <template #icon>
+              <!-- ใส่ SVG ไอคอนของคุณ -->
               <svg
                 width="24"
                 height="24"
@@ -186,29 +224,12 @@ const returnLoginPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
-                fill="white"
-              />
-            </svg>
-            <span>Profile</span>
-          </a> -->
 
-          <!-- My Parcel -->
-          <SidebarItem title="My parcel" @click="showResidentParcelPage">
+          <SidebarItem
+            title="My parcel"
+            :collapsed="isCollapsed"
+            @click="showResidentParcelPage"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -224,29 +245,12 @@ const returnLoginPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showResidentParcelPage"
+
+          <SidebarItem
+            title="Announcements"
+            :collapsed="isCollapsed"
+            @click="showAnnouncementPage"
           >
-            <svg
-              width="25"
-              height="25"
-              viewBox="0 0 25 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>My parcel</span>
-          </a> -->
-
-          <!-- Announcements -->
-          <SidebarItem title="Announcements" @click="showAnnouncementPage">
             <template #icon>
               <svg
                 width="24"
@@ -263,9 +267,11 @@ const returnLoginPage = async function () {
             </template>
           </SidebarItem>
         </nav>
+
         <!-- Log Out -->
         <SidebarItem
           title="Log Out"
+          :collapsed="isCollapsed"
           class="flex justify-center mt-auto"
           @click="returnLoginPage"
         >

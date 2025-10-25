@@ -22,6 +22,10 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
+const isCollapsed = ref(false)
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }
@@ -170,7 +174,35 @@ const returnLoginPage = async function () {
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <aside class="w-56 bg-blue-900 text-white flex flex-col">
+      <aside
+        :class="[
+          'bg-blue-900 text-white flex flex-col transition-all duration-300',
+          isCollapsed ? 'w-16' : 'w-56'
+        ]"
+      >
+        <!-- ปุ่มเปิด/ปิด -->
+        <div class="flex justify-end p-3">
+          <button @click="toggleSidebar" class="text-white focus:outline-none">
+            <!-- ไอคอน Hamburger -->
+            <svg
+              class="w-6 h-6 text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18 6H6m12 4H6m12 4H6m12 4H6"
+              />
+            </svg>
+          </button>
+        </div>
         <nav class="flex-1 divide-y divide-blue-700 space-y-1">
           <!-- Profile -->
           <SidebarItem title="Profile" @click="showProfileStaffPage">

@@ -1,25 +1,20 @@
 <script setup>
-const props = defineProps({
-  title: { type: String, required: true }
+defineProps({
+  title: String,
+  collapsed: Boolean
 })
-const emit = defineEmits(['click'])
 </script>
 
 <template>
-  <a
-    href="#"
-    class="flex items-center gap-3 p-4 hover:bg-blue-400 rounded"
-    @click.prevent="emit('click')"
+  <div
+    @click="$emit('click')"
+    class="flex items-center gap-3 p-4 hover:bg-blue-700 cursor-pointer rounded transition-all duration-200"
   >
-    <!-- slot สำหรับ icon -->
-    <slot name="icon">
-      <!-- default placeholder ถ้าไม่ได้ส่ง icon -->
-      <div class="w-6 h-6 bg-white/30 rounded flex-shrink-0"></div>
-    </slot>
-
-    <!-- title -->
-    <span class="whitespace-nowrap overflow-hidden text-ellipsis flex-1">
-      {{ title }}
-    </span>
-  </a>
+    <slot name="icon"></slot>
+    <span
+      v-if="!collapsed"
+      class="whitespace-nowrap overflow-hidden text-ellipsis flex-1"
+      >{{ title }}</span
+    >
+  </div>
 </template>
