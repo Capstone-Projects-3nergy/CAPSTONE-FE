@@ -8,6 +8,7 @@ const showAnnouncement = ref(false)
 const router = useRouter()
 const showHomePageResident = ref(false)
 const returnLogin = ref(false)
+const showProfileResident = ref(false)
 const parcels = ref([
   {
     id: 1,
@@ -55,6 +56,10 @@ const showAnnouncementPage = async function () {
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
+}
+const showProfileResidentPage = async function () {
+  router.replace({ name: 'profileresident' })
+  showProfileResident.value = true
 }
 </script>
 
@@ -194,10 +199,7 @@ const returnLoginPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileResidentPage">
             <template #icon>
               <svg
                 width="24"

@@ -10,6 +10,7 @@ const tab = ref('event')
 const currentSlide = ref(1)
 const showResidentParcels = ref(false)
 const returnLogin = ref(false)
+const showProfileResident = ref(false)
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
@@ -21,6 +22,10 @@ const showResidentParcelPage = async function () {
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
+}
+const showProfileResidentPage = async function () {
+  router.replace({ name: 'profileresident' })
+  showProfileResident.value = true
 }
 </script>
 
@@ -142,10 +147,7 @@ const returnLoginPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileResidentPage">
             <template #icon>
               <svg
                 width="24"
