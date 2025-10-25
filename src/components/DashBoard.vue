@@ -18,6 +18,7 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
 // ข้อมูลตัวอย่าง — แก้เป็นข้อมูลจริงของคุณได้
 const monthsTH = [
   'ม.ค.',
@@ -158,9 +159,13 @@ const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
+// const showDashBoardPage = async function () {
+//   router.replace({ name: 'dashboard' })
+//   showDashBoard.value = true
+// }
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
 </script>
 <template>
@@ -300,10 +305,7 @@ const showDashBoardPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"

@@ -23,6 +23,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
+const showProfileStaff = ref(false)
 // ฟอร์มปัจจุบัน
 const form = reactive({
   field1: '', // ชื่อผู้รับ
@@ -317,10 +318,10 @@ const greenPopup = reactive({
 function closeGreenPopup() {
   greenPopup.add.state = false
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
-  showParcelScanner.value = true
-}
+// const showParcelScannerPage = async function () {
+//   router.replace({ name: 'parcelscanner' })
+//   showParcelScanner.value = true
+// }
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
 //   showResidentParcels.value = true
@@ -341,6 +342,10 @@ const ShowManageResidentPage = async function () {
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
 </script>
 
@@ -483,10 +488,7 @@ const returnLoginPage = async function () {
             </span>
             Home
           </a> -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"

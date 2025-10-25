@@ -16,6 +16,7 @@ const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
+const showProfileStaff = ref(false)
 const parcels = ref([
   {
     id: 1,
@@ -141,6 +142,10 @@ const returnLoginPage = async function () {
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
 </script>
 
@@ -280,10 +285,7 @@ const showDashBoardPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem
-            title="Profile"
-            @click="() => console.log('Profile Clicked')"
-          >
+          <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
