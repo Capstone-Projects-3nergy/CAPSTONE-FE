@@ -436,7 +436,7 @@ const showDashBoardPage = async function () {
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 bg-gray-50">
+      <main class="flex-1 p-6">
         <!-- Header -->
         <div class="flex items-center space-x-2 mb-6">
           <svg
