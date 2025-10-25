@@ -14,8 +14,12 @@ const emit = defineEmits(['click'])
     <!-- slot สำหรับ icon -->
     <slot name="icon">
       <!-- default placeholder ถ้าไม่ได้ส่ง icon -->
-      <div class="w-6 h-6 bg-white/30 rounded"></div>
+      <div class="w-6 h-6 bg-white/30 rounded flex-shrink-0"></div>
     </slot>
-    <span>{{ title }}</span>
+
+    <!-- title -->
+    <span class="whitespace-nowrap overflow-hidden text-ellipsis flex-1">
+      {{ title }}
+    </span>
   </a>
 </template>
