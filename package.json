@@ -20,6 +20,7 @@
     "axios": "^1.12.2",
     "chart.js": "^4.5.0",
     "firebase": "^12.4.0",
+    "jwt-decode": "^4.0.0",
     "onscan.js": "^1.5.2",
     "pinia": "^3.0.3",
     "quagga": "^0.12.1",
