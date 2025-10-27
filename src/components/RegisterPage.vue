@@ -4,6 +4,30 @@ import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import RegisterAccount from '@/stores/RegisterAccount.js'
 import ButtonWeb from './ButtonWeb.vue'
+import { useRegisterManager } from '@/stores/RegisterManager'
+
+const registerStore = useRegisterManager()
+
+const submitForm = async () => {
+  await registerStore.registerAccount({
+    userType: userType.value,
+    fullName: form.fullName,
+    email: form.email,
+    password: form.password,
+    dormitoryName: form.dormitoryName,
+    gender: form.gender,
+    staffId: form.staffId,
+    position: form.position
+  })
+
+  if (registerStore.successMessage) {
+    alert(registerStore.successMessage)
+    router.push({ name: 'login' })
+  } else if (registerStore.errorMessage) {
+    alert(registerStore.errorMessage)
+  }
+}
+
 const {
   fullName,
   email,
@@ -43,9 +67,9 @@ const trimmedPassword = computed(() => form.password.trim())
 const trimmedStaffID = computed(() => form.staffId.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 
-function submitForm() {
-  alert(`Account created for ${userType.value.toUpperCase()} ✅`)
-}
+// function submitForm() {
+//   alert(`Account created for ${userType.value.toUpperCase()} ✅`)
+// }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
@@ -638,7 +662,7 @@ const checkInputLength = (field) => {
             type="submit"
             color="blue"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click=""
+            @click="submitForm"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
                 trimmedEmail.length === 0 ||
