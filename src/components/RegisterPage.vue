@@ -2,7 +2,6 @@
 import { reactive, ref, computed } from 'vue'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
-import RegisterAccount from '@/stores/RegisterAccount.js'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'

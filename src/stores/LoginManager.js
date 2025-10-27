@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '@/firebase/firebaseConfig' // ต้องมีไฟล์ firebaseConfig.js ตั้งค่า firebase app
 import { ref } from 'vue'
-import jwtDecode from 'jwt-decode'
+import * as jwtDecodeModule from 'jwt-decode' // แก้ import สำหรับ Vite
 
 export const useLoginManager = defineStore('loginManager', () => {
   // 🧠 state
@@ -54,7 +54,7 @@ export const useLoginManager = defineStore('loginManager', () => {
 
       // ✅ decode JWT จาก backend (ถ้ามี)
       if (data.accessToken) {
-        const decoded = jwtDecode(data.accessToken)
+        const decoded = jwtDecodeModule.default(data.accessToken)
         console.log('Decoded JWT payload:', decoded)
       }
 
