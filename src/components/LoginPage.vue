@@ -28,6 +28,13 @@ const error = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
 const loginManager = useLoginManager()
+// --- ปิด popup ด้วยมือ ---
+const closeIncorrectAlter = () => {
+  incorrect.value = false
+}
+const closeProblemAlter = () => {
+  error.value = false
+}
 
 const loginHomePageWeb = async () => {
   const data = await loginManager.loginAccount(
@@ -36,6 +43,8 @@ const loginHomePageWeb = async () => {
     router
   )
   if (!data) {
+    incorrect.value = true
+    error.value = true
     alert(loginManager.errorMessage || 'Login failed')
   }
 }
@@ -45,6 +54,8 @@ const signIn = () => {
     router.replace({ name: 'home' })
     showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
   } else {
+    incorrect.value = true
+    error.value = true
     alert('Please fill in both email and password.')
   }
 }
@@ -237,7 +248,21 @@ const showRegisterPageWeb = async function () {
         <p class="text-gray-500 mb-6">
           Welcome to tractify - Let's get started
         </p>
-
+        <!-- ✅ Popups อยู่ด้านบน -->
+        <AlertPopUp
+          v-if="incorrect"
+          :titles="'Username or Password is incorrect.'"
+          @closePopUp="closeIncorrectAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          @closePopUp="closeProblemAlter"
+          message="Error!!"
+          styleType="red"
+        />
         <!-- Form -->
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">

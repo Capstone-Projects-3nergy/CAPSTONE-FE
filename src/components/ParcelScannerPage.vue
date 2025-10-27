@@ -316,10 +316,16 @@ function cancelParcel() {
 const greenPopup = reactive({
   add: { state: false }
 })
+const redPopup = reactive({
+  add: { state: false }
+})
 
 // --- ปิด popup ด้วยมือ ---
 function closeGreenPopup() {
   greenPopup.add.state = false
+}
+function closeRedPopup() {
+  redPopup.add.state = false
 }
 // const showParcelScannerPage = async function () {
 //   router.replace({ name: 'parcelscanner' })
@@ -789,6 +795,16 @@ const showProfileStaffPage = async function () {
               styleType="green"
               :operate="'add'"
               @closePopUp="closeGreenPopup"
+            />
+          </div>
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp
+              v-if="redPopup.add.state"
+              :titles="'Error!!'"
+              message="Can Not Added."
+              styleType="red"
+              :operate="'add'"
+              @closePopUp="closeRedPopup"
             />
           </div>
           <!-- Section Header -->

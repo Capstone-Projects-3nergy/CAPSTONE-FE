@@ -6,6 +6,21 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
+const incorrect = ref(false)
+const error = ref(false)
+const success = ref(false)
+
+// --- ปิด popup ด้วยมือ ---
+// --- ปิด popup ด้วยมือ ---
+const closeIncorrectAlter = () => {
+  incorrect.value = false
+}
+const closeProblemAlter = () => {
+  error.value = false
+}
+const closeSuccessAlter = () => {
+  success.value = false
+}
 
 const submitForm = async () => {
   await registerStore.registerAccount({
@@ -27,19 +42,19 @@ const submitForm = async () => {
   }
 }
 
-const {
-  fullName,
-  email,
-  phone,
-  dormRoom,
-  username,
-  password,
-  confirmPassword,
-  loading,
-  errorMessage,
-  successMessage,
-  registerAccount
-} = RegisterAccount.setup()
+// const {
+//   fullName,
+//   email,
+//   phone,
+//   dormRoom,
+//   username,
+//   password,
+//   confirmPassword,
+//   loading,
+//   errorMessage,
+//   successMessage,
+//   registerAccount
+// } = RegisterAccount.setup()
 const userType = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
@@ -226,7 +241,28 @@ const checkInputLength = (field) => {
         <p class="text-gray-500 text-sm mb-6">
           Welcome to Tractify — Create your account below
         </p>
-
+        <!-- ✅ Popups อยู่ด้านบน -->
+        <AlertPopUp
+          v-if="incorrect"
+          :titles="'Username or Password is incorrect.'"
+          @closePopUp="closeIncorrectAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          @closePopUp="closeProblemAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="success"
+          :titles="'Register New Account is Successfull.'"
+          @closePopUp="closeSuccessAlter"
+          message="Success!!"
+          styleType="green"
+        />
         <!-- Toggle Buttons -->
         <div class="flex bg-gray-100 rounded-lg mb-6 p-1">
           <button
