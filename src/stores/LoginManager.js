@@ -1,15 +1,17 @@
 // 🔥 LoginManager.js — ใช้ Firebase Auth + เชื่อม Backend + เก็บใน Pinia
 import { defineStore } from 'pinia'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth'
 import { auth } from '@/firebase/firebaseConfig' // ต้องมีไฟล์ firebaseConfig.js ตั้งค่า firebase app
 import { ref } from 'vue'
-
-// ✅ ตัวช่วย decode JWT (สำหรับ backend ที่ส่ง token กลับ)
 import jwtDecode from 'jwt-decode'
 
 export const useLoginManager = defineStore('loginManager', () => {
   // 🧠 state
-  const user = ref(null) // เก็บข้อมูลผู้ใช้ที่ล็อกอินอยู่
+  const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref(null)
   const successMessage = ref(null)
@@ -32,18 +34,17 @@ export const useLoginManager = defineStore('loginManager', () => {
       // 🧾 ดึง token ของผู้ใช้จาก Firebase
       const idToken = await firebaseUser.getIdToken()
 
-      // ✅ ส่ง token ไป backend เพื่อยืนยันสิทธิ์และเช็ค role (resident / staff)
+      // ✅ ส่ง token ไป backend เพื่อยืนยันสิทธิ์และเช็ค role
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: idToken }) // ส่ง JWT จาก Firebase ให้ backend ตรวจสอบ
+        body: JSON.stringify({ token: idToken })
       })
 
       const data = await response.json()
-
       if (!response.ok) throw new Error(data.message || 'Login failed')
 
-      // 📌 สมมุติ backend ส่งกลับ: { success: true, role: 'resident', name: 'John' }
+      // 📌 เก็บข้อมูลผู้ใช้
       user.value = {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
@@ -59,7 +60,7 @@ export const useLoginManager = defineStore('loginManager', () => {
 
       successMessage.value = 'Login successful!'
 
-      // 🚀 นำทางไปหน้า dashboard/home ตาม role
+      // 🚀 นำทางตาม role
       if (data.role === 'resident') router.replace({ name: 'home' })
       else if (data.role === 'staff') router.replace({ name: 'staffDashboard' })
       else router.replace({ name: 'home' })
@@ -85,12 +86,44 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
+  // 👁️‍🗨️ ติดตามสถานะผู้ใช้ (ล็อกอินอยู่ / ออก)
+  const monitorAuthState = (router) => {
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // ✅ ผู้ใช้ล็อกอินอยู่
+        const idToken = await firebaseUser.getIdToken()
+        const response = await fetch('http://localhost:3000/api/verifyToken', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: idToken })
+        })
+
+        const data = await response.json()
+
+        user.value = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: data.name,
+          role: data.role
+        }
+
+        console.log('✅ User still logged in:', user.value)
+      } else {
+        // 🚫 ผู้ใช้ยังไม่ได้ล็อกอิน
+        user.value = null
+        console.log('🚫 User logged out')
+        if (router) router.replace({ name: 'login' })
+      }
+    })
+  }
+
   return {
     user,
     isLoading,
     errorMessage,
     successMessage,
     loginAccount,
-    logoutAccount
+    logoutAccount,
+    monitorAuthState
   }
 })
