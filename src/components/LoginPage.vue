@@ -3,13 +3,14 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
-import {
-  login,
-  decodeJWT,
-  useAuthGuard,
-  refreshToken
-} from '@/stores/UserManager'
+// import {
+//   login,
+//   decodeJWT,
+//   useAuthGuard,
+//   refreshToken
+// } from '@/stores/UserManager'
 import ButtonWeb from './ButtonWeb.vue'
+import { useLoginManager } from '@/stores/LoginManager'
 const isPasswordVisible = ref(false)
 const router = useRouter()
 const isEmailOverLimit = ref(false)
@@ -25,61 +26,74 @@ const incorrect = ref(false)
 const error = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
+const loginManager = useLoginManager()
+
+const loginHomePageWeb = async () => {
+  const data = await loginManager.loginAccount(
+    trimmedEmail.value,
+    trimmedPassword.value,
+    router
+  )
+  if (!data) {
+    alert(loginManager.errorMessage || 'Login failed')
+  }
+}
 
 const signIn = () => {
   if (email.value && password.value) {
-    router.replace({ name: 'dashboard' }) // ตัวอย่างเส้นทางหลังล็อกอิน
+    router.replace({ name: 'home' })
+    showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
   } else {
     alert('Please fill in both email and password.')
   }
 }
 
-const loginHomePageWeb = async function () {
-  // const data = await login(
-  //   {
-  //     email: trimmedemail.value,
-  //     password: trimmedPassword.value
-  //   },
-  //   router
-  // )
-  // if (data == '400' || data == '401') {
-  //   incorrect.value = true
-  // } else if ((data != '400', data != '401')) {
-  //   error.value = true
-  // }
-  // // ตรวจสอบเงื่อนไขว่ามีโทเค็นหรือไม่
-  // if (data && data.access_token) {
-  //   const decodedToken = decodeJWT(data.access_token) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
-  //   // console.log('Decoded JWT:', decodedToken) // แสดงข้อมูล JWT ที่ถอดรหัสใน console
-  //   // ตรวจสอบว่าค่าที่กรอกมาตรงกับข้อมูลใน JWT หรือไม่
-  //   if (decodedToken.payload.sub === trimmedemail.value) {
-  //     // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
-  //     // เรียก useAuthGuard เพื่อเริ่มต้นการตรวจสอบ token
-  //     useAuthGuard(router)
-  //     router.replace({ name: 'home' })
-  //     showHomePage.value = true
-  //   } else {
-  //     // If no access token is present, try refreshing the token
-  //     const newAccessToken = await refreshToken(router)
+// const loginHomePageWeb = async function () {
+//   // const data = await login(
+//   //   {
+//   //     email: trimmedemail.value,
+//   //     password: trimmedPassword.value
+//   //   },
+//   //   router
+//   // )
+//   // if (data == '400' || data == '401') {
+//   //   incorrect.value = true
+//   // } else if ((data != '400', data != '401')) {
+//   //   error.value = true
+//   // }
+//   // // ตรวจสอบเงื่อนไขว่ามีโทเค็นหรือไม่
+//   // if (data && data.access_token) {
+//   //   const decodedToken = decodeJWT(data.access_token) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
+//   //   // console.log('Decoded JWT:', decodedToken) // แสดงข้อมูล JWT ที่ถอดรหัสใน console
+//   //   // ตรวจสอบว่าค่าที่กรอกมาตรงกับข้อมูลใน JWT หรือไม่
+//   //   if (decodedToken.payload.sub === trimmedemail.value) {
+//   //     // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
+//   //     // เรียก useAuthGuard เพื่อเริ่มต้นการตรวจสอบ token
+//   //     useAuthGuard(router)
+//   //     router.replace({ name: 'home' })
+//   //     showHomePage.value = true
+//   //   } else {
+//   //     // If no access token is present, try refreshing the token
+//   //     const newAccessToken = await refreshToken(router)
 
-  //     if (newAccessToken) {
-  //       const decodedToken = decodeJWT(newAccessToken) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
+//   //     if (newAccessToken) {
+//   //       const decodedToken = decodeJWT(newAccessToken) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
 
-  //       if (decodedToken.payload.sub === trimmedEmail.value) {
-  //         // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
-  //         useAuthGuard(router)
-  //         router.replace({ name: 'home' })
-  //         showHomePage.value = true
-  //       }
-  //     } else {
-  //       // Handle the case where refreshing the token fails
-  //       error.value = true
-  //     }
-  //   }
-  // }
-  router.replace({ name: 'home' })
-  showHomePage.value = true
-}
+//   //       if (decodedToken.payload.sub === trimmedEmail.value) {
+//   //         // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
+//   //         useAuthGuard(router)
+//   //         router.replace({ name: 'home' })
+//   //         showHomePage.value = true
+//   //       }
+//   //     } else {
+//   //       // Handle the case where refreshing the token fails
+//   //       error.value = true
+//   //     }
+//   //   }
+//   // }
+//   router.replace({ name: 'home' })
+//   showHomePage.value = true
+// }
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
     isEmailOverLimit.value = true
