@@ -10,7 +10,8 @@ import RegisterPage from './RegisterPage.vue'
 //   refreshToken
 // } from '@/stores/UserManager'
 import ButtonWeb from './ButtonWeb.vue'
-import { useLoginManager } from '@/stores/LoginManager'
+import { useLoginManager } from '@/stores/LoginManager.js'
+import AlertPopUp from './AlertPopUp.vue'
 const isPasswordVisible = ref(false)
 const router = useRouter()
 const isEmailOverLimit = ref(false)

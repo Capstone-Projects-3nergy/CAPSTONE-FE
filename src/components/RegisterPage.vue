@@ -4,8 +4,8 @@ import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import RegisterAccount from '@/stores/RegisterAccount.js'
 import ButtonWeb from './ButtonWeb.vue'
-import { useRegisterManager } from '@/stores/RegisterManager'
-
+import { useRegisterManager } from '@/stores/RegisterManager.js'
+import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
 
 const submitForm = async () => {
