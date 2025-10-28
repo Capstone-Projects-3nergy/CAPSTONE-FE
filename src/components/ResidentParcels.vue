@@ -450,7 +450,7 @@ const toggleSidebar = () => {
           </div>
 
           <!-- Right: Search + Sort -->
-          <div class="flex items-center space-x-2 mb-3">
+          <div class="flex items-center space-x-4">
             <input
               type="text"
               placeholder="Search..."

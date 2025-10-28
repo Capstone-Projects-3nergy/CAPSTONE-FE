@@ -20,6 +20,38 @@ const showStaffParcels = ref(false)
 const showAnnouncement = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
+const parcels = ref([
+  {
+    id: 1,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: '101',
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 2,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH223456789X',
+    room: '102',
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 3,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH323456789X',
+    room: '103',
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  }
+  // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
+])
+
+const currentUser = ref('Pimpajee SetXXXXXX')
 const showProfileResident = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
