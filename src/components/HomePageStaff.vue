@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import ParcelScanner from '@/components/ParcelScannerPage.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AlertPopUp from './../components/AlertPopUp.vue'
@@ -9,7 +9,10 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileStaff from './ProfileStaff.vue'
-
+import UserInfo from '@/components/UserInfo.vue'
+import { useLoginManager } from '@/stores/LoginManager'
+const loginStore = useLoginManager()
+const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
 const slides = ['Package 1', 'Package 2', 'Package 3', 'Package 4', 'Package 5']
@@ -185,10 +188,8 @@ const currentUser = ref('Pimpajee SetXXXXXX')
 
           <!-- user info -->
           <div class="flex items-center gap-3">
-            <div class="w-[48px] h-[38px] bg-[#185DC0] rounded-[10px]"></div>
             <div class="flex flex-col leading-tight">
-              <span class="font-medium text-blue-500">John Demon</span>
-              <span class="text-blue-500 text-sm">Dormitory Admin</span>
+              <UserInfo />
             </div>
           </div>
         </div>
