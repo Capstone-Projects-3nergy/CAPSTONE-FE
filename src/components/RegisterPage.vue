@@ -236,7 +236,8 @@ const checkInputLength = (field) => {
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
-        <<AlertPopUp
+        <AlertPopUp
+          v-if="incorrect"
           :titles="'Username or Password is incorrect.'"
           message="Error!!"
           styleType="red"

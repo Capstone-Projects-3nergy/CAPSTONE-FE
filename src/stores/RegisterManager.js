@@ -13,16 +13,16 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
   const loading = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
-  const currentUser = ref(null) // ✅ เก็บข้อมูลผู้ใช้ปัจจุบัน (จาก onAuthStateChanged)
+  const currentUser = ref(null)
 
-  // 🔹 ACTION: สมัครสมาชิกใหม่
+  // 🔹 ACTION: สมัครสมาชิกใหม่ (ทั้ง staff และ resident)
   const registerAccount = async (formData) => {
     loading.value = true
     errorMessage.value = ''
     successMessage.value = ''
 
     try {
-      // 1️⃣ สร้างบัญชีใน Firebase Authentication
+      // 1️⃣ สร้างบัญชีใน Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -30,32 +30,40 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       )
       const user = userCredential.user
 
-      // 2️⃣ อัปเดตชื่อผู้ใช้ใน Firebase Profile (ถ้ามี)
+      // 2️⃣ อัปเดตชื่อใน Firebase Profile
       await updateProfile(user, {
         displayName: formData.fullName
       })
 
-      // 3️⃣ ส่งข้อมูลไปเก็บใน backend (Node.js/MySQL)
-      const response = await fetch('http://localhost:3000/api/register', {
+      // 3️⃣ เตรียมข้อมูลส่งไป backend
+      const payload = {
+        uid: user.uid,
+        userType: formData.userType, // "staff" หรือ "resident"
+        fullName: formData.fullName,
+        email: formData.email,
+        dormitoryName: formData.dormitoryName || null,
+        gender: formData.gender || null,
+        staffId: formData.staffId || null,
+        position: formData.position || null
+      }
+
+      // 4️⃣ แยก API ตามประเภทผู้ใช้
+      const endpoint =
+        formData.userType === 'staff'
+          ? 'http://localhost:3000/api/staff/register'
+          : 'http://localhost:3000/api/resident/register'
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          userType: formData.userType,
-          fullName: formData.fullName,
-          email: formData.email,
-          dormitoryName: formData.dormitoryName || null,
-          gender: formData.gender || null,
-          staffId: formData.staffId || null,
-          position: formData.position || null
-        })
+        body: JSON.stringify(payload)
       })
 
       if (!response.ok) {
         throw new Error('Failed to save user data in backend')
       }
 
-      successMessage.value = 'Account created successfully!'
+      successMessage.value = `Account created successfully as ${formData.userType}!`
     } catch (error) {
       console.error(error)
       if (error.code === 'auth/email-already-in-use') {
@@ -72,11 +80,10 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
     }
   }
 
-  // 🔹 ACTION: ตรวจสอบสถานะผู้ใช้ (onAuthStateChanged)
+  // 🔹 ACTION: ตรวจสอบสถานะผู้ใช้
   const initAuthWatcher = () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // ✅ มีผู้ใช้ล็อกอินอยู่
         currentUser.value = {
           uid: user.uid,
           email: user.email,
@@ -84,7 +91,6 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
         }
         console.log('🔄 Auth State: User is logged in:', currentUser.value)
       } else {
-        // ❌ ไม่มีผู้ใช้ (ล็อกเอาท์หรือ session หมดอายุ)
         currentUser.value = null
         console.log('🔄 Auth State: No user signed in')
       }

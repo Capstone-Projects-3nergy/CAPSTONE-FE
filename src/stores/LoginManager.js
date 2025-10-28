@@ -1,16 +1,15 @@
-// 🔥 LoginManager.js — ใช้ Firebase Auth + เชื่อม Backend + เก็บใน Pinia
+// src/stores/LoginManager.js
 import { defineStore } from 'pinia'
 import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth'
-import { auth } from '@/firebase/firebaseConfig' // ต้องมีไฟล์ firebaseConfig.js ตั้งค่า firebase app
+import { auth } from '@/firebase/firebaseConfig'
 import { ref } from 'vue'
-import * as jwtDecodeModule from 'jwt-decode' // แก้ import สำหรับ Vite
+import * as jwtDecodeModule from 'jwt-decode'
 
 export const useLoginManager = defineStore('loginManager', () => {
-  // 🧠 state
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref(null)
@@ -23,7 +22,7 @@ export const useLoginManager = defineStore('loginManager', () => {
     successMessage.value = null
 
     try {
-      // 🔐 เข้าสู่ระบบด้วย Firebase Authentication
+      // 1️⃣ เข้าสู่ระบบ Firebase
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -31,10 +30,10 @@ export const useLoginManager = defineStore('loginManager', () => {
       )
       const firebaseUser = userCredential.user
 
-      // 🧾 ดึง token ของผู้ใช้จาก Firebase
+      // 2️⃣ ดึง Token จาก Firebase
       const idToken = await firebaseUser.getIdToken()
 
-      // ✅ ส่ง token ไป backend เพื่อยืนยันสิทธิ์และเช็ค role
+      // 3️⃣ ส่ง Token ไป Backend
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,26 +43,30 @@ export const useLoginManager = defineStore('loginManager', () => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Login failed')
 
-      // 📌 เก็บข้อมูลผู้ใช้
+      // 4️⃣ เก็บข้อมูลผู้ใช้
       user.value = {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         name: data.name,
-        role: data.role
+        role: data.role // "resident" หรือ "staff"
       }
 
-      // ✅ decode JWT จาก backend (ถ้ามี)
+      // (optional) decode JWT backend ถ้ามี
       if (data.accessToken) {
         const decoded = jwtDecodeModule.default(data.accessToken)
         console.log('Decoded JWT payload:', decoded)
       }
 
-      successMessage.value = 'Login successful!'
+      successMessage.value = `Login successful as ${data.role}!`
 
-      // 🚀 นำทางตาม role
-      if (data.role === 'resident') router.replace({ name: 'home' })
-      else if (data.role === 'staff') router.replace({ name: 'staffDashboard' })
-      else router.replace({ name: 'home' })
+      // 5️⃣ Route ตาม role
+      if (data.role === 'resident') {
+        router.replace({ name: 'home' })
+      } else if (data.role === 'staff') {
+        router.replace({ name: 'staffDashboard' })
+      } else {
+        router.replace({ name: 'home' })
+      }
 
       return user.value
     } catch (err) {
@@ -75,7 +78,7 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
-  // 🧹 ฟังก์ชันออกจากระบบ
+  // 🧹 ออกจากระบบ
   const logoutAccount = async (router) => {
     try {
       await signOut(auth)
@@ -86,11 +89,10 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
-  // 👁️‍🗨️ ติดตามสถานะผู้ใช้ (ล็อกอินอยู่ / ออก)
+  // 👁️‍🗨️ ตรวจสอบสถานะล็อกอิน (เช็ค role จาก backend)
   const monitorAuthState = (router) => {
     onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // ✅ ผู้ใช้ล็อกอินอยู่
         const idToken = await firebaseUser.getIdToken()
         const response = await fetch('http://localhost:3000/api/verifyToken', {
           method: 'POST',
@@ -108,8 +110,13 @@ export const useLoginManager = defineStore('loginManager', () => {
         }
 
         console.log('✅ User still logged in:', user.value)
+
+        // ✅ route ตาม role (กัน refresh หน้า)
+        if (router) {
+          if (data.role === 'staff') router.replace({ name: 'staffDashboard' })
+          else router.replace({ name: 'home' })
+        }
       } else {
-        // 🚫 ผู้ใช้ยังไม่ได้ล็อกอิน
         user.value = null
         console.log('🚫 User logged out')
         if (router) router.replace({ name: 'login' })
