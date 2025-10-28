@@ -409,22 +409,59 @@ const toggleSidebar = () => {
           <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
         </div>
         <!-- Tabs -->
-        <div class="mb-4 flex space-x-2">
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-blue-700"
-          >
-            Day
-          </button>
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-gray-500"
-          >
-            Month
-          </button>
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-gray-500"
-          >
-            Year
-          </button>
+        <div
+          class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
+        >
+          <!-- Left: Date Label + Tabs -->
+          <div class="flex items-center space-x-4">
+            <span class="font-bold text-blue-600">Date</span>
+            <div class="flex rounded bg-gray-100 overflow-hidden">
+              <button
+                :class="
+                  tab === 'day'
+                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
+                    : 'px-4 py-2 text-gray-400'
+                "
+                @click="tab = 'day'"
+              >
+                Day
+              </button>
+              <button
+                :class="
+                  tab === 'month'
+                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
+                    : 'px-4 py-2 text-gray-400'
+                "
+                @click="tab = 'month'"
+              >
+                Month
+              </button>
+              <button
+                :class="
+                  tab === 'year'
+                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
+                    : 'px-4 py-2 text-gray-400'
+                "
+                @click="tab = 'year'"
+              >
+                Year
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Search + Sort -->
+          <div class="flex items-center space-x-2 mb-3">
+            <input
+              type="text"
+              placeholder="Search..."
+              class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              class="border border-gray-300 rounded px-3 py-1 text-gray-500"
+            >
+              <option>Sort by:</option>
+            </select>
+          </div>
         </div>
 
         <!-- Parcels Table -->
