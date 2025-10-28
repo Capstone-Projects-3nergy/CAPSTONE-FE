@@ -29,11 +29,9 @@ const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
 const loginManager = useLoginManager()
 // --- ปิด popup ด้วยมือ ---
-const closeIncorrectAlter = () => {
-  incorrect.value = false
-}
-const closeProblemAlter = () => {
-  error.value = false
+const closePopUp = (operate) => {
+  if (operate === 'incorrect') incorrect.value = false
+  if (operate === 'problem') error.value = false
 }
 
 // 🧩 ฟังก์ชันเข้าสู่ระบบ (มีตรวจ response code จาก backend)
@@ -221,16 +219,18 @@ const showRegisterPageWeb = async function () {
         <AlertPopUp
           v-if="incorrect"
           :titles="'Username or Password is incorrect.'"
-          @closePopUp="closeIncorrectAlter"
           message="Error!!"
           styleType="red"
+          operate="incorrect"
+          @closePopUp="closePopUp"
         />
         <AlertPopUp
           v-if="error"
           :titles="'There is a problem. Please try again later.'"
-          @closePopUp="closeProblemAlter"
           message="Error!!"
           styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
         />
 
         <!-- Form -->

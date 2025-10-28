@@ -12,14 +12,10 @@ const success = ref(false)
 
 // --- ปิด popup ด้วยมือ ---
 // --- ปิด popup ด้วยมือ ---
-const closeIncorrectAlter = () => {
-  incorrect.value = false
-}
-const closeProblemAlter = () => {
-  error.value = false
-}
-const closeSuccessAlter = () => {
-  success.value = false
+const closePopUp = (operate) => {
+  if (operate === 'incorrect') incorrect.value = false
+  if (operate === 'problem') error.value = false
+  if (operate === 'success ') success.value = false
 }
 
 // ✅ ฟังก์ชันสมัครสมาชิก
@@ -240,26 +236,28 @@ const checkInputLength = (field) => {
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
-        <AlertPopUp
-          v-if="incorrect"
+        <<AlertPopUp
           :titles="'Username or Password is incorrect.'"
-          @closePopUp="closeIncorrectAlter"
           message="Error!!"
           styleType="red"
+          operate="incorrect"
+          @closePopUp="closePopUp"
         />
         <AlertPopUp
           v-if="error"
           :titles="'There is a problem. Please try again later.'"
-          @closePopUp="closeProblemAlter"
           message="Error!!"
           styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
         />
         <AlertPopUp
           v-if="success"
           :titles="'Register New Account is Successfull.'"
-          @closePopUp="closeSuccessAlter"
           message="Success!!"
           styleType="green"
+          operate="success"
+          @closePopUp="closePopUp"
         />
 
         <!-- Toggle Buttons -->

@@ -7,6 +7,10 @@ const props = defineProps({
     validator(value) {
       return ['green', 'red', 'yellow'].includes(value)
     }
+  },
+  operate: {
+    type: String,
+    default: ''
   }
 })
 
@@ -14,7 +18,7 @@ const emit = defineEmits(['closePopUp'])
 </script>
 
 <template>
-  <div class="w-full flex relative">
+  <div class="w-full flex relative mb-6">
     <div
       class="relative itbkk-message px-6 py-4 rounded-lg shadow-lg"
       :class="
@@ -36,7 +40,7 @@ const emit = defineEmits(['closePopUp'])
       <!-- ปุ่ม X -->
       <span
         class="absolute top-2 right-2 cursor-pointer transition-transform duration-150 hover:scale-110"
-        @click="emit('closePopUp', operate)"
+        @click="emit('closePopUp', props.operate)"
       >
         <svg
           class="fill-current w-4 h-4"
