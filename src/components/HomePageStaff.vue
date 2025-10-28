@@ -65,6 +65,38 @@ const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
 }
+const parcels = ref([
+  {
+    id: 1,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: '101',
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 2,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH223456789X',
+    room: '102',
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 3,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH323456789X',
+    room: '103',
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  }
+  // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
+])
+
+const currentUser = ref('Pimpajee SetXXXXXX')
 </script>
 
 <template>
@@ -529,6 +561,145 @@ const returnLoginPage = async function () {
             </div>
           </div>
         </section>
+        <div class="flex space-x-1">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
+        </div>
+        <!-- Tabs -->
+        <div
+          class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
+        >
+          <!-- Right: Search + Sort -->
+          <div class="flex items-center space-x-4">
+            <input
+              type="text"
+              placeholder="Search..."
+              class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              class="border border-gray-300 rounded px-3 py-1 text-gray-500"
+            >
+              <option>Sort by:</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Parcels Table -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="text-blue-700 border-t border-b border-blue-700">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  Tracking
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  Name
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  <div class="flex items-center gap-1">
+                    <span>Room Number</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  Contact
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  <div class="flex items-center gap-1">
+                    <span> Status</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  <div class="flex items-center gap-1">
+                    <span> Date in</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  Operation
+                </th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-end space-x-2 text-sm">
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Previous</button>
+          <button class="px-3 py-1 rounded bg-blue-700 text-white">01</button>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">02</button>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">03</button>
+          <span>...</span>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Next</button>
+        </div>
       </main>
     </div>
   </div>

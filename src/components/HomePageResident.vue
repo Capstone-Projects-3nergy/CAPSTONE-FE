@@ -430,117 +430,132 @@ const toggleSidebar = () => {
           </div>
         </section>
         <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
           <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
         </div>
         <!-- Tabs -->
-        <div class="mb-4 flex space-x-2">
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-blue-700"
-          >
-            Day
-          </button>
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-gray-500"
-          >
-            Month
-          </button>
-          <button
-            class="px-4 py-2 bg-white rounded shadow font-medium text-gray-500"
-          >
-            Year
-          </button>
+        <div
+          class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
+        >
+          <!-- Right: Search + Sort -->
+          <div class="flex items-center space-x-4">
+            <input
+              type="text"
+              placeholder="Search..."
+              class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              class="border border-gray-300 rounded px-3 py-1 text-gray-500"
+            >
+              <option>Sort by:</option>
+            </select>
+          </div>
         </div>
 
         <!-- Parcels Table -->
-        <div class="bg-white rounded-lg shadow overflow-x-auto p-4">
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="text-blue-700 border-t border-b border-blue-700">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
                   Tracking
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
                   Name
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
-                  Room Number
+                  <div class="flex items-center gap-1">
+                    <span>Room Number</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
                   Contact
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
-                  Status
+                  <div class="flex items-center gap-1">
+                    <span> Status</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
-                  Date in
+                  <div class="flex items-center gap-1">
+                    <span> Date in</span>
+                    <svg
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 >
                   Operation
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="p in myParcels" :key="p.id">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.tracking }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.recipient }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.room }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.contact }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <span
-                    class="px-3 py-1 rounded-full text-sm font-semibold text-white"
-                    :class="{
-                      'bg-yellow-400': p.status === 'Pending',
-                      'bg-green-400': p.status === 'Picked Up',
-                      'bg-gray-400': p.status === 'In Transit'
-                    }"
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.date }}
-                </td>
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 cursor-pointer"
-                >
-                  Action
-                </td>
-              </tr>
-            </tbody>
           </table>
         </div>
 
