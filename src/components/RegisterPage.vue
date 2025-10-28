@@ -22,6 +22,7 @@ const closeSuccessAlter = () => {
   success.value = false
 }
 
+// ✅ ฟังก์ชันสมัครสมาชิก
 const submitForm = async () => {
   await registerStore.registerAccount({
     userType: userType.value,
@@ -41,20 +42,6 @@ const submitForm = async () => {
     alert(registerStore.errorMessage)
   }
 }
-
-// const {
-//   fullName,
-//   email,
-//   phone,
-//   dormRoom,
-//   username,
-//   password,
-//   confirmPassword,
-//   loading,
-//   errorMessage,
-//   successMessage,
-//   registerAccount
-// } = RegisterAccount.setup()
 const userType = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
