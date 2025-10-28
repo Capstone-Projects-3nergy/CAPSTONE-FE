@@ -12,10 +12,11 @@ const props = defineProps({
 
 const emit = defineEmits(['closePopUp'])
 </script>
+
 <template>
-  <div class="w-full flex">
+  <div class="w-full flex relative">
     <div
-      class="itbkk-message px-6 py-4 rounded-lg shadow-lg"
+      class="relative itbkk-message px-6 py-4 rounded-lg shadow-lg"
       :class="
         styleType === 'green'
           ? 'bg-green-100 border border-green-400 text-green-700'
@@ -31,9 +32,14 @@ const emit = defineEmits(['closePopUp'])
       <p>
         <span class="itbkk-message block sm:inline">{{ titles }}</span>
       </p>
-      <span class="absolute top-0 right-0 px-2 py-1">
+
+      <!-- ปุ่ม X -->
+      <span
+        class="absolute top-2 right-2 cursor-pointer transition-transform duration-150 hover:scale-110"
+        @click="emit('closePopUp', operate)"
+      >
         <svg
-          class="fill-current h-5 w-5 cursor-pointer"
+          class="fill-current w-4 h-4"
           :class="
             styleType === 'green'
               ? 'text-green-500'
@@ -43,7 +49,6 @@ const emit = defineEmits(['closePopUp'])
               ? 'text-yellow-500'
               : 'text-gray-500'
           "
-          @click="emit('closePopUp', operate)"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
         >

@@ -216,22 +216,23 @@ const showRegisterPageWeb = async function () {
         <p class="text-gray-500 mb-6">
           Welcome to tractify - Let's get started
         </p>
-        <div class="relative space-y-4 mb-6">
-          <!-- ✅ Popups อยู่ด้านบน -->
-          <AlertPopUp
-            :titles="'Username or Password is incorrect.'"
-            @closePopUp="closeIncorrectAlter"
-            message="Error!!"
-            styleType="red"
-          />
-          <AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            @closePopUp="closeProblemAlter"
-            message="Error!!"
-            styleType="red"
-          />
-        </div>
+
+        <!-- ✅ Popups อยู่ด้านบน -->
+        <AlertPopUp
+          v-if="incorrect"
+          :titles="'Username or Password is incorrect.'"
+          @closePopUp="closeIncorrectAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          @closePopUp="closeProblemAlter"
+          message="Error!!"
+          styleType="red"
+        />
+
         <!-- Form -->
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">

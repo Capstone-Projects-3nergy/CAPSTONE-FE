@@ -239,29 +239,29 @@ const checkInputLength = (field) => {
           Welcome to Tractify — Create your account below
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
-        <div class="relative space-y-4 mb-6">
-          <AlertPopUp
-            v-if="incorrect"
-            :titles="'Username or Password is incorrect.'"
-            @closePopUp="closeIncorrectAlter"
-            message="Error!!"
-            styleType="red"
-          />
-          <AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            @closePopUp="closeProblemAlter"
-            message="Error!!"
-            styleType="red"
-          />
-          <AlertPopUp
-            v-if="success"
-            :titles="'Register New Account is Successfull.'"
-            @closePopUp="closeSuccessAlter"
-            message="Success!!"
-            styleType="green"
-          />
-        </div>
+
+        <AlertPopUp
+          v-if="incorrect"
+          :titles="'Username or Password is incorrect.'"
+          @closePopUp="closeIncorrectAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          @closePopUp="closeProblemAlter"
+          message="Error!!"
+          styleType="red"
+        />
+        <AlertPopUp
+          v-if="success"
+          :titles="'Register New Account is Successfull.'"
+          @closePopUp="closeSuccessAlter"
+          message="Success!!"
+          styleType="green"
+        />
+
         <!-- Toggle Buttons -->
         <div class="flex bg-gray-100 rounded-lg mb-6 p-1">
           <button
