@@ -36,16 +36,40 @@ const closeProblemAlter = () => {
   error.value = false
 }
 
+// 🧩 ฟังก์ชันเข้าสู่ระบบ (มีตรวจ response code จาก backend)
 const loginHomePageWeb = async () => {
-  const data = await loginManager.loginAccount(
-    trimmedEmail.value,
-    trimmedPassword.value,
-    router
-  )
-  if (!data) {
-    incorrect.value = true
-    error.value = true
-    alert(loginManager.errorMessage || 'Login failed')
+  try {
+    const data = await loginManager.loginAccount(
+      trimmedEmail.value,
+      trimmedPassword.value,
+      router
+    )
+
+    // ⚠️ เช็ค response จาก backend
+    if (!data) {
+      // ถ้าไม่มี response หรือเกิด error ใน Pinia store
+      incorrect.value = true
+      return
+    }
+
+    // ✅ กรณี login สำเร็จ
+    if (loginManager.successMessage) {
+      console.log('✅ Login success:', loginManager.user)
+    }
+  } catch (err) {
+    console.error('❌ Login error:', err)
+
+    // ✅ เงื่อนไขตรวจ error จาก backend (เช่น status 400, 401)
+    if (
+      err.message.includes('400') ||
+      err.message.includes('401') ||
+      loginManager.errorMessage?.includes('Invalid') ||
+      loginManager.errorMessage?.includes('not found')
+    ) {
+      incorrect.value = true // ข้อมูลผิด เช่น email/password ไม่ถูกต้อง
+    } else {
+      error.value = true // ปัญหาภายในระบบ เช่น server ล่ม
+    }
   }
 }
 
@@ -60,52 +84,6 @@ const signIn = () => {
   }
 }
 
-// const loginHomePageWeb = async function () {
-//   // const data = await login(
-//   //   {
-//   //     email: trimmedemail.value,
-//   //     password: trimmedPassword.value
-//   //   },
-//   //   router
-//   // )
-//   // if (data == '400' || data == '401') {
-//   //   incorrect.value = true
-//   // } else if ((data != '400', data != '401')) {
-//   //   error.value = true
-//   // }
-//   // // ตรวจสอบเงื่อนไขว่ามีโทเค็นหรือไม่
-//   // if (data && data.access_token) {
-//   //   const decodedToken = decodeJWT(data.access_token) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
-//   //   // console.log('Decoded JWT:', decodedToken) // แสดงข้อมูล JWT ที่ถอดรหัสใน console
-//   //   // ตรวจสอบว่าค่าที่กรอกมาตรงกับข้อมูลใน JWT หรือไม่
-//   //   if (decodedToken.payload.sub === trimmedemail.value) {
-//   //     // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
-//   //     // เรียก useAuthGuard เพื่อเริ่มต้นการตรวจสอบ token
-//   //     useAuthGuard(router)
-//   //     router.replace({ name: 'home' })
-//   //     showHomePage.value = true
-//   //   } else {
-//   //     // If no access token is present, try refreshing the token
-//   //     const newAccessToken = await refreshToken(router)
-
-//   //     if (newAccessToken) {
-//   //       const decodedToken = decodeJWT(newAccessToken) // ถอดรหัส JWT เพื่อตรวจสอบข้อมูล
-
-//   //       if (decodedToken.payload.sub === trimmedEmail.value) {
-//   //         // เปลี่ยนเส้นทางไปยังหน้า 'Task' และแสดง modal
-//   //         useAuthGuard(router)
-//   //         router.replace({ name: 'home' })
-//   //         showHomePage.value = true
-//   //       }
-//   //     } else {
-//   //       // Handle the case where refreshing the token fails
-//   //       error.value = true
-//   //     }
-//   //   }
-//   // }
-//   router.replace({ name: 'home' })
-//   showHomePage.value = true
-// }
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
     isEmailOverLimit.value = true
@@ -133,17 +111,7 @@ const checkPasswordLength = () => {
 const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
-// const initialize = async () => {
-//   try {
-//     await msalInstance.initialize()
-//   } catch (error) {
-//     console.log('Initialization error', error)
-//   }
-// }
-// onMounted(async () => {
-//   await initialize()
-//   await handleRedirect()
-// })
+
 const showRegisterPageWeb = async function () {
   router.replace({ name: 'register' })
   showRegisterPage.value = true

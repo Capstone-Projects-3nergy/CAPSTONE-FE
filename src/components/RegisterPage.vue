@@ -24,22 +24,32 @@ const closeSuccessAlter = () => {
 
 // ✅ ฟังก์ชันสมัครสมาชิก
 const submitForm = async () => {
-  await registerStore.registerAccount({
-    userType: userType.value,
-    fullName: form.fullName,
-    email: form.email,
-    password: form.password,
-    dormitoryName: form.dormitoryName,
-    gender: form.gender,
-    staffId: form.staffId,
-    position: form.position
-  })
+  try {
+    const data = await registerStore.registerAccount({
+      userType: userType.value,
+      fullName: form.fullName,
+      email: form.email,
+      password: form.password,
+      dormitoryName: form.dormitoryName,
+      gender: form.gender,
+      staffId: form.staffId,
+      position: form.position
+    })
 
-  if (registerStore.successMessage) {
-    alert(registerStore.successMessage)
-    router.push({ name: 'login' })
-  } else if (registerStore.errorMessage) {
-    alert(registerStore.errorMessage)
+    // ✅ ตรวจผลลัพธ์
+    if (data === '400' || data === '401') {
+      incorrect.value = true
+    } else if (data && data.success) {
+      success.value = true
+      setTimeout(() => {
+        router.push({ name: 'login' })
+      }, 1000)
+    } else {
+      error.value = true
+    }
+  } catch (err) {
+    console.error('❌ Register error:', err)
+    error.value = true
   }
 }
 const userType = ref('resident')
