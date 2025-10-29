@@ -318,7 +318,7 @@ const checkInputLength = (field) => {
           <!-- Resident -->
           <transition name="fade" mode="out-in">
             <div v-if="userType === 'resident'" key="resident">
-              <div class="flex items-center space-x-4 mb-3">
+              <div class="relative flex items-center space-x-4 mb-3">
                 <label class="flex items-center text-sm">
                   <input
                     type="radio"
@@ -338,15 +338,30 @@ const checkInputLength = (field) => {
                   Male Dormitory
                 </label>
               </div>
-              <input
-                v-model="form.email"
-                type="email"
-                placeholder="Email"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                required
-                @input="checkInputLength('email')"
-                :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
-              />
+              <div class="relative">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  placeholder="Email"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  required
+                  @input="checkInputLength('email')"
+                  :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
+                />
+              </div>
               <div
                 style="display: flex; align-items: center"
                 v-if="isEmailOverLimit"
@@ -369,11 +384,25 @@ const checkInputLength = (field) => {
                 </div>
               </div>
               <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
                 <input
                   v-model="form.password"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   placeholder="Password"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   required
                   @input="checkInputLength('password')"
                   :class="{
