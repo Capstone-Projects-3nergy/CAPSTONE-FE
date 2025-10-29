@@ -334,7 +334,7 @@ const showRegisterPageWeb = async function () {
           <ButtonWeb
             label="Sign In"
             type="submit"
-            color="blue"
+            color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             @click="signIn"
             :class="{

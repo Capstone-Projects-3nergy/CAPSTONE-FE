@@ -666,15 +666,15 @@ const checkInputLength = (field) => {
             v-if="userType === 'resident'"
             label="Sign Up"
             type="submit"
-            color="blue"
+            color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             @click=""
             :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+              'disabled bg-gray-400 text-gray-200  cursor-default':
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedConfirmPassword.length === 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
+              'bg-black hover:bg-gray-600 text-white':
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0
@@ -693,16 +693,16 @@ const checkInputLength = (field) => {
             v-if="userType === 'staff'"
             label="Sign Up"
             type="submit"
-            color="blue"
+            color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             @click="submitForm"
             :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+              'disabled bg-gray-400 text-gray-200 cursor-default':
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedStaffID.length === 0 ||
                 trimmedConfirmPassword.length === 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
+              'bg-black hover:bg-gray-600 text-white':
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedStaffID.length > 0 &&
