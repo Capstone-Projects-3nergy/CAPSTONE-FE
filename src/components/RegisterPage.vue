@@ -457,11 +457,24 @@ const checkInputLength = (field) => {
                 </div>
               </div>
               <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
                 <input
                   v-model="form.confirmPassword"
                   :type="isComfirmPasswordVisible ? 'text' : 'password'"
                   placeholder="Confirm Password"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   required
                   @input="checkInputLength('confirmPassword')"
                   :class="{
@@ -515,24 +528,58 @@ const checkInputLength = (field) => {
                   </div>
                 </div>
               </div>
-              <input
-                v-model="form.dormitoryName"
-                type="text"
-                placeholder="Name Dormitory"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-              />
+              <div class="relative">
+                <svg
+                  width="21"
+                  height="17"
+                  viewBox="0 0 21 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.dormitoryName"
+                  type="text"
+                  placeholder="Name Dormitory"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                />
+              </div>
             </div>
 
             <!-- Staff -->
             <div v-else key="staff">
-              <input
-                v-model="form.staffId"
-                type="text"
-                placeholder="Staff ID"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                @input="checkInputLength('staffId')"
-                :class="{ 'border-red-600 text-red-600': isStaffIdOverLimit }"
-              />
+              <div class="relative">
+                <svg
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8F91] w-6 h-6"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 2a7 7 0 0 0-7 7 3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h1a1 1 0 0 0 1-1V9a5 5 0 1 1 10 0v7.083A2.919 2.919 0 0 1 14.083 19H14a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 1.732-1h.351a4.917 4.917 0 0 0 4.83-4H19a3 3 0 0 0 3-3v-2a3 3 0 0 0-3-3 7 7 0 0 0-7-7Zm1.45 3.275a4 4 0 0 0-4.352.976 1 1 0 0 0 1.452 1.376 2.001 2.001 0 0 1 2.836-.067 1 1 0 1 0 1.386-1.442 4 4 0 0 0-1.321-.843Z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.staffId"
+                  type="text"
+                  placeholder="Staff ID"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  @input="checkInputLength('staffId')"
+                  :class="{ 'border-red-600 text-red-600': isStaffIdOverLimit }"
+                />
+              </div>
               <div
                 style="display: flex; align-items: center"
                 v-if="isStaffIdOverLimit"
@@ -554,20 +601,73 @@ const checkInputLength = (field) => {
                   Limit staff id to 11 characters or less.
                 </div>
               </div>
-              <input
-                v-model="form.position"
-                type="text"
-                placeholder="Position"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-              />
-              <input
-                v-model="form.email"
-                type="email"
-                placeholder="Email"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                @input="checkInputLength('email')"
-                :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
-              />
+              <div class="relative">
+                <svg
+                  width="20"
+                  height="17"
+                  viewBox="0 0 20 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M14.6176 2.85294V7.08823C13.9568 7.08761 13.3033 7.22645 12.6999 7.49567C12.0964 7.7649 11.5565 8.15844 11.1155 8.65058C10.3389 9.51322 9.90993 10.6334 9.91176 11.7941C9.91239 12.0671 9.93498 12.3334 9.97953 12.5932C10.0981 13.2802 10.3677 13.9324 10.7689 14.5026C11.1701 15.0729 11.6929 15.5469 12.2995 15.8906C11.0468 16.2694 9.38376 16.5 7.55882 16.5C3.66047 16.5 0.5 15.4463 0.5 14.1471V2.85294"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14.6176 2.85294C14.6176 4.15224 11.4572 5.20588 7.55882 5.20588C3.66047 5.20588 0.5 4.15224 0.5 2.85294C0.5 1.55365 3.66047 0.5 7.55882 0.5C11.4572 0.5 14.6176 1.55365 14.6176 2.85294Z"
+                    fill="#8C8F91"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M0.5 10.3824C0.5 11.6816 3.66047 12.7353 7.55882 12.7353C8.40918 12.7353 9.22471 12.6854 9.97953 12.5932M0.5 6.61765C0.5 7.91694 3.66047 8.97059 7.55882 8.97059C8.85576 8.97059 10.0713 8.85388 11.1155 8.65059"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M19.3234 11.7941C19.3234 14.3932 17.2166 16.5 14.6175 16.5C13.7752 16.5 12.9836 16.2788 12.2994 15.8906C11.5747 15.4799 10.972 14.8843 10.5525 14.1647C10.133 13.4451 9.9119 12.6271 9.91162 11.7941C9.91162 10.5857 10.3672 9.48354 11.1154 8.6506C11.5564 8.15845 12.0962 7.76491 12.6997 7.49569C13.3032 7.22647 13.9567 7.08763 14.6175 7.08824C17.2166 7.08824 19.3234 9.19507 19.3234 11.7941Z"
+                    fill="#8C8F91"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.position"
+                  type="text"
+                  placeholder="Position"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                />
+              </div>
+              <div class="relative">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  placeholder="Email"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  @input="checkInputLength('email')"
+                  :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
+                />
+              </div>
               <div
                 style="display: flex; align-items: center"
                 v-if="isEmailOverLimit"
@@ -590,11 +690,25 @@ const checkInputLength = (field) => {
                 </div>
               </div>
               <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
                 <input
                   v-model="form.password"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   placeholder="Password"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('password')"
                   :class="{
                     'border-red-600 text-red-600': isPasswordOverLimit
@@ -648,11 +762,25 @@ const checkInputLength = (field) => {
                 </div>
               </div>
               <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
                 <input
                   v-model="form.confirmPassword"
                   :type="isComfirmPasswordVisible ? 'text' : 'password'"
                   placeholder="Confirm Password"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('confirmPassword')"
                   :class="{
                     'border-red-600 text-red-600': isConfirmPasswordOverLimit
