@@ -921,7 +921,7 @@ const checkInputLength = (field) => {
           Already have an account?
           <a
             href="#"
-            class="text-blue-600 font-medium hover:underline cursor-pointer"
+            class="text-[#107EFF] font-medium hover:underline cursor-pointer"
             @click="returnLoginPage"
             >Sign In</a
           >

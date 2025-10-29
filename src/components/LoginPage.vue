@@ -124,7 +124,7 @@ const showRegisterPageWeb = async function () {
     >
       <div class="max-w-md">
         <h1 class="text-3xl font-bold mb-4">Welcome back!</h1>
-        <p class="text-sm text-blue-100 mb-8">
+        <p class="text-sm text-white mb-8">
           dormitory parcel management system — manage, check status, and stay
           updated anytime with Tractify.
         </p>
@@ -210,7 +210,7 @@ const showRegisterPageWeb = async function () {
         </div>
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold mb-2">Get Started</h2>
+        <h2 class="text-4xl font-bold mb-2">Get Started</h2>
         <p class="text-[#8C8F91] mb-6">
           Welcome to tractify - Let's get started
         </p>
@@ -406,7 +406,7 @@ const showRegisterPageWeb = async function () {
           Don’t have an account?
           <a
             href="#"
-            class="text-blue-600 font-medium hover:underline cursor-pointer"
+            class="text-[#107EFF] font-medium hover:underline cursor-pointer"
             @click="showRegisterPageWeb"
             >Sign Up</a
           >

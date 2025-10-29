@@ -24,8 +24,8 @@ const userRole = computed(() =>
 
     <!-- ข้อมูลชื่อกับบทบาท -->
     <div class="flex flex-col leading-tight">
-      <span class="font-medium text-blue-500">{{ userName }}</span>
-      <span class="text-blue-500 text-sm">{{ userRole }}</span>
+      <span class="font-medium text-[#185DC0]">{{ userName }}</span>
+      <span class="text-[#185DC0] text-sm">{{ userRole }}</span>
     </div>
   </div>
 </template>
