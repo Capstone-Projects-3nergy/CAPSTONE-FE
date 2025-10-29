@@ -34,60 +34,60 @@ const routes = [
 
   // Resident
   {
-    path: '/homepage/resident',
+    path: '/homepage/resident/id',
     name: 'home',
     component: HomePageResident
   },
   {
-    path: '/homepage/resident/parcelspage',
+    path: '/homepage/resident/id/parcelspage',
     name: 'residentparcels',
     component: ResidentParcelsPage
   },
   {
-    path: '/homepage/resident/announcement',
+    path: '/homepage/resident/id/announcement',
     name: 'announcement',
     component: Announcement
   },
   ,
   {
-    path: '/homepage/resident/profile',
+    path: '/homepage/resident/id/profile',
     name: 'profileresident',
     component: ProfileResident
   },
 
   // Staff
   {
-    path: '/homepage/staff',
+    path: '/homepage/staff/id',
     name: 'homestaff',
     component: HomePageStaff
   },
   {
-    path: '/homepage/staff/manageresident',
+    path: '/homepage/staff/id/manageresident',
     name: 'manageresident',
     component: ManageResident
   },
   {
-    path: '/homepage/staff/manageparcel',
+    path: '/homepage/staff/id/manageparcel',
     name: 'staffparcels',
     component: StaffParcelsPage
   },
   {
-    path: '/homepage/staff/manageannouncement',
+    path: '/homepage/staff/id/manageannouncement',
     name: 'manageannouncement',
     component: ManageAnnouncement
   },
   {
-    path: '/homepage/staff/parcelscannerpage',
+    path: '/homepage/staff/id/parcelscannerpage',
     name: 'parcelscanner',
     component: ParcelScannerPage
   },
   {
-    path: '/homepage/staff/dashboardpage',
+    path: '/homepage/staff/id/dashboardpage',
     name: 'dashboard',
     component: DashBoard
   },
   {
-    path: '/homepage/staff/profile',
+    path: '/homepage/staff/id/profile',
     name: 'profilestaff',
     component: ProfileStaff
   }
