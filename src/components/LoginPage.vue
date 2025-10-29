@@ -236,12 +236,28 @@ const showRegisterPageWeb = async function () {
         <!-- Form -->
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">
+            <!-- ไอคอน SVG -->
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+            >
+              <path
+                d="M18.3333 3.66667H3.66659C2.65825 3.66667 1.84242 4.49167 1.84242 5.50001L1.83325 16.5C1.83325 17.5083 2.65825 18.3333 3.66659 18.3333H18.3333C19.3416 18.3333 20.1666 17.5083 20.1666 16.5V5.50001C20.1666 4.49167 19.3416 3.66667 18.3333 3.66667ZM18.3333 7.33334L10.9999 11.9167L3.66659 7.33334V5.50001L10.9999 10.0833L18.3333 5.50001V7.33334Z"
+                fill="#8C8F91"
+              />
+            </svg>
+
+            <!-- input -->
             <input
               v-model="email"
               type="email"
               required
               placeholder="Email"
-              class="w-full px-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full pl-10 pr-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               @input="checkEmailLength"
               :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
             />
@@ -268,12 +284,26 @@ const showRegisterPageWeb = async function () {
             </div>
           </div>
           <div class="relative">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+            >
+              <path
+                d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
+                fill="#8C8F91"
+              />
+            </svg>
+
             <input
               :type="isPasswordVisible ? 'text' : 'password'"
               v-model="password"
               type="password"
               placeholder="Password"
-              class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               @input="checkPasswordLength"
               :class="{ 'border-red-600 text-red-600': isPasswordOverLimit }"
             />
