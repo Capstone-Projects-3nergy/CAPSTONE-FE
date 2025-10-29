@@ -98,7 +98,7 @@ const showDashBoardPage = async function () {
       </button> -->
       <div
         :class="[
-          'bg-blue-900 text-blue-500 flex items-center justify-center h-full transition-all duration-300',
+          'bg-[#0E4B90] text-blue-500 flex items-center justify-center h-full transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -175,7 +175,7 @@ const showDashBoardPage = async function () {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-blue-900 text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >

@@ -383,7 +383,7 @@ const showProfileStaffPage = async function () {
       </button> -->
       <div
         :class="[
-          'bg-blue-900 text-blue-500 flex items-center justify-center h-full transition-all duration-300',
+          'bg-[#0E4B90] text-blue-500 flex items-center justify-center h-full transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -460,7 +460,7 @@ const showProfileStaffPage = async function () {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-blue-900 text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -503,7 +503,7 @@ const showProfileStaffPage = async function () {
             Tractity
           </span>
         </div>
-        <nav class="flex-1 divide-y bg-blue-900 divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y bg-[#0E4B90] divide-blue-700 space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg

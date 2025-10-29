@@ -197,7 +197,7 @@ const toggleSidebar = () => {
       </button> -->
       <div
         :class="[
-          'bg-blue-900 text-blue-500 flex items-center justify-center h-full transition-all duration-300',
+          'bg-[#0E4B90] text-blue-500 flex items-center justify-center h-full transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
