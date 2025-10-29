@@ -340,7 +340,7 @@ const showRegisterPageWeb = async function () {
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
                 trimmedEmail.length === 0 || trimmedPassword.length === 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
+              'bg-black hover:bg-gray-600 text-white':
                 trimmedEmail.length > 0 && trimmedPassword.length > 0
             }"
             :disabled="
