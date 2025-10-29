@@ -12,6 +12,7 @@ import DashBoard from './DashBoard.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
+import UserInfo from '@/components/UserInfo.vue'
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
@@ -443,12 +444,10 @@ const showProfileStaffPage = async function () {
             </defs>
           </svg>
 
-          <!-- user info -->
+         <!-- user info -->
           <div class="flex items-center gap-3">
-            <div class="w-[48px] h-[38px] bg-[#185DC0] rounded-[10px]"></div>
             <div class="flex flex-col leading-tight">
-              <span class="font-medium text-blue-500">John Demon</span>
-              <span class="text-blue-500 text-sm">Dormitory Admin</span>
+              <UserInfo />
             </div>
           </div>
         </div>

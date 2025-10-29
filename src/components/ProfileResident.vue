@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
+import UserInfo from '@/components/UserInfo.vue'
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
@@ -141,10 +142,8 @@ const toggleSidebar = () => {
 
           <!-- user info -->
           <div class="flex items-center gap-3">
-            <div class="w-[48px] h-[38px] bg-[#185DC0] rounded-[10px]"></div>
             <div class="flex flex-col leading-tight">
-              <span class="font-medium text-blue-500">John Demon</span>
-              <span class="text-blue-500 text-sm">Dormitory Admin</span>
+              <UserInfo />
             </div>
           </div>
         </div>

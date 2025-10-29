@@ -236,12 +236,10 @@ const toggleSidebar = () => {
             </defs>
           </svg>
 
-          <!-- user info -->
+         <!-- user info -->
           <div class="flex items-center gap-3">
-            <div class="w-[48px] h-[38px] bg-[#185DC0] rounded-[10px]"></div>
             <div class="flex flex-col leading-tight">
-              <span class="font-medium text-blue-500">John Demon</span>
-              <span class="text-blue-500 text-sm">Dormitory Admin</span>
+              <UserInfo />
             </div>
           </div>
         </div>
