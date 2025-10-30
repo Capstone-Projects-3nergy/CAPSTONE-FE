@@ -366,7 +366,7 @@ const showRegisterPageWeb = async function () {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="signIn"
+            @click="loginHomePageWeb"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
                 trimmedEmail.length === 0 || trimmedPassword.length === 0,
