@@ -545,17 +545,16 @@ const checkInputLength = (field) => {
                 </svg>
 
                 <!-- dropdown -->
-                <select
-                  v-model="form.dormitoryName"
-                  class="custom-select pl-10"
-                >
+                <select v-model="form.dormitoryName" class="custom-select">
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
-                  <option value="Dorm A">Dorm A</option>
-                  <option value="Dorm B">Dorm B</option>
-                  <option value="Dorm C">Dorm C</option>
-                  <option value="Dorm D">Dorm D</option>
+                  <option value="Hall 1">
+                    Dhammaraksa Residence Hall 1(Female Dormitory)
+                  </option>
+                  <option value="Hall 2">
+                    Dhammaraksa Residence Hall 2(Male Dormitory)
+                  </option>
                 </select>
               </div>
             </div>
@@ -952,25 +951,47 @@ const checkInputLength = (field) => {
   opacity: 0;
 }
 .custom-select {
-  padding: 9px;
   width: 100%;
-  border-radius: 0.6em;
-  border: 1px solid #acacac;
+  font-size: 0.875rem; /* ขนาดตัวอักษรเล็กลง ~14px */
   color: #181820;
-  font-size: 1rem;
+  border: 1px solid #acacac;
+  border-radius: 0.6em;
+  background-color: #fff;
+
+  /* ปรับ padding ให้เว้นที่ไอคอนซ้ายและลูกศรขวา */
+  padding: 0.55rem 2.5rem 0.55rem 2.6rem; /* top right bottom left */
+
+  /* ลบลูกศร default ของ browser */
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   -ms-appearance: none;
+
+  /* เพิ่มไอคอนลูกศรด้านขวา */
   background: url('https://cdn1.iconfinder.com/data/icons/arrows-vol-1-4/24/dropdown_arrow-512.png')
-    no-repeat right 1em center;
+    no-repeat right 0.9rem center;
   background-size: 15px 15px;
-  background-origin: content-box;
-  background-color: #fff;
+
+  transition: border-color 0.12s, box-shadow 0.12s;
 }
+
 .custom-select:focus {
   outline: none;
-  border-color: #3b82f6; /* สีฟ้าเมื่อ focus */
+  border-color: #3b82f6; /* ฟ้าเมื่อ focus */
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* ปรับตำแหน่ง svg ด้านหน้า */
+.relative svg {
+  left: 0.75rem; /* ระยะห่างจากขอบซ้าย */
+  width: 18px;
+  height: 18px;
+  color: #8c8f91;
+  pointer-events: none; /* ไม่รบกวนการคลิก select */
+}
+
+/* ปรับตัวเลือกใน dropdown */
+.custom-select option {
+  font-size: 0.875rem;
 }
 </style>
