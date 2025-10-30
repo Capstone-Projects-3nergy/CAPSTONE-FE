@@ -444,7 +444,7 @@ const showProfileStaffPage = async function () {
             </defs>
           </svg>
 
-         <!-- user info -->
+          <!-- user info -->
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -769,17 +769,21 @@ const showProfileStaffPage = async function () {
       <main class="flex-1 p-6">
         <div class="flex space-x-1">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="25"
-            viewBox="0 0 24 24"
+            width="36"
+            height="36"
+            viewBox="0 0 36 36"
             fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
-              fill="blue"
+              d="M6 12V9C6 8.20435 6.31607 7.44129 6.87868 6.87868C7.44129 6.31607 8.20435 6 9 6H12M6 24V27C6 27.7956 6.31607 28.5587 6.87868 29.1213C7.44129 29.6839 8.20435 30 9 30H12M24 6H27C27.7956 6 28.5587 6.31607 29.1213 6.87868C29.6839 7.44129 30 8.20435 30 9V12M24 30H27C27.7956 30 28.5587 29.6839 29.1213 29.1213C29.6839 28.5587 30 27.7956 30 27V24M10.5 18H25.5"
+              stroke="#185DC0"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
+
           <h2 class="text-2xl font-bold text-gray-800 mb-4">Parcel Scanner</h2>
         </div>
         <div
@@ -1005,10 +1009,10 @@ const showProfileStaffPage = async function () {
 
             <!-- Right side -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
-              <h2 class="text-xl font-semibold text-blue-700 mb-4">
+              <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
-              <div class="space-y-2 text-blue-700 font-medium">
+              <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
                   <span>Name:</span><span>{{ form.field1 }}</span>
                 </div>
@@ -1025,7 +1029,9 @@ const showProfileStaffPage = async function () {
 
               <!-- Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
-                <h3 class="font-semibold text-blue-700 mb-2">Parcel Picture</h3>
+                <h3 class="font-semibold text-[#185DC0] mb-2">
+                  Parcel Picture
+                </h3>
                 <img
                   :src="previewUrl"
                   class="w-full rounded shadow max-h-64 object-cover"
@@ -1040,7 +1046,7 @@ const showProfileStaffPage = async function () {
 
               <!-- Saved Parcels -->
               <div class="mt-6">
-                <h3 class="text-lg font-semibold text-blue-700 mb-2">
+                <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
                 </h3>
                 <ul class="space-y-2">
