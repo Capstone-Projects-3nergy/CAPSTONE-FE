@@ -528,7 +528,7 @@ const checkInputLength = (field) => {
                   </div>
                 </div>
               </div>
-              <div class="relative w-[487px]">
+              <div class="relative">
                 <!-- ไอคอนบ้าน -->
                 <svg
                   width="21"
@@ -547,7 +547,7 @@ const checkInputLength = (field) => {
                 <!-- dropdown -->
                 <select
                   v-model="form.dormitoryName"
-                  class="pl-10 pr-10 w-93 h-[58px] border border-[#BCBCBC] rounded-[10px] text-gray-700 focus:ring-2 focus:ring-blue-400 appearance-none"
+                  class="custom-select pl-10"
                 >
                   <option value="" disabled selected hidden>
                     Name Dormitory
@@ -555,6 +555,7 @@ const checkInputLength = (field) => {
                   <option value="Dorm A">Dorm A</option>
                   <option value="Dorm B">Dorm B</option>
                   <option value="Dorm C">Dorm C</option>
+                  <option value="Dorm D">Dorm D</option>
                 </select>
               </div>
             </div>
@@ -949,5 +950,27 @@ const checkInputLength = (field) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+.custom-select {
+  padding: 1em;
+  width: 100%;
+  border-radius: 0.6em;
+  border: 1px solid #acacac;
+  color: #181820;
+  font-size: 1rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  background: url('https://cdn1.iconfinder.com/data/icons/arrows-vol-1-4/24/dropdown_arrow-512.png')
+    no-repeat right 1em center;
+  background-size: 15px 15px;
+  background-origin: content-box;
+  background-color: #fff;
+}
+.custom-select:focus {
+  outline: none;
+  border-color: #3b82f6; /* สีฟ้าเมื่อ focus */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 </style>
