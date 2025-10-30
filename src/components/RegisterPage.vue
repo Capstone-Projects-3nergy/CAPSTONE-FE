@@ -952,7 +952,7 @@ const checkInputLength = (field) => {
   opacity: 0;
 }
 .custom-select {
-  padding: 1em;
+  padding: 9px;
   width: 100%;
   border-radius: 0.6em;
   border: 1px solid #acacac;
