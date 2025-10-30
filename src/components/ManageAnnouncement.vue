@@ -238,7 +238,7 @@ const showProfileStaffPage = async function () {
             </defs>
           </svg>
 
-         <!-- user info -->
+          <!-- user info -->
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -471,7 +471,7 @@ const showProfileStaffPage = async function () {
           > -->
           <SidebarItem
             title="Manage Announcements"
-            class="bg-blue-400 cursor-default"
+            class="bg-[#81AFEA] cursor-default"
           >
             <template #icon>
               <svg

@@ -286,7 +286,7 @@ const toggleSidebar = () => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="My parcel" class="bg-blue-400 cursor-default">
+          <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
             <template #icon>
               <svg
                 width="25"

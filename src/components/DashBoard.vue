@@ -257,7 +257,7 @@ const toggleSidebar = () => {
             </defs>
           </svg>
 
-         <!-- user info -->
+          <!-- user info -->
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -389,7 +389,7 @@ const toggleSidebar = () => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" class="bg-blue-400 cursor-default">
+          <SidebarItem title="Dashboard" class="bg-[#81AFEA] cursor-default">
             <template #icon>
               <svg
                 width="24"

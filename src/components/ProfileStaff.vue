@@ -254,7 +254,7 @@ const showDashBoardPage = async function () {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" class="bg-blue-400 cursor-default">
+          <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
             <template #icon>
               <svg
                 width="24"
