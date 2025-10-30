@@ -262,14 +262,14 @@ const checkInputLength = (field) => {
         />
 
         <!-- Toggle Buttons -->
-        <div class="flex bg-gray-100 rounded-lg mb-6 p-1">
+        <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
           <button
             @click="userType = 'resident'"
             :class="[
               'flex-1 py-2 rounded-lg text-sm font-medium transition cursor-pointer',
               userType === 'resident'
-                ? 'bg-blue-500 text-white shadow '
-                : 'text-gray-600 hover:bg-gray-200 '
+                ? 'bg-[#107EFF] text-white shadow '
+                : 'text-[#9A9FA7] hover:bg-gray-200 '
             ]"
           >
             Resident
@@ -279,8 +279,8 @@ const checkInputLength = (field) => {
             :class="[
               'flex-1 py-2 rounded-lg text-sm font-medium transition cursor-pointer',
               userType === 'staff'
-                ? 'bg-blue-500 text-white shadow'
-                : 'text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#107EFF] text-white shadow'
+                : 'text-[#9A9FA7] hover:bg-gray-200'
             ]"
           >
             Staff
