@@ -39,21 +39,29 @@ const submitForm = async () => {
     // ✅ ตรวจผลลัพธ์
     if (data === '400') {
       // Email ซ้ำ
-      isEmailDuplicate.value = true
-    } else if (data === '401') {
-      // รหัสผ่านสั้น
-      isPasswordWeak.value = true
-    } else if (data && data.success) {
-      success.value = true
       setTimeout(() => {
+        isEmailDuplicate.value = true
+      }, 1000)
+    } else if (data === '401') {
+      setTimeout(() => {
+        // รหัสผ่านสั้น
+        isPasswordWeak.value = true
+      }, 1000)
+    } else if (data && data.success) {
+      setTimeout(() => {
+        success.value = true
         router.push({ name: 'login' })
       }, 1000)
     } else {
-      error.value = true
+      setTimeout(() => {
+        error.value = true
+      }, 1000)
     }
   } catch (err) {
-    console.error('❌ Register error:', err)
-    error.value = true
+    setTimeout(() => {
+      console.error('❌ Register error:', err)
+      error.value = true
+    }, 1000)
   }
 }
 const userType = ref('resident')
