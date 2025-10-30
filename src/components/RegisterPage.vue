@@ -954,7 +954,7 @@ const checkInputLength = (field) => {
   width: 100%;
   font-size: 0.875rem; /* ขนาดตัวอักษรเล็กลง ~14px */
   color: #181820;
-  border: 1px solid #acacac;
+  border: 1px solid #000000;
   border-radius: 0.6em;
   background-color: #fff;
 
