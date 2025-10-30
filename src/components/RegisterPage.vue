@@ -87,10 +87,12 @@ const isStaffIdOverLimit = ref(false)
 const isNameOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
 // ใช้ computed สำหรับ trim ค่าอัตโนมัติ
+const trimmedFullName = computed(() => form.fullName.trim())
 const trimmedEmail = computed(() => form.email.trim())
 const trimmedPassword = computed(() => form.password.trim())
 const trimmedStaffID = computed(() => form.staffId.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
+const trimmedStaffPosition = computed(() => form.position.trim())
 
 // function submitForm() {
 //   alert(`Account created for ${userType.value.toUpperCase()} ✅`)
@@ -962,20 +964,25 @@ const checkInputLength = (field) => {
             @click=""
             :class="{
               'disabled bg-gray-400 text-gray-200  cursor-default':
+                trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedConfirmPassword.length === 0,
               'bg-black hover:bg-gray-600 text-white':
+                trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0
             }"
             :disabled="
+              trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
+              isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
+              isStaffPositionOverLimit ||
               isStaffIdOverLimit ||
               isConfirmPasswordOverLimit
             "
@@ -989,23 +996,31 @@ const checkInputLength = (field) => {
             @click="submitForm"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
+                trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedStaffID.length === 0 ||
+                trimmedStaffPosition.length === 0 ||
                 trimmedConfirmPassword.length === 0,
               'bg-black hover:bg-gray-600 text-white':
+                trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedStaffID.length > 0 &&
+                trimmedStaffPosition.length > 0 &&
                 trimmedConfirmPassword.length > 0
             }"
             :disabled="
+              trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedStaffID.length === 0 ||
+              trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
+              isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
+              isStaffPositionOverLimit ||
               isStaffIdOverLimit ||
               isConfirmPasswordOverLimit
             "
