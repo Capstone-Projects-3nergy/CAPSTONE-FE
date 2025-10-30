@@ -8,6 +8,8 @@ import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
 const incorrect = ref(false)
 const error = ref(false)
+const isEmailDuplicate = ref(false)
+const isPasswordWeak = ref(false)
 const success = ref(false)
 
 // --- ปิด popup ด้วยมือ ---
@@ -16,6 +18,8 @@ const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
+  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'password') isPasswordWeak.value = false
 }
 
 // ✅ ฟังก์ชันสมัครสมาชิก
@@ -33,8 +37,12 @@ const submitForm = async () => {
     })
 
     // ✅ ตรวจผลลัพธ์
-    if (data === '400' || data === '401') {
-      incorrect.value = true
+    if (data === '400') {
+      // Email ซ้ำ
+      isEmailDuplicate.value = true
+    } else if (data === '401') {
+      // รหัสผ่านสั้น
+      isPasswordWeak.value = true
     } else if (data && data.success) {
       success.value = true
       setTimeout(() => {
@@ -250,6 +258,25 @@ const checkInputLength = (field) => {
           message="Error!!"
           styleType="red"
           operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <!-- Duplicate Email -->
+        <AlertPopUp
+          v-if="isEmailDuplicate"
+          :titles="`This email is already registered`"
+          message="Error!!"
+          styleType="red"
+          operate="email"
+          @closePopUp="closePopUp"
+        />
+
+        <!-- Weak Password -->
+        <AlertPopUp
+          v-if="isPasswordWeak"
+          titles="Password must be at least 6 characters"
+          message="Error!!"
+          styleType="red"
+          operate="password"
           @closePopUp="closePopUp"
         />
         <AlertPopUp
