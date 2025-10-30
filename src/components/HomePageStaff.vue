@@ -425,7 +425,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -440,7 +440,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem

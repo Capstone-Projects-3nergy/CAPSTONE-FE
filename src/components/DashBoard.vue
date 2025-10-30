@@ -172,9 +172,9 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 </script>
+
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
-    <!-- Header -->
     <!-- Header -->
     <header class="flex items-center w-full h-16">
       <!-- <button
@@ -272,7 +272,7 @@ const toggleSidebar = () => {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-blue-900 text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -389,7 +389,7 @@ const toggleSidebar = () => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" class="bg-[#81AFEA] cursor-default">
+          <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -418,9 +418,10 @@ const toggleSidebar = () => {
                   d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
                   fill="white"
                 />
-              </svg> </span
-            >Dashboard
-          </a> -->
+              </svg>
+            </span>
+            Dashboard</a
+          > -->
           <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
             <template #icon>
               <svg
@@ -447,14 +448,17 @@ const toggleSidebar = () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M13.9674 2.61776C13.0261 2.23614 11.9732 2.23614 11.032 2.61776L8.75072 3.54276L18.7424 7.42818L22.257 6.07089C22.1124 5.95203 21.9509 5.85547 21.7778 5.78443L13.9674 2.61776ZM22.9163 7.49068L13.2809 11.2136V22.5917C13.5143 22.5445 13.7431 22.4754 13.9674 22.3844L21.7778 19.2178C22.1142 19.0815 22.4023 18.8479 22.6051 18.5469C22.808 18.2459 22.9163 17.8912 22.9163 17.5282V7.49068ZM11.7184 22.5917V11.2136L2.08301 7.49068V17.5292C2.08321 17.892 2.19167 18.2465 2.39449 18.5473C2.59732 18.8481 2.88529 19.0816 3.22155 19.2178L11.032 22.3844C11.2563 22.4747 11.4851 22.5431 11.7184 22.5917ZM2.74238 6.07089L12.4997 9.84068L16.5799 8.2636L6.63926 4.39901L3.22155 5.78443C3.04377 5.85665 2.88405 5.95214 2.74238 6.07089Z"
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
                   fill="white"
                 />
               </svg>
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem
+            title="Manage Residents"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -506,7 +510,7 @@ const toggleSidebar = () => {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+          <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
                 width="24"
@@ -524,7 +528,7 @@ const toggleSidebar = () => {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -539,7 +543,7 @@ const toggleSidebar = () => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem
