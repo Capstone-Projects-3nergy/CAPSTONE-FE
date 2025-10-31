@@ -12,6 +12,7 @@ import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
 import ProfileResident from '@/components/ProfileResident.vue'
 import ProfileStaff from '@/components/ProfileStaff.vue'
+import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -34,8 +35,8 @@ const routes = [
   {
     path: '/resetpasswordpage',
     name: 'resetpassword',
-    component: RegisterPage
-  }
+    component: ResetPasswordPage
+  },
 
   // Resident
   {
