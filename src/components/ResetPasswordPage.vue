@@ -197,7 +197,7 @@ const checkInputLength = (field) => {
       >
         <h2 class="text-2xl font-bold mb-3">Welcome to Tractify!</h2>
         <p class="text-sm text-blue-100 mb-8">
-          Register to manage and track your dormitory parcels
+          Forgot your password? Reset it here
         </p>
         <div class="flex justify-center items-center w-full mt-0">
           <svg
