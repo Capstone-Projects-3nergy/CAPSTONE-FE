@@ -32,7 +32,6 @@ const submitForm = async () => {
       password: form.password,
       dormitoryName: form.dormitoryName,
       gender: form.gender,
-      staffId: form.staffId,
       position: form.position
     })
 
@@ -82,7 +81,6 @@ const form = reactive({
   confirmPassword: '',
   dormitoryName: '',
   gender: 'female',
-  staffId: '',
   position: ''
 })
 
@@ -364,56 +362,6 @@ const checkInputLength = (field) => {
 
         <!-- Form Fields -->
         <form @submit.prevent="submitForm" class="space-y-4">
-          <!-- Common fields -->
-          <div class="relative">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M8 7C8 5.93913 8.42143 4.92172 9.17157 4.17157C9.92172 3.42143 10.9391 3 12 3C13.0609 3 14.0783 3.42143 14.8284 4.17157C15.5786 4.92172 16 5.93913 16 7C16 8.06087 15.5786 9.07828 14.8284 9.82843C14.0783 10.5786 13.0609 11 12 11C10.9391 11 9.92172 10.5786 9.17157 9.82843C8.42143 9.07828 8 8.06087 8 7ZM8 13C6.67392 13 5.40215 13.5268 4.46447 14.4645C3.52678 15.4021 3 16.6739 3 18C3 18.7956 3.31607 19.5587 3.87868 20.1213C4.44129 20.6839 5.20435 21 6 21H18C18.7956 21 19.5587 20.6839 20.1213 20.1213C20.6839 19.5587 21 18.7956 21 18C21 16.6739 20.4732 15.4021 19.5355 14.4645C18.5979 13.5268 17.3261 13 16 13H8Z"
-                fill="#8C8F91"
-              />
-            </svg>
-
-            <input
-              v-model="form.fullName"
-              :type="isNameVisible ? 'text' : 'fullName'"
-              type="text"
-              placeholder="Full Name"
-              class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              @input="checkInputLength('fullName')"
-              :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
-            />
-            <div
-              style="display: flex; align-items: center"
-              v-if="isNameOverLimit"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="-mt-px h-4 w-[20rem]"
-                class="w-[15px] text-red-600"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <div class="text-sm text-red-600">
-                Limit Full Name to 30 characters or less.
-              </div>
-            </div>
-          </div>
-
           <!-- Resident -->
           <transition name="fade" mode="out-in">
             <div v-if="userType === 'resident'" key="resident">
@@ -436,6 +384,54 @@ const checkInputLength = (field) => {
                   />
                   Male Dormitory
                 </label>
+              </div>
+              <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M8 7C8 5.93913 8.42143 4.92172 9.17157 4.17157C9.92172 3.42143 10.9391 3 12 3C13.0609 3 14.0783 3.42143 14.8284 4.17157C15.5786 4.92172 16 5.93913 16 7C16 8.06087 15.5786 9.07828 14.8284 9.82843C14.0783 10.5786 13.0609 11 12 11C10.9391 11 9.92172 10.5786 9.17157 9.82843C8.42143 9.07828 8 8.06087 8 7ZM8 13C6.67392 13 5.40215 13.5268 4.46447 14.4645C3.52678 15.4021 3 16.6739 3 18C3 18.7956 3.31607 19.5587 3.87868 20.1213C4.44129 20.6839 5.20435 21 6 21H18C18.7956 21 19.5587 20.6839 20.1213 20.1213C20.6839 19.5587 21 18.7956 21 18C21 16.6739 20.4732 15.4021 19.5355 14.4645C18.5979 13.5268 17.3261 13 16 13H8Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.fullName"
+                  :type="isNameVisible ? 'text' : 'fullName'"
+                  type="text"
+                  placeholder="Full Name"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  @input="checkInputLength('fullName')"
+                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                />
+                <div
+                  style="display: flex; align-items: center"
+                  v-if="isNameOverLimit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="-mt-px h-4 w-[20rem]"
+                    class="w-[15px] text-red-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Limit Full Name to 30 characters or less.
+                  </div>
+                </div>
               </div>
               <div class="relative">
                 <svg
@@ -648,19 +644,15 @@ const checkInputLength = (field) => {
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
-                  <option value="Hall 1">
-                    Dhammaraksa Residence Hall 1(Female Dormitory)
-                  </option>
-                  <option value="Hall 2">
-                    Dhammaraksa Residence Hall 2(Male Dormitory)
-                  </option>
+                  <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
+                  <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
                 </select>
               </div>
             </div>
 
             <!-- Staff -->
             <div v-else key="staff">
-              <div class="relative">
+              <!-- <div class="relative">
                 <svg
                   class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
                   aria-hidden="true"
@@ -705,6 +697,54 @@ const checkInputLength = (field) => {
                 </svg>
                 <div class="text-sm text-red-600">
                   Limit staff id to 11 characters or less.
+                </div>
+              </div> -->
+              <div class="relative">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M8 7C8 5.93913 8.42143 4.92172 9.17157 4.17157C9.92172 3.42143 10.9391 3 12 3C13.0609 3 14.0783 3.42143 14.8284 4.17157C15.5786 4.92172 16 5.93913 16 7C16 8.06087 15.5786 9.07828 14.8284 9.82843C14.0783 10.5786 13.0609 11 12 11C10.9391 11 9.92172 10.5786 9.17157 9.82843C8.42143 9.07828 8 8.06087 8 7ZM8 13C6.67392 13 5.40215 13.5268 4.46447 14.4645C3.52678 15.4021 3 16.6739 3 18C3 18.7956 3.31607 19.5587 3.87868 20.1213C4.44129 20.6839 5.20435 21 6 21H18C18.7956 21 19.5587 20.6839 20.1213 20.1213C20.6839 19.5587 21 18.7956 21 18C21 16.6739 20.4732 15.4021 19.5355 14.4645C18.5979 13.5268 17.3261 13 16 13H8Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.fullName"
+                  :type="isNameVisible ? 'text' : 'fullName'"
+                  type="text"
+                  placeholder="Full Name"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  @input="checkInputLength('fullName')"
+                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                />
+                <div
+                  style="display: flex; align-items: center"
+                  v-if="isNameOverLimit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="-mt-px h-4 w-[20rem]"
+                    class="w-[15px] text-red-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Limit Full Name to 30 characters or less.
+                  </div>
                 </div>
               </div>
               <div class="relative">

@@ -34,7 +34,6 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
         email: formData.email,
         dormitoryName: formData.dormitoryName || null,
         gender: formData.gender || null,
-        staffId: formData.staffId || null,
         position: formData.position || null
       }
 
