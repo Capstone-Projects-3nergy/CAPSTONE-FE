@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
+import { auth } from '@/firebase/firebaseConfig'
 
 export const useResetPasswordManager = defineStore(
   'ResetPasswordManager',
@@ -17,17 +18,27 @@ export const useResetPasswordManager = defineStore(
       errorMessage.value = ''
 
       try {
-        // 1️⃣ ส่ง POST ไป backend
+        // 1️⃣ ดึง Firebase ID Token ของผู้ใช้ปัจจุบัน (ถ้ามี login)
+        let idToken = null
+        const currentUser = auth.currentUser
+        if (currentUser) {
+          idToken = await currentUser.getIdToken(true)
+        }
+
+        // 2️⃣ ส่ง POST ไป backend พร้อม Authorization header
         const response = await axios.post(
           'http://localhost:3000/api/reset-password',
+          { email },
           {
-            email
+            headers: idToken
+              ? { Authorization: `Bearer ${idToken}` }
+              : undefined
           }
         )
 
         const data = response.data
 
-        // 2️⃣ ตรวจสอบ response
+        // 3️⃣ ตรวจสอบ response
         if (!data.success) {
           throw new Error(data.message || 'Failed to send reset email.')
         }
