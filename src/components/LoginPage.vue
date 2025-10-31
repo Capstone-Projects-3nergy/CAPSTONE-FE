@@ -35,48 +35,56 @@ const closePopUp = (operate) => {
 // 🧩 ฟังก์ชันเข้าสู่ระบบ (สอดคล้องกับ LoginManager ตัวใหม่)
 const loginHomePageWeb = async () => {
   try {
+    // เริ่มโหลด
     const userData = await loginManager.loginAccount(
       trimmedEmail.value,
       trimmedPassword.value,
       router,
-      true // 👉 ใช้ Firebase login (เปลี่ยนเป็น false ถ้าใช้ backend)
+      true // ✅ ใช้ Firebase login (เปลี่ยนเป็น false ถ้าใช้ backend)
     )
 
     // ❌ ถ้า login ไม่สำเร็จ (ไม่มีข้อมูลผู้ใช้)
     if (!userData) {
       incorrect.value = true
+      console.warn('⚠️ Login failed: No user data returned')
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
 
     // ✅ ถ้า login สำเร็จ
-    if (loginManager.successMessage) {
-      console.log('✅ Login success:', loginManager.user)
+    console.log('✅ Login success:', loginManager.user)
 
-      // Route อัตโนมัติตาม role (ระบบใน store จัดการอยู่แล้ว)
-      // แต่ถ้าอยาก force ไปหน้าหนึ่ง สามารถเพิ่มได้:
-      if (loginManager.user?.role === 'resident') {
-        router.push({ name: 'home' })
-      } else if (loginManager.user?.role === 'staff') {
-        router.push({ name: 'homestaff' })
-      } else {
-        router.push({ name: 'home' })
-      }
+    // แสดงข้อความ success (popup)
+    success.value = true
+    setTimeout(() => (success.value = false), 2000)
+
+    // ✅ redirect ตาม role (ระบบใน LoginManager มีอยู่แล้ว)
+    // แต่ถ้าอยากให้ force route อีกครั้ง (เช่น หลัง popup)
+    if (loginManager.user?.role === 'resident') {
+      router.replace({ name: 'home' })
+    } else if (loginManager.user?.role === 'staff') {
+      router.replace({ name: 'homestaff' })
+    } else {
+      router.replace({ name: 'home' })
     }
   } catch (err) {
     console.error('❌ Login error:', err)
 
+    // ✅ ตรวจประเภทของ error
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
       loginManager.errorMessage?.includes('Invalid') ||
-      loginManager.errorMessage?.includes('not found')
+      loginManager.errorMessage?.includes('not found') ||
+      err.message?.includes('auth') // Firebase auth errors เช่น invalid-password
 
     if (isAuthError) {
       incorrect.value = true
+      console.warn('⚠️ Incorrect credentials')
       setTimeout(() => (incorrect.value = false), 2000)
     } else {
       error.value = true
+      console.error('🚨 Unexpected login error')
       setTimeout(() => (error.value = false), 2000)
     }
   }
