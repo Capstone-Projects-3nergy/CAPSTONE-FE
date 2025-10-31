@@ -11,7 +11,7 @@ const error = ref(false)
 const isEmailDuplicate = ref(false)
 const isPasswordWeak = ref(false)
 const success = ref(false)
-
+const email = ref('')
 // --- ปิด popup ด้วยมือ ---
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
@@ -276,8 +276,6 @@ const checkInputLength = (field) => {
               />
             </defs>
           </svg>
-
-          <!-- <h1 class="text-xl font-semibold">Tractify</h1> -->
         </div>
 
         <h2 class="text-2xl font-bold mb-1">Create your account</h2>
@@ -330,14 +328,55 @@ const checkInputLength = (field) => {
           @closePopUp="closePopUp"
         />
 
-        <p class="text-center text-sm text-gray-600 mt-4">
-          Already have an account?
+        <!-- Email Input with icon -->
+        <form @submit.prevent="submitReset" class="space-y-4">
+          <div class="relative">
+            <span
+              class="absolute inset-y-0 left-3 flex items-center text-gray-400"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 12H8m0 0H6m2 0v4m0-4v-4m8 0h2m-2 0V8m0 4v4m0-4H8"
+                />
+              </svg>
+            </span>
+            <input
+              type="email"
+              v-model="email"
+              placeholder="you@example.com"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+              required
+            />
+          </div>
+
+          <!-- Submit Button with hover animation -->
+          <button
+            type="submit"
+            :disabled="!email.trim()"
+            class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+          >
+            Send Reset Link
+          </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-600 mt-6">
+          Remember your password?
           <a
             href="#"
-            class="text-[#107EFF] font-medium hover:underline cursor-pointer"
+            class="text-blue-600 font-medium hover:underline cursor-pointer"
             @click="returnLoginPage"
-            >Sign In</a
           >
+            Sign In
+          </a>
         </p>
       </div>
     </div>
