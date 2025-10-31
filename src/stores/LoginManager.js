@@ -1,18 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
-import * as jwtDecodeModule from 'jwt-decode'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { auth } from '@/firebase/firebaseConfig'
+import * as jwtDecodeModule from 'jwt-decode'
 
 export const useLoginManager = defineStore('loginManager', () => {
+  // -----------------------
+  // 🔹 STATE
+  // -----------------------
   const user = ref(null)
   const isLoading = ref(false)
-  const errorMessage = ref(null)
-  const successMessage = ref(null)
+  const errorMessage = ref('')
+  const successMessage = ref('')
 
   // -----------------------
-  // 🔹 ฟังก์ชันถอดรหัส JWT
+  // 🔹 ฟังก์ชันถอดรหัส JWT (optional)
   // -----------------------
   const decodeJWT = (token) => {
     try {
@@ -24,65 +27,60 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Login: Firebase หรือ backend custom
+  // 🔹 LOGIN (Firebase + ส่ง token ไป backend)
   // -----------------------
-  const loginAccount = async (email, password, router, useFirebase = true) => {
+  const loginAccount = async (email, password, router) => {
     isLoading.value = true
-    errorMessage.value = null
-    successMessage.value = null
+    errorMessage.value = ''
+    successMessage.value = ''
 
     try {
-      let accessToken = null
-      let role = null
-      let name = null
-      let id = null
+      // 1️⃣ เข้าสู่ระบบด้วย Firebase
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      const firebaseUser = userCredential.user
 
-      if (useFirebase) {
-        // ✅ Firebase login
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        )
-        const firebaseUser = userCredential.user
+      // 2️⃣ ขอ ID Token จาก Firebase
+      const idToken = await firebaseUser.getIdToken()
 
-        accessToken = await firebaseUser.getIdToken()
-        name = firebaseUser.displayName || ''
-        role = 'resident' // หรือดึงจาก Firestore ถ้ามี
-        id = firebaseUser.uid
-      } else {
-        // ✅ Backend login
-        const response = await axios.post('http://localhost:3000/api/login', {
-          email,
-          password
-        })
-        const data = response.data
-        if (!data.success) throw new Error(data.message || 'Login failed')
+      // 3️⃣ ส่ง ID Token ไป Backend เพื่อยืนยันและรับข้อมูลเพิ่มเติม
+      const response = await axios.post(
+        'http://localhost:3000/api/login',
+        {}, // body ว่างได้ เพราะ token อยู่ใน header
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`
+          }
+        }
+      )
 
-        accessToken = data.accessToken
-        name = data.name
-        role = data.role
-        id = data.id
+      // 4️⃣ ดึงข้อมูลที่ backend ส่งกลับมา เช่น role, name, id
+      const data = response.data
+      if (!data.success) throw new Error(data.message || 'Login failed')
+
+      // 5️⃣ เก็บข้อมูลผู้ใช้
+      user.value = {
+        id: data.id,
+        email,
+        name: data.name,
+        role: data.role,
+        accessToken: idToken
       }
 
-      // Decode JWT ถ้ามี token
-      if (accessToken) {
-        const decoded = decodeJWT(accessToken)
-        console.log('Decoded JWT payload:', decoded)
-      }
+      // 6️⃣ เก็บลง localStorage เพื่อใช้งานภายหลัง
+      localStorage.setItem('accessToken', idToken)
+      localStorage.setItem('userRole', data.role)
+      localStorage.setItem('userName', data.name)
 
-      // ✅ บันทึกข้อมูลผู้ใช้
-      user.value = { id, email, name, role, accessToken }
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('userRole', role)
-      localStorage.setItem('userName', name)
+      successMessage.value = `Login successful as ${data.role}!`
 
-      successMessage.value = `Login successful as ${role}!`
-
-      // ✅ Routing ตาม role
+      // 7️⃣ Routing ตาม role
       if (router) {
-        if (role === 'resident') router.replace({ name: 'home' })
-        else if (role === 'staff') router.replace({ name: 'homestaff' })
+        if (data.role === 'resident') router.replace({ name: 'home' })
+        else if (data.role === 'staff') router.replace({ name: 'homestaff' })
         else router.replace({ name: 'home' })
       }
 
@@ -98,20 +96,11 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Logout
+  // 🔹 LOGOUT
   // -----------------------
-  const logoutAccount = async (router, useFirebase = true) => {
+  const logoutAccount = async (router) => {
     try {
-      if (useFirebase) {
-        await auth.signOut()
-      } else if (user.value?.accessToken) {
-        await axios.post(
-          'http://localhost:3000/api/logout',
-          {},
-          { headers: { Authorization: `Bearer ${user.value.accessToken}` } }
-        )
-      }
-
+      await signOut(auth)
       user.value = null
       localStorage.removeItem('accessToken')
       localStorage.removeItem('userRole')
@@ -124,11 +113,9 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Refresh token
+  // 🔹 Refresh Token (กรณี token หมดอายุ)
   // -----------------------
   const refreshToken = async () => {
-    if (!user.value) return null
-
     try {
       if (auth.currentUser) {
         const newToken = await auth.currentUser.getIdToken(true)
@@ -136,6 +123,7 @@ export const useLoginManager = defineStore('loginManager', () => {
         localStorage.setItem('accessToken', newToken)
         return newToken
       }
+      return null
     } catch (err) {
       console.error('Refresh token error:', err)
       await logoutAccount()
@@ -144,7 +132,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Protected API Request
+  // 🔹 Protected API Request (แนบ Bearer token อัตโนมัติ)
   // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {

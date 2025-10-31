@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
+import { auth } from '@/firebase/firebaseConfig'
+import { createUserWithEmailAndPassword, getIdToken } from 'firebase/auth'
 
 export const useRegisterManager = defineStore('RegisterManager', () => {
   // 🔹 STATE
@@ -15,28 +17,41 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
     successMessage.value = ''
 
     try {
-      // 1️⃣ เตรียม payload
+      // 1️⃣ สมัครผู้ใช้ใน Firebase ก่อน
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      )
+
+      // 2️⃣ ดึง Firebase ID Token
+      const idToken = await getIdToken(userCredential.user)
+
+      // 3️⃣ เตรียม payload (ข้อมูลที่ backend ต้องใช้)
       const payload = {
-        userType: formData.userType, // "staff" หรือ "resident"
+        userType: formData.userType,
         fullName: formData.fullName,
         email: formData.email,
-        password: formData.password,
         dormitoryName: formData.dormitoryName || null,
         gender: formData.gender || null,
         staffId: formData.staffId || null,
         position: formData.position || null
       }
 
-      // 2️⃣ แยก API ตามประเภทผู้ใช้
+      // 4️⃣ แยก endpoint ตามประเภทผู้ใช้
       const endpoint =
         formData.userType === 'staff'
           ? 'http://localhost:3000/api/staff/register'
           : 'http://localhost:3000/api/resident/register'
 
-      // 3️⃣ ส่ง POST ไป backend ด้วย axios
-      const response = await axios.post(endpoint, payload)
+      // 5️⃣ ส่งข้อมูลไป backend พร้อม header Authorization
+      const response = await axios.post(endpoint, payload, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
+      })
 
-      // 4️⃣ ตรวจสอบ response จาก backend
+      // 6️⃣ ตรวจสอบ response จาก backend
       if (response.data && response.data.success) {
         successMessage.value = `Account created successfully as ${formData.userType}!`
       } else {
@@ -44,12 +59,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       }
     } catch (error) {
       console.error(error)
-      // Axios error อาจมี response.data.message หรือ message ธรรมดา
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      if (error.response?.data?.message) {
         errorMessage.value = error.response.data.message
       } else {
         errorMessage.value = error.message || 'Registration failed.'
@@ -60,11 +70,9 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
   }
 
   return {
-    // state
     loading,
     errorMessage,
     successMessage,
-    // actions
     registerAccount
   }
 })
