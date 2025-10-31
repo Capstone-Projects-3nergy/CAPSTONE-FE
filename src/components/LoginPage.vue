@@ -363,7 +363,6 @@ const showResetPasswordPageWeb = async function () {
           </div>
           <div class="flex justify-end">
             <a
-              href="#"
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
               >Reset password?</a
@@ -413,7 +412,6 @@ const showResetPasswordPageWeb = async function () {
         <p class="text-sm text-center text-[#8C8F91] mt-6">
           Don’t have an account?
           <a
-            href="#"
             class="text-[#107EFF] font-medium hover:underline cursor-pointer"
             @click="showRegisterPageWeb"
             >Sign Up</a
