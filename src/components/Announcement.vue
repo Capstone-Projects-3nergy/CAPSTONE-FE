@@ -5,6 +5,9 @@ import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import { useLoginManager } from '@/stores/LoginManager'
+
+const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
@@ -13,11 +16,14 @@ const showResidentParcels = ref(false)
 const returnLogin = ref(false)
 const showProfileResident = ref(false)
 const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home' })
+  router.replace({ name: 'home', params: { id: loginStore.user.id } })
   showHomePageResident.value = true
 }
 const showResidentParcelPage = async function () {
-  router.replace({ name: 'residentparcels' })
+  router.replace({
+    name: 'residentparcels',
+    params: { id: loginStore.user.id }
+  })
   showResidentParcels.value = true
 }
 const returnLoginPage = async function () {
@@ -25,7 +31,10 @@ const returnLoginPage = async function () {
   returnLogin.value = true
 }
 const showProfileResidentPage = async function () {
-  router.replace({ name: 'profileresident' })
+  router.replace({
+    name: 'profileresident',
+    params: { id: loginStore.user.id }
+  })
   showProfileResident.value = true
 }
 const isCollapsed = ref(false)

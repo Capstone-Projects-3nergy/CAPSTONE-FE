@@ -13,6 +13,9 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import { useLoginManager } from '@/stores/LoginManager'
+
+const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const scanResult = ref('')

@@ -8,6 +8,9 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import { useLoginManager } from '@/stores/LoginManager'
+
+const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)

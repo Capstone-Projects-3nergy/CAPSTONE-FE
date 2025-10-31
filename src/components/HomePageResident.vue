@@ -70,7 +70,10 @@ function nextSlide() {
 //   showParcelScanner.value = true
 // }
 const showResidentParcelPage = async function () {
-  router.replace({ name: 'residentparcels' })
+  router.replace({
+    name: 'residentparcels',
+    params: { id: loginStore.user.id }
+  })
   showResidentParcels.value = true
 }
 // const showStaffParcelPage = async function () {
@@ -78,7 +81,7 @@ const showResidentParcelPage = async function () {
 //   showStaffParcels.value = true
 // }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
+  router.replace({ name: 'announcement', params: { id: loginStore.user.id } })
   showAnnouncement.value = true
 }
 // const showDashBoardPage = async function () {
@@ -86,7 +89,10 @@ const showAnnouncementPage = async function () {
 //   showDashBoard.value = true
 // }
 const showProfileResidentPage = async function () {
-  router.replace({ name: 'profileresident' })
+  router.replace({
+    name: 'profileresident',
+    params: { id: loginStore.user.id }
+  })
   showProfileResident.value = true
 }
 // const returnLoginPage = async function () {

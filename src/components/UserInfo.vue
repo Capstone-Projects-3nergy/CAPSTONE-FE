@@ -5,15 +5,21 @@ import { useLoginManager } from '@/stores/LoginManager'
 // 🧠 ดึงข้อมูลผู้ใช้จาก Pinia store
 const loginStore = useLoginManager()
 
-// ✅ สร้าง computed เพื่ออ่านค่าจาก store
+// ✅ Computed สำหรับชื่อผู้ใช้
 const userName = computed(() => loginStore.user?.name || 'Guest')
-const userRole = computed(() =>
-  loginStore.user?.role === 'staff'
-    ? 'Dormitory Admin'
-    : loginStore.user?.role === 'resident'
-    ? 'Resident'
-    : 'Unknown'
-)
+
+// ✅ Computed สำหรับบทบาทผู้ใช้
+const userRole = computed(() => {
+  if (!loginStore.user?.role) return 'Unknown'
+  switch (loginStore.user.role) {
+    case 'staff':
+      return 'Dormitory Admin'
+    case 'resident':
+      return 'Resident'
+    default:
+      return 'Unknown'
+  }
+})
 </script>
 
 <template>
