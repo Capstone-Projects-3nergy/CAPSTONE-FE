@@ -2,15 +2,14 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 import * as jwtDecodeModule from 'jwt-decode'
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/firebase/firebaseConfig'
 
 export const useLoginManager = defineStore('loginManager', () => {
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref(null)
   const successMessage = ref(null)
-
-  const auth = getAuth() // Firebase Auth instance
 
   // -----------------------
   // 🔹 ฟังก์ชันถอดรหัส JWT
@@ -39,38 +38,40 @@ export const useLoginManager = defineStore('loginManager', () => {
       let id = null
 
       if (useFirebase) {
-        // Firebase login
+        // ✅ Firebase login
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
           password
         )
         const firebaseUser = userCredential.user
-        accessToken = await firebaseUser.getIdToken() // รับ Firebase ID Token
+
+        accessToken = await firebaseUser.getIdToken()
         name = firebaseUser.displayName || ''
-        role = 'resident' // หรือ fetch role จาก Firestore
+        role = 'resident' // หรือดึงจาก Firestore ถ้ามี
         id = firebaseUser.uid
       } else {
-        // Backend login
+        // ✅ Backend login
         const response = await axios.post('http://localhost:3000/api/login', {
           email,
           password
         })
         const data = response.data
         if (!data.success) throw new Error(data.message || 'Login failed')
+
         accessToken = data.accessToken
         name = data.name
         role = data.role
         id = data.id
       }
 
-      // Decode token
+      // Decode JWT ถ้ามี token
       if (accessToken) {
         const decoded = decodeJWT(accessToken)
         console.log('Decoded JWT payload:', decoded)
       }
 
-      // Save user info
+      // ✅ บันทึกข้อมูลผู้ใช้
       user.value = { id, email, name, role, accessToken }
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('userRole', role)
@@ -78,7 +79,7 @@ export const useLoginManager = defineStore('loginManager', () => {
 
       successMessage.value = `Login successful as ${role}!`
 
-      // Route ตาม role
+      // ✅ Routing ตาม role
       if (router) {
         if (role === 'resident') router.replace({ name: 'home' })
         else if (role === 'staff') router.replace({ name: 'homestaff' })
@@ -97,7 +98,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Logout: Firebase หรือ backend
+  // 🔹 Logout
   // -----------------------
   const logoutAccount = async (router, useFirebase = true) => {
     try {
@@ -111,7 +112,6 @@ export const useLoginManager = defineStore('loginManager', () => {
         )
       }
 
-      // Clear user info
       user.value = null
       localStorage.removeItem('accessToken')
       localStorage.removeItem('userRole')
@@ -131,13 +131,11 @@ export const useLoginManager = defineStore('loginManager', () => {
 
     try {
       if (auth.currentUser) {
-        // Firebase: force refresh
         const newToken = await auth.currentUser.getIdToken(true)
         user.value.accessToken = newToken
         localStorage.setItem('accessToken', newToken)
         return newToken
       }
-      // Backend refresh token logic (ถ้ามี)
     } catch (err) {
       console.error('Refresh token error:', err)
       await logoutAccount()
@@ -146,17 +144,16 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 API request สำหรับ protected endpoints
+  // 🔹 Protected API Request
   // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
-      let token = user.value?.accessToken || localStorage.getItem('accessToken')
+      const token =
+        user.value?.accessToken || localStorage.getItem('accessToken')
       if (!token) throw new Error('No access token available')
 
-      const headers = options.headers || {}
-      options.headers = { ...headers, Authorization: `Bearer ${token}` }
-
-      const response = await axios({ url, ...options })
+      const headers = { ...options.headers, Authorization: `Bearer ${token}` }
+      const response = await axios({ url, ...options, headers })
       return response.data
     } catch (err) {
       console.error('API request error:', err)
@@ -165,14 +162,13 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Navigation Guard สำหรับตรวจสอบ token ก่อนเข้าหน้า protected
+  // 🔹 Navigation Guard
   // -----------------------
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
       const token =
         user.value?.accessToken || localStorage.getItem('accessToken')
 
-      // Route ที่ไม่ต้อง auth
       if (!to.meta?.requiresAuth) return next()
 
       if (!token) return next({ name: 'login' })
@@ -181,7 +177,6 @@ export const useLoginManager = defineStore('loginManager', () => {
       const currentTime = Math.floor(Date.now() / 1000)
 
       if (decoded?.exp && decoded.exp < currentTime) {
-        // Token หมดอายุ → refresh
         const newToken = await refreshToken()
         if (newToken) return next()
         else return next({ name: 'login' })
