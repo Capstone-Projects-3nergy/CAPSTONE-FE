@@ -63,7 +63,7 @@ export const useLoginManager = defineStore('loginManager', () => {
       if (data.role === 'resident') {
         router.replace({ name: 'home' })
       } else if (data.role === 'staff') {
-        router.replace({ name: 'staffDashboard' })
+        router.replace({ name: 'homestaff' })
       } else {
         router.replace({ name: 'home' })
       }
