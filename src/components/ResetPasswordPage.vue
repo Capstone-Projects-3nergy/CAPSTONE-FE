@@ -5,7 +5,10 @@ import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-const registerStore = useRegisterManager()
+import { useResetPasswordManager } from '@/stores/ResetPasswordManager.js'
+
+const resetStore = useResetPasswordManager()
+const isEmailInvalid = ref(false)
 const incorrect = ref(false)
 const error = ref(false)
 const isEmailDuplicate = ref(false)
@@ -22,49 +25,25 @@ const closePopUp = (operate) => {
   if (operate === 'password') isPasswordWeak.value = false
 }
 
-// // ✅ ฟังก์ชันสมัครสมาชิก
-// const submitForm = async () => {
-//   try {
-//     const data = await registerStore.registerAccount({
-//       userType: userType.value,
-//       fullName: form.fullName,
-//       email: form.email,
-//       password: form.password,
-//       dormitoryName: form.dormitoryName,
-//       gender: form.gender,
-//       staffId: form.staffId,
-//       position: form.position
-//     })
+// --- ส่งลิงก์รีเซ็ตรหัสผ่าน ---
+const sendResetLink = async () => {
+  if (!trimmedEmail.value || !/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
+    isEmailInvalid.value = true
+    return
+  }
 
-//     // ✅ ตรวจผลลัพธ์
-//     if (data === '400') {
-//       // Email ซ้ำ
-//       setTimeout(() => {
-//         isEmailDuplicate.value = true
-//       }, 1000)
-//     } else if (data === '401') {
-//       setTimeout(() => {
-//         // รหัสผ่านสั้น
-//         isPasswordWeak.value = true
-//       }, 1000)
-//     } else if (data && data.success) {
-//       setTimeout(() => {
-//         success.value = true
-//         router.push({ name: 'login' })
-//       }, 1000)
-//     } else {
-//       setTimeout(() => {
-//         error.value = true
-//       }, 1000)
-//     }
-//   } catch (err) {
-//     setTimeout(() => {
-//       console.error('❌ Register error:', err)
-//       error.value = true
-//     }, 1000)
-//   }
-// }
-// const userType = ref('resident')
+  try {
+    await resetStore.sendResetEmail(trimmedEmail.value)
+    if (resetStore.successMessage) {
+      success.value = true
+    } else if (resetStore.errorMessage) {
+      error.value = true
+    }
+  } catch (err) {
+    console.error('❌ Reset password error:', err)
+    error.value = true
+  }
+}
 const returnLogin = ref(false)
 const router = useRouter()
 const isPasswordVisible = ref(false)
@@ -376,8 +355,26 @@ const checkInputLength = (field) => {
           <!-- Submit Button with hover animation -->
           <button
             type="submit"
-            :disabled="!email.trim()"
+            @click="sendResetLink"
             class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-default':
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedConfirmPassword.length === 0,
+              'bg-black hover:bg-gray-600 text-white':
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0
+            }"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit ||
+              isConfirmPasswordOverLimit
+            "
           >
             Send Reset Link
           </button>
