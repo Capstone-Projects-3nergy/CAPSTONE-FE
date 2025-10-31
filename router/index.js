@@ -31,6 +31,11 @@ const routes = [
     name: 'register',
     component: RegisterPage
   },
+  {
+    path: '/resetpasswordpage',
+    name: 'resetpassword',
+    component: RegisterPage
+  }
 
   // Resident
   {
