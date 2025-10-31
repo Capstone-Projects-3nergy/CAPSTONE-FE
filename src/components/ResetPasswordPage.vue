@@ -335,17 +335,15 @@ const checkInputLength = (field) => {
               class="absolute inset-y-0 left-3 flex items-center text-gray-400"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
                 fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 12H8m0 0H6m2 0v4m0-4v-4m8 0h2m-2 0V8m0 4v4m0-4H8"
+                  d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                  fill="#8C8F91"
                 />
               </svg>
             </span>
