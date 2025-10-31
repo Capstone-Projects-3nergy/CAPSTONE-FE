@@ -10,6 +10,7 @@ const incorrect = ref(false)
 const error = ref(false)
 const isEmailDuplicate = ref(false)
 const isPasswordWeak = ref(false)
+const isPasswordNotMatch = ref(false)
 const success = ref(false)
 
 // --- ปิด popup ด้วยมือ ---
@@ -20,29 +21,44 @@ const closePopUp = (operate) => {
   if (operate === 'success ') success.value = false
   if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
 }
 
 // ✅ ฟังก์ชันสมัครสมาชิก
 const submitForm = async () => {
   try {
+    // 🔹 ตรวจสอบ confirmPassword ก่อน
+    if (form.password !== form.confirmPassword) {
+      error.value = true
+      errorMessage.value = 'Passwords do not match'
+      setTimeout(() => {
+        error.value = false
+        errorMessage.value = ''
+      }, 2000)
+      return // หยุดการ submit
+    }
+
+    // เรียก store registerAccount
     await registerStore.registerAccount({
       userType: userType.value,
       fullName: form.fullName,
       email: form.email,
-      password: form.password,
+      password: form.password, // ส่งเฉพาะ password
       dormitoryName: form.dormitoryName,
       gender: form.gender,
       position: form.position
     })
 
-    // ✅ ตรวจสอบผลลัพธ์จาก store
+    // ตรวจสอบผลลัพธ์จาก store
     if (registerStore.errorMessage) {
-      if (registerStore.errorMessage.includes('email')) {
+      if (registerStore.errorMessage.toLowerCase().includes('email')) {
         isEmailDuplicate.value = true
         setTimeout(() => {
-          isEmailDuplicate.value = false // popup หายเอง
+          isEmailDuplicate.value = false
         }, 2000)
-      } else if (registerStore.errorMessage.includes('password')) {
+      } else if (
+        registerStore.errorMessage.toLowerCase().includes('password')
+      ) {
         isPasswordWeak.value = true
         setTimeout(() => {
           isPasswordWeak.value = false
@@ -57,7 +73,7 @@ const submitForm = async () => {
       success.value = true
       setTimeout(() => {
         success.value = false
-        router.push({ name: 'login' }) // เปลี่ยนหน้าเมื่อ popup หาย
+        router.push({ name: 'login' })
       }, 2000)
     }
   } catch (err) {
@@ -296,6 +312,14 @@ const checkInputLength = (field) => {
           message="Error!!"
           styleType="red"
           operate="incorrect"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isPasswordNotMatch"
+          :titles="'Password is not Match'"
+          message="Error!!"
+          styleType="red"
+          operate="errorpassword"
           @closePopUp="closePopUp"
         />
         <AlertPopUp

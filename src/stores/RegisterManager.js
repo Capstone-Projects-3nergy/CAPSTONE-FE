@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
-import { auth } from '@/firebase/firebaseConfig'
-import { createUserWithEmailAndPassword, getIdToken } from 'firebase/auth'
 
 export const useRegisterManager = defineStore('RegisterManager', () => {
   // 🔹 STATE
@@ -10,47 +8,34 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
   const errorMessage = ref('')
   const successMessage = ref('')
 
-  // 🔹 ACTION: สมัครสมาชิกใหม่ (ทั้ง staff และ resident)
+  // 🔹 ACTION: สมัครสมาชิกใหม่ (เฉพาะระบบ backend ของคุณ)
   const registerAccount = async (formData) => {
     loading.value = true
     errorMessage.value = ''
     successMessage.value = ''
 
     try {
-      // 1️⃣ สมัครผู้ใช้ใน Firebase ก่อน
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      )
-
-      // 2️⃣ ดึง Firebase ID Token
-      const idToken = await getIdToken(userCredential.user)
-
-      // 3️⃣ เตรียม payload (ข้อมูลที่ backend ต้องใช้)
+      // 1️⃣ เตรียม payload สำหรับ backend
       const payload = {
         userType: formData.userType,
         fullName: formData.fullName,
         email: formData.email,
+        password: formData.password, // สำหรับเฟส 1 อาจเก็บ hash ใน backend
         dormitoryName: formData.dormitoryName || null,
         gender: formData.gender || null,
         position: formData.position || null
       }
 
-      // 4️⃣ แยก endpoint ตามประเภทผู้ใช้
+      // 2️⃣ แยก endpoint ตามประเภทผู้ใช้
       const endpoint =
         formData.userType === 'staff'
           ? 'http://localhost:3000/api/staff/register'
           : 'http://localhost:3000/api/resident/register'
 
-      // 5️⃣ ส่งข้อมูลไป backend พร้อม header Authorization
-      const response = await axios.post(endpoint, payload, {
-        headers: {
-          Authorization: `Bearer ${idToken}`
-        }
-      })
+      // 3️⃣ ส่งข้อมูลไป backend
+      const response = await axios.post(endpoint, payload)
 
-      // 6️⃣ ตรวจสอบ response จาก backend
+      // 4️⃣ ตรวจสอบ response จาก backend
       if (response.data && response.data.success) {
         successMessage.value = `Account created successfully as ${formData.userType}!`
       } else {

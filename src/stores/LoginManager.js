@@ -15,7 +15,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   const successMessage = ref('')
 
   // -----------------------
-  // 🔹 ฟังก์ชันถอดรหัส JWT (optional)
+  // 🔹 ฟังก์ชันถอดรหัส JWT
   // -----------------------
   const decodeJWT = (token) => {
     try {
@@ -27,7 +27,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 LOGIN (Firebase + ส่ง token ไป backend)
+  // 🔹 LOGIN (Firebase Frontend + ส่ง token ไป Backend)
   // -----------------------
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
@@ -35,7 +35,7 @@ export const useLoginManager = defineStore('loginManager', () => {
     successMessage.value = ''
 
     try {
-      // 1️⃣ เข้าสู่ระบบด้วย Firebase
+      // 1️⃣ ล็อกอินด้วย Firebase
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -43,25 +43,20 @@ export const useLoginManager = defineStore('loginManager', () => {
       )
       const firebaseUser = userCredential.user
 
-      // 2️⃣ ขอ ID Token จาก Firebase
+      // 2️⃣ ขอ ID Token
       const idToken = await firebaseUser.getIdToken()
 
-      // 3️⃣ ส่ง ID Token ไป Backend เพื่อยืนยันและรับข้อมูลเพิ่มเติม
+      // 3️⃣ ส่ง token ไป backend
       const response = await axios.post(
         'http://localhost:3000/api/login',
-        {}, // body ว่างได้ เพราะ token อยู่ใน header
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`
-          }
-        }
+        {}, // body ว่าง
+        { headers: { Authorization: `Bearer ${idToken}` } }
       )
 
-      // 4️⃣ ดึงข้อมูลที่ backend ส่งกลับมา เช่น role, name, id
       const data = response.data
       if (!data.success) throw new Error(data.message || 'Login failed')
 
-      // 5️⃣ เก็บข้อมูลผู้ใช้
+      // 4️⃣ เก็บข้อมูลผู้ใช้
       user.value = {
         id: data.id,
         email,
@@ -70,14 +65,14 @@ export const useLoginManager = defineStore('loginManager', () => {
         accessToken: idToken
       }
 
-      // 6️⃣ เก็บลง localStorage เพื่อใช้งานภายหลัง
+      // 5️⃣ เก็บลง localStorage
       localStorage.setItem('accessToken', idToken)
       localStorage.setItem('userRole', data.role)
       localStorage.setItem('userName', data.name)
 
       successMessage.value = `Login successful as ${data.role}!`
 
-      // 7️⃣ Routing ตาม role
+      // 6️⃣ Routing ตาม role
       if (router) {
         if (data.role === 'resident') router.replace({ name: 'home' })
         else if (data.role === 'staff') router.replace({ name: 'homestaff' })
@@ -105,7 +100,6 @@ export const useLoginManager = defineStore('loginManager', () => {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('userRole')
       localStorage.removeItem('userName')
-
       if (router) router.replace({ name: 'login' })
     } catch (err) {
       console.error('Logout error:', err)
@@ -113,7 +107,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Refresh Token (กรณี token หมดอายุ)
+  // 🔹 Refresh Token (ถ้า token หมดอายุ)
   // -----------------------
   const refreshToken = async () => {
     try {
@@ -132,13 +126,20 @@ export const useLoginManager = defineStore('loginManager', () => {
   }
 
   // -----------------------
-  // 🔹 Protected API Request (แนบ Bearer token อัตโนมัติ)
+  // 🔹 Protected API Request (แนบ Bearer token และ auto refresh)
   // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
-      const token =
-        user.value?.accessToken || localStorage.getItem('accessToken')
+      let token = user.value?.accessToken || localStorage.getItem('accessToken')
       if (!token) throw new Error('No access token available')
+
+      // ตรวจสอบ token หมดอายุ
+      const decoded = decodeJWT(token)
+      const currentTime = Math.floor(Date.now() / 1000)
+      if (decoded?.exp && decoded.exp < currentTime) {
+        token = await refreshToken()
+        if (!token) throw new Error('Token expired')
+      }
 
       const headers = { ...options.headers, Authorization: `Bearer ${token}` }
       const response = await axios({ url, ...options, headers })
@@ -158,7 +159,6 @@ export const useLoginManager = defineStore('loginManager', () => {
         user.value?.accessToken || localStorage.getItem('accessToken')
 
       if (!to.meta?.requiresAuth) return next()
-
       if (!token) return next({ name: 'login' })
 
       const decoded = decodeJWT(token)
