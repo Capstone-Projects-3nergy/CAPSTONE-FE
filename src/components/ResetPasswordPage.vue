@@ -22,62 +22,57 @@ const closePopUp = (operate) => {
   if (operate === 'password') isPasswordWeak.value = false
 }
 
-// ✅ ฟังก์ชันสมัครสมาชิก
-const submitForm = async () => {
-  try {
-    const data = await registerStore.registerAccount({
-      userType: userType.value,
-      fullName: form.fullName,
-      email: form.email,
-      password: form.password,
-      dormitoryName: form.dormitoryName,
-      gender: form.gender,
-      staffId: form.staffId,
-      position: form.position
-    })
+// // ✅ ฟังก์ชันสมัครสมาชิก
+// const submitForm = async () => {
+//   try {
+//     const data = await registerStore.registerAccount({
+//       userType: userType.value,
+//       fullName: form.fullName,
+//       email: form.email,
+//       password: form.password,
+//       dormitoryName: form.dormitoryName,
+//       gender: form.gender,
+//       staffId: form.staffId,
+//       position: form.position
+//     })
 
-    // ✅ ตรวจผลลัพธ์
-    if (data === '400') {
-      // Email ซ้ำ
-      setTimeout(() => {
-        isEmailDuplicate.value = true
-      }, 1000)
-    } else if (data === '401') {
-      setTimeout(() => {
-        // รหัสผ่านสั้น
-        isPasswordWeak.value = true
-      }, 1000)
-    } else if (data && data.success) {
-      setTimeout(() => {
-        success.value = true
-        router.push({ name: 'login' })
-      }, 1000)
-    } else {
-      setTimeout(() => {
-        error.value = true
-      }, 1000)
-    }
-  } catch (err) {
-    setTimeout(() => {
-      console.error('❌ Register error:', err)
-      error.value = true
-    }, 1000)
-  }
-}
-const userType = ref('resident')
+//     // ✅ ตรวจผลลัพธ์
+//     if (data === '400') {
+//       // Email ซ้ำ
+//       setTimeout(() => {
+//         isEmailDuplicate.value = true
+//       }, 1000)
+//     } else if (data === '401') {
+//       setTimeout(() => {
+//         // รหัสผ่านสั้น
+//         isPasswordWeak.value = true
+//       }, 1000)
+//     } else if (data && data.success) {
+//       setTimeout(() => {
+//         success.value = true
+//         router.push({ name: 'login' })
+//       }, 1000)
+//     } else {
+//       setTimeout(() => {
+//         error.value = true
+//       }, 1000)
+//     }
+//   } catch (err) {
+//     setTimeout(() => {
+//       console.error('❌ Register error:', err)
+//       error.value = true
+//     }, 1000)
+//   }
+// }
+// const userType = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
 const isPasswordVisible = ref(false)
 const isComfirmPasswordVisible = ref(false)
 const form = reactive({
-  fullName: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  dormitoryName: '',
-  gender: 'female',
-  staffId: '',
-  position: ''
+  confirmPassword: ''
 })
 
 const isEmailOverLimit = ref(false)
@@ -278,9 +273,10 @@ const checkInputLength = (field) => {
           </svg>
         </div>
 
-        <h2 class="text-2xl font-bold mb-1">Create your account</h2>
+        <h2 class="text-2xl font-bold mb-1">Reset your password</h2>
         <p class="text-[#8C8F91] text-sm mb-6">
-          Welcome to Tractify — Create your account below
+          Enter your email below and we’ll send you a link to reset your
+          password
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
@@ -348,14 +344,35 @@ const checkInputLength = (field) => {
               </svg>
             </span>
             <input
-              type="email"
-              v-model="email"
+              v-model="form.email"
+                 :type="isEmailVisible ? 'text' : 'email'"
               placeholder="Email"
               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
-              required
+              @input="checkInputLength('email')"
+              :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
             />
           </div>
-
+          <div
+            style="display: flex; align-items: center"
+            v-if="isEmailOverLimit"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="-mt-px h-4 w-[20rem]"
+              class="w-[15px] text-red-600"
+            >
+              <path
+                fillRule="evenodd"
+                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <div class="text-sm text-red-600">
+              Limit email name to 30 characters or less.
+            </div>
+          </div>
           <!-- Submit Button with hover animation -->
           <button
             type="submit"
