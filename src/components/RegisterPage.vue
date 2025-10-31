@@ -25,7 +25,7 @@ const closePopUp = (operate) => {
 // ✅ ฟังก์ชันสมัครสมาชิก
 const submitForm = async () => {
   try {
-    const data = await registerStore.registerAccount({
+    await registerStore.registerAccount({
       userType: userType.value,
       fullName: form.fullName,
       email: form.email,
@@ -36,34 +36,40 @@ const submitForm = async () => {
       position: form.position
     })
 
-    // ✅ ตรวจผลลัพธ์
-    if (data === '400') {
-      // Email ซ้ำ
-      setTimeout(() => {
+    // ✅ ตรวจสอบผลลัพธ์จาก store
+    if (registerStore.errorMessage) {
+      if (registerStore.errorMessage.includes('email')) {
         isEmailDuplicate.value = true
-      }, 1000)
-    } else if (data === '401') {
-      setTimeout(() => {
-        // รหัสผ่านสั้น
+        setTimeout(() => {
+          isEmailDuplicate.value = false // popup หายเอง
+        }, 2000)
+      } else if (registerStore.errorMessage.includes('password')) {
         isPasswordWeak.value = true
-      }, 1000)
-    } else if (data && data.success) {
-      setTimeout(() => {
-        success.value = true
-        router.push({ name: 'login' })
-      }, 1000)
-    } else {
-      setTimeout(() => {
+        setTimeout(() => {
+          isPasswordWeak.value = false
+        }, 2000)
+      } else {
         error.value = true
-      }, 1000)
+        setTimeout(() => {
+          error.value = false
+        }, 2000)
+      }
+    } else if (registerStore.successMessage) {
+      success.value = true
+      setTimeout(() => {
+        success.value = false
+        router.push({ name: 'login' }) // เปลี่ยนหน้าเมื่อ popup หาย
+      }, 2000)
     }
   } catch (err) {
+    console.error('❌ Register error:', err)
+    error.value = true
     setTimeout(() => {
-      console.error('❌ Register error:', err)
-      error.value = true
-    }, 1000)
+      error.value = false
+    }, 2000)
   }
 }
+
 const userType = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
