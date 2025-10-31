@@ -1,50 +1,48 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { auth } from '@/firebase/firebaseConfig'
-import { sendPasswordResetEmail } from 'firebase/auth'
 
 export const useResetPasswordManager = defineStore(
   'ResetPasswordManager',
   () => {
-    // 🟦 State
     const loading = ref(false)
     const successMessage = ref('')
     const errorMessage = ref('')
 
-    // 🟨 Action: ส่งอีเมลรีเซ็ตรหัสผ่าน
     const sendResetEmail = async (email) => {
       loading.value = true
       successMessage.value = ''
       errorMessage.value = ''
 
       try {
-        await sendPasswordResetEmail(auth, email)
-        successMessage.value = '📧 Reset password email sent successfully!'
-      } catch (error) {
-        console.error('❌ Reset password error:', error)
+        const response = await fetch(
+          'http://localhost:3000/api/reset-password',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          }
+        )
 
-        // 🔹 แปลง error code ของ Firebase เป็นข้อความอ่านง่าย
-        switch (error.code) {
-          case 'auth/invalid-email':
-            errorMessage.value = 'Invalid email format.'
-            break
-          case 'auth/user-not-found':
-            errorMessage.value = 'No user found with this email.'
-            break
-          default:
-            errorMessage.value = 'Failed to send reset email. Please try again.'
+        const data = await response.json()
+
+        if (response.ok) {
+          successMessage.value =
+            data.message || '📧 Reset password email sent successfully!'
+        } else {
+          errorMessage.value = data.message || 'Failed to send reset email.'
         }
+      } catch (err) {
+        console.error('❌ Reset password error:', err)
+        errorMessage.value = 'Network error. Please try again.'
       } finally {
         loading.value = false
       }
     }
 
     return {
-      // State
       loading,
       successMessage,
       errorMessage,
-      // Actions
       sendResetEmail
     }
   }
