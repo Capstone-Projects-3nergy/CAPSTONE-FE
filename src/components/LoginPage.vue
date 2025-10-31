@@ -4,12 +4,6 @@ import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
 import ResetPasswordPage from './ResetPasswordPage.vue'
-// import {
-//   login,
-//   decodeJWT,
-//   useAuthGuard,
-//   refreshToken
-// } from '@/stores/UserManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useLoginManager } from '@/stores/LoginManager.js'
 import AlertPopUp from './AlertPopUp.vue'
@@ -25,47 +19,62 @@ const showRegisterPage = ref(false)
 const showResetPasswordPage = ref(false)
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
+const loading = computed(() => loginManager.isLoading)
 const incorrect = ref(false)
 const error = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
 const loginManager = useLoginManager()
+
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
 }
 
-// 🧩 ฟังก์ชันเข้าสู่ระบบ (มีตรวจ response code จาก backend)
+// 🧩 ฟังก์ชันเข้าสู่ระบบ (สอดคล้องกับ LoginManager ตัวใหม่)
 const loginHomePageWeb = async () => {
   try {
-    const data = await loginManager.loginAccount(
+    const userData = await loginManager.loginAccount(
       trimmedEmail.value,
       trimmedPassword.value,
-      router
+      router,
+      true // 👉 ใช้ Firebase login (เปลี่ยนเป็น false ถ้าใช้ backend)
     )
 
-    if (!data) {
+    // ❌ ถ้า login ไม่สำเร็จ (ไม่มีข้อมูลผู้ใช้)
+    if (!userData) {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
 
+    // ✅ ถ้า login สำเร็จ
     if (loginManager.successMessage) {
       console.log('✅ Login success:', loginManager.user)
-      router.push({ name: 'home' }) // redirect หลัง login สำเร็จ
+
+      // Route อัตโนมัติตาม role (ระบบใน store จัดการอยู่แล้ว)
+      // แต่ถ้าอยาก force ไปหน้าหนึ่ง สามารถเพิ่มได้:
+      if (loginManager.user?.role === 'resident') {
+        router.push({ name: 'home' })
+      } else if (loginManager.user?.role === 'staff') {
+        router.push({ name: 'homestaff' })
+      } else {
+        router.push({ name: 'home' })
+      }
     }
   } catch (err) {
     console.error('❌ Login error:', err)
 
-    if (
+    const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
       loginManager.errorMessage?.includes('Invalid') ||
       loginManager.errorMessage?.includes('not found')
-    ) {
+
+    if (isAuthError) {
       incorrect.value = true
-      setTimeout(() => (incorrect.value = false), 2000) // popup หายเอง
+      setTimeout(() => (incorrect.value = false), 2000)
     } else {
       error.value = true
       setTimeout(() => (error.value = false), 2000)
