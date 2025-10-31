@@ -345,7 +345,7 @@ const checkInputLength = (field) => {
             </span>
             <input
               v-model="form.email"
-                 :type="isEmailVisible ? 'text' : 'email'"
+              :type="isEmailVisible ? 'text' : 'email'"
               placeholder="Email"
               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
               @input="checkInputLength('email')"
