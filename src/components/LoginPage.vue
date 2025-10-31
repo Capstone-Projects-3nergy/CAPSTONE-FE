@@ -3,6 +3,7 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
+import ResetPasswordPage from './ResetPasswordPage.vue'
 // import {
 //   login,
 //   decodeJWT,
@@ -21,6 +22,7 @@ const email = ref('')
 const password = ref('')
 const showHomePage = ref(false)
 const showRegisterPage = ref(false)
+const showResetPasswordPage = ref(false)
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
 const incorrect = ref(false)
@@ -113,6 +115,11 @@ const togglePasswordVisibility = () => {
 const showRegisterPageWeb = async function () {
   router.replace({ name: 'register' })
   showRegisterPage.value = true
+}
+
+const showResetPasswordPageWeb = async function () {
+  router.replace({ name: 'resetpassword' })
+  showResetPasswordPage.value = true
 }
 </script>
 
