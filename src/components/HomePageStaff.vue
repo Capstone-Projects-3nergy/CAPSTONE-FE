@@ -61,11 +61,13 @@ const ShowManageResidentPage = async function () {
   showManageResident.value = true
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
+  router.replace({ name: 'dashboard' ,
+    params: { id: loginStore.user.id }})
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
+  router.replace({ name: 'profilestaff' ,
+    params: { id: loginStore.user.id }})
   showProfileStaff.value = true
 }
 // const returnLoginPage = async function () {

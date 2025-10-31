@@ -113,7 +113,7 @@ const parcels = ref([
   }
 ])
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
+  router.replace({ name: 'parcelscanner', params: { id: loginStore.user.id } })
   showParcelScanner.value = true
 }
 // const showResidentParcelPage = async function () {
@@ -121,7 +121,8 @@ const showParcelScannerPage = async function () {
 //   showResidentParcels.value = true
 // }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
+  router.replace({ name: 'staffparcels' ,
+    params: { id: loginStore.user.id }})
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
@@ -129,11 +130,13 @@ const ShowManageAnnouncementPage = async function () {
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' })
+  router.replace({ name: 'manageresident' ,
+    params: { id: loginStore.user.id }})
   showManageResident.value = true
 }
 const showHomePageStaffWeb = async () => {
-  router.replace({ name: 'homestaff' })
+  router.replace({ name: 'homestaff' ,
+    params: { id: loginStore.user.id }})
   showHomePageStaff.value = true
 }
 
@@ -147,11 +150,13 @@ const returnLoginPage = async () => {
   }
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
+  router.replace({ name: 'dashboard',
+    params: { id: loginStore.user.id } })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
+  router.replace({ name: 'profilestaff',
+    params: { id: loginStore.user.id } })
   showProfileStaff.value = true
 }
 const isCollapsed = ref(false)

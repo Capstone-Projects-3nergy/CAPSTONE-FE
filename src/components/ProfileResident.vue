@@ -41,11 +41,13 @@ const cancelEdit = () => {
   }
 }
 const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home' })
+  router.replace({ name: 'home',
+    params: { id: loginStore.user.id } })
   showHomePageResident.value = true
 }
 const showResidentParcelPage = async function () {
-  router.replace({ name: 'residentparcels' })
+  router.replace({ name: 'residentparcels' ,
+    params: { id: loginStore.user.id }})
   showResidentParcels.value = true
 }
 const returnLoginPage = async () => {

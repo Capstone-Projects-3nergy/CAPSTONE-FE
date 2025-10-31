@@ -50,11 +50,11 @@ const myParcels = computed(() =>
 )
 
 const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home' })
+  router.replace({ name: 'home', params: { id: loginStore.user.id } })
   showHomePageResident.value = true
 }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
+  router.replace({ name: 'announcement', params: { id: loginStore.user.id } })
   showAnnouncement.value = true
 }
 const returnLoginPage = async () => {
@@ -67,7 +67,10 @@ const returnLoginPage = async () => {
   }
 }
 const showProfileResidentPage = async function () {
-  router.replace({ name: 'profileresident' })
+  router.replace({
+    name: 'profileresident',
+    params: { id: loginStore.user.id }
+  })
   showProfileResident.value = true
 }
 const isCollapsed = ref(false)

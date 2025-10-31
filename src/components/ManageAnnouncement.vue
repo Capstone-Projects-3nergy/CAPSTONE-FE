@@ -118,7 +118,7 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
+  router.replace({ name: 'parcelscanner', params: { id: loginStore.user.id } })
   showParcelScanner.value = true
 }
 // const showResidentParcelPage = async function () {
@@ -153,11 +153,13 @@ const returnLoginPage = async () => {
   }
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
+  router.replace({ name: 'dashboard',
+    params: { id: loginStore.user.id } })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
+  router.replace({ name: 'profilestaff' ,
+    params: { id: loginStore.user.id }})
   showProfileStaff.value = true
 }
 </script>
