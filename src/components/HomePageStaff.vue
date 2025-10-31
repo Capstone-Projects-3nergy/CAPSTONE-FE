@@ -12,6 +12,7 @@ import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 const loginStore = useLoginManager()
+const loginManager = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
@@ -64,10 +65,20 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const returnLoginPage = async function () {
-  router.replace({ name: 'login' })
-  returnLogin.value = true
+// const returnLoginPage = async function () {
+//   router.replace({ name: 'login' })
+//   returnLogin.value = true
+// }
+const returnLoginPage = async () => {
+  try {
+    // เรียก logoutAccount จาก store
+    await loginManager.logoutAccount(router)
+    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
 }
+
 const parcels = ref([
   {
     id: 1,
