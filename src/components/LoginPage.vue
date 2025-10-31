@@ -45,44 +45,44 @@ const loginHomePageWeb = async () => {
       router
     )
 
-    // ⚠️ เช็ค response จาก backend
     if (!data) {
-      // ถ้าไม่มี response หรือเกิด error ใน Pinia store
       incorrect.value = true
+      setTimeout(() => (incorrect.value = false), 2000)
       return
     }
 
-    // ✅ กรณี login สำเร็จ
     if (loginManager.successMessage) {
       console.log('✅ Login success:', loginManager.user)
+      router.push({ name: 'home' }) // redirect หลัง login สำเร็จ
     }
   } catch (err) {
     console.error('❌ Login error:', err)
 
-    // ✅ เงื่อนไขตรวจ error จาก backend (เช่น status 400, 401)
     if (
-      err.message.includes('400') ||
-      err.message.includes('401') ||
+      err.response?.status === 400 ||
+      err.response?.status === 401 ||
       loginManager.errorMessage?.includes('Invalid') ||
       loginManager.errorMessage?.includes('not found')
     ) {
-      incorrect.value = true // ข้อมูลผิด เช่น email/password ไม่ถูกต้อง
+      incorrect.value = true
+      setTimeout(() => (incorrect.value = false), 2000) // popup หายเอง
     } else {
-      error.value = true // ปัญหาภายในระบบ เช่น server ล่ม
+      error.value = true
+      setTimeout(() => (error.value = false), 2000)
     }
   }
 }
 
-const signIn = () => {
-  if (email.value && password.value) {
-    router.replace({ name: 'home' })
-    showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
-  } else {
-    incorrect.value = true
-    error.value = true
-    alert('Please fill in both email and password.')
-  }
-}
+// const signIn = () => {
+//   if (email.value && password.value) {
+//     router.replace({ name: 'home' })
+//     showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
+//   } else {
+//     incorrect.value = true
+//     error.value = true
+//     alert('Please fill in both email and password.')
+//   }
+// }
 
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
