@@ -14,6 +14,7 @@ const isPasswordOverLimit = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
 const isStaffIdOverLimit = ref(false)
 const isNameOverLimit = ref(false)
+const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
 // ใช้ computed สำหรับ trim ค่าอัตโนมัติ
 const trimmedFullName = computed(() => form.fullName.trim())
@@ -105,6 +106,7 @@ const checkInputLength = (field) => {
   const MAX_EMAIL_LENGTH = 30
   const MAX_PASSWORD_LENGTH = 14
   const MAX_STAFFID_LENGTH = 11
+  const MAX_STAFFPOSITION_LENGTH = 30
   const MAX_STAFFPOSITION_LENGTH = 30
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
