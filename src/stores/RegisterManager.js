@@ -83,7 +83,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
     registerAccount
   }
 })
-
+console.log('BASE URL:', import.meta.env.VITE_BASE_URL)
 // version 1
 // import { defineStore } from 'pinia'
 // import { ref } from 'vue'
