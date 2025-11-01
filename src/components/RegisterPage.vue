@@ -20,7 +20,7 @@ const isStaffPositionOverLimit = ref(false)
 const trimmedFullName = computed(() => form.fullName.trim())
 const trimmedEmail = computed(() => form.email.trim())
 const trimmedPassword = computed(() => form.password.trim())
-const trimmedStaffID = computed(() => form.staffId.trim())
+const trimmedDormName = computed(() => form.dormName.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 const trimmedStaffPosition = computed(() => form.position.trim())
 const isPasswordWeak = ref(false)
@@ -509,11 +509,10 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </svg>
                 <input
-                  v-model="form.email"
+                  v-model.trim="form.email"
                   type="email"
                   placeholder="Email"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                  required
                   @input="checkInputLength('email')"
                   :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
                 />
@@ -1111,24 +1110,24 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
-                trimmedStaffID.length === 0 ||
                 trimmedStaffPosition.length === 0 ||
-                trimmedConfirmPassword.length === 0,
+                trimmedConfirmPassword.length === 0 ||
+                trimmedDormName.length === 0,
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
-                trimmedStaffID.length > 0 &&
                 trimmedStaffPosition.length > 0 &&
-                trimmedConfirmPassword.length > 0
+                trimmedConfirmPassword.length > 0 &&
+                trimmedDormName.length > 0
             }"
             :disabled="
               trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
-              trimmedStaffID.length === 0 ||
               trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
+              trimmedDormName.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||

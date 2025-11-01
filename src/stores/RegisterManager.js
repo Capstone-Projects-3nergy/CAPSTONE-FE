@@ -53,8 +53,8 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       // 3) เรียก backend เพื่อบันทึก "โปรไฟล์"
       const baseURL = import.meta.env.VITE_BASE_URL
       if (!baseURL) throw new Error('VITE_BASE_URL is not set')
-      const endpoint = `${baseURL}/public/auth/register`
 
+      const endpoint = `${baseURL}/public/auth/register`
       const response = await axios.post(endpoint, payload)
 
       // 4) ตรวจผลลัพธ์ และเก็บ idToken
