@@ -30,10 +30,9 @@ const submitForm = async () => {
     // 🔹 ตรวจสอบ confirmPassword ก่อน
     if (form.password !== form.confirmPassword) {
       error.value = true
-      errorMessage.value = 'Passwords do not match'
+
       setTimeout(() => {
         error.value = false
-        errorMessage.value = ''
       }, 2000)
       return // หยุดการ submit
     }
@@ -428,7 +427,6 @@ const checkInputLength = (field) => {
 
                 <input
                   v-model="form.fullName"
-                  :type="isNameVisible ? 'text' : 'fullName'"
                   type="text"
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
