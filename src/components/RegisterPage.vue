@@ -105,9 +105,8 @@ const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
   const MAX_EMAIL_LENGTH = 30
   const MAX_PASSWORD_LENGTH = 14
-  const MAX_STAFFID_LENGTH = 11
   const MAX_STAFFPOSITION_LENGTH = 30
-  const MAX_STAFFPOSITION_LENGTH = 30
+  const MAX_ROMNUMBER_LENGTH = 11
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
     if (trimmed.length > MAX_NAME_LENGTH) {
@@ -129,17 +128,6 @@ const checkInputLength = (field) => {
       }, 1000)
     } else {
       isEmailOverLimit.value = false
-    }
-  } else if (field === 'staffId') {
-    const trimmed = form.staffId.trim()
-    if (trimmed.length > MAX_STAFFID_LENGTH) {
-      isStaffIdOverLimit.value = true
-      form.staffId = trimmed.substring(0, MAX_STAFFID_LENGTH)
-      setTimeout(() => {
-        isStaffIdOverLimit.value = false
-      }, 1000)
-    } else {
-      isStaffIdOverLimit.value = false
     }
   } else if (field === 'position') {
     const trimmed = form.position.trim()
@@ -173,6 +161,17 @@ const checkInputLength = (field) => {
       }, 1000)
     } else {
       isConfirmPasswordOverLimit.value = false
+    }
+  } else if (field === 'roomNumber') {
+    const trimmed = form.roomNumber.trim()
+    if (trimmed.length > MAX_ROMNUMBER_LENGTH) {
+      isRoomNumberOverLimit.value = true
+      form.roomNumber = trimmed.substring(0, MAX_ROMNUMBER_LENGTH)
+      setTimeout(() => {
+        isRoomNumberOverLimit.value = false
+      }, 1000)
+    } else {
+      isRoomNumberOverLimit.value = false
     }
   }
 }
@@ -451,44 +450,21 @@ const toggleComfirmPasswordVisibility = () => {
               </div>
               <div class="relative">
                 <svg
-                  width="20"
-                  height="17"
-                  viewBox="0 0 20 17"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
                   class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    d="M14.6176 2.85294V7.08823C13.9568 7.08761 13.3033 7.22645 12.6999 7.49567C12.0964 7.7649 11.5565 8.15844 11.1155 8.65058C10.3389 9.51322 9.90993 10.6334 9.91176 11.7941C9.91239 12.0671 9.93498 12.3334 9.97953 12.5932C10.0981 13.2802 10.3677 13.9324 10.7689 14.5026C11.1701 15.0729 11.6929 15.5469 12.2995 15.8906C11.0468 16.2694 9.38376 16.5 7.55882 16.5C3.66047 16.5 0.5 15.4463 0.5 14.1471V2.85294"
-                    stroke="#8C8F91"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M14.6176 2.85294C14.6176 4.15224 11.4572 5.20588 7.55882 5.20588C3.66047 5.20588 0.5 4.15224 0.5 2.85294C0.5 1.55365 3.66047 0.5 7.55882 0.5C11.4572 0.5 14.6176 1.55365 14.6176 2.85294Z"
-                    fill="#8C8F91"
-                    stroke="#8C8F91"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M0.5 10.3824C0.5 11.6816 3.66047 12.7353 7.55882 12.7353C8.40918 12.7353 9.22471 12.6854 9.97953 12.5932M0.5 6.61765C0.5 7.91694 3.66047 8.97059 7.55882 8.97059C8.85576 8.97059 10.0713 8.85388 11.1155 8.65059"
-                    stroke="#8C8F91"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M19.3234 11.7941C19.3234 14.3932 17.2166 16.5 14.6175 16.5C13.7752 16.5 12.9836 16.2788 12.2994 15.8906C11.5747 15.4799 10.972 14.8843 10.5525 14.1647C10.133 13.4451 9.9119 12.6271 9.91162 11.7941C9.91162 10.5857 10.3672 9.48354 11.1154 8.6506C11.5564 8.15845 12.0962 7.76491 12.6997 7.49569C13.3032 7.22647 13.9567 7.08763 14.6175 7.08824C17.2166 7.08824 19.3234 9.19507 19.3234 11.7941Z"
-                    fill="#8C8F91"
-                    stroke="#8C8F91"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    d="M2.535 11A3.981 3.981 0 0 0 2 13v4a1 1 0 0 0 1 1h2v1a1 1 0 1 0 2 0v-1h10v1a1 1 0 1 0 2 0v-1h2a1 1 0 0 0 1-1v-4c0-.729-.195-1.412-.535-2H2.535ZM20 9V8a4 4 0 0 0-4-4h-3v5h7Zm-9-5H8a4 4 0 0 0-4 4v1h7V4Z"
                   />
                 </svg>
-
                 <input
                   v-model="form.roomNumber"
-                  type="number"
+                  type="text"
                   placeholder="Room Number"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('roomNumber')"
@@ -514,7 +490,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit Room Number to 30 characters or less.
+                    Limit Room Number Max is 11.
                   </div>
                 </div>
               </div>
@@ -592,7 +568,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <button
                   type="button"
                   @click="togglePasswordVisibility"
-                  class="absolute inset-y-0 right-3 flex items-center"
+                  class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
                 >
                   <svg
                     v-if="isPasswordVisible"
@@ -664,7 +640,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <button
                   type="button"
                   @click="toggleComfirmPasswordVisibility"
-                  class="absolute inset-y-0 right-3 flex items-center"
+                  class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
                 >
                   <svg
                     v-if="isComfirmPasswordVisible"
@@ -972,7 +948,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <button
                   type="button"
                   @click="togglePasswordVisibility"
-                  class="absolute inset-y-0 right-3 flex items-center"
+                  class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
                 >
                   <svg
                     v-if="isPasswordVisible"
@@ -1045,7 +1021,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <button
                   type="button"
                   @click="toggleComfirmPasswordVisibility"
-                  class="absolute inset-y-0 right-3 flex items-center"
+                  class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
                 >
                   <svg
                     v-if="isComfirmPasswordVisible"
