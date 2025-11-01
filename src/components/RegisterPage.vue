@@ -41,6 +41,7 @@ const submitForm = async () => {
     await registerStore.registerAccount({
       userType: userType.value,
       fullName: form.fullName,
+      roomNumber: form.roomNumber,
       email: form.email,
       password: form.password, // ส่งเฉพาะ password
       dormitoryName: form.dormitoryName,
@@ -91,6 +92,7 @@ const isPasswordVisible = ref(false)
 const isComfirmPasswordVisible = ref(false)
 const form = reactive({
   fullName: '',
+  roomNumber: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -457,6 +459,75 @@ const checkInputLength = (field) => {
               </div>
               <div class="relative">
                 <svg
+                  width="20"
+                  height="17"
+                  viewBox="0 0 20 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                >
+                  <path
+                    d="M14.6176 2.85294V7.08823C13.9568 7.08761 13.3033 7.22645 12.6999 7.49567C12.0964 7.7649 11.5565 8.15844 11.1155 8.65058C10.3389 9.51322 9.90993 10.6334 9.91176 11.7941C9.91239 12.0671 9.93498 12.3334 9.97953 12.5932C10.0981 13.2802 10.3677 13.9324 10.7689 14.5026C11.1701 15.0729 11.6929 15.5469 12.2995 15.8906C11.0468 16.2694 9.38376 16.5 7.55882 16.5C3.66047 16.5 0.5 15.4463 0.5 14.1471V2.85294"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14.6176 2.85294C14.6176 4.15224 11.4572 5.20588 7.55882 5.20588C3.66047 5.20588 0.5 4.15224 0.5 2.85294C0.5 1.55365 3.66047 0.5 7.55882 0.5C11.4572 0.5 14.6176 1.55365 14.6176 2.85294Z"
+                    fill="#8C8F91"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M0.5 10.3824C0.5 11.6816 3.66047 12.7353 7.55882 12.7353C8.40918 12.7353 9.22471 12.6854 9.97953 12.5932M0.5 6.61765C0.5 7.91694 3.66047 8.97059 7.55882 8.97059C8.85576 8.97059 10.0713 8.85388 11.1155 8.65059"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M19.3234 11.7941C19.3234 14.3932 17.2166 16.5 14.6175 16.5C13.7752 16.5 12.9836 16.2788 12.2994 15.8906C11.5747 15.4799 10.972 14.8843 10.5525 14.1647C10.133 13.4451 9.9119 12.6271 9.91162 11.7941C9.91162 10.5857 10.3672 9.48354 11.1154 8.6506C11.5564 8.15845 12.0962 7.76491 12.6997 7.49569C13.3032 7.22647 13.9567 7.08763 14.6175 7.08824C17.2166 7.08824 19.3234 9.19507 19.3234 11.7941Z"
+                    fill="#8C8F91"
+                    stroke="#8C8F91"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+
+                <input
+                  v-model="form.roomNumber"
+                  type="number"
+                  placeholder="Room Number"
+                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                  @input="checkInputLength('roomNumber')"
+                  :class="{
+                    'border-red-600 text-red-600': isRoomNumberOverLimit
+                  }"
+                />
+                <div
+                  style="display: flex; align-items: center"
+                  v-if="isRoomNumberOverLimit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="-mt-px h-4 w-[20rem]"
+                    class="w-[15px] text-red-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Limit Room Number to 30 characters or less.
+                  </div>
+                </div>
+              </div>
+              <div class="relative">
+                <svg
                   width="22"
                   height="22"
                   viewBox="0 0 22 22"
@@ -740,7 +811,6 @@ const checkInputLength = (field) => {
 
                 <input
                   v-model="form.fullName"
-                  :type="isNameVisible ? 'text' : 'fullName'"
                   type="text"
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
