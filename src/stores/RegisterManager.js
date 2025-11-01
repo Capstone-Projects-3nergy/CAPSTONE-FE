@@ -27,10 +27,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       }
 
       // 2️⃣ แยก endpoint ตามประเภทผู้ใช้
-      const endpoint =
-        formData.userType === 'staff'
-          ? 'http://localhost:3000/api/staff/register'
-          : 'http://localhost:3000/api/resident/register'
+      const endpoint = 'http://localhost:8080/public/auth/register'
 
       // 3️⃣ ส่งข้อมูลไป backend
       const response = await axios.post(endpoint, payload)
