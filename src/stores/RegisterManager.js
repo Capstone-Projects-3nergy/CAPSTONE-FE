@@ -16,17 +16,18 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
 
     try {
       // 1️⃣ เตรียม payload สำหรับ backend
+      const [firstName, lastName] = formData.fullName.split(' ') // simple split
+
       const payload = {
-        userType: formData.userType,
-        fullName: formData.fullName,
         email: formData.email,
-        password: formData.password, // สำหรับเฟส 1 อาจเก็บ hash ใน backend
+        password: formData.password,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        phoneNumber: formData.phoneNumber || '',
         dormitoryName: formData.dormitoryName || null,
-        gender: formData.gender || null,
         position: formData.position || null
       }
 
-      // 2️⃣ แยก endpoint ตามประเภทผู้ใช้
       const endpoint = 'http://localhost:8080/public/auth/register'
 
       // 3️⃣ ส่งข้อมูลไป backend
