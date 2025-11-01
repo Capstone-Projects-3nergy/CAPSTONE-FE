@@ -28,7 +28,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
         position: formData.position || null
       }
 
-      const endpoint = 'http://localhost:8080/public/auth/register'
+      const endpoint = `${import.meta.env.VITE_BASE_URL}/public/auth/register`
 
       // 3️⃣ ส่งข้อมูลไป backend
       const response = await axios.post(endpoint, payload)
