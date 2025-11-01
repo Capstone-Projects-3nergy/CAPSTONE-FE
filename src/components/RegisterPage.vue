@@ -1,10 +1,11 @@
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import axios from 'axios'
 const registerStore = useRegisterManager()
 const incorrect = ref(false)
 const error = ref(false)
@@ -43,6 +44,18 @@ const form = reactive({
   gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
 })
 
+const dormList = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/public/auth/register`
+    ) // endpoint ดึง dorm ทั้งหมด
+    dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
+  } catch (err) {
+    console.error('❌ Cannot fetch dorm list', err)
+  }
+})
 const submitForm = async () => {
   try {
     // 🔹 ตรวจสอบ confirmPassword ก่อน
@@ -54,25 +67,24 @@ const submitForm = async () => {
       return
     }
 
-    // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
-    const dormMap = {
-      'Hall 1': 1,
-      'Hall 2': 2
-    }
-    const dormId = dormMap[form.dormName] || null
+    // // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
+    // const dormMap = {
+    //   'Hall 1': 1,
+    //   'Hall 2': 2
+    // }
+    // const dormId = dormMap[form.dormName] || null
 
     // 🔹 เรียก store registerAccount
     await registerStore.registerAccount({
       fullName: form.fullName,
       email: form.email,
-      password: form.password, // ใช้กับ Firebase
-      role: form.role, // "RESIDENT" | "STAFF"
-      dormId: dormId, // number
+      password: form.password,
+      role: form.role,
+      dormId: form.dormId, // ส่ง dormId จาก select
       roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
       position: form.role === 'STAFF' ? form.position : null,
-      gender: form.gender // backend ไม่ใช้ แต่เก็บไว้ถ้าต้องการ
+      gender: form.gender
     })
-
     // 🔹 ตรวจสอบผลลัพธ์จาก store
     if (registerStore.errorMessage) {
       const msg = registerStore.errorMessage.toLowerCase()
@@ -98,7 +110,6 @@ const submitForm = async () => {
     error.value = true
     setTimeout(() => (error.value = false), 2000)
   }
-  console.log('BASE URL:', import.meta.env.VITE_BASE_URL)
 }
 
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
@@ -701,12 +712,17 @@ const toggleComfirmPasswordVisibility = () => {
                 </svg>
 
                 <!-- dropdown -->
-                <select v-model="form.dormName" class="custom-select">
+                <select v-model="form.dormId" class="custom-select">
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
-                  <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
-                  <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
+                  <option
+                    v-for="dorm in dormList"
+                    :key="dorm.id"
+                    :value="dorm.id"
+                  >
+                    {{ dorm.name }}
+                  </option>
                 </select>
               </div>
             </div>
