@@ -701,7 +701,7 @@ const toggleComfirmPasswordVisibility = () => {
                 </svg>
 
                 <!-- dropdown -->
-                <select v-model="form.dormitoryName" class="custom-select">
+                <select v-model="form.dormName" class="custom-select">
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
