@@ -1,344 +1,172 @@
+import axios from 'axios'
+import router from '@/router'
 import { refreshToken } from '@/stores/LoginManager'
+import { useLoginManager } from '@/stores/LoginManager'
 
-async function fetchWithAuth(url, options, router) {
-  const token = localStorage.getItem('jwt')
-  if (token) {
-    options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${token}`
+// 🧩 สร้าง instance ของ axios
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000', // ปรับตาม backend ของคุณ
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true // ถ้า backend ใช้ cookie
+})
+
+// 🟢 ดึง token จาก localStorage แล้วใส่ในทุก request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('jwt')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
-  }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
-  const res = await fetch(url, options)
+// 🔄 Interceptor สำหรับ refresh token อัตโนมัติเมื่อเจอ 401
+let isRefreshing = false
+let refreshSubscribers = []
 
-  if (!res.ok) {
-    if (res.status === 401) {
-      console.log('Access token expired, attempting to refresh...')
-      const newToken = await refreshToken(router)
-      if (newToken) {
-        // Retry the request with the new token
-        options.headers.Authorization = `Bearer ${newToken}`
-        const retryRes = await fetch(url, options)
-        if (retryRes.ok) {
-          return retryRes
+function onRereshDone(newToken) {
+  refreshSubscribers.forEach((cb) => cb(newToken))
+  refreshSubscribers = []
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+
+    // ⚠️ ถ้าเจอ 401 ให้ลอง refresh token
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          refreshSubscribers.push((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            resolve(api(originalRequest))
+          })
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const newToken = await refreshToken(router)
+        if (newToken) {
+          localStorage.setItem('jwt', newToken)
+          api.defaults.headers.Authorization = `Bearer ${newToken}`
+          onRereshDone(newToken)
+          return api(originalRequest)
         } else {
-          console.error(`Retry failed with status: ${retryRes.status}`)
-          return retryRes
+          throw new Error('Refresh token failed')
         }
-      } else {
-        console.error('Token refresh failed, logging out.')
-        logout()
-        router.replace({ name: 'Login' })
+      } catch (err) {
+        console.error('❌ Token refresh failed:', err)
+        const loginManager = useLoginManager()
+        await loginManager.logoutAccount(router)
+        return Promise.reject(err)
+      } finally {
+        isRefreshing = false
       }
-    } else {
-      console.error(`Failed to fetch: ${res.status}`)
     }
+
+    return Promise.reject(error)
   }
+)
 
-  return res
-}
+//
+// 🔹 ฟังก์ชัน CRUD (แทน fetch แบบเดิม)
+//
+export const apiService = {
+  async getItems(url) {
+    const res = await api.get(url)
+    return res.data
+  },
 
-export async function getItems(url, router) {
-  try {
-    const options = {
-      method: 'GET',
-      headers: {}
-    }
+  async getItemById(url, id) {
+    const res = await api.get(`${url}/${id}`)
+    return res.data
+  },
 
-    const res = await fetchWithAuth(url, options, router)
-    if (res) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function getItemById(url, id, router) {
-  try {
-    const options = {
-      method: 'GET',
-      headers: {}
-    }
-
-    const res = await fetchWithAuth(`${url}/${id}`, options, router)
-    if (res) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function deleteItemById(url, id, router) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {}
-    }
-
-    const res = await fetchWithAuth(`${url}/${id}`, options, router)
-    if (res.ok) {
-      return res.status
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function deleteAndTransferItem(url, id, newId, router) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {}
-    }
-
-    const res = await fetchWithAuth(`${url}/${id}/${newId}`, options, router)
-    if (res) {
-      return res.status
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function addItem(url, newItem, router) {
-  try {
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newItem)
-    }
-
-    const res = await fetchWithAuth(url, options, router)
-    if (res.ok) {
-      return await res.json()
-    }
+  async deleteItemById(url, id) {
+    const res = await api.delete(`${url}/${id}`)
     return res.status
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
+  },
 
-async function editItem(url, id, editedItem, router) {
-  try {
-    const options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(editedItem)
-    }
-
-    const res = await fetchWithAuth(`${url}/${id}`, options, router)
-    if (res) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function toggleVisibility(url, id, visibility) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ visibility })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function editReadWrite(url, id, readWrite) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ accessRight: readWrite })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function editInviteReadWrite(url, id, readWrite) {
-  try {
-    const options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ accessRight: readWrite })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function acceptInvite(url, router) {
-  try {
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-
-    const res = await fetchWithAuth(url, options, router)
-    if (res.ok) {
-      return await res.json()
-    }
+  async deleteAndTransferItem(url, id, newId) {
+    const res = await api.delete(`${url}/${id}/${newId}`)
     return res.status
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+  },
+
+  async addItem(url, newItem) {
+    const res = await api.post(url, newItem)
+    return res.data
+  },
+
+  async editItem(url, id, editedItem) {
+    const res = await api.put(`${url}/${id}`, editedItem)
+    return res.data
+  },
+
+  async toggleVisibility(url, id, visibility) {
+    const res = await api.patch(`${url}/${id}`, { visibility })
+    return res.data
+  },
+
+  async editReadWrite(url, id, readWrite) {
+    const res = await api.patch(`${url}/${id}`, { accessRight: readWrite })
+    return res.data
+  },
+
+  async editInviteReadWrite(url, id, readWrite) {
+    const res = await api.put(`${url}/${id}`, { accessRight: readWrite })
+    return res.data
+  },
+
+  async acceptInvite(url) {
+    const res = await api.post(url)
+    return res.data
+  },
+
+  async cancelInvite(url, id) {
+    const res = await api.delete(`${url}/${id}`)
+    return res.data
+  },
+
+  async declineInvite(url) {
+    const res = await api.delete(url)
+    return res.data
+  },
+
+  async editItemWithFile(url, id, files = null, editedItem = {}) {
+    const formData = new FormData()
+
+    if (files && Array.isArray(files)) {
+      files.forEach((file) => {
+        formData.append('file', file)
+      })
+    }
+
+    if (editedItem && Object.keys(editedItem).length > 0) {
+      const jsonString = JSON.stringify(editedItem)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      formData.append('taskDetails', blob)
+    }
+
+    const res = await api.put(`${url}/${id}`, formData)
+    return res.data
+  },
+
+  async deleteFile(url, id, file) {
+    const res = await api.delete(`${url}/${id}/file/${file}`)
+    return res.data
   }
 }
 
-async function cancelInvite(url, id) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return res
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function declineInvite(url) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await fetchWithAuth(`${url}`, options)
-    console.log(res)
-    if (res.ok) {
-      return res
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function editItemWithFile(url, id, file = null, editedItem, router) {
-  const formData = new FormData()
-  console.log(file)
-  if (file) {
-    file.forEach((file) => {
-      formData.append('file', file)
-    })
-  }
-  if (editedItem && Object.keys(editedItem).length > 0) {
-    const jsonString = JSON.stringify(editedItem)
-    const blob = new Blob([jsonString], { type: 'application/json' })
-    formData.append('taskDetails', blob)
-  }
-
-  try {
-    const options = {
-      method: 'PUT',
-      body: formData
-    }
-    console.log(options)
-
-    const res = await fetchWithAuth(`${url}/${id}`, options, router)
-    if (res) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-async function deleteFile(url, id, file, router) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    }
-    const res = await fetchWithAuth(
-      `${url}/${id}/file/${file}`,
-      options,
-      router
-    )
-    if (res.ok) {
-      return await res.json()
-    }
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
-}
-
-export {
-  getItemById,
-  deleteItemById,
-  addItem,
-  editItem,
-  deleteAndTransferItem,
-  toggleVisibility,
-  editReadWrite,
-  acceptInvite,
-  cancelInvite,
-  editInviteReadWrite,
-  declineInvite,
-  editItemWithFile,
-  deleteFile
-}
+export default api
