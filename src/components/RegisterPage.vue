@@ -9,98 +9,6 @@ const registerStore = useRegisterManager()
 const incorrect = ref(false)
 const error = ref(false)
 const isEmailDuplicate = ref(false)
-const isPasswordWeak = ref(false)
-const isPasswordNotMatch = ref(false)
-const success = ref(false)
-
-// --- ปิด popup ด้วยมือ ---
-// --- ปิด popup ด้วยมือ ---
-const closePopUp = (operate) => {
-  if (operate === 'incorrect') incorrect.value = false
-  if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
-  if (operate === 'password') isPasswordWeak.value = false
-  if (operate === 'errorpassword') isPasswordNotMatch.value = false
-}
-
-// ✅ ฟังก์ชันสมัครสมาชิก
-const submitForm = async () => {
-  try {
-    // 🔹 ตรวจสอบ confirmPassword ก่อน
-    if (form.password !== form.confirmPassword) {
-      error.value = true
-
-      setTimeout(() => {
-        error.value = false
-      }, 2000)
-      return // หยุดการ submit
-    }
-
-    // เรียก store registerAccount
-    await registerStore.registerAccount({
-      userType: userType.value,
-      fullName: form.fullName,
-      roomNumber: form.roomNumber,
-      email: form.email,
-      password: form.password, // ส่งเฉพาะ password
-      dormitoryName: form.dormitoryName,
-      gender: form.gender,
-      position: form.position
-    })
-
-    // ตรวจสอบผลลัพธ์จาก store
-    if (registerStore.errorMessage) {
-      if (registerStore.errorMessage.toLowerCase().includes('email')) {
-        isEmailDuplicate.value = true
-        setTimeout(() => {
-          isEmailDuplicate.value = false
-        }, 2000)
-      } else if (
-        registerStore.errorMessage.toLowerCase().includes('password')
-      ) {
-        isPasswordWeak.value = true
-        setTimeout(() => {
-          isPasswordWeak.value = false
-        }, 2000)
-      } else {
-        error.value = true
-        setTimeout(() => {
-          error.value = false
-        }, 2000)
-      }
-    } else if (registerStore.successMessage) {
-      success.value = true
-      setTimeout(() => {
-        success.value = false
-        router.push({ name: 'login' })
-      }, 2000)
-    }
-  } catch (err) {
-    console.error('❌ Register error:', err)
-    error.value = true
-    setTimeout(() => {
-      error.value = false
-    }, 2000)
-  }
-}
-
-const userType = ref('resident')
-const returnLogin = ref(false)
-const router = useRouter()
-const isPasswordVisible = ref(false)
-const isComfirmPasswordVisible = ref(false)
-const form = reactive({
-  fullName: '',
-  roomNumber: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  dormitoryName: '',
-  gender: 'female',
-  position: ''
-})
-
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
@@ -114,19 +22,81 @@ const trimmedPassword = computed(() => form.password.trim())
 const trimmedStaffID = computed(() => form.staffId.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 const trimmedStaffPosition = computed(() => form.position.trim())
+const isPasswordWeak = ref(false)
+const isPasswordNotMatch = ref(false)
+const success = ref(false)
+const role = ref('resident')
+const returnLogin = ref(false)
+const router = useRouter()
+const isPasswordVisible = ref(false)
+const isComfirmPasswordVisible = ref(false)
+const form = reactive({
+  fullName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  role: 'RESIDENT', // หรือ 'STAFF' เลือกจาก dropdown
+  dormName: '', // ต้องเก็บเป็น number, map จาก dormitoryName
+  roomNumber: '', // ถ้า role = RESIDENT
+  position: '', // ถ้า role = STAFF
+  gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
+})
 
-// function submitForm() {
-//   alert(`Account created for ${userType.value.toUpperCase()} ✅`)
-// }
-const returnLoginPage = async function () {
-  router.replace({ name: 'login' })
-  returnLogin.value = true
-}
-const togglePasswordVisibility = () => {
-  isPasswordVisible.value = !isPasswordVisible.value
-}
-const toggleComfirmPasswordVisibility = () => {
-  isComfirmPasswordVisible.value = !isComfirmPasswordVisible.value
+const submitForm = async () => {
+  try {
+    // 🔹 ตรวจสอบ confirmPassword ก่อน
+    if (form.password !== form.confirmPassword) {
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 2000)
+      return
+    }
+
+    // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
+    const dormMap = {
+      'Hall 1': 1,
+      'Hall 2': 2
+    }
+    const dormId = dormMap[form.dormName] || null
+
+    // 🔹 เรียก store registerAccount
+    await registerStore.registerAccount({
+      fullName: form.fullName,
+      email: form.email,
+      password: form.password, // ใช้กับ Firebase
+      role: form.role, // "RESIDENT" | "STAFF"
+      dormId: dormId, // number
+      roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
+      position: form.role === 'STAFF' ? form.position : null,
+      gender: form.gender // backend ไม่ใช้ แต่เก็บไว้ถ้าต้องการ
+    })
+
+    // 🔹 ตรวจสอบผลลัพธ์จาก store
+    if (registerStore.errorMessage) {
+      const msg = registerStore.errorMessage.toLowerCase()
+      if (msg.includes('email')) {
+        isEmailDuplicate.value = true
+        setTimeout(() => (isEmailDuplicate.value = false), 2000)
+      } else if (msg.includes('password')) {
+        isPasswordWeak.value = true
+        setTimeout(() => (isPasswordWeak.value = false), 2000)
+      } else {
+        error.value = true
+        setTimeout(() => (error.value = false), 2000)
+      }
+    } else if (registerStore.successMessage) {
+      success.value = true
+      setTimeout(() => {
+        success.value = false
+        router.push({ name: 'login' })
+      }, 2000)
+    }
+  } catch (err) {
+    console.error('❌ Register error:', err)
+    error.value = true
+    setTimeout(() => (error.value = false), 2000)
+  }
 }
 
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
@@ -203,6 +173,26 @@ const checkInputLength = (field) => {
       isConfirmPasswordOverLimit.value = false
     }
   }
+}
+// --- ปิด popup ด้วยมือ ---
+// --- ปิด popup ด้วยมือ ---
+const closePopUp = (operate) => {
+  if (operate === 'incorrect') incorrect.value = false
+  if (operate === 'problem') error.value = false
+  if (operate === 'success ') success.value = false
+  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
+}
+const returnLoginPage = async function () {
+  router.replace({ name: 'login' })
+  returnLogin.value = true
+}
+const togglePasswordVisibility = () => {
+  isPasswordVisible.value = !isPasswordVisible.value
+}
+const toggleComfirmPasswordVisibility = () => {
+  isComfirmPasswordVisible.value = !isComfirmPasswordVisible.value
 }
 </script>
 <template>
@@ -362,7 +352,7 @@ const checkInputLength = (field) => {
         <!-- Toggle Buttons -->
         <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
           <button
-            @click="userType = 'resident'"
+            @click="role = 'resident'"
             :class="[
               'flex-1 py-2 rounded-lg text-sm font-medium transition cursor-pointer',
               userType === 'resident'
@@ -373,10 +363,10 @@ const checkInputLength = (field) => {
             Resident
           </button>
           <button
-            @click="userType = 'staff'"
+            @click="role = 'staff'"
             :class="[
               'flex-1 py-2 rounded-lg text-sm font-medium transition cursor-pointer',
-              userType === 'staff'
+              role === 'staff'
                 ? 'bg-[#107EFF] text-white shadow'
                 : 'text-[#9A9FA7] hover:bg-gray-200'
             ]"
