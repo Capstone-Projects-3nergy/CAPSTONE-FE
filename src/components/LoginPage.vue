@@ -32,18 +32,17 @@ const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
 }
 
-// 🧩 ฟังก์ชันเข้าสู่ระบบ (สอดคล้องกับ LoginManager ตัวใหม่)
-// 🧩 ฟังก์ชันเข้าสู่ระบบ (สอดคล้องกับ LoginManager ตัวใหม่)
+// 🧩 ฟังก์ชันเข้าสู่ระบบ (ใช้ LoginManager ตัวใหม่)
 const loginHomePageWeb = async () => {
   try {
     // เริ่มโหลด
     const userData = await loginManager.loginAccount(
       trimmedEmail.value,
       trimmedPassword.value,
-      router // router สำหรับ redirect
+      router // router สำหรับ redirect หลัง login
     )
 
-    // ❌ ถ้า login ไม่สำเร็จ (ไม่มีข้อมูลผู้ใช้)
+    // ❌ ถ้า login ไม่สำเร็จ
     if (!userData) {
       incorrect.value = true
       console.warn('⚠️ Login failed: No user data returned')
@@ -54,51 +53,19 @@ const loginHomePageWeb = async () => {
     // ✅ ถ้า login สำเร็จ
     console.log('✅ Login success:', loginManager.user)
 
-    // -----------------------
-    // 🔹 ตรวจสอบ JWT / refresh token อัตโนมัติ
-    // -----------------------
-    const token = loginManager.user.accessToken
-    const decoded = loginManager.decodeJWT(token)
-    const currentTime = Math.floor(Date.now() / 1000)
-
-    if (decoded?.exp && decoded.exp < currentTime) {
-      console.log('⏳ Token expired, refreshing...')
-      const newToken = await loginManager.refreshToken()
-      if (newToken) {
-        console.log('✅ Token refreshed')
-      } else {
-        console.warn('⚠️ Unable to refresh token, redirect to login')
-        router.replace({ name: 'login' })
-        return
-      }
-    }
-
-    // -----------------------
-    // 🔹 ใช้ useAuthGuard ถ้าอยาก apply guard ทั่วหน้า
-    // -----------------------
-    loginManager.useAuthGuard(router)
-
-    // แสดงข้อความ success (popup)
+    // แสดง popup สำเร็จ
     success.value = true
     setTimeout(() => (success.value = false), 2000)
-
-    // -----------------------
-    // 🔹 Routing ตาม role (force route หลัง popup)
-    // -----------------------
-    const role = loginManager.user?.role
-    if (role === 'resident') router.replace({ name: 'home' })
-    else if (role === 'staff') router.replace({ name: 'homestaff' })
-    else router.replace({ name: 'home' })
   } catch (err) {
     console.error('❌ Login error:', err)
 
-    // ✅ ตรวจประเภทของ error
+    // ✅ ตรวจ error ว่าเป็นการเข้าสู่ระบบผิดหรือไม่
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
       loginManager.errorMessage?.includes('Invalid') ||
       loginManager.errorMessage?.includes('not found') ||
-      err.message?.toLowerCase().includes('auth') // Firebase auth errors เช่น invalid-password
+      err.message?.toLowerCase()?.includes('auth')
 
     if (isAuthError) {
       incorrect.value = true
