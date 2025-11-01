@@ -98,6 +98,7 @@ const submitForm = async () => {
     error.value = true
     setTimeout(() => (error.value = false), 2000)
   }
+  console.log('BASE URL:', import.meta.env.VITE_BASE_URL)
 }
 
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
