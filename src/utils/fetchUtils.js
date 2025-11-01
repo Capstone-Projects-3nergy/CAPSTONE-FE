@@ -1,4 +1,4 @@
-import { refreshToken } from '@/stores/UserManager'
+import { refreshToken } from '@/stores/LoginManager'
 
 async function fetchWithAuth(url, options, router) {
   const token = localStorage.getItem('jwt')
