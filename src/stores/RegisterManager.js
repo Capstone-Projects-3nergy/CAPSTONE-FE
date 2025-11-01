@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
-import { auth } from '@/firebase'
+import { auth } from '@/firebase/firebaseConfig'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 export const useRegisterManager = defineStore('RegisterManager', () => {

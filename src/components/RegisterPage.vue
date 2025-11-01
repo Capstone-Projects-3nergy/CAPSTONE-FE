@@ -35,7 +35,7 @@ const form = reactive({
   email: '',
   password: '',
   confirmPassword: '',
-  role: 'RESIDENT', // หรือ 'STAFF' เลือกจาก dropdown
+  role: '', // หรือ 'STAFF' เลือกจาก dropdown
   dormName: '', // ต้องเก็บเป็น number, map จาก dormitoryName
   roomNumber: '', // ถ้า role = RESIDENT
   position: '', // ถ้า role = STAFF
@@ -355,7 +355,7 @@ const toggleComfirmPasswordVisibility = () => {
             @click="role = 'resident'"
             :class="[
               'flex-1 py-2 rounded-lg text-sm font-medium transition cursor-pointer',
-              userType === 'resident'
+              role === 'resident'
                 ? 'bg-[#107EFF] text-white shadow '
                 : 'text-[#9A9FA7] hover:bg-gray-200 '
             ]"
@@ -379,7 +379,7 @@ const toggleComfirmPasswordVisibility = () => {
         <form @submit.prevent="submitForm" class="space-y-4">
           <!-- Resident -->
           <transition name="fade" mode="out-in">
-            <div v-if="userType === 'resident'" key="resident">
+            <div v-if="role === 'resident'" key="resident">
               <div class="relative flex items-center space-x-4 mb-3">
                 <label class="flex items-center text-sm">
                   <input
@@ -1090,7 +1090,7 @@ const toggleComfirmPasswordVisibility = () => {
             </div>
           </transition>
           <ButtonWeb
-            v-if="userType === 'resident'"
+            v-if="role === 'resident'"
             label="Sign Up"
             type="submit"
             color="black"
@@ -1122,7 +1122,7 @@ const toggleComfirmPasswordVisibility = () => {
             "
           />
           <ButtonWeb
-            v-if="userType === 'staff'"
+            v-if="role === 'staff'"
             label="Sign Up"
             type="submit"
             color="black"
