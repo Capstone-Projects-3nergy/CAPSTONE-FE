@@ -49,7 +49,7 @@ const dormList = ref([])
 
 onMounted(async () => {
   try {
-    const url = `${import.meta.env.VITE_BASE_URL}/public/auth/register`
+    const url = `${import.meta.env.VITE_BASE_URL}/public/auth/dorms`
     console.log('Fetching dorm list from:', url)
     const response = await axios.get(url)
     console.log('Dorm list response:', response.data)
@@ -82,14 +82,14 @@ const submitForm = async () => {
             lastName,
             role: roleUpper,
             dormId: Number(form.dormId),
-            dormType,
+            dormType: form.dormType,
             roomNumber: form.roomNumber
           }
         : {
             email: form.email,
             firstName,
             lastName,
-            dormType,
+            dormType: form.dormType,
             role: roleUpper,
             position: form.position
           }
