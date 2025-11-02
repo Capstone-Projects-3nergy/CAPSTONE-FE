@@ -45,18 +45,18 @@ const form = reactive({
   gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
 })
 
-// const dormList = ref([])
+const dormList = ref([])
 
-// onMounted(async () => {
-//   try {
-//     const response = await axios.get(
-//       `${import.meta.env.VITE_BASE_URL}/public/api/dorms`
-//     ) // endpoint ดึง dorm ทั้งหมด
-//     dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
-//   } catch (err) {
-//     console.error('❌ Cannot fetch dorm list', err)
-//   }
-// })
+onMounted(async () => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/public/auth/register`
+    ) // endpoint ดึง dorm ทั้งหมด
+    dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
+  } catch (err) {
+    console.error('❌ Cannot fetch dorm list', err)
+  }
+})
 
 const submitForm = async () => {
   try {
@@ -726,16 +726,16 @@ const toggleComfirmPasswordVisibility = () => {
                 </svg>
 
                 <!-- dropdown -->
-                <select v-model="form.dormName" class="custom-select">
+                <!-- <select v-model="form.dormName" class="custom-select">
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
                   <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
                   <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
-                </select>
-                <!-- <select v-model="form.dormId" class="custom-select">
+                </select> -->
+                <select v-model="form.dormId" class="custom-select">
                   <option value="" disabled selected hidden>
-                    Name Dormitory
+                    Select Dormitory
                   </option>
                   <option
                     v-for="dorm in dormList"
@@ -744,59 +744,12 @@ const toggleComfirmPasswordVisibility = () => {
                   >
                     {{ dorm.name }}
                   </option>
-                </select> -->
+                </select>
               </div>
             </div>
 
             <!-- Staff -->
             <div v-else key="staff">
-              <!-- <div class="relative">
-                <svg
-                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12 2a7 7 0 0 0-7 7 3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h1a1 1 0 0 0 1-1V9a5 5 0 1 1 10 0v7.083A2.919 2.919 0 0 1 14.083 19H14a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 1.732-1h.351a4.917 4.917 0 0 0 4.83-4H19a3 3 0 0 0 3-3v-2a3 3 0 0 0-3-3 7 7 0 0 0-7-7Zm1.45 3.275a4 4 0 0 0-4.352.976 1 1 0 0 0 1.452 1.376 2.001 2.001 0 0 1 2.836-.067 1 1 0 1 0 1.386-1.442 4 4 0 0 0-1.321-.843Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-
-                <input
-                  v-model="form.staffId"
-                  type="text"
-                  placeholder="Staff ID"
-                  class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                  @input="checkInputLength('staffId')"
-                  :class="{ 'border-red-600 text-red-600': isStaffIdOverLimit }"
-                />
-              </div>
-              <div
-                style="display: flex; align-items: center"
-                v-if="isStaffIdOverLimit"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="-mt-px h-4 w-[20rem]"
-                  class="w-[15px] text-red-600"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div class="text-sm text-red-600">
-                  Limit staff id to 11 characters or less.
-                </div>
-              </div> -->
               <div class="relative">
                 <svg
                   width="24"
@@ -1174,29 +1127,6 @@ const toggleComfirmPasswordVisibility = () => {
               isConfirmPasswordOverLimit
             "
           />
-          <!-- <button
-            type="submit"
-            class="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
-            :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
-                trimmedEmail.length === 0 || trimmedPassword.length === 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
-                trimmedEmail.length > 0 && trimmedPassword.length > 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
-                trimmedStaffID.length > 0 && trimmedStaffID.length > 0
-            }"
-            :disabled="
-              trimmedEmail.length === 0 ||
-              trimmedPassword.length === 0 ||
-              trimmedStaffID.length === 0 ||
-              isEmailOverLimit ||
-              isPasswordOverLimit ||
-              isStaffIdOverLimit ||
-              isConfirmPasswordOverLimit
-            " 
-          >
-            Sign Up
-          </button> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-4">
