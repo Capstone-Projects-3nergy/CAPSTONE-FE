@@ -149,11 +149,11 @@ const submitForm = async () => {
   } catch (err) {
     error.value = true
     console.error('❌ Register error:', err)
-    alert(
-      registerStore.errorMessage ||
-        err?.response?.data?.message ||
-        'Registration failed.'
-    )
+    // alert(
+    //   registerStore.errorMessage ||
+    //     err?.response?.data?.message ||
+    //     'Registration failed.'
+    // )
   }
 }
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
