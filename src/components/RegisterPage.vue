@@ -101,17 +101,38 @@ onMounted(async () => {
   }
 })
 
+// สมมติว่ามี list email เดิมใน frontend
+const existingEmails = ref(['test@example.com', 'user@gmail.com']) // ตัวอย่าง
+
 const submitForm = async (roleType) => {
   try {
+    // เช็ค password match
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
+      return
+    }
+
+    // เช็ค fullName อย่างน้อย 6 ตัวอักษร
+    if (!form.fullName || form.fullName.trim().length < 6) {
+      isFullNameWeak.value = true
+      return
+    }
+
+    // เช็ค password อย่างน้อย 6 ตัวอักษร
+    if (!form.password || form.password.length < 6) {
+      isPasswordWeak.value = true
+      return
+    }
+
+    // ✅ เช็ค email ซ้ำที่ frontend
+    if (existingEmails.value.includes(form.email)) {
+      isEmailDuplicate.value = true
       return
     }
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
 
-    // ✅ payload แยกตาม role ที่ส่งมา
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -134,7 +155,7 @@ const submitForm = async (roleType) => {
             fullName: form.fullName
           }
 
-    // ✅ guard ฝั่งฟรอนต์
+    // Guard ฝั่ง front-end
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
         isNoDorm.value = true
@@ -151,23 +172,21 @@ const submitForm = async (roleType) => {
       }
     }
 
-    // ✅ เรียก store
+    // เรียก store
     await registerStore.registerAccount(payload)
 
-    // ✅ ล้างข้อมูลหลัง register
+    // เพิ่ม email ที่ register แล้วเข้า existingEmails (optional)
+    existingEmails.value.push(payload.email)
+
+    // ล้างข้อมูลหลัง register
     form.password = ''
     form.confirmPassword = ''
     success.value = true
 
     router.push({ name: 'login' })
   } catch (err) {
-    error.value = true
     console.error('❌ Register error:', err)
-    alert(
-      registerStore.errorMessage ||
-        err?.response?.data?.message ||
-        'Registration failed.'
-    )
+    error.value = true
   }
 }
 
