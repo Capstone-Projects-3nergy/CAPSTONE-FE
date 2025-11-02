@@ -53,14 +53,41 @@ const dormList = ref([]) // [{ dormId, dormName }]
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/public/dorms`)
-    console.log('API response:', res) // ดูทั้ง response
-    console.log('Data:', res.data)
+    const baseURL = import.meta.env.VITE_BASE_URL
+    console.log('Base URL:', baseURL)
 
-    // ดู array จริง
-    dormList.value = res.data
+    if (!baseURL) throw new Error('VITE_BASE_URL not set')
+
+    const res = await axios.get(`${baseURL}/public/dorms`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    console.log('API response full:', res)
+
+    // ตรวจสอบว่าข้อมูลอยู่ใน data หรือ data.data
+    const dataList = res.data?.data ?? res.data
+    console.log('Dorm data after check:', dataList)
+
+    // ถ้ามันว่าง ให้ใส่ fallback เผื่อ dropdown ไม่ empty
+    if (!Array.isArray(dataList) || dataList.length === 0) {
+      console.warn('Dorm list empty, using fallback data')
+      dormList.value = [
+        { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+        { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+      ]
+    } else {
+      dormList.value = dataList.map((d) => ({
+        dormId: Number(d.dormId),
+        dormName: d.dormName
+      }))
+    }
   } catch (err) {
     console.error('❌ Cannot fetch dorm list', err)
+    // ใช้ fallback data
+    dormList.value = [
+      { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+      { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+    ]
   }
 })
 
@@ -111,7 +138,7 @@ const submitForm = async () => {
     }
 
     // เรียก store: โพสต์เฉพาะ "โปรไฟล์" ไป backend (ไม่มี password)
-    await registerStore.registerProfile(payload)
+    await registerStore.registerAccount(payload)
 
     // ล้างรหัสออกจากหน่วยความจำ
     form.password = ''
@@ -782,7 +809,6 @@ const toggleComfirmPasswordVisibility = () => {
                 </select> -->
                 <select v-model.number="form.dormId" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
-
                   <option
                     v-for="dorm in dormList"
                     :key="dorm.dormId"
