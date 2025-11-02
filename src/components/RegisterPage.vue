@@ -21,7 +21,7 @@ const isStaffPositionOverLimit = ref(false)
 const trimmedFullName = computed(() => form.fullName.trim())
 const trimmedEmail = computed(() => form.email.trim())
 const trimmedPassword = computed(() => form.password.trim())
-const trimmedDormName = computed(() => form.dormName.trim())
+const trimmedDormName = computed(() => form.dormId.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 const trimmedStaffPosition = computed(() => form.position.trim())
 const isPasswordWeak = ref(false)
@@ -39,7 +39,7 @@ const form = reactive({
   password: '',
   confirmPassword: '',
   role: '', // หรือ 'STAFF' เลือกจาก dropdown
-  dormName: '', // ต้องเก็บเป็น number, map จาก dormitoryName
+  dormId: '', // ต้องเก็บเป็น number, map จาก dormitoryName
   roomNumber: '', // ถ้า role = RESIDENT
   position: '', // ถ้า role = STAFF
   dormType: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
@@ -49,7 +49,7 @@ const dormList = ref([])
 
 onMounted(async () => {
   try {
-    const url = `${import.meta.env.VITE_BASE_URL}/public/auth/dorms`
+    const url = `${import.meta.env.VITE_BASE_URL}/public/dorms`
     console.log('Fetching dorm list from:', url)
     const response = await axios.get(url)
     console.log('Dorm list response:', response.data)
