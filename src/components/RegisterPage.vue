@@ -27,6 +27,7 @@ const trimmedStaffPosition = computed(() => form.position.trim())
 const isPasswordWeak = ref(false)
 const isPasswordNotMatch = ref(false)
 const isFullNameWeak = ref(false)
+const isNoDorm = ref(false)
 const success = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
@@ -94,7 +95,7 @@ const submitForm = async () => {
     // guard ฝั่งฟรอนต์
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
-        alert('Please select a dormitory.')
+        isNoDorm.value = false
         return
       }
       if (!payload.roomNumber) {
@@ -209,6 +210,7 @@ const closePopUp = (operate) => {
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
   if (operate === 'fullname') isFullNameWeak.value = false
+  if (operate === 'dorm') isNoDorm.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -382,7 +384,14 @@ const toggleComfirmPasswordVisibility = () => {
           operate="fullname"
           @closePopUp="closePopUp"
         />
-
+        <AlertPopUp
+          v-if="isNoDorm"
+          :titles="'Please select a dormitory.'"
+          message="Error!!"
+          styleType="red"
+          operate="dorm"
+          @closePopUp="closePopUp"
+        />
         <!-- Toggle Buttons -->
         <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
           <button
