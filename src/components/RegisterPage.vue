@@ -43,6 +43,19 @@ const form = reactive({
   gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
 })
 
+const dormList = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/public/api/dorms`
+    ) // endpoint ดึง dorm ทั้งหมด
+    dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
+  } catch (err) {
+    console.error('❌ Cannot fetch dorm list', err)
+  }
+})
+
 const submitForm = async () => {
   try {
     // 🔹 ตรวจสอบ confirmPassword ก่อน
@@ -72,6 +85,16 @@ const submitForm = async () => {
       position: form.role === 'STAFF' ? form.position : null,
       gender: form.gender // backend ไม่ใช้ แต่เก็บไว้ถ้าต้องการ
     })
+    //     await registerStore.registerAccount({
+    //   fullName: form.fullName,
+    //   email: form.email,
+    //   password: form.password,
+    //   role: form.role,
+    //   dormId: form.dormId, // ส่ง dormId จาก select
+    //   roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
+    //   position: form.role === 'STAFF' ? form.position : null,
+    //   gender: form.gender
+    // })
 
     // 🔹 ตรวจสอบผลลัพธ์จาก store
     if (registerStore.errorMessage) {
@@ -707,6 +730,18 @@ const toggleComfirmPasswordVisibility = () => {
                   <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
                   <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
                 </select>
+                <!-- <select v-model="form.dormId" class="custom-select">
+                  <option value="" disabled selected hidden>
+                    Name Dormitory
+                  </option>
+                  <option
+                    v-for="dorm in dormList"
+                    :key="dorm.id"
+                    :value="dorm.id"
+                  >
+                    {{ dorm.name }}
+                  </option>
+                </select> -->
               </div>
             </div>
 

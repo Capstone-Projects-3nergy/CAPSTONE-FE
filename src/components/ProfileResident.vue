@@ -23,11 +23,13 @@ const resident = ref({
   building: 'Building 2',
   address: '203/45 Moo 5, Bangkok, Thailand'
 })
-
+const registerStore = useRegisterManager()
 const saveProfile = () => {
   console.log('Saving resident profile...', resident.value)
   alert('Resident profile updated successfully!')
 }
+// const registeredUser = registerStore.registeredUser // สมมติ store เก็บ response
+// console.log(registeredUser.dormName) // แสดงชื่อหอ
 
 const cancelEdit = () => {
   resident.value = {
@@ -41,13 +43,14 @@ const cancelEdit = () => {
   }
 }
 const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'home', params: { id: loginStore.user.id } })
   showHomePageResident.value = true
 }
 const showResidentParcelPage = async function () {
-  router.replace({ name: 'residentparcels' ,
-    params: { id: loginStore.user.id }})
+  router.replace({
+    name: 'residentparcels',
+    params: { id: loginStore.user.id }
+  })
   showResidentParcels.value = true
 }
 const returnLoginPage = async () => {
@@ -377,6 +380,8 @@ const toggleSidebar = () => {
                 <p class="text-lg font-semibold">B-305</p>
               </div>
               <div>
+                <!-- <p>หอพัก: {{ registeredUser?.dormName || 'ยังไม่ได้เลือกหอ' }}</p> -->
+
                 <p class="text-sm text-gray-500">Building</p>
                 <p class="text-lg font-semibold">Building B</p>
               </div>
