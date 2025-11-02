@@ -52,6 +52,14 @@ const form = reactive({
 })
 
 const dormList = ref([]) // [{ dormId, dormName }]
+// 🧠 ฟังก์ชันกรองตามประเภท dormType ที่เลือก
+const filteredDormList = computed(() => {
+  if (!form.dormType) return dormList.value
+  const type = form.dormType.toLowerCase().includes('female')
+    ? 'female'
+    : 'male'
+  return dormList.value.filter((d) => d.dormName.toLowerCase().includes(type))
+})
 
 onMounted(async () => {
   try {
@@ -817,7 +825,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <select v-model.number="form.dormId" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
                   <option
-                    v-for="dorm in dormList"
+                    v-for="dorm in filteredDormList"
                     :key="dorm.dormId"
                     :value="dorm.dormId"
                   >
