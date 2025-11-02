@@ -16,6 +16,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
    *   email: string,
    *   password: string,       // สำหรับ Firebase
    *   role: 'RESIDENT' | 'STAFF',
+   *   dormType: 'RESIDENT' | 'STAFF', // 👈 เพิ่ม dormType
    *   dormId?: number,         // สำหรับ RESIDENT
    *   roomNumber?: string,     // สำหรับ RESIDENT
    *   position?: string        // สำหรับ STAFF
@@ -27,14 +28,30 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
     successMessage.value = ''
 
     try {
-      // แยกชื่อ
+      // 🔹 แยกชื่อ
       const [firstName, ...rest] = (formData.fullName || '').trim().split(/\s+/)
       const lastName = rest.join(' ')
       const role = String(formData.role || '').toUpperCase()
+      const dormType = String(formData.dormType || '').toUpperCase()
 
-      // สร้าง payload ตาม role
-      let payload = { email: formData.email, firstName, lastName, role }
+      // 🔹 ตรวจสอบค่าเบื้องต้น
+      if (!['RESIDENT', 'STAFF'].includes(role)) {
+        throw new Error('Invalid role.')
+      }
+      if (!['RESIDENT', 'STAFF'].includes(dormType)) {
+        throw new Error('Invalid dorm type.')
+      }
 
+      // 🔹 Payload พื้นฐาน
+      let payload = {
+        email: formData.email,
+        firstName,
+        lastName,
+        role,
+        dormType // 👈 เพิ่มเข้า payload
+      }
+
+      // 🔹 เงื่อนไขสำหรับ Resident
       if (role === 'RESIDENT') {
         const dormIdNum = Number(formData.dormId)
         if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
@@ -48,7 +65,10 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
           dormId: dormIdNum,
           roomNumber: formData.roomNumber.trim()
         }
-      } else if (role === 'STAFF') {
+      }
+
+      // 🔹 เงื่อนไขสำหรับ Staff
+      else if (role === 'STAFF') {
         if (!formData.position || !formData.position.trim()) {
           throw new Error('Position is required for staff.')
         }
@@ -56,16 +76,15 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
           ...payload,
           position: formData.position.trim()
         }
-      } else {
-        throw new Error('Invalid role.')
       }
 
-      // 🔹 เรียก backend ก่อน
+      // 🔹 เรียก backend
       const baseURL = import.meta.env.VITE_BASE_URL
       if (!baseURL) throw new Error('VITE_BASE_URL is not set')
       const endpoint = `${baseURL}/public/auth/register`
 
       const response = await axios.post(endpoint, payload)
+
       if (!response.data?.userId) {
         throw new Error('Registration failed on backend.')
       }

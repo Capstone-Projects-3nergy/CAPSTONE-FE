@@ -42,17 +42,18 @@ const form = reactive({
   dormName: '', // ต้องเก็บเป็น number, map จาก dormitoryName
   roomNumber: '', // ถ้า role = RESIDENT
   position: '', // ถ้า role = STAFF
-  gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
+  dormType: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
 })
 
 const dormList = ref([])
 
 onMounted(async () => {
   try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/public/auth/register`
-    ) // endpoint ดึง dorm ทั้งหมด
-    dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
+    const url = `${import.meta.env.VITE_BASE_URL}/public/auth/register`
+    console.log('Fetching dorm list from:', url)
+    const response = await axios.get(url)
+    console.log('Dorm list response:', response.data)
+    dormList.value = response.data
   } catch (err) {
     console.error('❌ Cannot fetch dorm list', err)
   }
@@ -60,35 +61,43 @@ onMounted(async () => {
 
 const submitForm = async () => {
   try {
-    // 🔹 ตรวจสอบ confirmPassword ก่อน
+    // ตรวจสอบ confirmPassword ก่อน
     if (form.password !== form.confirmPassword) {
       error.value = true
-      setTimeout(() => {
-        error.value = false
-      }, 2000)
+      setTimeout(() => (error.value = false), 2000)
       return
     }
 
-    // // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
-    // const dormMap = {
-    //   'Hall 1': 1,
-    //   'Hall 2': 2
-    // }
-    // const dormId = dormMap[form.dormName] || null
+    // แยกชื่อ fullName -> firstName, lastName
+    const [firstName, ...rest] = form.fullName.trim().split(/\s+/)
+    const lastName = rest.join(' ')
 
-    // 🔹 เรียก store registerAccount
-    await registerStore.registerAccount({
-      fullName: form.fullName,
-      email: form.email,
-      password: form.password,
-      role: form.role, // "RESIDENT" | "STAFF"
-      dormId: form.dormId, // number จาก dropdown
-      roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
-      position: form.role === 'STAFF' ? form.position : null,
-      gender: form.gender
-    })
+    // สร้าง payload ตาม role
+    const roleUpper = form.role.toUpperCase()
+    const payload =
+      roleUpper === 'RESIDENT'
+        ? {
+            email: form.email,
+            firstName,
+            lastName,
+            role: roleUpper,
+            dormId: Number(form.dormId),
+            dormType,
+            roomNumber: form.roomNumber
+          }
+        : {
+            email: form.email,
+            firstName,
+            lastName,
+            dormType,
+            role: roleUpper,
+            position: form.position
+          }
 
-    // 🔹 ตรวจสอบผลลัพธ์จาก store
+    // เรียก backend ผ่าน store
+    await registerStore.registerAccount(payload)
+
+    // ตรวจสอบผลลัพธ์
     if (registerStore.errorMessage) {
       const msg = registerStore.errorMessage.toLowerCase()
       if (msg.includes('email')) {
@@ -413,7 +422,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <input
                     type="radio"
                     value="female"
-                    v-model="form.gender"
+                    v-model="form.dormType"
                     class="mr-2"
                   />
                   Female Dormitory
@@ -422,7 +431,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <input
                     type="radio"
                     value="male"
-                    v-model="form.gender"
+                    v-model="form.dormType"
                     class="mr-2"
                   />
                   Male Dormitory
