@@ -12,9 +12,9 @@ const userName = computed(() => loginStore.user?.name || 'Guest')
 const userRole = computed(() => {
   if (!loginStore.user?.role) return 'Unknown'
   switch (loginStore.user.role) {
-    case 'staff':
+    case 'STAFF':
       return 'Dormitory Admin'
-    case 'resident':
+    case 'RESIDENT':
       return 'Resident'
     default:
       return 'Unknown'

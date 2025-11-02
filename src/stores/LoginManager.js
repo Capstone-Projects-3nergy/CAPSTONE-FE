@@ -47,33 +47,49 @@ export const useLoginManager = defineStore('loginManager', () => {
       const idToken = await firebaseUser.getIdToken()
 
       // 3️⃣ ส่ง token ไป backend
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/public/auth/verify`, // <-- backtick
-        {}, // body ว่าง
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`
-          }
-        }
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/api/auth/verify`,
+        { headers: { Authorization: `Bearer ${idToken}` } }
       )
+      // const response = await axios.post(
+      //   `${import.meta.env.VITE_BASE_URL}/api/auth/verify`, // <-- backtick
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${idToken}`
+      //     }
+      //   }
+      // )
 
-      const data = response.data
-      if (!data.success) throw new Error(data.message || 'Login failed')
-
+      // const data = response.data
+      // if (!data.success) throw new Error(data.message || 'Login failed')
+      const data = response.data // AuthVerifyDto ของคุณ
+      if (!data?.authenticated) throw new Error('Verify failed')
       // 4️⃣ เก็บข้อมูลผู้ใช้
+      // user.value = {
+      //   id: data.id,
+      //   email,
+      //   name: data.name,
+      //   role: data.role,
+      //   accessToken: idToken
+      // }
       user.value = {
-        id: data.id,
-        email,
-        name: data.name,
-        role: data.role,
+        id: data.userId,
+        email: data.email,
+        name: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
+        role: data.role, // 'RESIDENT' | 'STAFF'
         accessToken: idToken
       }
 
       // 5️⃣ เก็บลง localStorage
+      // localStorage.setItem('accessToken', idToken)
+      // localStorage.setItem('userRole', data.role)
+      // localStorage.setItem('userName', data.name)
       localStorage.setItem('accessToken', idToken)
       localStorage.setItem('userRole', data.role)
-      localStorage.setItem('userName', data.name)
-
+      localStorage.setItem(
+        'userName',
+        `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim()
+      )
       successMessage.value = `Login successful as ${data.role}!`
 
       // 6️⃣ Routing ตาม role
