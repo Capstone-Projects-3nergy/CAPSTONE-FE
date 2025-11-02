@@ -48,7 +48,7 @@ export const useLoginManager = defineStore('loginManager', () => {
 
       // 3️⃣ ส่ง token ไป backend
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/public/auth/login`, // <-- backtick
+        `${import.meta.env.VITE_BASE_URL}/public/auth/verify`, // <-- backtick
         {}, // body ว่าง
         {
           headers: {
