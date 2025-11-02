@@ -91,22 +91,17 @@ onMounted(async () => {
   }
 })
 
-const submitForm = async () => {
+const submitForm = async (roleType) => {
   try {
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       return
     }
 
-    // แยกชื่อ
-    // const [firstName, ...rest] = (form.fullName || '').trim().split(/\s+/)
-    // const lastName = rest.join(' ')
-    const [firstName, lastName] = form.fullName.split(' ')
-    const roleUpper = String(form.role).toUpperCase()
-    console.log(form.fullName)
-    console.log(firstName)
-    console.log(lastName)
-    // payload ให้ตรงกับ backend
+    const [firstName, lastName] = (form.fullName || '').split(' ')
+    const roleUpper = String(roleType).toUpperCase()
+
+    // ✅ payload แยกตาม role ที่ส่งมา
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -115,17 +110,21 @@ const submitForm = async () => {
             lastName,
             role: roleUpper,
             dormId: Number(form.dormId),
-            roomNumber: (form.roomNumber || '').trim()
+            roomNumber: (form.roomNumber || '').trim(),
+            password: form.password,
+            fullName: form.fullName
           }
         : {
             email: form.email,
             firstName,
             lastName,
             role: roleUpper,
-            position: (form.position || '').trim()
+            position: (form.position || '').trim(),
+            password: form.password,
+            fullName: form.fullName
           }
-    console.log(payload)
-    // guard ฝั่งฟรอนต์
+
+    // ✅ guard ฝั่งฟรอนต์
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
         isNoDorm.value = true
@@ -135,30 +134,33 @@ const submitForm = async () => {
         isRoomRequired.value = true
         return
       }
-    } else if (!payload.position) {
-      isPositionRequired.value = true
-      return
+    } else if (roleUpper === 'STAFF') {
+      if (!payload.position) {
+        isPositionRequired.value = true
+        return
+      }
     }
 
-    // เรียก store: โพสต์เฉพาะ "โปรไฟล์" ไป backend (ไม่มี password)
+    // ✅ เรียก store
     await registerStore.registerAccount(payload)
 
-    // ล้างรหัสออกจากหน่วยความจำ
+    // ✅ ล้างข้อมูลหลัง register
     form.password = ''
     form.confirmPassword = ''
-
     success.value = true
+
     router.push({ name: 'login' })
   } catch (err) {
     error.value = true
     console.error('❌ Register error:', err)
-    // alert(
-    //   registerStore.errorMessage ||
-    //     err?.response?.data?.message ||
-    //     'Registration failed.'
-    // )
+    alert(
+      registerStore.errorMessage ||
+        err?.response?.data?.message ||
+        'Registration failed.'
+    )
   }
 }
+
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
@@ -1138,19 +1140,17 @@ const toggleComfirmPasswordVisibility = () => {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="submitForm"
+            @click="submitForm('RESIDENT')"
             :class="{
               'disabled bg-gray-400 text-gray-200  cursor-default':
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
-                trimmedStaffPosition.length === 0 ||
                 trimmedConfirmPassword.length === 0,
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
-                trimmedStaffPosition.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
                 trimmedDormName.length > 0
             }"
@@ -1158,13 +1158,11 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
-              trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               trimmedDormName.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
-              isStaffPositionOverLimit ||
               isConfirmPasswordOverLimit
             "
           />
@@ -1174,7 +1172,7 @@ const toggleComfirmPasswordVisibility = () => {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="submitForm"
+            @click="submitForm('STAFF')"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
                 trimmedFullName.length === 0 ||
@@ -1185,6 +1183,7 @@ const toggleComfirmPasswordVisibility = () => {
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
+                trimmedStaffPosition.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0
             }"
@@ -1192,12 +1191,12 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
+              trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
               isStaffPositionOverLimit ||
-              isStaffIdOverLimit ||
               isConfirmPasswordOverLimit
             "
           />
