@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
@@ -43,18 +44,18 @@ const form = reactive({
   gender: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
 })
 
-const dormList = ref([])
+// const dormList = ref([])
 
-onMounted(async () => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/public/api/dorms`
-    ) // endpoint ดึง dorm ทั้งหมด
-    dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
-  } catch (err) {
-    console.error('❌ Cannot fetch dorm list', err)
-  }
-})
+// onMounted(async () => {
+//   try {
+//     const response = await axios.get(
+//       `${import.meta.env.VITE_BASE_URL}/public/api/dorms`
+//     ) // endpoint ดึง dorm ทั้งหมด
+//     dormList.value = response.data // response.data = [{id: 1, name: 'Hall 1'}, ...]
+//   } catch (err) {
+//     console.error('❌ Cannot fetch dorm list', err)
+//   }
+// })
 
 const submitForm = async () => {
   try {
