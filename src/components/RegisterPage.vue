@@ -31,6 +31,7 @@ const isNoDorm = ref(false)
 const isNotMatch = ref(false)
 const success = ref(false)
 const isRoomRequired = ref(false)
+const isPositionRequired = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
@@ -105,7 +106,7 @@ const submitForm = async () => {
         return
       }
     } else if (!payload.position) {
-      alert('Position is required for staff.')
+      isPositionRequired.value = true
       return
     }
 
@@ -119,6 +120,7 @@ const submitForm = async () => {
     success.value = true
     router.push({ name: 'login' })
   } catch (err) {
+    error.value = true
     console.error('❌ Register error:', err)
     alert(
       registerStore.errorMessage ||
@@ -215,6 +217,7 @@ const closePopUp = (operate) => {
   if (operate === 'dorm') isNoDorm.value = false
   if (operate === 'notmatch') isNotMatch.value = false
   if (operate === 'notroomrequired') isRoomRequired.value = false
+  if (operate === 'notpositionrequired') isPositionRequired.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -410,6 +413,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="notroomrequired"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isPositionRequired"
+          :titles="'Position is required for staff.'"
+          message="Error!!"
+          styleType="red"
+          operate="notpositionrequired"
           @closePopUp="closePopUp"
         />
         <!-- Toggle Buttons -->
