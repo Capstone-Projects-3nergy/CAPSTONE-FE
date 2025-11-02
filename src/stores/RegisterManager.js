@@ -29,10 +29,11 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
 
     try {
       // 🔹 แยกชื่อ
-      const [firstName, ...rest] = (formData.fullName || '').trim().split(/\s+/)
-      const lastName = rest.join(' ')
+      // const [firstName, ...rest] = (formData.fullName || '').trim().split(/\s+/)
+      // const lastName = rest.join(' ')
+      // const [firstName, lastName] = formData.fullname.split(' ')
       const role = String(formData.role || '').toUpperCase()
-
+      console.log('www')
       // 🔹 ตรวจสอบค่าเบื้องต้น
       if (!['RESIDENT', 'STAFF'].includes(role)) {
         throw new Error('Invalid role.')
@@ -40,12 +41,12 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
 
       // 🔹 Payload พื้นฐาน
       let payload = {
-        email: formData.email,
-        firstName,
-        lastName,
+        ...formData,
+        // email: formData.email,
+        // firstName: formData.firstName,
+        // lastName: formData.lastName,
         role
       }
-
       // 🔹 เงื่อนไขสำหรับ Resident
       if (role === 'RESIDENT') {
         const dormIdNum = Number(formData.dormId)
@@ -77,7 +78,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       const baseURL = import.meta.env.VITE_BASE_URL
       if (!baseURL) throw new Error('VITE_BASE_URL is not set')
       const endpoint = `${baseURL}/public/auth/register`
-
+      console.log(await payload)
       const response = await axios.post(endpoint, payload)
 
       if (!response.data?.userId) {

@@ -99,10 +99,13 @@ const submitForm = async () => {
     }
 
     // แยกชื่อ
-    const [firstName, ...rest] = (form.fullName || '').trim().split(/\s+/)
-    const lastName = rest.join(' ')
+    // const [firstName, ...rest] = (form.fullName || '').trim().split(/\s+/)
+    // const lastName = rest.join(' ')
+    const [firstName, lastName] = form.fullName.split(' ')
     const roleUpper = String(form.role).toUpperCase()
-
+    console.log(form.fullName)
+    console.log(firstName)
+    console.log(lastName)
     // payload ให้ตรงกับ backend
     const payload =
       roleUpper === 'RESIDENT'
@@ -121,7 +124,7 @@ const submitForm = async () => {
             role: roleUpper,
             position: (form.position || '').trim()
           }
-
+    console.log(payload)
     // guard ฝั่งฟรอนต์
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
