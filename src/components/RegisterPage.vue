@@ -30,6 +30,7 @@ const isFullNameWeak = ref(false)
 const isNoDorm = ref(false)
 const isNotMatch = ref(false)
 const success = ref(false)
+const isRoomRequired = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
@@ -96,11 +97,11 @@ const submitForm = async () => {
     // guard ฝั่งฟรอนต์
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
-        isNoDorm.value = false
+        isNoDorm.value = true
         return
       }
       if (!payload.roomNumber) {
-        alert('Room number is required.')
+        isRoomRequired.value = true
         return
       }
     } else if (!payload.position) {
@@ -115,7 +116,7 @@ const submitForm = async () => {
     form.password = ''
     form.confirmPassword = ''
 
-    alert('Registered!')
+    success.value = true
     router.push({ name: 'login' })
   } catch (err) {
     console.error('❌ Register error:', err)
@@ -213,6 +214,7 @@ const closePopUp = (operate) => {
   if (operate === 'fullname') isFullNameWeak.value = false
   if (operate === 'dorm') isNoDorm.value = false
   if (operate === 'notmatch') isNotMatch.value = false
+  if (operate === 'notroomrequired') isRoomRequired.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -400,6 +402,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="notmatch"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isRoomRequired"
+          :titles="'Room number is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="notroomrequired"
           @closePopUp="closePopUp"
         />
         <!-- Toggle Buttons -->
