@@ -26,6 +26,7 @@ const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 const trimmedStaffPosition = computed(() => form.position.trim())
 const isPasswordWeak = ref(false)
 const isPasswordNotMatch = ref(false)
+const isFullNameWeak = ref(false)
 const success = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
@@ -86,17 +87,6 @@ const submitForm = async () => {
       position: form.role === 'STAFF' ? form.position : null,
       gender: form.gender // backend ไม่ใช้ แต่เก็บไว้ถ้าต้องการ
     })
-    //     await registerStore.registerAccount({
-    //   fullName: form.fullName,
-    //   email: form.email,
-    //   password: form.password,
-    //   role: form.role,
-    //   dormId: form.dormId, // ส่ง dormId จาก select
-    //   roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
-    //   position: form.role === 'STAFF' ? form.position : null,
-    //   gender: form.gender
-    // })
-
     // 🔹 ตรวจสอบผลลัพธ์จาก store
     if (registerStore.errorMessage) {
       const msg = registerStore.errorMessage.toLowerCase()
@@ -106,6 +96,9 @@ const submitForm = async () => {
       } else if (msg.includes('password')) {
         isPasswordWeak.value = true
         setTimeout(() => (isPasswordWeak.value = false), 2000)
+      } else if (msg.includes('fullName')) {
+        isFullNameWeak.value = true
+        setTimeout(() => (isFullNameWeak.value = false), 2000)
       } else {
         error.value = true
         setTimeout(() => (error.value = false), 2000)
@@ -208,6 +201,7 @@ const closePopUp = (operate) => {
   if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
+  if (operate === 'fullname') isFullNameWeak.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -371,6 +365,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Success!!"
           styleType="green"
           operate="success"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isFullNameWeak"
+          :titles="'Full Name must be at least 6 characters.'"
+          message="Error!!"
+          styleType="red"
+          operate="fullname"
           @closePopUp="closePopUp"
         />
 

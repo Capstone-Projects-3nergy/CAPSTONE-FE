@@ -56,6 +56,8 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
 
       const endpoint = `${baseURL}/public/auth/register`
       const response = await axios.post(endpoint, payload)
+      console.log('✅ import.meta.env =', import.meta.env)
+      console.log('✅ BASE URL =', import.meta.env.VITE_BASE_URL)
 
       // 4) ตรวจผลลัพธ์ และเก็บ idToken
       if (response.data && response.data.userId) {
