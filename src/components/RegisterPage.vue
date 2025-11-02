@@ -28,6 +28,7 @@ const isPasswordWeak = ref(false)
 const isPasswordNotMatch = ref(false)
 const isFullNameWeak = ref(false)
 const isNoDorm = ref(false)
+const isNotMatch = ref(false)
 const success = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
@@ -64,7 +65,7 @@ onMounted(async () => {
 const submitForm = async () => {
   try {
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match')
+      isNotMatch.value = true
       return
     }
 
@@ -211,6 +212,7 @@ const closePopUp = (operate) => {
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
   if (operate === 'fullname') isFullNameWeak.value = false
   if (operate === 'dorm') isNoDorm.value = false
+  if (operate === 'notmatch') isNotMatch.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -390,6 +392,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="dorm"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isNotMatch"
+          :titles="'Passwords do not match'"
+          message="Error!!"
+          styleType="red"
+          operate="notmatch"
           @closePopUp="closePopUp"
         />
         <!-- Toggle Buttons -->
