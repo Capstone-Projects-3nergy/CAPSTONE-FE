@@ -36,24 +36,25 @@ const isComfirmPasswordVisible = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
-  password: '',
+  password: '', // ใช้กับ Firebase เท่านั้น (อย่าส่งไป backend)
   confirmPassword: '',
-  role: '', // หรือ 'STAFF' เลือกจาก dropdown
-  dormId: '', // ต้องเก็บเป็น number, map จาก dormitoryName
-  roomNumber: '', // ถ้า role = RESIDENT
-  position: '', // ถ้า role = STAFF
-  dormType: 'female' // เก็บไว้ถ้าต้องการ, backend ไม่ใช้
+  role: 'RESIDENT', // 'RESIDENT' | 'STAFF'
+  dormId: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
+  dormType: 'female dormitory',
+  roomNumber: '', // เฉพาะ RESIDENT
+  position: '' // เฉพาะ STAFF
 })
 
-const dormList = ref([])
+const dormList = ref([]) // [{ dormId, dormName }]
 
 onMounted(async () => {
   try {
-    const url = `${import.meta.env.VITE_BASE_URL}/public/dorms`
-    console.log('Fetching dorm list from:', url)
-    const response = await axios.get(url)
-    console.log('Dorm list response:', response.data)
-    dormList.value = response.data
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/public/dorms`)
+    console.log('API response:', res) // ดูทั้ง response
+    console.log('Data:', res.data)
+
+    // ดู array จริง
+    dormList.value = res.data
   } catch (err) {
     console.error('❌ Cannot fetch dorm list', err)
   }
@@ -61,19 +62,17 @@ onMounted(async () => {
 
 const submitForm = async () => {
   try {
-    // ตรวจสอบ confirmPassword ก่อน
     if (form.password !== form.confirmPassword) {
-      error.value = true
-      setTimeout(() => (error.value = false), 2000)
+      alert('Passwords do not match')
       return
     }
 
-    // แยกชื่อ fullName -> firstName, lastName
-    const [firstName, ...rest] = form.fullName.trim().split(/\s+/)
+    // แยกชื่อ
+    const [firstName, ...rest] = (form.fullName || '').trim().split(/\s+/)
     const lastName = rest.join(' ')
+    const roleUpper = String(form.role).toUpperCase()
 
-    // สร้าง payload ตาม role
-    const roleUpper = form.role.toUpperCase()
+    // payload ให้ตรงกับ backend
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -82,51 +81,49 @@ const submitForm = async () => {
             lastName,
             role: roleUpper,
             dormId: Number(form.dormId),
-            dormType: form.dormType,
-            roomNumber: form.roomNumber
+            roomNumber: (form.roomNumber || '').trim()
           }
         : {
             email: form.email,
             firstName,
             lastName,
-            dormType: form.dormType,
             role: roleUpper,
-            position: form.position
+            position: (form.position || '').trim()
           }
 
-    // เรียก backend ผ่าน store
-    await registerStore.registerAccount(payload)
-
-    // ตรวจสอบผลลัพธ์
-    if (registerStore.errorMessage) {
-      const msg = registerStore.errorMessage.toLowerCase()
-      if (msg.includes('email')) {
-        isEmailDuplicate.value = true
-        setTimeout(() => (isEmailDuplicate.value = false), 2000)
-      } else if (msg.includes('password')) {
-        isPasswordWeak.value = true
-        setTimeout(() => (isPasswordWeak.value = false), 2000)
-      } else if (msg.includes('fullName')) {
-        isFullNameWeak.value = true
-        setTimeout(() => (isFullNameWeak.value = false), 2000)
-      } else {
-        error.value = true
-        setTimeout(() => (error.value = false), 2000)
+    // guard ฝั่งฟรอนต์
+    if (roleUpper === 'RESIDENT') {
+      if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
+        alert('Please select a dormitory.')
+        return
       }
-    } else if (registerStore.successMessage) {
-      success.value = true
-      setTimeout(() => {
-        success.value = false
-        router.push({ name: 'login' })
-      }, 2000)
+      if (!payload.roomNumber) {
+        alert('Room number is required.')
+        return
+      }
+    } else if (!payload.position) {
+      alert('Position is required for staff.')
+      return
     }
+
+    // เรียก store: โพสต์เฉพาะ "โปรไฟล์" ไป backend (ไม่มี password)
+    await registerStore.registerProfile(payload)
+
+    // ล้างรหัสออกจากหน่วยความจำ
+    form.password = ''
+    form.confirmPassword = ''
+
+    alert('Registered!')
+    router.push({ name: 'login' })
   } catch (err) {
     console.error('❌ Register error:', err)
-    error.value = true
-    setTimeout(() => (error.value = false), 2000)
+    alert(
+      registerStore.errorMessage ||
+        err?.response?.data?.message ||
+        'Registration failed.'
+    )
   }
 }
-
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
@@ -421,7 +418,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <label class="flex items-center text-sm">
                   <input
                     type="radio"
-                    value="female"
+                    value="female dormitory"
                     v-model="form.dormType"
                     class="mr-2"
                   />
@@ -430,7 +427,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <label class="flex items-center text-sm">
                   <input
                     type="radio"
-                    value="male"
+                    value="male dormitory"
                     v-model="form.dormType"
                     class="mr-2"
                   />
@@ -743,16 +740,15 @@ const toggleComfirmPasswordVisibility = () => {
                   <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
                   <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
                 </select> -->
-                <select v-model="form.dormId" class="custom-select">
-                  <option value="" disabled selected hidden>
-                    Select Dormitory
-                  </option>
+                <select v-model.number="form.dormId" class="custom-select">
+                  <option :value="null" disabled>Select Dormitory</option>
+
                   <option
                     v-for="dorm in dormList"
-                    :key="dorm.id"
-                    :value="dorm.id"
+                    :key="dorm.dormId"
+                    :value="dorm.dormId"
                   >
-                    {{ dorm.name }}
+                    {{ dorm.dormName }}
                   </option>
                 </select>
               </div>

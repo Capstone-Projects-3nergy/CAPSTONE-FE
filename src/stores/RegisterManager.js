@@ -32,14 +32,10 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
       const [firstName, ...rest] = (formData.fullName || '').trim().split(/\s+/)
       const lastName = rest.join(' ')
       const role = String(formData.role || '').toUpperCase()
-      const dormType = String(formData.dormType || '').toUpperCase()
 
       // 🔹 ตรวจสอบค่าเบื้องต้น
       if (!['RESIDENT', 'STAFF'].includes(role)) {
         throw new Error('Invalid role.')
-      }
-      if (!['RESIDENT', 'STAFF'].includes(dormType)) {
-        throw new Error('Invalid dorm type.')
       }
 
       // 🔹 Payload พื้นฐาน
@@ -47,8 +43,7 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
         email: formData.email,
         firstName,
         lastName,
-        role,
-        dormType // 👈 เพิ่มเข้า payload
+        role
       }
 
       // 🔹 เงื่อนไขสำหรับ Resident
