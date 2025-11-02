@@ -69,24 +69,25 @@ const submitForm = async () => {
       return
     }
 
-    // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
-    const dormMap = {
-      'Hall 1': 1,
-      'Hall 2': 2
-    }
-    const dormId = dormMap[form.dormName] || null
+    // // 🔹 แปลง dormName เป็น dormId (ตัวอย่าง map)
+    // const dormMap = {
+    //   'Hall 1': 1,
+    //   'Hall 2': 2
+    // }
+    // const dormId = dormMap[form.dormName] || null
 
     // 🔹 เรียก store registerAccount
     await registerStore.registerAccount({
       fullName: form.fullName,
       email: form.email,
-      password: form.password, // ใช้กับ Firebase
+      password: form.password,
       role: form.role, // "RESIDENT" | "STAFF"
-      dormId: dormId, // number
+      dormId: form.dormId, // number จาก dropdown
       roomNumber: form.role === 'RESIDENT' ? form.roomNumber : null,
       position: form.role === 'STAFF' ? form.position : null,
-      gender: form.gender // backend ไม่ใช้ แต่เก็บไว้ถ้าต้องการ
+      gender: form.gender
     })
+
     // 🔹 ตรวจสอบผลลัพธ์จาก store
     if (registerStore.errorMessage) {
       const msg = registerStore.errorMessage.toLowerCase()
