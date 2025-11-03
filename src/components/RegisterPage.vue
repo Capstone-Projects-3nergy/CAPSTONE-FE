@@ -7,16 +7,15 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
-const incorrect = ref(false)
 const error = ref(false)
 const isEmailDuplicate = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
-const isStaffIdOverLimit = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
+const incorrectEmailForm = ref(false)
 // ใช้ computed สำหรับ trim ค่าอัตโนมัติ
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
@@ -34,6 +33,7 @@ const isNotMatch = ref(false)
 const success = ref(false)
 const isRoomRequired = ref(false)
 const isPositionRequired = ref(false)
+const incorrectemailform = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
@@ -109,26 +109,38 @@ const submitForm = async (roleType) => {
     // เช็ค password match
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
+      setTimeout(() => {
+        isNotMatch.value = false
+      }, 3000)
       return
     }
 
     // เช็ค fullName อย่างน้อย 6 ตัวอักษร
     if (!form.fullName || form.fullName.trim().length < 6) {
       isFullNameWeak.value = true
+      setTimeout(() => {
+        isFullNameWeak.value = false
+      }, 3000)
       return
     }
 
     // เช็ค password อย่างน้อย 6 ตัวอักษร
     if (!form.password || form.password.length < 6) {
       isPasswordWeak.value = true
+      setTimeout(() => {
+        isPasswordWeak.value = false
+      }, 3000)
       return
     }
 
-    // ✅ เช็ค email ซ้ำที่ frontend
-    // if (form.email === form.email) {
-    //   isEmailDuplicate.value = true
-    //   return
-    // }
+    // ✅ เช็ค email ต้องเป็น @gmail.com
+    if (!form.email || !form.email.endsWith('@gmail.com')) {
+      incorrectemailform.value = true
+      setTimeout(() => {
+        incorrectemailform.value = false
+      }, 3000)
+      return
+    }
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
@@ -159,15 +171,24 @@ const submitForm = async (roleType) => {
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
         isNoDorm.value = true
+        setTimeout(() => {
+          isNoDorm.value = false
+        }, 3000)
         return
       }
       if (!payload.roomNumber) {
         isRoomRequired.value = true
+        setTimeout(() => {
+          isRoomRequired.value = false
+        }, 3000)
         return
       }
     } else if (roleUpper === 'STAFF') {
       if (!payload.position) {
         isPositionRequired.value = true
+        setTimeout(() => {
+          isPositionRequired.value = false
+        }, 3000)
         return
       }
     }
@@ -175,17 +196,31 @@ const submitForm = async (roleType) => {
     // เรียก store
     await registerStore.registerAccount(payload)
 
-    // เพิ่ม email ที่ register แล้วเข้า existingEmails (optional)
-
     // ล้างข้อมูลหลัง register
     form.password = ''
     form.confirmPassword = ''
     success.value = true
+    setTimeout(() => {
+      success.value = false
+    }, 3000)
 
     // router.push({ name: 'login' })
   } catch (err) {
     console.error('❌ Register error:', err)
+
+    // ถ้า backend ส่ง status 409 = email ซ้ำ
+    if (err.response?.status === 409) {
+      isEmailDuplicate.value = true
+      setTimeout(() => {
+        isEmailDuplicate.value = false
+      }, 3000)
+      return
+    }
+
     error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 3000)
   }
 }
 
@@ -267,7 +302,6 @@ const checkInputLength = (field) => {
 // --- ปิด popup ด้วยมือ ---
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
-  if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
   if (operate === 'email ') isEmailDuplicate.value = false
@@ -278,6 +312,7 @@ const closePopUp = (operate) => {
   if (operate === 'notmatch') isNotMatch.value = false
   if (operate === 'notroomrequired') isRoomRequired.value = false
   if (operate === 'notpositionrequired') isPositionRequired.value = false
+  if (operate === 'emailform') incorrectemailform.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -392,14 +427,14 @@ const toggleComfirmPasswordVisibility = () => {
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
-        <AlertPopUp
+        <!-- <AlertPopUp
           v-if="incorrect"
           :titles="'Username or Password is incorrect.'"
           message="Error!!"
           styleType="red"
           operate="incorrect"
           @closePopUp="closePopUp"
-        />
+        /> -->
         <AlertPopUp
           v-if="isPasswordNotMatch"
           :titles="'Password is not Match'"
@@ -423,6 +458,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="email"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="incorrectemailform"
+          :titles="'Email Form Is Incorrect'"
+          message="Error!!"
+          styleType="red"
+          operate="emailform"
           @closePopUp="closePopUp"
         />
 
