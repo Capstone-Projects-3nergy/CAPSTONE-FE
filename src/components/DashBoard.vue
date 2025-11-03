@@ -416,7 +416,11 @@ const toggleSidebar = () => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem
+            title="Dashboard"
+            @click="showDashBoardPage"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="24"
@@ -482,10 +486,7 @@ const toggleSidebar = () => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem
-            title="Manage Residents"
-            class="bg-[#81AFEA] cursor-default"
-          >
+          <SidebarItem title="Manage Residents">
             <template #icon>
               <svg
                 width="25"
