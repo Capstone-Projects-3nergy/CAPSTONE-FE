@@ -8,6 +8,7 @@ import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
 const error = ref(false)
+const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -15,7 +16,6 @@ const isConfirmPasswordOverLimit = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
-const incorrectEmailForm = ref(false)
 // ใช้ computed สำหรับ trim ค่าอัตโนมัติ
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
@@ -25,6 +25,7 @@ const trimmedConfirmPassword = computed(
   () => form.confirmPassword?.trim() || ''
 )
 const trimmedStaffPosition = computed(() => form.position?.trim() || '')
+const trimmedRoomNumber = computed(() => form.roomNumber?.trim() || '')
 const isPasswordWeak = ref(false)
 const isPasswordNotMatch = ref(false)
 const isFullNameWeak = ref(false)
@@ -207,16 +208,6 @@ const submitForm = async (roleType) => {
     // router.push({ name: 'login' })
   } catch (err) {
     console.error('❌ Register error:', err)
-
-    // ถ้า backend ส่ง status 409 = email ซ้ำ
-    if (err.response?.status === 409) {
-      isEmailDuplicate.value = true
-      setTimeout(() => {
-        isEmailDuplicate.value = false
-      }, 3000)
-      return
-    }
-
     error.value = true
     setTimeout(() => {
       error.value = false
@@ -313,6 +304,7 @@ const closePopUp = (operate) => {
   if (operate === 'notroomrequired') isRoomRequired.value = false
   if (operate === 'notpositionrequired') isPositionRequired.value = false
   if (operate === 'emailform') incorrectemailform.value = false
+  if (operate === 'notnumber') roomidnotnumber.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -449,6 +441,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="roomidnotnumber"
+          :titles="'Room Number can only type as number.'"
+          message="Error!!"
+          styleType="red"
+          operate="notnumber"
           @closePopUp="closePopUp"
         />
         <!-- Duplicate Email -->
@@ -1217,13 +1217,15 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
-                trimmedConfirmPassword.length === 0,
+                trimmedConfirmPassword.length === 0 ||
+                trimmedRoomNumber.length === 0,
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedDormName.length > 0
+                trimmedDormName.length > 0 &&
+                trimmedRoomNumber.length > 0
             }"
             :disabled="
               trimmedFullName.length === 0 ||
@@ -1231,6 +1233,7 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               trimmedDormName.length === 0 ||
+              isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
