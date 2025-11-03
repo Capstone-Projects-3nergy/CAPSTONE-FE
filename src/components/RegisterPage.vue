@@ -58,14 +58,17 @@ const filteredDormList = computed(() => {
   const type = form.dormType.toLowerCase().includes('female')
     ? 'female'
     : 'male'
-  return dormList.value.filter((d) => d.dormName.toLowerCase().includes(type))
+
+  return dormList.value.filter((d) => {
+    const name = d.dormName.toLowerCase()
+    return name.match(new RegExp(`\\b${type}\\b`)) // match คำเต็ม
+  })
 })
 
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
-
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
     const res = await axios.get(`${baseURL}/public/dorms`, {
@@ -77,7 +80,7 @@ onMounted(async () => {
     // ตรวจสอบว่าข้อมูลอยู่ใน data หรือ data.data
     const dataList = res.data?.data ?? res.data
     console.log('Dorm data after check:', dataList)
-
+    console.log(form.dormType)
     // ถ้ามันว่าง ให้ใส่ fallback เผื่อ dropdown ไม่ empty
     if (!Array.isArray(dataList) || dataList.length === 0) {
       console.warn('Dorm list empty, using fallback data')
