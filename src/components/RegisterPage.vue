@@ -128,7 +128,7 @@ const submitForm = async (roleType) => {
     }
 
     // ✅ เช็ค email ซ้ำที่ frontend
-    if (existingEmails.value.includes(form.email)) {
+    if (form.email === form.email) {
       isEmailDuplicate.value = true
       return
     }
