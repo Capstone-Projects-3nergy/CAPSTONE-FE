@@ -486,7 +486,7 @@ const toggleSidebar = () => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents">
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"

@@ -604,18 +604,18 @@ const toggleSidebar = () => {
         </div>
         <!-- Date Tabs -->
         <div class="flex space-x-2 mb-4">
-          <!-- <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
+          <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
           <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
             Month
           </button>
           <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
             Year
-          </button> -->
+          </button>
         </div>
 
         <!-- Parcel Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
-          <!-- <table class="min-w-full text-left border-collapse">
+          <table class="min-w-full text-left border-collapse">
             <thead class="bg-gray-100">
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-gray-700">
@@ -698,19 +698,19 @@ const toggleSidebar = () => {
                 </td>
               </tr>
             </tbody>
-          </table> -->
+          </table>
         </div>
 
         <!-- Pagination -->
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <!-- <button class="px-3 py-1 rounded hover:bg-gray-200">
+          <button class="px-3 py-1 rounded hover:bg-gray-200">
             &lt; Previous
           </button>
           <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
           <span class="px-2 py-1">...</span>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button> -->
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
         </div>
       </main>
     </div>
