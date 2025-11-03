@@ -176,7 +176,6 @@ const submitForm = async (roleType) => {
     await registerStore.registerAccount(payload)
 
     // เพิ่ม email ที่ register แล้วเข้า existingEmails (optional)
-    existingEmails.value.push(payload.email)
 
     // ล้างข้อมูลหลัง register
     form.password = ''
