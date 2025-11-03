@@ -94,9 +94,11 @@ export const useLoginManager = defineStore('loginManager', () => {
 
       // 6️⃣ Routing ตาม role
       if (router) {
-        if (data.role === 'resident') router.replace({ name: 'home' })
-        else if (data.role === 'staff') router.replace({ name: 'homestaff' })
-        else router.replace({ name: 'home' })
+        if (data.role === 'resident')
+          router.replace({ name: 'home', params: { id: data.userId } })
+        else if (data.role === 'staff')
+          router.replace({ name: 'homestaff', params: { id: data.userId } })
+        else router.replace({ name: 'home', params: { id: data.userId } })
       }
 
       return user.value
