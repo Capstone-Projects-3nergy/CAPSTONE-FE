@@ -14,7 +14,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-
+const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -92,8 +92,7 @@ const deletePreview = () => {
 }
 
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'dashboard'})
   showDashBoard.value = true
 }
 
@@ -278,8 +277,7 @@ function stopScan() {
 }
 
 const showHomePageStaffWeb = async function () {
-  router.replace({ name: 'homestaff' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'homestaff'})
   showHomePageStaff.value = true
 }
 // --- function: save ---
@@ -352,8 +350,7 @@ const ShowManageAnnouncementPage = async function () {
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'manageresident'})
   showManageResident.value = true
 }
 

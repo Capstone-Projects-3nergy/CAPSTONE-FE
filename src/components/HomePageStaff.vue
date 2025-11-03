@@ -38,7 +38,7 @@ function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner', params: { id: loginStore.user.id } })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 // const showResidentParcelPage = async function () {
@@ -46,28 +46,25 @@ const showParcelScannerPage = async function () {
 //   showResidentParcels.value = true
 // }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels', params: { id: loginStore.user.id } })
+  router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({
-    name: 'manageannouncement',
-    params: { id: loginStore.user.id }
+    name: 'manageannouncement'
   })
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident', params: { id: loginStore.user.id } })
+  router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 // const returnLoginPage = async function () {

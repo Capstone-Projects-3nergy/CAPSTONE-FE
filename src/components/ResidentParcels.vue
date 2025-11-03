@@ -6,6 +6,7 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
+const loginManager = useLoginManager()
 
 const loginStore = useLoginManager()
 const showAnnouncement = ref(false)
@@ -50,11 +51,11 @@ const myParcels = computed(() =>
 )
 
 const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home', params: { id: loginStore.user.id } })
+  router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement', params: { id: loginStore.user.id } })
+  router.replace({ name: 'announcement' })
   showAnnouncement.value = true
 }
 const returnLoginPage = async () => {
@@ -68,8 +69,7 @@ const returnLoginPage = async () => {
 }
 const showProfileResidentPage = async function () {
   router.replace({
-    name: 'profileresident',
-    params: { id: loginStore.user.id }
+    name: 'profileresident'
   })
   showProfileResident.value = true
 }

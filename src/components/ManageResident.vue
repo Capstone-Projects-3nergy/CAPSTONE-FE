@@ -8,7 +8,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-
+const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -113,7 +113,7 @@ const parcels = ref([
   }
 ])
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner', params: { id: loginStore.user.id } })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 // const showResidentParcelPage = async function () {
@@ -121,8 +121,7 @@ const showParcelScannerPage = async function () {
 //   showResidentParcels.value = true
 // }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
@@ -130,13 +129,11 @@ const ShowManageAnnouncementPage = async function () {
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 const showHomePageStaffWeb = async () => {
-  router.replace({ name: 'homestaff' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
 
@@ -150,13 +147,11 @@ const returnLoginPage = async () => {
   }
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 const isCollapsed = ref(false)

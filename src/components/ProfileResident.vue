@@ -6,7 +6,7 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-
+const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
@@ -23,7 +23,7 @@ const resident = ref({
   building: 'Building 2',
   address: '203/45 Moo 5, Bangkok, Thailand'
 })
-const registerStore = useRegisterManager()
+//const registerStore = useRegisterManager()
 const saveProfile = () => {
   console.log('Saving resident profile...', resident.value)
   alert('Resident profile updated successfully!')
@@ -48,8 +48,7 @@ const showHomePageResidentWeb = async function () {
 }
 const showResidentParcelPage = async function () {
   router.replace({
-    name: 'residentparcels',
-    params: { id: loginStore.user.id }
+    name: 'residentparcels'
   })
   showResidentParcels.value = true
 }

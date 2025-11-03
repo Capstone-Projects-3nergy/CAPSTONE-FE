@@ -10,7 +10,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-
+const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -134,8 +134,7 @@ onMounted(() => {
 })
 
 const showHomePageStaffWeb = async function () {
-  router.replace({ name: 'homestaff' , 
-  params: { id: loginStore.user.id }})
+  router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
 const returnLoginPage = async function () {
@@ -143,13 +142,11 @@ const returnLoginPage = async function () {
   returnLogin.value = true
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner', 
-  params: { id: loginStore.user.id } })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels', 
-  params: { id: loginStore.user.id } })
+  router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 // const showResidentParcelPage = async function () {
@@ -158,13 +155,13 @@ const showManageParcelPage = async function () {
 // }
 
 const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement', 
-  params: { id: loginStore.user.id } })
+  router.replace({
+    name: 'manageannouncement'
+  })
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident', 
-  params: { id: loginStore.user.id } })
+  router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 // const showDashBoardPage = async function () {
@@ -172,8 +169,7 @@ const ShowManageResidentPage = async function () {
 //   showDashBoard.value = true
 // }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff', 
-  params: { id: loginStore.user.id } })
+  router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 const isCollapsed = ref(false)

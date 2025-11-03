@@ -71,8 +71,7 @@ function nextSlide() {
 // }
 const showResidentParcelPage = async function () {
   router.replace({
-    name: 'residentparcels',
-    params: { id: loginStore.user.id }
+    name: 'residentparcels'
   })
   showResidentParcels.value = true
 }
@@ -81,7 +80,7 @@ const showResidentParcelPage = async function () {
 //   showStaffParcels.value = true
 // }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement', params: { id: loginStore.user.id } })
+  router.replace({ name: 'announcement' })
   showAnnouncement.value = true
 }
 // const showDashBoardPage = async function () {
@@ -90,8 +89,7 @@ const showAnnouncementPage = async function () {
 // }
 const showProfileResidentPage = async function () {
   router.replace({
-    name: 'profileresident',
-    params: { id: loginStore.user.id }
+    name: 'profileresident'
   })
   showProfileResident.value = true
 }

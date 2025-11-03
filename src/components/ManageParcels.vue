@@ -9,7 +9,7 @@ import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-
+const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -118,29 +118,24 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 const showHomePageStaffWeb = async () => {
-  router.replace({ name: 'homestaff',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
 
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' ,
-    params: { id: loginStore.user.id }})
+  router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 
@@ -154,13 +149,11 @@ const returnLoginPage = async () => {
   }
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff',
-    params: { id: loginStore.user.id } })
+  router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 </script>
