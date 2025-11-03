@@ -340,13 +340,12 @@ function closeRedPopup() {
 //   showResidentParcels.value = true
 // }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels', params: { id: loginStore.user.id } })
+  router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({
-    name: 'manageannouncement',
-    params: { id: loginStore.user.id }
+    name: 'manageannouncement'
   })
   showManageAnnouncement.value = true
 }
@@ -365,7 +364,7 @@ const returnLoginPage = async () => {
   }
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff', params: { id: loginStore.user.id } })
+  router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 </script>
