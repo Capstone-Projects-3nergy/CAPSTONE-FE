@@ -21,6 +21,7 @@ const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
 const loading = computed(() => loginManager.isLoading)
 const incorrect = ref(false)
+const success = ref(false)
 const error = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
