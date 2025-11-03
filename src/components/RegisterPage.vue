@@ -104,9 +104,6 @@ onMounted(async () => {
   }
 })
 
-// สมมติว่ามี list email เดิมใน frontend
-const existingEmails = ref(['test@example.com', 'user@gmail.com']) // ตัวอย่าง
-
 const submitForm = async (roleType) => {
   try {
     // เช็ค password match
@@ -128,10 +125,10 @@ const submitForm = async (roleType) => {
     }
 
     // ✅ เช็ค email ซ้ำที่ frontend
-    if (form.email === form.email) {
-      isEmailDuplicate.value = true
-      return
-    }
+    // if (form.email === form.email) {
+    //   isEmailDuplicate.value = true
+    //   return
+    // }
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
