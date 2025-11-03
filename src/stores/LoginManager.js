@@ -92,11 +92,11 @@ export const useLoginManager = defineStore('loginManager', () => {
       )
       successMessage.value = `Login successful as ${data.role}!`
 
-      // 6️⃣ Routing ตาม role
+      // 6️⃣ Routing ตาม role //bug
       if (router) {
-        if (data.role === 'resident')
+        if (data.role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
-        else if (data.role === 'staff')
+        else if (data.role === 'STAFF')
           router.replace({ name: 'homestaff', params: { id: data.userId } })
         else router.replace({ name: 'home', params: { id: data.userId } })
       }
