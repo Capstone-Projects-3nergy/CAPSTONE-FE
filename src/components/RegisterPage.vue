@@ -182,7 +182,7 @@ const submitForm = async (roleType) => {
     form.confirmPassword = ''
     success.value = true
 
-    router.push({ name: 'login' })
+    // router.push({ name: 'login' })
   } catch (err) {
     console.error('❌ Register error:', err)
     error.value = true
