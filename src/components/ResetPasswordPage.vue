@@ -442,16 +442,22 @@ const checkInputLength = (field) => {
           <button
             type="submit"
             @click="sendResetLink"
-            class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
-                trimmedEmail.length === 0,
+                trimmedEmail.length === 0 || trimmedPassword.length === 0,
 
-              'bg-black hover:bg-gray-600 text-white': trimmedEmail.length > 0
+              'bg-black hover:bg-gray-600 text-white':
+                trimmedEmail.length > 0 && trimmedPassword.length > 0
             }"
-            :disabled="trimmedEmail.length === 0 || isEmailOverLimit"
+            :disabled="
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              isEmailOverLimit ||
+              isPasswordOverLimit
+            "
           >
-            Send Email
+            Reset Password
           </button>
         </form>
 
