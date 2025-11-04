@@ -18,13 +18,19 @@ const email = ref('')
 // --- ปิด popup ด้วยมือ ---
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
-  if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
   if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
+  if (operate === 'fullname') isFullNameWeak.value = false
+  if (operate === 'dorm') isNoDorm.value = false
+  if (operate === 'notmatch') isNotMatch.value = false
+  if (operate === 'notroomrequired') isRoomRequired.value = false
+  if (operate === 'notpositionrequired') isPositionRequired.value = false
+  if (operate === 'emailform') incorrectemailform.value = false
+  if (operate === 'notnumber') roomidnotnumber.value = false
 }
-
 // --- ส่งลิงก์รีเซ็ตรหัสผ่าน ---
 const sendResetLink = async () => {
   if (!trimmedEmail.value || !/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
@@ -254,19 +260,18 @@ const checkInputLength = (field) => {
 
         <h2 class="text-2xl font-bold mb-1">Reset your password</h2>
         <p class="text-[#8C8F91] text-sm mb-6">
-          Enter your email below and we’ll send you a link to reset your
-          password
+          Enter your email below to reset your password
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
-        <AlertPopUp
+        <!-- <AlertPopUp
           v-if="incorrect"
           :titles="'Username or Password is incorrect.'"
           message="Error!!"
           styleType="red"
           operate="incorrect"
           @closePopUp="closePopUp"
-        />
+        /> -->
         <AlertPopUp
           v-if="error"
           :titles="'There is a problem. Please try again later.'"
@@ -276,30 +281,38 @@ const checkInputLength = (field) => {
           @closePopUp="closePopUp"
         />
         <!-- Duplicate Email -->
-        <AlertPopUp
+        <!-- <AlertPopUp
           v-if="isEmailDuplicate"
           :titles="`This email is already registered`"
           message="Error!!"
           styleType="red"
           operate="email"
           @closePopUp="closePopUp"
-        />
+        /> -->
 
         <!-- Weak Password -->
-        <AlertPopUp
+        <!-- <AlertPopUp
           v-if="isPasswordWeak"
           titles="Password must be at least 6 characters"
           message="Error!!"
           styleType="red"
           operate="password"
           @closePopUp="closePopUp"
-        />
+        /> -->
         <AlertPopUp
           v-if="success"
           :titles="'Register New Account is Successfull.'"
           message="Success!!"
           styleType="green"
           operate="success"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="incorrectemailform"
+          :titles="'Email Form Is Incorrect'"
+          message="Error!!"
+          styleType="red"
+          operate="emailform"
           @closePopUp="closePopUp"
         />
 
@@ -365,7 +378,7 @@ const checkInputLength = (field) => {
             }"
             :disabled="trimmedEmail.length === 0 || isEmailOverLimit"
           >
-            Send Reset Link
+            Send Email
           </button>
         </form>
 
