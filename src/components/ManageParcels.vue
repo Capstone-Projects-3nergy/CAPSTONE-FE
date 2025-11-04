@@ -233,7 +233,6 @@ const toggleSidebar = () => {
               </span>
             </div>
           </button>
-          <hr class="border-t border-[#3269A8] my-4" />
         </div>
       </div>
       <div
