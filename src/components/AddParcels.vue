@@ -538,7 +538,7 @@ const toggleSidebar = () => {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -553,7 +553,7 @@ const toggleSidebar = () => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem

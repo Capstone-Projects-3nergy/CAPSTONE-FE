@@ -14,6 +14,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
+import AddParcels from '@/components/AddParcels.vue'
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -28,6 +29,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
+const showAddParcels = ref(false)
 // ฟอร์มปัจจุบัน
 const form = reactive({
   field1: '', // ชื่อผู้รับ
@@ -44,7 +46,10 @@ let html5QrCode = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const isCameraReady = ref(false)
-
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
+}
 // -------- OCR function (คงเดิม) ----------
 async function extractParcelInfo(imageDataUrl) {
   try {
@@ -647,7 +652,11 @@ const showProfileStaffPage = async function () {
 
             <span>Dashboard</span>
           </a> -->
-          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+          <SidebarItem
+            title=" Manage Parcel"
+            @click="showManageParcelPage"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -750,7 +759,7 @@ const showProfileStaffPage = async function () {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
+          <!-- <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -765,7 +774,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem
@@ -816,7 +825,7 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-[#185dc0]  mb-4">Parcel Scanner</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
@@ -1014,6 +1023,11 @@ const showProfileStaffPage = async function () {
                 >
                   Cancel
                 </button> -->
+                <ButtonWeb
+                  label="Add Parcels Page"
+                  color="blue"
+                  @click="showAddParcelPage"
+                />
                 <ButtonWeb
                   label="Save"
                   color="green"
