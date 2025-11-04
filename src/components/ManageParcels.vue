@@ -9,18 +9,22 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
+import AddParcels from './AddParcels.vue'
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
+const showAddParcels = ref(false)
 const returnLogin = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const tabs = ['Day', 'Month', 'Year']
+const activeTab = ref('Day')
 const parcels = ref([
   {
     id: 1,
@@ -121,9 +125,9 @@ const showParcelScannerPage = async function () {
 //   router.replace({ name: 'residentparcels' })
 //   showResidentParcels.value = true
 // }
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
@@ -537,7 +541,7 @@ const toggleSidebar = () => {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -552,7 +556,7 @@ const toggleSidebar = () => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem
@@ -602,122 +606,189 @@ const toggleSidebar = () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+        <!-- 🔲 Filter Bar Wrapper -->
+        <div
+          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <!-- Left: Date Tabs -->
+            <div class="flex items-center space-x-4">
+              <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
+              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'px-4 py-1 font-medium transition',
+                    activeTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ tab }}
+                </button>
+              </div>
+            </div>
 
-        <!-- Form -->
-        <form class="bg-white p-6 rounded-lg shadow space-y-6">
-          <!-- Row 1 -->
-          <!-- Header -->
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-6">Add Parcel</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Recipient Name</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Room Number</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+            <!-- Right: Search + Sort + Add -->
+            <div class="flex items-center space-x-3">
+              <!-- Search -->
+              <div class="relative">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search ..."
+                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              <!-- Sort -->
+              <select
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option>Sort by:</option>
+                <option>Newest</option>
+                <option>Oldest</option>
+              </select>
+
+              <!-- Add Parcel -->
+              <button
+                @click="showAddParcelPage"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span>Add parcel</span>
+              </button>
             </div>
           </div>
+        </div>
 
-          <!-- Row 2 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Contact</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Status</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
+        <!-- Parcel Table -->
+        <div class="overflow-x-auto bg-white rounded-lg shadow">
+          <table class="min-w-full text-left border-collapse">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Tracking
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Name
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Room Number
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Contact
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Status
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Date in
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Operation
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.tracking }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.recipient }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    :class="{
+                      'bg-yellow-400': p.status === 'Pending',
+                      'bg-green-400': p.status === 'Picked Up',
+                      'bg-red-400': p.status === 'Unclaimed'
+                    }"
+                  >
+                    {{ p.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
+                  <button class="text-blue-600 hover:text-blue-800">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
+                      />
+                    </svg>
+                  </button>
+                  <button class="text-red-600 hover:text-red-800">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Pickup at</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Update at</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <hr class="border-t border-[#3269A8] my-4" />
-
-          <!-- Row 4 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Sender Name</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Company ID</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Recieve at</label>
-              <input
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex justify-end space-x-2 mt-6">
-            <button
-              type="submit"
-              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        <!-- Pagination -->
+        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
+          <button class="px-3 py-1 rounded hover:bg-gray-200">
+            &lt; Previous
+          </button>
+          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
+          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
+          <span class="px-2 py-1">...</span>
+          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
+        </div>
       </main>
     </div>
   </div>

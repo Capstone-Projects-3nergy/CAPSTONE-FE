@@ -667,7 +667,7 @@ const toggleSidebar = () => {
               </select>
 
               <!-- Add Parcel -->
-              <button
+              <!-- <button
                 class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
               >
                 <svg
@@ -685,7 +685,7 @@ const toggleSidebar = () => {
                   />
                 </svg>
                 <span>Add parcel</span>
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
