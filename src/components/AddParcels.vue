@@ -9,6 +9,7 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
+import ButtonWeb from './ButtonWeb.vue'
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -704,18 +705,30 @@ const toggleSidebar = () => {
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <button
+            <ButtonWeb
+              label="Scarn Parcel"
+              color="blue"
+              @click="showParcelScannerPage"
+            />
+            <ButtonWeb label="Save" color="green" @click="" />
+            <ButtonWeb
+              label="Cancel"
+              color="red"
+              @click="showManageParcelPage"
+            />
+            <!-- <button
               type="submit"
-              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600"
+              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 cursor-pointer"
             >
               Save
-            </button>
-            <button
+            </button> -->
+            <!-- <button
+              @click="showManageParcelPage"
               type="button"
-              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600"
+              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 cursor-pointer"
             >
               Cancel
-            </button>
+            </button> -->
           </div>
         </form>
       </main>

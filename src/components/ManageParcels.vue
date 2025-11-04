@@ -10,6 +10,7 @@ import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import AddParcels from './AddParcels.vue'
+import ButtonWeb from './ButtonWeb.vue'
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -620,7 +621,7 @@ const toggleSidebar = () => {
                   :key="tab"
                   @click="activeTab = tab"
                   :class="[
-                    'px-4 py-1 font-medium transition',
+                    'px-4 py-1 font-medium transition  cursor-pointer',
                     activeTab === tab
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-500 hover:bg-gray-200'
@@ -658,7 +659,7 @@ const toggleSidebar = () => {
 
               <!-- Sort -->
               <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
               >
                 <option>Sort by:</option>
                 <option>Newest</option>
@@ -668,7 +669,7 @@ const toggleSidebar = () => {
               <!-- Add Parcel -->
               <button
                 @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
