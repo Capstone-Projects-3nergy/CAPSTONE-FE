@@ -334,7 +334,7 @@ const toggleSidebar = () => {
         <!-- Announcement Section -->
         <section>
           <h2
-            class="text-xl font-bold flex items-center gap-2 mb-4 text-gray-900"
+            class="text-xl font-bold flex items-center gap-2 mb-4 text-[#185dc0] "
           >
             <svg
               width="49"

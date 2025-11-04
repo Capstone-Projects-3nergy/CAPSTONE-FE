@@ -526,7 +526,7 @@ const showDashBoardPage = async function () {
               clip-rule="evenodd"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-gray-800">Profile Staff</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] ">Profile Staff</h2>
         </div>
 
         <!-- Profile Card -->

@@ -816,7 +816,7 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Parcel Scanner</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]  mb-4">Parcel Scanner</h2>
         </div>
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"

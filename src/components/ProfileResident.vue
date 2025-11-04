@@ -370,7 +370,7 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800">Profile Resident</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] ">Profile Resident</h2>
         </div>
 
         <!-- Profile Card -->

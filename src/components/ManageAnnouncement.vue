@@ -599,7 +599,7 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">
+          <h2 class="text-2xl font-bold text-[#185dc0]  mb-4">
             Manage Announcements
           </h2>
         </div>

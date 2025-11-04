@@ -600,7 +600,7 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Manage Resident</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]  mb-4">Manage Resident</h2>
         </div>
         <!-- Date Tabs -->
         <div class="flex space-x-2 mb-4">

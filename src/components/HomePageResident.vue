@@ -386,7 +386,7 @@ const toggleSidebar = () => {
 
         <!-- HOME -->
         <section class="p-4">
-          <h1 class="text-xl font-bold flex items-center mb-4 text-black">
+          <h1 class="text-xl font-bold flex items-center mb-4 text-[#185DC0]">
             <svg
               width="44"
               height="44"
