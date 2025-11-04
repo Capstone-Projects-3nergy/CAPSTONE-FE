@@ -145,23 +145,27 @@ const submitForm = async (roleType) => {
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
+
     // -----------------------
-    // 🔹 เช็คอีเมลซ้ำ
+    // 🔹 เช็คอีเมลซ้ำจาก backend
     // -----------------------
     try {
       const baseURL = import.meta.env.VITE_BASE_URL
-      const checkEmail = await axios.get(`${baseURL}/public/auth/register`)
+      const checkEmail = await axios.get(`${baseURL}/public/auth/register`, {
+        params: { email: form.email }
+      })
 
-      // ✅ ถ้า backend ส่งข้อมูลกลับมาว่า status.name = "CONFLICT"
-      if (checkEmail.data?.status?.name === 'CONFLICT') {
+      // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
+      if (
+        checkEmail.data?.status?.name === 'CONFLICT' ||
+        checkEmail.data === 'CONFLICT'
+      ) {
         isEmailDuplicate.value = true
         setTimeout(() => {
           isEmailDuplicate.value = false
         }, 3000)
         return
       }
-
-      // ถ้าไม่ใช่ CONFLICT → ไปต่อได้
     } catch (checkErr) {
       console.error('Error checking email:', checkErr)
     }
