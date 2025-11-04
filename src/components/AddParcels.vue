@@ -587,7 +587,8 @@ const toggleSidebar = () => {
 
       <!-- Main Content -->
       <main class="flex-1 p-6">
-        <div class="flex space-x-1">
+        <div class="flex items-center space-x-2 mb-6">
+          <!-- 📦 ไอคอน -->
           <svg
             width="25"
             height="25"
@@ -601,14 +602,17 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
+          <!-- 🏷️ Breadcrumb Text -->
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
+
+          <!-- 📨 Next title -->
+          <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
         </div>
 
         <!-- Form -->
         <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <!-- Row 1 -->
           <!-- Header -->
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-6">Add Parcel</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
