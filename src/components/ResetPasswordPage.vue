@@ -11,6 +11,7 @@ const resetStore = useResetPasswordManager()
 const isEmailInvalid = ref(false)
 const incorrect = ref(false)
 const error = ref(false)
+const isPasswordNotMatch = ref(false)
 const isEmailDuplicate = ref(false)
 const isPasswordWeak = ref(false)
 const success = ref(false)
@@ -20,19 +21,19 @@ const email = ref('')
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
+  // if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
-  if (operate === 'dorm') isNoDorm.value = false
+  // if (operate === 'fullname') isFullNameWeak.value = false
+  // if (operate === 'dorm') isNoDorm.value = false
   if (operate === 'notmatch') isNotMatch.value = false
-  if (operate === 'notroomrequired') isRoomRequired.value = false
-  if (operate === 'notpositionrequired') isPositionRequired.value = false
+  // if (operate === 'notroomrequired') isRoomRequired.value = false
+  // if (operate === 'notpositionrequired') isPositionRequired.value = false
   if (operate === 'emailform') incorrectemailform.value = false
-  if (operate === 'notnumber') roomidnotnumber.value = false
+  // if (operate === 'notnumber') roomidnotnumber.value = false
 }
 // --- ส่งลิงก์รีเซ็ตรหัสผ่าน ---
-const sendResetLink = async () => {
+const sendResetEmail = async () => {
   if (!trimmedEmail.value || !/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
     isEmailInvalid.value = true
     return
@@ -264,14 +265,6 @@ const checkInputLength = (field) => {
         </p>
         <!-- ✅ Popups อยู่ด้านบน -->
 
-        <!-- <AlertPopUp
-          v-if="incorrect"
-          :titles="'Username or Password is incorrect.'"
-          message="Error!!"
-          styleType="red"
-          operate="incorrect"
-          @closePopUp="closePopUp"
-        /> -->
         <AlertPopUp
           v-if="error"
           :titles="'There is a problem. Please try again later.'"
@@ -280,25 +273,14 @@ const checkInputLength = (field) => {
           operate="problem"
           @closePopUp="closePopUp"
         />
-        <!-- Duplicate Email -->
-        <!-- <AlertPopUp
-          v-if="isEmailDuplicate"
-          :titles="`This email is already registered`"
+        <AlertPopUp
+          v-if="isPasswordNotMatch"
+          :titles="'Password is not Match'"
           message="Error!!"
           styleType="red"
-          operate="email"
+          operate="errorpassword"
           @closePopUp="closePopUp"
-        /> -->
-
-        <!-- Weak Password -->
-        <!-- <AlertPopUp
-          v-if="isPasswordWeak"
-          titles="Password must be at least 6 characters"
-          message="Error!!"
-          styleType="red"
-          operate="password"
-          @closePopUp="closePopUp"
-        /> -->
+        />
         <AlertPopUp
           v-if="success"
           :titles="'Register New Account is Successfull.'"
@@ -513,7 +495,7 @@ const checkInputLength = (field) => {
           <!-- Submit Button with hover animation -->
           <button
             type="submit"
-            @click="sendResetLink"
+            @click="sendResetEmail"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
