@@ -145,7 +145,7 @@ const showResetPasswordPageWeb = async function () {
   <div class="min-h-screen flex flex-col md:flex-row">
     <!-- Left Section -->
     <div
-      class="flex-1 bg-gradient-to-b from-blue-700 to-blue-400 text-white flex flex-col justify-center items-center p-8"
+      class="flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex flex-col justify-center items-center p-8"
     >
       <div class="max-w-md">
         <h1 class="text-3xl font-bold mb-4">Welcome back!</h1>

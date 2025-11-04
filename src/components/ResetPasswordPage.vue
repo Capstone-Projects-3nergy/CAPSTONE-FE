@@ -173,7 +173,7 @@ const checkInputLength = (field) => {
     >
       <!-- Left Side -->
       <div
-        class="w-1/2 bg-gradient-to-b from-blue-700 to-blue-400 text-white flex flex-col p-8 pt-50"
+        class="w-1/2 bg-gradient-to-b from-[#0047B1] to-[#7BB8FF] text-white flex flex-col p-8 pt-50"
       >
         <h2 class="text-2xl font-bold mb-3">Welcome to Tractify!</h2>
         <p class="text-sm text-blue-100 mb-8">
