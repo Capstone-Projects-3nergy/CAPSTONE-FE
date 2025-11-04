@@ -8,6 +8,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
+import UserInfo from '@/components/UserInfo.vue'
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -586,132 +587,122 @@ const toggleSidebar = () => {
 
       <!-- Main Content -->
       <main class="flex-1 p-6">
-        <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
+        <!-- Header -->
+        <h2 class="text-2xl font-bold text-[#185dc0] mb-6">Add Parcel</h2>
 
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
-        </div>
-        <!-- Date Tabs -->
-        <div class="flex space-x-2 mb-4">
-          <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Month
-          </button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Year
-          </button>
-        </div>
+        <!-- Form -->
+        <form class="bg-white p-6 rounded-lg shadow space-y-6">
+          <!-- Row 1 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Tracking number</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Recipient Name</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Room Number</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
 
-        <!-- Parcel Table -->
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
-          <table class="min-w-full text-left border-collapse">
-            <thead class="bg-gray-100">
-              <tr>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Tracking
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Name
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Room Number
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Contact
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Date in
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Operation
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.tracking }}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.recipient }}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
-                <td class="px-4 py-3">
-                  <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                    :class="{
-                      'bg-yellow-400': p.status === 'Pending',
-                      'bg-green-400': p.status === 'Picked Up',
-                      'bg-red-400': p.status === 'Unclaimed'
-                    }"
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <button class="text-blue-600 hover:text-blue-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
-                      />
-                    </svg>
-                  </button>
-                  <button class="text-red-600 hover:text-red-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <!-- Row 2 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Parcel Type</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Contact</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Status</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button class="px-3 py-1 rounded hover:bg-gray-200">
-            &lt; Previous
-          </button>
-          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
-          <span class="px-2 py-1">...</span>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
-        </div>
+          <!-- Row 3 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Pickup at</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Update at</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
+
+          <hr class="border-t border-blue-300 my-4" />
+
+          <!-- Row 4 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Sender Name</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Company ID</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Recieve at</label>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex justify-end space-x-2 mt-6">
+            <button
+              type="submit"
+              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </main>
     </div>
   </div>
