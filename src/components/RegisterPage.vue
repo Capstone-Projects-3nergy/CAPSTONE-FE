@@ -886,7 +886,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <select v-model.number="form.dormId" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
                   <option
-                    v-for="dorm in filteredDormList"
+                    v-for="dorm in dormList"
                     :key="dorm.dormId"
                     :value="dorm.dormId"
                   >
