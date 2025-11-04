@@ -21,6 +21,8 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const tabs = ['Day', 'Month', 'Year']
+const activeTab = ref('Day')
 const parcels = ref([
   {
     id: 1,
@@ -605,15 +607,87 @@ const toggleSidebar = () => {
             Manage Resident
           </h2>
         </div>
-        <!-- Date Tabs -->
-        <div class="flex space-x-2 mb-4">
-          <button class="px-4 py-1 bg-blue-700 text-white rounded">Day</button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Month
-          </button>
-          <button class="px-4 py-1 bg-gray-200 text-gray-700 rounded">
-            Year
-          </button>
+        <!-- 🔲 Filter Bar Wrapper -->
+        <div
+          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <!-- Left: Date Tabs -->
+            <div class="flex items-center space-x-4">
+              <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
+              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'px-4 py-1 font-medium transition',
+                    activeTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ tab }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Search + Sort + Add -->
+            <div class="flex items-center space-x-3">
+              <!-- Search -->
+              <div class="relative">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search ..."
+                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              <!-- Sort -->
+              <select
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option>Sort by:</option>
+                <option>Newest</option>
+                <option>Oldest</option>
+              </select>
+
+              <!-- Add Parcel -->
+              <button
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span>Add parcel</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Parcel Table -->
