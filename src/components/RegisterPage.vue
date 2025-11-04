@@ -169,6 +169,7 @@ const submitForm = async (roleType) => {
     } catch (checkErr) {
       console.error('Error checking email:', checkErr)
     }
+
     const payload =
       roleUpper === 'RESIDENT'
         ? {
