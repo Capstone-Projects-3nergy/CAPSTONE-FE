@@ -233,9 +233,9 @@ const toggleSidebar = () => {
               </span>
             </div>
           </button>
+          <hr class="border-t border-[#3269A8] my-4" />
         </div>
       </div>
-      <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -325,7 +325,7 @@ const toggleSidebar = () => {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -603,6 +603,7 @@ const toggleSidebar = () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+
         <!-- Form -->
         <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <!-- Row 1 -->
@@ -675,7 +676,7 @@ const toggleSidebar = () => {
             </div>
           </div>
 
-          <hr class="border-t border-blue-300 my-4" />
+          <hr class="border-t border-[#3269A8] my-4" />
 
           <!-- Row 4 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

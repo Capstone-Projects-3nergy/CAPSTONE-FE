@@ -326,7 +326,7 @@ const showProfileStaffPage = async function () {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
