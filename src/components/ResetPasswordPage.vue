@@ -517,16 +517,22 @@ const checkInputLength = (field) => {
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
-                trimmedEmail.length === 0 || trimmedPassword.length === 0,
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedConfirmPassword.length === 0,
 
               'bg-black hover:bg-gray-600 text-white':
-                trimmedEmail.length > 0 && trimmedPassword.length > 0
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0
             }"
             :disabled="
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
               isEmailOverLimit ||
-              isPasswordOverLimit
+              isPasswordOverLimit ||
+              isConfirmPasswordOverLimit
             "
           >
             Reset Password
