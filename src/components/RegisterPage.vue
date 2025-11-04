@@ -54,17 +54,17 @@ const form = reactive({
 
 const dormList = ref([]) // [{ dormId, dormName }]
 // 🧠 ฟังก์ชันกรองตามประเภท dormType ที่เลือก
-const filteredDormList = computed(() => {
-  if (!form.dormType) return dormList.value
-  const type = form.dormType.toLowerCase().includes('female')
-    ? 'female'
-    : 'male'
+// const filteredDormList = computed(() => {
+//   if (!form.dormType) return dormList.value
+//   const type = form.dormType.toLowerCase().includes('female')
+//     ? 'female'
+//     : 'male'
 
-  return dormList.value.filter((d) => {
-    const name = d.dormName.toLowerCase()
-    return name.match(new RegExp(`\\b${type}\\b`)) // match คำเต็ม
-  })
-})
+//   return dormList.value.filter((d) => {
+//     const name = d.dormName.toLowerCase()
+//     return name.match(new RegExp(`\\b${type}\\b`)) // match คำเต็ม
+//   })
+// })
 
 onMounted(async () => {
   try {
@@ -145,7 +145,26 @@ const submitForm = async (roleType) => {
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
+    // -----------------------
+    // 🔹 เช็คอีเมลซ้ำ
+    // -----------------------
+    try {
+      const baseURL = import.meta.env.VITE_BASE_URL
+      const checkEmail = await axios.get(`${baseURL}/public/auth/register`)
 
+      // ✅ ถ้า backend ส่งข้อมูลกลับมาว่า status.name = "CONFLICT"
+      if (checkEmail.data?.status?.name === 'CONFLICT') {
+        isEmailDuplicate.value = true
+        setTimeout(() => {
+          isEmailDuplicate.value = false
+        }, 3000)
+        return
+      }
+
+      // ถ้าไม่ใช่ CONFLICT → ไปต่อได้
+    } catch (checkErr) {
+      console.error('Error checking email:', checkErr)
+    }
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -198,8 +217,20 @@ const submitForm = async (roleType) => {
     await registerStore.registerAccount(payload)
 
     // ล้างข้อมูลหลัง register
-    form.password = ''
-    form.confirmPassword = ''
+    // 🔹 เคลียร์ฟอร์มหลัง register
+    // 🔹 เคลียร์ฟอร์มหลัง register
+    Object.keys(form).forEach((key) => {
+      // ถ้าเป็น dormId → รีเซ็ตเป็น null
+      if (key === 'dormId') {
+        form[key] = null
+      } else if (key === 'dormType') {
+        form[key] === 'female dormitory'
+      } else {
+        form[key] = ''
+      }
+    })
+    // form.password = ''
+    // form.confirmPassword = ''
     success.value = true
     setTimeout(() => {
       success.value = false
