@@ -171,27 +171,51 @@ export const useLoginManager = defineStore('loginManager', () => {
       throw err
     }
   }
+  // -----------------------
+  // 🔹 Navigation Guard (Auto Protect Routes)
+  // -----------------------
 
-  // -----------------------
-  // 🔹 Navigation Guard
-  // -----------------------
+  let guardInstalled = false
+
   const useAuthGuard = (router) => {
+    if (guardInstalled) return // ✅ ป้องกันซ้ำ
+    guardInstalled = true
+    console.log('✅ Navigation Guard Installed')
+
     router.beforeEach(async (to, from, next) => {
-      const token =
-        user.value?.accessToken || localStorage.getItem('accessToken')
+      const publicPages = ['login', 'register', 'resetpassword']
+      const accessToken = localStorage.getItem('accessToken')
 
-      if (!to.meta?.requiresAuth) return next()
-      if (!token) return next({ name: 'login' })
+      // ✅ ผ่านถ้าเป็น public page
+      if (publicPages.includes(to.name)) return next()
 
-      const decoded = decodeJWT(token)
-      const currentTime = Math.floor(Date.now() / 1000)
-
-      if (decoded?.exp && decoded.exp < currentTime) {
-        const newToken = await refreshToken()
-        if (newToken) return next()
-        else return next({ name: 'login' })
+      // ❌ ไม่มี token
+      if (!accessToken) {
+        console.warn('🚫 Unauthorized: redirect to login')
+        return next({ name: 'login' })
       }
 
+      // ✅ ตรวจสอบอายุ token
+      const decoded = decodeJWT(accessToken)
+      const currentTime = Math.floor(Date.now() / 1000)
+      if (decoded?.exp && decoded.exp < currentTime) {
+        console.warn('⚠️ Token expired, refreshing...')
+        const newToken = await refreshToken()
+        if (!newToken) return next({ name: 'login' })
+      }
+
+      // ✅ ตรวจ role
+      const userRole = localStorage.getItem('userRole')
+      if (to.name === 'home' && userRole !== 'RESIDENT') {
+        console.warn('STAFF cannot access RESIDENT route')
+        return next({ name: 'login' })
+      }
+      if (to.name === 'homestaff' && userRole !== 'STAFF') {
+        console.warn('RESIDENT cannot access STAFF route')
+        return next({ name: 'login' })
+      }
+
+      // ✅ ผ่านทั้งหมด
       next()
     })
   }

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
@@ -32,51 +32,38 @@ const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
 }
+onBeforeMount(() => {
+  const router = useRouter()
+  const loginManager = useLoginManager()
+  loginManager.useAuthGuard(router)
+})
 
 const loginHomePageWeb = async () => {
   try {
-    // -------------------------
-    // เริ่มโหลด Login
-    // -------------------------
     const userData = await loginManager.loginAccount(
-      trimmedEmail.value,
-      trimmedPassword.value,
-      router // router สำหรับ redirect หลัง login
+      email.value.trim(),
+      password.value.trim(),
+      router
     )
 
-    // -------------------------
-    // ❌ ถ้า login ไม่สำเร็จ
-    // -------------------------
     if (!userData) {
       incorrect.value = true
-      console.warn('⚠️ Login failed: No user data returned')
+      console.warn('⚠️ Login failed: invalid credentials')
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
 
-    // -------------------------
-    // ✅ Login สำเร็จ
-    // -------------------------
-    console.log('✅ Login success:', loginManager.user)
-
-    // 🔹 เรียก useAuthGuard เพื่อป้องกันการเข้าหน้าอื่นถ้า token หมดอายุ
-    loginManager.useAuthGuard(router)
-
-    // 🔹 ตรวจสอบว่า token ปัจจุบันยังไม่หมดอายุ
+    // ✅ ตรวจ token ว่ายังไม่หมดอายุ
     const token =
       loginManager.user?.accessToken || localStorage.getItem('accessToken')
     if (token) {
       const decoded = loginManager.decodeJWT(token)
       const currentTime = Math.floor(Date.now() / 1000)
 
-      // ถ้า token หมดอายุ -> refreshToken
       if (decoded?.exp && decoded.exp < currentTime) {
-        console.warn('⚠️ Token expired. Refreshing...')
+        console.warn('⚠️ Token expired, refreshing...')
         const newToken = await loginManager.refreshToken()
-
-        if (newToken) {
-          console.log('🔁 Token refreshed successfully')
-        } else {
+        if (!newToken) {
           console.error('🚫 Token refresh failed, logging out...')
           await loginManager.logoutAccount(router)
           return
@@ -84,29 +71,22 @@ const loginHomePageWeb = async () => {
       }
     }
 
-    // 🔹 แสดง popup สำเร็จ
+    // ✅ แสดง popup สำเร็จ
     success.value = true
     setTimeout(() => (success.value = false), 2000)
   } catch (err) {
-    // -------------------------
-    // ❌ จัดการ error ต่าง ๆ
-    // -------------------------
     console.error('❌ Login error:', err)
-
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
       loginManager.errorMessage?.includes('Invalid') ||
-      loginManager.errorMessage?.includes('not found') ||
       err.message?.toLowerCase()?.includes('auth')
 
     if (isAuthError) {
       incorrect.value = true
-      console.warn('⚠️ Incorrect credentials')
       setTimeout(() => (incorrect.value = false), 2000)
     } else {
       error.value = true
-      console.error('🚨 Unexpected login error')
       setTimeout(() => (error.value = false), 2000)
     }
   }
@@ -400,11 +380,11 @@ const showResetPasswordPageWeb = async function () {
             </div>
           </div>
           <div class="flex justify-end">
-            <!-- <a
+            <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
               >Reset password?</a
-            > -->
+            >
           </div>
           <ButtonWeb
             label="Sign In"
