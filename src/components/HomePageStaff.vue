@@ -236,7 +236,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >

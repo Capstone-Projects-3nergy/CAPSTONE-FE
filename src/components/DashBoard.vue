@@ -299,7 +299,7 @@ const toggleSidebar = () => {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -619,7 +619,7 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-[#185dc0]  mb-4">Dash Board</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Dash Board</h2>
         </div>
         <!-- Tabs -->
         <div class="mb-4 flex space-x-2">

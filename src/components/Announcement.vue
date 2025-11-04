@@ -167,7 +167,7 @@ const toggleSidebar = () => {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -334,7 +334,7 @@ const toggleSidebar = () => {
         <!-- Announcement Section -->
         <section>
           <h2
-            class="text-xl font-bold flex items-center gap-2 mb-4 text-[#185dc0] "
+            class="text-xl font-bold flex items-center gap-2 mb-4 text-[#185dc0]"
           >
             <svg
               width="49"
