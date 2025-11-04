@@ -33,17 +33,20 @@ const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
 }
 
-// 🧩 ฟังก์ชันเข้าสู่ระบบ (ใช้ LoginManager ตัวใหม่)
 const loginHomePageWeb = async () => {
   try {
-    // เริ่มโหลด
+    // -------------------------
+    // เริ่มโหลด Login
+    // -------------------------
     const userData = await loginManager.loginAccount(
       trimmedEmail.value,
       trimmedPassword.value,
       router // router สำหรับ redirect หลัง login
     )
 
+    // -------------------------
     // ❌ ถ้า login ไม่สำเร็จ
+    // -------------------------
     if (!userData) {
       incorrect.value = true
       console.warn('⚠️ Login failed: No user data returned')
@@ -51,16 +54,45 @@ const loginHomePageWeb = async () => {
       return
     }
 
-    // ✅ ถ้า login สำเร็จ
+    // -------------------------
+    // ✅ Login สำเร็จ
+    // -------------------------
     console.log('✅ Login success:', loginManager.user)
 
-    // แสดง popup สำเร็จ
+    // 🔹 เรียก useAuthGuard เพื่อป้องกันการเข้าหน้าอื่นถ้า token หมดอายุ
+    loginManager.useAuthGuard(router)
+
+    // 🔹 ตรวจสอบว่า token ปัจจุบันยังไม่หมดอายุ
+    const token =
+      loginManager.user?.accessToken || localStorage.getItem('accessToken')
+    if (token) {
+      const decoded = loginManager.decodeJWT(token)
+      const currentTime = Math.floor(Date.now() / 1000)
+
+      // ถ้า token หมดอายุ -> refreshToken
+      if (decoded?.exp && decoded.exp < currentTime) {
+        console.warn('⚠️ Token expired. Refreshing...')
+        const newToken = await loginManager.refreshToken()
+
+        if (newToken) {
+          console.log('🔁 Token refreshed successfully')
+        } else {
+          console.error('🚫 Token refresh failed, logging out...')
+          await loginManager.logoutAccount(router)
+          return
+        }
+      }
+    }
+
+    // 🔹 แสดง popup สำเร็จ
     success.value = true
     setTimeout(() => (success.value = false), 2000)
   } catch (err) {
+    // -------------------------
+    // ❌ จัดการ error ต่าง ๆ
+    // -------------------------
     console.error('❌ Login error:', err)
 
-    // ✅ ตรวจ error ว่าเป็นการเข้าสู่ระบบผิดหรือไม่
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
@@ -79,7 +111,6 @@ const loginHomePageWeb = async () => {
     }
   }
 }
-
 // const signIn = () => {
 //   if (email.value && password.value) {
 //     router.replace({ name: 'home' })
