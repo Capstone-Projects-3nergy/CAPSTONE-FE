@@ -10,7 +10,9 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useLoginManager } from '@/stores/LoginManager'
+const registerStore = useRegisterManager()
 const loginStore = useLoginManager()
 const loginManager = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
@@ -111,7 +113,8 @@ const parcels = ref([
   }
   // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
 ])
-
+console.log(loginStore.user.email)
+console.log(registerStore.userData)
 const currentUser = ref('Pimpajee SetXXXXXX')
 </script>
 

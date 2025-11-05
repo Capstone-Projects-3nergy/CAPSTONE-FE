@@ -68,7 +68,6 @@ const dormList = ref([]) // [{ dormId, dormName }]
 
 onMounted(async () => {
   try {
-    console.log(registerStore)
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
@@ -105,7 +104,17 @@ onMounted(async () => {
     ]
   }
 })
+// หลังสมัครเสร็จค่อยเช็ก
+// const handleRegister = async () => {
+//   await registerStore.registerAccount(form)
 
+//   // ✅ ปลอดภัยด้วย ?. (optional chaining)
+//   if (registerStore.userData?.email === form.email) {
+//     isEmailDuplicate.value = true
+//   } else {
+//     error.value = true
+//   }
+// }
 const submitForm = async (roleType) => {
   try {
     // เช็ค password match
@@ -146,36 +155,6 @@ const submitForm = async (roleType) => {
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
-    // 🔹 เช็คอีเมลซ้ำจาก backend
-    // -----------------------
-    // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
-    // const registerStore = useRegisterManager()
-    // console.log(registerStore)
-    if (registerStore.registerAccount.userData.email === form.email) {
-      isEmailDuplicate.value = true
-      setTimeout(() => {
-        isEmailDuplicate.value = false
-      }, 3000)
-      return
-    }
-    // try {
-    //   const baseURL = import.meta.env.VITE_BASE_URL
-    //   const checkEmail = await axios.get(`${baseURL}/public/auth/register`, {
-    //     params: { email: form.email }
-    //   })
-
-    //   // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
-    //   if (checkEmail.data.status.name === 'CONFLICT') {
-    //     isEmailDuplicate.value = true
-    //     setTimeout(() => {
-    //       isEmailDuplicate.value = false
-    //     }, 3000)
-    //     return
-    //   }
-    // } catch (checkErr) {
-    //   console.error('Error checking email:', checkErr)
-    // }
-
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -226,7 +205,13 @@ const submitForm = async (roleType) => {
 
     // เรียก store
     await registerStore.registerAccount(payload)
-
+    if (registerStore.userData.email === form.email) {
+      isEmailDuplicate.value = true
+      setTimeout(() => {
+        isEmailDuplicate.value = true
+      }, 3000)
+      return
+    }
     // ล้างข้อมูลหลัง register
     // 🔹 เคลียร์ฟอร์มหลัง register
     // 🔹 เคลียร์ฟอร์มหลัง register

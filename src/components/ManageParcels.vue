@@ -11,6 +11,9 @@ import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import AddParcels from './AddParcels.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import { useRegisterManager } from '@/stores/RegisterManager.js'
+import AlertPopUp from './AlertPopUp.vue'
+const registerStore = useRegisterManager()
 const loginManager = useLoginManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -142,7 +145,7 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
+console.log(registerStore.userData)
 const returnLoginPage = async () => {
   try {
     // เรียก logoutAccount จาก store
