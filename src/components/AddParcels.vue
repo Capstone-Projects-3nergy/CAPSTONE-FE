@@ -603,36 +603,46 @@ const toggleSidebar = () => {
           </svg>
 
           <!-- 🏷️ Breadcrumb Text -->
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
 
           <!-- 📨 Next title -->
-          <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
 
         <!-- Form -->
         <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <!-- Row 1 -->
           <!-- Header -->
+          <!-- แถวบนสุด: Title + ปุ่ม -->
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
+            <ButtonWeb
+              label="Scan Parcel"
+              color="blue"
+              @click="showParcelScannerPage"
+              class="w-full md:w-auto"
+            />
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Recipient Name</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Room Number</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -643,39 +653,39 @@ const toggleSidebar = () => {
               <label class="block font-semibold mb-1">Parcel Type</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Contact</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
 
           <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Update at</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -688,32 +698,27 @@ const toggleSidebar = () => {
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Company ID</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Recieve at</label>
               <input
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb
-              label="Scarn Parcel"
-              color="blue"
-              @click="showParcelScannerPage"
-            />
             <ButtonWeb label="Save" color="green" @click="" />
             <ButtonWeb
               label="Cancel"
