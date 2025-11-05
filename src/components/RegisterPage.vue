@@ -67,9 +67,10 @@ const dormList = ref([]) // [{ dormId, dormName }]
 // })
 
 onMounted(async () => {
+  registerStore.loadUserData()
   try {
-    const registerStore = useRegisterManager()
-    console.log(registerStore)
+    // const registerStore = useRegisterManager()
+    // console.log(registerStore)
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
@@ -152,7 +153,7 @@ const submitForm = async (roleType) => {
     // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
     // const registerStore = useRegisterManager()
     // console.log(registerStore)
-    if (registerStore.data.email === form.email) {
+    if (registerStore.userData.email === form.email) {
       isEmailDuplicate.value = true
       setTimeout(() => {
         isEmailDuplicate.value = false
