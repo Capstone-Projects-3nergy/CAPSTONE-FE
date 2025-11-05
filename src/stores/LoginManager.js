@@ -171,61 +171,75 @@ export const useLoginManager = defineStore('loginManager', () => {
       throw err
     }
   }
-  // -----------------------
-  // 🔹 Navigation Guard (Auto Protect Routes)
-  // -----------------------
-
   let guardInstalled = false
 
   const useAuthGuard = async (router) => {
-    if (guardInstalled) return // ✅ ป้องกันซ้ำ
+    if (guardInstalled) return
     guardInstalled = true
 
-    // ✅ รอให้ router พร้อมก่อน (สำคัญ!)
     await router.isReady()
     console.log('✅ Navigation Guard Installed')
 
     router.beforeEach(async (to, from, next) => {
-      console.log('🧭 Checking route:', to.name)
-
       const publicPages = ['login', 'register', 'resetpassword']
       const accessToken = localStorage.getItem('accessToken')
+      const userRole = localStorage.getItem('userRole')
 
-      // ✅ ผ่านถ้าเป็น public page
+      if (!user.value && accessToken) restoreUserFromLocalStorage()
+
       if (publicPages.includes(to.name)) {
-        console.log('🟢 Public page, allow access')
+        if (accessToken) {
+          if (userRole === 'RESIDENT')
+            return next({ name: 'home', params: { id: user.value?.id } })
+          if (userRole === 'STAFF')
+            return next({ name: 'homestaff', params: { id: user.value?.id } })
+        }
         return next()
       }
 
-      // ❌ ไม่มี token
       if (!accessToken) {
-        console.warn('🚫 Unauthorized: redirect to login')
+        console.warn('🚫 No token, redirect to login')
         return next({ name: 'login' })
       }
 
-      // ✅ ตรวจสอบอายุ token
       const decoded = decodeJWT(accessToken)
-      const currentTime = Math.floor(Date.now() / 1000)
-      if (decoded?.exp && decoded.exp < currentTime) {
-        console.warn('⚠️ Token expired, refreshing...')
+      const now = Math.floor(Date.now() / 1000)
+      if (decoded?.exp && decoded.exp < now) {
+        console.warn('⚠️ Token expired → refresh')
         const newToken = await refreshToken()
         if (!newToken) return next({ name: 'login' })
       }
 
-      // ✅ ตรวจ role
-      const userRole = localStorage.getItem('userRole')
-      if (to.name === 'home' && userRole !== 'RESIDENT') {
-        console.warn('STAFF cannot access RESIDENT route')
+      if (to.name === 'home' && userRole !== 'RESIDENT')
         return next({ name: 'login' })
-      }
-      if (to.name === 'homestaff' && userRole !== 'STAFF') {
-        console.warn('RESIDENT cannot access STAFF route')
+      if (to.name === 'homestaff' && userRole !== 'STAFF')
         return next({ name: 'login' })
-      }
 
-      console.log('✅ Access granted to', to.name)
       next()
     })
+  }
+
+  const restoreUserFromLocalStorage = () => {
+    const token = localStorage.getItem('accessToken')
+    const role = localStorage.getItem('userRole')
+    const name = localStorage.getItem('userName')
+
+    if (!token || !role) {
+      console.warn('⚠️ No user data found in localStorage')
+      return false
+    }
+
+    const decoded = decodeJWT(token)
+    user.value = {
+      id: decoded?.user_id || decoded?.uid || null,
+      email: decoded?.email || '',
+      name: name ?? '',
+      role: role,
+      accessToken: token
+    }
+
+    console.log('♻️ User restored from localStorage:', user.value)
+    return true
   }
 
   return {
@@ -238,7 +252,8 @@ export const useLoginManager = defineStore('loginManager', () => {
     apiRequest,
     decodeJWT,
     refreshToken,
-    useAuthGuard
+    useAuthGuard,
+    restoreUserFromLocalStorage
   }
 })
 

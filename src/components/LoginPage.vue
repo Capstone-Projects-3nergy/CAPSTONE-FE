@@ -40,6 +40,7 @@ const closePopUp = (operate) => {
 onMounted(async () => {
   const router = useRouter()
   const loginManager = useLoginManager()
+  await loginManager.restoreUserFromLocalStorage()
   await loginManager.useAuthGuard(router)
   console.log(loginManager.useAuthGuard(router))
 })
