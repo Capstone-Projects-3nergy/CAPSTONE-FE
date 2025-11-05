@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { auth } from '@/firebase/firebaseConfig'
-import * as jwtDecodeModule from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 export const useLoginManager = defineStore('loginManager', () => {
   // -----------------------
@@ -19,7 +19,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   // -----------------------
   const decodeJWT = (token) => {
     try {
-      return jwtDecodeModule.default(token)
+      return jwtDecode(token) // ✅ เรียกตรงนี้แทน jwtDecodeModule.default
     } catch (err) {
       console.error('Invalid token:', err)
       return null
