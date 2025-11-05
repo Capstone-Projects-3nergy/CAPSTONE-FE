@@ -185,23 +185,34 @@ export const useLoginManager = defineStore('loginManager', () => {
       const accessToken = localStorage.getItem('accessToken')
       const userRole = localStorage.getItem('userRole')
 
-      if (!user.value && accessToken) restoreUserFromLocalStorage()
+      // ♻️ Restore user ถ้ามี token
+      if (!user.value && accessToken) {
+        const restored = restoreUserFromLocalStorage()
+        if (!restored) {
+          console.warn('🚫 Failed to restore user → ไป login ใหม่')
+          return next({ name: 'login' })
+        }
+      }
 
+      // ✅ 1. หน้าสาธารณะ
       if (publicPages.includes(to.name)) {
         if (accessToken) {
-          if (userRole === 'RESIDENT')
+          if (userRole === 'RESIDENT') {
             return next({ name: 'home', params: { id: user.value?.id } })
-          if (userRole === 'STAFF')
+          } else if (userRole === 'STAFF') {
             return next({ name: 'homestaff', params: { id: user.value?.id } })
+          }
         }
         return next()
       }
 
+      // ✅ 2. ถ้าไม่มี token → กลับหน้า login
       if (!accessToken) {
-        console.warn('🚫 No token, redirect to login')
+        console.warn('🚫 No token → redirect to login')
         return next({ name: 'login' })
       }
 
+      // ✅ 3. ตรวจ token หมดอายุ
       const decoded = decodeJWT(accessToken)
       const now = Math.floor(Date.now() / 1000)
       if (decoded?.exp && decoded.exp < now) {
@@ -210,12 +221,18 @@ export const useLoginManager = defineStore('loginManager', () => {
         if (!newToken) return next({ name: 'login' })
       }
 
-      if (to.name === 'home' && userRole !== 'RESIDENT')
+      // ✅ 4. ตรวจ role
+      if (to.name === 'home' && userRole !== 'RESIDENT') {
+        console.warn('🚫 ไม่ใช่ resident ห้ามเข้าหน้า home')
         return next({ name: 'login' })
-      if (to.name === 'homestaff' && userRole !== 'STAFF')
+      }
+      if (to.name === 'homestaff' && userRole !== 'STAFF') {
+        console.warn('🚫 ไม่ใช่ staff ห้ามเข้าหน้า homestaff')
         return next({ name: 'login' })
+      }
 
-      next()
+      // ✅ ผ่านทั้งหมด
+      return next()
     })
   }
 
