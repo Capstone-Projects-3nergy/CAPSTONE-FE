@@ -825,7 +825,7 @@ const showProfileStaffPage = async function () {
           <!-- 🏷️ Breadcrumb Text -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
 
-          <svg
+          <!-- <svg
             width="36"
             height="36"
             viewBox="0 0 36 36"
@@ -839,7 +839,7 @@ const showProfileStaffPage = async function () {
               stroke-linecap="round"
               stroke-linejoin="round"
             />
-          </svg>
+          </svg> -->
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
@@ -1040,11 +1040,6 @@ const showProfileStaffPage = async function () {
                   Cancel
                 </button> -->
                 <ButtonWeb
-                  label="Add Parcels Page"
-                  color="blue"
-                  @click="showAddParcelPage"
-                />
-                <ButtonWeb
                   label="Save"
                   color="green"
                   :disabled="
@@ -1071,6 +1066,19 @@ const showProfileStaffPage = async function () {
 
             <!-- Right side -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
+              <div class="flex items-center justify-end mb-4">
+                <h2
+                  @click="showAddParcelPage"
+                  class="text-2xl font-bold text-[#185dc0] mb-4 cursor-pointer"
+                >
+                  < Go Back
+                </h2>
+                <!-- <ButtonWeb
+                  label="Add Parcels Page"
+                  color="blue"
+                  @click="showAddParcelPage"
+                /> -->
+              </div>
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
