@@ -156,10 +156,7 @@ const submitForm = async (roleType) => {
       })
 
       // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
-      if (
-        checkEmail.data?.status?.name === 'CONFLICT' ||
-        checkEmail.data === 'CONFLICT'
-      ) {
+      if (checkEmail.data.status.name === 'CONFLICT') {
         isEmailDuplicate.value = true
         setTimeout(() => {
           isEmailDuplicate.value = false
