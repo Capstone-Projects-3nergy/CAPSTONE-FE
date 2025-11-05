@@ -41,6 +41,7 @@ onMounted(async () => {
   const router = useRouter()
   const loginManager = useLoginManager()
   await loginManager.useAuthGuard(router)
+  console.log(loginManager.useAuthGuard(router))
 })
 
 const loginHomePageWeb = async () => {

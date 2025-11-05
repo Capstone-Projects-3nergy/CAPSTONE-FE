@@ -146,26 +146,53 @@ const submitForm = async (roleType) => {
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
 
-    // -----------------------
     // 🔹 เช็คอีเมลซ้ำจาก backend
     // -----------------------
-    try {
-      const baseURL = import.meta.env.VITE_BASE_URL
-      const checkEmail = await axios.get(`${baseURL}/public/auth/register`, {
+    const baseURL = import.meta.env.VITE_BASE_URL
+
+    const checkEmail = await axios
+      .get(`${baseURL}/public/auth/register`, {
         params: { email: form.email }
       })
+      .catch((err) => {
+        console.error('Error checking email:', err)
+        return null
+      })
 
-      // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
-      if (checkEmail.data.status.name === 'CONFLICT') {
-        isEmailDuplicate.value = true
-        setTimeout(() => {
-          isEmailDuplicate.value = false
-        }, 3000)
-        return
-      }
-    } catch (checkErr) {
-      console.error('Error checking email:', checkErr)
+    // ถ้า request ล้มเหลวหรือไม่มีข้อมูล
+    if (!checkEmail || !checkEmail.data) {
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 3000)
+      return
     }
+
+    // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
+    if (checkEmail.data?.status?.name === 'CONFLICT') {
+      isEmailDuplicate.value = true
+      setTimeout(() => {
+        isEmailDuplicate.value = false
+      }, 3000)
+      return
+    }
+    // try {
+    //   const baseURL = import.meta.env.VITE_BASE_URL
+    //   const checkEmail = await axios.get(`${baseURL}/public/auth/register`, {
+    //     params: { email: form.email }
+    //   })
+
+    //   // ✅ ตรวจค่าที่ backend ส่งมา เช่น { status: { name: "CONFLICT" } }
+    //   if (checkEmail.data.status.name === 'CONFLICT') {
+    //     isEmailDuplicate.value = true
+    //     setTimeout(() => {
+    //       isEmailDuplicate.value = false
+    //     }, 3000)
+    //     return
+    //   }
+    // } catch (checkErr) {
+    //   console.error('Error checking email:', checkErr)
+    // }
 
     const payload =
       roleUpper === 'RESIDENT'
