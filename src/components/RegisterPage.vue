@@ -35,6 +35,7 @@ const success = ref(false)
 const isRoomRequired = ref(false)
 const isPositionRequired = ref(false)
 const incorrectemailform = ref(false)
+const isPositionWrong = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
@@ -332,6 +333,7 @@ const closePopUp = (operate) => {
   if (operate === 'notpositionrequired') isPositionRequired.value = false
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'notnumber') roomidnotnumber.value = false
+  if (operate === 'erroeposition ') isPositionWrong.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -460,6 +462,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="errorpassword"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isPositionWrong"
+          :titles="'Position must be text, not a number.'"
+          message="Error!!"
+          styleType="red"
+          operate="errorposition"
           @closePopUp="closePopUp"
         />
         <AlertPopUp
