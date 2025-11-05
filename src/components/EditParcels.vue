@@ -606,7 +606,7 @@ const toggleSidebar = () => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
 
           <!-- 📨 Next title -->
-          <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
 
         <!-- Form -->
@@ -615,7 +615,7 @@ const toggleSidebar = () => {
           <!-- Header -->
           <!-- แถวบนสุด: Title + ปุ่ม -->
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
+            <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
             <ButtonWeb
               label="Scan Parcel"
               color="blue"
