@@ -1,4 +1,3 @@
-// 📁 stores/RegisterManager.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
@@ -6,61 +5,72 @@ import { auth } from '@/firebase/firebaseConfig'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 export const useRegisterManager = defineStore('RegisterManager', () => {
-  // -----------------------
-  // 🔹 STATE
-  // -----------------------
   const loading = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
-  const userData = ref(null) // ✅ เก็บข้อมูลผู้ใช้หลังสมัครสำเร็จ
+  const userData = ref(null) // ✅ เก็บข้อมูลผู้ใช้หลังสมัครเสร็จ
 
-  // -----------------------
-  // 🔹 ฟังก์ชันสมัครสมาชิก
-  // -----------------------
+  /**
+   * formData ที่คาดหวัง:
+   * {
+   *   fullName: string,
+   *   email: string,
+   *   password: string,
+   *   role: 'RESIDENT' | 'STAFF',
+   *   dormType: 'RESIDENT' | 'STAFF',
+   *   dormId?: number,
+   *   roomNumber?: string,
+   *   position?: string
+   * }
+   */
   const registerAccount = async (formData) => {
     loading.value = true
     errorMessage.value = ''
     successMessage.value = ''
-    userData.value = null
+    userData.value = null // reset ก่อนเริ่ม
 
     try {
+      // ----------------------------
+      // 🔹 ตรวจ role เบื้องต้น
+      // ----------------------------
       const role = String(formData.role || '').toUpperCase()
-
       if (!['RESIDENT', 'STAFF'].includes(role)) {
         throw new Error('Invalid role.')
       }
 
-      // ✅ จัด payload ส่ง backend
-      let payload = {
-        ...formData,
-        role
-      }
+      // ----------------------------
+      // 🔹 เตรียม payload สำหรับ backend
+      // ----------------------------
+      let payload = { ...formData, role }
 
       if (role === 'RESIDENT') {
         const dormIdNum = Number(formData.dormId)
-        if (!Number.isFinite(dormIdNum) || dormIdNum <= 0)
+        if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
           throw new Error('Please select a valid dormitory.')
-        if (!formData.roomNumber?.trim())
+        }
+        if (!formData.roomNumber || !formData.roomNumber.trim()) {
           throw new Error('Room number is required.')
-
+        }
         payload = {
           ...payload,
           dormId: dormIdNum,
           roomNumber: formData.roomNumber.trim()
         }
-      }
-
-      if (role === 'STAFF') {
-        if (!formData.position?.trim())
+      } else if (role === 'STAFF') {
+        if (!formData.position || !formData.position.trim()) {
           throw new Error('Position is required for staff.')
+        }
         payload = {
           ...payload,
           position: formData.position.trim()
         }
       }
 
-      // ✅ เรียก backend
+      // ----------------------------
+      // 🔹 ส่งข้อมูลไป Backend
+      // ----------------------------
       const baseURL = import.meta.env.VITE_BASE_URL
+      if (!baseURL) throw new Error('VITE_BASE_URL is not set')
       const endpoint = `${baseURL}/public/auth/register`
       const response = await axios.post(endpoint, payload)
 
@@ -68,41 +78,39 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
         throw new Error('Registration failed on backend.')
       }
 
-      // ✅ สมัครใน Firebase
+      // ----------------------------
+      // 🔹 สร้างบัญชีใน Firebase
+      // ----------------------------
       const cred = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       )
+
+      // รับ token จาก Firebase
       const idToken = await cred.user.getIdToken()
 
-      // ✅ เก็บ token และข้อมูลผู้ใช้ใน localStorage และ state
-      localStorage.setItem('idToken', idToken)
-      localStorage.setItem(
-        'userData',
-        JSON.stringify({
-          userId: response.data.userId,
-          email: formData.email,
-          role: formData.role,
-          fullName: formData.fullName,
-          dormId: formData.dormId || null,
-          roomNumber: formData.roomNumber || null,
-          position: formData.position || null
-        })
-      )
-
+      // ----------------------------
+      // 🔹 เก็บข้อมูลลงใน Pinia + LocalStorage
+      // ----------------------------
       userData.value = {
         userId: response.data.userId,
         email: formData.email,
-        role: formData.role,
         fullName: formData.fullName,
-        dormId: formData.dormId || null,
-        roomNumber: formData.roomNumber || null,
-        position: formData.position || null
+        role,
+        accessToken: idToken
       }
+
+      localStorage.setItem('accessToken', idToken)
+      localStorage.setItem('userRole', role)
+      localStorage.setItem('userEmail', formData.email)
+      localStorage.setItem('userName', formData.fullName)
 
       successMessage.value = 'Account created successfully!'
     } catch (error) {
+      // ----------------------------
+      // 🔹 แสดง Error message
+      // ----------------------------
       const backendErrors = error?.response?.data?.errors
       if (backendErrors && typeof backendErrors === 'object') {
         errorMessage.value = Object.entries(backendErrors)
@@ -119,33 +127,12 @@ export const useRegisterManager = defineStore('RegisterManager', () => {
     }
   }
 
-  // -----------------------
-  // 🔹 โหลดข้อมูลจาก localStorage (ถ้ามี)
-  // -----------------------
-  const loadUserData = () => {
-    const saved = localStorage.getItem('userData')
-    if (saved) {
-      userData.value = JSON.parse(saved)
-    }
-  }
-
-  // -----------------------
-  // 🔹 ล้างข้อมูลผู้ใช้ (ตอน logout)
-  // -----------------------
-  const clearUserData = () => {
-    userData.value = null
-    localStorage.removeItem('userData')
-    localStorage.removeItem('idToken')
-  }
-
   return {
     loading,
     errorMessage,
     successMessage,
-    userData,
-    registerAccount,
-    loadUserData,
-    clearUserData
+    userData, // ✅ เพิ่มใน return
+    registerAccount
   }
 })
 
