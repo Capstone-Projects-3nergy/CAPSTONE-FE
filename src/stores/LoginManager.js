@@ -177,17 +177,25 @@ export const useLoginManager = defineStore('loginManager', () => {
 
   let guardInstalled = false
 
-  const useAuthGuard = (router) => {
+  const useAuthGuard = async (router) => {
     if (guardInstalled) return // ✅ ป้องกันซ้ำ
     guardInstalled = true
+
+    // ✅ รอให้ router พร้อมก่อน (สำคัญ!)
+    await router.isReady()
     console.log('✅ Navigation Guard Installed')
 
     router.beforeEach(async (to, from, next) => {
+      console.log('🧭 Checking route:', to.name)
+
       const publicPages = ['login', 'register', 'resetpassword']
       const accessToken = localStorage.getItem('accessToken')
 
       // ✅ ผ่านถ้าเป็น public page
-      if (publicPages.includes(to.name)) return next()
+      if (publicPages.includes(to.name)) {
+        console.log('🟢 Public page, allow access')
+        return next()
+      }
 
       // ❌ ไม่มี token
       if (!accessToken) {
@@ -215,7 +223,7 @@ export const useLoginManager = defineStore('loginManager', () => {
         return next({ name: 'login' })
       }
 
-      // ✅ ผ่านทั้งหมด
+      console.log('✅ Access granted to', to.name)
       next()
     })
   }

@@ -32,10 +32,15 @@ const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
 }
-onBeforeMount(() => {
+// onBeforeMount(() => {
+//   const router = useRouter()
+//   const loginManager = useLoginManager()
+//   loginManager.useAuthGuard(router)
+// })
+onMounted(async () => {
   const router = useRouter()
   const loginManager = useLoginManager()
-  loginManager.useAuthGuard(router)
+  await loginManager.useAuthGuard(router)
 })
 
 const loginHomePageWeb = async () => {
