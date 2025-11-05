@@ -16,6 +16,7 @@ const isConfirmPasswordOverLimit = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
+const isFullNameWrong = ref(false)
 // ใช้ computed สำหรับ trim ค่าอัตโนมัติ
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
@@ -132,6 +133,13 @@ const submitForm = async (roleType) => {
       isFullNameWeak.value = true
       setTimeout(() => {
         isFullNameWeak.value = false
+      }, 3000)
+      return
+    }
+    if (/\d/.test(form.fullName)) {
+      isFullNameWrong.value = true
+      setTimeout(() => {
+        isFullNameWrong.value = false
       }, 3000)
       return
     }
@@ -342,6 +350,7 @@ const closePopUp = (operate) => {
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'notnumber') roomidnotnumber.value = false
   if (operate === 'erroeposition ') isPositionWrong.value = false
+  if (operate === 'nametypewrong ') isFullNameWrong.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -561,6 +570,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="notroomrequired"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isFullNameWrong"
+          :titles="'Full Name can only type as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="nametypewrong"
           @closePopUp="closePopUp"
         />
         <AlertPopUp
