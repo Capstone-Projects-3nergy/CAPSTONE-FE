@@ -203,6 +203,14 @@ const submitForm = async (roleType) => {
         return
       }
     }
+    // ✅ เช็คว่ามีตัวเลขใน position หรือไม่
+    if (/\d/.test(payload.position)) {
+      isPositionWrong.value = true
+      setTimeout(() => {
+        isPositionWrong.value = false
+      }, 3000)
+      return
+    }
 
     // เรียก store
     await registerStore.registerAccount(payload)
