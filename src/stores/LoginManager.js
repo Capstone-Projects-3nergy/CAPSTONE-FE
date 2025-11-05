@@ -4,11 +4,13 @@ import axios from 'axios'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { auth } from '@/firebase/firebaseConfig'
 import { jwtDecode } from 'jwt-decode'
+import { useRegisterManager } from '@/stores/RegisterManager.js'
 
 export const useLoginManager = defineStore('loginManager', () => {
   // -----------------------
   // 🔹 STATE
   // -----------------------
+  const registerStore = useRegisterManager()
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref('')
@@ -116,6 +118,7 @@ export const useLoginManager = defineStore('loginManager', () => {
   // 🔹 LOGOUT
   // -----------------------
   const logoutAccount = async (router) => {
+    registerStore.logout()
     try {
       await signOut(auth)
       user.value = null

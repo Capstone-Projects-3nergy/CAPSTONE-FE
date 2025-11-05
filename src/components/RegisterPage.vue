@@ -69,6 +69,8 @@ const dormList = ref([]) // [{ dormId, dormName }]
 // })
 
 onMounted(async () => {
+  registerStore.loadUserFromLocalStorage()
+  console.log('🔹 User loaded:', registerStore.userData)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
@@ -222,7 +224,9 @@ const submitForm = async (roleType) => {
 
     // เรียก store
     await registerStore.registerAccount(payload)
-    if (registerStore.userData.email === form.email) {
+    await registerStore.registerAccount(form)
+
+    if (registerStore.userData?.email === form.email) {
       isEmailDuplicate.value = true
       setTimeout(() => {
         isEmailDuplicate.value = true
