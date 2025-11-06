@@ -1,3 +1,4 @@
+// 📁 src/stores/ResetPasswordManager.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
@@ -12,7 +13,7 @@ export const useResetPasswordManager = defineStore(
     const successMessage = ref('')
     const errorMessage = ref('')
 
-    // 🟨 Action 1: ส่งอีเมลรีเซ็ตรหัสผ่านผ่าน Firebase + Backend
+    // 🟨 Action 1: ส่งอีเมลรีเซ็ตรหัสผ่านผ่าน Firebase + (แจ้ง Backend ถ้ามี)
     const sendResetEmail = async (email) => {
       loading.value = true
       successMessage.value = ''
@@ -23,23 +24,27 @@ export const useResetPasswordManager = defineStore(
         await sendPasswordResetEmail(auth, email)
         console.log('✅ Firebase reset email sent.')
 
-        // 🔹 Step 2: แจ้ง backend ว่ามีการรีเซ็ต (optional — logging)
+        // 🔹 Step 2: แจ้ง backend (optional สำหรับบันทึก log หรือ event)
         const baseURL = import.meta.env.VITE_BASE_URL
-        if (!baseURL) throw new Error('VITE_BASE_URL is not set')
-
-        await axios.post(`${baseURL}/public/auth/reset-password-request`, {
-          email
-        })
+        if (baseURL) {
+          await axios.post(`${baseURL}/public/auth/reset-password-request`, {
+            email
+          })
+        }
 
         // 🔹 Step 3: สำเร็จ
         successMessage.value =
           '📧 Reset password email sent! Please check your inbox.'
       } catch (error) {
         console.error('❌ Reset password error:', error)
-        errorMessage.value =
-          error.response?.data?.message ||
-          error.message ||
-          'Failed to send reset email. Please try again.'
+        if (error.code === 'auth/user-not-found') {
+          errorMessage.value = '❌ Email not found in system.'
+        } else {
+          errorMessage.value =
+            error.response?.data?.message ||
+            error.message ||
+            'Failed to send reset email. Please try again.'
+        }
       } finally {
         loading.value = false
       }
@@ -58,25 +63,30 @@ export const useResetPasswordManager = defineStore(
 
         // 🔹 Step 2: แจ้ง backend เพื่อ sync password (optional)
         const baseURL = import.meta.env.VITE_BASE_URL
-        if (!baseURL) throw new Error('VITE_BASE_URL is not set')
-
-        await axios.post(`${baseURL}/public/auth/confirm-reset`, {
-          oobCode,
-          newPassword
-        })
+        if (baseURL) {
+          await axios.post(`${baseURL}/public/auth/confirm-reset`, {
+            oobCode,
+            newPassword
+          })
+        }
 
         successMessage.value = '✅ Password has been reset successfully!'
       } catch (error) {
         console.error('❌ Confirm reset error:', error)
-        errorMessage.value =
-          error.response?.data?.message ||
-          error.message ||
-          'Failed to reset password. Please try again.'
+        if (error.code === 'auth/invalid-action-code') {
+          errorMessage.value = '❌ Reset link is invalid or expired.'
+        } else {
+          errorMessage.value =
+            error.response?.data?.message ||
+            error.message ||
+            'Failed to reset password. Please try again.'
+        }
       } finally {
         loading.value = false
       }
     }
 
+    // 🟢 Return values
     return {
       loading,
       successMessage,
