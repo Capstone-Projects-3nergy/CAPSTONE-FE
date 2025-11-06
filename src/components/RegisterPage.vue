@@ -371,7 +371,7 @@ const submitForm = async (roleType) => {
     await authManager.registerAccount(payload)
 
     // ถ้ามี email ซ้ำจาก backend
-    if (authManager.errorMessage?.includes('duplicate')) {
+    if (authManager.errorMessage?.includes('CONFLICT')) {
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
       return
