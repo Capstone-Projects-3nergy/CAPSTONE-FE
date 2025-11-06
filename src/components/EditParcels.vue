@@ -10,9 +10,12 @@ import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import { useParcelManager } from '@/stores/ParcelManager.js' // ⬅️ store สำหรับจัดการ parcel
+import axios from 'axios'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
+const route = useRoute()
+const parcelStore = useParcelManager()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -22,98 +25,58 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
+// 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
+const form = ref({
+  parcel_id: '',
+  tracking_number: '',
+  recipient_name: '',
+  room_number: '',
+  parcel_type: '',
+  contact: '',
+  status: '',
+  pickup_at: '',
+  update_at: '',
+  sender_name: '',
+  company_id: '',
+  receive_at: ''
+})
+
+// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
+onMounted(async () => {
+  const parcelId = route.params.id
+  try {
+    const res = await axios.get(`http://localhost:5000/api/parcels/${parcelId}`)
+    form.value = res.data
+    console.log('📦 Loaded parcel:', res.data)
+  } catch (err) {
+    console.error('❌ Error loading parcel:', err)
   }
-])
+})
+
+// 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
+const saveParcel = async () => {
+  try {
+    const res = await axios.put(
+      `http://localhost:5000/api/parcels/${form.value.parcel_id}`,
+      form.value
+    )
+
+    // ✅ อัปเดตใน store ด้วย (Pinia)
+    await parcelStore.updateParcel(form.value.parcel_id, res.data)
+
+    console.log('✅ Updated parcel:', res.data)
+
+    // 🔄 กลับไปหน้ารายการพัสดุ
+    router.replace({ name: 'staffparcels' })
+  } catch (err) {
+    console.error('❌ Failed to update parcel:', err)
+  }
+}
+
+// 🟥 ปุ่ม Cancel
+const cancelEdit = () => {
+  router.replace({ name: 'staffparcels' })
+}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -588,45 +551,30 @@ const toggleSidebar = () => {
       <!-- Main Content -->
       <main class="flex-1 p-6">
         <div class="flex items-center space-x-2 mb-6">
-          <!-- 📦 ไอคอน -->
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
-
-          <!-- 🏷️ Breadcrumb Text -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-
-          <!-- 📨 Next title -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
 
-        <!-- Form -->
-        <form class="bg-white p-6 rounded-lg shadow space-y-6">
-          <!-- Row 1 -->
+        <form
+          class="bg-white p-6 rounded-lg shadow space-y-6"
+          @submit.prevent="saveParcel"
+        >
           <!-- Header -->
-          <!-- แถวบนสุด: Title + ปุ่ม -->
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
             <ButtonWeb
               label="Scan Parcel"
               color="blue"
-              @click="showParcelScannerPage"
-              class="w-full md:w-auto"
+              @click="() => router.replace({ name: 'parcelscanner' })"
             />
           </div>
+
+          <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
               <input
+                v-model="form.tracking_number"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -634,6 +582,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Recipient Name</label>
               <input
+                v-model="form.recipient_name"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -641,6 +590,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Room Number</label>
               <input
+                v-model="form.room_number"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -652,6 +602,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Parcel Type</label>
               <input
+                v-model="form.parcel_type"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -659,6 +610,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Contact</label>
               <input
+                v-model="form.contact"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -666,6 +618,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <input
+                v-model="form.status"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -677,6 +630,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
+                v-model="form.pickup_at"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -684,6 +638,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Update at</label>
               <input
+                v-model="form.update_at"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -697,6 +652,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
+                v-model="form.sender_name"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -704,13 +660,15 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Company ID</label>
               <input
+                v-model="form.company_id"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Recieve at</label>
+              <label class="block font-semibold mb-1">Receive at</label>
               <input
+                v-model="form.receive_at"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -719,25 +677,8 @@ const toggleSidebar = () => {
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="" />
-            <ButtonWeb
-              label="Cancel"
-              color="red"
-              @click="showManageParcelPage"
-            />
-            <!-- <button
-              type="submit"
-              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 cursor-pointer"
-            >
-              Save
-            </button> -->
-            <!-- <button
-              @click="showManageParcelPage"
-              type="button"
-              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 cursor-pointer"
-            >
-              Cancel
-            </button> -->
+            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>
         </form>
       </main>
