@@ -585,161 +585,190 @@ const toggleSidebar = () => {
         </SidebarItem>
       </aside>
 
-      <!-- Main Content -->
-      <main class="flex-1 p-6">
-        <div class="flex items-center space-x-2 mb-6">
-          <!-- 📦 ไอคอน -->
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
-
-          <!-- 🏷️ Breadcrumb Text -->
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-
-          <!-- 📨 Next title -->
-          <h2 class="text-2xl font-bold text-[#185dc0]">Detail</h2>
-        </div>
-
-        <!-- Form -->
-        <form class="bg-white p-6 rounded-lg shadow space-y-6">
-          <!-- Row 1 -->
-          <!-- Header -->
-          <!-- แถวบนสุด: Title + ปุ่ม -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Detail Parcel</h2>
+      <main class="flex-1 p-8 bg-white rounded-lg shadow-md">
+        <!-- 🔹 กล่องหลัก -->
+        <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
+          <!-- Header row -->
+          <div class="flex items-center justify-between mb-8">
+            <!-- Left: Back button -->
             <ButtonWeb
-              label="Scan Parcel"
+              label="
+              Back to Manage Parcels
+           
+            "
               color="blue"
-              @click="showParcelScannerPage"
+              @click="showManageParcelPage"
               class="w-full md:w-auto"
             />
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Recipient Name</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Room Number</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <!-- Row 2 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Contact</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Status</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Pickup at</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Update at</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <hr class="border-t border-[#3269A8] my-4" />
-
-          <!-- Row 4 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Sender Name</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Company ID</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Recieve at</label>
-              <input
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <!-- Buttons -->
-          <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="" />
-            <ButtonWeb
-              label="Cancel"
-              color="red"
-              @click="showManageParcelPage"
-            />
             <!-- <button
-              type="submit"
-              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 cursor-pointer"
+              class="bg-[#185dc0] text-white font-semibold px-5 py-2 rounded-md shadow hover:bg-[#154ba1] transition"
             >
-              Save
-            </button> -->
-            <!-- <button
-              @click="showManageParcelPage"
-              type="button"
-              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 cursor-pointer"
+              Back to My Parcel
+            </button>
+             -->
+
+            <!-- Center: Title -->
+            <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Details</h2>
+
+            <!-- Right: Picked Up button -->
+            <button
+              class="bg-green-500 text-white font-semibold px-6 py-2 rounded-md shadow hover:bg-green-600 transition"
             >
-              Cancel
-            </button> -->
+              Picked Up
+            </button>
           </div>
-        </form>
+
+          <!-- Form Section -->
+          <form class="space-y-8">
+            <!-- Row 1 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Tracking</label
+                >
+                <input
+                  type="text"
+                  value="TH123456789X"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Parcel Type</label
+                >
+                <input
+                  type="text"
+                  value="Envelope"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Date in</label
+                >
+                <input
+                  type="text"
+                  value="05 Oct 2025"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Name</label
+                >
+                <input
+                  type="text"
+                  value="Pimpajee SetXXXXXX"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Contact</label
+                >
+                <input
+                  type="text"
+                  value="097-230-XXXX"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Room Number</label
+                >
+                <input
+                  type="text"
+                  value="101"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Pickup at</label
+                >
+                <input
+                  type="text"
+                  value="05 Oct 2025"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Update at</label
+                >
+                <input
+                  type="text"
+                  value="05 Oct 2025"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div></div>
+            </div>
+
+            <hr class="border-t border-[#185dc0] my-4" />
+
+            <!-- Row 4 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Sender Name</label
+                >
+                <input
+                  type="text"
+                  value="ABC"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Company ID</label
+                >
+                <input
+                  type="text"
+                  value="001"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Receive at</label
+                >
+                <input
+                  type="text"
+                  value="05 Oct 2025"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600"
+                />
+              </div>
+            </div>
+          </form>
+        </div>
       </main>
     </div>
   </div>
