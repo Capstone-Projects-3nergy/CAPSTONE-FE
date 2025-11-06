@@ -114,7 +114,8 @@ const parcels = ref([
   // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
 ])
 // console.log(loginStore.user.email)
-// console.log(registerStore.userData)
+registerStore.loadUserFromLocalStorage()
+console.log(registerStore.userData)
 const currentUser = ref('Pimpajee SetXXXXXX')
 </script>
 
