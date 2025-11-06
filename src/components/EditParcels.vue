@@ -10,7 +10,7 @@ import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
-import { useParcelManager } from '@/stores/ParcelManager.js' // ⬅️ store สำหรับจัดการ parcel
+import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
 const loginManager = useAuthManager()
 const router = useRouter()
