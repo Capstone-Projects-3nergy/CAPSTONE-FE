@@ -1071,7 +1071,7 @@ const showProfileStaffPage = async function () {
                   @click="showAddParcelPage"
                   class="text-2xl font-bold text-[#185dc0] mb-4 cursor-pointer"
                 >
-                  < Go Back
+                  < Go Back To Add
                 </h2>
                 <!-- <ButtonWeb
                   label="Add Parcels Page"
