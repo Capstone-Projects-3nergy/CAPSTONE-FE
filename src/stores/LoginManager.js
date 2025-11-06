@@ -7,94 +7,62 @@ import { jwtDecode } from 'jwt-decode'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 
 export const useLoginManager = defineStore('loginManager', () => {
-  // -----------------------
-  // 🔹 STATE
-  // -----------------------
   const registerStore = useRegisterManager()
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
 
-  // -----------------------
-  // 🔹 ฟังก์ชันถอดรหัส JWT
-  // -----------------------
   const decodeJWT = (token) => {
     try {
-      return jwtDecode(token) // ✅ เรียกตรงนี้แทน jwtDecodeModule.default
+      return jwtDecode(token)
     } catch (err) {
       console.error('Invalid token:', err)
       return null
     }
   }
 
-  // -----------------------
-  // 🔹 LOGIN (Firebase Frontend + ส่ง token ไป Backend)
-  // -----------------------
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
     errorMessage.value = ''
     successMessage.value = ''
 
     try {
-      // 1️⃣ ล็อกอินด้วย Firebase
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       )
       const firebaseUser = userCredential.user
-
-      // 2️⃣ ขอ ID Token
       const idToken = await firebaseUser.getIdToken()
 
-      // 3️⃣ ส่ง token ไป backend
       const response = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/api/auth/verify`,
-        { headers: { Authorization: `Bearer ${idToken}` } }
+        {
+          headers: { Authorization: `Bearer ${idToken}` }
+        }
       )
-      // const response = await axios.post(
-      //   `${import.meta.env.VITE_BASE_URL}/api/auth/verify`, // <-- backtick
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${idToken}`
-      //     }
-      //   }
-      // )
-
-      // const data = response.data
-      // if (!data.success) throw new Error(data.message || 'Login failed')
-      const data = response.data // AuthVerifyDto ของคุณ
+      const data = response.data
       if (!data?.authenticated) throw new Error('Verify failed')
-      // 4️⃣ เก็บข้อมูลผู้ใช้
-      // user.value = {
-      //   id: data.id,
-      //   email,
-      //   name: data.name,
-      //   role: data.role,
-      //   accessToken: idToken
-      // }
+
       user.value = {
         id: data.userId,
         email: data.email,
         name: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
-        role: data.role, // 'RESIDENT' | 'STAFF'
+        role: data.role,
         accessToken: idToken
       }
 
-      // 5️⃣ เก็บลง localStorage
-      // localStorage.setItem('accessToken', idToken)
-      // localStorage.setItem('userRole', data.role)
-      // localStorage.setItem('userName', data.name)
+      // เก็บ localStorage
       localStorage.setItem('accessToken', idToken)
       localStorage.setItem('userRole', data.role)
       localStorage.setItem(
         'userName',
         `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim()
       )
+
       successMessage.value = `Login successful as ${data.role}!`
 
-      // 6️⃣ Routing ตาม role //bug
       if (router) {
         if (data.role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
@@ -114,9 +82,6 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
-  // -----------------------
-  // 🔹 LOGOUT
-  // -----------------------
   const logoutAccount = async (router) => {
     registerStore.logout()
     try {
@@ -131,14 +96,11 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
-  // -----------------------
-  // 🔹 Refresh Token (ถ้า token หมดอายุ)
-  // -----------------------
   const refreshToken = async () => {
     try {
       if (auth.currentUser) {
         const newToken = await auth.currentUser.getIdToken(true)
-        user.value.accessToken = newToken
+        if (user.value) user.value.accessToken = newToken
         localStorage.setItem('accessToken', newToken)
         return newToken
       }
@@ -150,15 +112,11 @@ export const useLoginManager = defineStore('loginManager', () => {
     }
   }
 
-  // -----------------------
-  // 🔹 Protected API Request (แนบ Bearer token และ auto refresh)
-  // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
       let token = user.value?.accessToken || localStorage.getItem('accessToken')
       if (!token) throw new Error('No access token available')
 
-      // ตรวจสอบ token หมดอายุ
       const decoded = decodeJWT(token)
       const currentTime = Math.floor(Date.now() / 1000)
       if (decoded?.exp && decoded.exp < currentTime) {
@@ -174,80 +132,13 @@ export const useLoginManager = defineStore('loginManager', () => {
       throw err
     }
   }
-  let guardInstalled = false
-
-  const useAuthGuard = async (router) => {
-    if (guardInstalled) return
-    guardInstalled = true
-
-    await router.isReady()
-    console.log('✅ Navigation Guard Installed')
-
-    router.beforeEach(async (to, from, next) => {
-      const publicPages = ['login', 'register', 'resetpassword']
-      const accessToken = localStorage.getItem('accessToken')
-      const userRole = localStorage.getItem('userRole')
-
-      // ♻️ Restore user ถ้ามี token
-      if (!user.value && accessToken) {
-        const restored = restoreUserFromLocalStorage()
-        if (!restored) {
-          console.warn('🚫 Failed to restore user → ไป login ใหม่')
-          return next({ name: 'login' })
-        }
-      }
-
-      // ✅ 1. หน้าสาธารณะ
-      if (publicPages.includes(to.name)) {
-        if (accessToken) {
-          if (userRole === 'RESIDENT') {
-            return next({ name: 'home', params: { id: user.value?.id } })
-          } else if (userRole === 'STAFF') {
-            return next({ name: 'homestaff', params: { id: user.value?.id } })
-          }
-        }
-        return next()
-      }
-
-      // ✅ 2. ถ้าไม่มี token → กลับหน้า login
-      if (!accessToken) {
-        console.warn('🚫 No token → redirect to login')
-        return next({ name: 'login' })
-      }
-
-      // ✅ 3. ตรวจ token หมดอายุ
-      const decoded = decodeJWT(accessToken)
-      const now = Math.floor(Date.now() / 1000)
-      if (decoded?.exp && decoded.exp < now) {
-        console.warn('⚠️ Token expired → refresh')
-        const newToken = await refreshToken()
-        if (!newToken) return next({ name: 'login' })
-      }
-
-      // ✅ 4. ตรวจ role
-      if (to.name === 'home' && userRole !== 'RESIDENT') {
-        console.warn('🚫 ไม่ใช่ resident ห้ามเข้าหน้า home')
-        return next({ name: 'login' })
-      }
-      if (to.name === 'homestaff' && userRole !== 'STAFF') {
-        console.warn('🚫 ไม่ใช่ staff ห้ามเข้าหน้า homestaff')
-        return next({ name: 'login' })
-      }
-
-      // ✅ ผ่านทั้งหมด
-      return next()
-    })
-  }
 
   const restoreUserFromLocalStorage = () => {
     const token = localStorage.getItem('accessToken')
     const role = localStorage.getItem('userRole')
     const name = localStorage.getItem('userName')
 
-    if (!token || !role) {
-      console.warn('⚠️ No user data found in localStorage')
-      return false
-    }
+    if (!token || !role) return false
 
     const decoded = decodeJWT(token)
     user.value = {
@@ -258,8 +149,53 @@ export const useLoginManager = defineStore('loginManager', () => {
       accessToken: token
     }
 
-    console.log('♻️ User restored from localStorage:', user.value)
     return true
+  }
+
+  const useAuthGuard = async (router) => {
+    await router.isReady()
+
+    router.beforeEach(async (to, from, next) => {
+      const publicPages = ['login', 'register', 'resetpassword']
+      const accessToken = localStorage.getItem('accessToken')
+      const userRole = localStorage.getItem('userRole')
+
+      // หน้า login / register → ล้างข้อมูลเก่า
+      if (to.name === 'login' || to.name === 'register') {
+        user.value = null
+        registerStore.userData = null
+      }
+
+      // Restore user
+      if (!user.value && accessToken) {
+        const restored = restoreUserFromLocalStorage()
+        if (!restored && !publicPages.includes(to.name)) {
+          return next({ name: 'login' })
+        }
+      }
+
+      // Public pages → เข้าถึงได้
+      if (publicPages.includes(to.name)) return next()
+
+      // ไม่มี token → กลับ login
+      if (!accessToken) return next({ name: 'login' })
+
+      // ตรวจ token หมดอายุ
+      const decoded = decodeJWT(accessToken)
+      const now = Math.floor(Date.now() / 1000)
+      if (decoded?.exp && decoded.exp < now) {
+        const newToken = await refreshToken()
+        if (!newToken) return next({ name: 'login' })
+      }
+
+      // ตรวจ role
+      if (to.name === 'home' && userRole !== 'RESIDENT')
+        return next({ name: 'login' })
+      if (to.name === 'homestaff' && userRole !== 'STAFF')
+        return next({ name: 'login' })
+
+      return next()
+    })
   }
 
   return {
