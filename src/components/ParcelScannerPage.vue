@@ -15,7 +15,7 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
-const loginManager = useLoginManager()
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)

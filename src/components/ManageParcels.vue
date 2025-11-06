@@ -14,7 +14,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
-const loginManager = useLoginManager()
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)

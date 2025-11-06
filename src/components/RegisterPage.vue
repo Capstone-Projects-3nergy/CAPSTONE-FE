@@ -71,7 +71,7 @@ const dormList = ref([]) // [{ dormId, dormName }]
 // })
 onMounted(async () => {
   authManager.loadUserFromLocalStorage()
-
+  console.log(authManager)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)

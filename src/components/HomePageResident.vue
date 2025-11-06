@@ -24,7 +24,7 @@ const showStaffParcels = ref(false)
 const showAnnouncement = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
-const loginManager = useLoginManager()
+const loginManager = useAuthManager()
 const parcels = ref([
   {
     id: 1,
