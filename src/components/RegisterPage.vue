@@ -4,9 +4,11 @@ import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import { useRegisterManager } from '@/stores/RegisterManager.js'
+// import { useRegisterManager } from '@/stores/RegisterManager.js'
+import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useRegisterManager
 import AlertPopUp from './AlertPopUp.vue'
-const registerStore = useRegisterManager()
+// const registerStore = useRegisterManager()
+const authManager = useAuthManager() // ✅ ใช้ store เดียว
 const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
@@ -67,10 +69,9 @@ const dormList = ref([]) // [{ dormId, dormName }]
 //     return name.match(new RegExp(`\\b${type}\\b`)) // match คำเต็ม
 //   })
 // })
-
 onMounted(async () => {
-  registerStore.loadUserFromLocalStorage()
-  console.log('🔹 User loaded:', registerStore.userData)
+  authManager.loadUserFromLocalStorage()
+
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
@@ -80,92 +81,246 @@ onMounted(async () => {
       headers: { Accept: 'application/json' }
     })
 
-    console.log('API response full:', res)
-
-    // ตรวจสอบว่าข้อมูลอยู่ใน data หรือ data.data
     const dataList = res.data?.data ?? res.data
-    console.log('Dorm data after check:', dataList)
-    console.log(form.dormType)
-    // ถ้ามันว่าง ให้ใส่ fallback เผื่อ dropdown ไม่ empty
-    if (!Array.isArray(dataList) || dataList.length === 0) {
-      console.warn('Dorm list empty, using fallback data')
-      dormList.value = [
-        { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-        { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
-      ]
-    } else {
-      dormList.value = dataList.map((d) => ({
-        dormId: Number(d.dormId),
-        dormName: d.dormName
-      }))
-    }
+    dormList.value =
+      Array.isArray(dataList) && dataList.length > 0
+        ? dataList.map((d) => ({
+            dormId: Number(d.dormId),
+            dormName: d.dormName
+          }))
+        : [
+            { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+            { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+          ]
   } catch (err) {
     console.error('❌ Cannot fetch dorm list', err)
-    // ใช้ fallback data
     dormList.value = [
       { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
       { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
     ]
   }
 })
-// หลังสมัครเสร็จค่อยเช็ก
-// const handleRegister = async () => {
-//   await registerStore.registerAccount(form)
 
-//   // ✅ ปลอดภัยด้วย ?. (optional chaining)
-//   if (registerStore.userData?.email === form.email) {
-//     isEmailDuplicate.value = true
-//   } else {
+// onMounted(async () => {
+//   registerStore.loadUserFromLocalStorage()
+//   console.log('🔹 User loaded:', registerStore.userData)
+//   try {
+//     const baseURL = import.meta.env.VITE_BASE_URL
+//     console.log('Base URL:', baseURL)
+//     if (!baseURL) throw new Error('VITE_BASE_URL not set')
+
+//     const res = await axios.get(`${baseURL}/public/dorms`, {
+//       headers: { Accept: 'application/json' }
+//     })
+
+//     console.log('API response full:', res)
+
+//     // ตรวจสอบว่าข้อมูลอยู่ใน data หรือ data.data
+//     const dataList = res.data?.data ?? res.data
+//     console.log('Dorm data after check:', dataList)
+//     console.log(form.dormType)
+//     // ถ้ามันว่าง ให้ใส่ fallback เผื่อ dropdown ไม่ empty
+//     if (!Array.isArray(dataList) || dataList.length === 0) {
+//       console.warn('Dorm list empty, using fallback data')
+//       dormList.value = [
+//         { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+//         { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//       ]
+//     } else {
+//       dormList.value = dataList.map((d) => ({
+//         dormId: Number(d.dormId),
+//         dormName: d.dormName
+//       }))
+//     }
+//   } catch (err) {
+//     console.error('❌ Cannot fetch dorm list', err)
+//     // ใช้ fallback data
+//     dormList.value = [
+//       { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+//       { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//     ]
+//   }
+// })
+
+// const submitForm = async (roleType) => {
+//   try {
+//     // เช็ค password match
+//     if (form.password !== form.confirmPassword) {
+//       isNotMatch.value = true
+//       setTimeout(() => {
+//         isNotMatch.value = false
+//       }, 3000)
+//       return
+//     }
+
+//     // เช็ค fullName อย่างน้อย 6 ตัวอักษร
+//     if (!form.fullName || form.fullName.trim().length < 6) {
+//       isFullNameWeak.value = true
+//       setTimeout(() => {
+//         isFullNameWeak.value = false
+//       }, 3000)
+//       return
+//     }
+//     if (/\d/.test(form.fullName)) {
+//       isFullNameWrong.value = true
+//       setTimeout(() => {
+//         isFullNameWrong.value = false
+//       }, 3000)
+//       return
+//     }
+
+//     // เช็ค password อย่างน้อย 6 ตัวอักษร
+//     if (!form.password || form.password.length < 6) {
+//       isPasswordWeak.value = true
+//       setTimeout(() => {
+//         isPasswordWeak.value = false
+//       }, 3000)
+//       return
+//     }
+
+//     // ✅ เช็ค email ต้องเป็น @gmail.com
+//     if (!form.email || !form.email.endsWith('@gmail.com')) {
+//       incorrectemailform.value = true
+//       setTimeout(() => {
+//         incorrectemailform.value = false
+//       }, 3000)
+//       return
+//     }
+
+//     const [firstName, lastName] = (form.fullName || '').split(' ')
+//     const roleUpper = String(roleType).toUpperCase()
+//     const payload =
+//       roleUpper === 'RESIDENT'
+//         ? {
+//             email: form.email,
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             dormId: Number(form.dormId),
+//             roomNumber: (form.roomNumber || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName
+//           }
+//         : {
+//             email: form.email,
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             position: (form.position || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName
+//           }
+
+//     // Guard ฝั่ง front-end
+//     if (roleUpper === 'RESIDENT') {
+//       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
+//         isNoDorm.value = true
+//         setTimeout(() => {
+//           isNoDorm.value = false
+//         }, 3000)
+//         return
+//       }
+//       if (!payload.roomNumber) {
+//         isRoomRequired.value = true
+//         setTimeout(() => {
+//           isRoomRequired.value = false
+//         }, 3000)
+//         return
+//       }
+//     } else if (roleUpper === 'STAFF') {
+//       if (!payload.position) {
+//         isPositionRequired.value = true
+//         setTimeout(() => {
+//           isPositionRequired.value = false
+//         }, 3000)
+//         return
+//       }
+//     }
+//     // ✅ เช็คว่ามีตัวเลขใน position หรือไม่
+//     if (/\d/.test(payload.position)) {
+//       isPositionWrong.value = true
+//       setTimeout(() => {
+//         isPositionWrong.value = false
+//       }, 3000)
+//       return
+//     }
+
+//     // เรียก store
+//     await registerStore.registerAccount(payload)
+//     await registerStore.registerAccount(form)
+
+//     if (registerStore.userData?.email === form.email) {
+//       isEmailDuplicate.value = true
+//       setTimeout(() => {
+//         isEmailDuplicate.value = true
+//       }, 3000)
+//       return
+//     }
+//     // ล้างข้อมูลหลัง register
+//     // 🔹 เคลียร์ฟอร์มหลัง register
+//     // 🔹 เคลียร์ฟอร์มหลัง register
+//     Object.keys(form).forEach((key) => {
+//       // ถ้าเป็น dormId → รีเซ็ตเป็น null
+//       if (key === 'dormId') {
+//         form[key] = null
+//       } else if (key === 'dormType') {
+//         form[key] === 'female dormitory'
+//       } else {
+//         form[key] = ''
+//       }
+//     })
+//     // form.password = ''
+//     // form.confirmPassword = ''
+//     success.value = true
+//     setTimeout(() => {
+//       success.value = false
+//     }, 3000)
+
+//     // router.push({ name: 'login' })
+//   } catch (err) {
+//     console.error('❌ Register error:', err)
 //     error.value = true
+//     setTimeout(() => {
+//       error.value = false
+//     }, 3000)
 //   }
 // }
+// ---------------- REGISTER FUNCTION ----------------
 const submitForm = async (roleType) => {
   try {
-    // เช็ค password match
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
-      setTimeout(() => {
-        isNotMatch.value = false
-      }, 3000)
+      setTimeout(() => (isNotMatch.value = false), 3000)
       return
     }
 
-    // เช็ค fullName อย่างน้อย 6 ตัวอักษร
     if (!form.fullName || form.fullName.trim().length < 6) {
       isFullNameWeak.value = true
-      setTimeout(() => {
-        isFullNameWeak.value = false
-      }, 3000)
+      setTimeout(() => (isFullNameWeak.value = false), 3000)
       return
     }
+
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
-      setTimeout(() => {
-        isFullNameWrong.value = false
-      }, 3000)
+      setTimeout(() => (isFullNameWrong.value = false), 3000)
       return
     }
 
-    // เช็ค password อย่างน้อย 6 ตัวอักษร
     if (!form.password || form.password.length < 6) {
       isPasswordWeak.value = true
-      setTimeout(() => {
-        isPasswordWeak.value = false
-      }, 3000)
+      setTimeout(() => (isPasswordWeak.value = false), 3000)
       return
     }
 
-    // ✅ เช็ค email ต้องเป็น @gmail.com
     if (!form.email || !form.email.endsWith('@gmail.com')) {
       incorrectemailform.value = true
-      setTimeout(() => {
-        incorrectemailform.value = false
-      }, 3000)
+      setTimeout(() => (incorrectemailform.value = false), 3000)
       return
     }
 
     const [firstName, lastName] = (form.fullName || '').split(' ')
     const roleUpper = String(roleType).toUpperCase()
+
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -188,81 +343,55 @@ const submitForm = async (roleType) => {
             fullName: form.fullName
           }
 
-    // Guard ฝั่ง front-end
     if (roleUpper === 'RESIDENT') {
       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
         isNoDorm.value = true
-        setTimeout(() => {
-          isNoDorm.value = false
-        }, 3000)
+        setTimeout(() => (isNoDorm.value = false), 3000)
         return
       }
       if (!payload.roomNumber) {
         isRoomRequired.value = true
-        setTimeout(() => {
-          isRoomRequired.value = false
-        }, 3000)
+        setTimeout(() => (isRoomRequired.value = false), 3000)
         return
       }
     } else if (roleUpper === 'STAFF') {
       if (!payload.position) {
         isPositionRequired.value = true
-        setTimeout(() => {
-          isPositionRequired.value = false
-        }, 3000)
+        setTimeout(() => (isPositionRequired.value = false), 3000)
+        return
+      }
+      if (/\d/.test(payload.position)) {
+        isPositionWrong.value = true
+        setTimeout(() => (isPositionWrong.value = false), 3000)
         return
       }
     }
-    // ✅ เช็คว่ามีตัวเลขใน position หรือไม่
-    if (/\d/.test(payload.position)) {
-      isPositionWrong.value = true
-      setTimeout(() => {
-        isPositionWrong.value = false
-      }, 3000)
-      return
-    }
 
-    // เรียก store
-    await registerStore.registerAccount(payload)
-    await registerStore.registerAccount(form)
+    // ✅ เรียกใช้ register จาก AuthManager
+    await authManager.registerAccount(payload)
 
-    if (registerStore.userData?.email === form.email) {
+    // ถ้ามี email ซ้ำจาก backend
+    if (authManager.errorMessage?.includes('duplicate')) {
       isEmailDuplicate.value = true
-      setTimeout(() => {
-        isEmailDuplicate.value = true
-      }, 3000)
+      setTimeout(() => (isEmailDuplicate.value = false), 3000)
       return
     }
-    // ล้างข้อมูลหลัง register
-    // 🔹 เคลียร์ฟอร์มหลัง register
-    // 🔹 เคลียร์ฟอร์มหลัง register
-    Object.keys(form).forEach((key) => {
-      // ถ้าเป็น dormId → รีเซ็ตเป็น null
-      if (key === 'dormId') {
-        form[key] = null
-      } else if (key === 'dormType') {
-        form[key] === 'female dormitory'
-      } else {
-        form[key] = ''
-      }
-    })
-    // form.password = ''
-    // form.confirmPassword = ''
-    success.value = true
-    setTimeout(() => {
-      success.value = false
-    }, 3000)
 
-    // router.push({ name: 'login' })
+    // ✅ ล้างฟอร์มหลังสำเร็จ
+    Object.keys(form).forEach((key) => {
+      if (key === 'dormId') form[key] = null
+      else if (key === 'dormType') form[key] = 'female dormitory'
+      else form[key] = ''
+    })
+
+    success.value = true
+    setTimeout(() => (success.value = false), 3000)
   } catch (err) {
     console.error('❌ Register error:', err)
     error.value = true
-    setTimeout(() => {
-      error.value = false
-    }, 3000)
+    setTimeout(() => (error.value = false), 3000)
   }
 }
-
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
