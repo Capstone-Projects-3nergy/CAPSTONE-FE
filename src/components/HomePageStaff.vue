@@ -10,11 +10,12 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useRegisterManager } from '@/stores/RegisterManager.js'
-import { useLoginManager } from '@/stores/LoginManager'
-const registerStore = useRegisterManager()
-const loginStore = useLoginManager()
-const loginManager = useLoginManager()
+// import { useRegisterManager } from '@/stores/RegisterManager.js'
+// import { useLoginManager } from '@/stores/LoginManager'
+import { useAuthManager } from '@/stores/AuthManager.js'
+const registerStore = useAuthManager()
+const loginStore = useAuthManager()
+const loginManager = useAuthManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
@@ -115,7 +116,8 @@ const parcels = ref([
 ])
 // console.log(loginStore.user.email)
 registerStore.loadUserFromLocalStorage()
-console.log(registerStore.userData)
+console.log(registerStore.user.value)
+
 const currentUser = ref('Pimpajee SetXXXXXX')
 </script>
 
