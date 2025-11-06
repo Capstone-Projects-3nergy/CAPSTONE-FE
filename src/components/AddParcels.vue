@@ -22,106 +22,52 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
+// 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
+const parcelData = ref({
+  trackingNumber: '',
+  recipientName: '',
+  roomNumber: '',
+  parcelType: '',
+  contact: '',
+  status: '',
+  pickupAt: '',
+  updateAt: '',
+  senderName: '',
+  companyId: '',
+  receiveAt: ''
+})
+
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
+
+// 🟩 ฟังก์ชันบันทึกข้อมูล (เชื่อม backend + store)
+const saveParcel = async () => {
+  try {
+    console.log('🚀 Sending parcel to backend...', parcelData.value)
+
+    // 🔹 เรียก API backend
+    const response = await axios.post(
+      'https://your-backend-api.com/api/parcels',
+      parcelData.value
+    )
+
+    // 🔹 สมมติ backend ส่งข้อมูลกลับมา (พร้อม id)
+    const savedParcel = response.data
+
+    // ✅ เก็บข้อมูลลง Pinia store
+    parcelStore.addParcel(savedParcel)
+
+    console.log('✅ Parcel saved successfully:', savedParcel)
+
+    // 🔹 กลับไปหน้า Manage Parcel
+    router.replace({ name: 'staffparcels' })
+  } catch (error) {
+    console.error('❌ Failed to add parcel:', error)
+  }
+}
+
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
@@ -602,18 +548,15 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <!-- 🏷️ Breadcrumb Text -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-
-          <!-- 📨 Next title -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
 
         <!-- Form -->
-        <form class="bg-white p-6 rounded-lg shadow space-y-6">
-          <!-- Row 1 -->
-          <!-- Header -->
-          <!-- แถวบนสุด: Title + ปุ่ม -->
+        <form
+          class="bg-white p-6 rounded-lg shadow space-y-6"
+          @submit.prevent="saveParcel"
+        >
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
             <ButtonWeb
@@ -623,26 +566,31 @@ const toggleSidebar = () => {
               class="w-full md:w-auto"
             />
           </div>
+
+          <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
               <input
+                v-model="parcelData.trackingNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Recipient Name</label>
               <input
+                v-model="parcelData.recipientName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Room Number</label>
               <input
+                v-model="parcelData.roomNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -652,22 +600,25 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Parcel Type</label>
               <input
+                v-model="parcelData.parcelType"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Contact</label>
               <input
+                v-model="parcelData.contact"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <input
+                v-model="parcelData.status"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -677,15 +628,17 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
+                v-model="parcelData.pickupAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Update at</label>
               <input
+                v-model="parcelData.updateAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -697,47 +650,37 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
+                v-model="parcelData.senderName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Company ID</label>
               <input
+                v-model="parcelData.companyId"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Recieve at</label>
+              <label class="block font-semibold mb-1">Receive at</label>
               <input
+                v-model="parcelData.receiveAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="" />
+            <ButtonWeb label="Save" color="green" @click="saveParcel" />
             <ButtonWeb
               label="Cancel"
               color="red"
-              @click="showManageParcelPage"
+              @click="() => router.replace({ name: 'staffparcels' })"
             />
-            <!-- <button
-              type="submit"
-              class="px-4 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 cursor-pointer"
-            >
-              Save
-            </button> -->
-            <!-- <button
-              @click="showManageParcelPage"
-              type="button"
-              class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 cursor-pointer"
-            >
-              Cancel
-            </button> -->
           </div>
         </form>
       </main>
