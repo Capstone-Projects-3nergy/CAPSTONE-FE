@@ -81,18 +81,18 @@ export const useLoginManager = defineStore('loginManager', () => {
       isLoading.value = false
     }
   }
-
+  // Logout ต้องล้างค่า Pinia และ router
   const logoutAccount = async (router) => {
-    registerStore.logout()
     try {
       await signOut(auth)
-      user.value = null
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('userRole')
-      localStorage.removeItem('userName')
-      if (router) router.replace({ name: 'login' })
     } catch (err) {
       console.error('Logout error:', err)
+    } finally {
+      user.value = null
+      registerStore.userData = null
+      localStorage.clear() // ล้างทั้งหมดเพื่อป้องกัน leak
+      router.replace({ name: 'login' })
+      window.location.reload() // optional
     }
   }
 
@@ -152,36 +152,21 @@ export const useLoginManager = defineStore('loginManager', () => {
     return true
   }
 
-  const useAuthGuard = async (router) => {
-    await router.isReady()
-
+  const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
       const publicPages = ['login', 'register', 'resetpassword']
-      const accessToken = localStorage.getItem('accessToken')
-      const userRole = localStorage.getItem('userRole')
 
-      // หน้า login / register → ล้างข้อมูลเก่า
-      if (to.name === 'login' || to.name === 'register') {
-        user.value = null
-        registerStore.userData = null
-      }
-
-      // Restore user
-      if (!user.value && accessToken) {
-        const restored = restoreUserFromLocalStorage()
-        if (!restored && !publicPages.includes(to.name)) {
-          return next({ name: 'login' })
-        }
-      }
-
-      // Public pages → เข้าถึงได้
+      // ถ้า public page → ผ่าน
       if (publicPages.includes(to.name)) return next()
 
-      // ไม่มี token → กลับ login
-      if (!accessToken) return next({ name: 'login' })
+      // ตรวจ user จาก store
+      if (!user.value) {
+        // ไม่มี user → redirect login
+        return next({ name: 'login' })
+      }
 
       // ตรวจ token หมดอายุ
-      const decoded = decodeJWT(accessToken)
+      const decoded = decodeJWT(user.value.accessToken)
       const now = Math.floor(Date.now() / 1000)
       if (decoded?.exp && decoded.exp < now) {
         const newToken = await refreshToken()
@@ -189,12 +174,14 @@ export const useLoginManager = defineStore('loginManager', () => {
       }
 
       // ตรวจ role
-      if (to.name === 'home' && userRole !== 'RESIDENT')
+      if (
+        (to.name === 'home' && user.value.role !== 'RESIDENT') ||
+        (to.name === 'homestaff' && user.value.role !== 'STAFF')
+      ) {
         return next({ name: 'login' })
-      if (to.name === 'homestaff' && userRole !== 'STAFF')
-        return next({ name: 'login' })
+      }
 
-      return next()
+      next()
     })
   }
 
