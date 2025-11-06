@@ -5,9 +5,9 @@ export const useParcelManager = defineStore('parcelManager', () => {
   // 📦 State
   const parcels = reactive([])
 
-  // 📄 Structure of one parcel (for reference)
+  // 📄 โครงสร้างข้อมูลแต่ละพัสดุ (ตัวอย่าง)
   // {
-  //   id: 1,
+  //   parcelId: 1,
   //   trackingNumber: '',
   //   recipientName: '',
   //   roomNumber: '',
@@ -36,17 +36,18 @@ export const useParcelManager = defineStore('parcelManager', () => {
   // 🟨 Add
   const addParcel = (newParcel) => {
     parcels.push({
-      id: Date.now(), // สร้าง id อัตโนมัติ
+      parcelId: Date.now(), // 🔹 ใช้ parcelId แทน id
       ...newParcel
     })
     console.log('🆕 Parcel added:', newParcel)
   }
 
   // 🟧 Edit
-  const findIndexById = (id) => parcels.findIndex((el) => el.id === id)
+  const findIndexByParcelId = (parcelId) =>
+    parcels.findIndex((el) => el.parcelId === parcelId)
 
-  const editParcel = (id, updatedParcel) => {
-    const index = findIndexById(id)
+  const editParcel = (parcelId, updatedParcel) => {
+    const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
       parcels[index] = { ...parcels[index], ...updatedParcel }
       console.log('✏️ Edited parcel:', parcels[index])
@@ -54,15 +55,15 @@ export const useParcelManager = defineStore('parcelManager', () => {
   }
 
   // 🟥 Delete
-  const deleteParcel = (id) => {
-    const index = findIndexById(id)
+  const deleteParcel = (parcelId) => {
+    const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
       console.log('🗑️ Deleted parcel:', parcels[index])
       parcels.splice(index, 1)
     }
   }
 
-  // 🔍 Find by status or tracking
+  // 🔍 Find by status or tracking number
   const findByStatus = (status) => parcels.filter((el) => el.status === status)
   const findByTracking = (trackingNumber) =>
     parcels.find((el) => el.trackingNumber === trackingNumber)
