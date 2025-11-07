@@ -84,7 +84,16 @@ export const useAuthManager = defineStore('authManager', () => {
       }
 
       saveUserToLocalStorage(user.value)
+      // ✅ รอ tick ก่อนเปลี่ยนหน้า
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
       successMessage.value = 'Account created successfully!'
+      if (router) {
+        if (data.role === 'RESIDENT')
+          router.replace({ name: 'home', params: { id: data.userId } })
+        else if (data.role === 'STAFF')
+          router.replace({ name: 'homestaff', params: { id: data.userId } })
+      }
     } catch (error) {
       errorMessage.value =
         error?.response?.data?.message ||
@@ -165,13 +174,14 @@ export const useAuthManager = defineStore('authManager', () => {
     } finally {
       user.value = null
       localStorage.clear()
-      router?.replace({ name: 'login' })
-      window.location.reload()
+      await router?.replace({ name: 'login' })
+      // ❌ อย่าทำ reload — ปล่อยให้ guard handle เอง
     }
   }
 
   // 🟡 โหลดจาก localStorage
   const loadUserFromLocalStorage = () => {
+    const id = localStorage.getItem('userId')
     const token = localStorage.getItem('accessToken')
     const role = localStorage.getItem('userRole')
     const name = localStorage.getItem('userName')
@@ -183,6 +193,7 @@ export const useAuthManager = defineStore('authManager', () => {
     if (!token || !role) return false
 
     user.value = {
+      id, // ✅ restore กลับ
       email,
       fullName: name,
       role,
@@ -265,6 +276,7 @@ export const useAuthManager = defineStore('authManager', () => {
   // 🧰 helper: save user -> localStorage
   const saveUserToLocalStorage = (u) => {
     if (!u) return
+    localStorage.setItem('userId', u.id) // ✅
     localStorage.setItem('accessToken', u.accessToken)
     localStorage.setItem('userRole', u.role)
     localStorage.setItem('userEmail', u.email)
