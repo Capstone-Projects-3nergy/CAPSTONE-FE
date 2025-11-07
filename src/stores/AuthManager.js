@@ -10,13 +10,14 @@ import {
 import { jwtDecode } from 'jwt-decode'
 
 export const useAuthManager = defineStore('authManager', () => {
-  // 🟦 State
+  // -----------------------
+  // STATE
+  // -----------------------
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
 
-  // 🧩 ฟังก์ชัน decode JWT
   const decodeJWT = (token) => {
     try {
       return jwtDecode(token)
@@ -25,8 +26,10 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // 🟢 Register (สมัครสมาชิก)
-  const registerAccount = async (formData) => {
+  // -----------------------
+  // REGISTER
+  // -----------------------
+  const registerAccount = async (formData, router) => {
     isLoading.value = true
     errorMessage.value = ''
     successMessage.value = ''
@@ -43,8 +46,10 @@ export const useAuthManager = defineStore('authManager', () => {
         const dormIdNum = Number(formData.dormId)
         if (!Number.isFinite(dormIdNum) || dormIdNum <= 0)
           throw new Error('Please select a valid dormitory.')
+
         if (!formData.roomNumber?.trim())
           throw new Error('Room number is required.')
+
         payload = {
           ...payload,
           dormId: dormIdNum,
@@ -53,17 +58,21 @@ export const useAuthManager = defineStore('authManager', () => {
       } else if (role === 'STAFF') {
         if (!formData.position?.trim())
           throw new Error('Position is required for staff.')
+
         payload = { ...payload, position: formData.position.trim() }
       }
 
+      // ✅ Register backend
       const baseURL = import.meta.env.VITE_BASE_URL
       const response = await axios.post(
         `${baseURL}/public/auth/register`,
         payload
       )
+
       if (!response.data?.userId)
         throw new Error('Registration failed on backend.')
 
+      // ✅ Register Firebase
       const cred = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -79,20 +88,26 @@ export const useAuthManager = defineStore('authManager', () => {
         accessToken: idToken,
         ...(role === 'STAFF' ? { position: formData.position } : {}),
         ...(role === 'RESIDENT'
-          ? { dormId: formData.dormId, roomNumber: formData.roomNumber }
+          ? {
+              dormId: formData.dormId,
+              roomNumber: formData.roomNumber
+            }
           : {})
       }
 
       saveUserToLocalStorage(user.value)
-      // ✅ รอ tick ก่อนเปลี่ยนหน้า
-      await new Promise((resolve) => setTimeout(resolve, 200))
 
       successMessage.value = 'Account created successfully!'
+
+      // ✅ Redirect correctly
       if (router) {
-        if (data.role === 'RESIDENT')
-          router.replace({ name: 'home', params: { id: data.userId } })
-        else if (data.role === 'STAFF')
-          router.replace({ name: 'homestaff', params: { id: data.userId } })
+        if (role === 'RESIDENT')
+          router.replace({ name: 'home', params: { id: response.data.userId } })
+        else if (role === 'STAFF')
+          router.replace({
+            name: 'homestaff',
+            params: { id: response.data.userId }
+          })
       }
     } catch (error) {
       errorMessage.value =
@@ -104,13 +119,16 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // 🟣 Login (เข้าสู่ระบบ)
+  // -----------------------
+  // LOGIN
+  // -----------------------
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
     errorMessage.value = ''
     successMessage.value = ''
 
     try {
+      // ✅ Firebase sign in
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -119,6 +137,7 @@ export const useAuthManager = defineStore('authManager', () => {
       const firebaseUser = userCredential.user
       const idToken = await firebaseUser.getIdToken()
 
+      // ✅ Backend verify
       const response = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/api/auth/verify`,
         { headers: { Authorization: `Bearer ${idToken}` } }
@@ -126,31 +145,33 @@ export const useAuthManager = defineStore('authManager', () => {
       const data = response.data
       if (!data?.authenticated) throw new Error('Verify failed')
 
+      // ✅ Build user object safely
+      const role = data.role
+
       user.value = {
         id: data.userId,
         email: data.email,
         fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
-        role: data.role,
+        role,
         accessToken: idToken,
-        ...(data.role === 'STAFF' ? { position: data.position ?? '' } : {}),
-        ...(data.role === 'RESIDENT'
+        ...(role === 'STAFF' ? { position: data.position ?? null } : {}),
+        ...(role === 'RESIDENT'
           ? {
-              dormId: Number(
-                (data.dormId ?? localStorage.getItem('dormId')) || 0
-              ),
-              roomNumber:
-                (data.roomNumber ?? localStorage.getItem('roomNumber')) || ''
+              dormId: data.dormId ?? null,
+              roomNumber: data.roomNumber ?? null
             }
           : {})
       }
 
       saveUserToLocalStorage(user.value)
-      successMessage.value = `Login successful as ${data.role}!`
 
+      successMessage.value = `Login successful as ${role}!`
+
+      // ✅ Redirect
       if (router) {
-        if (data.role === 'RESIDENT')
+        if (role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
-        else if (data.role === 'STAFF')
+        else if (role === 'STAFF')
           router.replace({ name: 'homestaff', params: { id: data.userId } })
       }
 
@@ -165,7 +186,10 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // 🔴 Logout
+  // -----------------------
+  // LOGOUT
+  // -----------------------
+  // ✅ Logout แบบถูกต้อง
   const logoutAccount = async (router) => {
     try {
       await signOut(auth)
@@ -173,13 +197,25 @@ export const useAuthManager = defineStore('authManager', () => {
       console.error('Logout error:', err)
     } finally {
       user.value = null
-      localStorage.clear()
+
+      // ✅ ลบเฉพาะข้อมูลของ auth ไม่ลบทิ้งทั้งหมด
+      localStorage.removeItem('userId')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('userRole')
+      localStorage.removeItem('userEmail')
+      localStorage.removeItem('userName')
+      // localStorage.removeItem('position')
+      // localStorage.removeItem('dormId')
+      localStorage.removeItem('roomNumber')
+
+      // ✅ กลับหน้า login
       await router?.replace({ name: 'login' })
-      // ❌ อย่าทำ reload — ปล่อยให้ guard handle เอง
     }
   }
 
-  // 🟡 โหลดจาก localStorage
+  // -----------------------
+  // LOAD LOCAL STORAGE
+  // -----------------------
   const loadUserFromLocalStorage = () => {
     const id = localStorage.getItem('userId')
     const token = localStorage.getItem('accessToken')
@@ -193,19 +229,23 @@ export const useAuthManager = defineStore('authManager', () => {
     if (!token || !role) return false
 
     user.value = {
-      id, // ✅ restore กลับ
+      id,
       email,
       fullName: name,
       role,
       accessToken: token,
       ...(role === 'STAFF' ? { position } : {}),
-      ...(role === 'RESIDENT' ? { dormId, roomNumber } : {})
+      ...(role === 'RESIDENT'
+        ? { dormId: dormId ?? null, roomNumber: roomNumber ?? null }
+        : {})
     }
 
     return true
   }
 
-  // 🧠 Refresh token
+  // -----------------------
+  // REFRESH TOKEN
+  // -----------------------
   const refreshToken = async () => {
     try {
       if (auth.currentUser) {
@@ -222,21 +262,25 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // 🌐 สำหรับเรียก API พร้อม token ตรวจสอบอัตโนมัติ
+  // -----------------------
+  // API REQUEST
+  // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
       let token = user.value?.accessToken || localStorage.getItem('accessToken')
       if (!token) throw new Error('No access token available')
 
       const decoded = decodeJWT(token)
-      const currentTime = Math.floor(Date.now() / 1000)
-      if (decoded?.exp && decoded.exp < currentTime) {
+      const now = Math.floor(Date.now() / 1000)
+
+      if (decoded?.exp && decoded.exp < now) {
         token = await refreshToken()
         if (!token) throw new Error('Token expired')
       }
 
       const headers = { ...options.headers, Authorization: `Bearer ${token}` }
       const response = await axios({ url, ...options, headers })
+
       return response.data
     } catch (err) {
       console.error('API request error:', err)
@@ -244,7 +288,9 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // 🔒 Navigation Guard (กันหน้า)
+  // -----------------------
+  // NAVIGATION GUARD
+  // -----------------------
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
       const publicPages = ['login', 'register', 'resetpassword']
@@ -252,11 +298,15 @@ export const useAuthManager = defineStore('authManager', () => {
       if (publicPages.includes(to.name)) return next()
 
       if (!user.value && !loadUserFromLocalStorage()) {
-        return next({ name: 'login' })
+        if (to.name !== 'login') {
+          return next({ name: 'login' })
+        }
+        return next()
       }
 
       const decoded = decodeJWT(user.value.accessToken)
       const now = Math.floor(Date.now() / 1000)
+
       if (decoded?.exp && decoded.exp < now) {
         const newToken = await refreshToken()
         if (!newToken) return next({ name: 'login' })
@@ -273,20 +323,23 @@ export const useAuthManager = defineStore('authManager', () => {
     })
   }
 
-  // 🧰 helper: save user -> localStorage
+  // -----------------------
+  // SAVE USER TO LOCALSTORAGE
+  // -----------------------
   const saveUserToLocalStorage = (u) => {
     if (!u) return
-    localStorage.setItem('userId', u.id) // ✅
+    localStorage.setItem('userId', u.id)
     localStorage.setItem('accessToken', u.accessToken)
     localStorage.setItem('userRole', u.role)
     localStorage.setItem('userEmail', u.email)
     localStorage.setItem('userName', u.fullName)
+
     if (u.position) localStorage.setItem('position', u.position)
-    if (u.dormId) localStorage.setItem('dormId', u.dormId)
+    if (u.dormId !== null && u.dormId !== undefined)
+      localStorage.setItem('dormId', u.dormId)
     if (u.roomNumber) localStorage.setItem('roomNumber', u.roomNumber)
   }
 
-  // 📦 export ทุกอย่าง
   return {
     user,
     isLoading,
