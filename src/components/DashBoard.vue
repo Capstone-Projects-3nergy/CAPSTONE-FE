@@ -6,11 +6,12 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-const loginManager = useLoginManager()
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -299,7 +300,7 @@ const toggleSidebar = () => {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -342,7 +343,7 @@ const toggleSidebar = () => {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -619,7 +620,7 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Dash Board</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Dash Board</h2>
         </div>
         <!-- Tabs -->
         <div class="mb-4 flex space-x-2">

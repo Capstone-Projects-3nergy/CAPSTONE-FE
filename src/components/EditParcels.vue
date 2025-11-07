@@ -1,64 +1,108 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import HomePageResident from '@/components/HomePageResident.vue'
+import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import UserInfo from '@/components/UserInfo.vue'
+import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import UserInfo from '@/components/UserInfo.vue'
+import ButtonWeb from './ButtonWeb.vue'
+import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
+import axios from 'axios'
 const loginManager = useAuthManager()
-
-const loginStore = useLoginManager()
-const showAnnouncement = ref(false)
 const router = useRouter()
-const showHomePageResident = ref(false)
+const route = useRoute()
+const parcelStore = useParcelManager()
+const showHomePageStaff = ref(false)
+const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showProfileResident = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: '101',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: '102',
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: '103',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
+const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
+// 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
+const form = ref({
+  parcel_id: '',
+  tracking_number: '',
+  recipient_name: '',
+  room_number: '',
+  parcel_type: '',
+  contact: '',
+  status: '',
+  pickup_at: '',
+  update_at: '',
+  sender_name: '',
+  company_id: '',
+  receive_at: ''
+})
+
+// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
+onMounted(async () => {
+  const parcelId = route.params.id
+  try {
+    const res = await axios.get(`http://localhost:5000/api/parcels/${parcelId}`)
+    form.value = res.data
+    console.log('📦 Loaded parcel:', res.data)
+  } catch (err) {
+    console.error('❌ Error loading parcel:', err)
   }
-  // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
-])
+})
 
-const currentUser = ref('Pimpajee SetXXXXXX')
-const myParcels = computed(() =>
-  parcels.value.filter((p) => p.recipient === currentUser.value)
-)
+// 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
+const saveParcel = async () => {
+  try {
+    const res = await axios.put(
+      `http://localhost:5000/api/parcels/${form.value.parcel_id}`,
+      form.value
+    )
 
-const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home' })
-  showHomePageResident.value = true
+    // ✅ อัปเดตใน store ด้วย (Pinia)
+    await parcelStore.updateParcel(form.value.parcel_id, res.data)
+
+    console.log('✅ Updated parcel:', res.data)
+
+    // 🔄 กลับไปหน้ารายการพัสดุ
+    router.replace({ name: 'staffparcels' })
+  } catch (err) {
+    console.error('❌ Failed to update parcel:', err)
+  }
 }
-const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
-  showAnnouncement.value = true
+
+// 🟥 ปุ่ม Cancel
+const cancelEdit = () => {
+  router.replace({ name: 'staffparcels' })
 }
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+// const showResidentParcelPage = async function () {
+//   router.replace({ name: 'residentparcels' })
+//   showResidentParcels.value = true
+// }
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+
 const returnLoginPage = async () => {
   try {
     // เรียก logoutAccount จาก store
@@ -68,11 +112,13 @@ const returnLoginPage = async () => {
     console.error('Logout failed:', err)
   }
 }
-const showProfileResidentPage = async function () {
-  router.replace({
-    name: 'profileresident'
-  })
-  showProfileResident.value = true
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
@@ -102,7 +148,6 @@ const toggleSidebar = () => {
           />
         </svg>
       </button> -->
-
       <div
         :class="[
           'bg-[#0E4B90] text-blue-500 flex items-center justify-center h-full transition-all duration-300',
@@ -112,6 +157,7 @@ const toggleSidebar = () => {
         <!-- ปุ่มเปิด/ปิด -->
         <div class="flex justify-end p-3">
           <button @click="toggleSidebar" class="text-white focus:outline-none">
+            <!-- ไอคอน Hamburger -->
             <div class="flex items-center gap-3 p-4">
               <svg
                 width="45"
@@ -154,7 +200,6 @@ const toggleSidebar = () => {
           </button>
         </div>
       </div>
-      <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -197,7 +242,7 @@ const toggleSidebar = () => {
     </header>
 
     <!-- Body (Sidebar + Main) -->
-    <div class="flex flex-1">
+    <div class="flex flex-1 border-[#3269A8]">
       <!-- Sidebar -->
       <aside
         :class="[
@@ -244,9 +289,8 @@ const toggleSidebar = () => {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
-          <SidebarItem title="Home" @click="showHomePageResidentWeb">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
+          <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
                 width="24"
@@ -282,7 +326,7 @@ const toggleSidebar = () => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileResidentPage">
+          <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -319,7 +363,43 @@ const toggleSidebar = () => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
+          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <template #icon>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Dashboard</a
+          > -->
+          <SidebarItem
+            title=" Manage Parcel"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -335,28 +415,60 @@ const toggleSidebar = () => {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showResidentParcelPage"
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Manage Parcel</a
+          > -->
+          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+            <template #icon>
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Manage Residents</a
+          > -->
+          <SidebarItem
+            title="Manage Announcements"
+            @click="ShowManageAnnouncementPage"
           >
-            <svg
-              width="25"
-              height="25"
-              viewBox="0 0 25 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>My parcel</span>
-          </a> -->
-
-          <SidebarItem title="Announcements" @click="showAnnouncementPage">
             <template #icon>
               <svg
                 width="24"
@@ -372,26 +484,40 @@ const toggleSidebar = () => {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showAnnouncementPage"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>Announcements</span>
-          </a> -->
+          <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Manage Announcements</a
+          > -->
+          <!-- 🟢 Scarn Parcel -->
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="25"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem
@@ -425,243 +551,155 @@ const toggleSidebar = () => {
 
       <!-- Main Content -->
       <main class="flex-1 p-6">
-        <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
+        <div class="flex items-center space-x-2 mb-6">
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
-        <!-- Tabs -->
-        <div
-          class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
+
+        <form
+          class="bg-white p-6 rounded-lg shadow space-y-6"
+          @submit.prevent="saveParcel"
         >
-          <!-- Left: Date Label + Tabs -->
-          <div class="flex items-center space-x-4">
-            <span class="font-bold text-blue-600">Date</span>
-            <div class="flex rounded bg-gray-100 overflow-hidden">
-              <button
-                :class="
-                  tab === 'day'
-                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
-                    : 'px-4 py-2 text-gray-400'
-                "
-                @click="tab = 'day'"
-              >
-                Day
-              </button>
-              <button
-                :class="
-                  tab === 'month'
-                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
-                    : 'px-4 py-2 text-gray-400'
-                "
-                @click="tab = 'month'"
-              >
-                Month
-              </button>
-              <button
-                :class="
-                  tab === 'year'
-                    ? 'px-4 py-2 bg-blue-600 text-white font-medium'
-                    : 'px-4 py-2 text-gray-400'
-                "
-                @click="tab = 'year'"
-              >
-                Year
-              </button>
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
+            <ButtonWeb
+              label="Scan Parcel"
+              color="blue"
+              @click="() => router.replace({ name: 'parcelscanner' })"
+            />
+          </div>
+
+          <!-- Row 1 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Tracking number</label>
+              <input
+                v-model="form.tracking_number"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Recipient Name</label>
+              <input
+                v-model="form.recipient_name"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Room Number</label>
+              <input
+                v-model="form.room_number"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
             </div>
           </div>
 
-          <!-- Right: Search + Sort -->
-          <div class="flex items-center space-x-4">
-            <input
-              type="text"
-              placeholder="Search..."
-              class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <select
-              class="border border-gray-300 rounded px-3 py-1 text-gray-500"
-            >
-              <option>Sort by:</option>
-            </select>
+          <!-- Row 2 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Parcel Type</label>
+              <input
+                v-model="form.parcel_type"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Contact</label>
+              <input
+                v-model="form.contact"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Status</label>
+              <input
+                v-model="form.status"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
           </div>
-        </div>
 
-        <!-- Parcels Table -->
-        <div class="bg-white rounded-lg shadow overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="text-blue-700 border-t border-b border-blue-700">
-              <tr>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  Tracking
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>Room Number</span>
-                    <svg
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  Contact
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  <div class="flex items-center gap-1">
-                    <span> Status</span>
-                    <svg
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  <div class="flex items-center gap-1">
-                    <span> Date in</span>
-                    <svg
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                >
-                  Operation
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="p in myParcels" :key="p.id">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.tracking }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.recipient }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.room }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.contact }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <span
-                    class="px-3 py-1 rounded-full text-sm font-semibold text-white"
-                    :class="{
-                      'bg-yellow-400': p.status === 'Pending',
-                      'bg-green-400': p.status === 'Picked Up',
-                      'bg-gray-400': p.status === 'In Transit'
-                    }"
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ p.date }}
-                </td>
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 cursor-pointer"
-                >
-                  Action
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <!-- Row 3 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Pickup at</label>
+              <input
+                v-model="form.pickup_at"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Update at</label>
+              <input
+                v-model="form.update_at"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
 
-        <!-- Pagination -->
-        <div class="mt-4 flex justify-end space-x-2 text-sm">
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Previous</button>
-          <button class="px-3 py-1 rounded bg-blue-700 text-white">01</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">02</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">03</button>
-          <span>...</span>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next</button>
-        </div>
+          <hr class="border-t border-[#3269A8] my-4" />
+
+          <!-- Row 4 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-semibold mb-1">Sender Name</label>
+              <input
+                v-model="form.sender_name"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Company ID</label>
+              <input
+                v-model="form.company_id"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1">Receive at</label>
+              <input
+                v-model="form.receive_at"
+                type="text"
+                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex justify-end space-x-2 mt-6">
+            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
+          </div>
+        </form>
       </main>
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePageResident"
-    ><HomePageResident
-  /></Teleport>
-
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <Teleport to="body" v-if="showParcelScanner">
+    <StaffParcelsPage> </StaffParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="showResidentParcels">
+    <ResidentParcelsPage> </ResidentParcelsPage>
+  </Teleport>
+  <Teleport to="body" v-if="showStaffParcels">
+    <StaffParcelsPage> </StaffParcelsPage>
+  </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
+  <Teleport to="body" v-if="showDashBoard">
+    <DashBoard> </DashBoard>
+  </Teleport>
 </template>
-
-<style scoped>
-/* เพิ่มเงาหรือการปรับปรุงเล็กน้อย */
-</style>

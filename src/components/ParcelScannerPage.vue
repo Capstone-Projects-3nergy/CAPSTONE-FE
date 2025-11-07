@@ -14,7 +14,9 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-const loginManager = useLoginManager()
+import AddParcels from '@/components/AddParcels.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -28,6 +30,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
+const showAddParcels = ref(false)
 // ฟอร์มปัจจุบัน
 const form = reactive({
   field1: '', // ชื่อผู้รับ
@@ -44,7 +47,10 @@ let html5QrCode = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const isCameraReady = ref(false)
-
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
+}
 // -------- OCR function (คงเดิม) ----------
 async function extractParcelInfo(imageDataUrl) {
   try {
@@ -491,7 +497,7 @@ const showProfileStaffPage = async function () {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -534,7 +540,7 @@ const showProfileStaffPage = async function () {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y bg-[#0E4B90] divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y bg-[#0E4B90] divide-[#0e4b90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -647,7 +653,11 @@ const showProfileStaffPage = async function () {
 
             <span>Dashboard</span>
           </a> -->
-          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+          <SidebarItem
+            title=" Manage Parcel"
+            @click="showManageParcelPage"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -750,7 +760,7 @@ const showProfileStaffPage = async function () {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
+          <!-- <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -765,7 +775,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
         </nav>
         <!-- Log Out -->
         <SidebarItem
@@ -801,6 +811,22 @@ const showProfileStaffPage = async function () {
       <main class="flex-1 p-6">
         <div class="flex space-x-1">
           <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+              fill="#185DC0"
+            />
+          </svg>
+
+          <!-- 🏷️ Breadcrumb Text -->
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
+
+          <!-- <svg
             width="36"
             height="36"
             viewBox="0 0 36 36"
@@ -814,9 +840,9 @@ const showProfileStaffPage = async function () {
               stroke-linecap="round"
               stroke-linejoin="round"
             />
-          </svg>
+          </svg> -->
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Parcel Scanner</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
@@ -1041,6 +1067,19 @@ const showProfileStaffPage = async function () {
 
             <!-- Right side -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
+              <div class="flex items-center justify-end mb-4">
+                <h2
+                  @click="showAddParcelPage"
+                  class="text-2xl font-bold text-[#185dc0] mb-4 cursor-pointer"
+                >
+                  < Go Back To Add
+                </h2>
+                <!-- <ButtonWeb
+                  label="Add Parcels Page"
+                  color="blue"
+                  @click="showAddParcelPage"
+                /> -->
+              </div>
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>

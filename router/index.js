@@ -12,6 +12,10 @@ import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
 import ProfileResident from '@/components/ProfileResident.vue'
 import ProfileStaff from '@/components/ProfileStaff.vue'
+import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
+import AddParcels from '@/components/AddParcels.vue'
+import EditParcels from '@/components/EditParcels.vue'
+import ParcelsDetail from '@/components/ParcelsDetail.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -30,6 +34,12 @@ const routes = [
     path: '/registerpage',
     name: 'register',
     component: RegisterPage
+  },
+  ,
+  {
+    path: '/resetpasswordpage',
+    name: 'resetpassword',
+    component: ResetPasswordPage
   },
 
   // Resident
@@ -90,6 +100,21 @@ const routes = [
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/addparcel',
+    name: 'addparcels',
+    component: AddParcels
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/editparcel',
+    name: 'editparcels',
+    component: EditParcels
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/detailparcel',
+    name: 'detailparcels',
+    component: ParcelsDetail
   }
 ]
 

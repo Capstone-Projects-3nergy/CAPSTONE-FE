@@ -9,7 +9,8 @@ import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-const loginManager = useLoginManager()
+import { useAuthManager } from '@/stores/AuthManager.js'
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -283,7 +284,7 @@ const showProfileStaffPage = async function () {
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -326,7 +327,7 @@ const showProfileStaffPage = async function () {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -599,7 +600,7 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
             Manage Announcements
           </h2>
         </div>

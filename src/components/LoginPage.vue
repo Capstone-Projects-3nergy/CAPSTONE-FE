@@ -5,92 +5,106 @@ import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
 import ResetPasswordPage from './ResetPasswordPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
-import { useLoginManager } from '@/stores/LoginManager.js'
+import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useLoginManager
 import AlertPopUp from './AlertPopUp.vue'
-const isPasswordVisible = ref(false)
+
 const router = useRouter()
+const authManager = useAuthManager() // ✅ ใช้ AuthManager ตัวเดียว
+
+// --------------------- UI STATE ---------------------
+const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
-
 const email = ref('')
 const password = ref('')
 const showHomePage = ref(false)
 const showRegisterPage = ref(false)
 const showResetPasswordPage = ref(false)
-const trimmedEmail = computed(() => email.value.trim())
-const trimmedPassword = computed(() => password.value.trim())
-const loading = computed(() => loginManager.isLoading)
 const incorrect = ref(false)
 const success = ref(false)
 const error = ref(false)
+
+// --------------------- LIMIT CONFIG ---------------------
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
-const loginManager = useLoginManager()
 
-// --- ปิด popup ด้วยมือ ---
+// --------------------- COMPUTED ---------------------
+const trimmedEmail = computed(() => email.value.trim())
+const trimmedPassword = computed(() => password.value.trim())
+const loading = computed(() => authManager.loading)
+
+// --------------------- POPUP ---------------------
 const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
 }
 
-// 🧩 ฟังก์ชันเข้าสู่ระบบ (ใช้ LoginManager ตัวใหม่)
+// --------------------- LIFE CYCLE ---------------------
+onMounted(async () => {
+  await authManager.loadUserFromLocalStorage()
+})
+
+// --------------------- LOGIN FUNCTION ---------------------
 const loginHomePageWeb = async () => {
   try {
-    // เริ่มโหลด
-    const userData = await loginManager.loginAccount(
-      trimmedEmail.value,
-      trimmedPassword.value,
-      router // router สำหรับ redirect หลัง login
+    const userData = await authManager.loginAccount(
+      email.value.trim(),
+      password.value.trim(),
+      router
     )
 
-    // ❌ ถ้า login ไม่สำเร็จ
     if (!userData) {
       incorrect.value = true
-      console.warn('⚠️ Login failed: No user data returned')
+      console.warn('⚠️ Login failed: invalid credentials')
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
 
-    // ✅ ถ้า login สำเร็จ
-    console.log('✅ Login success:', loginManager.user)
+    // ✅ ตรวจ token ว่ายังไม่หมดอายุ
+    const token =
+      authManager.userData?.accessToken || localStorage.getItem('accessToken')
 
-    // แสดง popup สำเร็จ
+    if (token) {
+      const decoded = authManager.decodeJWT
+        ? authManager.decodeJWT(token)
+        : null
+      const currentTime = Math.floor(Date.now() / 1000)
+
+      if (decoded?.exp && decoded.exp < currentTime) {
+        console.warn('⚠️ Token expired, refreshing...')
+        const newToken = authManager.refreshToken
+          ? await authManager.refreshToken()
+          : null
+        if (!newToken) {
+          console.error('🚫 Token refresh failed, logging out...')
+          await authManager.logoutAccount(router)
+          return
+        }
+      }
+    }
+
+    // ✅ แสดง popup สำเร็จ
     success.value = true
     setTimeout(() => (success.value = false), 2000)
   } catch (err) {
     console.error('❌ Login error:', err)
-
-    // ✅ ตรวจ error ว่าเป็นการเข้าสู่ระบบผิดหรือไม่
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
-      loginManager.errorMessage?.includes('Invalid') ||
-      loginManager.errorMessage?.includes('not found') ||
+      authManager.errorMessage?.includes('Invalid') ||
       err.message?.toLowerCase()?.includes('auth')
 
     if (isAuthError) {
       incorrect.value = true
-      console.warn('⚠️ Incorrect credentials')
       setTimeout(() => (incorrect.value = false), 2000)
     } else {
       error.value = true
-      console.error('🚨 Unexpected login error')
       setTimeout(() => (error.value = false), 2000)
     }
   }
 }
 
-// const signIn = () => {
-//   if (email.value && password.value) {
-//     router.replace({ name: 'home' })
-//     showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
-//   } else {
-//     incorrect.value = true
-//     error.value = true
-//     alert('Please fill in both email and password.')
-//   }
-// }
-
+// --------------------- FORM VALIDATION ---------------------
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
     isEmailOverLimit.value = true
@@ -115,6 +129,7 @@ const checkPasswordLength = () => {
   }
 }
 
+// --------------------- UI EVENT ---------------------
 const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
@@ -128,13 +143,161 @@ const showResetPasswordPageWeb = async function () {
   router.replace({ name: 'resetpassword' })
   showResetPasswordPage.value = true
 }
+
+// import { reactive, ref, computed, onMounted, onBeforeMount } from 'vue'
+// import { useRouter } from 'vue-router'
+// import HomePage from '@/components/HomePageResident.vue'
+// import RegisterPage from './RegisterPage.vue'
+// import ResetPasswordPage from './ResetPasswordPage.vue'
+// import ButtonWeb from './ButtonWeb.vue'
+// import { useLoginManager } from '@/stores/LoginManager.js'
+// import AlertPopUp from './AlertPopUp.vue'
+// const isPasswordVisible = ref(false)
+// const router = useRouter()
+// const isEmailOverLimit = ref(false)
+// const isPasswordOverLimit = ref(false)
+
+// const email = ref('')
+// const password = ref('')
+// const showHomePage = ref(false)
+// const showRegisterPage = ref(false)
+// const showResetPasswordPage = ref(false)
+// const trimmedEmail = computed(() => email.value.trim())
+// const trimmedPassword = computed(() => password.value.trim())
+// const loading = computed(() => loginManager.isLoading)
+// const incorrect = ref(false)
+// const success = ref(false)
+// const error = ref(false)
+// const MAX_EMAIL_LENGTH = 50
+// const MAX_PASSWORD_LENGTH = 14
+// const loginManager = useLoginManager()
+
+// // --- ปิด popup ด้วยมือ ---
+// const closePopUp = (operate) => {
+//   if (operate === 'incorrect') incorrect.value = false
+//   if (operate === 'problem') error.value = false
+// }
+// // onBeforeMount(() => {
+// //   const router = useRouter()
+// //   const loginManager = useLoginManager()
+// //   loginManager.useAuthGuard(router)
+// // })
+// onMounted(async () => {
+//   const router = useRouter()
+//   const loginManager = useLoginManager()
+//   await loginManager.restoreUserFromLocalStorage()
+//   // await loginManager.useAuthGuard(router)
+//   // console.log(loginManager.useAuthGuard(router))
+// })
+
+// const loginHomePageWeb = async () => {
+//   try {
+//     const userData = await loginManager.loginAccount(
+//       email.value.trim(),
+//       password.value.trim(),
+//       router
+//     )
+
+//     if (!userData) {
+//       incorrect.value = true
+//       console.warn('⚠️ Login failed: invalid credentials')
+//       setTimeout(() => (incorrect.value = false), 2000)
+//       return
+//     }
+
+//     // ✅ ตรวจ token ว่ายังไม่หมดอายุ
+//     const token =
+//       loginManager.user?.accessToken || localStorage.getItem('accessToken')
+//     if (token) {
+//       const decoded = loginManager.decodeJWT(token)
+//       const currentTime = Math.floor(Date.now() / 1000)
+
+//       if (decoded?.exp && decoded.exp < currentTime) {
+//         console.warn('⚠️ Token expired, refreshing...')
+//         const newToken = await loginManager.refreshToken()
+//         if (!newToken) {
+//           console.error('🚫 Token refresh failed, logging out...')
+//           await loginManager.logoutAccount(router)
+//           return
+//         }
+//       }
+//     }
+
+//     // ✅ แสดง popup สำเร็จ
+//     success.value = true
+//     setTimeout(() => (success.value = false), 2000)
+//   } catch (err) {
+//     console.error('❌ Login error:', err)
+//     const isAuthError =
+//       err.response?.status === 400 ||
+//       err.response?.status === 401 ||
+//       loginManager.errorMessage?.includes('Invalid') ||
+//       err.message?.toLowerCase()?.includes('auth')
+
+//     if (isAuthError) {
+//       incorrect.value = true
+//       setTimeout(() => (incorrect.value = false), 2000)
+//     } else {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 2000)
+//     }
+//   }
+// }
+// // const signIn = () => {
+// //   if (email.value && password.value) {
+// //     router.replace({ name: 'home' })
+// //     showHomePage.value = true // ตัวอย่างเส้นทางหลังล็อกอิน
+// //   } else {
+// //     incorrect.value = true
+// //     error.value = true
+// //     alert('Please fill in both email and password.')
+// //   }
+// // }
+
+// const checkEmailLength = () => {
+//   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
+//     isEmailOverLimit.value = true
+//     email.value = trimmedEmail.value.substring(0, MAX_EMAIL_LENGTH)
+//     setTimeout(() => {
+//       isEmailOverLimit.value = false
+//     }, 1000)
+//   } else {
+//     isEmailOverLimit.value = false
+//   }
+// }
+
+// const checkPasswordLength = () => {
+//   if (trimmedPassword.value.length > MAX_PASSWORD_LENGTH) {
+//     isPasswordOverLimit.value = true
+//     password.value = trimmedPassword.value.substring(0, MAX_PASSWORD_LENGTH)
+//     setTimeout(() => {
+//       isPasswordOverLimit.value = false
+//     }, 1000)
+//   } else {
+//     isPasswordOverLimit.value = false
+//   }
+// }
+
+// const togglePasswordVisibility = () => {
+//   isPasswordVisible.value = !isPasswordVisible.value
+// }
+
+// const showRegisterPageWeb = async function () {
+//   router.replace({ name: 'register' })
+//   showRegisterPage.value = true
+// }
+
+// const showResetPasswordPageWeb = async function () {
+//   router.replace({ name: 'resetpassword' })
+//   showResetPasswordPage.value = true
+// }
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <!-- Left Section -->
     <div
-      class="flex-1 bg-gradient-to-b from-blue-700 to-blue-400 text-white flex flex-col justify-center items-center p-8"
+      class="flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex flex-col justify-center items-center p-8"
     >
       <div class="max-w-md">
         <h1 class="text-3xl font-bold mb-4">Welcome back!</h1>

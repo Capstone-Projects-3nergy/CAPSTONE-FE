@@ -30,7 +30,7 @@ const bgClass = computed(() => {
 <template>
   <button
     @click="$emit('click')"
-    :class="`${bgClass} text-white px-5 py-2 rounded`"
+    :class="`${bgClass} text-white px-5 py-2 rounded cursor-pointer`"
   >
     {{ label }}
   </button>

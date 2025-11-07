@@ -1,359 +1,152 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
-import Quagga from 'quagga'
-import axios from 'axios'
-import Tesseract from 'tesseract.js'
-import ButtonWeb from './ButtonWeb.vue'
-import AlertPopUp from './AlertPopUp.vue'
+import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import DashBoard from './DashBoard.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import UserInfo from '@/components/UserInfo.vue'
+import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
-const loginManager = useLoginManager()
+import UserInfo from '@/components/UserInfo.vue'
+import AddParcels from './AddParcels.vue'
+import ButtonWeb from './ButtonWeb.vue'
+import { useRegisterManager } from '@/stores/RegisterManager.js'
+import { useAuthManager } from '@/stores/AuthManager.js'
+import AlertPopUp from './AlertPopUp.vue'
+const registerStore = useRegisterManager()
+const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
-const scanResult = ref('')
-const previewUrl = ref(null)
-const showStaffParcels = ref(false)
 const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
+const showAddParcels = ref(false)
+const returnLogin = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
-const returnLogin = ref(false)
 const showProfileStaff = ref(false)
-// ฟอร์มปัจจุบัน
-const form = reactive({
-  field1: '', // ชื่อผู้รับ
-  field2: '', // เลขพัสดุ
-  field3: '', // บริการขนส่ง
-  notes: '' // ประเภทพัสดุ
-})
-
-// Array เก็บข้อมูล parcel
-const savedParcels = ref([])
-
-const scanningMode = ref('')
-let html5QrCode = null
-const videoStream = ref(null)
-const videoRef = ref(null)
-const isCameraReady = ref(false)
-
-// -------- OCR function (คงเดิม) ----------
-async function extractParcelInfo(imageDataUrl) {
-  try {
-    const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result.data.text
-    console.log('OCR Result:', text)
-
-    const info = { name: '', tracking: '', courier: '', type: '' }
-
-    const nameMatch = text.match(
-      /(ชื่อเจ้าของพัสดุ|ชื่อผู้รับ)[:\s]*([\u0E00-\u0E7Fa-zA-Z ]+)/
-    )
-    if (nameMatch) info.name = nameMatch[2].trim()
-
-    const trackingMatch = text.match(/(TH\d{10,}[A-Z]?)/)
-    if (trackingMatch) info.tracking = trackingMatch[1]
-
-    if (/Shopee Express/i.test(text)) info.courier = 'Shopee Express'
-    else if (/Kerry/i.test(text)) info.courier = 'Kerry Express'
-    else if (/J&T/i.test(text)) info.courier = 'J&T Express'
-
-    if (/กล่องเล็ก/.test(text)) info.type = 'กล่องเล็ก'
-    else if (/กล่องใหญ่/.test(text)) info.type = 'กล่องใหญ่'
-    else if (/ซอง/.test(text)) info.type = 'ซอง'
-
-    return info
-  } catch (err) {
-    console.error('OCR Error:', err)
-    return null
+const tabs = ['Day', 'Month', 'Year']
+const activeTab = ref('Day')
+const parcels = ref([
+  {
+    id: 1,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 101,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 2,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH223456789X',
+    room: 102,
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 3,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH323456789X',
+    room: 103,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 4,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH423456789X',
+    room: 104,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 5,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 105,
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 6,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 106,
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 7,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 107,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 8,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 108,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 9,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 109,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 10,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 110,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
   }
+])
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const deleteScanResult = () => {
-  scanResult.value = null
-}
-function deleteSaveInformation(index) {
-  savedParcels.value.splice(index, 1)
-  console.log(`❌ Deleted parcel at index ${index}`)
-}
-const deletePreview = () => {
-  previewUrl.value = null
-}
-
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
-
-// -------- Camera functions (คงเดิม) ----------
-async function startCamera() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    alert('กล้องไม่รองรับ')
-    return
-  }
-  try {
-    videoStream.value = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
-    })
-    videoRef.value.srcObject = videoStream.value
-    videoRef.value.onloadedmetadata = () => {
-      videoRef.value.play()
-      isCameraReady.value = true
-    }
-  } catch (err) {
-    console.error(err)
-    alert('ไม่สามารถเปิดกล้องได้')
-  }
-}
-function stopCameraOnly() {
-  if (videoStream.value) {
-    videoStream.value.getTracks().forEach((track) => track.stop())
-    videoStream.value = null
-    isCameraReady.value = false
-  }
-}
-
-// -------- Photo capture + OCR (คงเดิม) ----------
-async function capturePhoto() {
-  if (!videoRef.value || !isCameraReady.value) {
-    alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
-    return
-  }
-  const video = videoRef.value
-  const canvas = document.createElement('canvas')
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-  previewUrl.value = canvas.toDataURL('image/png')
-
-  const parcelInfo = await extractParcelInfo(previewUrl.value)
-  if (parcelInfo) {
-    form.field1 = parcelInfo.name || ''
-    form.field2 = parcelInfo.tracking || ''
-    form.field3 = parcelInfo.courier || ''
-    form.notes = parcelInfo.type || ''
-  }
-}
-
-// -------- NEW: QuaggaJS2 สำหรับ Barcode ----------
-function startQuagga() {
-  Quagga.init(
-    {
-      inputStream: {
-        name: 'Live',
-        type: 'LiveStream',
-        target: document.querySelector('#reader'),
-        constraints: {
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        }
-      },
-      locator: {
-        patchSize: 'medium',
-        halfSample: false // ปรับเป็น false เพื่อสแกนชัด
-      },
-      numOfWorkers: navigator.hardwareConcurrency || 4,
-      decoder: {
-        readers: [
-          'code_128_reader',
-          'ean_reader',
-          'ean_8_reader',
-          'code_39_reader',
-          'code_39_vin_reader',
-          'codabar_reader',
-          'upc_reader',
-          'upc_e_reader',
-          'i2of5_reader'
-        ]
-      },
-      locate: true
-    },
-    (err) => {
-      if (err) {
-        console.error('Quagga init error:', err)
-        return
-      }
-      Quagga.start()
-      console.log('📸 Quagga started for Barcode')
-    }
-  )
-
-  Quagga.onDetected((result) => {
-    if (result?.codeResult?.code) {
-      const detectedCode = result.codeResult.code.trim()
-      console.log('✅ Barcode detected:', detectedCode)
-      scanResult.value = detectedCode
-      form.field2 = detectedCode
-      form.notes = 'Format: Barcode'
-      stopQuagga()
-    }
-  })
-}
-
-function stopQuagga() {
-  try {
-    Quagga.stop()
-    Quagga.offDetected()
-    console.log('🛑 Quagga stopped')
-  } catch (e) {
-    console.warn('Stop Quagga error:', e)
-  }
-}
-
-// -------- สแกนเลือกตามโหมด (แก้ไขใหม่) ----------
-function startScan(mode) {
-  scanningMode.value = mode
-  if (mode === 'qr') {
-    html5QrCode = new Html5Qrcode('reader')
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 350 },
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.QR_CODE,
-        Html5QrcodeSupportedFormats.AZTEC,
-        Html5QrcodeSupportedFormats.CODABAR,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.CODE_93,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.DATA_MATRIX,
-        Html5QrcodeSupportedFormats.MAXICODE,
-        Html5QrcodeSupportedFormats.ITF,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.PDF_417,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.RSS_14,
-        Html5QrcodeSupportedFormats.RSS_EXPANDED
-      ]
-    }
-    html5QrCode
-      .start(
-        { facingMode: 'environment' },
-        config,
-        (decodedText) => {
-          const cleanText = decodedText.trim()
-          console.log('✅ QR/Barcode Decoded:', cleanText)
-          scanResult.value = cleanText
-          form.field2 = cleanText
-          form.notes = 'Format: QR/Barcode'
-        },
-        (errorMsg) => console.warn('Scan error:', errorMsg)
-      )
-      .catch((err) => {
-        console.error('❌ QR Scan start error:', err)
-        alert('เริ่มสแกน QR ไม่สำเร็จ')
-      })
-  } else if (mode === 'barcode') {
-    startQuagga()
-  }
-}
-
-// -------- หยุดสแกน (รองรับทั้งสอง lib) ----------
-function stopScan() {
-  scanningMode.value = ''
-  if (html5QrCode) {
-    html5QrCode.stop().catch(() => {})
-    html5QrCode.clear()
-    html5QrCode = null
-  }
-  stopQuagga()
-  stopCameraOnly()
-}
-
-const showHomePageStaffWeb = async function () {
-  router.replace({ name: 'homestaff' })
-  showHomePageStaff.value = true
-}
-// --- function: save ---
-function saveParcel() {
-  const parcelData = {
-    name: form.field1,
-    tracking: form.field2,
-    courier: form.field3,
-    type: form.notes,
-    image: previewUrl.value || null // เพิ่มเก็บภาพที่ถ่าย
-  }
-
-  savedParcels.value.push(parcelData)
-
-  console.log('✅ Parcel saved:', parcelData)
-
-  // reset form
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
-
-  // แสดง popup
-  greenPopup.add.state = true
-  previewUrl.value = null
-  // ตั้งเวลาให้ popup ปิดเองใน 3 วินาที
-  setTimeout(() => {
-    greenPopup.add.state = false
-  }, 3000)
-}
-
-// --- function: cancel form ---
-function cancelParcel() {
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
-  console.log('🛑 Form canceled/reset')
-}
-const greenPopup = reactive({
-  add: { state: false }
-})
-const redPopup = reactive({
-  add: { state: false }
-})
-
-// --- ปิด popup ด้วยมือ ---
-function closeGreenPopup() {
-  greenPopup.add.state = false
-}
-function closeRedPopup() {
-  redPopup.add.state = false
-}
-// const showParcelScannerPage = async function () {
-//   router.replace({ name: 'parcelscanner' })
-//   showParcelScanner.value = true
-// }
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
 //   showResidentParcels.value = true
 // }
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
+  router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
-
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+console.log(registerStore.userData)
 const returnLoginPage = async () => {
   try {
     // เรียก logoutAccount จาก store
@@ -363,15 +156,22 @@ const returnLoginPage = async () => {
     console.error('Logout failed:', err)
   }
 }
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
+}
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
+const isCollapsed = ref(false)
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-100">
-    <!-- 🔵 Top Bar -->
+  <div class="min-h-screen bg-gray-100 flex flex-col">
     <!-- Header -->
     <header class="flex items-center w-full h-16">
       <!-- <button
@@ -444,7 +244,6 @@ const showProfileStaffPage = async function () {
           </button>
         </div>
       </div>
-      <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -487,11 +286,11 @@ const showProfileStaffPage = async function () {
     </header>
 
     <!-- Body (Sidebar + Main) -->
-    <div class="flex flex-1">
+    <div class="flex flex-1 border-[#3269A8]">
       <!-- Sidebar -->
       <aside
         :class="[
-          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300',
+          'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
           isCollapsed ? 'w-16' : 'w-56'
         ]"
       >
@@ -534,7 +333,7 @@ const showProfileStaffPage = async function () {
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y bg-[#0E4B90] divide-blue-700 space-y-1">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -554,10 +353,9 @@ const showProfileStaffPage = async function () {
           <!-- <a
             href="#"
             class="flex items-center p-2 rounded hover:bg-blue-700"
-            @click="showHomePageWebStaff"
-          >
-            <span class="mr-2">
-              <svg
+            @click="showHomePageWeb"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -570,8 +368,8 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </span>
-            Home
-          </a> -->
+            Home</a
+          > -->
           <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
@@ -590,9 +388,9 @@ const showProfileStaffPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-            <span class="mr-2">
-              <svg
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -607,10 +405,8 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </span>
-            Profile
-          </a> -->
-
-          <!-- Dashboard -->
+            Profile</a
+          > -->
           <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
@@ -627,29 +423,25 @@ const showProfileStaffPage = async function () {
               </svg>
             </template>
           </SidebarItem>
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showDashBoardPage"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>Dashboard</span>
-          </a> -->
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Dashboard</a
+          > -->
           <SidebarItem
             title=" Manage Parcel"
-            @click="showManageParcelPage"
             class="bg-[#81AFEA] cursor-default"
           >
             <template #icon>
@@ -754,7 +546,7 @@ const showProfileStaffPage = async function () {
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <!-- <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -801,7 +593,7 @@ const showProfileStaffPage = async function () {
         </SidebarItem>
       </aside>
 
-      <!-- Content -->
+      <!-- Main Content -->
       <main class="flex-1 p-6">
         <div class="flex space-x-1">
           <svg
@@ -817,304 +609,195 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Manage Resident</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+        <!-- 🔲 Filter Bar Wrapper -->
         <div
-          class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
+          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
-          <!-- Alert Popup -->
-          <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
-              v-if="greenPopup.add.state"
-              :titles="'Success!!'"
-              message="Successfully Added."
-              styleType="green"
-              :operate="'add'"
-              @closePopUp="closeGreenPopup"
-            />
-          </div>
-          <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
-              v-if="redPopup.add.state"
-              :titles="'Error!!'"
-              message="Can Not Added."
-              styleType="red"
-              :operate="'add'"
-              @closePopUp="closeRedPopup"
-            />
-          </div>
-          <!-- Section Header -->
-          <!-- <div
-            class="bg-blue-700 text-white px-6 py-3 text-xl font-semibold flex items-center space-x-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
-              />
-            </svg>
-            <span>Parcel Scanner</span>
-          </div> -->
-
-          <div class="grid md:grid-cols-2 gap-6 p-6">
-            <!-- Left side -->
-            <div class="space-y-6">
-              <!-- Scanner -->
-              <div
-                id="scanner"
-                class="w-full h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
-              >
-                <span v-if="!scanningMode && !videoStream" class="text-white"
-                  >Scan QR/Barcode or Take Picture</span
+          <div class="flex items-center justify-between mb-4">
+            <!-- Left: Date Tabs -->
+            <div class="flex items-center space-x-4">
+              <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
+              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'px-4 py-1 font-medium transition  cursor-pointer',
+                    activeTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-200'
+                  ]"
                 >
+                  {{ tab }}
+                </button>
+              </div>
+            </div>
 
-                <!-- Scanner Overlay -->
-                <div
-                  id="scanner-overlay"
-                  :class="
-                    scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
-                  "
+            <!-- Right: Search + Sort + Add -->
+            <div class="flex items-center space-x-3">
+              <!-- Search -->
+              <div class="relative">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <div id="reader" class="w-full h-full"></div>
-                  <ButtonWeb
-                    label=" Cancel"
-                    color="red"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                    @click="stopScan"
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
-
-                  <!-- <button
-                    @click="stopScan"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                  >
-                    Cancel
-                  </button> -->
-                </div>
-
-                <!-- Video Preview -->
-                <video
-                  ref="videoRef"
-                  :class="
-                    videoStream
-                      ? 'w-full h-full object-cover rounded-lg'
-                      : 'hidden'
-                  "
-                ></video>
-                <ButtonWeb
-                  label=" Close Camera"
-                  color="red"
-                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                  v-if="videoStream"
-                  @click="stopCameraOnly"
-                />
-                <!-- <button
-                  @click="stopCameraOnly"
-                  v-if="videoStream"
-                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                >
-                  Close Camera
-                </button> -->
-              </div>
-
-              <!-- Buttons -->
-              <div class="flex flex-wrap justify-center gap-3">
-                <ButtonWeb
-                  label="Scan QR"
-                  color="blue"
-                  @click="startScan('qr')"
-                  :disabled="scanningMode || videoStream"
-                />
-                <!-- <button
-                  @click="startScan('qr')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  Scan QR
-                </button> -->
-                <ButtonWeb
-                  label="Scan Barcode"
-                  color="green"
-                  @click="startScan('barcode')"
-                  :disabled="scanningMode || videoStream"
-                />
-                <!-- <button
-                  @click="startScan('barcode')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
-                >
-                  Scan Barcode
-                </button> -->
-                <ButtonWeb
-                  label=" Open Camera"
-                  color="yellow"
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream"
-                />
-                <!-- <button
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400"
-                >
-                  Open Camera
-                </button> -->
-                <ButtonWeb
-                  label="Take Photo"
-                  color="orange"
-                  @click="capturePhoto"
-                  :disabled="!videoStream"
-                />
-                <!-- <button
-                  @click="capturePhoto"
-                  :disabled="!videoStream"
-                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400"
-                >
-                  Take Photo
-                </button> -->
-              </div>
-
-              <!-- Inputs -->
-              <div class="space-y-3">
+                </svg>
                 <input
-                  v-model="form.field1"
-                  placeholder="Name"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  type="text"
+                  placeholder="Search ..."
+                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
-                <input
-                  v-model="form.field2"
-                  placeholder="Tracking"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.field3"
-                  placeholder="Service"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <textarea
-                  v-model="form.notes"
-                  placeholder="Type"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  rows="2"
-                ></textarea>
               </div>
 
-              <!-- Save/Cancel -->
-              <div class="flex justify-end space-x-3">
-                <!-- <button
-                  @click="saveParcel"
-                  class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
+              <!-- Sort -->
+              <select
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+              >
+                <option>Sort by:</option>
+                <option>Newest</option>
+                <option>Oldest</option>
+              </select>
+
+              <!-- Add Parcel -->
+              <button
+                @click="showAddParcelPage"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-4 h-4"
                 >
-                  Save
-                </button>
-                <button
-                  @click="cancelParcel"
-                  class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600"
-                >
-                  Cancel
-                </button> -->
-                <ButtonWeb
-                  label="Save"
-                  color="green"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
-                  @click="saveParcel"
-                />
-                <ButtonWeb
-                  label="Cancel"
-                  color="red"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
-                  @click="cancelParcel"
-                />
-              </div>
-            </div>
-
-            <!-- Right side -->
-            <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
-              <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
-                Parcel Information
-              </h2>
-              <div class="space-y-2 text-[#185DC0] font-medium">
-                <div class="flex justify-between border-b py-2">
-                  <span>Name:</span><span>{{ form.field1 }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span><span>{{ form.field2 }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Service:</span><span>{{ form.field3 }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Type:</span><span>{{ form.notes }}</span>
-                </div>
-              </div>
-
-              <!-- Image Preview -->
-              <div v-if="previewUrl" class="mt-4 relative">
-                <h3 class="font-semibold text-[#185DC0] mb-2">
-                  Parcel Picture
-                </h3>
-                <img
-                  :src="previewUrl"
-                  class="w-full rounded shadow max-h-64 object-cover"
-                />
-                <button
-                  @click="deletePreview"
-                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100"
-                >
-                  ×
-                </button>
-              </div>
-
-              <!-- Saved Parcels -->
-              <div class="mt-6">
-                <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
-                  Saved Parcels
-                </h3>
-                <ul class="space-y-2">
-                  <li
-                    v-for="(p, i) in savedParcels"
-                    :key="i"
-                    class="border p-3 rounded relative flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0"
-                  >
-                    <div>
-                      <div>Name: {{ p.name }}</div>
-                      <div>Tracking: {{ p.tracking }}</div>
-                      <div>Service: {{ p.courier }}</div>
-                      <div>Type: {{ p.type }}</div>
-                    </div>
-                    <div v-if="p.image" class="md:ml-4">
-                      <img
-                        :src="p.image"
-                        class="w-28 h-28 object-cover rounded"
-                      />
-                    </div>
-                    <button
-                      @click="deleteSaveInformation(i)"
-                      class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100"
-                    >
-                      ×
-                    </button>
-                  </li>
-                </ul>
-              </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span>Add parcel</span>
+              </button>
             </div>
           </div>
+        </div>
+
+        <!-- Parcel Table -->
+        <div class="overflow-x-auto bg-white rounded-lg shadow">
+          <table class="min-w-full text-left border-collapse">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Tracking
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Name
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Room Number
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Contact
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Status
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Date in
+                </th>
+                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                  Operation
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.tracking }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.recipient }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    :class="{
+                      'bg-yellow-400': p.status === 'Pending',
+                      'bg-green-400': p.status === 'Picked Up',
+                      'bg-red-400': p.status === 'Unclaimed'
+                    }"
+                  >
+                    {{ p.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
+                  <button class="text-blue-600 hover:text-blue-800">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
+                      />
+                    </svg>
+                  </button>
+                  <button class="text-red-600 hover:text-red-800">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
+          <button class="px-3 py-1 rounded hover:bg-gray-200">
+            &lt; Previous
+          </button>
+          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
+          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
+          <span class="px-2 py-1">...</span>
+          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
+          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
         </div>
       </main>
     </div>
   </div>
+
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
@@ -1132,9 +815,3 @@ const showProfileStaffPage = async function () {
     <DashBoard> </DashBoard>
   </Teleport>
 </template>
-
-<style scoped>
-body {
-  background-color: #f3f4f6;
-}
-</style>
