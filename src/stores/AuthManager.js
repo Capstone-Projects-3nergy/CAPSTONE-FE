@@ -206,7 +206,7 @@ export const useAuthManager = defineStore('authManager', () => {
       localStorage.removeItem('userName')
       // localStorage.removeItem('position')
       // localStorage.removeItem('dormId')
-      localStorage.removeItem('roomNumber')
+      // localStorage.removeItem('roomNumber')
 
       // ✅ กลับหน้า login
       await router?.replace({ name: 'login' })
