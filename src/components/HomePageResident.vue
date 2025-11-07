@@ -26,6 +26,7 @@ const showAnnouncement = ref(false)
 const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const loginManager = useAuthManager()
+const registerStore = useAuthManager()
 const parcels = ref([
   {
     id: 1,
@@ -111,6 +112,8 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+registerStore.loadUserFromLocalStorage()
+console.log(registerStore.user)
 </script>
 
 <template>

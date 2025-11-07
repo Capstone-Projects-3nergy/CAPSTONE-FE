@@ -115,6 +115,7 @@ const parcels = ref([
   // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
 ])
 // console.log(loginStore.user.email)
+
 registerStore.loadUserFromLocalStorage()
 console.log(registerStore.user)
 

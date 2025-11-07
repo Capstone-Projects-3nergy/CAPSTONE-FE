@@ -70,8 +70,8 @@ const dormList = ref([]) // [{ dormId, dormName }]
 //   })
 // })
 onMounted(async () => {
-  authManager.loadUserFromLocalStorage()
-  console.log(authManager.user.email)
+  // authManager.loadUserFromLocalStorage()
+  // console.log(authManager.user.email)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
@@ -371,11 +371,11 @@ const submitForm = async (roleType) => {
     await authManager.registerAccount(payload)
     authManager.loadUserFromLocalStorage()
     // ถ้ามี email ซ้ำจาก backend
-    if (authManager.user.email == form.email) {
-      isEmailDuplicate.value = true
-      setTimeout(() => (isEmailDuplicate.value = false), 3000)
-      return
-    }
+    // if (authManager.user.email == form.email) {
+    //   isEmailDuplicate.value = true
+    //   setTimeout(() => (isEmailDuplicate.value = false), 3000)
+    //   return
+    // }
 
     // ✅ ล้างฟอร์มหลังสำเร็จ
     Object.keys(form).forEach((key) => {
