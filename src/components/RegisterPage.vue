@@ -369,7 +369,7 @@ const submitForm = async (roleType) => {
 
     // ✅ เรียกใช้ register จาก AuthManager
     await authManager.registerAccount(payload)
-
+    authManager.loadUserFromLocalStorage()
     // ถ้ามี email ซ้ำจาก backend
     if (authManager.user.email == form.email) {
       isEmailDuplicate.value = true
