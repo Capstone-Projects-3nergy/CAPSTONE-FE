@@ -6,6 +6,7 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
+import { useAuthManager } from '@/stores/AuthManager.js'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -370,7 +371,7 @@ const toggleSidebar = () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-[#185dc0] ">Profile Resident</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
 
         <!-- Profile Card -->

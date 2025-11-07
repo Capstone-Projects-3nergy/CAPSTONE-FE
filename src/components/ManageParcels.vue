@@ -12,6 +12,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import AddParcels from './AddParcels.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
+import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 const registerStore = useRegisterManager()
 const loginManager = useAuthManager()

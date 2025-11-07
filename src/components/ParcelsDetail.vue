@@ -10,6 +10,7 @@ import DashBoard from './DashBoard.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()

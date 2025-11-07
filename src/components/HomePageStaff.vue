@@ -10,9 +10,9 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
 // import { useRegisterManager } from '@/stores/RegisterManager.js'
 // import { useLoginManager } from '@/stores/LoginManager'
-import { useAuthManager } from '@/stores/AuthManager.js'
 const registerStore = useAuthManager()
 const loginStore = useAuthManager()
 const loginManager = useAuthManager()
