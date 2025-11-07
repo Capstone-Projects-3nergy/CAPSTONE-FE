@@ -71,7 +71,7 @@ const dormList = ref([]) // [{ dormId, dormName }]
 // })
 onMounted(async () => {
   authManager.loadUserFromLocalStorage()
-  console.log(authManager.user)
+  console.log(authManager.user.email)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     console.log('Base URL:', baseURL)
@@ -371,7 +371,7 @@ const submitForm = async (roleType) => {
     await authManager.registerAccount(payload)
 
     // ถ้ามี email ซ้ำจาก backend
-    if (authManager.errorMessage?.includes('CONFLICT')) {
+    if (authManager.user.email == form.email) {
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
       return
