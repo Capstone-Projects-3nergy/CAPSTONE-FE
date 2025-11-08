@@ -41,7 +41,7 @@ const closePopUp = (operate) => {
 
 // --------------------- LIFE CYCLE ---------------------
 onMounted(async () => {
-  await authManager.loadUserFromLocalStorage()
+  await authManager.loadUserFromBackend()
 })
 
 // --------------------- LOGIN FUNCTION ---------------------
