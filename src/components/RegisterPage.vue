@@ -51,7 +51,7 @@ const form = reactive({
   confirmPassword: '',
   role: 'RESIDENT', // 'RESIDENT' | 'STAFF'
   dormId: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
-  dormType: 'female dormitory',
+  // dormType: 'female dormitory',
   roomNumber: '', // เฉพาะ RESIDENT
   position: '' // เฉพาะ STAFF
 })
@@ -379,9 +379,9 @@ const submitForm = async (roleType) => {
 
     // ✅ ล้างฟอร์มหลังสำเร็จ
     Object.keys(form).forEach((key) => {
-      if (key === 'dormId') form[key] = null
-      else if (key === 'dormType') form[key] = 'female dormitory'
-      else form[key] = ''
+      if { (key === 'dormId') form[key] = null
+
+    }else form[key] = ''
     })
 
     success.value = true
@@ -752,7 +752,7 @@ const toggleComfirmPasswordVisibility = () => {
           <!-- Resident -->
           <transition name="fade" mode="out-in">
             <div v-if="role === 'resident'" key="resident">
-              <div class="relative flex items-center space-x-4 mb-3">
+              <!-- <div class="relative flex items-center space-x-4 mb-3">
                 <label class="flex items-center text-sm">
                   <input
                     type="radio"
@@ -771,7 +771,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                   Male Dormitory
                 </label>
-              </div>
+              </div> -->
               <div class="relative">
                 <svg
                   width="24"
