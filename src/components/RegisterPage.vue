@@ -379,9 +379,11 @@ const submitForm = async (roleType) => {
 
     // ✅ ล้างฟอร์มหลังสำเร็จ
     Object.keys(form).forEach((key) => {
-      if { (key === 'dormId') form[key] = null
-
-    }else form[key] = ''
+      if (key === 'dormId') {
+        form[key] = null
+      } else {
+        form[key] = ''
+      }
     })
 
     success.value = true
