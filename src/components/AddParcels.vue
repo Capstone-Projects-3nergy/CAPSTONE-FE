@@ -645,7 +645,7 @@ const toggleSidebar = () => {
             </div>
           </div>
 
-          <hr class="border-t border-[#3269A8] my-4" />
+          <hr class="border-t border-1 border-[#185DC0] my-4" />
 
           <!-- Row 4 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
