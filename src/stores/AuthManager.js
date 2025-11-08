@@ -37,7 +37,7 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const idToken = await currentUser.getIdToken()
       const baseURL = import.meta.env.VITE_BASE_URL
-      const response = await axios.get(`${baseURL}/api/auth/verify`, {
+      const response = await axios.get(`${baseURL}/auth/verify`, {
         headers: { Authorization: `Bearer ${idToken}` }
       })
 
@@ -124,10 +124,7 @@ export const useAuthManager = defineStore('authManager', () => {
       }
 
       const baseURL = import.meta.env.VITE_BASE_URL
-      const response = await axios.post(
-        `${baseURL}/public/auth/register`,
-        payload
-      )
+      const response = await axios.post(`${baseURL}/auth/register`, payload)
       if (!response.data?.userId)
         throw new Error('Registration failed on backend.')
 
