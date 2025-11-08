@@ -728,7 +728,7 @@ const toggleSidebar = () => {
               <div></div>
             </div>
 
-            <hr class="border-t border-[#185dc0] my-4" />
+            <!-- <hr class="border-t border-[#185dc0] my-4" /> -->
 
             <!-- Row 4 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -756,7 +756,7 @@ const toggleSidebar = () => {
                 />
               </div>
 
-              <div>
+              <!-- <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
                   >Receive at</label
                 >
@@ -766,7 +766,7 @@ const toggleSidebar = () => {
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
-              </div>
+              </div> -->
             </div>
           </form>
         </div>
