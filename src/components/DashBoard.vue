@@ -43,95 +43,47 @@ const monthsTH = [
 const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
 ]
-
 onMounted(() => {
-  const ctx = document.getElementById('packagesChart')
-  if (!ctx) {
-    console.error('❌ ไม่พบ element ที่มี id="packagesChart"')
-    return
-  }
-
-  const packagesChart = new Chart(ctx.getContext('2d'), {
+  const ctx = document.getElementById('parcelChart')
+  new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: monthsTH,
+      labels: ['Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       datasets: [
         {
-          label: 'จำนวนพัสดุ (ชิ้น)',
-          data: packagesPerMonth,
-          backgroundColor: function (context) {
-            const value = context.dataset.data[context.dataIndex]
-            return value >= 170
-              ? 'rgba(16,185,129,0.85)'
-              : 'rgba(59,130,246,0.85)'
+          label: 'Parcel Volume',
+          data: [24, 15, 31, 40, 23, 15, 33],
+          backgroundColor: (context) => {
+            const index = context.dataIndex
+            return index === 3
+              ? 'rgba(37, 99, 235, 0.9)' // เดือนที่สูงสุด — สีน้ำเงินเข้ม
+              : 'rgba(59, 130, 246, 0.3)' // เดือนอื่น — สีอ่อน
           },
-          borderRadius: 6,
-          barThickness: 28
+          borderRadius: 8,
+          barThickness: 30
         }
       ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { maxRotation: 0, minRotation: 0 }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 50 },
-          grid: { borderDash: [4, 4] }
-        }
-      },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function (context) {
-              return ` ${context.parsed.y} ชิ้น`
-            }
+            label: (context) => `${context.parsed.y} พัสดุ`
           }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          grid: { borderDash: [4, 4] },
+          ticks: { stepSize: 10 }
         }
       }
     }
   })
-
-  // เติมข้อมูลลงในตาราง
-  const tbody = document.getElementById('packagesTableBody')
-  const totalEl = document.getElementById('totalPackages')
-  if (!tbody || !totalEl) return
-
-  let total = 0
-  tbody.innerHTML = ''
-  for (let i = 0; i < monthsTH.length; i++) {
-    const month = monthsTH[i]
-    const value = packagesPerMonth[i] ?? 0
-    total += value
-    let pct = '-'
-    if (i > 0) {
-      const prev = packagesPerMonth[i - 1] || 0
-      if (prev === 0) pct = value === 0 ? '0%' : '—'
-      else {
-        const change = ((value - prev) / prev) * 100
-        pct = (change >= 0 ? '+' : '') + change.toFixed(1) + '%'
-      }
-    }
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td class="px-4 py-3 text-gray-700">${month}</td>
-      <td class="px-4 py-3 text-right text-gray-800 font-medium">${value.toLocaleString()}</td>
-      <td class="px-4 py-3 text-right text-sm ${
-        pct !== '-' && pct.startsWith('+')
-          ? 'text-green-600'
-          : pct !== '-' && pct.startsWith('-')
-          ? 'text-red-600'
-          : 'text-gray-500'
-      }">${pct}</td>
-    `
-    tbody.appendChild(tr)
-  }
-  totalEl.innerText = total.toLocaleString()
 })
 
 const showHomePageStaffWeb = async function () {
