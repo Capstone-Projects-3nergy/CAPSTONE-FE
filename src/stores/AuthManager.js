@@ -215,7 +215,7 @@ export const useAuthManager = defineStore('authManager', () => {
       const idToken = await firebaseUser.getIdToken()
 
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/api/auth/verify`,
+        `${import.meta.env.VITE_BASE_URL}/auth/verify`,
         {
           headers: { Authorization: `Bearer ${idToken}` }
         }
