@@ -618,7 +618,7 @@ const toggleComfirmPasswordVisibility = () => {
         />
         <AlertPopUp
           v-if="isPositionWrong"
-          :titles="'Position must be text, not a number.'"
+          :titles="'Position can only be typed as text.'"
           message="Error!!"
           styleType="red"
           operate="errorposition"
@@ -709,7 +709,7 @@ const toggleComfirmPasswordVisibility = () => {
         />
         <AlertPopUp
           v-if="isFullNameWrong"
-          :titles="'Full Name can only type as text.'"
+          :titles="'Full Name can only be typed as text.'"
           message="Error!!"
           styleType="red"
           operate="nametypewrong"
