@@ -18,6 +18,7 @@ export const useAuthManager = defineStore('authManager', () => {
   const isLoading = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
+  const status = ref(null)
 
   const decodeJWT = (token) => {
     try {
@@ -98,75 +99,102 @@ export const useAuthManager = defineStore('authManager', () => {
     errorMessage.value = ''
     successMessage.value = ''
     user.value = null
+    status.value = null // ✅ reset ทุกครั้งก่อนเริ่ม
 
-    try {
-      const role = String(formData.role || '').toUpperCase()
-      if (!['RESIDENT', 'STAFF'].includes(role))
-        throw new Error('Invalid role.')
-
-      let payload = { ...formData, role }
-
-      if (role === 'RESIDENT') {
-        const dormIdNum = Number(formData.dormId)
-        if (!Number.isFinite(dormIdNum) || dormIdNum <= 0)
-          throw new Error('Please select a valid dormitory.')
-        if (!formData.roomNumber?.trim())
-          throw new Error('Room number is required.')
-        payload = {
-          ...payload,
-          dormId: dormIdNum,
-          roomNumber: formData.roomNumber.trim()
-        }
-      } else if (role === 'STAFF') {
-        if (!formData.position?.trim())
-          throw new Error('Position is required for staff.')
-        payload = { ...payload, position: formData.position.trim() }
-      }
-
-      const baseURL = import.meta.env.VITE_BASE_URL
-      const response = await axios.post(`${baseURL}/auth/register`, payload)
-      if (!response.data?.userId)
-        throw new Error('Registration failed on backend.')
-
-      // ✅ Register Firebase
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      )
-      const idToken = await cred.user.getIdToken()
-
-      user.value = {
-        id: response.data.userId,
-        email: formData.email,
-        fullName: formData.fullName,
-        role,
-        accessToken: idToken,
-        ...(role === 'STAFF' ? { position: formData.position } : {}),
-        ...(role === 'RESIDENT'
-          ? { dormId: formData.dormId, roomNumber: formData.roomNumber }
-          : {})
-      }
-
-      successMessage.value = 'Account created successfully!'
-
-      if (router) {
-        if (role === 'RESIDENT')
-          router.replace({ name: 'home', params: { id: response.data.userId } })
-        else if (role === 'STAFF')
-          router.replace({
-            name: 'homestaff',
-            params: { id: response.data.userId }
-          })
-      }
-    } catch (error) {
-      errorMessage.value =
-        error?.response?.data?.message ||
-        error.message ||
-        'Registration failed.'
-    } finally {
+    const role = String(formData.role || '').toUpperCase()
+    if (!['RESIDENT', 'STAFF'].includes(role)) {
+      errorMessage.value = 'Invalid role.'
       isLoading.value = false
+      return
     }
+
+    let payload = { ...formData, role }
+
+    if (role === 'RESIDENT') {
+      const dormIdNum = Number(formData.dormId)
+      if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
+        errorMessage.value = 'Please select a valid dormitory.'
+        isLoading.value = false
+        return
+      }
+      if (!formData.roomNumber?.trim()) {
+        errorMessage.value = 'Room number is required.'
+        isLoading.value = false
+        return
+      }
+      payload = {
+        ...payload,
+        dormId: dormIdNum,
+        roomNumber: formData.roomNumber.trim()
+      }
+    } else if (role === 'STAFF') {
+      if (!formData.position?.trim()) {
+        errorMessage.value = 'Position is required for staff.'
+        isLoading.value = false
+        return
+      }
+      payload = { ...payload, position: formData.position.trim() }
+    }
+
+    const baseURL = import.meta.env.VITE_BASE_URL
+
+    // ✅ ใช้ then/catch เพื่อเก็บ status (ไม่โยน error)
+    await axios
+      .post(`${baseURL}/auth/register`, payload)
+      .then(async (response) => {
+        status.value = response.status // ✅ บันทึกสถานะ 200 หรือ 201
+        if (!response.data?.userId) {
+          errorMessage.value = 'Registration failed on backend.'
+          return
+        }
+
+        // ✅ Register Firebase
+        const cred = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        )
+        const idToken = await cred.user.getIdToken()
+
+        user.value = {
+          id: response.data.userId,
+          email: formData.email,
+          fullName: formData.fullName,
+          role,
+          accessToken: idToken,
+          ...(role === 'STAFF' ? { position: formData.position } : {}),
+          ...(role === 'RESIDENT'
+            ? { dormId: formData.dormId, roomNumber: formData.roomNumber }
+            : {})
+        }
+
+        successMessage.value = 'Account created successfully!'
+
+        if (router) {
+          if (role === 'RESIDENT')
+            router.replace({
+              name: 'home',
+              params: { id: response.data.userId }
+            })
+          else if (role === 'STAFF')
+            router.replace({
+              name: 'homestaff',
+              params: { id: response.data.userId }
+            })
+        }
+      })
+      .catch((error) => {
+        status.value = error.response?.status || 500 // ✅ เก็บ status จาก backend
+        if (status.value === 409) {
+          errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
+        } else {
+          errorMessage.value =
+            error.response?.data?.message || 'Registration failed.'
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 
   // -----------------------
@@ -323,6 +351,7 @@ export const useAuthManager = defineStore('authManager', () => {
     isLoading,
     errorMessage,
     successMessage,
+    status,
     registerAccount,
     loginAccount,
     logoutAccount,

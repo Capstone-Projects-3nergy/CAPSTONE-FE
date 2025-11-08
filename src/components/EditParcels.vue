@@ -11,6 +11,7 @@ import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
 const loginManager = useAuthManager()
@@ -26,6 +27,8 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const success = ref(false)
+const error = ref(false)
 // 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
 const form = ref({
   parcel_id: '',
@@ -58,7 +61,7 @@ onMounted(async () => {
 const saveParcel = async () => {
   try {
     const res = await axios.put(
-      `http://localhost:5000/api/parcels/${form.value.parcel_id}`,
+      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcel_id}`,
       form.value
     )
 
@@ -68,8 +71,10 @@ const saveParcel = async () => {
     console.log('✅ Updated parcel:', res.data)
 
     // 🔄 กลับไปหน้ารายการพัสดุ
-    router.replace({ name: 'staffparcels' })
+    success.value = true
+    // router.replace({ name: 'staffparcels' })
   } catch (err) {
+    error.value = true
     console.error('❌ Failed to update parcel:', err)
   }
 }
@@ -123,6 +128,22 @@ const showProfileStaffPage = async function () {
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'success ') success.value = false
+  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
+  if (operate === 'fullname') isFullNameWeak.value = false
+  if (operate === 'dorm') isNoDorm.value = false
+  if (operate === 'notmatch') isNotMatch.value = false
+  if (operate === 'notroomrequired') isRoomRequired.value = false
+  if (operate === 'notpositionrequired') isPositionRequired.value = false
+  if (operate === 'emailform') incorrectemailform.value = false
+  if (operate === 'notnumber') roomidnotnumber.value = false
+  if (operate === 'erroeposition ') isPositionWrong.value = false
+  if (operate === 'nametypewrong ') isFullNameWrong.value = false
 }
 </script>
 
@@ -569,7 +590,21 @@ const toggleSidebar = () => {
               @click="() => router.replace({ name: 'parcelscanner' })"
             />
           </div>
-
+          <AlertPopUp
+            v-if="success"
+            :titles="'Register New Account is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="success"
+            @closePopUp="closePopUp"
+          /><AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>

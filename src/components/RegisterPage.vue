@@ -371,11 +371,11 @@ const submitForm = async (roleType) => {
     await authManager.registerAccount(payload)
     authManager.loadUserFromBackend()
     // ถ้ามี email ซ้ำจาก backend
-    // if (authManager.user.email == form.email) {
-    //   isEmailDuplicate.value = true
-    //   setTimeout(() => (isEmailDuplicate.value = false), 3000)
-    //   return
-    // }
+    if (authManager.status === 409) {
+      isEmailDuplicate.value = true
+      setTimeout(() => (isEmailDuplicate.value = false), 3000)
+      return
+    }
 
     // ✅ ล้างฟอร์มหลังสำเร็จ
     Object.keys(form).forEach((key) => {
@@ -469,7 +469,7 @@ const checkInputLength = (field) => {
     }
   }
 }
-// --- ปิด popup ด้วยมือ ---
+
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
