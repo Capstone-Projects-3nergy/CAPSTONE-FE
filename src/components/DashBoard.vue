@@ -605,8 +605,9 @@ const toggleSidebar = () => {
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
-        <div class="flex space-x-1">
+      <main class="flex-1 p-6 bg-gray-50 min-h-screen">
+        <!-- หัวข้อ -->
+        <div class="flex items-center space-x-2 mb-6">
           <svg
             width="25"
             height="25"
@@ -619,66 +620,139 @@ const toggleSidebar = () => {
               fill="#185DC0"
             />
           </svg>
-
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Dash Board</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Dashboard</h2>
         </div>
-        <!-- Tabs -->
-        <div class="mb-4 flex space-x-2">
-          <div class="w-full mx-auto space-y-6">
-            <h1 class="text-1xl font-semibold text-gray-800">
-              จำนวนพัสดุที่มาส่งหอพัก (รายเดือน)
-            </h1>
 
-            <div class="bg-white rounded-lg shadow overflow-x-auto p-6">
-              <!-- กราฟ -->
-              <div class="mb-6">
-                <canvas id="packagesChart" height="120"></canvas>
+        <!-- การ์ดสรุป -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div
+            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="bg-[#185dc0]/10 p-3 rounded-xl text-[#185dc0] flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.75 6.75l7.5-3 7.5 3M3.75 6.75v10.5l7.5 3m-7.5-13.5l7.5 3m0 10.5v-10.5m0 10.5l7.5-3V6.75m0 0l-7.5 3"
+                  />
+                </svg>
               </div>
-
-              <!-- ตาราง -->
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-4 py-3 text-left font-medium text-gray-600">
-                        เดือน
-                      </th>
-                      <th
-                        class="px-4 py-3 text-right font-medium text-gray-600"
-                      >
-                        จำนวนพัสดุ (ชิ้น)
-                      </th>
-                      <th
-                        class="px-4 py-3 text-right font-medium text-gray-600"
-                      >
-                        เปรียบเทียบกับเดือนก่อน (%)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    id="packagesTableBody"
-                    class="bg-white divide-y divide-gray-100"
-                  >
-                    <!-- แถวจะถูกเติมด้วย JavaScript -->
-                  </tbody>
-                  <tfoot class="bg-gray-50">
-                    <tr>
-                      <td class="px-4 py-3 font-medium text-gray-700">
-                        รวม (ปี)
-                      </td>
-                      <td
-                        id="totalPackages"
-                        class="px-4 py-3 text-right font-semibold text-gray-800"
-                      >
-                        —
-                      </td>
-                      <td class="px-4 py-3"></td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div>
+                <p class="text-gray-600 text-sm">Total Parcel</p>
+                <p class="text-2xl font-bold">247</p>
               </div>
             </div>
           </div>
+
+          <div
+            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="bg-green-100 p-3 rounded-xl text-green-600 flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-gray-600 text-sm">Unreceived Parcel</p>
+                <p class="text-2xl font-bold">89</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="bg-pink-100 p-3 rounded-xl text-pink-600 flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v6h4.5M3 12a9 9 0 1118 0 9 9 0 01-18 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-gray-600 text-sm">Received Parcel</p>
+                <p class="text-2xl font-bold">158</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="bg-purple-100 p-3 rounded-xl text-purple-600 flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17 20h5v-2a2 2 0 00-2-2h-3m0 0H7m10 0a2 2 0 00-2-2H9a2 2 0 00-2 2m0 0H4a2 2 0 00-2 2v2h5m10 0v-2a2 2 0 00-2-2h-6a2 2 0 00-2 2v2m10 0H7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-gray-600 text-sm">All Resident</p>
+                <p class="text-2xl font-bold">342</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- กราฟ -->
+        <div class="bg-white rounded-2xl shadow p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-gray-700 font-semibold">Parcel Volume</h3>
+            <button
+              class="border rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
+            >
+              This Week ▾
+            </button>
+          </div>
+          <canvas id="parcelChart" height="120"></canvas>
         </div>
       </main>
     </div>
