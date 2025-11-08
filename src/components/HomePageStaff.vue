@@ -116,7 +116,6 @@ const parcels = ref([
 ])
 // console.log(loginStore.user.email)
 
-registerStore.loadUserFromBackend()
 console.log(registerStore.user)
 
 const currentUser = ref('Pimpajee SetXXXXXX')

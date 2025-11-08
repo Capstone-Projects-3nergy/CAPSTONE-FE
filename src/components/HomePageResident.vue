@@ -112,7 +112,6 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
-registerStore.loadUserFromBackend()
 console.log(registerStore.user)
 </script>
 

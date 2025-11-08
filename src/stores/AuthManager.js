@@ -5,7 +5,8 @@ import { auth } from '@/firebase/firebaseConfig'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 
@@ -27,7 +28,7 @@ export const useAuthManager = defineStore('authManager', () => {
   }
 
   // -----------------------
-  // ✅ ดึงข้อมูล user จาก backend โดยตรง
+  // FETCH USER จาก backend
   // -----------------------
   const fetchUserFromBackend = async () => {
     try {
@@ -50,10 +51,10 @@ export const useAuthManager = defineStore('authManager', () => {
         role: data.role,
         accessToken: idToken,
         ...(data.role === 'STAFF'
-          ? { position: data.position ?? null }
+          ? { position: data.position || '' }
           : {
-              dormId: data.dormId ?? null,
-              roomNumber: data.roomNumber ?? null
+              dormId: data.dorm_id != null ? Number(data.dorm_id) : null,
+              roomNumber: data.room_number || ''
             })
       }
 
@@ -65,9 +66,6 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // -----------------------
-  // 🔄 ใช้แทน loadUserFromLocalStorage
-  // -----------------------
   const loadUserFromBackend = async () => {
     try {
       const currentUser = auth.currentUser
@@ -79,7 +77,19 @@ export const useAuthManager = defineStore('authManager', () => {
       return false
     }
   }
-
+  const initUser = () => {
+    return new Promise((resolve) => {
+      onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          await loadUserFromBackend() // โหลดข้อมูล user จาก backend
+          resolve(true)
+        } else {
+          user.value = null
+          resolve(false)
+        }
+      })
+    })
+  }
   // -----------------------
   // REGISTER
   // -----------------------
@@ -100,10 +110,8 @@ export const useAuthManager = defineStore('authManager', () => {
         const dormIdNum = Number(formData.dormId)
         if (!Number.isFinite(dormIdNum) || dormIdNum <= 0)
           throw new Error('Please select a valid dormitory.')
-
         if (!formData.roomNumber?.trim())
           throw new Error('Room number is required.')
-
         payload = {
           ...payload,
           dormId: dormIdNum,
@@ -112,17 +120,14 @@ export const useAuthManager = defineStore('authManager', () => {
       } else if (role === 'STAFF') {
         if (!formData.position?.trim())
           throw new Error('Position is required for staff.')
-
         payload = { ...payload, position: formData.position.trim() }
       }
 
-      // ✅ Register backend
       const baseURL = import.meta.env.VITE_BASE_URL
       const response = await axios.post(
         `${baseURL}/public/auth/register`,
         payload
       )
-
       if (!response.data?.userId)
         throw new Error('Registration failed on backend.')
 
@@ -148,7 +153,6 @@ export const useAuthManager = defineStore('authManager', () => {
 
       successMessage.value = 'Account created successfully!'
 
-      // ✅ Redirect
       if (router) {
         if (role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: response.data.userId } })
@@ -185,10 +189,11 @@ export const useAuthManager = defineStore('authManager', () => {
       const firebaseUser = userCredential.user
       const idToken = await firebaseUser.getIdToken()
 
-      // ✅ verify กับ backend
       const response = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/api/auth/verify`,
-        { headers: { Authorization: `Bearer ${idToken}` } }
+        {
+          headers: { Authorization: `Bearer ${idToken}` }
+        }
       )
 
       const data = response.data
@@ -201,10 +206,10 @@ export const useAuthManager = defineStore('authManager', () => {
         role: data.role,
         accessToken: idToken,
         ...(data.role === 'STAFF'
-          ? { position: data.position ?? null }
+          ? { position: data.position || '' }
           : {
-              dormId: data.dormId ?? null,
-              roomNumber: data.roomNumber ?? null
+              dormId: data.dorm_id != null ? Number(data.dorm_id) : null,
+              roomNumber: data.room_number || ''
             })
       }
 
@@ -270,7 +275,6 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const decoded = decodeJWT(token)
       const now = Math.floor(Date.now() / 1000)
-
       if (decoded?.exp && decoded.exp < now) {
         token = await refreshToken()
         if (!token) throw new Error('Token expired')
@@ -278,7 +282,6 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const headers = { ...options.headers, Authorization: `Bearer ${token}` }
       const response = await axios({ url, ...options, headers })
-
       return response.data
     } catch (err) {
       console.error('API request error:', err)
@@ -292,21 +295,21 @@ export const useAuthManager = defineStore('authManager', () => {
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
       const publicPages = ['login', 'register', 'resetpassword']
-
       if (publicPages.includes(to.name)) return next()
 
-      if (!user.value && !(await loadUserFromBackend())) {
-        return next({ name: 'login' })
-      }
+      // รอ Firebase initialize
+      const isLoggedIn = user.value || (await initUser())
+      if (!isLoggedIn) return next({ name: 'login' })
 
+      // ตรวจสอบ token หมดอายุ
       const decoded = decodeJWT(user.value.accessToken)
       const now = Math.floor(Date.now() / 1000)
       if (decoded?.exp && decoded.exp < now) {
-        const newToken = await auth.currentUser?.getIdToken(true)
+        const newToken = await refreshToken()
         if (!newToken) return next({ name: 'login' })
-        user.value.accessToken = newToken
       }
 
+      // ตรวจสอบ role
       if (
         (to.name === 'home' && user.value.role !== 'RESIDENT') ||
         (to.name === 'homestaff' && user.value.role !== 'STAFF')
@@ -333,6 +336,7 @@ export const useAuthManager = defineStore('authManager', () => {
     loadUserFromBackend
   }
 })
+
 // import { defineStore } from 'pinia'
 // import { ref } from 'vue'
 // import axios from 'axios'
