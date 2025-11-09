@@ -126,7 +126,7 @@ export const useAuthManager = defineStore('authManager', () => {
     let payload = { ...formData, role }
 
     if (role === 'RESIDENT') {
-      const dormIdNum = Number(formData.dormName)
+      const dormIdNum = Number(formData.dormId)
       if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
         errorMessage.value = 'Please select a valid dormitory.'
         isLoading.value = false
