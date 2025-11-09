@@ -211,7 +211,7 @@ export const useAuthManager = defineStore('authManager', () => {
         if (firebaseErr.code === 'auth/user-not-found') {
           // 2️⃣ ตรวจสอบกับ backend ว่า user นี้มี UID หรือยัง
           const { data: checkUid } = await axios.get(
-            `${baseURL}/auth/check-firebase-uid`,
+            `${baseURL}/auth/save-firebase-uid`,
             {
               params: { email }
             }
@@ -227,7 +227,7 @@ export const useAuthManager = defineStore('authManager', () => {
             console.log('✅ Created new Firebase user')
 
             // 4️⃣ ส่ง UID + email ไป backend เพื่อบันทึก
-            await axios.post(`${baseURL}/auth/save-firebase-uid`, {
+            await axios.get(`${baseURL}/auth/verify`, {
               email,
               firebaseUid: firebaseUserCredential.user.uid
             })
