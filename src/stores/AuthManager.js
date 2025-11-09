@@ -185,60 +185,107 @@ export const useAuthManager = defineStore('authManager', () => {
     isLoading.value = true
     errorMessage.value = ''
     successMessage.value = ''
+    user.value = null
+    status.value = null
+
+    if (!email || !password) {
+      errorMessage.value = 'Email and password are required'
+      isLoading.value = false
+      return null
+    }
+
+    const baseURL = import.meta.env.VITE_BASE_URL
 
     try {
-      // ✅ 1. เข้าระบบ Firebase ก่อน เพื่อรับ ID Token (จาก email + password)
-      const cred = await signInWithEmailAndPassword(auth, email, password)
-      const firebaseUser = cred.user
-      const idToken = await firebaseUser.getIdToken()
+      let firebaseUserCredential
 
-      // ✅ 2. ส่ง token ไป verify กับ backend
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/auth/verify`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`
+      // 1️⃣ พยายาม login ด้วย Firebase
+      try {
+        firebaseUserCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        )
+        console.log('✅ Firebase login successful')
+      } catch (firebaseErr) {
+        if (firebaseErr.code === 'auth/user-not-found') {
+          // 2️⃣ ตรวจสอบกับ backend ว่า user นี้มี UID หรือยัง
+          const { data: checkUid } = await axios.get(
+            `${baseURL}/auth/check-firebase-uid`,
+            {
+              params: { email }
+            }
+          )
+
+          if (!checkUid.firebaseUid) {
+            // 3️⃣ ยังไม่มี UID → สร้าง Firebase user ใหม่
+            firebaseUserCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            )
+            console.log('✅ Created new Firebase user')
+
+            // 4️⃣ ส่ง UID + email ไป backend เพื่อบันทึก
+            await axios.post(`${baseURL}/auth/save-firebase-uid`, {
+              email,
+              firebaseUid: firebaseUserCredential.user.uid
+            })
+          } else {
+            throw new Error(
+              'User exists in backend but missing in Firebase. Contact admin.'
+            )
           }
+        } else if (firebaseErr.code === 'auth/wrong-password') {
+          throw new Error('Incorrect password')
+        } else {
+          throw firebaseErr
         }
-      )
-
-      const data = response.data
-      if (!data?.authenticated) {
-        throw new Error('User verification failed')
       }
 
-      // ✅ 3. เก็บสถานะผู้ใช้ใน Pinia
+      // 5️⃣ ดึง Firebase ID token
+      const idToken = await firebaseUserCredential.user.getIdToken()
+
+      // 6️⃣ ส่ง token ไป backend เพื่อ verify user
+      const response = await axios.get(`${baseURL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      })
+
+      const data = response.data
+      if (!data?.userId) throw new Error('Backend verification failed')
+
+      // 7️⃣ เก็บ user state
+      const role = data.role
       user.value = {
         id: data.userId,
         email: data.email,
         fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
-        role: data.role,
+        role,
         accessToken: idToken,
-        ...(data.role === 'STAFF'
-          ? { position: data.position || '' }
-          : {
+        ...(role === 'STAFF' ? { position: data.position ?? null } : {}),
+        ...(role === 'RESIDENT'
+          ? {
               dormId: data.dormName ?? null,
-              roomNumber: data.roomNumber || ''
-            })
+              roomNumber: data.roomNumber ?? null
+            }
+          : {})
       }
 
-      successMessage.value = `Login successful as ${data.role}!`
+      successMessage.value = `Login successful as ${role}!`
 
-      // ✅ 4. Redirect ตาม role
+      // 8️⃣ Redirect ตาม role
       if (router) {
-        if (data.role === 'RESIDENT') {
+        if (role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
-        } else if (data.role === 'STAFF') {
+        else if (role === 'STAFF')
           router.replace({ name: 'homestaff', params: { id: data.userId } })
-        }
       }
 
       return user.value
     } catch (err) {
       console.error('❌ Login error:', err)
       errorMessage.value =
-        err.response?.data?.message || err.message || 'Login failed'
+        err.response?.data?.message || err.message || 'Login failed.'
       user.value = null
       return null
     } finally {
