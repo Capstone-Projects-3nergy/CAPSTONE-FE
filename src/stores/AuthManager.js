@@ -61,7 +61,7 @@ export const useAuthManager = defineStore('authManager', () => {
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
           : {
-              dormId: data.dormId != null ? Number(data.dormId) : null,
+              dormId: data.dormName != null ? data.dormName : null,
               roomNumber: data.roomNumber || ''
             })
       }
@@ -126,7 +126,7 @@ export const useAuthManager = defineStore('authManager', () => {
     let payload = { ...formData, role }
 
     if (role === 'RESIDENT') {
-      const dormIdNum = Number(formData.dormId)
+      const dormIdNum = Number(formData.dormName)
       if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
         errorMessage.value = 'Please select a valid dormitory.'
         isLoading.value = false
@@ -177,7 +177,7 @@ export const useAuthManager = defineStore('authManager', () => {
           accessToken: idToken,
           ...(role === 'STAFF' ? { position: formData.position } : {}),
           ...(role === 'RESIDENT'
-            ? { dormId: formData.dormId, roomNumber: formData.roomNumber }
+            ? { dormId: formData.dormName, roomNumber: formData.roomNumber }
             : {})
         }
 
@@ -244,7 +244,7 @@ export const useAuthManager = defineStore('authManager', () => {
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
           : {
-              dormId: data.dormId != null ? Number(data.dormId) : null,
+              dormId: data.dormName != null ? data.dormName : null,
               roomNumber: data.roomNumber || ''
             })
       }
