@@ -77,7 +77,7 @@ onMounted(async () => {
     console.log('Base URL:', baseURL)
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
-    const res = await axios.get(`${baseURL}/public/dorms`, {
+    const res = await axios.get(`${baseURL}/auth/dorms`, {
       headers: { Accept: 'application/json' }
     })
 
