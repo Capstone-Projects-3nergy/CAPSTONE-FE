@@ -157,6 +157,8 @@ export const useAuthManager = defineStore('authManager', () => {
       .post(`${baseURL}/auth/register`, payload)
       .then(async (response) => {
         status.value = response.status
+        console.log('✅ Backend response:', response) // แสดง response ทั้ง object
+        console.log('📄 Backend response data:', response.data) // แสดง data ที่ backend ส่งกลับ
         if (!response.data?.userId) {
           errorMessage.value = 'Registration failed on backend.'
           return
