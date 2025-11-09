@@ -45,7 +45,7 @@ export const useAuthManager = defineStore('authManager', () => {
       const response = await axios.get(`${baseURL}/auth/verify`, {
         headers: { Authorization: `Bearer ${idToken}` }
       })
-
+      console.log('🔍 verify response:', response.data)
       const data = response.data
       if (!data?.authenticated) {
         console.error('❌ Backend verify failed:', data)
@@ -61,8 +61,8 @@ export const useAuthManager = defineStore('authManager', () => {
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
           : {
-              dormId: data.dorm_id != null ? Number(data.dorm_id) : null,
-              roomNumber: data.room_number || ''
+              dormId: data.dormId != null ? Number(data.dormId) : null,
+              roomNumber: data.roomNumber || ''
             })
       }
 
@@ -231,7 +231,7 @@ export const useAuthManager = defineStore('authManager', () => {
         `${import.meta.env.VITE_BASE_URL}/auth/verify`,
         { headers: { Authorization: `Bearer ${idToken}` } }
       )
-
+      console.log('🔍 verify response:', response.data)
       const data = response.data
       if (!data?.authenticated) throw new Error('Verify failed')
 
@@ -244,8 +244,8 @@ export const useAuthManager = defineStore('authManager', () => {
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
           : {
-              dormId: data.dorm_id != null ? Number(data.dorm_id) : null,
-              roomNumber: data.room_number || ''
+              dormId: data.dormId != null ? Number(data.dormId) : null,
+              roomNumber: data.roomNumber || ''
             })
       }
 
