@@ -372,6 +372,7 @@ const submitForm = async (roleType) => {
     authManager.loadUserFromBackend()
     // ถ้ามี email ซ้ำจาก backend
     if (authManager.status === 409) {
+      success.value = false
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
       return
