@@ -13,7 +13,7 @@ import AddParcels from './AddParcels.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
-// import AlertPopUp from './AlertPopUp.vue'
+import AlertPopUp from './AlertPopUp.vue'
 
 import {
   sortByRoomNumber,
@@ -163,8 +163,9 @@ const totalPages = computed(() =>
 const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
-  return parcels.value.slice(start, end)
+  return filteredParcels.value.slice(start, end)
 })
+
 const showParacelDetail = async function (id, operate) {
   router.push({ name: 'detailparcels', params: { tid: id } })
   operation.value = operate
@@ -786,7 +787,7 @@ const pageNumbers = computed(() => {
             </thead>
             <tbody class="divide-y">
               <tr
-                v-for="p in filteredParcels"
+                v-for="p in paginatedParcels"
                 :key="p.id"
                 class="hover:bg-gray-50"
               >
@@ -858,12 +859,16 @@ const pageNumbers = computed(() => {
 
         <!-- Pagination -->
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button @click="prevPage" class="px-3 py-1 rounded hover:bg-gray-200">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+          >
             &lt; Previous
           </button>
 
           <button
-            v-for="page in pageNumbers"
+            v-for="page in totalPages"
             :key="page"
             @click="goToPage(page)"
             :class="[
@@ -876,7 +881,11 @@ const pageNumbers = computed(() => {
             {{ page.toString().padStart(2, '0') }}
           </button>
 
-          <button @click="nextPage" class="px-3 py-1 rounded hover:bg-gray-200">
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+          >
             Next &gt;
           </button>
         </div>
