@@ -604,35 +604,32 @@ export const useAuthManager = defineStore('authManager', () => {
 //         )
 //         console.log('✅ Firebase login successful')
 //       } catch (firebaseErr) {
-//         if (firebaseErr.code === 'auth/user-not-found') {
-//           // 2️⃣ ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
-//           const { data: backendUser } = await axios.get(
-//             `${baseURL}/auth/verify`,
-//             {
-//               params: { email }
-//             }
-//           )
+//         console.log('🔥 Firebase login failed:', firebaseErr.code)
 
-//           if (!backendUser?.firebaseUid) {
-//             // 3️⃣ ยังไม่มี UID → สร้าง Firebase user ใหม่
-//             firebaseUserCredential = await createUserWithEmailAndPassword(
-//               auth,
-//               email,
-//               password
-//             )
-//             console.log('✅ Created new Firebase user')
-
-//             // 4️⃣ ส่ง UID + email ไป backend เพื่อบันทึก
-//             await axios.get(`${baseURL}/auth/verify`, {
-//               email,
-//               firebaseUid: firebaseUserCredential.user.uid
-//             })
-//             console.log('✅ Linked Firebase UID to backend')
-//           } else {
-//             throw new Error(
-//               'User exists in backend but missing in Firebase. Contact admin.'
-//             )
+//         // 2️⃣ ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
+//         const { data: backendUser } = await axios.get(
+//           `${baseURL}/auth/verify`,
+//           {
+//             params: { email }
 //           }
+//         )
+//         console.log('📡 Backend verify result:', backendUser)
+
+//         if (!backendUser?.firebaseUid) {
+//           // 3️⃣ ยังไม่มี UID → สร้าง Firebase user ใหม่
+//           firebaseUserCredential = await createUserWithEmailAndPassword(
+//             auth,
+//             email,
+//             password
+//           )
+//           console.log('✅ Created new Firebase user')
+
+//           // 4️⃣ ส่ง UID + email ไป backend เพื่อบันทึก
+//           await axios.get(`${baseURL}/auth/verify`, {
+//             email,
+//             firebaseUid: firebaseUserCredential.user.uid
+//           })
+//           console.log('✅ Linked Firebase UID to backend')
 //         } else if (firebaseErr.code === 'auth/wrong-password') {
 //           throw new Error('Incorrect password')
 //         } else {
