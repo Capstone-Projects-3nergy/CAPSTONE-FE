@@ -55,7 +55,7 @@ const saveParcel = async () => {
 
     // 🔹 เรียก API backend
     const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/auth/add`,
+      `${import.meta.env.VITE_BASE_URL}/parcels/add`,
       parcelData.value
     )
 
