@@ -14,6 +14,15 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  searchParcels
+} from '@/stores/SortManager'
 const registerStore = useRegisterManager()
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
@@ -33,8 +42,8 @@ const activeTab = ref('Day')
 const parcels = ref([
   {
     id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Pimpajee',
+    tracking: 'TH123',
     room: 101,
     contact: '097-230-XXXX',
     status: 'Pending',
@@ -42,86 +51,53 @@ const parcels = ref([
   },
   {
     id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
+    recipient: 'Pimpajee',
+    tracking: 'TH223',
     room: 102,
     contact: '097-230-XXXX',
     status: 'Picked Up',
     date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
   }
+  // ... ข้อมูลอื่น ๆ
 ])
+
+// Search
+const searchKeyword = ref('')
+
+// Sort
+const sortOption = ref('Newest')
+
+// ฟังก์ชันเรียงลำดับตาม select
+const sortParcels = () => {
+  switch (sortOption.value) {
+    case 'Newest':
+      sortDateReverse(parcels.value)
+      break
+    case 'Oldest':
+      sortDate(parcels.value)
+      break
+    case 'Room ↑':
+      sortByRoomNumber(parcels.value)
+      break
+    case 'Room ↓':
+      sortByRoomNumberReverse(parcels.value)
+      break
+    case 'Status A→Z':
+      sortByStatus(parcels.value)
+      break
+    case 'Status Z→A':
+      sortByStatusReverse(parcels.value)
+      break
+  }
+}
+
+// Computed สำหรับค้นหาและเรียงลำดับ
+const filteredParcels = computed(() => {
+  const searched = searchKeyword.value
+    ? searchParcels(parcels.value, searchKeyword.value)
+    : parcels.value
+  return searched
+})
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -596,103 +572,57 @@ const toggleSidebar = () => {
       <!-- Main Content -->
       <main class="flex-1 p-6">
         <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
-
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
-        <!-- 🔲 Filter Bar Wrapper -->
+
+        <!-- Filter Bar -->
         <div
-          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200 flex justify-between items-center"
         >
-          <div class="flex items-center justify-between mb-4">
-            <!-- Left: Date Tabs -->
-            <div class="flex items-center space-x-4">
-              <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
-              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
-                <button
-                  v-for="tab in tabs"
-                  :key="tab"
-                  @click="activeTab = tab"
-                  :class="[
-                    'px-4 py-1 font-medium transition  cursor-pointer',
-                    activeTab === tab
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-500 hover:bg-gray-200'
-                  ]"
-                >
-                  {{ tab }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Right: Search + Sort + Add -->
-            <div class="flex items-center space-x-3">
-              <!-- Search -->
-              <div class="relative">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <!-- Sort -->
-              <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-              >
-                <option>Sort by:</option>
-                <option>Newest</option>
-                <option>Oldest</option>
-              </select>
-
-              <!-- Add Parcel -->
-              <button
-                @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="w-4 h-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                <span>Add parcel</span>
-              </button>
-            </div>
+          <!-- Search -->
+          <div class="relative">
+            <svg
+              class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              v-model="searchKeyword"
+              type="text"
+              placeholder="Search ..."
+              class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
           </div>
+
+          <!-- Sort -->
+          <select
+            v-model="sortOption"
+            @change="sortParcels"
+            class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+          >
+            <option>Newest</option>
+            <option>Oldest</option>
+            <option>Room ↑</option>
+            <option>Room ↓</option>
+            <option>Status A→Z</option>
+            <option>Status Z→A</option>
+          </select>
+
+          <!-- Add Parcel -->
+          <button
+            @click="router.push({ name: 'addparcels' })"
+            class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
+          >
+            <span>Add parcel</span>
+          </button>
         </div>
 
         <!-- Parcel Table -->
@@ -718,13 +648,14 @@ const toggleSidebar = () => {
                 <th class="px-4 py-3 text-sm font-semibold text-gray-700">
                   Date in
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
-                  Operation
-                </th>
               </tr>
             </thead>
             <tbody class="divide-y">
-              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
+              <tr
+                v-for="p in filteredParcels"
+                :key="p.id"
+                class="hover:bg-gray-50"
+              >
                 <td class="px-4 py-3 text-sm text-gray-700">
                   {{ p.tracking }}
                 </td>
@@ -746,53 +677,9 @@ const toggleSidebar = () => {
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <button class="text-blue-600 hover:text-blue-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
-                      />
-                    </svg>
-                  </button>
-                  <button class="text-red-600 hover:text-red-800">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
-                      />
-                    </svg>
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button class="px-3 py-1 rounded hover:bg-gray-200">
-            &lt; Previous
-          </button>
-          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
-          <span class="px-2 py-1">...</span>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
         </div>
       </main>
     </div>
