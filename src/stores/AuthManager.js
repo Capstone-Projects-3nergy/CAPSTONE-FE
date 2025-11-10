@@ -6,7 +6,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithCustomToken
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 
@@ -34,7 +35,10 @@ export const useAuthManager = defineStore('authManager', () => {
   const fetchUserFromBackend = async () => {
     try {
       const currentUser = auth.currentUser
-      if (!currentUser) return null
+      if (!currentUser) {
+        console.warn('⚠️ No Firebase user yet, skipping verify.')
+        return null
+      }
 
       const idToken = await currentUser.getIdToken()
       const baseURL = import.meta.env.VITE_BASE_URL
@@ -44,7 +48,10 @@ export const useAuthManager = defineStore('authManager', () => {
       })
 
       const data = response.data
-      if (!data?.authenticated) throw new Error('User verification failed.')
+      if (!data?.authenticated) {
+        console.error('❌ Backend verify failed:', data)
+        throw new Error('User verification failed.')
+      }
 
       user.value = {
         id: data.userId,
@@ -55,8 +62,8 @@ export const useAuthManager = defineStore('authManager', () => {
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
           : {
-              dormId: data.dormName ?? null,
-              roomNumber: data.roomNumber ?? ''
+              dormId: data.dormName != null ? data.dormName : null,
+              roomNumber: data.roomNumber || ''
             })
       }
 
@@ -86,6 +93,7 @@ export const useAuthManager = defineStore('authManager', () => {
         if (firebaseUser) {
           let ok = await loadUserFromBackend()
           if (!ok) {
+            console.warn('Retry loading user from backend...')
             await new Promise((r) => setTimeout(r, 500))
             ok = await loadUserFromBackend()
           }
@@ -99,9 +107,9 @@ export const useAuthManager = defineStore('authManager', () => {
   }
 
   // -----------------------
-  // REGISTER (สร้าง Firebase แต่ยังไม่เก็บใน backend)
+  // REGISTER
   // -----------------------
-  const registerAccount = async (formData) => {
+  const registerAccount = async (formData, router) => {
     isLoading.value = true
     errorMessage.value = ''
     successMessage.value = ''
@@ -145,24 +153,10 @@ export const useAuthManager = defineStore('authManager', () => {
 
     const baseURL = import.meta.env.VITE_BASE_URL
     try {
-      // 1️⃣ สร้าง Firebase user
-      let firebaseUserCredential
-      try {
-        firebaseUserCredential = await createUserWithEmailAndPassword(
-          auth,
-          formData.email,
-          formData.password
-        )
-        console.log('✅ Firebase user created during registration')
-      } catch (firebaseErr) {
-        errorMessage.value =
-          firebaseErr.message || 'Firebase registration failed.'
-        return
-      }
-
-      // 2️⃣ ส่งข้อมูลไป backend (ยังไม่ส่ง UID)
       const response = await axios.post(`${baseURL}/auth/register`, payload)
       status.value = response.status
+      console.log('✅ Backend response:', response)
+      console.log('📄 Backend response data:', response.data)
 
       if (!response.data?.userId) {
         errorMessage.value = 'Registration failed on backend.'
@@ -170,6 +164,7 @@ export const useAuthManager = defineStore('authManager', () => {
       }
 
       successMessage.value = 'Account registered successfully! Please login.'
+      // ไม่สร้าง Firebase UID ที่นี่
     } catch (error) {
       status.value = error.response?.status || 500
       if (status.value === 409) {
@@ -184,7 +179,7 @@ export const useAuthManager = defineStore('authManager', () => {
   }
 
   // -----------------------
-  // LOGIN (เชื่อม Firebase UID กับ backend)
+  // LOGIN (backend สร้าง Firebase UID)
   // -----------------------
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
@@ -204,6 +199,7 @@ export const useAuthManager = defineStore('authManager', () => {
     try {
       let firebaseUserCredential
 
+      // 1️⃣ พยายาม login ด้วย Firebase
       try {
         firebaseUserCredential = await signInWithEmailAndPassword(
           auth,
@@ -212,31 +208,16 @@ export const useAuthManager = defineStore('authManager', () => {
         )
         console.log('✅ Firebase login successful')
       } catch (firebaseErr) {
-        if (firebaseErr.code === 'auth/user-not-found') {
-          // ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
-          const { data: backendUser } = await axios.get(
-            `${baseURL}/auth/verify`,
-            { params: { email } }
-          )
-          if (!backendUser?.firebaseUid) {
-            // ยังไม่มี UID → สร้าง Firebase user ใหม่
-            firebaseUserCredential = await createUserWithEmailAndPassword(
-              auth,
-              email,
-              password
-            )
-            console.log('✅ Created new Firebase user')
+        console.log('🔥 Firebase login failed:', firebaseErr.code)
 
-            // ส่ง UID + email ไป backend เพื่อบันทึก
-            await axios.get(`${baseURL}/auth/verify`, {
-              params: { email, firebaseUid: firebaseUserCredential.user.uid }
-            })
-            console.log('✅ Linked Firebase UID to backend')
-          } else {
-            throw new Error(
-              'User exists in backend but missing in Firebase. Contact admin.'
-            )
-          }
+        if (firebaseErr.code) {
+          // 2️⃣ สร้าง Firebase user ใหม่
+          firebaseUserCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          )
+          console.log('✅ Created new Firebase user')
         } else if (firebaseErr.code === 'auth/wrong-password') {
           throw new Error('Incorrect password')
         } else {
@@ -244,17 +225,18 @@ export const useAuthManager = defineStore('authManager', () => {
         }
       }
 
-      // ดึง Firebase ID token
+      // 3️⃣ ดึง Firebase ID token
       const idToken = await firebaseUserCredential.user.getIdToken()
 
-      // ส่ง token ไป backend เพื่อ verify user & ดึงข้อมูล
+      // 4️⃣ ส่ง token ไป backend เพื่อ verify user & link Firebase UID
       const response = await axios.get(`${baseURL}/auth/verify`, {
         headers: { Authorization: `Bearer ${idToken}` }
       })
+
       const data = response.data
       if (!data?.userId) throw new Error('Backend verification failed')
 
-      // เก็บ user state
+      // 5️⃣ เก็บ user state
       const role = data.role
       user.value = {
         id: data.userId,
@@ -273,7 +255,7 @@ export const useAuthManager = defineStore('authManager', () => {
 
       successMessage.value = `Login successful as ${role}!`
 
-      // Redirect ตาม role
+      // 6️⃣ Redirect ตาม role
       if (router) {
         if (role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
@@ -330,14 +312,24 @@ export const useAuthManager = defineStore('authManager', () => {
   // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
-      if (!user.value) await initUser()
+      if (!user.value) {
+        console.warn('User not ready, waiting for init...')
+        await initUser()
+      }
+
       let token = user.value?.accessToken
-      if (!token) token = await refreshToken()
-      if (!token) throw new Error('No access token available after refresh')
+      if (!token) {
+        console.warn('No token, fetching new one...')
+        token = await refreshToken()
+        if (!token) throw new Error('No access token available after refresh')
+      }
 
       const decoded = decodeJWT(token)
       const now = Math.floor(Date.now() / 1000)
-      if (decoded?.exp && decoded.exp < now) token = await refreshToken()
+      if (decoded?.exp && decoded.exp < now) {
+        token = await refreshToken()
+        if (!token) throw new Error('Token expired')
+      }
 
       const headers = { ...options.headers, Authorization: `Bearer ${token}` }
       const response = await axios({ url, ...options, headers })
@@ -357,8 +349,10 @@ export const useAuthManager = defineStore('authManager', () => {
       if (publicPages.includes(to.name)) return next()
 
       const isLoggedIn = user.value || (await initUser())
-      if (!isLoggedIn || !user.value?.accessToken)
+      if (!isLoggedIn || !user.value?.accessToken) {
+        console.warn('🔒 No logged-in user or token')
         return next({ name: 'login' })
+      }
 
       const decoded = decodeJWT(user.value.accessToken)
       const now = Math.floor(Date.now() / 1000)
@@ -394,6 +388,7 @@ export const useAuthManager = defineStore('authManager', () => {
     loadUserFromBackend
   }
 })
+// version create firebase in register
 // import { defineStore } from 'pinia'
 // import { ref } from 'vue'
 // import axios from 'axios'
@@ -402,8 +397,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //   signInWithEmailAndPassword,
 //   createUserWithEmailAndPassword,
 //   signOut,
-//   onAuthStateChanged,
-//   signInWithCustomToken
+//   onAuthStateChanged
 // } from 'firebase/auth'
 // import { jwtDecode } from 'jwt-decode'
 
@@ -431,10 +425,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //   const fetchUserFromBackend = async () => {
 //     try {
 //       const currentUser = auth.currentUser
-//       if (!currentUser) {
-//         console.warn('⚠️ No Firebase user yet, skipping verify.')
-//         return null
-//       }
+//       if (!currentUser) return null
 
 //       const idToken = await currentUser.getIdToken()
 //       const baseURL = import.meta.env.VITE_BASE_URL
@@ -444,10 +435,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       })
 
 //       const data = response.data
-//       if (!data?.authenticated) {
-//         console.error('❌ Backend verify failed:', data)
-//         throw new Error('User verification failed.')
-//       }
+//       if (!data?.authenticated) throw new Error('User verification failed.')
 
 //       user.value = {
 //         id: data.userId,
@@ -458,8 +446,8 @@ export const useAuthManager = defineStore('authManager', () => {
 //         ...(data.role === 'STAFF'
 //           ? { position: data.position || '' }
 //           : {
-//               dormId: data.dormName != null ? data.dormName : null,
-//               roomNumber: data.roomNumber || ''
+//               dormId: data.dormName ?? null,
+//               roomNumber: data.roomNumber ?? ''
 //             })
 //       }
 
@@ -489,7 +477,6 @@ export const useAuthManager = defineStore('authManager', () => {
 //         if (firebaseUser) {
 //           let ok = await loadUserFromBackend()
 //           if (!ok) {
-//             console.warn('Retry loading user from backend...')
 //             await new Promise((r) => setTimeout(r, 500))
 //             ok = await loadUserFromBackend()
 //           }
@@ -503,9 +490,9 @@ export const useAuthManager = defineStore('authManager', () => {
 //   }
 
 //   // -----------------------
-//   // REGISTER
+//   // REGISTER (สร้าง Firebase แต่ยังไม่เก็บใน backend)
 //   // -----------------------
-//   const registerAccount = async (formData, router) => {
+//   const registerAccount = async (formData) => {
 //     isLoading.value = true
 //     errorMessage.value = ''
 //     successMessage.value = ''
@@ -549,10 +536,24 @@ export const useAuthManager = defineStore('authManager', () => {
 
 //     const baseURL = import.meta.env.VITE_BASE_URL
 //     try {
+//       // 1️⃣ สร้าง Firebase user
+//       let firebaseUserCredential
+//       try {
+//         firebaseUserCredential = await createUserWithEmailAndPassword(
+//           auth,
+//           formData.email,
+//           formData.password
+//         )
+//         console.log('✅ Firebase user created during registration')
+//       } catch (firebaseErr) {
+//         errorMessage.value =
+//           firebaseErr.message || 'Firebase registration failed.'
+//         return
+//       }
+
+//       // 2️⃣ ส่งข้อมูลไป backend (ยังไม่ส่ง UID)
 //       const response = await axios.post(`${baseURL}/auth/register`, payload)
 //       status.value = response.status
-//       console.log('✅ Backend response:', response)
-//       console.log('📄 Backend response data:', response.data)
 
 //       if (!response.data?.userId) {
 //         errorMessage.value = 'Registration failed on backend.'
@@ -560,7 +561,6 @@ export const useAuthManager = defineStore('authManager', () => {
 //       }
 
 //       successMessage.value = 'Account registered successfully! Please login.'
-//       // ไม่สร้าง Firebase UID ที่นี่
 //     } catch (error) {
 //       status.value = error.response?.status || 500
 //       if (status.value === 409) {
@@ -575,7 +575,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //   }
 
 //   // -----------------------
-//   // LOGIN (backend สร้าง Firebase UID)
+//   // LOGIN (เชื่อม Firebase UID กับ backend)
 //   // -----------------------
 //   const loginAccount = async (email, password, router) => {
 //     isLoading.value = true
@@ -595,7 +595,6 @@ export const useAuthManager = defineStore('authManager', () => {
 //     try {
 //       let firebaseUserCredential
 
-//       // 1️⃣ พยายาม login ด้วย Firebase
 //       try {
 //         firebaseUserCredential = await signInWithEmailAndPassword(
 //           auth,
@@ -604,32 +603,31 @@ export const useAuthManager = defineStore('authManager', () => {
 //         )
 //         console.log('✅ Firebase login successful')
 //       } catch (firebaseErr) {
-//         console.log('🔥 Firebase login failed:', firebaseErr.code)
-
-//         // 2️⃣ ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
-//         const { data: backendUser } = await axios.get(
-//           `${baseURL}/auth/verify`,
-//           {
-//             params: { email }
-//           }
-//         )
-//         console.log('📡 Backend verify result:', backendUser)
-
-//         if (!backendUser?.firebaseUid) {
-//           // 3️⃣ ยังไม่มี UID → สร้าง Firebase user ใหม่
-//           firebaseUserCredential = await createUserWithEmailAndPassword(
-//             auth,
-//             email,
-//             password
+//         if (firebaseErr.code === 'auth/user-not-found') {
+//           // ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
+//           const { data: backendUser } = await axios.get(
+//             `${baseURL}/auth/verify`,
+//             { params: { email } }
 //           )
-//           console.log('✅ Created new Firebase user')
+//           if (!backendUser?.firebaseUid) {
+//             // ยังไม่มี UID → สร้าง Firebase user ใหม่
+//             firebaseUserCredential = await createUserWithEmailAndPassword(
+//               auth,
+//               email,
+//               password
+//             )
+//             console.log('✅ Created new Firebase user')
 
-//           // 4️⃣ ส่ง UID + email ไป backend เพื่อบันทึก
-//           await axios.get(`${baseURL}/auth/verify`, {
-//             email,
-//             firebaseUid: firebaseUserCredential.user.uid
-//           })
-//           console.log('✅ Linked Firebase UID to backend')
+//             // ส่ง UID + email ไป backend เพื่อบันทึก
+//             await axios.get(`${baseURL}/auth/verify`, {
+//               params: { email, firebaseUid: firebaseUserCredential.user.uid }
+//             })
+//             console.log('✅ Linked Firebase UID to backend')
+//           } else {
+//             throw new Error(
+//               'User exists in backend but missing in Firebase. Contact admin.'
+//             )
+//           }
 //         } else if (firebaseErr.code === 'auth/wrong-password') {
 //           throw new Error('Incorrect password')
 //         } else {
@@ -637,18 +635,17 @@ export const useAuthManager = defineStore('authManager', () => {
 //         }
 //       }
 
-//       // 5️⃣ ดึง Firebase ID token
+//       // ดึง Firebase ID token
 //       const idToken = await firebaseUserCredential.user.getIdToken()
 
-//       // 6️⃣ ส่ง token ไป backend เพื่อ verify user & ดึงข้อมูล
+//       // ส่ง token ไป backend เพื่อ verify user & ดึงข้อมูล
 //       const response = await axios.get(`${baseURL}/auth/verify`, {
 //         headers: { Authorization: `Bearer ${idToken}` }
 //       })
-
 //       const data = response.data
 //       if (!data?.userId) throw new Error('Backend verification failed')
 
-//       // 7️⃣ เก็บ user state
+//       // เก็บ user state
 //       const role = data.role
 //       user.value = {
 //         id: data.userId,
@@ -667,7 +664,7 @@ export const useAuthManager = defineStore('authManager', () => {
 
 //       successMessage.value = `Login successful as ${role}!`
 
-//       // 8️⃣ Redirect ตาม role
+//       // Redirect ตาม role
 //       if (router) {
 //         if (role === 'RESIDENT')
 //           router.replace({ name: 'home', params: { id: data.userId } })
@@ -724,24 +721,14 @@ export const useAuthManager = defineStore('authManager', () => {
 //   // -----------------------
 //   const apiRequest = async (url, options = {}) => {
 //     try {
-//       if (!user.value) {
-//         console.warn('User not ready, waiting for init...')
-//         await initUser()
-//       }
-
+//       if (!user.value) await initUser()
 //       let token = user.value?.accessToken
-//       if (!token) {
-//         console.warn('No token, fetching new one...')
-//         token = await refreshToken()
-//         if (!token) throw new Error('No access token available after refresh')
-//       }
+//       if (!token) token = await refreshToken()
+//       if (!token) throw new Error('No access token available after refresh')
 
 //       const decoded = decodeJWT(token)
 //       const now = Math.floor(Date.now() / 1000)
-//       if (decoded?.exp && decoded.exp < now) {
-//         token = await refreshToken()
-//         if (!token) throw new Error('Token expired')
-//       }
+//       if (decoded?.exp && decoded.exp < now) token = await refreshToken()
 
 //       const headers = { ...options.headers, Authorization: `Bearer ${token}` }
 //       const response = await axios({ url, ...options, headers })
@@ -761,10 +748,8 @@ export const useAuthManager = defineStore('authManager', () => {
 //       if (publicPages.includes(to.name)) return next()
 
 //       const isLoggedIn = user.value || (await initUser())
-//       if (!isLoggedIn || !user.value?.accessToken) {
-//         console.warn('🔒 No logged-in user or token')
+//       if (!isLoggedIn || !user.value?.accessToken)
 //         return next({ name: 'login' })
-//       }
 
 //       const decoded = decodeJWT(user.value.accessToken)
 //       const now = Math.floor(Date.now() / 1000)
