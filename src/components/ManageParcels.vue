@@ -165,6 +165,35 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return parcels.value.slice(start, end)
 })
+const showParacelDetail = async function (id, operate) {
+  router.push({ name: 'detailparcels', params: { tid: id } })
+  operation.value = operate
+  taskDetail.value = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
+    id
+  )
+  if (taskDetail.value.status == '404') {
+    alert('The requested task does not exist')
+    router.replace({ name: 'Task' })
+    return
+  }
+  showTaskDetailModal.value = true
+}
+
+const showEditParacelDetail = async function (id, operate) {
+  router.push({ name: 'editparcels', params: { tid: id } })
+  operation.value = operate
+  taskDetail.value = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
+    id
+  )
+  if (taskDetail.value.status == '404') {
+    alert('The requested task does not exist')
+    router.replace({ name: 'Task' })
+    return
+  }
+  showTaskDetailModal.value = true
+}
 
 // ฟังก์ชันเปลี่ยนหน้า
 const goToPage = (page) => {
