@@ -652,7 +652,20 @@ const toggleSidebar = () => {
                 @click="showAddParcelPage"
                 class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
               >
-                <svg ...>...</svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
                 <span>Add parcel</span>
               </button>
             </div>
