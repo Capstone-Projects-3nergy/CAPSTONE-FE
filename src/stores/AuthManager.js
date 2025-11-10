@@ -153,7 +153,11 @@ export const useAuthManager = defineStore('authManager', () => {
 
     const baseURL = import.meta.env.VITE_BASE_URL
     try {
-      const response = await axios.post(`${baseURL}/auth/register`, payload)
+      const response = await axios.post(`${baseURL}/auth/register`, payload, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
+      })
       status.value = response.status
       console.log('✅ Backend response:', response)
       console.log('📄 Backend response data:', response.data)
