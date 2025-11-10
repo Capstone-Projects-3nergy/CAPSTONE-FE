@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -12,6 +12,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 
 const loginManager = useAuthManager()
+// ✅ Computed สำหรับชื่อผู้ใช้
 
 // const loginStore = useLoginManager()
 const router = useRouter()
@@ -23,6 +24,16 @@ const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
+// First name
+const firstName = computed(() => {
+  return loginManager.user.fullName.split(' ')[0] || ''
+})
+
+// Last name
+const lastName = computed(() => {
+  const parts = loginManager.user.fullName.split(' ')
+  return parts.slice(1).join(' ') || ''
+})
 // const staff = ref({
 //   name: 'John Doe',
 //   email: 'john.doe@example.com',
@@ -552,7 +563,9 @@ const showDashBoardPage = async function () {
                 />
               </div>
 
-              <p class="mt-3 text-gray-600 font-medium">Pimpajee SetXXXXXX</p>
+              <p class="mt-3 text-gray-600 font-medium">
+                {{ loginManager.user.fullName }}
+              </p>
             </div>
 
             <!-- Right Section -->
@@ -563,11 +576,12 @@ const showDashBoardPage = async function () {
                 <label class="block font-semibold text-blue-700 mb-1"
                   >Firstname</label
                 >
-                <input
+                <!-- <input
                   type="text"
                   value="Pimpajee"
                   class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                /> -->
+                {{ firstName }}
               </div>
 
               <div>
