@@ -13,8 +13,9 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import axios from 'axios'
 import AlertPopUp from './AlertPopUp.vue'
+import { useParcelManager } from '@/stores/ParcelsManager'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
+// const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -27,6 +28,7 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const success = ref(false)
 const error = ref(false)
+const parcelStore = useParcelManager()
 
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 const parcelData = ref({
@@ -48,31 +50,43 @@ const showParcelScannerPage = async function () {
   showParcelScanner.value = true
 }
 
-// 🟩 ฟังก์ชันบันทึกข้อมูล (เชื่อม backend + store)
+// 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
 const saveParcel = async () => {
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
-    // 🔹 เรียก API backend
+    // 🔹 ส่งข้อมูลไป backend
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/parcels/add`,
       parcelData.value
     )
 
-    // 🔹 สมมติ backend ส่งข้อมูลกลับมา (พร้อม id)
+    // 🔹 ได้ข้อมูลพัสดุที่บันทึกแล้วจาก backend
     const savedParcel = response.data
 
-    // ✅ เก็บข้อมูลลง Pinia store
+    // ✅ เพิ่มพัสดุเข้า Pinia store
     parcelStore.addParcel(savedParcel)
 
     console.log('✅ Parcel saved successfully:', savedParcel)
-
-    // 🔹 กลับไปหน้า Manage Parcel
     success.value = true
-    // router.replace({ name: 'staffparcels' })
-  } catch (error) {
+
+    // ✅ (ถ้าต้องการ) เคลียร์ input หลังบันทึกสำเร็จ
+    parcelData.value = {
+      trackingNumber: '',
+      recipientName: '',
+      roomNumber: '',
+      parcelType: '',
+      contact: '',
+      status: '',
+      pickupAt: '',
+      updateAt: '',
+      senderName: '',
+      companyId: '',
+      receiveAt: ''
+    }
+  } catch (err) {
+    console.error('❌ Failed to add parcel:', err)
     error.value = true
-    console.error('❌ Failed to add parcel:', error)
   }
 }
 
