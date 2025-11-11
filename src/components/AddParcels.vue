@@ -31,18 +31,20 @@ const error = ref(false)
 const parcelStore = useParcelManager()
 
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
+// ข้อมูลพัสดุ reactive
 const parcelData = ref({
+  userId: null, // backend ใช้หาผู้พัก ไม่ต้องให้ผู้ใช้กรอก
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
   parcelType: '',
   contact: '',
-  status: '',
-  pickupAt: '',
-  updateAt: '',
+  status: 'Pending', // default
+  pickupAt: null,
+  updateAt: null,
   senderName: '',
   companyId: '',
-  receiveAt: ''
+  receiveAt: null
 })
 
 const showParcelScannerPage = async function () {
@@ -51,38 +53,38 @@ const showParcelScannerPage = async function () {
 }
 
 // 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
+// ฟังก์ชันบันทึกพัสดุ
 const saveParcel = async () => {
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
-    // 🔹 ส่งข้อมูลไป backend
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/parcels/add`,
       parcelData.value
     )
 
-    // 🔹 ได้ข้อมูลพัสดุที่บันทึกแล้วจาก backend
     const savedParcel = response.data
 
-    // ✅ เพิ่มพัสดุเข้า Pinia store
+    // เพิ่มเข้า Pinia store
     parcelStore.addParcel(savedParcel)
 
     console.log('✅ Parcel saved successfully:', savedParcel)
     success.value = true
 
-    // ✅ (ถ้าต้องการ) เคลียร์ input หลังบันทึกสำเร็จ
+    // เคลียร์ form
     parcelData.value = {
+      userId: null,
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
       parcelType: '',
       contact: '',
-      status: '',
-      pickupAt: '',
-      updateAt: '',
+      status: 'Pending',
+      pickupAt: null,
+      updateAt: null,
       senderName: '',
       companyId: '',
-      receiveAt: ''
+      receiveAt: null
     }
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
@@ -733,7 +735,7 @@ const closePopUp = (operate) => {
             <ButtonWeb
               label="Cancel"
               color="red"
-              @click="() => router.replace({ name: 'staffparcels' })"
+              @click="showManageParcelPage"
             />
           </div>
         </form>
