@@ -43,7 +43,7 @@ export const useAuthManager = defineStore('authManager', () => {
       const idToken = await currentUser.getIdToken()
       const baseURL = import.meta.env.VITE_BASE_URL
 
-      const response = await axios.get(`${baseURL}/api/auth/verify`, {
+      const response = await axios.post(`${baseURL}/api/auth/login`, {
         headers: { Authorization: `Bearer ${idToken}` }
       })
 
@@ -154,15 +154,11 @@ export const useAuthManager = defineStore('authManager', () => {
     const baseURL = import.meta.env.VITE_BASE_URL
     try {
       // const response = await axios.post(`${baseURL}/api/auth/register`, payload)
-      const response = await axios.post(
-        `${baseURL}/api/auth/register`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`
-          }
+      const response = await axios.post(`${baseURL}/api/auth/signup`, payload, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
         }
-      )
+      })
       status.value = response.status
       console.log('✅ Backend response:', response)
       console.log('📄 Backend response data:', response.data)
@@ -238,10 +234,13 @@ export const useAuthManager = defineStore('authManager', () => {
       const idToken = await firebaseUserCredential.user.getIdToken()
 
       // 4️⃣ ส่ง token ไป backend เพื่อ verify user & link Firebase UID
-      const response = await axios.get(`${baseURL}/api/auth/verify`, {
-        headers: { Authorization: `Bearer ${idToken}` }
-      })
-
+      const response = await axios.post(
+        `${baseURL}/api/auth/login`,
+        {}, // ไม่มี body
+        {
+          headers: { Authorization: `Bearer ${idToken}` }
+        }
+      )
       const data = response.data
       if (!data?.userId) throw new Error('Backend verification failed')
 
@@ -439,7 +438,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       const idToken = await currentUser.getIdToken()
 //       const baseURL = import.meta.env.VITE_BASE_URL
 
-//       const response = await axios.get(`${baseURL}/auth/verify`, {
+//       const response = await axios.post(`${baseURL}/auth/verify`, {
 //         headers: { Authorization: `Bearer ${idToken}` }
 //       })
 
@@ -614,7 +613,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       } catch (firebaseErr) {
 //         if (firebaseErr.code === 'auth/user-not-found') {
 //           // ตรวจสอบ backend ว่ามี user อีเมลนี้หรือยัง
-//           const { data: backendUser } = await axios.get(
+//           const { data: backendUser } = await axios.post(
 //             `${baseURL}/auth/verify`,
 //             { params: { email } }
 //           )
@@ -628,7 +627,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //             console.log('✅ Created new Firebase user')
 
 //             // ส่ง UID + email ไป backend เพื่อบันทึก
-//             await axios.get(`${baseURL}/auth/verify`, {
+//             await axios.post(`${baseURL}/auth/verify`, {
 //               params: { email, firebaseUid: firebaseUserCredential.user.uid }
 //             })
 //             console.log('✅ Linked Firebase UID to backend')
@@ -648,7 +647,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       const idToken = await firebaseUserCredential.user.getIdToken()
 
 //       // ส่ง token ไป backend เพื่อ verify user & ดึงข้อมูล
-//       const response = await axios.get(`${baseURL}/auth/verify`, {
+//       const response = await axios.post(`${baseURL}/auth/verify`, {
 //         headers: { Authorization: `Bearer ${idToken}` }
 //       })
 //       const data = response.data
@@ -838,7 +837,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       const idToken = await currentUser.getIdToken()
 //       const baseURL = import.meta.env.VITE_BASE_URL
 
-//       const response = await axios.get(`${baseURL}/auth/verify`, {
+//       const response = await axios.post(`${baseURL}/auth/verify`, {
 //         headers: { Authorization: `Bearer ${idToken}` }
 //       })
 //       console.log('🔍 verify response:', response.data)
@@ -1025,7 +1024,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       const firebaseUser = userCredential.user
 //       const idToken = await firebaseUser.getIdToken()
 
-//       const response = await axios.get(
+//       const response = await axios.post(
 //         `${import.meta.env.VITE_BASE_URL}/auth/verify`,
 //         { headers: { Authorization: `Bearer ${idToken}` } }
 //       )
@@ -1220,7 +1219,7 @@ export const useAuthManager = defineStore('authManager', () => {
 
 //       const idToken = await currentUser.getIdToken()
 //       const baseURL = import.meta.env.VITE_BASE_URL
-//       const response = await axios.get(`${baseURL}/auth/verify`, {
+//       const response = await axios.post(`${baseURL}/auth/verify`, {
 //         headers: { Authorization: `Bearer ${idToken}` }
 //       })
 
@@ -1396,7 +1395,7 @@ export const useAuthManager = defineStore('authManager', () => {
 //       const firebaseUser = userCredential.user
 //       const idToken = await firebaseUser.getIdToken()
 
-//       const response = await axios.get(
+//       const response = await axios.post(
 //         `${import.meta.env.VITE_BASE_URL}/auth/verify`,
 //         {
 //           headers: { Authorization: `Bearer ${idToken}` }

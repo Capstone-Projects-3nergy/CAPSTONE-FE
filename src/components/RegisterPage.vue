@@ -71,17 +71,17 @@ const dormList = ref([]) // [{ dormId, dormName }]
 // })
 onMounted(async () => {
   authManager.loadUserFromBackend()
-  // console.log(authManager.user.email)
+
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    console.log('Base URL:', baseURL)
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
+    // 🔹 ดึง dorm ทั้งหมดจาก backend
     const res = await axios.get(`${baseURL}/dorms`, {
       headers: { Accept: 'application/json' }
     })
 
-    const dataList = res.data?.data ?? res.data
+    const dataList = res.data // backend return List<Dorm> ตรง ๆ
     dormList.value =
       Array.isArray(dataList) && dataList.length > 0
         ? dataList.map((d) => ({
