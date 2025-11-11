@@ -113,6 +113,7 @@ export const useAuthManager = defineStore('authManager', () => {
   // -----------------------
   // REGISTER
   // -----------------------
+
   const registerAccount = async (formData, router) => {
     isLoading.value = true
     errorMessage.value = ''
@@ -120,72 +121,131 @@ export const useAuthManager = defineStore('authManager', () => {
     user.value = null
     status.value = null
 
-    const role = String(formData.role || '').toUpperCase()
-    if (!['RESIDENT', 'STAFF'].includes(role)) {
-      errorMessage.value = 'Invalid role.'
-      isLoading.value = false
-      return
-    }
-
-    let payload = { ...formData, role }
-
-    if (role === 'RESIDENT') {
-      const dormIdNum = Number(formData.dormId)
-      if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
-        errorMessage.value = 'Please select a valid dormitory.'
-        isLoading.value = false
-        return
-      }
-      if (!formData.roomNumber?.trim()) {
-        errorMessage.value = 'Room number is required.'
-        isLoading.value = false
-        return
-      }
-      payload = {
-        ...payload,
-        dormId: dormIdNum,
-        roomNumber: formData.roomNumber.trim()
-      }
-    } else if (role === 'STAFF') {
-      if (!formData.position?.trim()) {
-        errorMessage.value = 'Position is required for staff.'
-        isLoading.value = false
-        return
-      }
-      payload = { ...payload, position: formData.position.trim() }
-    }
-
-    const baseURL = import.meta.env.VITE_BASE_URL
     try {
-      // const response = await axios.post(`${baseURL}/api/auth/register`, payload)
-      const response = await axios.post(`${baseURL}/api/auth/signup`, payload, {
-        headers: {
-          Authorization: `Bearer ${idToken}`
-        }
-      })
-      status.value = response.status
-      console.log('✅ Backend response:', response)
-      console.log('📄 Backend response data:', response.data)
+      const role = String(formData.role || '').toUpperCase()
+      if (!['RESIDENT', 'STAFF'].includes(role))
+        throw new Error('Invalid role.')
 
-      if (!response.data?.userId) {
-        errorMessage.value = 'Registration failed on backend.'
-        return
+      // 🚩 ทำ payload ให้ "ตรงกับ backend" ตอนนี้ใช้ dormName ไม่ใช่ dormId
+      const payload = {
+        email: formData.email?.trim(),
+        password: formData.password, // backend จะสร้าง Firebase user ให้
+        firstName: formData.firstName?.trim(),
+        lastName: formData.lastName?.trim(),
+        role
       }
 
+      if (role === 'RESIDENT') {
+        if (!formData.dormName?.trim())
+          throw new Error('Dorm name is required for residents.')
+        payload.dormName = formData.dormName.trim()
+        // ถ้าอยากเก็บห้องด้วย ต้องให้ backend รองรับใน SignUpRequest และ set ลง Users
+        if (formData.roomNumber?.trim())
+          payload.roomNumber = formData.roomNumber.trim()
+      } else if (role === 'STAFF') {
+        if (!formData.position?.trim())
+          throw new Error('Position is required for staff.')
+        payload.position = formData.position.trim()
+      }
+
+      const baseURL = import.meta.env.VITE_BASE_URL
+
+      // ❌ ห้ามส่ง Authorization ใน signup (backend ไม่ต้องใช้ และ idToken ก็ไม่มี)
+      const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
+
+      status.value = res.status
+      console.log('✅ Backend response:', res.data)
+
+      // backend ตอนนี้คืน { FirebaseUid, email, message } → ไม่มี userId
       successMessage.value = 'Account registered successfully! Please login.'
-      // ไม่สร้าง Firebase UID ที่นี่
+
+      // จากนั้นให้ผู้ใช้ไปล็อกอิน (ด้วย email/password) → ฟรอนต์จะได้ idToken แล้ว verify ที่ /login
     } catch (error) {
       status.value = error.response?.status || 500
-      if (status.value === 409) {
-        errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
-      } else {
+      if (status.value === 409) errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
+      else
         errorMessage.value =
-          error.response?.data?.message || 'Registration failed.'
-      }
+          error.response?.data?.message ||
+          error.message ||
+          'Registration failed.'
     } finally {
       isLoading.value = false
     }
   }
+
+  // const registerAccount = async (formData, router) => {
+  //   isLoading.value = true
+  //   errorMessage.value = ''
+  //   successMessage.value = ''
+  //   user.value = null
+  //   status.value = null
+
+  //   const role = String(formData.role || '').toUpperCase()
+  //   if (!['RESIDENT', 'STAFF'].includes(role)) {
+  //     errorMessage.value = 'Invalid role.'
+  //     isLoading.value = false
+  //     return
+  //   }
+
+  //   let payload = { ...formData, role }
+
+  //   if (role === 'RESIDENT') {
+  //     const dormIdNum = Number(formData.dormId)
+  //     if (!Number.isFinite(dormIdNum) || dormIdNum <= 0) {
+  //       errorMessage.value = 'Please select a valid dormitory.'
+  //       isLoading.value = false
+  //       return
+  //     }
+  //     if (!formData.roomNumber?.trim()) {
+  //       errorMessage.value = 'Room number is required.'
+  //       isLoading.value = false
+  //       return
+  //     }
+  //     payload = {
+  //       ...payload,
+  //       dormId: dormIdNum,
+  //       roomNumber: formData.roomNumber.trim()
+  //     }
+  //   } else if (role === 'STAFF') {
+  //     if (!formData.position?.trim()) {
+  //       errorMessage.value = 'Position is required for staff.'
+  //       isLoading.value = false
+  //       return
+  //     }
+  //     payload = { ...payload, position: formData.position.trim() }
+  //   }
+
+  //   const baseURL = import.meta.env.VITE_BASE_URL
+  //   try {
+  //     // const response = await axios.post(`${baseURL}/api/auth/register`, payload)
+  //     const response = await axios.post(`${baseURL}/api/auth/signup`, payload, {
+  //       headers: {
+  //         Authorization: `Bearer ${idToken}`
+  //       }
+  //     })
+  //     status.value = response.status
+  //     console.log('✅ Backend response:', response)
+  //     console.log('📄 Backend response data:', response.data)
+
+  //     if (!response.data?.userId) {
+  //       errorMessage.value = 'Registration failed on backend.'
+  //       return
+  //     }
+
+  //     successMessage.value = 'Account registered successfully! Please login.'
+  //     // ไม่สร้าง Firebase UID ที่นี่
+  //   } catch (error) {
+  //     status.value = error.response?.status || 500
+  //     if (status.value === 409) {
+  //       errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
+  //     } else {
+  //       errorMessage.value =
+  //         error.response?.data?.message || 'Registration failed.'
+  //     }
+  //   } finally {
+  //     isLoading.value = false
+  //   }
+  // }
 
   // -----------------------
   // LOGIN (backend สร้าง Firebase UID)
@@ -197,95 +257,237 @@ export const useAuthManager = defineStore('authManager', () => {
     user.value = null
     status.value = null
 
-    if (!email || !password) {
-      errorMessage.value = 'Email and password are required'
-      isLoading.value = false
-      return null
-    }
-
-    const baseURL = import.meta.env.VITE_BASE_URL
-
     try {
-      let firebaseUserCredential
+      if (!email || !password)
+        throw new Error('Email and password are required')
 
-      // 1️⃣ พยายาม login ด้วย Firebase
-      try {
-        firebaseUserCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        )
-        console.log('✅ Firebase login successful')
-      } catch (firebaseErr) {
-        console.log('🔥 Firebase login failed:', firebaseErr.code)
+      // 1) Firebase sign-in
+      const cred = await signInWithEmailAndPassword(auth, email, password)
 
-        if (firebaseErr.code) {
-          // 2️⃣ สร้าง Firebase user ใหม่
-          firebaseUserCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          )
-          console.log('✅ Created new Firebase user')
-        } else if (firebaseErr.code === 'auth/wrong-password') {
-          throw new Error('Incorrect password')
-        } else {
-          throw firebaseErr
-        }
+      // 2) Get ID token
+      const idToken = await cred.user.getIdToken()
+
+      // 3) Verify กับ backend
+      const baseURL = import.meta.env.VITE_BASE_URL
+      const res = await axios.post(
+        `${baseURL}/api/auth/login`,
+        {},
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      )
+
+      const data = res.data
+
+      if (!data?.userId || !data?.role) {
+        throw new Error('Backend verification failed: missing userId/role')
       }
 
-      // 3️⃣ ดึง Firebase ID token
-      const idToken = await firebaseUserCredential.user.getIdToken()
-
-      // 4️⃣ ส่ง token ไป backend เพื่อ verify user & link Firebase UID
-      const response = await axios.post(
-        `${baseURL}/api/auth/login`,
-        {}, // ไม่มี body
-        {
-          headers: { Authorization: `Bearer ${idToken}` }
-        }
-      )
-      const data = response.data
-      if (!data?.userId) throw new Error('Backend verification failed')
-
-      // 5️⃣ เก็บ user state
-      const role = data.role
+      // 4) map state ผู้ใช้
+      const fullName = `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim()
       user.value = {
         id: data.userId,
+        uid: data.firebaseUid,
         email: data.email,
-        fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
-        role,
+        fullName,
+        role: data.role,
         accessToken: idToken,
-        ...(role === 'STAFF' ? { position: data.position ?? null } : {}),
-        ...(role === 'RESIDENT'
+        ...(data.role === 'STAFF' ? { position: data.position ?? null } : {}),
+        ...(data.role === 'RESIDENT'
           ? {
-              dormId: data.dormName ?? null,
+              dormName: data.dormName ?? null,
               roomNumber: data.roomNumber ?? null
             }
           : {})
       }
 
-      successMessage.value = `Login successful as ${role}!`
+      successMessage.value = data.message || `Login successful as ${data.role}!`
 
-      // 6️⃣ Redirect ตาม role
+      // 5) Redirect ตาม role (ถ้าต้องการ param id)
       if (router) {
-        if (role === 'RESIDENT')
+        if (data.role === 'RESIDENT') {
           router.replace({ name: 'home', params: { id: data.userId } })
-        else if (role === 'STAFF')
+        } else if (data.role === 'STAFF') {
           router.replace({ name: 'homestaff', params: { id: data.userId } })
+        } else {
+          router.replace({ name: 'dashboard' }) // สำรองสำหรับ ADMIN/อื่น ๆ
+        }
       }
 
       return user.value
     } catch (err) {
       console.error('❌ Login error:', err)
-      errorMessage.value =
-        err.response?.data?.message || err.message || 'Login failed.'
+      const msg =
+        err.response?.data?.message ||
+        (err.code === 'auth/user-not-found'
+          ? 'Account not found. Please sign up first.'
+          : null) ||
+        err.message ||
+        'Login failed.'
+      errorMessage.value = msg
       user.value = null
       return null
     } finally {
       isLoading.value = false
     }
   }
+
+  // const loginAccount = async (email, password, router) => {
+  //   isLoading.value = true
+  //   errorMessage.value = ''
+  //   successMessage.value = ''
+  //   user.value = null
+  //   status.value = null
+
+  //   if (!email || !password) {
+  //     errorMessage.value = 'Email and password are required'
+  //     isLoading.value = false
+  //     return null
+  //   }
+
+  //   const baseURL = import.meta.env.VITE_BASE_URL
+
+  //   try {
+  //     // 1️⃣ Login ด้วย Firebase
+  //     const firebaseUserCredential = await signInWithEmailAndPassword(
+  //       auth,
+  //       email,
+  //       password
+  //     )
+  //     console.log('✅ Firebase login successful')
+
+  //     // 2️⃣ ดึง Firebase ID token
+  //     const idToken = await firebaseUserCredential.user.getIdToken()
+
+  //     // 3️⃣ ส่ง token ไป backend เพื่อ verify
+  //     const response = await axios.post(
+  //       `${baseURL}/api/auth/login`,
+  //       {}, // ไม่มี body
+  //       { headers: { Authorization: `Bearer ${idToken}` } }
+  //     )
+
+  //     const data = response.data
+  //     if (!data?.FirebaseUid) throw new Error('Backend verification failed')
+
+  //     // 4️⃣ เก็บ user state
+  //     user.value = {
+  //       id: data.FirebaseUid,
+  //       email: data.email,
+  //       accessToken: idToken
+  //     }
+
+  //     successMessage.value = 'Login successful!'
+
+  //     // 5️⃣ Redirect หลัง login (ตอนนี้ backend ยังไม่ส่ง role → redirect ไปหน้าเดียว)
+  //     if (router)
+  //       router.replace({ name: 'home', params: { id: data.FirebaseUid } })
+
+  //     return user.value
+  //   } catch (err) {
+  //     console.error('❌ Login error:', err)
+  //     errorMessage.value =
+  //       err.response?.data?.message || err.message || 'Login failed.'
+  //     user.value = null
+  //     return null
+  //   } finally {
+  //     isLoading.value = false
+  //   }
+  // }
+
+  // const loginAccount = async (email, password, router) => {
+  //   isLoading.value = true
+  //   errorMessage.value = ''
+  //   successMessage.value = ''
+  //   user.value = null
+  //   status.value = null
+
+  //   if (!email || !password) {
+  //     errorMessage.value = 'Email and password are required'
+  //     isLoading.value = false
+  //     return null
+  //   }
+
+  //   const baseURL = import.meta.env.VITE_BASE_URL
+
+  //   try {
+  //     let firebaseUserCredential
+
+  //     // 1️⃣ พยายาม login ด้วย Firebase
+  //     try {
+  //       firebaseUserCredential = await signInWithEmailAndPassword(
+  //         auth,
+  //         email,
+  //         password
+  //       )
+  //       console.log('✅ Firebase login successful')
+  //     } catch (firebaseErr) {
+  //       console.log('🔥 Firebase login failed:', firebaseErr.code)
+
+  //       if (firebaseErr.code) {
+  //         // 2️⃣ สร้าง Firebase user ใหม่
+  //         firebaseUserCredential = await createUserWithEmailAndPassword(
+  //           auth,
+  //           email,
+  //           password
+  //         )
+  //         console.log('✅ Created new Firebase user')
+  //       } else if (firebaseErr.code === 'auth/wrong-password') {
+  //         throw new Error('Incorrect password')
+  //       } else {
+  //         throw firebaseErr
+  //       }
+  //     }
+
+  //     // 3️⃣ ดึง Firebase ID token
+  //     const idToken = await firebaseUserCredential.user.getIdToken()
+
+  //     // 4️⃣ ส่ง token ไป backend เพื่อ verify user & link Firebase UID
+  //     const response = await axios.post(
+  //       `${baseURL}/api/auth/login`,
+  //       {}, // ไม่มี body
+  //       {
+  //         headers: { Authorization: `Bearer ${idToken}` }
+  //       }
+  //     )
+  //     const data = response.data
+  //     if (!data?.userId) throw new Error('Backend verification failed')
+
+  //     // 5️⃣ เก็บ user state
+  //     const role = data.role
+  //     user.value = {
+  //       id: data.userId,
+  //       email: data.email,
+  //       fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
+  //       role,
+  //       accessToken: idToken,
+  //       ...(role === 'STAFF' ? { position: data.position ?? null } : {}),
+  //       ...(role === 'RESIDENT'
+  //         ? {
+  //             dormId: data.dormName ?? null,
+  //             roomNumber: data.roomNumber ?? null
+  //           }
+  //         : {})
+  //     }
+
+  //     successMessage.value = `Login successful as ${role}!`
+
+  //     // 6️⃣ Redirect ตาม role
+  //     if (router) {
+  //       if (role === 'RESIDENT')
+  //         router.replace({ name: 'home', params: { id: data.userId } })
+  //       else if (role === 'STAFF')
+  //         router.replace({ name: 'homestaff', params: { id: data.userId } })
+  //     }
+
+  //     return user.value
+  //   } catch (err) {
+  //     console.error('❌ Login error:', err)
+  //     errorMessage.value =
+  //       err.response?.data?.message || err.message || 'Login failed.'
+  //     user.value = null
+  //     return null
+  //   } finally {
+  //     isLoading.value = false
+  //   }
+  // }
 
   // -----------------------
   // LOGOUT

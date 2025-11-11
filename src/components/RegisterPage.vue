@@ -23,7 +23,7 @@ const isFullNameWrong = ref(false)
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
 const trimmedPassword = computed(() => form.password?.trim() || '')
-const trimmedDormName = computed(() => String(form.dormId ?? '').trim() || '')
+const trimmedDormName = computed(() => String(form.dormName ?? '').trim() || '')
 const trimmedConfirmPassword = computed(
   () => form.confirmPassword?.trim() || ''
 )
@@ -50,25 +50,12 @@ const form = reactive({
   password: '', // ใช้กับ Firebase เท่านั้น (อย่าส่งไป backend)
   confirmPassword: '',
   role: 'RESIDENT', // 'RESIDENT' | 'STAFF'
-  dormId: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
+  dormName: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
   // dormType: 'female dormitory',
   roomNumber: '', // เฉพาะ RESIDENT
   position: '' // เฉพาะ STAFF
 })
-
-const dormList = ref([]) // [{ dormId, dormName }]
-// 🧠 ฟังก์ชันกรองตามประเภท dormType ที่เลือก
-// const filteredDormList = computed(() => {
-//   if (!form.dormType) return dormList.value
-//   const type = form.dormType.toLowerCase().includes('female')
-//     ? 'female'
-//     : 'male'
-
-//   return dormList.value.filter((d) => {
-//     const name = d.dormName.toLowerCase()
-//     return name.match(new RegExp(`\\b${type}\\b`)) // match คำเต็ม
-//   })
-// })
+const dormList = ref([])
 onMounted(async () => {
   authManager.loadUserFromBackend()
 
@@ -76,119 +63,103 @@ onMounted(async () => {
     const baseURL = import.meta.env.VITE_BASE_URL
     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
-    // 🔹 ดึง dorm ทั้งหมดจาก backend
-    const res = await axios.get(`${baseURL}/dorms`, {
+    // ดึงหอจาก /api/dorms
+    const res = await axios.get(`${baseURL}/api/dorms`, {
       headers: { Accept: 'application/json' }
     })
 
-    const dataList = res.data // backend return List<Dorm> ตรง ๆ
-    dormList.value =
-      Array.isArray(dataList) && dataList.length > 0
-        ? dataList.map((d) => ({
-            dormId: Number(d.dormId),
-            dormName: d.dormName
-          }))
-        : [
-            { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-            { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
-          ]
+    // เก็บเป็น list ของชื่อหอ
+    if (Array.isArray(res.data)) {
+      dormList.value = res.data
+        .map((d) => String(d.dormName))
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
+    } else {
+      console.warn('Dorm data is not an array, using fallback')
+      dormList.value = [
+        'Dhammaraksa Residence Hall 1',
+        'Dhammaraksa Residence Hall 2'
+      ]
+    }
   } catch (err) {
     console.error('❌ Cannot fetch dorm list', err)
     dormList.value = [
-      { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-      { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+      'Dhammaraksa Residence Hall 1',
+      'Dhammaraksa Residence Hall 2'
     ]
   }
 })
 
 // onMounted(async () => {
-//   registerStore.loadUserFromLocalStorage()
-//   console.log('🔹 User loaded:', registerStore.userData)
+//   authManager.loadUserFromBackend() // โหลด user ก่อน
+
 //   try {
 //     const baseURL = import.meta.env.VITE_BASE_URL
-//     console.log('Base URL:', baseURL)
 //     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
-//     const res = await axios.get(`${baseURL}/public/dorms`, {
+//     // 🔹 ดึง dorm ทั้งหมดจาก backend
+//     const res = await axios.get(`${baseURL}/dorms`, {
 //       headers: { Accept: 'application/json' }
 //     })
 
-//     console.log('API response full:', res)
-
-//     // ตรวจสอบว่าข้อมูลอยู่ใน data หรือ data.data
-//     const dataList = res.data?.data ?? res.data
-//     console.log('Dorm data after check:', dataList)
-//     console.log(form.dormType)
-//     // ถ้ามันว่าง ให้ใส่ fallback เผื่อ dropdown ไม่ empty
-//     if (!Array.isArray(dataList) || dataList.length === 0) {
-//       console.warn('Dorm list empty, using fallback data')
-//       dormList.value = [
-//         { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-//         { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
-//       ]
-//     } else {
-//       dormList.value = dataList.map((d) => ({
-//         dormId: Number(d.dormId),
+//     // backend return List<Dorm>
+//     if (Array.isArray(res.data)) {
+//       dormList.value = res.data.map((d) => ({
+//         dormName: Number(d.dormName),
 //         dormName: d.dormName
 //       }))
+//     } else {
+//       console.warn('Dorm data is not an array, using fallback')
+//       dormList.value = [
+//         { dormName: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+//         { dormName: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//       ]
 //     }
 //   } catch (err) {
 //     console.error('❌ Cannot fetch dorm list', err)
-//     // ใช้ fallback data
 //     dormList.value = [
-//       { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-//       { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//       { dormName: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+//       { dormName: 2, dormName: 'Dhammaraksa Residence Hall 2' }
 //     ]
 //   }
 // })
 
+// ---------------- REGISTER FUNCTION ----------------
 // const submitForm = async (roleType) => {
 //   try {
-//     // เช็ค password match
 //     if (form.password !== form.confirmPassword) {
 //       isNotMatch.value = true
-//       setTimeout(() => {
-//         isNotMatch.value = false
-//       }, 3000)
+//       setTimeout(() => (isNotMatch.value = false), 3000)
 //       return
 //     }
 
-//     // เช็ค fullName อย่างน้อย 6 ตัวอักษร
 //     if (!form.fullName || form.fullName.trim().length < 6) {
 //       isFullNameWeak.value = true
-//       setTimeout(() => {
-//         isFullNameWeak.value = false
-//       }, 3000)
+//       setTimeout(() => (isFullNameWeak.value = false), 3000)
 //       return
 //     }
+
 //     if (/\d/.test(form.fullName)) {
 //       isFullNameWrong.value = true
-//       setTimeout(() => {
-//         isFullNameWrong.value = false
-//       }, 3000)
+//       setTimeout(() => (isFullNameWrong.value = false), 3000)
 //       return
 //     }
 
-//     // เช็ค password อย่างน้อย 6 ตัวอักษร
 //     if (!form.password || form.password.length < 6) {
 //       isPasswordWeak.value = true
-//       setTimeout(() => {
-//         isPasswordWeak.value = false
-//       }, 3000)
+//       setTimeout(() => (isPasswordWeak.value = false), 3000)
 //       return
 //     }
 
-//     // ✅ เช็ค email ต้องเป็น @gmail.com
 //     if (!form.email || !form.email.endsWith('@gmail.com')) {
 //       incorrectemailform.value = true
-//       setTimeout(() => {
-//         incorrectemailform.value = false
-//       }, 3000)
+//       setTimeout(() => (incorrectemailform.value = false), 3000)
 //       return
 //     }
 
 //     const [firstName, lastName] = (form.fullName || '').split(' ')
 //     const roleUpper = String(roleType).toUpperCase()
+
 //     const payload =
 //       roleUpper === 'RESIDENT'
 //         ? {
@@ -196,7 +167,7 @@ onMounted(async () => {
 //             firstName,
 //             lastName,
 //             role: roleUpper,
-//             dormId: Number(form.dormId),
+//             dormName: Number(form.dormName),
 //             roomNumber: (form.roomNumber || '').trim(),
 //             password: form.password,
 //             fullName: form.fullName
@@ -211,140 +182,118 @@ onMounted(async () => {
 //             fullName: form.fullName
 //           }
 
-//     // Guard ฝั่ง front-end
 //     if (roleUpper === 'RESIDENT') {
-//       if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
+//       if (!Number.isFinite(payload.dormName) || payload.dormName <= 0) {
 //         isNoDorm.value = true
-//         setTimeout(() => {
-//           isNoDorm.value = false
-//         }, 3000)
+//         setTimeout(() => (isNoDorm.value = false), 3000)
 //         return
 //       }
 //       if (!payload.roomNumber) {
 //         isRoomRequired.value = true
-//         setTimeout(() => {
-//           isRoomRequired.value = false
-//         }, 3000)
+//         setTimeout(() => (isRoomRequired.value = false), 3000)
 //         return
 //       }
 //     } else if (roleUpper === 'STAFF') {
 //       if (!payload.position) {
 //         isPositionRequired.value = true
-//         setTimeout(() => {
-//           isPositionRequired.value = false
-//         }, 3000)
+//         setTimeout(() => (isPositionRequired.value = false), 3000)
+//         return
+//       }
+//       if (/\d/.test(payload.position)) {
+//         isPositionWrong.value = true
+//         setTimeout(() => (isPositionWrong.value = false), 3000)
 //         return
 //       }
 //     }
-//     // ✅ เช็คว่ามีตัวเลขใน position หรือไม่
-//     if (/\d/.test(payload.position)) {
-//       isPositionWrong.value = true
-//       setTimeout(() => {
-//         isPositionWrong.value = false
-//       }, 3000)
-//       return
-//     }
 
-//     // เรียก store
-//     await registerStore.registerAccount(payload)
-//     await registerStore.registerAccount(form)
-
-//     if (registerStore.userData?.email === form.email) {
+//     // ✅ เรียกใช้ register จาก AuthManager
+//     await authManager.registerAccount(payload)
+//     authManager.loadUserFromBackend()
+//     // ถ้ามี email ซ้ำจาก backend
+//     if (authManager.status === 409) {
+//       success.value = false
 //       isEmailDuplicate.value = true
-//       setTimeout(() => {
-//         isEmailDuplicate.value = true
-//       }, 3000)
+//       setTimeout(() => (isEmailDuplicate.value = false), 3000)
 //       return
 //     }
-//     // ล้างข้อมูลหลัง register
-//     // 🔹 เคลียร์ฟอร์มหลัง register
-//     // 🔹 เคลียร์ฟอร์มหลัง register
+
+//     // ✅ ล้างฟอร์มหลังสำเร็จ
 //     Object.keys(form).forEach((key) => {
-//       // ถ้าเป็น dormId → รีเซ็ตเป็น null
-//       if (key === 'dormId') {
+//       if (key === 'dormName') {
 //         form[key] = null
-//       } else if (key === 'dormType') {
-//         form[key] === 'female dormitory'
 //       } else {
 //         form[key] = ''
 //       }
 //     })
-//     // form.password = ''
-//     // form.confirmPassword = ''
-//     success.value = true
-//     setTimeout(() => {
-//       success.value = false
-//     }, 3000)
 
-//     // router.push({ name: 'login' })
+//     success.value = true
+//     setTimeout(() => (success.value = false), 3000)
 //   } catch (err) {
 //     console.error('❌ Register error:', err)
 //     error.value = true
-//     setTimeout(() => {
-//       error.value = false
-//     }, 3000)
+//     setTimeout(() => (error.value = false), 3000)
 //   }
 // }
-// ---------------- REGISTER FUNCTION ----------------
 const submitForm = async (roleType) => {
   try {
+    // ✅ validations เดิม
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       setTimeout(() => (isNotMatch.value = false), 3000)
       return
     }
-
     if (!form.fullName || form.fullName.trim().length < 6) {
       isFullNameWeak.value = true
       setTimeout(() => (isFullNameWeak.value = false), 3000)
       return
     }
-
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
       setTimeout(() => (isFullNameWrong.value = false), 3000)
       return
     }
-
     if (!form.password || form.password.length < 6) {
       isPasswordWeak.value = true
       setTimeout(() => (isPasswordWeak.value = false), 3000)
       return
     }
-
     if (!form.email || !form.email.endsWith('@gmail.com')) {
       incorrectemailform.value = true
       setTimeout(() => (incorrectemailform.value = false), 3000)
       return
     }
 
-    const [firstName, lastName] = (form.fullName || '').split(' ')
+    const [firstName = '', lastName = ''] = (form.fullName || '')
+      .trim()
+      .split(/\s+/, 2)
     const roleUpper = String(roleType).toUpperCase()
 
+    // ⬇⬇⬇ เปลี่ยนจาก dormId → dormName ⬇⬇⬇
     const payload =
       roleUpper === 'RESIDENT'
         ? {
-            email: form.email,
+            email: form.email.trim(),
             firstName,
             lastName,
             role: roleUpper,
-            dormId: Number(form.dormId),
+            dormName: (form.dormName || '').trim(), // ⬅ ใช้ชื่อนี้
             roomNumber: (form.roomNumber || '').trim(),
             password: form.password,
-            fullName: form.fullName
+            fullName: form.fullName.trim()
           }
         : {
-            email: form.email,
+            email: form.email.trim(),
             firstName,
             lastName,
             role: roleUpper,
             position: (form.position || '').trim(),
             password: form.password,
-            fullName: form.fullName
+            fullName: form.fullName.trim()
           }
 
+    // ✅ validation ฝั่ง RESIDENT ตาม dormName
     if (roleUpper === 'RESIDENT') {
-      if (!Number.isFinite(payload.dormId) || payload.dormId <= 0) {
+      if (!payload.dormName) {
         isNoDorm.value = true
         setTimeout(() => (isNoDorm.value = false), 3000)
         return
@@ -367,10 +316,10 @@ const submitForm = async (roleType) => {
       }
     }
 
-    // ✅ เรียกใช้ register จาก AuthManager
+    // ✅ เรียก register ผ่าน AuthManager (ไม่ต้องแนบ Authorization)
     await authManager.registerAccount(payload)
     authManager.loadUserFromBackend()
-    // ถ้ามี email ซ้ำจาก backend
+
     if (authManager.status === 409) {
       success.value = false
       isEmailDuplicate.value = true
@@ -378,13 +327,10 @@ const submitForm = async (roleType) => {
       return
     }
 
-    // ✅ ล้างฟอร์มหลังสำเร็จ
+    // ✅ ล้างฟอร์ม
     Object.keys(form).forEach((key) => {
-      if (key === 'dormId') {
-        form[key] = null
-      } else {
-        form[key] = ''
-      }
+      if (key === 'dormName') form[key] = null
+      else form[key] = ''
     })
 
     success.value = true
@@ -395,6 +341,7 @@ const submitForm = async (roleType) => {
     setTimeout(() => (error.value = false), 3000)
   }
 }
+
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
@@ -1081,14 +1028,20 @@ const toggleComfirmPasswordVisibility = () => {
                   <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
                   <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
                 </select> -->
-                <select v-model.number="form.dormId" class="custom-select">
+                <!-- <select v-model.number="form.dormName" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
                   <option
                     v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
+                    :key="dorm.dormName"
+                    :value="dorm.dormName"
                   >
                     {{ dorm.dormName }}
+                  </option>
+                </select> -->
+                <select v-model="form.dormName" class="custom-select">
+                  <option :value="null" disabled>Select Dormitory</option>
+                  <option v-for="name in dormList" :key="name" :value="name">
+                    {{ name }}
                   </option>
                 </select>
               </div>
