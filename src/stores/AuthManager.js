@@ -43,9 +43,13 @@ export const useAuthManager = defineStore('authManager', () => {
       const idToken = await currentUser.getIdToken()
       const baseURL = import.meta.env.VITE_BASE_URL
 
-      const response = await axios.post(`${baseURL}/api/auth/login`, {
-        headers: { Authorization: `Bearer ${idToken}` }
-      })
+      const response = await axios.post(
+        `${baseURL}/api/auth/login`,
+        {}, // ไม่มี body
+        {
+          headers: { Authorization: `Bearer ${idToken}` }
+        }
+      )
 
       const data = response.data
       if (!data?.authenticated) {
