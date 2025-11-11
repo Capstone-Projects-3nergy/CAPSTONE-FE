@@ -31,18 +31,18 @@ const success = ref(false)
 const error = ref(false)
 // 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
 const form = ref({
-  parcel_id: '',
-  tracking_number: '',
-  recipient_name: '',
-  room_number: '',
-  parcel_type: '',
+  parcelId: '',
+  trackingNumber: '',
+  recipientName: '',
+  roomNumber: '',
+  parcelType: '',
   contact: '',
   status: '',
-  pickup_at: '',
-  update_at: '',
-  sender_name: '',
-  company_id: '',
-  receive_at: ''
+  pickupAt: '',
+  updateAt: '',
+  senderName: '',
+  companyId: '',
+  receiveAt: ''
 })
 
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
@@ -610,7 +610,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
               <input
-                v-model="form.tracking_number"
+                v-model="form.trackingNumber"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -618,7 +618,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Recipient Name</label>
               <input
-                v-model="form.recipient_name"
+                v-model="form.recipientName"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -626,7 +626,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Room Number</label>
               <input
-                v-model="form.room_number"
+                v-model="form.roomNumber"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -638,7 +638,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Parcel Type</label>
               <input
-                v-model="form.parcel_type"
+                v-model="form.parcelType"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -666,7 +666,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
-                v-model="form.pickup_at"
+                v-model="form.pickupAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -674,7 +674,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Update at</label>
               <input
-                v-model="form.update_at"
+                v-model="form.updateAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -688,7 +688,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
-                v-model="form.sender_name"
+                v-model="form.senderName"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -696,7 +696,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Company ID</label>
               <input
-                v-model="form.company_id"
+                v-model="form.companyId"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -704,7 +704,7 @@ const closePopUp = (operate) => {
             <div>
               <label class="block font-semibold mb-1">Receive at</label>
               <input
-                v-model="form.receive_at"
+                v-model="form.receiveAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
