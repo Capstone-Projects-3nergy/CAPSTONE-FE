@@ -30,98 +30,98 @@ const parcelStore = useParcelManager()
 const parcel = ref(null)
 
 const route = useRoute()
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
+// const parcels = ref([
+//   {
+//     id: 1,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 101,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 2,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH223456789X',
+//     room: 102,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 3,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH323456789X',
+//     room: 103,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 4,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH423456789X',
+//     room: 104,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 5,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 105,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 6,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 106,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 7,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 107,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 8,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 108,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 9,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 109,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 10,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 110,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   }
+// ])
 // 🔹 โหลดข้อมูลจาก store หรือ backend
 onMounted(async () => {
   const parcelId = Number(route.params.id) // รับพัสดุจาก route param เช่น /parcels/:id
