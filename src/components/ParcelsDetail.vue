@@ -161,6 +161,12 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const getParcelDetail = async (parcelId) => {
+  const res = await axios.get(
+    `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
+  )
+  console.log('📦 Parcel detail:', res.data)
+}
 </script>
 
 <template>
