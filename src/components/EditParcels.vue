@@ -14,6 +14,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
@@ -61,18 +62,15 @@ onMounted(async () => {
 const saveParcel = async () => {
   try {
     const res = await axios.put(
-      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcel_id}`,
+      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcelId}`,
       form.value
     )
 
-    // ✅ อัปเดตใน store ด้วย (Pinia)
-    await parcelStore.updateParcel(form.value.parcel_id, res.data)
+    // อัปเดตใน Pinia
+    parcelStore.editParcel(form.value.parcelId, res.data)
 
     console.log('✅ Updated parcel:', res.data)
-
-    // 🔄 กลับไปหน้ารายการพัสดุ
     success.value = true
-    // router.replace({ name: 'staffparcels' })
   } catch (err) {
     error.value = true
     console.error('❌ Failed to update parcel:', err)
