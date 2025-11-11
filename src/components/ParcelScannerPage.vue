@@ -444,7 +444,7 @@ const showProfileStaffPage = async function () {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
