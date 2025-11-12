@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -11,6 +11,7 @@ import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager.js'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -23,98 +24,130 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
+// ✅ เรียกใช้ store
+const parcelStore = useParcelManager()
+// 🔹 สร้าง ref สำหรับข้อมูลพัสดุ
+const parcel = ref(null)
+
+const route = useRoute()
+// const parcels = ref([
+//   {
+//     id: 1,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 101,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 2,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH223456789X',
+//     room: 102,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 3,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH323456789X',
+//     room: 103,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 4,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH423456789X',
+//     room: 104,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 5,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 105,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 6,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 106,
+//     contact: '097-230-XXXX',
+//     status: 'Picked Up',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 7,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 107,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 8,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 108,
+//     contact: '097-230-XXXX',
+//     status: 'Pending',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 9,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 109,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   },
+//   {
+//     id: 10,
+//     recipient: 'Pimpajee SetXXXXXX',
+//     tracking: 'TH123456789X',
+//     room: 110,
+//     contact: '097-230-XXXX',
+//     status: 'Unclaimed',
+//     date: '05 Oct 2025'
+//   }
+// ])
+// 🔹 โหลดข้อมูลจาก store หรือ backend
+onMounted(async () => {
+  const parcelId = Number(route.params.id) // รับพัสดุจาก route param เช่น /parcels/:id
+
+  // 1️⃣ ลองหาจาก store ก่อน
+  const localParcel = parcelStore.parcels.find((p) => p.parcelId === parcelId)
+
+  if (localParcel) {
+    parcel.value = localParcel
+    console.log('📦 Loaded from store:', parcel.value)
+  } else {
+    // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
+      )
+      parcel.value = res.data
+      console.log('📦 Loaded from backend:', parcel.value)
+
+      // ✅ เก็บไว้ใน store ด้วย
+      parcelStore.addParcel(res.data)
+    } catch (err) {
+      console.error('❌ Failed to load parcel:', err)
+    }
   }
-])
+})
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -160,6 +193,12 @@ const showProfileStaffPage = async function () {
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+const getParcelDetail = async (parcelId) => {
+  const res = await axios.get(
+    `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
+  )
+  console.log('📦 Parcel detail:', res.data)
 }
 </script>
 
@@ -587,31 +626,16 @@ const toggleSidebar = () => {
       </aside>
 
       <main class="flex-1 p-8 bg-white rounded-lg shadow-md">
-        <!-- 🔹 กล่องหลัก -->
         <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
-          <!-- Header row -->
           <div class="flex items-center justify-between mb-8">
-            <!-- Left: Back button -->
             <ButtonWeb
-              label="
-              Back to Manage Parcels
-           
-            "
+              label="Back to Manage Parcels"
               color="blue"
               @click="showManageParcelPage"
               class="w-full md:w-auto"
             />
-            <!-- <button
-              class="bg-[#185dc0] text-white font-semibold px-5 py-2 rounded-md shadow hover:bg-[#154ba1] transition"
-            >
-              Back to My Parcel
-            </button>
-             -->
-
-            <!-- Center: Title -->
             <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Details</h2>
 
-            <!-- Right: Picked Up button -->
             <button
               class="bg-green-500 text-white font-semibold px-6 py-2 rounded-md shadow hover:bg-green-600 transition"
             >
@@ -619,7 +643,6 @@ const toggleSidebar = () => {
             </button>
           </div>
 
-          <!-- Form Section -->
           <form class="space-y-8">
             <!-- Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -629,7 +652,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="TH123456789X"
+                  :value="parcel?.trackingNumber || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -641,7 +664,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="Envelope"
+                  :value="parcel?.parcelType || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -653,7 +676,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="05 Oct 2025"
+                  :value="parcel?.receivedAt || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -668,7 +691,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="Pimpajee SetXXXXXX"
+                  :value="parcel?.recipientName || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -680,7 +703,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="097-230-XXXX"
+                  :value="parcel?.contact || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -692,7 +715,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="101"
+                  :value="parcel?.roomNumber || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -707,7 +730,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="05 Oct 2025"
+                  :value="parcel?.pickedUpAt || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -719,7 +742,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="05 Oct 2025"
+                  :value="parcel?.updatedAt || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -727,8 +750,6 @@ const toggleSidebar = () => {
 
               <div></div>
             </div>
-
-            <hr class="border-t border-[#185dc0] my-4" />
 
             <!-- Row 4 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -738,7 +759,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="ABC"
+                  :value="parcel?.senderName || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -750,19 +771,7 @@ const toggleSidebar = () => {
                 >
                 <input
                   type="text"
-                  value="001"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Receive at</label
-                >
-                <input
-                  type="text"
-                  value="05 Oct 2025"
+                  :value="parcel?.companyId || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />

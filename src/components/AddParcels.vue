@@ -12,8 +12,10 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import axios from 'axios'
+import AlertPopUp from './AlertPopUp.vue'
+import { useParcelManager } from '@/stores/ParcelsManager'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
+// const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -24,19 +26,25 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const success = ref(false)
+const error = ref(false)
+const parcelStore = useParcelManager()
+
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
+// ข้อมูลพัสดุ reactive
 const parcelData = ref({
+  userId: null, // backend ใช้หาผู้พัก ไม่ต้องให้ผู้ใช้กรอก
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
   parcelType: '',
   contact: '',
-  status: '',
-  pickupAt: '',
-  updateAt: '',
+  status: 'Pending', // default
+  pickupAt: null,
+  updateAt: null,
   senderName: '',
   companyId: '',
-  receiveAt: ''
+  receiveAt: null
 })
 
 const showParcelScannerPage = async function () {
@@ -44,29 +52,43 @@ const showParcelScannerPage = async function () {
   showParcelScanner.value = true
 }
 
-// 🟩 ฟังก์ชันบันทึกข้อมูล (เชื่อม backend + store)
+// 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
+// ฟังก์ชันบันทึกพัสดุ
 const saveParcel = async () => {
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
-    // 🔹 เรียก API backend
     const response = await axios.post(
-      'https://your-backend-api.com/api/parcels',
+      `${import.meta.env.VITE_BASE_URL}/parcels/add`,
       parcelData.value
     )
 
-    // 🔹 สมมติ backend ส่งข้อมูลกลับมา (พร้อม id)
     const savedParcel = response.data
 
-    // ✅ เก็บข้อมูลลง Pinia store
+    // เพิ่มเข้า Pinia store
     parcelStore.addParcel(savedParcel)
 
     console.log('✅ Parcel saved successfully:', savedParcel)
+    success.value = true
 
-    // 🔹 กลับไปหน้า Manage Parcel
-    router.replace({ name: 'staffparcels' })
-  } catch (error) {
-    console.error('❌ Failed to add parcel:', error)
+    // เคลียร์ form
+    parcelData.value = {
+      userId: null,
+      trackingNumber: '',
+      recipientName: '',
+      roomNumber: '',
+      parcelType: '',
+      contact: '',
+      status: 'Pending',
+      pickupAt: null,
+      updateAt: null,
+      senderName: '',
+      companyId: '',
+      receiveAt: null
+    }
+  } catch (err) {
+    console.error('❌ Failed to add parcel:', err)
+    error.value = true
   }
 }
 
@@ -107,6 +129,23 @@ const showProfileStaffPage = async function () {
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+// --- ปิด popup ด้วยมือ ---
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'success ') success.value = false
+  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
+  if (operate === 'fullname') isFullNameWeak.value = false
+  if (operate === 'dorm') isNoDorm.value = false
+  if (operate === 'notmatch') isNotMatch.value = false
+  if (operate === 'notroomrequired') isRoomRequired.value = false
+  if (operate === 'notpositionrequired') isPositionRequired.value = false
+  if (operate === 'emailform') incorrectemailform.value = false
+  if (operate === 'notnumber') roomidnotnumber.value = false
+  if (operate === 'erroeposition ') isPositionWrong.value = false
+  if (operate === 'nametypewrong ') isFullNameWrong.value = false
 }
 </script>
 
@@ -568,6 +607,21 @@ const toggleSidebar = () => {
               class="w-full md:w-auto"
             />
           </div>
+          <AlertPopUp
+            v-if="success"
+            :titles="'Register New Account is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="success"
+            @closePopUp="closePopUp"
+          /><AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
 
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -645,7 +699,7 @@ const toggleSidebar = () => {
             </div>
           </div>
 
-          <hr class="border-t border-[#3269A8] my-4" />
+          <!-- <hr class="border-t border-1 border-[#185DC0] my-4" /> -->
 
           <!-- Row 4 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -681,7 +735,7 @@ const toggleSidebar = () => {
             <ButtonWeb
               label="Cancel"
               color="red"
-              @click="() => router.replace({ name: 'staffparcels' })"
+              @click="showManageParcelPage"
             />
           </div>
         </form>

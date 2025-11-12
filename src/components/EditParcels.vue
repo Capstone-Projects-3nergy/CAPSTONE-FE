@@ -11,8 +11,10 @@ import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
@@ -26,20 +28,22 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const success = ref(false)
+const error = ref(false)
 // 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
 const form = ref({
-  parcel_id: '',
-  tracking_number: '',
-  recipient_name: '',
-  room_number: '',
-  parcel_type: '',
+  parcelId: '',
+  trackingNumber: '',
+  recipientName: '',
+  roomNumber: '',
+  parcelType: '',
   contact: '',
   status: '',
-  pickup_at: '',
-  update_at: '',
-  sender_name: '',
-  company_id: '',
-  receive_at: ''
+  pickupAt: '',
+  updateAt: '',
+  senderName: '',
+  companyId: '',
+  receiveAt: ''
 })
 
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
@@ -58,18 +62,17 @@ onMounted(async () => {
 const saveParcel = async () => {
   try {
     const res = await axios.put(
-      `http://localhost:5000/api/parcels/${form.value.parcel_id}`,
+      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcelId}`,
       form.value
     )
 
-    // ✅ อัปเดตใน store ด้วย (Pinia)
-    await parcelStore.updateParcel(form.value.parcel_id, res.data)
+    // อัปเดตใน Pinia
+    parcelStore.editParcel(form.value.parcelId, res.data)
 
     console.log('✅ Updated parcel:', res.data)
-
-    // 🔄 กลับไปหน้ารายการพัสดุ
-    router.replace({ name: 'staffparcels' })
+    success.value = true
   } catch (err) {
+    error.value = true
     console.error('❌ Failed to update parcel:', err)
   }
 }
@@ -123,6 +126,22 @@ const showProfileStaffPage = async function () {
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'success ') success.value = false
+  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'password') isPasswordWeak.value = false
+  if (operate === 'errorpassword') isPasswordNotMatch.value = false
+  if (operate === 'fullname') isFullNameWeak.value = false
+  if (operate === 'dorm') isNoDorm.value = false
+  if (operate === 'notmatch') isNotMatch.value = false
+  if (operate === 'notroomrequired') isRoomRequired.value = false
+  if (operate === 'notpositionrequired') isPositionRequired.value = false
+  if (operate === 'emailform') incorrectemailform.value = false
+  if (operate === 'notnumber') roomidnotnumber.value = false
+  if (operate === 'erroeposition ') isPositionWrong.value = false
+  if (operate === 'nametypewrong ') isFullNameWrong.value = false
 }
 </script>
 
@@ -569,13 +588,27 @@ const toggleSidebar = () => {
               @click="() => router.replace({ name: 'parcelscanner' })"
             />
           </div>
-
+          <AlertPopUp
+            v-if="success"
+            :titles="'Register New Account is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="success"
+            @closePopUp="closePopUp"
+          /><AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
               <input
-                v-model="form.tracking_number"
+                v-model="form.trackingNumber"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -583,7 +616,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Recipient Name</label>
               <input
-                v-model="form.recipient_name"
+                v-model="form.recipientName"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -591,7 +624,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Room Number</label>
               <input
-                v-model="form.room_number"
+                v-model="form.roomNumber"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -603,7 +636,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Parcel Type</label>
               <input
-                v-model="form.parcel_type"
+                v-model="form.parcelType"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -631,7 +664,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
-                v-model="form.pickup_at"
+                v-model="form.pickupAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -639,7 +672,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Update at</label>
               <input
-                v-model="form.update_at"
+                v-model="form.updateAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -653,7 +686,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
-                v-model="form.sender_name"
+                v-model="form.senderName"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -661,7 +694,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Company ID</label>
               <input
-                v-model="form.company_id"
+                v-model="form.companyId"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -669,7 +702,7 @@ const toggleSidebar = () => {
             <div>
               <label class="block font-semibold mb-1">Receive at</label>
               <input
-                v-model="form.receive_at"
+                v-model="form.receiveAt"
                 type="text"
                 class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
               />

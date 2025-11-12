@@ -374,54 +374,98 @@ const toggleSidebar = () => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
 
-        <!-- Profile Card -->
-        <div class="bg-white rounded-2xl shadow p-6 max-w-3xl mx-auto">
+        <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
+          <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
+            Personal Information
+          </h2>
+
           <div
-            class="flex flex-col md:flex-row items-center md:items-start md:space-x-6"
+            class="flex flex-col md:flex-row items-center md:items-start gap-10"
           >
-            <!-- Profile Image -->
-            <div
-              class="w-32 h-32 rounded-full overflow-hidden border-4 border-sky-500 mb-4 md:mb-0"
-            >
-              <img
-                src="https://i.pravatar.cc/150?img=12"
-                alt="Profile"
-                class="w-full h-full object-cover"
-              />
+            <!-- Left Section -->
+            <div class="flex flex-col items-center w-full md:w-1/3">
+              <!-- Profile Image -->
+              <div
+                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-600 mb-4 md:mb-0"
+              >
+                <img
+                  src="https://i.pravatar.cc/150?img=8"
+                  alt="Profile"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+
+              <p class="mt-3 text-gray-600 font-medium">Pimpajee SetXXXXXX</p>
             </div>
 
-            <!-- Profile Info -->
-            <div class="flex-1 space-y-3 text-gray-700 w-full">
+            <!-- Right Section -->
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
+            >
               <div>
-                <p class="text-sm text-gray-500">Full Name</p>
-                <p class="text-lg font-semibold">Krittapas Jaruburanasak</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Room</p>
-                <p class="text-lg font-semibold">B-305</p>
-              </div>
-              <div>
-                <!-- <p>หอพัก: {{ registeredUser?.dormName || 'ยังไม่ได้เลือกหอ' }}</p> -->
-
-                <p class="text-sm text-gray-500">Building</p>
-                <p class="text-lg font-semibold">Building B</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Email</p>
-                <p class="text-lg font-semibold">krittapas@example.com</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Phone</p>
-                <p class="text-lg font-semibold">098-765-4321</p>
-              </div>
-
-              <!-- Edit Button -->
-              <div class="pt-4 flex space-x-3">
-                <button
-                  class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition"
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >Firstname</label
                 >
-                  Edit Profile
-                </button>
+                <input
+                  type="text"
+                  value="Pimpajee"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >Lastname</label
+                >
+                <input
+                  type="text"
+                  value="SetXXXXXX"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >Email</label
+                >
+                <input
+                  type="email"
+                  value="abcd@gmail.com"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >LineID</label
+                >
+                <input
+                  type="text"
+                  value="abcdef555"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >Contact</label
+                >
+                <input
+                  type="text"
+                  value="097-230-XXXX"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-blue-700 mb-1"
+                  >Room Number</label
+                >
+                <input
+                  type="text"
+                  value="101"
+                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
               </div>
             </div>
           </div>

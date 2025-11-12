@@ -41,18 +41,20 @@ const closePopUp = (operate) => {
 
 // --------------------- LIFE CYCLE ---------------------
 onMounted(async () => {
-  await authManager.loadUserFromLocalStorage()
+  await authManager.loadUserFromBackend()
 })
 
 // --------------------- LOGIN FUNCTION ---------------------
 const loginHomePageWeb = async () => {
   try {
+    // 🔹 เรียก login จาก Pinia store
     const userData = await authManager.loginAccount(
       email.value.trim(),
       password.value.trim(),
       router
     )
 
+    // ❌ ถ้า login ไม่สำเร็จ
     if (!userData) {
       incorrect.value = true
       console.warn('⚠️ Login failed: invalid credentials')
@@ -60,11 +62,16 @@ const loginHomePageWeb = async () => {
       return
     }
 
-    // ✅ ตรวจ token ว่ายังไม่หมดอายุ
-    const token =
-      authManager.userData?.accessToken || localStorage.getItem('accessToken')
+    // ✅ ตรวจสอบ token จาก Pinia state
+    const token = authManager.user?.accessToken
+    if (!token) {
+      console.error('🚫 Missing access token, please log in again.')
+      await authManager.logoutAccount(router)
+      return
+    }
 
-    if (token) {
+    // 🔍 ตรวจสอบว่า token หมดอายุหรือยัง
+    try {
       const decoded = authManager.decodeJWT
         ? authManager.decodeJWT(token)
         : null
@@ -75,12 +82,17 @@ const loginHomePageWeb = async () => {
         const newToken = authManager.refreshToken
           ? await authManager.refreshToken()
           : null
+
         if (!newToken) {
           console.error('🚫 Token refresh failed, logging out...')
           await authManager.logoutAccount(router)
           return
         }
       }
+    } catch (decodeErr) {
+      console.error('⚠️ Failed to decode or refresh token:', decodeErr)
+      await authManager.logoutAccount(router)
+      return
     }
 
     // ✅ แสดง popup สำเร็จ
@@ -88,6 +100,8 @@ const loginHomePageWeb = async () => {
     setTimeout(() => (success.value = false), 2000)
   } catch (err) {
     console.error('❌ Login error:', err)
+
+    // ตรวจสอบว่าเป็น error ด้าน auth หรือไม่
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
@@ -103,6 +117,65 @@ const loginHomePageWeb = async () => {
     }
   }
 }
+
+// const loginHomePageWeb = async () => {
+//   try {
+//     const userData = await authManager.loginAccount(
+//       email.value.trim(),
+//       password.value.trim(),
+//       router
+//     )
+
+//     if (!userData) {
+//       incorrect.value = true
+//       console.warn('⚠️ Login failed: invalid credentials')
+//       setTimeout(() => (incorrect.value = false), 2000)
+//       return
+//     }
+
+//     // ✅ ตรวจ token ว่ายังไม่หมดอายุ
+//     const token =
+//       authManager.userData?.accessToken || localStorage.getItem('accessToken')
+
+//     if (token) {
+//       const decoded = authManager.decodeJWT
+//         ? authManager.decodeJWT(token)
+//         : null
+//       const currentTime = Math.floor(Date.now() / 1000)
+
+//       if (decoded?.exp && decoded.exp < currentTime) {
+//         console.warn('⚠️ Token expired, refreshing...')
+//         const newToken = authManager.refreshToken
+//           ? await authManager.refreshToken()
+//           : null
+//         if (!newToken) {
+//           console.error('🚫 Token refresh failed, logging out...')
+//           await authManager.logoutAccount(router)
+//           return
+//         }
+//       }
+//     }
+
+//     // ✅ แสดง popup สำเร็จ
+//     success.value = true
+//     setTimeout(() => (success.value = false), 2000)
+//   } catch (err) {
+//     console.error('❌ Login error:', err)
+//     const isAuthError =
+//       err.response?.status === 400 ||
+//       err.response?.status === 401 ||
+//       authManager.errorMessage?.includes('Invalid') ||
+//       err.message?.toLowerCase()?.includes('auth')
+
+//     if (isAuthError) {
+//       incorrect.value = true
+//       setTimeout(() => (incorrect.value = false), 2000)
+//     } else {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 2000)
+//     }
+//   }
+// }
 
 // --------------------- FORM VALIDATION ---------------------
 const checkEmailLength = () => {

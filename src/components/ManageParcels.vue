@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -14,9 +14,19 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-const registerStore = useRegisterManager()
+
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  searchParcels
+} from '@/stores/SortManager'
+
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
+
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -28,8 +38,8 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const tabs = ['Day', 'Month', 'Year']
-const activeTab = ref('Day')
+
+// Reactive state
 const parcels = ref([
   {
     id: 1,
@@ -122,6 +132,24 @@ const parcels = ref([
     date: '05 Oct 2025'
   }
 ])
+
+const searchKeyword = ref('')
+const activeTab = ref('Day')
+const tabs = ['Day', 'Month', 'Year']
+
+// Computed filtered + searched parcels
+const filteredParcels = computed(() => {
+  if (!searchKeyword.value) return parcels.value
+  return searchParcels(parcels.value, searchKeyword.value)
+})
+
+// Sort functions
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortDateAsc = () => sortByDate(parcels.value)
+const sortDateDesc = () => sortByDateReverse(parcels.value)
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -146,7 +174,7 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-console.log(registerStore.userData)
+console.log(loginManager.userData)
 const returnLoginPage = async () => {
   try {
     // เรียก logoutAccount จาก store
@@ -168,6 +196,68 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+// Pagination State
+const currentPage = ref(1)
+const perPage = ref(3) // จำนวนแถวต่อหน้า
+const totalPages = computed(() =>
+  Math.ceil(parcels.value.length / perPage.value)
+)
+
+// ข้อมูลที่จะแสดงบนตาราง
+const paginatedParcels = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredParcels.value.slice(start, end)
+})
+
+const showParacelDetail = async function (id, operate) {
+  router.push({ name: 'detailparcels', params: { tid: id } })
+  operation.value = operate
+  taskDetail.value = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
+    id
+  )
+  if (taskDetail.value.status == '404') {
+    alert('The requested task does not exist')
+    router.replace({ name: 'Task' })
+    return
+  }
+  showTaskDetailModal.value = true
+}
+
+const showEditParacelDetail = async function (id, operate) {
+  router.push({ name: 'editparcels', params: { tid: id } })
+  operation.value = operate
+  taskDetail.value = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
+    id
+  )
+  if (taskDetail.value.status == '404') {
+    alert('The requested task does not exist')
+    router.replace({ name: 'Task' })
+    return
+  }
+  showTaskDetailModal.value = true
+}
+
+// ฟังก์ชันเปลี่ยนหน้า
+const goToPage = (page) => {
+  if (page < 1) page = 1
+  if (page > totalPages.value) page = totalPages.value
+  currentPage.value = page
+}
+
+const nextPage = () => goToPage(currentPage.value + 1)
+const prevPage = () => goToPage(currentPage.value - 1)
+
+// สร้าง array ของตัวเลขหน้าสำหรับ pagination
+const pageNumbers = computed(() => {
+  const pages = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    pages.push(i)
+  }
+  return pages
+})
 </script>
 
 <template>
@@ -604,13 +694,14 @@ const toggleSidebar = () => {
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+              d="M13.9674 2.61776C13.0261 2.23614 11.9732 2.23614 11.032 2.61776L8.75072 3.54276L18.7424 7.42818L22.257 6.07089C22.1124 5.95203 21.9509 5.85547 21.7778 5.78443L13.9674 2.61776ZM22.9163 7.49068L13.2809 11.2136V22.5917C13.5143 22.5445 13.7431 22.4754 13.9674 22.3844L21.7778 19.2178C22.1142 19.0815 22.4023 18.8479 22.6051 18.5469C22.808 18.2459 22.9163 17.8912 22.9163 17.5282V7.49068ZM11.7184 22.5917V11.2136L2.08301 7.49068V17.5292C2.08321 17.892 2.19167 18.2465 2.39449 18.5473C2.59732 18.8481 2.88529 19.0816 3.22155 19.2178L11.032 22.3844C11.2563 22.4747 11.4851 22.5431 11.7184 22.5917ZM2.74238 6.07089L12.4997 9.84068L16.5799 8.2636L6.63926 4.39901L3.22155 5.78443C3.04377 5.85665 2.88405 5.95214 2.74238 6.07089Z"
               fill="#185DC0"
             />
           </svg>
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+
         <!-- 🔲 Filter Bar Wrapper -->
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
@@ -625,7 +716,7 @@ const toggleSidebar = () => {
                   :key="tab"
                   @click="activeTab = tab"
                   :class="[
-                    'px-4 py-1 font-medium transition  cursor-pointer',
+                    'px-4 py-1 font-medium transition cursor-pointer',
                     activeTab === tab
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-500 hover:bg-gray-200'
@@ -641,21 +732,22 @@ const toggleSidebar = () => {
               <!-- Search -->
               <div class="relative">
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 absolute left-3 top-2.5 text-gray-400"
+                  class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
                   fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
+                    d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
+                    fill="#9A9FA7"
                   />
                 </svg>
+
                 <input
                   type="text"
+                  v-model="searchKeyword"
                   placeholder="Search ..."
                   class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
@@ -664,10 +756,26 @@ const toggleSidebar = () => {
               <!-- Sort -->
               <select
                 class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                @change="
+                  ($event) => {
+                    if ($event.target.value === 'Newest') sortDateDesc()
+                    else if ($event.target.value === 'Oldest') sortDateAsc()
+                    else if ($event.target.value === 'Room ↑') sortRoomAsc()
+                    else if ($event.target.value === 'Room ↓') sortRoomDesc()
+                    else if ($event.target.value === 'Status A→Z')
+                      sortStatusAsc()
+                    else if ($event.target.value === 'Status Z→A')
+                      sortStatusDesc()
+                  }
+                "
               >
                 <option>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
+                <option>Room ↑</option>
+                <option>Room ↓</option>
+                <option>Status A→Z</option>
+                <option>Status Z→A</option>
               </select>
 
               <!-- Add Parcel -->
@@ -676,19 +784,18 @@ const toggleSidebar = () => {
                 class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="w-4 h-4"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 4v16m8-8H4"
+                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                    fill="white"
                   />
                 </svg>
+
                 <span>Add parcel</span>
               </button>
             </div>
@@ -724,7 +831,11 @@ const toggleSidebar = () => {
               </tr>
             </thead>
             <tbody class="divide-y">
-              <tr v-for="p in parcels" :key="p.id" class="hover:bg-gray-50">
+              <tr
+                v-for="p in paginatedParcels"
+                :key="p.id"
+                class="hover:bg-gray-50"
+              >
                 <td class="px-4 py-3 text-sm text-gray-700">
                   {{ p.tracking }}
                 </td>
@@ -749,31 +860,39 @@ const toggleSidebar = () => {
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
                   <button class="text-blue-600 hover:text-blue-800">
                     <svg
-                      class="w-5 h-5"
+                      width="21"
+                      height="21"
+                      viewBox="0 0 21 21"
                       fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
+                        d="M10 1.99634H3C2.46957 1.99634 1.96086 2.20705 1.58579 2.58212C1.21071 2.9572 1 3.4659 1 3.99634V17.9963C1 18.5268 1.21071 19.0355 1.58579 19.4106C1.96086 19.7856 2.46957 19.9963 3 19.9963H17C17.5304 19.9963 18.0391 19.7856 18.4142 19.4106C18.7893 19.0355 19 18.5268 19 17.9963V10.9963"
+                        stroke="#185DC0"
+                        stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        d="M15.232 5.232l3.536 3.536M4 13v7h7l11-11-7-7-11 11z"
+                      />
+                      <path
+                        d="M16.3751 1.62132C16.7729 1.2235 17.3125 1 17.8751 1C18.4377 1 18.9773 1.2235 19.3751 1.62132C19.7729 2.01914 19.9964 2.55871 19.9964 3.12132C19.9964 3.68393 19.7729 4.2235 19.3751 4.62132L10.3621 13.6353C10.1246 13.8726 9.8313 14.0462 9.50909 14.1403L6.63609 14.9803C6.55005 15.0054 6.45883 15.0069 6.372 14.9847C6.28517 14.9624 6.20592 14.9173 6.14254 14.8539C6.07916 14.7905 6.03398 14.7112 6.01174 14.6244C5.98949 14.5376 5.991 14.4464 6.01609 14.3603L6.85609 11.4873C6.95062 11.1654 7.12463 10.8724 7.36209 10.6353L16.3751 1.62132Z"
+                        stroke="#185DC0"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                       />
                     </svg>
                   </button>
                   <button class="text-red-600 hover:text-red-800">
                     <svg
-                      class="w-5 h-5"
+                      width="18"
+                      height="21"
+                      viewBox="0 0 18 21"
                       fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M10 3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
+                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                        fill="#185DC0"
                       />
                     </svg>
                   </button>
@@ -785,14 +904,35 @@ const toggleSidebar = () => {
 
         <!-- Pagination -->
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button class="px-3 py-1 rounded hover:bg-gray-200">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+          >
             &lt; Previous
           </button>
-          <button class="px-3 py-1 bg-blue-700 text-white rounded">01</button>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">02</button>
-          <span class="px-2 py-1">...</span>
-          <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
+
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-3 py-1 rounded',
+              currentPage === page
+                ? 'bg-blue-700 text-white'
+                : 'hover:bg-gray-200'
+            ]"
+          >
+            {{ page.toString().padStart(2, '0') }}
+          </button>
+
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+          >
+            Next &gt;
+          </button>
         </div>
       </main>
     </div>
