@@ -170,7 +170,7 @@ const submitForm = async (roleType) => {
             firstName,
             lastName,
             role: roleUpper,
-            dormId: (form.dormId || '').trim(), // ⬅ ใช้ชื่อนี้
+            dormId: form.dormId || '', // ⬅ ใช้ชื่อนี้
             roomNumber: (form.roomNumber || '').trim(),
             password: form.password,
             fullName: form.fullName.trim()
