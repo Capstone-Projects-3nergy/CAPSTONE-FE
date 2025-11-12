@@ -263,6 +263,7 @@ onMounted(async () => {
 //   }
 // }
 const submitForm = async (roleType) => {
+  console.log(form.dormName)
   try {
     // ✅ validations เดิม
     if (form.password !== form.confirmPassword) {
@@ -346,6 +347,7 @@ const submitForm = async (roleType) => {
 
     // ✅ เรียก register ผ่าน AuthManager (ไม่ต้องแนบ Authorization)
     await authManager.registerAccount(payload)
+
     authManager.loadUserFromBackend()
 
     if (authManager.status === 409) {

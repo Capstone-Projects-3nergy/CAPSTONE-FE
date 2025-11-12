@@ -138,9 +138,9 @@ export const useAuthManager = defineStore('authManager', () => {
       if (role === 'RESIDENT') {
         if (!formData.dormName?.trim())
           throw new Error('Dorm name is required for residents.')
-        payload.dorm = { dormName: formData.dormName.trim() }
+        // payload.dorm = { dormName: formData.dormName.trim() }
 
-        // payload.dormName = formData.dormName.trim()
+        payload.dormName = formData.dormName.trim()
         // ถ้าอยากเก็บห้องด้วย ต้องให้ backend รองรับใน SignUpRequest และ set ลง Users
         if (formData.roomNumber?.trim())
           payload.roomNumber = formData.roomNumber.trim()
