@@ -124,35 +124,31 @@ onMounted(async () => {
 
     let dormArray = []
 
-    // พยายาม parse JSON ปกติ
-    try {
-      dormArray = JSON.parse(res.data)
-    } catch (err) {
-      console.warn('Cannot parse res.data as JSON, fallback to regex')
-      // fallback ด้วย regex ดึง dormName จาก string
-      const matches = res.data.match(/"dormName":"(.*?)"/g) || []
-      dormArray = matches.map((s) => ({
-        dormName: s.replace('"dormName":"', '').replace('"', '')
-      }))
+    if (typeof res.data === 'string') {
+      // ถ้า backend ส่งเป็น string JSON
+      try {
+        dormArray = JSON.parse(res.data)
+      } catch (err) {
+        console.warn('Cannot parse res.data as JSON, fallback to regex')
+        const matches = res.data.match(/"dormName":"(.*?)"/g) || []
+        dormArray = matches.map((s) => ({
+          dormName: s.replace('"dormName":"', '').replace('"', '')
+        }))
+      }
+    } else if (Array.isArray(res.data)) {
+      // ✅ ปกติ axios จะได้แบบนี้อยู่แล้ว
+      dormArray = res.data
+    } else {
+      console.warn('Unexpected res.data type:', typeof res.data)
     }
 
-    // สร้าง Set ไม่ซ้ำ
-    let dormNames = [...new Set(dormArray.map((d) => d.dormName))]
-
-    // เพิ่ม fallback dorm เพิ่มเติม
-    const fallbackDorms = [
-      'Dhammaraksa Residence Hall 1',
-      'KMUTT Female Dorm A',
-      'KMUTT Female Dorm B',
-      'KMUTT Male Dorm C'
-    ]
-
-    dormNames = [...new Set([...dormNames, ...fallbackDorms])]
+    // ดึงเฉพาะชื่อ dorm แบบไม่ซ้ำ
+    const dormNames = [...new Set(dormArray.map((d) => d.dormName))]
 
     dormList.value = dormNames
-    console.log('dormList.value:', dormList.value)
+    console.log('✅ dormList.value:', dormList.value)
   } catch (err) {
-    console.error(err)
+    console.error('❌ Error fetching dorms:', err)
   }
 })
 
