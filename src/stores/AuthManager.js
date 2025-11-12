@@ -149,7 +149,7 @@ export const useAuthManager = defineStore('authManager', () => {
       }
 
       const baseURL = import.meta.env.VITE_BASE_URL
-
+      console.log(payload)
       // ❌ ห้ามส่ง Authorization ใน signup (backend ไม่ต้องใช้ และ idToken ก็ไม่มี)
       const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
 
