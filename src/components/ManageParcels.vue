@@ -130,7 +130,7 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-console.log(registerStore.userData)
+console.log(loginManager.userData)
 const returnLoginPage = async () => {
   try {
     // เรียก logoutAccount จาก store
