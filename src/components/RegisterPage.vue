@@ -56,101 +56,74 @@ const form = reactive({
   position: '' // เฉพาะ STAFF
 })
 const dormList = ref([])
-// onMounted(async () => {
-//   authManager.loadUserFromBackend()
 
-//   try {
-//     const baseURL = import.meta.env.VITE_BASE_URL
-//     if (!baseURL) throw new Error('VITE_BASE_URL not set')
-
-//     const res = await axios.get(`${baseURL}/api/dorms`, {
-//       headers: { Accept: 'application/json' }
-//     })
-
-//     console.log('📦 Dorm response:', res.data)
-
-//     // ตรวจสอบว่ามี map ให้ใช้
-//     dormList.value = []
-//     if (res.data && typeof res.data.map === 'function') {
-//       res.data.forEach(d => {
-//         if (d?.dormName) dormList.value.push(String(d.dormName))
-//       })
-//       dormList.value.sort((a, b) => a.localeCompare(b))
-//     }
-
-//     // fallback
-//     if (dormList.value.length === 0) {
-//       dormList.value = [
-//         'Dhammaraksa Residence Hall 1',
-//         'Dhammaraksa Residence Hall 2'
-//       ]
-//     }
-//   } catch (err) {
-//     console.error('❌ Cannot fetch dorm list', err)
-//     dormList.value = [
-//       'Dhammaraksa Residence Hall 1',
-//       'Dhammaraksa Residence Hall 2'
-//     ]
-//   }
-// })
-
-// onMounted(async () => {
-//   try {
-//     const baseURL = import.meta.env.VITE_BASE_URL
-//     const res = await axios.get(`${baseURL}/api/dorms`, {
-//       headers: { Accept: 'application/json' }
-//     })
-
-//     // แปลง string เป็น JSON
-//     let dormArray = []
-//     try {
-//       dormArray = JSON.parse(res.data)
-//     } catch (err) {
-//       console.error('Cannot parse res.data as JSON', err)
-//     }
-
-//     dormList.value = [...new Set(dormArray.map((d) => d.dormName))]
-//     console.log('dormList.value:', dormList.value)
-//   } catch (err) {
-//     console.error(err)
-//   }
-// })
 onMounted(async () => {
+  authManager.loadUserFromBackend()
+  // console.log(authManager.user.email)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
+    console.log('Base URL:', baseURL)
+    if (!baseURL) throw new Error('VITE_BASE_URL not set')
+
     const res = await axios.get(`${baseURL}/api/dorms`, {
       headers: { Accept: 'application/json' }
     })
-    console.log(res.data)
-    let dormArray = []
 
-    if (typeof res.data === 'string') {
-      // ถ้า backend ส่งเป็น string JSON
-      try {
-        dormArray = JSON.parse(res.data)
-      } catch (err) {
-        console.warn('Cannot parse res.data as JSON, fallback to regex')
-        const matches = res.data.match(/"dormName":"(.*?)"/g) || []
-        dormArray = matches.map((s) => ({
-          dormName: s.replace('"dormName":"', '').replace('"', '')
-        }))
-      }
-    } else if (Array.isArray(res.data)) {
-      // ✅ ปกติ axios จะได้แบบนี้อยู่แล้ว
-      dormArray = res.data
-    } else {
-      console.warn('Unexpected res.data type:', typeof res.data)
-    }
-
-    // ดึงเฉพาะชื่อ dorm แบบไม่ซ้ำ
-    const dormNames = [...new Set(dormArray.map((d) => d.dormName))]
-
-    dormList.value = dormNames
-    console.log('✅ dormList.value:', dormList.value)
+    const dataList = res.data?.data ?? res.data
+    dormList.value =
+      Array.isArray(dataList) && dataList.length > 0
+        ? dataList.map((d) => ({
+            dormId: Number(d.dormId),
+            dormName: d.dormName
+          }))
+        : [
+            { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+            { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+          ]
   } catch (err) {
-    console.error('❌ Error fetching dorms:', err)
+    console.error('❌ Cannot fetch dorm list', err)
+    dormList.value = [
+      { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
+      { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+    ]
   }
 })
+// onMounted(async () => {
+//   try {
+//     const baseURL = import.meta.env.VITE_BASE_URL
+//     const res = await axios.get(`${baseURL}/api/dorms`, {
+//       headers: { Accept: 'application/json' }
+//     })
+//     console.log(res.data)
+//     let dormArray = []
+
+//     if (typeof res.data === 'string') {
+//       // ถ้า backend ส่งเป็น string JSON
+//       try {
+//         dormArray = JSON.parse(res.data)
+//       } catch (err) {
+//         console.warn('Cannot parse res.data as JSON, fallback to regex')
+//         const matches = res.data.match(/"dormName":"(.*?)"/g) || []
+//         dormArray = matches.map((s) => ({
+//           dormName: s.replace('"dormName":"', '').replace('"', '')
+//         }))
+//       }
+//     } else if (Array.isArray(res.data)) {
+//       // ✅ ปกติ axios จะได้แบบนี้อยู่แล้ว
+//       dormArray = res.data
+//     } else {
+//       console.warn('Unexpected res.data type:', typeof res.data)
+//     }
+
+//     // ดึงเฉพาะชื่อ dorm แบบไม่ซ้ำ
+//     const dormNames = [...new Set(dormArray.map((d) => d.dormName))]
+
+//     dormList.value = dormNames
+//     console.log('✅ dormList.value:', dormList.value)
+//   } catch (err) {
+//     console.error('❌ Error fetching dorms:', err)
+//   }
+// })
 
 // ---------------- REGISTER FUNCTION ----------------
 // const submitForm = async (roleType) => {
@@ -1074,12 +1047,12 @@ const toggleComfirmPasswordVisibility = () => {
                     {{ name }}
                   </option>
                 </select> -->
-                <select v-model="form.dormName" class="custom-select">
+                <!-- <select v-model="form.dormName" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
                   <option v-for="name in dormList" :key="name" :value="name">
                     {{ name }}
                   </option>
-                </select>
+                </select> -->
               </div>
             </div>
 
