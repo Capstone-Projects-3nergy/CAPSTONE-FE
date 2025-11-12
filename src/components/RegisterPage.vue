@@ -93,7 +93,7 @@ const dormList = ref([])
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    const res = await axios.get(`${baseURL}/api/dorms`, {
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
       headers: { Accept: 'application/json' }
     })
     console.log('📦 Raw response:', res.data)
