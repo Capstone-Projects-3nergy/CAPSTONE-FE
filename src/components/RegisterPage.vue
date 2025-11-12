@@ -121,7 +121,7 @@ onMounted(async () => {
     const res = await axios.get(`${baseURL}/api/dorms`, {
       headers: { Accept: 'application/json' }
     })
-
+    console.log(res.data)
     let dormArray = []
 
     if (typeof res.data === 'string') {
