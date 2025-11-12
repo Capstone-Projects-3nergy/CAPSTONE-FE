@@ -23,7 +23,7 @@ const isFullNameWrong = ref(false)
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
 const trimmedPassword = computed(() => form.password?.trim() || '')
-const trimmedDormName = computed(() => String(form.dormName ?? '').trim() || '')
+const trimmedDormId = computed(() => String(form.dormId ?? '').trim() || '')
 const trimmedConfirmPassword = computed(
   () => form.confirmPassword?.trim() || ''
 )
@@ -50,193 +50,85 @@ const form = reactive({
   password: '', // ใช้กับ Firebase เท่านั้น (อย่าส่งไป backend)
   confirmPassword: '',
   role: 'RESIDENT', // 'RESIDENT' | 'STAFF'
-  dormName: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
+  dormId: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
   // dormType: 'female dormitory',
   roomNumber: '', // เฉพาะ RESIDENT
   position: '' // เฉพาะ STAFF
 })
-const dormList = ref([])
 
-onMounted(async () => {
-  authManager.loadUserFromBackend()
-  // console.log(authManager.user.email)
-  try {
-    const baseURL = import.meta.env.VITE_BASE_URL
-    console.log('Base URL:', baseURL)
-    if (!baseURL) throw new Error('VITE_BASE_URL not set')
-
-    const res = await axios.get(`${baseURL}/api/dorms`, {
-      headers: { Accept: 'application/json' }
-    })
-
-    const dataList = res.data?.data ?? res.data
-    dormList.value =
-      Array.isArray(dataList) && dataList.length > 0
-        ? dataList.map((d) => ({
-            dormId: Number(d.dormId),
-            dormName: d.dormName
-          }))
-        : [
-            { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-            { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
-          ]
-  } catch (err) {
-    console.error('❌ Cannot fetch dorm list', err)
-    dormList.value = [
-      { dormId: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-      { dormId: 2, dormName: 'Dhammaraksa Residence Hall 2' }
-    ]
-  }
-})
 // onMounted(async () => {
+//   authManager.loadUserFromBackend()
+//   // console.log(authManager.user.email)
 //   try {
 //     const baseURL = import.meta.env.VITE_BASE_URL
+//     console.log('Base URL:', baseURL)
+//     if (!baseURL) throw new Error('VITE_BASE_URL not set')
+
 //     const res = await axios.get(`${baseURL}/api/dorms`, {
 //       headers: { Accept: 'application/json' }
 //     })
-//     console.log(res.data)
-//     let dormArray = []
 
-//     if (typeof res.data === 'string') {
-//       // ถ้า backend ส่งเป็น string JSON
-//       try {
-//         dormArray = JSON.parse(res.data)
-//       } catch (err) {
-//         console.warn('Cannot parse res.data as JSON, fallback to regex')
-//         const matches = res.data.match(/"dormName":"(.*?)"/g) || []
-//         dormArray = matches.map((s) => ({
-//           dormName: s.replace('"dormName":"', '').replace('"', '')
-//         }))
-//       }
-//     } else if (Array.isArray(res.data)) {
-//       // ✅ ปกติ axios จะได้แบบนี้อยู่แล้ว
-//       dormArray = res.data
-//     } else {
-//       console.warn('Unexpected res.data type:', typeof res.data)
-//     }
-
-//     // ดึงเฉพาะชื่อ dorm แบบไม่ซ้ำ
-//     const dormNames = [...new Set(dormArray.map((d) => d.dormName))]
-
-//     dormList.value = dormNames
-//     console.log('✅ dormList.value:', dormList.value)
+//     const dataList = res.data?.data ?? res.data
+//     dormList.value =
+//       Array.isArray(dataList) && dataList.length > 0
+//         ? dataList.map((d) => ({
+//             dormId: Number(d.dormId),
+//             dormId: d.dormId
+//           }))
+//         : [
+//             { dormId: 1, dormId: 'Dhammaraksa Residence Hall 1' },
+//             { dormId: 2, dormId: 'Dhammaraksa Residence Hall 2' }
+//           ]
 //   } catch (err) {
-//     console.error('❌ Error fetching dorms:', err)
+//     console.error('❌ Cannot fetch dorm list', err)
+//     dormList.value = [
+//       { dormId: 1, dormId: 'Dhammaraksa Residence Hall 1' },
+//       { dormId: 2, dormId: 'Dhammaraksa Residence Hall 2' }
+//     ]
 //   }
 // })
 
+const dormList = ref([])
+
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms`, {
+      headers: { Accept: 'application/json' }
+    })
+    console.log('📦 Raw response:', res.data)
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      // ใช้ regex ดึง dormId และ dormName
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+    console.log('✅ dormList:', dormList.value)
+  } catch (err) {
+    console.error('❌ Error fetching dorms:', err)
+  }
+})
 // ---------------- REGISTER FUNCTION ----------------
-// const submitForm = async (roleType) => {
-//   try {
-//     if (form.password !== form.confirmPassword) {
-//       isNotMatch.value = true
-//       setTimeout(() => (isNotMatch.value = false), 3000)
-//       return
-//     }
 
-//     if (!form.fullName || form.fullName.trim().length < 6) {
-//       isFullNameWeak.value = true
-//       setTimeout(() => (isFullNameWeak.value = false), 3000)
-//       return
-//     }
-
-//     if (/\d/.test(form.fullName)) {
-//       isFullNameWrong.value = true
-//       setTimeout(() => (isFullNameWrong.value = false), 3000)
-//       return
-//     }
-
-//     if (!form.password || form.password.length < 6) {
-//       isPasswordWeak.value = true
-//       setTimeout(() => (isPasswordWeak.value = false), 3000)
-//       return
-//     }
-
-//     if (!form.email || !form.email.endsWith('@gmail.com')) {
-//       incorrectemailform.value = true
-//       setTimeout(() => (incorrectemailform.value = false), 3000)
-//       return
-//     }
-
-//     const [firstName, lastName] = (form.fullName || '').split(' ')
-//     const roleUpper = String(roleType).toUpperCase()
-
-//     const payload =
-//       roleUpper === 'RESIDENT'
-//         ? {
-//             email: form.email,
-//             firstName,
-//             lastName,
-//             role: roleUpper,
-//             dormName: Number(form.dormName),
-//             roomNumber: (form.roomNumber || '').trim(),
-//             password: form.password,
-//             fullName: form.fullName
-//           }
-//         : {
-//             email: form.email,
-//             firstName,
-//             lastName,
-//             role: roleUpper,
-//             position: (form.position || '').trim(),
-//             password: form.password,
-//             fullName: form.fullName
-//           }
-
-//     if (roleUpper === 'RESIDENT') {
-//       if (!Number.isFinite(payload.dormName) || payload.dormName <= 0) {
-//         isNoDorm.value = true
-//         setTimeout(() => (isNoDorm.value = false), 3000)
-//         return
-//       }
-//       if (!payload.roomNumber) {
-//         isRoomRequired.value = true
-//         setTimeout(() => (isRoomRequired.value = false), 3000)
-//         return
-//       }
-//     } else if (roleUpper === 'STAFF') {
-//       if (!payload.position) {
-//         isPositionRequired.value = true
-//         setTimeout(() => (isPositionRequired.value = false), 3000)
-//         return
-//       }
-//       if (/\d/.test(payload.position)) {
-//         isPositionWrong.value = true
-//         setTimeout(() => (isPositionWrong.value = false), 3000)
-//         return
-//       }
-//     }
-
-//     // ✅ เรียกใช้ register จาก AuthManager
-//     await authManager.registerAccount(payload)
-//     authManager.loadUserFromBackend()
-//     // ถ้ามี email ซ้ำจาก backend
-//     if (authManager.status === 409) {
-//       success.value = false
-//       isEmailDuplicate.value = true
-//       setTimeout(() => (isEmailDuplicate.value = false), 3000)
-//       return
-//     }
-
-//     // ✅ ล้างฟอร์มหลังสำเร็จ
-//     Object.keys(form).forEach((key) => {
-//       if (key === 'dormName') {
-//         form[key] = null
-//       } else {
-//         form[key] = ''
-//       }
-//     })
-
-//     success.value = true
-//     setTimeout(() => (success.value = false), 3000)
-//   } catch (err) {
-//     console.error('❌ Register error:', err)
-//     error.value = true
-//     setTimeout(() => (error.value = false), 3000)
-//   }
-// }
 const submitForm = async (roleType) => {
-  console.log(form.dormName)
+  console.log(form.dormId)
   try {
     // ✅ validations เดิม
     if (form.password !== form.confirmPassword) {
@@ -270,7 +162,7 @@ const submitForm = async (roleType) => {
       .split(/\s+/, 2)
     const roleUpper = String(roleType).toUpperCase()
 
-    // ⬇⬇⬇ เปลี่ยนจาก dormId → dormName ⬇⬇⬇
+    // ⬇⬇⬇ เปลี่ยนจาก dormId → dormId ⬇⬇⬇
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -278,7 +170,7 @@ const submitForm = async (roleType) => {
             firstName,
             lastName,
             role: roleUpper,
-            dormName: (form.dormName || '').trim(), // ⬅ ใช้ชื่อนี้
+            dormId: (form.dormId || '').trim(), // ⬅ ใช้ชื่อนี้
             roomNumber: (form.roomNumber || '').trim(),
             password: form.password,
             fullName: form.fullName.trim()
@@ -293,9 +185,9 @@ const submitForm = async (roleType) => {
             fullName: form.fullName.trim()
           }
 
-    // ✅ validation ฝั่ง RESIDENT ตาม dormName
+    // ✅ validation ฝั่ง RESIDENT ตาม dormId
     if (roleUpper === 'RESIDENT') {
-      if (!payload.dormName) {
+      if (!payload.dormId) {
         isNoDorm.value = true
         setTimeout(() => (isNoDorm.value = false), 3000)
         return
@@ -332,7 +224,7 @@ const submitForm = async (roleType) => {
 
     // ✅ ล้างฟอร์ม
     Object.keys(form).forEach((key) => {
-      if (key === 'dormName') form[key] = null
+      if (key === 'dormId') form[key] = null
       else form[key] = ''
     })
 
@@ -1024,35 +916,40 @@ const toggleComfirmPasswordVisibility = () => {
                 </svg>
 
                 <!-- dropdown -->
-                <!-- <select v-model="form.dormName" class="custom-select">
+                <!-- <select v-model="form.dormId" class="custom-select">
                   <option value="" disabled selected hidden>
                     Name Dormitory
                   </option>
                   <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
                   <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
                 </select> -->
-                <!-- <select v-model.number="form.dormName" class="custom-select">
+                <!-- <select v-model.number="form.dormId" class="custom-select">
                   <option :value="null" disabled>Select Dormitory</option>
                   <option
                     v-for="dorm in dormList"
-                    :key="dorm.dormName"
-                    :value="dorm.dormName"
+                    :key="dorm.dormId"
+                    :value="dorm.dormId"
+                  >
+                    {{ dorm.dormId }}
+                  </option>
+                </select> -->
+                <!-- <select v-model="form.dormId" class="custom-select">
+                  <option :value="null" disabled>Select Dormitory</option>
+                  <option v-for="name in dormList" :key="name" :value="name">
+                    {{ name }}
+                  </option>
+                </select> -->
+                <select v-model="form.dormId" class="custom-select">
+                  <option :value="null" disabled>Select Dormitory</option>
+                  <option
+                    v-for="dorm in dormList"
+                    :key="dorm.dormId"
+                    :value="dorm.dormId"
                   >
                     {{ dorm.dormName }}
+                    <!-- แสดงชื่อหอ -->
                   </option>
-                </select> -->
-                <!-- <select v-model="form.dormName" class="custom-select">
-                  <option :value="null" disabled>Select Dormitory</option>
-                  <option v-for="name in dormList" :key="name" :value="name">
-                    {{ name }}
-                  </option>
-                </select> -->
-                <!-- <select v-model="form.dormName" class="custom-select">
-                  <option :value="null" disabled>Select Dormitory</option>
-                  <option v-for="name in dormList" :key="name" :value="name">
-                    {{ name }}
-                  </option>
-                </select> -->
+                </select>
               </div>
             </div>
 
@@ -1384,7 +1281,7 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedDormName.length > 0 &&
+                trimmedDormId.length > 0 &&
                 trimmedRoomNumber.length > 0
             }"
             :disabled="
@@ -1392,7 +1289,7 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
-              trimmedDormName.length === 0 ||
+              trimmedDormId.length === 0 ||
               isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
