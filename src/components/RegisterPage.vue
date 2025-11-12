@@ -56,73 +56,50 @@ const form = reactive({
   position: '' // เฉพาะ STAFF
 })
 const dormList = ref([])
-onMounted(async () => {
-  authManager.loadUserFromBackend()
-
-  try {
-    const baseURL = import.meta.env.VITE_BASE_URL
-    if (!baseURL) throw new Error('VITE_BASE_URL not set')
-
-    // ดึงหอจาก /api/dorms
-    const res = await axios.get(`${baseURL}/api/dorms`, {
-      headers: { Accept: 'application/json' }
-    })
-
-    // เก็บเป็น list ของชื่อหอ
-    if (Array.isArray(res.data)) {
-      dormList.value = res.data
-        .map((d) => String(d.dormName))
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b))
-    } else {
-      console.warn('Dorm data is not an array, using fallback')
-      dormList.value = [
-        'Dhammaraksa Residence Hall 1',
-        'Dhammaraksa Residence Hall 2'
-      ]
-    }
-  } catch (err) {
-    console.error('❌ Cannot fetch dorm list', err)
-    dormList.value = [
-      'Dhammaraksa Residence Hall 1',
-      'Dhammaraksa Residence Hall 2'
-    ]
-  }
-})
-
 // onMounted(async () => {
-//   authManager.loadUserFromBackend() // โหลด user ก่อน
+//   authManager.loadUserFromBackend()
 
 //   try {
 //     const baseURL = import.meta.env.VITE_BASE_URL
 //     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
-//     // 🔹 ดึง dorm ทั้งหมดจาก backend
-//     const res = await axios.get(`${baseURL}/dorms`, {
+//     const res = await axios.get(`${baseURL}/api/dorms`, {
 //       headers: { Accept: 'application/json' }
 //     })
 
-//     // backend return List<Dorm>
-//     if (Array.isArray(res.data)) {
-//       dormList.value = res.data.map((d) => ({
-//         dormName: Number(d.dormName),
-//         dormName: d.dormName
-//       }))
-//     } else {
-//       console.warn('Dorm data is not an array, using fallback')
+//     console.log('📦 Dorm response:', res.data)
+
+//     // ตรวจสอบว่ามี map ให้ใช้
+//     dormList.value = []
+//     if (res.data && typeof res.data.map === 'function') {
+//       res.data.forEach(d => {
+//         if (d?.dormName) dormList.value.push(String(d.dormName))
+//       })
+//       dormList.value.sort((a, b) => a.localeCompare(b))
+//     }
+
+//     // fallback
+//     if (dormList.value.length === 0) {
 //       dormList.value = [
-//         { dormName: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-//         { dormName: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//         'Dhammaraksa Residence Hall 1',
+//         'Dhammaraksa Residence Hall 2'
 //       ]
 //     }
 //   } catch (err) {
 //     console.error('❌ Cannot fetch dorm list', err)
 //     dormList.value = [
-//       { dormName: 1, dormName: 'Dhammaraksa Residence Hall 1' },
-//       { dormName: 2, dormName: 'Dhammaraksa Residence Hall 2' }
+//       'Dhammaraksa Residence Hall 1',
+//       'Dhammaraksa Residence Hall 2'
 //     ]
 //   }
 // })
+
+onMounted(async () => {
+  const baseURL = import.meta.env.VITE_BASE_URL
+  const res = await axios.get(`${baseURL}/api/dorms`)
+  console.log(res.data, Array.isArray(res.data)) // ต้องเป็น true
+  dormList.value = res.data.map((d) => d.dormName)
+})
 
 // ---------------- REGISTER FUNCTION ----------------
 // const submitForm = async (roleType) => {
@@ -1036,6 +1013,12 @@ const toggleComfirmPasswordVisibility = () => {
                     :value="dorm.dormName"
                   >
                     {{ dorm.dormName }}
+                  </option>
+                </select> -->
+                <!-- <select v-model="form.dormName" class="custom-select">
+                  <option :value="null" disabled>Select Dormitory</option>
+                  <option v-for="name in dormList" :key="name" :value="name">
+                    {{ name }}
                   </option>
                 </select> -->
                 <select v-model="form.dormName" class="custom-select">

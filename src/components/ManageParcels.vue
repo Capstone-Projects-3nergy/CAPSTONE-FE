@@ -85,8 +85,52 @@ const parcels = ref([
     contact: '097-230-XXXX',
     status: 'Picked Up',
     date: '05 Oct 2025'
+  },
+  {
+    id: 6,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 106,
+    contact: '097-230-XXXX',
+    status: 'Picked Up',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 7,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 107,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 8,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 108,
+    contact: '097-230-XXXX',
+    status: 'Pending',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 9,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 109,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 10,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 110,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
   }
-  // ... เพิ่มข้อมูลตามต้องการ
 ])
 
 const searchKeyword = ref('')
@@ -688,6 +732,7 @@ const pageNumbers = computed(() => {
               <!-- Search -->
               <div class="relative">
                 <svg
+                  class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
                   width="18"
                   height="18"
                   viewBox="0 0 18 18"
