@@ -94,6 +94,27 @@ const dormList = ref([])
 //   }
 // })
 
+// onMounted(async () => {
+//   try {
+//     const baseURL = import.meta.env.VITE_BASE_URL
+//     const res = await axios.get(`${baseURL}/api/dorms`, {
+//       headers: { Accept: 'application/json' }
+//     })
+
+//     // แปลง string เป็น JSON
+//     let dormArray = []
+//     try {
+//       dormArray = JSON.parse(res.data)
+//     } catch (err) {
+//       console.error('Cannot parse res.data as JSON', err)
+//     }
+
+//     dormList.value = [...new Set(dormArray.map((d) => d.dormName))]
+//     console.log('dormList.value:', dormList.value)
+//   } catch (err) {
+//     console.error(err)
+//   }
+// })
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -101,15 +122,34 @@ onMounted(async () => {
       headers: { Accept: 'application/json' }
     })
 
-    // แปลง string เป็น JSON
     let dormArray = []
+
+    // พยายาม parse JSON ปกติ
     try {
       dormArray = JSON.parse(res.data)
     } catch (err) {
-      console.error('Cannot parse res.data as JSON', err)
+      console.warn('Cannot parse res.data as JSON, fallback to regex')
+      // fallback ด้วย regex ดึง dormName จาก string
+      const matches = res.data.match(/"dormName":"(.*?)"/g) || []
+      dormArray = matches.map((s) => ({
+        dormName: s.replace('"dormName":"', '').replace('"', '')
+      }))
     }
 
-    dormList.value = [...new Set(dormArray.map((d) => d.dormName))]
+    // สร้าง Set ไม่ซ้ำ
+    let dormNames = [...new Set(dormArray.map((d) => d.dormName))]
+
+    // เพิ่ม fallback dorm เพิ่มเติม
+    const fallbackDorms = [
+      'Dhammaraksa Residence Hall 1',
+      'KMUTT Female Dorm A',
+      'KMUTT Female Dorm B',
+      'KMUTT Male Dorm C'
+    ]
+
+    dormNames = [...new Set([...dormNames, ...fallbackDorms])]
+
+    dormList.value = dormNames
     console.log('dormList.value:', dormList.value)
   } catch (err) {
     console.error(err)
