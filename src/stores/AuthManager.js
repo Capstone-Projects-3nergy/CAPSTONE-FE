@@ -52,7 +52,7 @@ export const useAuthManager = defineStore('authManager', () => {
       )
 
       const data = response.data
-      if (!data?.authenticated) {
+      if (!data || !data.userId || !data.email) {
         console.error('❌ Backend verify failed:', data)
         throw new Error('User verification failed.')
       }
