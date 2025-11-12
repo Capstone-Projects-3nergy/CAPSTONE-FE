@@ -95,10 +95,25 @@ const dormList = ref([])
 // })
 
 onMounted(async () => {
-  const baseURL = import.meta.env.VITE_BASE_URL
-  const res = await axios.get(`${baseURL}/api/dorms`)
-  console.log(res.data, Array.isArray(res.data)) // ต้องเป็น true
-  dormList.value = res.data.map((d) => d.dormName)
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    // แปลง string เป็น JSON
+    let dormArray = []
+    try {
+      dormArray = JSON.parse(res.data)
+    } catch (err) {
+      console.error('Cannot parse res.data as JSON', err)
+    }
+
+    dormList.value = [...new Set(dormArray.map((d) => d.dormName))]
+    console.log('dormList.value:', dormList.value)
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 // ---------------- REGISTER FUNCTION ----------------
