@@ -166,16 +166,28 @@ const parcels = ref([
 const searchKeyword = ref('')
 const activeTab = ref('Day')
 const tabs = ['Day', 'Month', 'Year']
-const filteredParcelsDate = computed(() => {
-  if (activeTab.value === 'Day') return filterByDay(parcels.value)
-  if (activeTab.value === 'Month') return filterByMonth(parcels.value)
-  if (activeTab.value === 'Year') return filterByYear(parcels.value)
-  return parcels.value
-})
+// const filteredParcelsDate = computed(() => {
+//   if (activeTab.value === 'Day') return filterByDay(parcels.value)
+//   if (activeTab.value === 'Month') return filterByMonth(parcels.value)
+//   if (activeTab.value === 'Year') return filterByYear(parcels.value)
+//   return parcels.value
+// })
 // Computed filtered + searched parcels
 const filteredParcels = computed(() => {
-  if (!searchKeyword.value) return parcels.value
-  return searchParcels(parcels.value, searchKeyword.value)
+  // เริ่มจากข้อมูลทั้งหมด
+  let result = parcels.value
+
+  // 1️⃣ กรองตามแท็บ Day / Month / Year
+  // if (activeTab.value === 'Day') result = filterByDay(result)
+  // else if (activeTab.value === 'Month') result = filterByMonth(result)
+  // else if (activeTab.value === 'Year') result = filterByYear(result)
+
+  // 2️⃣ กรองตาม searchKeyword ถ้ามี
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  return result
 })
 
 // Sort functions
@@ -189,6 +201,40 @@ const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
+function parseDate(dateStr) {
+  if (!dateStr) return null
+
+  // ลองแปลงตรง ๆ ก่อน
+  let d = new Date(dateStr)
+  if (!isNaN(d)) return d
+
+  // ถ้าเป็นรูปแบบ "05 Oct 2025"
+  const parts = dateStr.split(' ')
+  if (parts.length === 3) {
+    const [day, mon, year] = parts
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+    const monthIndex = months.indexOf(mon)
+    if (monthIndex !== -1) {
+      return new Date(year, monthIndex, day)
+    }
+  }
+
+  return null
+}
+
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
 //   showResidentParcels.value = true
@@ -767,7 +813,7 @@ const pageNumbers = computed(() => {
               <!-- Search -->
               <div class="relative">
                 <svg
-                  class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
+                  class="absolute left-2 top-1/2 -translate-y-1/2"
                   width="18"
                   height="18"
                   viewBox="0 0 18 18"
@@ -840,27 +886,27 @@ const pageNumbers = computed(() => {
         <!-- Parcel Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
           <table class="min-w-full text-left border-collapse">
-            <thead class="bg-gray-100">
+            <thead class="bg-white border-t border-b border-[#185DC0] my-4">
               <tr>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Tracking
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Name
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Room Number
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Contact
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Status
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Date in
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-gray-700">
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Operation
                 </th>
               </tr>
