@@ -349,7 +349,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -366,7 +366,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -386,7 +386,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -401,7 +401,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2"
               ><svg
@@ -455,7 +455,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -470,7 +470,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -488,7 +488,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
+          <!-- <SidebarItem
             title="Manage Announcements"
             @click="ShowManageAnnouncementPage"
           >
@@ -506,7 +506,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
