@@ -290,15 +290,21 @@ function saveParcel() {
     trackingNumber: form.value.trackingNumber,
     companyId: form.value.companyId,
     parcelType: form.value.parcelType,
-    imageUrl: previewUrl.value || null
+    imageUrl: previewUrl.value || null,
+    status: 'Pending', // กำหนดค่าเริ่มต้น
+    roomNumber: form.value.roomNumber || '' // ถ้ามี
   }
-  savedParcels.value.push(parcelData)
-  console.log('✅ Parcel saved:', parcelData)
 
-  // reset
+  // ✅ เพิ่มพัสดุเข้า store
+  parcelStore.addParcel(parcelData)
+  console.log('✅ Parcel saved to store:', parcelData)
+
+  // reset form
   Object.keys(form.value).forEach(
     (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
   )
+
+  // popup success
   greenPopup.add.state = true
   previewUrl.value = null
   setTimeout(() => (greenPopup.add.state = false), 3000)
