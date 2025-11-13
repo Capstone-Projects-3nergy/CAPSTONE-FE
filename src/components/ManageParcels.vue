@@ -130,6 +130,33 @@ const parcels = ref([
     contact: '097-230-XXXX',
     status: 'Unclaimed',
     date: '05 Oct 2025'
+  },
+  {
+    id: 11,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 110,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 12,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 110,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
+  },
+  {
+    id: 13,
+    recipient: 'Pimpajee SetXXXXXX',
+    tracking: 'TH123456789X',
+    room: 110,
+    contact: '097-230-XXXX',
+    status: 'Unclaimed',
+    date: '05 Oct 2025'
   }
 ])
 
@@ -198,7 +225,7 @@ const toggleSidebar = () => {
 }
 // Pagination State
 const currentPage = ref(1)
-const perPage = ref(3) // จำนวนแถวต่อหน้า
+const perPage = ref(10) // จำนวนแถวต่อหน้า
 const totalPages = computed(() =>
   Math.ceil(parcels.value.length / perPage.value)
 )
