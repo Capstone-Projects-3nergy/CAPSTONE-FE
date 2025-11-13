@@ -206,6 +206,7 @@ const filteredParcels = computed(() => {
 
   const now = new Date() // วันที่ปัจจุบัน
 
+  // filterByDay/Month/Year ไม่ทำงานกับ "05 Jan 2024" แบบ hardcode
   // if (activeTab.value === 'Day') result = filterByDay(result, now)
   // else if (activeTab.value === 'Month') result = filterByMonth(result, now)
   // else if (activeTab.value === 'Year') result = filterByYear(result, now)
