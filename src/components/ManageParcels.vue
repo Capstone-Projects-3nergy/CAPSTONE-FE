@@ -202,15 +202,14 @@ const tabs = ['Day', 'Month', 'Year']
 // })
 // Computed filtered + searched parcels
 const filteredParcels = computed(() => {
-  // เริ่มจากข้อมูลทั้งหมด
-  let result = parcels.value
+  let result = parcels.value // ไม่ต้อง .value ถ้าเป็น reactive
 
-  // 1️⃣ กรองตามแท็บ Day / Month / Year
-  // if (activeTab.value === 'Day') result = filterByDay(result)
-  // else if (activeTab.value === 'Month') result = filterByMonth(result)
-  // else if (activeTab.value === 'Year') result = filterByYear(result)
+  const now = new Date() // วันที่ปัจจุบัน
 
-  // 2️⃣ กรองตาม searchKeyword ถ้ามี
+  // if (activeTab.value === 'Day') result = filterByDay(result, now)
+  // else if (activeTab.value === 'Month') result = filterByMonth(result, now)
+  // else if (activeTab.value === 'Year') result = filterByYear(result, now)
+
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
   }

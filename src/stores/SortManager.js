@@ -103,9 +103,15 @@ function parseDate(dateStr) {
   return new Date(dateStr)
 }
 
-// 🔹 กรองข้อมูลตามวัน (Day)
+// แปลง string เป็น Date
+// function parseDate(dateStr) {
+//   // สมมติ dateStr = "05 Jan 2024"
+//   return new Date(dateStr)
+// }
+
+// 🔹 กรองข้อมูลตามวันและเรียงตามวันที่ (DD MMM YYYY)
 function filterByDay(parcels, targetDate = new Date()) {
-  return parcels.filter((p) => {
+  const filtered = parcels.filter((p) => {
     const d = parseDate(p.date)
     return (
       d.getDate() === targetDate.getDate() &&
@@ -113,25 +119,31 @@ function filterByDay(parcels, targetDate = new Date()) {
       d.getFullYear() === targetDate.getFullYear()
     )
   })
+  // เรียงตามวันที่เต็ม
+  return filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date))
 }
 
-// 🔹 กรองข้อมูลตามเดือน (Month)
+// 🔹 กรองข้อมูลตามเดือนและเรียงแบบ MMM DD YYYY
 function filterByMonth(parcels, targetDate = new Date()) {
-  return parcels.filter((p) => {
+  const filtered = parcels.filter((p) => {
     const d = parseDate(p.date)
     return (
       d.getMonth() === targetDate.getMonth() &&
       d.getFullYear() === targetDate.getFullYear()
     )
   })
+  // เรียงวันที่ภายในเดือน
+  return filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date))
 }
 
-// 🔹 กรองข้อมูลตามปี (Year)
+// 🔹 กรองข้อมูลตามปีและเรียงแบบ MMM DD YYYY
 function filterByYear(parcels, targetDate = new Date()) {
-  return parcels.filter((p) => {
+  const filtered = parcels.filter((p) => {
     const d = parseDate(p.date)
     return d.getFullYear() === targetDate.getFullYear()
   })
+  // เรียงวันที่ภายในปี
+  return filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date))
 }
 // เรียงตาม First Name (A → Z)
 function sortByFirstName(parcels) {
