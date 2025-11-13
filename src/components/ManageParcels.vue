@@ -22,7 +22,10 @@ import {
   sortByStatusReverse,
   sortByDate,
   sortByDateReverse,
-  searchParcels
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
 } from '@/stores/SortManager'
 
 const loginManager = useAuthManager()
@@ -48,7 +51,7 @@ const parcels = ref([
     room: 101,
     contact: '097-230-XXXX',
     status: 'Pending',
-    date: '05 Oct 2025'
+    date: '05 Jan 2024'
   },
   {
     id: 2,
@@ -57,7 +60,7 @@ const parcels = ref([
     room: 102,
     contact: '097-230-XXXX',
     status: 'Picked Up',
-    date: '05 Oct 2025'
+    date: '05 Feb 2024'
   },
   {
     id: 3,
@@ -66,7 +69,7 @@ const parcels = ref([
     room: 103,
     contact: '097-230-XXXX',
     status: 'Pending',
-    date: '05 Oct 2025'
+    date: '05 Mar 2025'
   },
   {
     id: 4,
@@ -75,7 +78,7 @@ const parcels = ref([
     room: 104,
     contact: '097-230-XXXX',
     status: 'Unclaimed',
-    date: '05 Oct 2025'
+    date: '05 jan 2026'
   },
   {
     id: 5,
@@ -84,7 +87,7 @@ const parcels = ref([
     room: 105,
     contact: '097-230-XXXX',
     status: 'Picked Up',
-    date: '05 Oct 2025'
+    date: '05 Oct 2026'
   },
   {
     id: 6,
@@ -163,7 +166,12 @@ const parcels = ref([
 const searchKeyword = ref('')
 const activeTab = ref('Day')
 const tabs = ['Day', 'Month', 'Year']
-
+const filteredParcelsDate = computed(() => {
+  if (activeTab.value === 'Day') return filterByDay(parcels.value)
+  if (activeTab.value === 'Month') return filterByMonth(parcels.value)
+  if (activeTab.value === 'Year') return filterByYear(parcels.value)
+  return parcels.value
+})
 // Computed filtered + searched parcels
 const filteredParcels = computed(() => {
   if (!searchKeyword.value) return parcels.value

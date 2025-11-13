@@ -45,6 +45,41 @@ function searchParcels(parcels, keywords) {
       (p.date && p.date.toLowerCase().includes(lower))
   )
 }
+// 🧩 Helper: แปลง string "05 Oct 2025" เป็น Date object
+function parseDate(dateStr) {
+  return new Date(dateStr)
+}
+
+// 🔹 กรองข้อมูลตามวัน (Day)
+function filterByDay(parcels, targetDate = new Date()) {
+  return parcels.filter((p) => {
+    const d = parseDate(p.date)
+    return (
+      d.getDate() === targetDate.getDate() &&
+      d.getMonth() === targetDate.getMonth() &&
+      d.getFullYear() === targetDate.getFullYear()
+    )
+  })
+}
+
+// 🔹 กรองข้อมูลตามเดือน (Month)
+function filterByMonth(parcels, targetDate = new Date()) {
+  return parcels.filter((p) => {
+    const d = parseDate(p.date)
+    return (
+      d.getMonth() === targetDate.getMonth() &&
+      d.getFullYear() === targetDate.getFullYear()
+    )
+  })
+}
+
+// 🔹 กรองข้อมูลตามปี (Year)
+function filterByYear(parcels, targetDate = new Date()) {
+  return parcels.filter((p) => {
+    const d = parseDate(p.date)
+    return d.getFullYear() === targetDate.getFullYear()
+  })
+}
 
 export {
   sortByRoomNumber,
@@ -53,5 +88,8 @@ export {
   sortByStatusReverse,
   sortByDate,
   sortByDateReverse,
-  searchParcels
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
 }
