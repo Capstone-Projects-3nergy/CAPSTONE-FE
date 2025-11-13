@@ -191,12 +191,35 @@ const filteredParcels = computed(() => {
 })
 
 // Sort functions
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
 const sortRoomAsc = () => sortByRoomNumber(parcels.value)
 const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
 const sortStatusAsc = () => sortByStatus(parcels.value)
 const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
+// ===== ฟังก์ชัน toggle =====
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -841,22 +864,12 @@ const pageNumbers = computed(() => {
                   ($event) => {
                     if ($event.target.value === 'Newest') sortDateDesc()
                     else if ($event.target.value === 'Oldest') sortDateAsc()
-                    else if ($event.target.value === 'Room ↑') sortRoomAsc()
-                    else if ($event.target.value === 'Room ↓') sortRoomDesc()
-                    else if ($event.target.value === 'Status A→Z')
-                      sortStatusAsc()
-                    else if ($event.target.value === 'Status Z→A')
-                      sortStatusDesc()
                   }
                 "
               >
                 <option>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>Room ↑</option>
-                <option>Room ↓</option>
-                <option>Status A→Z</option>
-                <option>Status Z→A</option>
               </select>
 
               <!-- Add Parcel -->
@@ -895,16 +908,92 @@ const pageNumbers = computed(() => {
                   Name
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Room Number
+                  <div
+                    class="relative flex items-center justify-start space-x-3"
+                  >
+                    <span>Room Number</span>
+                    <svg
+                      class="cursor-pointer hover:opacity-70 transition"
+                      @click="toggleSortRoom"
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
+
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Contact
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Status
+                  <div
+                    class="relative flex items-center justify-start space-x-3"
+                  >
+                    <span>Status</span>
+                    <svg
+                      class="cursor-pointer hover:opacity-70 transition"
+                      @click="toggleSortStatus"
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Date in
+                  <div
+                    class="relative flex items-center justify-start space-x-3"
+                  >
+                    <span>Date in</span>
+                    <svg
+                      class="cursor-pointer hover:opacity-70 transition"
+                      @click="toggleSortDate"
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Operation
