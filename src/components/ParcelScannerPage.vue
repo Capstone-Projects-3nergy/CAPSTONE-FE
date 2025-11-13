@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
@@ -16,9 +16,12 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
+
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
+
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
 const previewUrl = ref(null)
@@ -31,15 +34,28 @@ const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
-// ฟอร์มปัจจุบัน
-const form = reactive({
-  field1: '', // ชื่อผู้รับ
-  field2: '', // เลขพัสดุ
-  field3: '', // บริการขนส่ง
-  notes: '' // ประเภทพัสดุ
+
+// store
+const parcelStore = useParcelManager()
+
+// ✅ ฟอร์มใหม่ตามที่กำหนด
+const form = ref({
+  userId: null,
+  trackingNumber: '',
+  recipientName: '',
+  roomNumber: '',
+  parcelType: '',
+  contact: '',
+  status: 'Pending',
+  pickupAt: null,
+  updateAt: null,
+  senderName: '',
+  companyId: '',
+  receiveAt: null,
+  imageUrl: ''
 })
 
-// Array เก็บข้อมูล parcel
+// เก็บรายการพัสดุที่บันทึก
 const savedParcels = ref([])
 
 const scanningMode = ref('')
@@ -47,11 +63,13 @@ let html5QrCode = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const isCameraReady = ref(false)
-const showAddParcelPage = async function () {
+
+const showAddParcelPage = async () => {
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
-// -------- OCR function (คงเดิม) ----------
+
+// -------- OCR function ----------
 async function extractParcelInfo(imageDataUrl) {
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
@@ -82,27 +100,28 @@ async function extractParcelInfo(imageDataUrl) {
     return null
   }
 }
+
+// -------- Sidebar toggle ----------
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
-const deleteScanResult = () => {
-  scanResult.value = null
-}
+
+// -------- Delete function ----------
+const deleteScanResult = () => (scanResult.value = null)
 function deleteSaveInformation(index) {
   savedParcels.value.splice(index, 1)
   console.log(`❌ Deleted parcel at index ${index}`)
 }
-const deletePreview = () => {
-  previewUrl.value = null
-}
+const deletePreview = () => (previewUrl.value = null)
 
-const showDashBoardPage = async function () {
+// -------- Navigation ----------
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
 
-// -------- Camera functions (คงเดิม) ----------
+// -------- Camera ----------
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
     alert('กล้องไม่รองรับ')
@@ -122,6 +141,7 @@ async function startCamera() {
     alert('ไม่สามารถเปิดกล้องได้')
   }
 }
+
 function stopCameraOnly() {
   if (videoStream.value) {
     videoStream.value.getTracks().forEach((track) => track.stop())
@@ -130,7 +150,7 @@ function stopCameraOnly() {
   }
 }
 
-// -------- Photo capture + OCR (คงเดิม) ----------
+// -------- Photo capture + OCR ----------
 async function capturePhoto() {
   if (!videoRef.value || !isCameraReady.value) {
     alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
@@ -146,14 +166,14 @@ async function capturePhoto() {
 
   const parcelInfo = await extractParcelInfo(previewUrl.value)
   if (parcelInfo) {
-    form.field1 = parcelInfo.name || ''
-    form.field2 = parcelInfo.tracking || ''
-    form.field3 = parcelInfo.courier || ''
-    form.notes = parcelInfo.type || ''
+    form.value.recipientName = parcelInfo.name || ''
+    form.value.trackingNumber = parcelInfo.tracking || ''
+    form.value.companyId = parcelInfo.courier || ''
+    form.value.parcelType = parcelInfo.type || ''
   }
 }
 
-// -------- NEW: QuaggaJS2 สำหรับ Barcode ----------
+// -------- Barcode (QuaggaJS2) ----------
 function startQuagga() {
   Quagga.init(
     {
@@ -169,10 +189,7 @@ function startQuagga() {
           }
         }
       },
-      locator: {
-        patchSize: 'medium',
-        halfSample: false // ปรับเป็น false เพื่อสแกนชัด
-      },
+      locator: { patchSize: 'medium', halfSample: false },
       numOfWorkers: navigator.hardwareConcurrency || 4,
       decoder: {
         readers: [
@@ -190,10 +207,7 @@ function startQuagga() {
       locate: true
     },
     (err) => {
-      if (err) {
-        console.error('Quagga init error:', err)
-        return
-      }
+      if (err) return console.error('Quagga init error:', err)
       Quagga.start()
       console.log('📸 Quagga started for Barcode')
     }
@@ -204,8 +218,8 @@ function startQuagga() {
       const detectedCode = result.codeResult.code.trim()
       console.log('✅ Barcode detected:', detectedCode)
       scanResult.value = detectedCode
-      form.field2 = detectedCode
-      form.notes = 'Format: Barcode'
+      form.value.trackingNumber = detectedCode
+      form.value.parcelType = 'Format: Barcode'
       stopQuagga()
     }
   })
@@ -221,7 +235,7 @@ function stopQuagga() {
   }
 }
 
-// -------- สแกนเลือกตามโหมด (แก้ไขใหม่) ----------
+// -------- Scan QR/Barcode ----------
 function startScan(mode) {
   scanningMode.value = mode
   if (mode === 'qr') {
@@ -229,24 +243,7 @@ function startScan(mode) {
     const config = {
       fps: 10,
       qrbox: { width: 250, height: 350 },
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.QR_CODE,
-        Html5QrcodeSupportedFormats.AZTEC,
-        Html5QrcodeSupportedFormats.CODABAR,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.CODE_93,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.DATA_MATRIX,
-        Html5QrcodeSupportedFormats.MAXICODE,
-        Html5QrcodeSupportedFormats.ITF,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.PDF_417,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.RSS_14,
-        Html5QrcodeSupportedFormats.RSS_EXPANDED
-      ]
+      formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
     html5QrCode
       .start(
@@ -256,8 +253,8 @@ function startScan(mode) {
           const cleanText = decodedText.trim()
           console.log('✅ QR/Barcode Decoded:', cleanText)
           scanResult.value = cleanText
-          form.field2 = cleanText
-          form.notes = 'Format: QR/Barcode'
+          form.value.trackingNumber = cleanText
+          form.value.parcelType = 'Format: QR/Barcode'
         },
         (errorMsg) => console.warn('Scan error:', errorMsg)
       )
@@ -270,7 +267,6 @@ function startScan(mode) {
   }
 }
 
-// -------- หยุดสแกน (รองรับทั้งสอง lib) ----------
 function stopScan() {
   scanningMode.value = ''
   if (html5QrCode) {
@@ -282,94 +278,73 @@ function stopScan() {
   stopCameraOnly()
 }
 
-const showHomePageStaffWeb = async function () {
+// -------- Navigation --------
+const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-// --- function: save ---
+
 function saveParcel() {
   const parcelData = {
-    name: form.field1,
-    tracking: form.field2,
-    courier: form.field3,
-    type: form.notes,
-    image: previewUrl.value || null // เพิ่มเก็บภาพที่ถ่าย
+    recipientName: form.value.recipientName,
+    trackingNumber: form.value.trackingNumber,
+    companyId: form.value.companyId,
+    parcelType: form.value.parcelType,
+    imageUrl: previewUrl.value || null
   }
-
   savedParcels.value.push(parcelData)
-
   console.log('✅ Parcel saved:', parcelData)
 
-  // reset form
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
-
-  // แสดง popup
+  // reset
+  Object.keys(form.value).forEach(
+    (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+  )
   greenPopup.add.state = true
   previewUrl.value = null
-  // ตั้งเวลาให้ popup ปิดเองใน 3 วินาที
-  setTimeout(() => {
-    greenPopup.add.state = false
-  }, 3000)
+  setTimeout(() => (greenPopup.add.state = false), 3000)
 }
 
-// --- function: cancel form ---
 function cancelParcel() {
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
+  Object.keys(form.value).forEach(
+    (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+  )
   console.log('🛑 Form canceled/reset')
 }
-const greenPopup = reactive({
-  add: { state: false }
-})
-const redPopup = reactive({
-  add: { state: false }
-})
 
-// --- ปิด popup ด้วยมือ ---
+const greenPopup = reactive({ add: { state: false } })
+const redPopup = reactive({ add: { state: false } })
+
 function closeGreenPopup() {
   greenPopup.add.state = false
 }
 function closeRedPopup() {
   redPopup.add.state = false
 }
-// const showParcelScannerPage = async function () {
-//   router.replace({ name: 'parcelscanner' })
-//   showParcelScanner.value = true
-// }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
-const showManageParcelPage = async function () {
+
+const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
+
+const ShowManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
-const ShowManageResidentPage = async function () {
+
+const ShowManageResidentPage = async () => {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
 }
-const showProfileStaffPage = async function () {
+
+const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
