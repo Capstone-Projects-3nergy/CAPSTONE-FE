@@ -56,120 +56,138 @@ const showProfileStaff = ref(false)
 const parcels = ref([
   {
     id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Alice Brown',
+    tracking: 'TH123456789A',
     room: 101,
-    contact: '097-230-XXXX',
+    contact: '097-111-1111',
     status: 'Pending',
     date: '05 Jan 2024'
   },
   {
     id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
+    recipient: 'Bob Smith',
+    tracking: 'TH223456789B',
     room: 102,
-    contact: '097-230-XXXX',
+    contact: '097-222-2222',
     status: 'Picked Up',
     date: '05 Feb 2024'
   },
   {
     id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
+    recipient: 'Charlie Doe',
+    tracking: 'TH323456789C',
     room: 103,
-    contact: '097-230-XXXX',
+    contact: '097-333-3333',
     status: 'Pending',
     date: '05 Mar 2025'
   },
   {
     id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
+    recipient: 'Diana White',
+    tracking: 'TH423456789D',
     room: 104,
-    contact: '097-230-XXXX',
+    contact: '097-444-4444',
     status: 'Unclaimed',
-    date: '05 jan 2026'
+    date: '05 Jan 2026'
   },
   {
     id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Ethan Black',
+    tracking: 'TH523456789E',
     room: 105,
-    contact: '097-230-XXXX',
+    contact: '097-555-5555',
     status: 'Picked Up',
     date: '05 Oct 2026'
   },
   {
     id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Fiona Green',
+    tracking: 'TH623456789F',
     room: 106,
-    contact: '097-230-XXXX',
+    contact: '097-666-6666',
     status: 'Picked Up',
     date: '05 Oct 2025'
   },
   {
     id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'George King',
+    tracking: 'TH723456789G',
     room: 107,
-    contact: '097-230-XXXX',
+    contact: '097-777-7777',
     status: 'Pending',
     date: '05 Oct 2025'
   },
   {
     id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Hannah Lee',
+    tracking: 'TH823456789H',
     room: 108,
-    contact: '097-230-XXXX',
+    contact: '097-888-8888',
     status: 'Pending',
     date: '05 Oct 2025'
   },
   {
     id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Ian Moore',
+    tracking: 'TH923456789I',
     room: 109,
-    contact: '097-230-XXXX',
+    contact: '097-999-9999',
     status: 'Unclaimed',
     date: '05 Oct 2025'
   },
   {
     id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
+    recipient: 'Jane Doe',
+    tracking: 'TH103456789J',
     room: 110,
-    contact: '097-230-XXXX',
+    contact: '097-101-0101',
     status: 'Unclaimed',
     date: '05 Oct 2025'
   },
   {
     id: 11,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
+    recipient: 'Kevin Chan',
+    tracking: 'TH113456789K',
+    room: 111,
+    contact: '097-111-1212',
+    status: 'Pending',
+    date: '10 Nov 2024'
   },
   {
     id: 12,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
+    recipient: 'Laura Kim',
+    tracking: 'TH123456789L',
+    room: 112,
+    contact: '097-121-1313',
+    status: 'Picked Up',
+    date: '15 Dec 2024'
   },
   {
     id: 13,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
+    recipient: 'Michael Tan',
+    tracking: 'TH133456789M',
+    room: 113,
+    contact: '097-131-1414',
     status: 'Unclaimed',
-    date: '05 Oct 2025'
+    date: '20 Jan 2025'
+  },
+  {
+    id: 14,
+    recipient: 'Nina Park',
+    tracking: 'TH143456789N',
+    room: 114,
+    contact: '097-141-1515',
+    status: 'Pending',
+    date: '25 Feb 2025'
+  },
+  {
+    id: 15,
+    recipient: 'Oliver Scott',
+    tracking: 'TH153456789O',
+    room: 115,
+    contact: '097-151-1616',
+    status: 'Picked Up',
+    date: '01 Mar 2025'
   }
 ])
 
