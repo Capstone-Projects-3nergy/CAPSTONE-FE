@@ -282,7 +282,7 @@ const toggleSidebar = () => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileResidentPage">
+          <!-- <SidebarItem title="Profile" @click="showProfileResidentPage">
             <template #icon>
               <svg
                 width="24"
@@ -299,7 +299,7 @@ const toggleSidebar = () => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -356,7 +356,7 @@ const toggleSidebar = () => {
             <span>My parcel</span>
           </a> -->
 
-          <SidebarItem title="Announcements" @click="showAnnouncementPage">
+          <!-- <SidebarItem title="Announcements" @click="showAnnouncementPage">
             <template #icon>
               <svg
                 width="24"
@@ -371,7 +371,7 @@ const toggleSidebar = () => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
