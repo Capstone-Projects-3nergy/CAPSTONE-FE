@@ -798,31 +798,14 @@ const showProfileStaffPage = async () => {
             />
           </svg>
 
-          <!-- 🏷️ Breadcrumb Text -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-
-          <!-- <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 12V9C6 8.20435 6.31607 7.44129 6.87868 6.87868C7.44129 6.31607 8.20435 6 9 6H12M6 24V27C6 27.7956 6.31607 28.5587 6.87868 29.1213C7.44129 29.6839 8.20435 30 9 30H12M24 6H27C27.7956 6 28.5587 6.31607 29.1213 6.87868C29.6839 7.44129 30 8.20435 30 9V12M24 30H27C27.7956 30 28.5587 29.6839 29.1213 29.1213C29.6839 28.5587 30 27.7956 30 27V24M10.5 18H25.5"
-              stroke="#185DC0"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg> -->
-
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
+
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <!-- Alert Popup -->
+          <!-- ✅ Alert Popup -->
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="greenPopup.add.state"
@@ -843,34 +826,18 @@ const showProfileStaffPage = async () => {
               @closePopUp="closeRedPopup"
             />
           </div>
-          <!-- Section Header -->
-          <!-- <div
-            class="bg-blue-700 text-white px-6 py-3 text-xl font-semibold flex items-center space-x-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
-              />
-            </svg>
-            <span>Parcel Scanner</span>
-          </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <!-- Left side -->
+            <!-- 🟦 Left side -->
             <div class="space-y-6">
               <!-- Scanner -->
               <div
                 id="scanner"
                 class="w-full h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
               >
-                <span v-if="!scanningMode && !videoStream" class="text-white"
-                  >Scan QR/Barcode or Take Picture</span
-                >
+                <span v-if="!scanningMode && !videoStream" class="text-white">
+                  Scan QR/Barcode or Take Picture
+                </span>
 
                 <!-- Scanner Overlay -->
                 <div
@@ -881,18 +848,11 @@ const showProfileStaffPage = async () => {
                 >
                   <div id="reader" class="w-full h-full"></div>
                   <ButtonWeb
-                    label=" Cancel"
+                    label="Cancel"
                     color="red"
                     class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                     @click="stopScan"
                   />
-
-                  <!-- <button
-                    @click="stopScan"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                  >
-                    Cancel
-                  </button> -->
                 </div>
 
                 <!-- Video Preview -->
@@ -905,22 +865,15 @@ const showProfileStaffPage = async () => {
                   "
                 ></video>
                 <ButtonWeb
-                  label=" Close Camera"
+                  label="Close Camera"
                   color="red"
                   class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                   v-if="videoStream"
                   @click="stopCameraOnly"
                 />
-                <!-- <button
-                  @click="stopCameraOnly"
-                  v-if="videoStream"
-                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                >
-                  Close Camera
-                </button> -->
               </div>
 
-              <!-- Buttons -->
+              <!-- 🟨 Buttons -->
               <div class="flex flex-wrap justify-center gap-3">
                 <ButtonWeb
                   label="Scan QR"
@@ -928,119 +881,89 @@ const showProfileStaffPage = async () => {
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startScan('qr')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  Scan QR
-                </button> -->
                 <ButtonWeb
                   label="Scan Barcode"
                   color="green"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startScan('barcode')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
-                >
-                  Scan Barcode
-                </button> -->
                 <ButtonWeb
-                  label=" Open Camera"
+                  label="Open Camera"
                   color="yellow"
                   @click="startCamera"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400"
-                >
-                  Open Camera
-                </button> -->
                 <ButtonWeb
                   label="Take Photo"
                   color="orange"
                   @click="capturePhoto"
                   :disabled="!videoStream"
                 />
-                <!-- <button
-                  @click="capturePhoto"
-                  :disabled="!videoStream"
-                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400"
-                >
-                  Take Photo
-                </button> -->
               </div>
 
-              <!-- Inputs -->
+              <!-- 🟩 Inputs -->
               <div class="space-y-3">
                 <input
-                  v-model="form.field1"
-                  placeholder="Name"
+                  v-model="form.recipientName"
+                  placeholder="Recipient Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.field2"
-                  placeholder="Tracking"
+                  v-model="form.trackingNumber"
+                  placeholder="Tracking Number"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.field3"
-                  placeholder="Service"
+                  v-model="form.senderName"
+                  placeholder="Sender Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
-                <textarea
-                  v-model="form.notes"
-                  placeholder="Type"
+                <input
+                  v-model="form.roomNumber"
+                  placeholder="Room Number"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  rows="2"
-                ></textarea>
+                />
+                <input
+                  v-model="form.parcelType"
+                  placeholder="Parcel Type"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.contact"
+                  placeholder="Contact Number"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.companyId"
+                  placeholder="Company ID"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.status"
+                  placeholder="Status (Default: Pending)"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  disabled
+                />
               </div>
 
-              <!-- Save/Cancel -->
+              <!-- 🟪 Save/Cancel -->
               <div class="flex justify-end space-x-3">
-                <!-- <button
-                  @click="saveParcel"
-                  class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
-                >
-                  Save
-                </button>
-                <button
-                  @click="cancelParcel"
-                  class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600"
-                >
-                  Cancel
-                </button> -->
                 <ButtonWeb
                   label="Save"
                   color="green"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
+                  :disabled="!form.recipientName || !form.trackingNumber"
                   @click="saveParcel"
                 />
                 <ButtonWeb
                   label="Cancel"
                   color="red"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
+                  :disabled="!form.recipientName && !form.trackingNumber"
                   @click="cancelParcel"
                 />
               </div>
             </div>
 
-            <!-- Right side -->
+            <!-- 🟥 Right side -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
                 <h2
@@ -1049,31 +972,40 @@ const showProfileStaffPage = async () => {
                 >
                   < Go Back To Add
                 </h2>
-                <!-- <ButtonWeb
-                  label="Add Parcels Page"
-                  color="blue"
-                  @click="showAddParcelPage"
-                /> -->
               </div>
+
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
+
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
-                  <span>Name:</span><span>{{ form.field1 }}</span>
+                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span><span>{{ form.field2 }}</span>
+                  <span>Tracking:</span><span>{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Service:</span><span>{{ form.field3 }}</span>
+                  <span>Sender:</span><span>{{ form.senderName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Type:</span><span>{{ form.notes }}</span>
+                  <span>Room:</span><span>{{ form.roomNumber }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Type:</span><span>{{ form.parcelType }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Contact:</span><span>{{ form.contact }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Status:</span><span>{{ form.status }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Company ID:</span><span>{{ form.companyId }}</span>
                 </div>
               </div>
 
-              <!-- Image Preview -->
+              <!-- 🖼️ Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
                   Parcel Picture
@@ -1090,7 +1022,7 @@ const showProfileStaffPage = async () => {
                 </button>
               </div>
 
-              <!-- Saved Parcels -->
+              <!-- 💾 Saved Parcels -->
               <div class="mt-6">
                 <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
@@ -1102,14 +1034,15 @@ const showProfileStaffPage = async () => {
                     class="border p-3 rounded relative flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0"
                   >
                     <div>
-                      <div>Name: {{ p.name }}</div>
-                      <div>Tracking: {{ p.tracking }}</div>
-                      <div>Service: {{ p.courier }}</div>
-                      <div>Type: {{ p.type }}</div>
+                      <div>Recipient: {{ p.recipientName }}</div>
+                      <div>Tracking: {{ p.trackingNumber }}</div>
+                      <div>Sender: {{ p.senderName }}</div>
+                      <div>Type: {{ p.parcelType }}</div>
+                      <div>Status: {{ p.status }}</div>
                     </div>
-                    <div v-if="p.image" class="md:ml-4">
+                    <div v-if="p.imageUrl" class="md:ml-4">
                       <img
-                        :src="p.image"
+                        :src="p.imageUrl"
                         class="w-28 h-28 object-cover rounded"
                       />
                     </div>
