@@ -23,6 +23,16 @@ import {
   sortByDate,
   sortByDateReverse,
   searchParcels,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
   filterByDay,
   filterByMonth,
   filterByYear
@@ -195,10 +205,10 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-const sortStatusAsc = () => sortByStatus(parcels.value)
-const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+// const sortStatusAsc = () => sortByStatus(parcels.value)
+// const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
 // ===== ฟังก์ชัน toggle =====
@@ -220,6 +230,28 @@ const toggleSortDate = () => {
   isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
   isDateAsc.value = !isDateAsc.value
 }
+const selectedSort = ref('Sort by:')
+
+const handleSort = () => {
+  if (selectedSort.value === 'Newest') sortDateDesc()
+  else if (selectedSort.value === 'Oldest') sortDateAsc()
+  else if (selectedSort.value === 'Tracking (A→Z)')
+    sortByTracking(parcels.value)
+  else if (selectedSort.value === 'Tracking (Z→A)')
+    sortByTrackingReverse(parcels.value)
+  else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
+  else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
+  else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
+  else if (selectedSort.value === 'Contact (9→0)')
+    sortByContactReverse(parcels.value)
+  else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
+  else if (selectedSort.value === 'First Name (Z→A)')
+    sortByFirstNameReverse(parcels.value)
+  else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
+  else if (selectedSort.value === 'Last Name (Z→A)')
+    sortByLastNameReverse(parcels.value)
+}
+
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -860,16 +892,14 @@ const pageNumbers = computed(() => {
               <!-- Sort -->
               <select
                 class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-                @change="
-                  ($event) => {
-                    if ($event.target.value === 'Newest') sortDateDesc()
-                    else if ($event.target.value === 'Oldest') sortDateAsc()
-                  }
-                "
+                v-model="selectedSort"
+                @change="handleSort"
               >
                 <option>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
+                <option>First Name</option>
+                <option>Last Name</option>
               </select>
 
               <!-- Add Parcel -->

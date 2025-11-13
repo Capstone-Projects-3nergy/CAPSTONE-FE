@@ -31,6 +31,59 @@ function sortByDate(parcels) {
 function sortByDateReverse(parcels) {
   parcels.sort((a, b) => new Date(b.date) - new Date(a.date))
 }
+// เรียงตาม Tracking (A → Z)
+function sortByTracking(parcels) {
+  parcels.sort((a, b) =>
+    (a.tracking || '').localeCompare(b.tracking || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+// เรียงตาม Tracking (Z → A)
+function sortByTrackingReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.tracking || '').localeCompare(a.tracking || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+// เรียงตามชื่อผู้รับ (Name) (A → Z)
+function sortByName(parcels) {
+  parcels.sort((a, b) =>
+    (a.recipient || '').localeCompare(b.recipient || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+// เรียงตามชื่อผู้รับ (Name) (Z → A)
+function sortByNameReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.recipient || '').localeCompare(a.recipient || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+// เรียงตามเบอร์ติดต่อ (Contact) (น้อย → มาก)
+function sortByContact(parcels) {
+  parcels.sort((a, b) =>
+    (a.contact || '').localeCompare(b.contact || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+// เรียงตามเบอร์ติดต่อ (Contact) (มาก → น้อย)
+function sortByContactReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.contact || '').localeCompare(a.contact || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
 
 // ค้นหาพัสดุจากคีย์เวิร์ด
 function searchParcels(parcels, keywords) {
@@ -80,6 +133,41 @@ function filterByYear(parcels, targetDate = new Date()) {
     return d.getFullYear() === targetDate.getFullYear()
   })
 }
+// เรียงตาม First Name (A → Z)
+function sortByFirstName(parcels) {
+  parcels.sort((a, b) => {
+    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    return aFirst.localeCompare(bFirst)
+  })
+}
+
+// เรียงตาม First Name (Z → A)
+function sortByFirstNameReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    return bFirst.localeCompare(aFirst)
+  })
+}
+
+// เรียงตาม Last Name (A → Z)
+function sortByLastName(parcels) {
+  parcels.sort((a, b) => {
+    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    return aLast.localeCompare(bLast)
+  })
+}
+
+// เรียงตาม Last Name (Z → A)
+function sortByLastNameReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    return bLast.localeCompare(aLast)
+  })
+}
 
 export {
   sortByRoomNumber,
@@ -88,6 +176,16 @@ export {
   sortByStatusReverse,
   sortByDate,
   sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
   searchParcels,
   filterByDay,
   filterByMonth,
