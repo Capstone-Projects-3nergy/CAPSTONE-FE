@@ -419,7 +419,7 @@ const showProfileStaffPage = async () => {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -511,7 +511,7 @@ const showProfileStaffPage = async () => {
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->

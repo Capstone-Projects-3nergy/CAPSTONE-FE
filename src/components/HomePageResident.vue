@@ -183,7 +183,7 @@ console.log(registerStore.user)
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -275,7 +275,7 @@ console.log(registerStore.user)
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
