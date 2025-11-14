@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -51,6 +51,18 @@ const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
+const isAllEmpty = computed(() => {
+  return (
+    !parcelData.value.trackingNumber &&
+    !parcelData.value.recipientName &&
+    !parcelData.value.roomNumber &&
+    !parcelData.value.parcelType &&
+    !parcelData.value.contact &&
+    !parcelData.value.senderName &&
+    !parcelData.value.companyId &&
+    !parcelData.value.receiveAt
+  )
+})
 
 // 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
 // ฟังก์ชันบันทึกพัสดุ
@@ -64,9 +76,7 @@ const saveParcel = async () => {
     )
 
     const savedParcel = response.data
-    const trimmedTrackingNumber = computed(
-      () => parcelData.trackingNumber?.trim() || ''
-    )
+
     // เพิ่มเข้า Pinia store
     parcelStore.addParcel(savedParcel)
 
@@ -749,33 +759,12 @@ const closePopUp = (operate) => {
               color="green"
               @click="saveParcel"
               :class="{
-                'disabled bg-gray-400 text-gray-200  cursor-default':
-                  trimmedTrackingNumber.length === 0 ||
-                  trimmedEmail.length === 0 ||
-                  trimmedPassword.length === 0 ||
-                  trimmedConfirmPassword.length === 0 ||
-                  trimmedRoomNumber.length === 0,
-                'bg-black hover:bg-gray-600 text-white':
-                  trimmedTrackingNumber.length > 0 &&
-                  trimmedEmail.length > 0 &&
-                  trimmedPassword.length > 0 &&
-                  trimmedConfirmPassword.length > 0 &&
-                  trimmedDormId.length > 0 &&
-                  trimmedRoomNumber.length > 0
+                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
               }"
-              :disabled="
-                trimmedTrackingNumber.length === 0 ||
-                trimmedEmail.length === 0 ||
-                trimmedPassword.length === 0 ||
-                trimmedConfirmPassword.length === 0 ||
-                trimmedDormId.length === 0 ||
-                isRoomNumberOverLimit ||
-                isNameOverLimit ||
-                isEmailOverLimit ||
-                isPasswordOverLimit ||
-                isConfirmPasswordOverLimit
-              "
+              :disabled="isAllEmpty"
             />
+
             <ButtonWeb
               label="Cancel"
               color="red"
