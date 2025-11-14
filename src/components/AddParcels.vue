@@ -59,7 +59,7 @@ const saveParcel = async () => {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
     const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/parcels/add`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       parcelData.value
     )
 
