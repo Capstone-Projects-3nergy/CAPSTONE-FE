@@ -1077,7 +1077,10 @@ const pageNumbers = computed(() => {
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <button class="text-blue-600 hover:text-blue-800">
+                  <button
+                    @click="showEditParacelDetail"
+                    class="text-blue-600 hover:text-blue-800"
+                  >
                     <svg
                       width="21"
                       height="21"
@@ -1101,7 +1104,7 @@ const pageNumbers = computed(() => {
                       />
                     </svg>
                   </button>
-                  <button class="text-red-600 hover:text-red-800">
+                  <button  @click="deleteParcel" class="text-red-600 hover:text-red-800">
                     <svg
                       width="18"
                       height="21"
