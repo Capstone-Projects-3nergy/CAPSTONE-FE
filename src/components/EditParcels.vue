@@ -14,7 +14,21 @@ import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
-
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
@@ -63,34 +77,41 @@ onMounted(async () => {
 
 // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
 const saveEditParcel = async () => {
-  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+  // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
     roomNumberError.value = true
     return
   }
 
-  // 2️⃣ ตรวจสอบ Sender Name → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
     SenderNameError.value = true
     return
   }
 
-  // 3️⃣ ตรวจสอบ Parcel Type → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
     parcelTypeError.value = true
     return
   }
 
   try {
-    const res = await axios.put(
-      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcelId}`,
-      form.value
+    const updatedParcel = await editItem(
+      `${import.meta.env.VITE_BASE_URL}/auth/edit`,
+      form.value.parcelId,
+      form.value,
+      router
     )
 
-    // อัปเดตใน Pinia
-    parcelStore.editParcel(form.value.parcelId, res.data)
+    if (!updatedParcel) {
+      error.value = true
+      return
+    }
 
-    console.log('✅ Updated parcel:', res.data)
+    // 👉 update Pinia
+    parcelManager.editParcel(form.value.parcelId, updatedParcel)
+
+    console.log('✅ Updated parcel:', updatedParcel)
     router.replace({ name: 'staffparcels' })
   } catch (err) {
     error.value = true

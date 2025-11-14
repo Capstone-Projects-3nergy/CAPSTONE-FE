@@ -12,6 +12,21 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import axios from 'axios'
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 const loginManager = useAuthManager()
@@ -78,33 +93,38 @@ const saveParcel = async () => {
     return
   }
 
-  // 2️⃣ ตรวจสอบ Sender Name → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
     SenderNameError.value = true
     return
   }
 
-  // 3️⃣ ตรวจสอบ Parcel Type → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
     parcelTypeError.value = true
     return
   }
 
-  // 4️⃣ ถ้าผ่าน validation = ค่อยยิง backend
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
-    const response = await axios.post(
+    const savedParcel = await addItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      parcelData.value
+      parcelData.value,
+      router
     )
 
-    const savedParcel = response.data
-    parcelStore.addParcel(savedParcel)
+    if (!savedParcel) {
+      error.value = true
+      return
+    }
+
+    // 👉 บันทึกลง Pinia
+    parcelManager.addParcel(savedParcel)
 
     console.log('✅ Parcel saved successfully:', savedParcel)
 
-    // Reset form
+    // reset form
     parcelData.value = {
       userId: null,
       trackingNumber: '',

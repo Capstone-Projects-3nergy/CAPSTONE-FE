@@ -37,7 +37,21 @@ import {
   filterByMonth,
   filterByYear
 } from '@/stores/SortManager'
-
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 
@@ -427,21 +441,23 @@ const redPopup = reactive({
   delete: { state: false, parcelTitle: '' }
 })
 const deleteParcel = async (parcelId) => {
-  deletedParcel.value = await post(
-    `${import.meta.env.VITE_BASE_URL}/v3/parcels`, // แก้ URL ให้ตรง backend
-    parcelId
+  const resStatus = await deleteItemById(
+    `${import.meta.env.VITE_BASE_URL}/v3/parcels`,
+    parcelId,
+    router
   )
 
-  if (deletedParcel.value == '404') {
+  if (!resStatus) {
     error.value = true
-    emit('redAlert')
-    emit('cancelDetail', true)
     return
   }
 
-  // ลบใน Pinia
+  deleteSuccess.value = true
+
+  // 👉 ลบออกจาก Pinia
   parcelManager.deleteParcels(parcelId)
 }
+
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
