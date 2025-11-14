@@ -64,7 +64,9 @@ const saveParcel = async () => {
     )
 
     const savedParcel = response.data
-
+    const trimmedTrackingNumber = computed(
+      () => parcelData.trackingNumber?.trim() || ''
+    )
     // เพิ่มเข้า Pinia store
     parcelStore.addParcel(savedParcel)
 
@@ -742,7 +744,38 @@ const closePopUp = (operate) => {
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb
+              label="Save"
+              color="green"
+              @click="saveParcel"
+              :class="{
+                'disabled bg-gray-400 text-gray-200  cursor-default':
+                  trimmedTrackingNumber.length === 0 ||
+                  trimmedEmail.length === 0 ||
+                  trimmedPassword.length === 0 ||
+                  trimmedConfirmPassword.length === 0 ||
+                  trimmedRoomNumber.length === 0,
+                'bg-black hover:bg-gray-600 text-white':
+                  trimmedTrackingNumber.length > 0 &&
+                  trimmedEmail.length > 0 &&
+                  trimmedPassword.length > 0 &&
+                  trimmedConfirmPassword.length > 0 &&
+                  trimmedDormId.length > 0 &&
+                  trimmedRoomNumber.length > 0
+              }"
+              :disabled="
+                trimmedTrackingNumber.length === 0 ||
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedConfirmPassword.length === 0 ||
+                trimmedDormId.length === 0 ||
+                isRoomNumberOverLimit ||
+                isNameOverLimit ||
+                isEmailOverLimit ||
+                isPasswordOverLimit ||
+                isConfirmPasswordOverLimit
+              "
+            />
             <ButtonWeb
               label="Cancel"
               color="red"
