@@ -1053,12 +1053,10 @@ const pageNumbers = computed(() => {
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                class="hover:bg-gray-50"
+                @click="showParacelDetail"
+                class="hover:bg-gray-50 cursor-pointer"
               >
-                <td
-                  @click="showParacelDetail"
-                  class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
-                >
+                <td class="px-4 py-3 text-sm text-gray-700">
                   {{ p.tracking }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
