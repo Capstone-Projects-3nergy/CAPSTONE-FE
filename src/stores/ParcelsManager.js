@@ -55,7 +55,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
   }
 
   // 🟥 Delete
-  const deleteParcel = (parcelId) => {
+  const deleteParcels = (parcelId) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
       console.log('🗑️ Deleted parcel:', parcels[index])
@@ -74,7 +74,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
     setParcels,
     addParcel,
     editParcel,
-    deleteParcel,
+    deleteParcels,
     findByStatus,
     findByTracking
   }

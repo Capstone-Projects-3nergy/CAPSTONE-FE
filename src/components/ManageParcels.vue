@@ -13,9 +13,8 @@ import AddParcels from './AddParcels.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import DeleteParcels from './DeleteParcels.vue'
-
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -40,7 +39,9 @@ import {
 } from '@/stores/SortManager'
 
 const loginManager = useAuthManager()
+const parcelManager = useParcelManager()
 
+const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -422,6 +423,22 @@ const redPopup = reactive({
   edit: { state: false, parcelTitle: '' },
   delete: { state: false, parcelTitle: '' }
 })
+const deleteParcel = async (parcelId) => {
+  deletedParcel.value = await post(
+    `${import.meta.env.VITE_BASE_URL}/v3/parcels`, // แก้ URL ให้ตรง backend
+    parcelId
+  )
+
+  if (deletedParcel.value == '404') {
+    error.value = true
+    emit('redAlert')
+    emit('cancelDetail', true)
+    return
+  }
+
+  // ลบใน Pinia
+  parcelManager.deleteParcels(parcelId)
+}
 </script>
 
 <template>
