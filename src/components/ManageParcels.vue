@@ -1055,7 +1055,10 @@ const pageNumbers = computed(() => {
                 :key="p.id"
                 class="hover:bg-gray-50"
               >
-                <td class="px-4 py-3 text-sm text-gray-700">
+                <td
+                  @click="showParacelDetail"
+                  class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
+                >
                   {{ p.tracking }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
