@@ -1274,6 +1274,24 @@ const closePopUp = (operate) => {
       @showGreenPopup="openGreenPopup"
     ></showParacelDetail>
   </teleport>
+  <teleport to="body" v-if="showAddParcel">
+    <AddParcels
+      @cancelAdd="clearDeletePopUp"
+      @confirmAdd="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelId="parcelDetail"
+    >
+    </AddParcels>
+  </teleport>
+  <teleport to="body" v-if="showEditParcel">
+    <EditParcels
+      @cancelDetail="clearDeletePopUp"
+      @confirmDetail="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelId="parcelDetail"
+    >
+    </EditParcels>
+  </teleport>
   <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"

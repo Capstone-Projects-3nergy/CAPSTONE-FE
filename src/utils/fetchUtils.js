@@ -1,6 +1,7 @@
-import { refreshToken } from '@/stores/AuthManager'
+import { useAuthManager } from '@/stores/AuthManager.js'
 
 async function fetchWithAuth(url, options, router) {
+  const authManager = useAuthManager()
   const token = localStorage.getItem('jwt')
   if (token) {
     options.headers = {
@@ -14,7 +15,7 @@ async function fetchWithAuth(url, options, router) {
   if (!res.ok) {
     if (res.status === 401) {
       console.log('Access token expired, attempting to refresh...')
-      const newToken = await refreshToken(router)
+      const newToken = await authManager.refreshToken(router)
       if (newToken) {
         // Retry the request with the new token
         options.headers.Authorization = `Bearer ${newToken}`

@@ -41,7 +41,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const success = ref(false)
+const addSuccess = ref(false)
 const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
@@ -121,7 +121,7 @@ const saveParcel = async () => {
 
     // 👉 บันทึกลง Pinia
     parcelManager.addParcel(savedParcel)
-
+    addSuccess.value = true
     console.log('✅ Parcel saved successfully:', savedParcel)
 
     // reset form
@@ -188,7 +188,7 @@ const toggleSidebar = () => {
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
@@ -638,6 +638,14 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
+        <AlertPopUp
+          v-if="addSuccess"
+          :titles="'Add New Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="addSuccessMessage"
+          @closePopUp="closePopUp"
+        />
         <AlertPopUp
           v-if="error"
           :titles="'There is a problem. Please try again later.'"
