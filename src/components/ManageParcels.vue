@@ -14,6 +14,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import DeleteParcels from './DeleteParcels.vue'
 
 import {
   sortByRoomNumber,
@@ -1180,4 +1181,24 @@ const pageNumbers = computed(() => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <teleport to="body" v-if="showTaskDetailModal">
+    <showParacelDetail
+      :taskDetail="taskDetail"
+      @showTaskDetailModal="showTaskDetailModal = false"
+      :operate="operation"
+      @showRedPopup="openRedPopup"
+      @showGreenPopup="openGreenPopup"
+      @showLoadingScreen="showLoading"
+      @finishLoadingScreen="closeLoading"
+    ></showParacelDetail>
+  </teleport>
+  <teleport to="body" v-if="showDeleteTaskDetail">
+    <DeletePopUp
+      @cancelDetail="clearDeletePopUp"
+      @confirmDetail="showDelComplete"
+      @redAlert="openRedPopup"
+      :taskId="taskDetail"
+    >
+    </DeletePopUp>
+  </teleport>
 </template>

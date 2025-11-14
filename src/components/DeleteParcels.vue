@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { deleteItemById } from '@/utils/fetchUtils'
-import { useParcelManager } from '@/stores/ParcelManager'
+// import { deleteItemById } from '@/utils/fetchUtils'
+import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRoute, useRouter } from 'vue-router'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
@@ -62,7 +62,10 @@ const deleteParcel = async (parcelId) => {
         <button
           class="itbkk-button-cancel bg-red-400 rounded-[2px] w-[50px] h-[25px] mr-3 mt-4 mb-2"
           @click="
-            ;[emit('cancelDetail', true), router.replace({ name: 'Parcel' })]
+            ;[
+              emit('cancelDetail', true),
+              router.replace({ name: 'staffparcels' })
+            ]
           "
         >
           Cancel
