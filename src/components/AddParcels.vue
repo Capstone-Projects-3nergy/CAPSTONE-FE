@@ -592,7 +592,14 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
-
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
         <!-- Form -->
         <form
           class="bg-white p-6 rounded-lg shadow space-y-6"
