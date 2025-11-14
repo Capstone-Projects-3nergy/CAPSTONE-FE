@@ -52,7 +52,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-
+const showParcelDetailModal = ref(false)
 // Reactive state
 const parcels = ref([
   {
@@ -374,10 +374,10 @@ const showParacelDetail = async function (id, operate) {
   )
   if (taskDetail.value.status == '404') {
     alert('The requested task does not exist')
-    router.replace({ name: 'Task' })
+    router.replace({ name: 'detailparcels' })
     return
   }
-  showTaskDetailModal.value = true
+  showParcelsDetailModal.value = true
 }
 
 const showEditParacelDetail = async function (id, operate) {
@@ -412,6 +412,15 @@ const pageNumbers = computed(() => {
     pages.push(i)
   }
   return pages
+})
+const greenPopup = reactive({
+  add: { state: false, parcelTitle: '' },
+  edit: { state: false, parcelTitle: '' },
+  delete: { state: false, parcelTitle: '' }
+})
+const redPopup = reactive({
+  edit: { state: false, parcelTitle: '' },
+  delete: { state: false, parcelTitle: '' }
 })
 </script>
 
@@ -1054,10 +1063,12 @@ const pageNumbers = computed(() => {
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                @click="showParacelDetail"
                 class="hover:bg-gray-50 cursor-pointer"
               >
-                <td class="px-4 py-3 text-sm text-gray-700">
+                <td
+                  @click="showParacelDetail"
+                  class="px-4 py-3 text-sm text-gray-700"
+                >
                   {{ p.tracking }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
@@ -1181,24 +1192,22 @@ const pageNumbers = computed(() => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
-  <teleport to="body" v-if="showTaskDetailModal">
+  <teleport to="body" v-if="showParcelDetailModal">
     <showParacelDetail
-      :taskDetail="taskDetail"
-      @showTaskDetailModal="showTaskDetailModal = false"
+      :ParcelDetail="parcelDetail"
+      @showParcelDetailModal="showParcelDetailModal = false"
       :operate="operation"
       @showRedPopup="openRedPopup"
       @showGreenPopup="openGreenPopup"
-      @showLoadingScreen="showLoading"
-      @finishLoadingScreen="closeLoading"
     ></showParacelDetail>
   </teleport>
-  <teleport to="body" v-if="showDeleteTaskDetail">
-    <DeletePopUp
+  <teleport to="body" v-if="showDeleteParcel">
+    <DeleteParcels
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :taskId="taskDetail"
+      :parcelId="parcelDetail"
     >
-    </DeletePopUp>
+    </DeleteParcels>
   </teleport>
 </template>
