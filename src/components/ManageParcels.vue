@@ -368,7 +368,7 @@ const showParacelDetail = async function (id, operate) {
   router.push({ name: 'detailparcels', params: { tid: id } })
   operation.value = operate
   taskDetail.value = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels/${route.params.id}`,
     id
   )
   if (taskDetail.value.status == '404') {
@@ -1104,7 +1104,10 @@ const pageNumbers = computed(() => {
                       />
                     </svg>
                   </button>
-                  <button  @click="deleteParcel" class="text-red-600 hover:text-red-800">
+                  <button
+                    @click="deleteParcel"
+                    class="text-red-600 hover:text-red-800"
+                  >
                     <svg
                       width="18"
                       height="21"
