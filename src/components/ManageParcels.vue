@@ -54,6 +54,9 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
+const addSuccess = ref(false)
+const editSuccess = ref(false)
+const deleteSuccess = ref(false)
 // Reactive state
 const parcels = ref([
   {
@@ -438,6 +441,12 @@ const deleteParcel = async (parcelId) => {
 
   // ลบใน Pinia
   parcelManager.deleteParcels(parcelId)
+}
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
+  if (operate === 'editSuccessMessage') editSuccess.value = false
 }
 </script>
 
@@ -971,7 +980,38 @@ const deleteParcel = async (parcelId) => {
             </div>
           </div>
         </div>
-
+        <AlertPopUp
+          v-if="deleteSuccess"
+          :titles="'Delete Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="addSuccess"
+          :titles="'Add New Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="addSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="editSuccess"
+          :titles="'Edit Parcel  is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="editSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
         <!-- Parcel Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
           <table class="min-w-full text-left border-collapse">
