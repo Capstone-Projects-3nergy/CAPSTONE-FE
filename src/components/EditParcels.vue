@@ -30,6 +30,9 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const success = ref(false)
 const error = ref(false)
+const roomNumberError = ref(false)
+const SenderNameError = ref(false)
+const parcelTypeError = ref(false)
 // 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
 const form = ref({
   parcelId: '',
@@ -59,7 +62,25 @@ onMounted(async () => {
 })
 
 // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
-const saveParcel = async () => {
+const saveEditParcel = async () => {
+  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+  if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+    roomNumberError.value = true
+    return
+  }
+
+  // 2️⃣ ตรวจสอบ Sender Name → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+    SenderNameError.value = true
+    return
+  }
+
+  // 3️⃣ ตรวจสอบ Parcel Type → เป็นตัวอักษรเท่านั้น (อนุญาตช่องว่าง)
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+    parcelTypeError.value = true
+    return
+  }
+
   try {
     const res = await axios.put(
       `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcelId}`,
@@ -70,7 +91,7 @@ const saveParcel = async () => {
     parcelStore.editParcel(form.value.parcelId, res.data)
 
     console.log('✅ Updated parcel:', res.data)
-    success.value = true
+    router.replace({ name: 'staffparcels' })
   } catch (err) {
     error.value = true
     console.error('❌ Failed to update parcel:', err)
@@ -127,21 +148,27 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const isAllEmpty = computed(() => {
+  return (
+    !parcelData.value.trackingNumber &&
+    !parcelData.value.recipientName &&
+    !parcelData.value.roomNumber &&
+    !parcelData.value.parcelType &&
+    !parcelData.value.contact &&
+    !parcelData.value.senderName &&
+    !parcelData.value.companyId &&
+    !parcelData.value.receiveAt &&
+    !parcelData.value.pickupAt &&
+    !parcelData.value.updateAt
+  )
+})
+// --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
-  if (operate === 'password') isPasswordWeak.value = false
-  if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
-  if (operate === 'dorm') isNoDorm.value = false
-  if (operate === 'notmatch') isNotMatch.value = false
-  if (operate === 'notroomrequired') isRoomRequired.value = false
-  if (operate === 'notpositionrequired') isPositionRequired.value = false
-  if (operate === 'emailform') incorrectemailform.value = false
-  if (operate === 'notnumber') roomidnotnumber.value = false
-  if (operate === 'erroeposition ') isPositionWrong.value = false
-  if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
 }
 </script>
 
@@ -574,7 +601,38 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
-
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Room Number can only be typed as number.'"
+          message="Error!!"
+          styleType="red"
+          operate="roomNumber"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Sender Name can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="SenderName"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Parcel Type can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="parcelType "
+          @closePopUp="closePopUp"
+        />
         <form
           class="bg-white p-6 rounded-lg shadow space-y-6"
           @submit.prevent="saveParcel"
@@ -588,7 +646,7 @@ const closePopUp = (operate) => {
               @click="() => router.replace({ name: 'parcelscanner' })"
             />
           </div>
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="success"
             :titles="'Register New Account is Successfull.'"
             message="Success!!"
@@ -602,7 +660,7 @@ const closePopUp = (operate) => {
             styleType="red"
             operate="problem"
             @closePopUp="closePopUp"
-          />
+          /> -->
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -715,7 +773,22 @@ const closePopUp = (operate) => {
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb
+              label="Save"
+              color="green"
+              @click="saveEditParcel"
+              :class="{
+                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+              }"
+              :disabled="isAllEmpty"
+            />
+
+            <ButtonWeb
+              label="Cancel"
+              color="red"
+              @click="showManageParcelPage"
+            />
             <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>
         </form>
