@@ -39,7 +39,7 @@ const parcelData = ref({
   roomNumber: '',
   parcelType: '',
   contact: '',
-  status: 'Pending', // default
+  status: 'pending', // default
   pickupAt: null,
   updateAt: null,
   senderName: '',
@@ -678,11 +678,15 @@ const closePopUp = (operate) => {
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
-              <input
+              <select
                 v-model="parcelData.status"
-                type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+              >
+                <option :value="null" disabled>Select Status</option>
+                <option value="pending">Pending</option>
+                <option value="pickedUp">Picked Up</option>
+                <option value="unclaimed">Unclaimed</option>
+              </select>
             </div>
           </div>
 

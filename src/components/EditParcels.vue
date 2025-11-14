@@ -651,11 +651,15 @@ const closePopUp = (operate) => {
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
-              <input
-                v-model="form.status"
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+              <select
+                v-model="parcelData.status"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              >
+                <option :value="null" disabled>Select Status</option>
+                <option value="pending">Pending</option>
+                <option value="pickedUp">Picked Up</option>
+                <option value="unclaimed">Unclaimed</option>
+              </select>
             </div>
           </div>
 
