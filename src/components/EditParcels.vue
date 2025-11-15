@@ -1,6 +1,6 @@
 <script setup>
-import { ref ,onMounted} from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -17,6 +17,7 @@ import axios from 'axios'
 
 const router = useRouter()
 const route = useRoute()
+const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
 const loginManager = useAuthManager()
 
 const parcelManager = useParcelManager()
@@ -51,7 +52,7 @@ const form = ref({
 })
 
 onMounted(async () => {
-  const parcelId = route.params.id
+  const parcelId = tid
   const parcel = await getItemById(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     parcelId,

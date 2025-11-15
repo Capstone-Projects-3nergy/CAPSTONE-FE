@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter,useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -74,6 +74,7 @@ const showParcelDetailModal = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
+
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 onMounted(async () => {
@@ -272,7 +273,7 @@ const paginatedParcels = computed(() => {
   return filteredParcels.value.slice(start, end)
 })
 
-const showParacelDetail = async function (id, operate) {
+const showParacelDetail = async function (id) {
   router.push({ name: 'detailparcels', params: { tid: id } })
 }
 
