@@ -76,28 +76,27 @@ onMounted(async () => {
     console.error('❌ Error loading parcel:', err)
   }
 })
-
-// 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
-const saveEditParcel = async () => {
+const saveAllParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number
-  if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
     return
   }
 
   // 2️⃣ ตรวจสอบ Sender Name
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
     return
   }
 
   // 3️⃣ ตรวจสอบ Parcel Type
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     return
   }
 
   try {
+    // 🔹 อัปเดตข้อมูลหลัก
     const updatedParcel = await editItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
       form.value.parcelId,
@@ -113,9 +112,31 @@ const saveEditParcel = async () => {
 
     // 👉 update Pinia
     parcelManager.editParcel(form.value.parcelId, updatedParcel)
-    emit('edit-success')
-    // editSuccess.value = true
     console.log('✅ Updated parcel:', updatedParcel)
+
+    // 🔹 ถ้ามีการเปลี่ยน status ให้เรียก PATCH
+    if (form.value.status) {
+      try {
+        const updatedStatus = await updateItemPatch(
+          `${import.meta.env.VITE_BASE_URL}/api/parcels/${
+            form.value.id
+          }/status`,
+          { status: form.value.status },
+          router
+        )
+
+        // update Pinia
+        parcelManager.updateParcel(updatedStatus)
+        console.log('✅ Updated status:', updatedStatus)
+      } catch (errStatus) {
+        console.error('❌ Failed to update status:', errStatus)
+        emit('edit-error')
+        router.replace({ name: 'staffparcels' })
+        return
+      }
+    }
+
+    emit('edit-success')
     router.replace({ name: 'staffparcels' })
   } catch (err) {
     emit('edit-error')
@@ -123,6 +144,70 @@ const saveEditParcel = async () => {
     console.error('❌ Failed to update parcel:', err)
   }
 }
+
+// const changeStatus = async (id, status) => {
+//   try {
+//     const updated = await updateItemPatch(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/status`,
+//       { status },
+//       router
+//     )
+
+//     parcelManager.updateParcel(updated)
+//     emit('edit-success')
+//     router.replace({ name: 'staffparcels' })
+//   } catch (e) {
+//     emit('edit-error')
+//     router.replace({ name: 'staffparcels' })
+//   }
+// }
+
+// // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
+// const saveEditParcel = async () => {
+//   // 1️⃣ ตรวจสอบ Room Number
+//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+//     roomNumberError.value = true
+//     return
+//   }
+
+//   // 2️⃣ ตรวจสอบ Sender Name
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+//     SenderNameError.value = true
+//     return
+//   }
+
+//   // 3️⃣ ตรวจสอบ Parcel Type
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+//     parcelTypeError.value = true
+//     return
+//   }
+
+//   try {
+//     const updatedParcel = await editItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+//       form.value.parcelId,
+//       form.value,
+//       router
+//     )
+
+//     if (!updatedParcel) {
+//       emit('edit-error')
+//       router.replace({ name: 'staffparcels' })
+//       return
+//     }
+
+//     // 👉 update Pinia
+//     parcelManager.editParcel(form.value.parcelId, updatedParcel)
+//     emit('edit-success')
+//     // editSuccess.value = true
+//     console.log('✅ Updated parcel:', updatedParcel)
+//     router.replace({ name: 'staffparcels' })
+//   } catch (err) {
+//     emit('edit-error')
+//     router.replace({ name: 'staffparcels' })
+//     console.error('❌ Failed to update parcel:', err)
+//   }
+// }
 
 // 🟥 ปุ่ม Cancel
 const cancelEdit = () => {
@@ -196,16 +281,6 @@ const closePopUp = (operate) => {
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
 }
-onMounted(async () => {
-  const parcel = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/${editId}`,
-    editId
-  )
-
-  if (parcel.status !== '404') {
-    form.value = { ...parcel }
-  }
-})
 </script>
 
 <template>
