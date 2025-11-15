@@ -46,7 +46,7 @@ const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
-const parcelStore = useParcelManager()
+const parcelManager = useParcelManager()
 
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
@@ -83,6 +83,7 @@ const isAllEmpty = computed(() => {
     !parcelData.value.updateAt
   )
 })
+const emit = defineEmits(['add-success', 'add-error'])
 
 // 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
 // ฟังก์ชันบันทึกพัสดุ
@@ -115,13 +116,19 @@ const saveParcel = async () => {
     )
 
     if (!savedParcel) {
-      error.value = true
+      // error.value = true
+      emit('add-error')
+      router.replace({ name: 'staffparcels' })
       return
     }
 
     // 👉 บันทึกลง Pinia
     parcelManager.addParcel(savedParcel)
-    addSuccess.value = true
+    // addSuccess.value = true
+
+    // ⬅️ ส่ง emit ไปให้ parent แทนที่จะแสดง popup ในไฟล์นี้
+    emit('add-success')
+
     console.log('✅ Parcel saved successfully:', savedParcel)
 
     // reset form
@@ -143,7 +150,9 @@ const saveParcel = async () => {
     router.replace({ name: 'staffparcels' })
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
-    error.value = true
+    // error.value = true
+    emit('add-error')
+    router.replace({ name: 'staffparcels' })
   }
 }
 

@@ -32,7 +32,7 @@ import {
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
-const parcelStore = useParcelManager()
+const parcelManager = useParcelManager()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -62,7 +62,7 @@ const form = ref({
   companyId: '',
   receiveAt: ''
 })
-
+const emit = defineEmits(['edit-success', 'edit-error'])
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
 onMounted(async () => {
   const parcelId = route.params.id
@@ -104,17 +104,20 @@ const saveEditParcel = async () => {
     )
 
     if (!updatedParcel) {
-      error.value = true
+      emit('edit-error')
+      router.replace({ name: 'staffparcels' })
       return
     }
 
     // 👉 update Pinia
     parcelManager.editParcel(form.value.parcelId, updatedParcel)
-    editSuccess.value = true
+    emit('edit-success')
+    // editSuccess.value = true
     console.log('✅ Updated parcel:', updatedParcel)
     router.replace({ name: 'staffparcels' })
   } catch (err) {
-    error.value = true
+    emit('edit-error')
+    router.replace({ name: 'staffparcels' })
     console.error('❌ Failed to update parcel:', err)
   }
 }

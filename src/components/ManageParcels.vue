@@ -54,6 +54,7 @@ import {
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const emit = defineEmits(['add-success'])
 
 const deletedParcel = ref(null)
 const router = useRouter()
@@ -209,7 +210,18 @@ const parcels = ref([
     date: '01 Mar 2025'
   }
 ])
-
+const showAddSuccessPopup = () => {
+  addSuccess.value = true
+}
+const showAddErrorPopup = () => {
+  error.value = true
+}
+const showEditSuccessPopup  = () => {
+  editSuccess.value = true
+}
+const showEditErrorPopup = () => {
+  error.value = true
+}
 const searchKeyword = ref('')
 const activeTab = ref('Day')
 const tabs = ['Day', 'Month', 'Year']
@@ -1274,7 +1286,7 @@ const closePopUp = (operate) => {
       @showGreenPopup="openGreenPopup"
     ></showParacelDetail>
   </teleport>
-  <teleport to="body" v-if="showAddParcel">
+  <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels
       @cancelAdd="clearDeletePopUp"
       @confirmAdd="showDelComplete"
@@ -1282,8 +1294,8 @@ const closePopUp = (operate) => {
       :parcelId="parcelDetail"
     >
     </AddParcels>
-  </teleport>
-  <teleport to="body" v-if="showEditParcel">
+  </teleport> -->
+  <!-- <teleport to="body" v-if="showEditParcel">
     <EditParcels
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
@@ -1291,7 +1303,7 @@ const closePopUp = (operate) => {
       :parcelId="parcelDetail"
     >
     </EditParcels>
-  </teleport>
+  </teleport> -->
   <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"
@@ -1301,4 +1313,16 @@ const closePopUp = (operate) => {
     >
     </DeleteParcels>
   </teleport>
+  <AddParcels
+    @add-success="showAddSuccessPopup"
+    @add-error="showAddErrorPopup"
+  />
+  <AddParcels
+    @add-success="showAddSuccessPopup"
+    @add-error="showAddErrorPopup"
+  />
+  <EditParcels
+    @edit-success="showEditSuccessPopup"
+    @edit-error="showEditErrorPopup"
+  />
 </template>
