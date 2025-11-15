@@ -16,6 +16,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import { getItems } from '@/utils/fetchUtils'
+import EditParcels from './EditParcels.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -1158,7 +1159,7 @@ const closePopUp = (operate) => {
     >
     </EditParcels>
   </teleport> -->
-  <teleport to="body" v-if="showDeleteParcel">
+  <!-- <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
@@ -1166,11 +1167,7 @@ const closePopUp = (operate) => {
       :parcelId="parcelDetail"
     >
     </DeleteParcels>
-  </teleport>
-  <AddParcels
-    @add-success="showAddSuccessPopup"
-    @add-error="showAddErrorPopup"
-  />
+  </teleport> -->
   <AddParcels
     @add-success="showAddSuccessPopup"
     @add-error="showAddErrorPopup"
