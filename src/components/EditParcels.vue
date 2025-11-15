@@ -14,24 +14,11 @@ import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
-import {
-  getItemById,
-  deleteItemById,
-  addItem,
-  editItem,
-  deleteAndTransferItem,
-  toggleVisibility,
-  editReadWrite,
-  acceptInvite,
-  cancelInvite,
-  editInviteReadWrite,
-  declineInvite,
-  editItemWithFile,
-  deleteFile
-} from '@/utils/fetchUtils'
-const loginManager = useAuthManager()
+
 const router = useRouter()
 const route = useRoute()
+const loginManager = useAuthManager()
+
 const parcelManager = useParcelManager()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -47,9 +34,9 @@ const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
-// 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
+
 const form = ref({
-  parcelId: '',
+  id: null,
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
@@ -62,12 +49,27 @@ const form = ref({
   companyId: '',
   receiveAt: ''
 })
+
+onMounted(async () => {
+  const parcelId = route.params.id
+  const parcel = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    parcelId,
+    router
+  )
+  if (parcel) {
+    form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
+  }
+})
+
 const emit = defineEmits(['edit-success', 'edit-error'])
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
 onMounted(async () => {
   const parcelId = route.params.id
   try {
-    const res = await axios.get(`http://localhost:5000/api/parcels/${parcelId}`)
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
+    )
     form.value = res.data
     console.log('📦 Loaded parcel:', res.data)
   } catch (err) {
@@ -97,7 +99,7 @@ const saveEditParcel = async () => {
 
   try {
     const updatedParcel = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/auth/edit`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
       form.value.parcelId,
       form.value,
       router
@@ -194,6 +196,16 @@ const closePopUp = (operate) => {
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
 }
+onMounted(async () => {
+  const parcel = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels/${editId}`,
+    editId
+  )
+
+  if (parcel.status !== '404') {
+    form.value = { ...parcel }
+  }
+})
 </script>
 
 <template>
@@ -667,7 +679,7 @@ const closePopUp = (operate) => {
         />
         <form
           class="bg-white p-6 rounded-lg shadow space-y-6"
-          @submit.prevent="saveParcel"
+          @submit.prevent="saveEditParcel"
         >
           <!-- Header -->
           <div class="flex items-center justify-between mb-4">
@@ -678,21 +690,7 @@ const closePopUp = (operate) => {
               @click="() => router.replace({ name: 'parcelscanner' })"
             />
           </div>
-          <!-- <AlertPopUp
-            v-if="success"
-            :titles="'Register New Account is Successfull.'"
-            message="Success!!"
-            styleType="green"
-            operate="success"
-            @closePopUp="closePopUp"
-          /><AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          /> -->
+
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -700,7 +698,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.trackingNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -708,7 +706,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.recipientName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -716,7 +714,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.roomNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -728,7 +726,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.parcelType"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -736,13 +734,13 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.contact"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <select
-                v-model="parcelData.status"
+                v-model="form.status"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               >
                 <option :value="null" disabled>Select Status</option>
@@ -760,7 +758,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.pickupAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -768,7 +766,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.updateAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -782,7 +780,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.senderName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -790,7 +788,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.companyId"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -798,7 +796,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.receiveAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -814,12 +812,6 @@ const closePopUp = (operate) => {
                 'bg-black hover:bg-gray-600 text-white': !isAllEmpty
               }"
               :disabled="isAllEmpty"
-            />
-
-            <ButtonWeb
-              label="Cancel"
-              color="red"
-              @click="showManageParcelPage"
             />
             <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>

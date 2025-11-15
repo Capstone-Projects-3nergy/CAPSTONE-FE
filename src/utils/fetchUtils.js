@@ -327,6 +327,27 @@ async function deleteFile(url, id, file, router) {
     return null
   }
 }
+async function updateParcelStatus(url, id, newStatus, router) {
+  try {
+    const options = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/status`, options, router)
+
+    if (res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error(`Network error: ${error}`)
+    return null
+  }
+}
 
 export {
   getItemById,
@@ -341,5 +362,6 @@ export {
   editInviteReadWrite,
   declineInvite,
   editItemWithFile,
-  deleteFile
+  deleteFile,
+  updateParcelStatus
 }
