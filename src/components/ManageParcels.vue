@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
-import { useRouter,useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -1169,12 +1169,15 @@ const closePopUp = (operate) => {
     >
     </DeleteParcels>
   </teleport> -->
-  <AddParcels
-    @add-success="showAddSuccessPopup"
-    @add-error="showAddErrorPopup"
-  />
-  <EditParcels
-    @edit-success="showEditSuccessPopup"
-    @edit-error="showEditErrorPopup"
-  />
+  <div style="display: none">
+    <AddParcels
+      @add-success="showAddSuccessPopup"
+      @add-error="showAddErrorPopup"
+    />
+
+    <EditParcels
+      @edit-success="showEditSuccessPopup"
+      @edit-error="showEditErrorPopup"
+    />
+  </div>
 </template>
