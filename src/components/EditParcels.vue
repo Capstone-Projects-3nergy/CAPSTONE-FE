@@ -77,7 +77,7 @@ const emit = defineEmits(['edit-success', 'edit-error'])
 //     console.error('❌ Error loading parcel:', err)
 //   }
 // })
-const saveAllParcel = async () => {
+const saveEditParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
@@ -817,12 +817,17 @@ const closePopUp = (operate) => {
               <label class="block font-semibold mb-1">Status</label>
               <select
                 v-model="form.status"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200 text-black transition-all duration-300"
+                :class="{
+                  'bg-yellow-400': form.status === 'Pending',
+                  'bg-green-400': form.status === 'Picked Up',
+                  'bg-red-400': form.status === 'Unclaimed'
+                }"
               >
                 <option :value="null" disabled>Select Status</option>
-                <option value="pending">Pending</option>
-                <option value="pickedUp">Picked Up</option>
-                <option value="unclaimed">Unclaimed</option>
+                <option value="Pending">Pending</option>
+                <option value="Picked Up">Picked Up</option>
+                <option value="Unclaimed">Unclaimed</option>
               </select>
             </div>
           </div>
