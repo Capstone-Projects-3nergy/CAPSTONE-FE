@@ -107,12 +107,12 @@ const routes = [
     component: AddParcels
   },
   {
-    path: '/homepage/staff/:id/manageparcel/:sid/editparcel',
+    path: '/homepage/staff/:id/manageparcel/:tid/editparcel',
     name: 'editparcels',
     component: EditParcels
   },
   {
-    path: '/homepage/staff/:id/manageparcel//:sid/detailparcel',
+    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel',
     name: 'detailparcels',
     component: ParcelsDetail
   }
