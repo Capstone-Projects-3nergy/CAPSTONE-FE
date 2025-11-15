@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -15,6 +15,7 @@ import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
+import { getItems } from '@/utils/fetchUtils'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -73,143 +74,18 @@ const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 // Reactive state
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Alice Brown',
-    tracking: 'TH123456789A',
-    room: 101,
-    contact: '097-111-1111',
-    status: 'Pending',
-    date: '05 Jan 2024'
-  },
-  {
-    id: 2,
-    recipient: 'Bob Smith',
-    tracking: 'TH223456789B',
-    room: 102,
-    contact: '097-222-2222',
-    status: 'Picked Up',
-    date: '05 Feb 2024'
-  },
-  {
-    id: 3,
-    recipient: 'Charlie Doe',
-    tracking: 'TH323456789C',
-    room: 103,
-    contact: '097-333-3333',
-    status: 'Pending',
-    date: '05 Mar 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Diana White',
-    tracking: 'TH423456789D',
-    room: 104,
-    contact: '097-444-4444',
-    status: 'Unclaimed',
-    date: '05 Jan 2026'
-  },
-  {
-    id: 5,
-    recipient: 'Ethan Black',
-    tracking: 'TH523456789E',
-    room: 105,
-    contact: '097-555-5555',
-    status: 'Picked Up',
-    date: '05 Oct 2026'
-  },
-  {
-    id: 6,
-    recipient: 'Fiona Green',
-    tracking: 'TH623456789F',
-    room: 106,
-    contact: '097-666-6666',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'George King',
-    tracking: 'TH723456789G',
-    room: 107,
-    contact: '097-777-7777',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Hannah Lee',
-    tracking: 'TH823456789H',
-    room: 108,
-    contact: '097-888-8888',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Ian Moore',
-    tracking: 'TH923456789I',
-    room: 109,
-    contact: '097-999-9999',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Jane Doe',
-    tracking: 'TH103456789J',
-    room: 110,
-    contact: '097-101-0101',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 11,
-    recipient: 'Kevin Chan',
-    tracking: 'TH113456789K',
-    room: 111,
-    contact: '097-111-1212',
-    status: 'Pending',
-    date: '10 Nov 2024'
-  },
-  {
-    id: 12,
-    recipient: 'Laura Kim',
-    tracking: 'TH123456789L',
-    room: 112,
-    contact: '097-121-1313',
-    status: 'Picked Up',
-    date: '15 Dec 2024'
-  },
-  {
-    id: 13,
-    recipient: 'Michael Tan',
-    tracking: 'TH133456789M',
-    room: 113,
-    contact: '097-131-1414',
-    status: 'Unclaimed',
-    date: '20 Jan 2025'
-  },
-  {
-    id: 14,
-    recipient: 'Nina Park',
-    tracking: 'TH143456789N',
-    room: 114,
-    contact: '097-141-1515',
-    status: 'Pending',
-    date: '25 Feb 2025'
-  },
-  {
-    id: 15,
-    recipient: 'Oliver Scott',
-    tracking: 'TH153456789O',
-    room: 115,
-    contact: '097-151-1616',
-    status: 'Picked Up',
-    date: '01 Mar 2025'
+// onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
+onMounted(async () => {
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
+  if (data) {
+    parcelManager.setParcels(data)
   }
-])
+})
+const parcels = computed(() => parcelManager.parcel)
+
 const showAddSuccessPopup = () => {
   addSuccess.value = true
 }

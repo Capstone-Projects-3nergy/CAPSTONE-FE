@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref ,onMounted} from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -64,18 +64,18 @@ onMounted(async () => {
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
-onMounted(async () => {
-  const parcelId = route.params.id
-  try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-    )
-    form.value = res.data
-    console.log('📦 Loaded parcel:', res.data)
-  } catch (err) {
-    console.error('❌ Error loading parcel:', err)
-  }
-})
+// onMounted(async () => {
+//   const parcelId = route.params.id
+//   try {
+//     const res = await axios.get(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
+//     )
+//     form.value = res.data
+//     console.log('📦 Loaded parcel:', res.data)
+//   } catch (err) {
+//     console.error('❌ Error loading parcel:', err)
+//   }
+// })
 const saveAllParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
