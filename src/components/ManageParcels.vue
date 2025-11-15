@@ -216,7 +216,7 @@ const showAddSuccessPopup = () => {
 const showAddErrorPopup = () => {
   error.value = true
 }
-const showEditSuccessPopup  = () => {
+const showEditSuccessPopup = () => {
   editSuccess.value = true
 }
 const showEditErrorPopup = () => {
@@ -397,32 +397,10 @@ const paginatedParcels = computed(() => {
 
 const showParacelDetail = async function (id, operate) {
   router.push({ name: 'detailparcels', params: { tid: id } })
-  operation.value = operate
-  taskDetail.value = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/${route.params.id}`,
-    id
-  )
-  if (taskDetail.value.status == '404') {
-    alert('The requested task does not exist')
-    router.replace({ name: 'detailparcels' })
-    return
-  }
-  showParcelsDetailModal.value = true
 }
 
-const showEditParacelDetail = async function (id, operate) {
+const showEditParacelDetail = async function (id) {
   router.push({ name: 'editparcels', params: { tid: id } })
-  operation.value = operate
-  taskDetail.value = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/v3/boards/${route.params.id}/tasks`,
-    id
-  )
-  if (taskDetail.value.status == '404') {
-    alert('The requested task does not exist')
-    router.replace({ name: 'Task' })
-    return
-  }
-  showTaskDetailModal.value = true
 }
 
 // ฟังก์ชันเปลี่ยนหน้า
@@ -454,7 +432,7 @@ const redPopup = reactive({
 })
 const deleteParcel = async (parcelId) => {
   const resStatus = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/v3/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     parcelId,
     router
   )
