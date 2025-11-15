@@ -21,7 +21,10 @@ import { useParcelManager } from '@/stores/ParcelsManager'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
-
+const error = ref(false)
+const roomNumberError = ref(false)
+const SenderNameError = ref(false)
+const parcelTypeError = ref(false)
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
 const previewUrl = ref(null)
@@ -284,32 +287,120 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 
-function saveParcel() {
+// function saveParcel() {
+//   const parcelData = {
+//     recipientName: form.value.recipientName,
+//     trackingNumber: form.value.trackingNumber,
+//     companyId: form.value.companyId,
+//     parcelType: form.value.parcelType,
+//     imageUrl: previewUrl.value || null,
+//     status: 'Pending', // กำหนดค่าเริ่มต้น
+//     roomNumber: form.value.roomNumber || '' // ถ้ามี
+//   }
+
+//   // ✅ เพิ่มพัสดุเข้า store
+//   parcelStore.addParcel(parcelData)
+//   console.log('✅ Parcel saved to store:', parcelData)
+
+//   // reset form
+//   Object.keys(form.value).forEach(
+//     (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+//   )
+
+//   // popup success
+//   greenPopup.add.state = true
+//   previewUrl.value = null
+//   setTimeout(() => (greenPopup.add.state = false), 3000)
+// }
+const saveParcel = async () => {
+  // สร้าง object จาก form
   const parcelData = {
     recipientName: form.value.recipientName,
     trackingNumber: form.value.trackingNumber,
     companyId: form.value.companyId,
     parcelType: form.value.parcelType,
     imageUrl: previewUrl.value || null,
-    status: 'Pending', // กำหนดค่าเริ่มต้น
-    roomNumber: form.value.roomNumber || '' // ถ้ามี
+    status: 'Pending',
+    roomNumber: form.value.roomNumber || ''
   }
 
-  // ✅ เพิ่มพัสดุเข้า store
-  parcelStore.addParcel(parcelData)
-  console.log('✅ Parcel saved to store:', parcelData)
+  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+  if (!/^[0-9]+$/.test(parcelData.roomNumber)) {
+    roomNumberError.value = true
+    return
+  }
 
-  // reset form
-  Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
-  )
+  // 2️⃣ ตรวจสอบ Sender Name
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.recipientName)) {
+    SenderNameError.value = true
+    return
+  }
 
-  // popup success
-  greenPopup.add.state = true
-  previewUrl.value = null
-  setTimeout(() => (greenPopup.add.state = false), 3000)
+  // 3️⃣ ตรวจสอบ Parcel Type
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.parcelType)) {
+    parcelTypeError.value = true
+    return
+  }
+
+  try {
+    console.log('🚀 Sending parcel to backend...', parcelData)
+
+    // ส่งไป backend
+    const savedParcel = await addItem(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      parcelData,
+      router
+    )
+
+    if (!savedParcel) {
+      emit('scan-error')
+      router.replace({ name: 'staffparcels' })
+      return
+    }
+
+    // บันทึกลง Pinia
+    parcelStore.addParcel(savedParcel)
+    console.log('✅ Parcel saved to store:', savedParcel)
+
+    // ส่ง emit ไป parent แทนการแสดง popup ในไฟล์นี้
+    emit('scan-success')
+
+    // reset form
+    Object.keys(form.value).forEach(
+      (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+    )
+    previewUrl.value = null
+
+    router.replace({ name: 'staffparcels' })
+  } catch (err) {
+    console.error('❌ Failed to add parcel:', err)
+    emit('scan-error')
+    router.replace({ name: 'staffparcels' })
+  }
 }
-
+const isAllEmpty = computed(() => {
+  return (
+    !parcelData.value.trackingNumber &&
+    !parcelData.value.recipientName &&
+    !parcelData.value.roomNumber &&
+    !parcelData.value.parcelType &&
+    !parcelData.value.contact &&
+    !parcelData.value.senderName &&
+    !parcelData.value.companyId &&
+    !parcelData.value.receiveAt &&
+    !parcelData.value.pickupAt &&
+    !parcelData.value.updateAt
+  )
+})
+const emit = defineEmits(['scan-success', 'scan-error'])
+// --- ปิด popup ด้วยมือ ---
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
+}
 function cancelParcel() {
   Object.keys(form.value).forEach(
     (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
@@ -813,16 +904,48 @@ const showProfileStaffPage = async () => {
         >
           <!-- ✅ Alert Popup -->
           <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
+            <!-- <AlertPopUp
               v-if="greenPopup.add.state"
               :titles="'Success!!'"
               message="Successfully Added."
               styleType="green"
               :operate="'add'"
               @closePopUp="closeGreenPopup"
+            /> -->
+            <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="problem"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Room Number can only be typed as number.'"
+              message="Error!!"
+              styleType="red"
+              operate="roomNumber"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Sender Name can only be typed as text.'"
+              message="Error!!"
+              styleType="red"
+              operate="SenderName"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Parcel Type can only be typed as text.'"
+              message="Error!!"
+              styleType="red"
+              operate="parcelType "
+              @closePopUp="closePopUp"
             />
           </div>
-          <div class="fixed top-5 left-5 z-50">
+          <!-- <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="redPopup.add.state"
               :titles="'Error!!'"
@@ -831,7 +954,7 @@ const showProfileStaffPage = async () => {
               :operate="'add'"
               @closePopUp="closeRedPopup"
             />
-          </div>
+          </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
             <!-- 🟦 Left side -->
@@ -954,11 +1077,21 @@ const showProfileStaffPage = async () => {
 
               <!-- 🟪 Save/Cancel -->
               <div class="flex justify-end space-x-3">
-                <ButtonWeb
+                <!-- <ButtonWeb
                   label="Save"
                   color="green"
                   :disabled="!form.recipientName || !form.trackingNumber"
                   @click="saveParcel"
+                /> -->
+                <ButtonWeb
+                  label="Save"
+                  color="green"
+                  @click="saveParcel"
+                  :class="{
+                    'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                    'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+                  }"
+                  :disabled="isAllEmpty"
                 />
                 <ButtonWeb
                   label="Cancel"
