@@ -95,23 +95,25 @@ const saveEditParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
     return
   }
 
   // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
 
   // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
 
   try {
-    // 🔹 อัปเดตข้อมูลหลัก
     const updatedParcel = await editItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
       form.value.parcelId,
@@ -125,11 +127,9 @@ const saveEditParcel = async () => {
       return
     }
 
-    // 👉 update Pinia
     parcelManager.editParcel(form.value.parcelId, updatedParcel)
     console.log('✅ Updated parcel:', updatedParcel)
 
-    // 🔹 ถ้ามีการเปลี่ยน status ให้เรียก PATCH
     if (form.value.status) {
       try {
         const updatedStatus = await updateItemPatch(
@@ -139,8 +139,6 @@ const saveEditParcel = async () => {
           { status: form.value.status },
           router
         )
-
-        // update Pinia
         parcelManager.updateParcel(updatedStatus)
         console.log('✅ Updated status:', updatedStatus)
       } catch (errStatus) {

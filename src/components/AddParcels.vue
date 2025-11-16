@@ -91,18 +91,21 @@ const saveParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
     roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
     return
   }
 
   // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
     SenderNameError.value = true
+      setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
 
   // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
     parcelTypeError.value = true
+      setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
 
