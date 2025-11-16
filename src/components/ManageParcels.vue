@@ -110,22 +110,23 @@ const tabs = ['Day', 'Month', 'Year']
 //   return parcels.value
 // })
 // Computed filtered + searched parcels
-const filteredParcels = computed(() => {
-  let result = parcels.value // ไม่ต้อง .value ถ้าเป็น reactive
 
-  const now = new Date() // วันที่ปัจจุบัน
+// const filteredParcels = computed(() => {
+//   let result = parcels.value // ไม่ต้อง .value ถ้าเป็น reactive
 
-  // filterByDay/Month/Year ไม่ทำงานกับ "05 Jan 2024" แบบ hardcode
-  // if (activeTab.value === 'Day') result = filterByDay(result, now)
-  // else if (activeTab.value === 'Month') result = filterByMonth(result, now)
-  // else if (activeTab.value === 'Year') result = filterByYear(result, now)
+//   const now = new Date() // วันที่ปัจจุบัน
 
-  if (searchKeyword.value) {
-    result = searchParcels(result, searchKeyword.value)
-  }
+//   // filterByDay/Month/Year ไม่ทำงานกับ "05 Jan 2024" แบบ hardcode
+//   if (activeTab.value === 'Day') result = filterByDay(result, now)
+//   else if (activeTab.value === 'Month') result = filterByMonth(result, now)
+//   else if (activeTab.value === 'Year') result = filterByYear(result, now)
 
-  return result
-})
+//   if (searchKeyword.value) {
+//     result = searchParcels(result, searchKeyword.value)
+//   }
+
+//   return result
+// })
 
 // Sort functions
 const isRoomAsc = ref(true)
@@ -216,6 +217,24 @@ function parseDate(dateStr) {
 
   return null
 }
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
+  }))
+
+  const now = new Date()
+
+  if (activeTab.value === 'Day') result = filterByDay(result, now)
+  else if (activeTab.value === 'Month') result = filterByMonth(result, now)
+  else if (activeTab.value === 'Year') result = filterByYear(result, now)
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  return result
+})
 
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
@@ -299,15 +318,15 @@ const pageNumbers = computed(() => {
   }
   return pages
 })
-const greenPopup = reactive({
-  add: { state: false, parcelTitle: '' },
-  edit: { state: false, parcelTitle: '' },
-  delete: { state: false, parcelTitle: '' }
-})
-const redPopup = reactive({
-  edit: { state: false, parcelTitle: '' },
-  delete: { state: false, parcelTitle: '' }
-})
+// const greenPopup = reactive({
+//   add: { state: false, parcelTitle: '' },
+//   edit: { state: false, parcelTitle: '' },
+//   delete: { state: false, parcelTitle: '' }
+// })
+// const redPopup = reactive({
+//   edit: { state: false, parcelTitle: '' },
+//   delete: { state: false, parcelTitle: '' }
+// })
 const deleteParcel = async (parcelId) => {
   const resStatus = await deleteItemById(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
