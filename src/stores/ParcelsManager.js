@@ -22,7 +22,10 @@ export const useParcelManager = defineStore('parcelManager', () => {
   // }
 
   // 🟦 Getter
-  const getParcels = () => parcel
+  // const getParcels = () => parcel
+  const getParcels = function () {
+    return parcel
+  }
 
   // 🟩 Setter
   // const setParcels = (parcelList = []) => {
