@@ -25,11 +25,17 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const getParcels = () => parcel
 
   // 🟩 Setter
+  // const setParcels = (parcelList = []) => {
+  //   parcel.length = 0
+  //   if (parcelList != null) {
+  //     parcelList.forEach((p) => parcel.push(p))
+  //   }
+  //   console.log('✅ Parcels set:', parcel)
+  // }
   const setParcels = (parcelList = []) => {
     parcel.length = 0
-    if (parcelList != null) {
-      parcelList.forEach((p) => parcel.push(p))
-    }
+    const list = Array.isArray(parcelList) ? parcelList : [parcelList]
+    list.forEach((p) => parcel.push(p))
     console.log('✅ Parcels set:', parcel)
   }
 
