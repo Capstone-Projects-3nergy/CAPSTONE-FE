@@ -47,7 +47,10 @@ const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
 const parcelManager = useParcelManager()
-
+const trackingNumberError = ref(false)
+const recipientNameError = ref(false)
+const senderNameError = ref(false)
+const companyIdError = ref(false)
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
@@ -98,9 +101,51 @@ const saveParcel = async () => {
   // ต้องเปลี่ยนมาจาก resident ที่เลือก (เช่นจาก dropdown)
   // สมมติยังใช้ของเดิมไปก่อน = auth.user.id
   parcelData.value.userId = auth.user.id
+  if (!parcelData.value.trackingNumber) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.recipientName) {
+    recipientNameError.value = true
+    setTimeout(() => (recipientNameError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.parcelType) {
+    parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.senderName) {
+    senderNameError.value = true
+    setTimeout(() => (senderNameError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.companyId) {
+    companyIdError.value = true
+    setTimeout(() => (companyIdError.value = false), 3000)
+    return
+  }
+  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+  if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+    roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+    return
+  }
 
+  // 2️⃣ ตรวจสอบ Sender Name
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 3000)
+    return
+  }
   // validate ต่าง ๆ (roomNumber, senderName, parcelType) เหมือนเดิม...
-
+  // 3️⃣ ตรวจสอบ Parcel Type
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+    parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
+    return
+  }
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
@@ -759,6 +804,54 @@ const closePopUp = (operate) => {
           styleType="red"
           operate="parcelType "
           @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="trackingNumberError"
+          :titles="'Tracking Number is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="trackingNumber"
+          @closePopUp="closePopUp('trackingNumber')"
+        />
+
+        <!-- Alert สำหรับ Recipient Name -->
+        <AlertPopUp
+          v-if="recipientNameError"
+          :titles="'Recipient Name is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="recipientName"
+          @closePopUp="closePopUp('recipientName')"
+        />
+
+        <!-- Alert สำหรับ Parcel Type -->
+        <AlertPopUp
+          v-if="parcelTypeError"
+          :titles="'Parcel Type is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="parcelType"
+          @closePopUp="closePopUp('parcelType')"
+        />
+
+        <!-- Alert สำหรับ Sender Name -->
+        <AlertPopUp
+          v-if="senderNameError"
+          :titles="'Sender Name is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="senderName"
+          @closePopUp="closePopUp('senderName')"
+        />
+
+        <!-- Alert สำหรับ Company ID -->
+        <AlertPopUp
+          v-if="companyIdError"
+          :titles="'Company ID is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="companyId"
+          @closePopUp="closePopUp('companyId')"
         />
         <!-- Form -->
         <form

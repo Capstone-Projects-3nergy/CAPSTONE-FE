@@ -1222,7 +1222,7 @@ const closePopUp = (operate) => {
     >
     </DeleteParcels>
   </teleport> -->
-  <div style="display: none">
+  <!-- <div style="display: none">
     <AddParcels @add-success="addSuccess = true" @add-error="error = true" />
     <ParcelScannerPage
       @add-success="addSuccess = true"
@@ -1232,5 +1232,5 @@ const closePopUp = (operate) => {
       @edit-success="editSuccess = true"
       @edit-error="error = true"
     />
-  </div>
+  </div> -->
 </template>
