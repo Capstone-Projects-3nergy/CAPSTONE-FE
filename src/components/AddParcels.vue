@@ -58,7 +58,6 @@ const parcelData = ref({
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  contact: '',
   status: 'pending', // default
   pickupAt: null,
   updateAt: null,
@@ -77,7 +76,6 @@ const isAllEmpty = computed(() => {
     !parcelData.value.recipientName &&
     !parcelData.value.roomNumber &&
     !parcelData.value.parcelType &&
-    !parcelData.value.contact &&
     !parcelData.value.senderName &&
     !parcelData.value.companyId &&
     !parcelData.value.receiveAt &&
@@ -150,7 +148,6 @@ const saveParcel = async () => {
       recipientName: '',
       roomNumber: '',
       parcelType: '',
-      contact: '',
       status: 'Pending',
       pickupAt: null,
       updateAt: null,
@@ -751,14 +748,14 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Contact</label>
               <input
                 v-model="parcelData.contact"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <select
