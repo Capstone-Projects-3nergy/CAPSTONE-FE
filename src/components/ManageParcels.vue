@@ -1171,7 +1171,7 @@ const closePopUp = (operate) => {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <!-- <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
@@ -1186,7 +1186,7 @@ const closePopUp = (operate) => {
   </Teleport>
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
-  </Teleport>
+  </Teleport> -->
   <teleport to="body" v-if="showParcelDetailModal">
     <showParacelDetail
       :ParcelDetail="parcelDetail"
@@ -1195,6 +1195,15 @@ const closePopUp = (operate) => {
       @showRedPopup="openRedPopup"
       @showGreenPopup="openGreenPopup"
     ></showParacelDetail>
+  </teleport>
+  <teleport to="body" v-if="showDeleteParcel">
+    <DeleteParcels
+      @cancelDetail="clearDeletePopUp"
+      @confirmDetail="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelId="parcelDetail"
+    >
+    </DeleteParcels>
   </teleport>
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels
@@ -1214,15 +1223,6 @@ const closePopUp = (operate) => {
     >
     </EditParcels>
   </teleport> -->
-  <teleport to="body" v-if="showDeleteParcel">
-    <DeleteParcels
-      @cancelDetail="clearDeletePopUp"
-      @confirmDetail="showDelComplete"
-      @redAlert="openRedPopup"
-      :parcelId="parcelDetail"
-    >
-    </DeleteParcels>
-  </teleport>
   <!-- <div style="display: none">
     <AddParcels @add-success="addSuccess = true" @add-error="error = true" />
     <ParcelScannerPage
