@@ -2,7 +2,8 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 
 async function fetchWithAuth(url, options, router) {
   const authManager = useAuthManager()
-  const token = localStorage.getItem('jwt')
+  const token = authManager.user?.accessToken // ✔ ใช้ token จาก Pinia
+
   if (token) {
     options.headers = {
       ...options.headers,
@@ -12,28 +13,26 @@ async function fetchWithAuth(url, options, router) {
 
   const res = await fetch(url, options)
 
-  if (!res.ok) {
-    if (res.status === 401) {
-      console.log('Access token expired, attempting to refresh...')
-      const newToken = await authManager.refreshToken(router)
-      if (newToken) {
-        // Retry the request with the new token
-        options.headers.Authorization = `Bearer ${newToken}`
-        const retryRes = await fetch(url, options)
-        if (retryRes.ok) {
-          return retryRes
-        } else {
-          console.error(`Retry failed with status: ${retryRes.status}`)
-          return retryRes
-        }
-      } else {
-        console.error('Token refresh failed, logging out.')
-        logout()
-        router.replace({ name: 'Login' })
-      }
-    } else {
-      console.error(`Failed to fetch: ${res.status}`)
+  // 401 Unauthorized → try refresh token
+  if (res.status === 401) {
+    console.log('Access token expired, refreshing...')
+
+    const newToken = await authManager.refreshToken() // ✔ ไม่ส่ง router แล้ว
+
+    if (newToken) {
+      // retry request
+      options.headers.Authorization = `Bearer ${newToken}`
+      const retryRes = await fetch(url, options)
+
+      if (retryRes.ok) return retryRes
+      console.error(`Retry failed: ${retryRes.status}`)
+      return retryRes
     }
+
+    // refresh failed → logout
+    console.error('Token refresh failed, logging out...')
+    authManager.logoutAccount(router) // ✔ ใช้ logout จาก pinia
+    return null
   }
 
   return res
@@ -153,67 +152,37 @@ async function editItem(url, id, editedItem, router) {
   }
 }
 
-async function toggleVisibility(url, id, visibility) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ visibility })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+async function toggleVisibility(url, id, visibility, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visibility })
   }
+  const res = await fetchWithAuth(`${url}/${id}`, options, router)
+  if (res.ok) return await res.json()
+  return null
 }
 
-async function editReadWrite(url, id, readWrite) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ accessRight: readWrite })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+async function editReadWrite(url, id, readWrite, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessRight: readWrite })
   }
+  const res = await fetchWithAuth(`${url}/${id}`, options, router)
+  if (res.ok) return await res.json()
+  return null
 }
 
-async function editInviteReadWrite(url, id, readWrite) {
-  try {
-    const options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ accessRight: readWrite })
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+async function editInviteReadWrite(url, id, readWrite, router) {
+  const options = {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessRight: readWrite })
   }
+  const res = await fetchWithAuth(`${url}/${id}`, options, router)
+  if (res.ok) return await res.json()
+  return null
 }
 
 async function acceptInvite(url, router) {
@@ -236,44 +205,24 @@ async function acceptInvite(url, router) {
   }
 }
 
-async function cancelInvite(url, id) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await fetchWithAuth(`${url}/${id}`, options)
-    console.log(res)
-    if (res.ok) {
-      return res
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+async function cancelInvite(url, id, router) {
+  const options = {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
   }
+  const res = await fetchWithAuth(`${url}/${id}`, options, router)
+  if (res?.ok) return res
+  return null
 }
 
-async function declineInvite(url) {
-  try {
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-    const res = await fetchWithAuth(`${url}`, options)
-    console.log(res)
-    if (res.ok) {
-      return res
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
+async function declineInvite(url, router) {
+  const options = {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
   }
+  const res = await fetchWithAuth(url, options, router)
+  if (res?.ok) return res
+  return null
 }
 
 async function editItemWithFile(url, id, file = null, editedItem, router) {
