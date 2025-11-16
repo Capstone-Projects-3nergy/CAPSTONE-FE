@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -71,6 +71,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
+const error = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
@@ -87,7 +88,23 @@ onMounted(async () => {
   }
 })
 const parcels = computed(() => parcelManager.parcel)
+// ✅ ใช้ watch เพื่อ setTimeout ให้หายเอง
+// ✅ ฟังก์ชันช่วยสร้าง watch + timeout อัตโนมัติ
+function autoClose(refVar, timeout = 3000) {
+  watch(refVar, (val) => {
+    if (val) {
+      setTimeout(() => {
+        refVar.value = false
+      }, timeout)
+    }
+  })
+}
 
+// เรียกใช้กับทุก popup
+autoClose(addSuccess)
+autoClose(editSuccess)
+autoClose(deleteSuccess)
+autoClose(error)
 // const showAddSuccessPopup = () => {
 //   addSuccess.value = true
 // }
@@ -367,7 +384,6 @@ const closePopUp = (operate) => {
       break
   }
 }
-
 </script>
 
 <template>

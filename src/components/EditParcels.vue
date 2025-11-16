@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -262,16 +262,16 @@ const toggleSidebar = () => {
 }
 const isAllEmpty = computed(() => {
   return (
-    !parcelData.value.trackingNumber &&
-    !parcelData.value.recipientName &&
-    !parcelData.value.roomNumber &&
-    !parcelData.value.parcelType &&
-    !parcelData.value.contact &&
-    !parcelData.value.senderName &&
-    !parcelData.value.companyId &&
-    !parcelData.value.receiveAt &&
-    !parcelData.value.pickupAt &&
-    !parcelData.value.updateAt
+    !form.value.trackingNumber &&
+    !form.value.recipientName &&
+    !form.value.roomNumber &&
+    !form.value.parcelType &&
+    !form.value.contact &&
+    !form.value.senderName &&
+    !form.value.companyId &&
+    !form.value.receiveAt &&
+    !form.value.pickupAt &&
+    !form.value.updateAt
   )
 })
 // --- ปิด popup ด้วยมือ ---
