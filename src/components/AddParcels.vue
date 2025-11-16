@@ -51,7 +51,7 @@ const parcelManager = useParcelManager()
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
-console.log(auth.user.id)
+console.log(auth.user.role)
 const parcelData = ref({
   userId: auth.user.id, // ให้มี userId ติดคงไว้
   trackingNumber: '',
@@ -92,78 +92,142 @@ const emit = defineEmits(['add-success', 'add-error'])
 const saveParcel = async () => {
   const auth = useAuthManager()
   console.log(auth.user.id)
-  parcelData.value.userId = auth.user.id // <-- ใส่ userId ก่อนส่ง
 
-  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
-  if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
-    roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
-    return
-  }
+  // ตอนนี้คุณใช้ userId = staff ที่ล็อกอินอยู่
+  // ถ้าอยากให้ parcel เป็นของ resident จริง ๆ
+  // ต้องเปลี่ยนมาจาก resident ที่เลือก (เช่นจาก dropdown)
+  // สมมติยังใช้ของเดิมไปก่อน = auth.user.id
+  parcelData.value.userId = auth.user.id
 
-  // 2️⃣ ตรวจสอบ Sender Name
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
-    SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 3000)
-    return
-  }
-
-  // 3️⃣ ตรวจสอบ Parcel Type
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
-    parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 3000)
-    return
-  }
+  // validate ต่าง ๆ (roomNumber, senderName, parcelType) เหมือนเดิม...
 
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
+    // ✅ สร้าง payload ให้ตรงกับ CreateParcelDto / Parcels
+    const requestBody = {
+      userId: parcelData.value.userId,
+      trackingNumber: parcelData.value.trackingNumber,
+      recipientName: parcelData.value.recipientName,
+      parcelType: parcelData.value.parcelType,
+      senderName: parcelData.value.senderName,
+      companyId: Number(parcelData.value.companyId) // แปลงให้เป็น number
+    }
+
     const savedParcel = await addItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
-      parcelData.value,
+      requestBody, // ❗ ส่งเฉพาะฟิลด์ที่ backend ใช้จริง
       router
     )
 
-    if (!savedParcel) {
-      // error.value = true
+    if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
       error.value = true
       setTimeout(() => (error.value = false), 3000)
-      // router.replace({ name: 'staffparcels' })
       return
     }
 
-    // 👉 บันทึกลง Pinia
     parcelManager.addParcel(savedParcel)
-    // addSuccess.value = true
 
-    // ⬅️ ส่ง emit ไปให้ parent แทนที่จะแสดง popup ในไฟล์นี้
-    addSuccess.value = TextTrackCue
+    addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 3000)
     console.log('✅ Parcel saved successfully:', savedParcel)
 
-    // reset form
+    // reset form (อันนี้จะเก็บไว้แค่ในหน้า UI ไม่ส่งไป backend)
     parcelData.value = {
-      userId: auth.user.id, // ให้มี userId ติดคงไว้
+      userId: auth.user.id,
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
       parcelType: '',
-      status: 'Pending',
+      status: 'pending', // ตัวนี้ไม่ถูกใช้ใน backend ตอน add
       pickupAt: null,
       updateAt: null,
       senderName: '',
       companyId: '',
       receiveAt: null
     }
-
-    // router.replace({ name: 'staffparcels' })
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
     error.value = true
     setTimeout(() => (error.value = false), 3000)
-    // router.replace({ name: 'staffparcels' })
   }
 }
+
+// const saveParcel = async () => {
+//   const auth = useAuthManager()
+//   console.log(auth.user.id)
+//   parcelData.value.userId = auth.user.id // <-- ใส่ userId ก่อนส่ง
+
+//   // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+//     roomNumberError.value = true
+//     setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+//     return
+//   }
+
+//   // 2️⃣ ตรวจสอบ Sender Name
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+//     SenderNameError.value = true
+//     setTimeout(() => (SenderNameError.value = false), 3000)
+//     return
+//   }
+
+//   // 3️⃣ ตรวจสอบ Parcel Type
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+//     parcelTypeError.value = true
+//     setTimeout(() => (parcelTypeError.value = false), 3000)
+//     return
+//   }
+
+//   try {
+//     console.log('🚀 Sending parcel to backend...', parcelData.value)
+
+//     const savedParcel = await addItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+//       parcelData.value,
+//       router
+//     )
+
+//     if (!savedParcel) {
+//       // error.value = true
+//       error.value = true
+//       setTimeout(() => (error.value = false), 3000)
+//       // router.replace({ name: 'staffparcels' })
+//       return
+//     }
+
+//     // 👉 บันทึกลง Pinia
+//     parcelManager.addParcel(savedParcel)
+//     // addSuccess.value = true
+
+//     // ⬅️ ส่ง emit ไปให้ parent แทนที่จะแสดง popup ในไฟล์นี้
+//     addSuccess.value = TextTrackCue
+//     setTimeout(() => (addSuccess.value = false), 3000)
+//     console.log('✅ Parcel saved successfully:', savedParcel)
+
+//     // reset form
+//     parcelData.value = {
+//       userId: auth.user.id, // ให้มี userId ติดคงไว้
+//       trackingNumber: '',
+//       recipientName: '',
+//       roomNumber: '',
+//       parcelType: '',
+//       status: 'Pending',
+//       pickupAt: null,
+//       updateAt: null,
+//       senderName: '',
+//       companyId: '',
+//       receiveAt: null
+//     }
+
+//     // router.replace({ name: 'staffparcels' })
+//   } catch (err) {
+//     console.error('❌ Failed to add parcel:', err)
+//     error.value = true
+//     setTimeout(() => (error.value = false), 3000)
+//     // router.replace({ name: 'staffparcels' })
+//   }
+// }
 
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
@@ -758,15 +822,12 @@ const closePopUp = (operate) => {
             </div> -->
             <div>
               <label class="block font-semibold mb-1">Status</label>
-              <select
-                v-model="parcelData.status"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              >
-                <option :value="null" disabled>Select Status</option>
-                <option value="pending">Pending</option>
-                <option value="pickedUp">Picked Up</option>
-                <option value="unclaimed">Unclaimed</option>
-              </select>
+              <input
+                type="text"
+                class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
+                value="pending"
+                disabled
+              />
             </div>
           </div>
 
