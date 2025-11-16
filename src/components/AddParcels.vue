@@ -57,6 +57,9 @@ const parcelTypeErrorRequired = ref(false)
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
 console.log(auth.user.role)
+// 🏢 สร้าง reactive variable สำหรับเก็บ companies
+const companyList = ref([])
+
 const parcelData = ref({
   userId: auth.user.id, // ให้มี userId ติดคงไว้
   trackingNumber: '',
@@ -156,6 +159,46 @@ onMounted(async () => {
     console.log('Residents loaded:', residents.value)
   } catch (e) {
     console.error('Failed to load residents:', e)
+  }
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}` // ✅ ส่ง token
+      }
+    })
+    console.log('📦 Raw company response:', res.data)
+
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    if (typeof rawData === 'string') {
+      // กรณี server ส่ง string → ใช้ regex ดึง companyId และ companyName
+      const companyMatches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = companyMatches.map((str) => {
+        const idMatch = str.match(/"companyId":(\d+)/)
+        const nameMatch = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: idMatch ? Number(idMatch[1]) : null,
+          companyName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      // กรณี server ส่ง array มาเลย
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
+    console.log('✅ companyList:', companyList.value)
+  } catch (err) {
+    console.error('❌ Error fetching companies:', err)
   }
 })
 
@@ -1132,12 +1175,30 @@ const closePopUp = (operate) => {
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Company</label>
+              <label for="companySelect" class="block font-semibold mb-1"
+                >Company</label
+              >
+              <select
+                v-model="parcelData.companyId"
+                id="companySelect"
+                class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option :value="null" disabled>Select Company</option>
+                <option
+                  v-for="company in companyList"
+                  :key="company.companyId"
+                  :value="company.companyId"
+                >
+                  {{ company.companyName }}
+                </option>
+              </select>
+
+              <!-- <label class="block font-semibold mb-1">Company</label>
               <input
                 v-model="parcelData.companyId"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+              /> -->
             </div>
             <div>
               <label class="block font-semibold mb-1">Receive at</label>
