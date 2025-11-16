@@ -148,6 +148,9 @@ watch(recipientSearch, (val) => {
 // })
 
 onMounted(async () => {
+  console.log(parcelManager.getParcels())
+  // จะได้ array ของ object ที่เพิ่งเพิ่ม
+
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
@@ -166,7 +169,7 @@ onMounted(async () => {
     console.error('Failed to load residents:', e)
   }
 })
-const parcels = computed(() => parcelManager.parcel)
+const parcels = computed(() => parcelManager.getParcels())
 // ✅ ใช้ watch เพื่อ setTimeout ให้หายเอง
 // ✅ ฟังก์ชันช่วยสร้าง watch + timeout อัตโนมัติ
 function autoClose(refVar, timeout = 3000) {

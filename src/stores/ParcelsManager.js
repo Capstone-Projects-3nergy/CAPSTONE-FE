@@ -41,12 +41,27 @@ export const useParcelManager = defineStore('parcelManager', () => {
 
   // 🟨 Add
   const addParcel = (newParcel) => {
-    parcel.push({
-      parcelId: Date.now(), // 🔹 ใช้ parcelId แทน id
+    if (!newParcel || newParcel.status >= 400) {
+      console.error('Invalid parcel data:', newParcel)
+      return null
+    }
+
+    const parcelWithId = {
+      parcelId: Date.now(),
       ...newParcel
-    })
-    console.log('🆕 Parcel added:', newParcel)
+    }
+    parcel.push(parcelWithId)
+    console.log('🆕 Parcel added:', parcelWithId)
+    return parcelWithId
   }
+
+  // const addParcel = (newParcel) => {
+  //   parcel.push({
+  //     parcelId: Date.now(), // 🔹 ใช้ parcelId แทน id
+  //     ...newParcel
+  //   })
+  //   console.log('🆕 Parcel added:', newParcel)
+  // }
 
   // 🟧 Edit
   const findIndexByParcelId = (parcelId) =>
@@ -75,7 +90,6 @@ export const useParcelManager = defineStore('parcelManager', () => {
     parcel.find((el) => el.trackingNumber === trackingNumber)
 
   return {
-    parcel,
     getParcels,
     setParcels,
     addParcel,
