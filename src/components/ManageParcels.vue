@@ -76,6 +76,7 @@ const error = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
+const showDeleteParcel = ref(false)
 
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
@@ -1213,7 +1214,7 @@ const closePopUp = (operate) => {
     >
     </EditParcels>
   </teleport> -->
-  <!-- <teleport to="body" v-if="showDeleteParcel">
+  <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
@@ -1221,7 +1222,7 @@ const closePopUp = (operate) => {
       :parcelId="parcelDetail"
     >
     </DeleteParcels>
-  </teleport> -->
+  </teleport>
   <!-- <div style="display: none">
     <AddParcels @add-success="addSuccess = true" @add-error="error = true" />
     <ParcelScannerPage
