@@ -50,8 +50,10 @@ const parcelManager = useParcelManager()
 
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
+const auth = useAuthManager()
+console.log(auth.user.id)
 const parcelData = ref({
-  userId: null, // backend ใช้หาผู้พัก ไม่ต้องให้ผู้ใช้กรอก
+  userId: auth.user.id, // ให้มี userId ติดคงไว้
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
@@ -85,9 +87,15 @@ const isAllEmpty = computed(() => {
 })
 const emit = defineEmits(['add-success', 'add-error'])
 
+// console.log(auth.user.id)
+
 // 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
 // ฟังก์ชันบันทึกพัสดุ
 const saveParcel = async () => {
+  const auth = useAuthManager()
+  console.log(auth.user.id)
+  parcelData.value.userId = auth.user.id // <-- ใส่ userId ก่อนส่ง
+
   // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
     roomNumberError.value = true
@@ -98,14 +106,14 @@ const saveParcel = async () => {
   // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
     SenderNameError.value = true
-      setTimeout(() => (SenderNameError.value = false), 3000)
+    setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
 
   // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
     parcelTypeError.value = true
-      setTimeout(() => (parcelTypeError.value = false), 3000)
+    setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
 
@@ -113,15 +121,16 @@ const saveParcel = async () => {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
     const savedParcel = await addItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
       parcelData.value,
       router
     )
 
     if (!savedParcel) {
       // error.value = true
-      emit('add-error')
-      router.replace({ name: 'staffparcels' })
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
+      // router.replace({ name: 'staffparcels' })
       return
     }
 
@@ -130,13 +139,13 @@ const saveParcel = async () => {
     // addSuccess.value = true
 
     // ⬅️ ส่ง emit ไปให้ parent แทนที่จะแสดง popup ในไฟล์นี้
-    emit('add-success')
-
+    addSuccess.value = TextTrackCue
+    setTimeout(() => (addSuccess.value = false), 3000)
     console.log('✅ Parcel saved successfully:', savedParcel)
 
     // reset form
     parcelData.value = {
-      userId: null,
+      userId: auth.user.id, // ให้มี userId ติดคงไว้
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
@@ -150,12 +159,12 @@ const saveParcel = async () => {
       receiveAt: null
     }
 
-    router.replace({ name: 'staffparcels' })
+    // router.replace({ name: 'staffparcels' })
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
-    // error.value = true
-    emit('add-error')
-    router.replace({ name: 'staffparcels' })
+    error.value = true
+    setTimeout(() => (error.value = false), 3000)
+    // router.replace({ name: 'staffparcels' })
   }
 }
 
@@ -838,7 +847,7 @@ const closePopUp = (operate) => {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <!-- <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport> -->
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
