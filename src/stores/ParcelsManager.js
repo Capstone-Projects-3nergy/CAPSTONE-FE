@@ -3,7 +3,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useParcelManager = defineStore('parcelManager', () => {
   // 📦 State
-  const parcels = reactive([])
+  const parcel = reactive([])
 
   // 📄 โครงสร้างข้อมูลแต่ละพัสดุ (ตัวอย่าง)
   // {
@@ -22,59 +22,79 @@ export const useParcelManager = defineStore('parcelManager', () => {
   // }
 
   // 🟦 Getter
-  const getParcels = () => parcels
+  const getParcels = () => parcel
 
   // 🟩 Setter
+  // const setParcels = (parcelList = []) => {
+  //   parcel.length = 0
+  //   if (parcelList != null) {
+  //     parcelList.forEach((p) => parcel.push(p))
+  //   }
+  //   console.log('✅ Parcels set:', parcel)
+  // }
   const setParcels = (parcelList = []) => {
-    parcels.length = 0
-    if (parcelList != null) {
-      parcelList.forEach((p) => parcels.push(p))
-    }
-    console.log('✅ Parcels set:', parcels)
+    parcel.length = 0
+    const list = Array.isArray(parcelList) ? parcelList : [parcelList]
+    list.forEach((p) => parcel.push(p))
+    console.log('✅ Parcels set:', parcel)
   }
 
   // 🟨 Add
   const addParcel = (newParcel) => {
-    parcels.push({
-      parcelId: Date.now(), // 🔹 ใช้ parcelId แทน id
+    if (!newParcel || newParcel.status >= 400) {
+      console.error('Invalid parcel data:', newParcel)
+      return null
+    }
+
+    const parcelWithId = {
+      parcelId: Date.now(),
       ...newParcel
-    })
-    console.log('🆕 Parcel added:', newParcel)
+    }
+    parcel.push(parcelWithId)
+    console.log('🆕 Parcel added:', parcelWithId)
+    return parcelWithId
   }
+
+  // const addParcel = (newParcel) => {
+  //   parcel.push({
+  //     parcelId: Date.now(), // 🔹 ใช้ parcelId แทน id
+  //     ...newParcel
+  //   })
+  //   console.log('🆕 Parcel added:', newParcel)
+  // }
 
   // 🟧 Edit
   const findIndexByParcelId = (parcelId) =>
-    parcels.findIndex((el) => el.parcelId === parcelId)
+    parcel.findIndex((el) => el.parcelId === parcelId)
 
   const editParcel = (parcelId, updatedParcel) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
-      parcels[index] = { ...parcels[index], ...updatedParcel }
-      console.log('✏️ Edited parcel:', parcels[index])
+      parcel[index] = { ...parcel[index], ...updatedParcel }
+      console.log('✏️ Edited parcel:', parcel[index])
     }
   }
 
   // 🟥 Delete
-  const deleteParcel = (parcelId) => {
+  const deleteParcels = (parcelId) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
-      console.log('🗑️ Deleted parcel:', parcels[index])
-      parcels.splice(index, 1)
+      console.log('🗑️ Deleted parcel:', parcel[index])
+      parcel.splice(index, 1)
     }
   }
 
   // 🔍 Find by status or tracking number
-  const findByStatus = (status) => parcels.filter((el) => el.status === status)
+  const findByStatus = (status) => parcel.filter((el) => el.status === status)
   const findByTracking = (trackingNumber) =>
-    parcels.find((el) => el.trackingNumber === trackingNumber)
+    parcel.find((el) => el.trackingNumber === trackingNumber)
 
   return {
-    parcels,
     getParcels,
     setParcels,
     addParcel,
     editParcel,
-    deleteParcel,
+    deleteParcels,
     findByStatus,
     findByTracking
   }

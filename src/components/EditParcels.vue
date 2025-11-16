@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -14,11 +14,27 @@ import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
-
-const loginManager = useAuthManager()
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 const router = useRouter()
 const route = useRoute()
-const parcelStore = useParcelManager()
+const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
+const loginManager = useAuthManager()
+
+const parcelManager = useParcelManager()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -28,11 +44,14 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const success = ref(false)
+const editSuccess = ref(false)
 const error = ref(false)
-// 🟦 สร้าง reactive state เก็บข้อมูลพัสดุ
+const roomNumberError = ref(false)
+const SenderNameError = ref(false)
+const parcelTypeError = ref(false)
+
 const form = ref({
-  parcelId: '',
+  id: null,
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
@@ -46,36 +65,163 @@ const form = ref({
   receiveAt: ''
 })
 
-// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
 onMounted(async () => {
-  const parcelId = route.params.id
-  try {
-    const res = await axios.get(`http://localhost:5000/api/parcels/${parcelId}`)
-    form.value = res.data
-    console.log('📦 Loaded parcel:', res.data)
-  } catch (err) {
-    console.error('❌ Error loading parcel:', err)
+  const parcelId = tid
+  const parcel = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    parcelId,
+    router
+  )
+  if (parcel) {
+    form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
   }
 })
 
-// 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
-const saveParcel = async () => {
+const emit = defineEmits(['edit-success', 'edit-error'])
+// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
+// onMounted(async () => {
+//   const parcelId = route.params.id
+//   try {
+//     const res = await axios.get(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
+//     )
+//     form.value = res.data
+//     console.log('📦 Loaded parcel:', res.data)
+//   } catch (err) {
+//     console.error('❌ Error loading parcel:', err)
+//   }
+// })
+const saveEditParcel = async () => {
+  // 1️⃣ ตรวจสอบ Room Number
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+    return
+  }
+
+  // 2️⃣ ตรวจสอบ Sender Name
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 3000)
+    return
+  }
+
+  // 3️⃣ ตรวจสอบ Parcel Type
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
+    parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
+    return
+  }
+
   try {
-    const res = await axios.put(
-      `${import.meta.env.VITE_BASE_URL}/auth/edit/${form.value.parcelId}`,
-      form.value
+    const updatedParcel = await editItem(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+      form.value.parcelId,
+      form.value,
+      router
     )
 
-    // อัปเดตใน Pinia
-    parcelStore.editParcel(form.value.parcelId, res.data)
+    if (!updatedParcel) {
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
+      return
+    }
 
-    console.log('✅ Updated parcel:', res.data)
-    success.value = true
+    parcelManager.editParcel(form.value.parcelId, updatedParcel)
+    console.log('✅ Updated parcel:', updatedParcel)
+
+    if (form.value.status) {
+      try {
+        const updatedStatus = await updateItemPatch(
+          `${import.meta.env.VITE_BASE_URL}/api/parcels/${
+            form.value.id
+          }/status`,
+          { status: form.value.status },
+          router
+        )
+        parcelManager.updateParcel(updatedStatus)
+        console.log('✅ Updated status:', updatedStatus)
+      } catch (errStatus) {
+        console.error('❌ Failed to update status:', errStatus)
+        error.value = true
+        setTimeout(() => (error.value = false), 3000)
+        return
+      }
+    }
+
+    editSuccess.value = true
+    setTimeout(() => (editSuccess.value = false), 3000)
   } catch (err) {
     error.value = true
+    setTimeout(() => (error.value = false), 3000)
+    router.replace({ name: 'staffparcels' })
     console.error('❌ Failed to update parcel:', err)
   }
 }
+
+// const changeStatus = async (id, status) => {
+//   try {
+//     const updated = await updateItemPatch(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/status`,
+//       { status },
+//       router
+//     )
+
+//     parcelManager.updateParcel(updated)
+//     emit('edit-success')
+//     router.replace({ name: 'staffparcels' })
+//   } catch (e) {
+//     emit('edit-error')
+//     router.replace({ name: 'staffparcels' })
+//   }
+// }
+
+// // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
+// const saveEditParcel = async () => {
+//   // 1️⃣ ตรวจสอบ Room Number
+//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+//     roomNumberError.value = true
+//     return
+//   }
+
+//   // 2️⃣ ตรวจสอบ Sender Name
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+//     SenderNameError.value = true
+//     return
+//   }
+
+//   // 3️⃣ ตรวจสอบ Parcel Type
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+//     parcelTypeError.value = true
+//     return
+//   }
+
+//   try {
+//     const updatedParcel = await editItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+//       form.value.parcelId,
+//       form.value,
+//       router
+//     )
+
+//     if (!updatedParcel) {
+//       emit('edit-error')
+//       router.replace({ name: 'staffparcels' })
+//       return
+//     }
+
+//     // 👉 update Pinia
+//     parcelManager.editParcel(form.value.parcelId, updatedParcel)
+//     emit('edit-success')
+//     // editSuccess.value = true
+//     console.log('✅ Updated parcel:', updatedParcel)
+//     router.replace({ name: 'staffparcels' })
+//   } catch (err) {
+//     emit('edit-error')
+//     router.replace({ name: 'staffparcels' })
+//     console.error('❌ Failed to update parcel:', err)
+//   }
+// }
 
 // 🟥 ปุ่ม Cancel
 const cancelEdit = () => {
@@ -127,21 +273,27 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const isAllEmpty = computed(() => {
+  return (
+    !form.value.trackingNumber &&
+    !form.value.recipientName &&
+    !form.value.roomNumber &&
+    !form.value.parcelType &&
+    !form.value.contact &&
+    !form.value.senderName &&
+    !form.value.companyId &&
+    !form.value.receiveAt &&
+    !form.value.pickupAt &&
+    !form.value.updateAt
+  )
+})
+// --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
-  if (operate === 'password') isPasswordWeak.value = false
-  if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
-  if (operate === 'dorm') isNoDorm.value = false
-  if (operate === 'notmatch') isNotMatch.value = false
-  if (operate === 'notroomrequired') isRoomRequired.value = false
-  if (operate === 'notpositionrequired') isPositionRequired.value = false
-  if (operate === 'emailform') incorrectemailform.value = false
-  if (operate === 'notnumber') roomidnotnumber.value = false
-  if (operate === 'erroeposition ') isPositionWrong.value = false
-  if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'editSuccessMessage ') editSuccess.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
 }
 </script>
 
@@ -213,7 +365,7 @@ const closePopUp = (operate) => {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -304,7 +456,7 @@ const closePopUp = (operate) => {
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
@@ -574,35 +726,60 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
-
+        <AlertPopUp
+          v-if="editSuccess"
+          :titles="'Edit Parcel  is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="editSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Room Number can only be typed as number.'"
+          message="Error!!"
+          styleType="red"
+          operate="roomNumber"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Sender Name can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="SenderName"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'Parcel Type can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="parcelType "
+          @closePopUp="closePopUp"
+        />
         <form
           class="bg-white p-6 rounded-lg shadow space-y-6"
-          @submit.prevent="saveParcel"
+          @submit.prevent="saveEditParcel"
         >
           <!-- Header -->
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
-            <ButtonWeb
+            <!-- <ButtonWeb
               label="Scan Parcel"
               color="blue"
               @click="() => router.replace({ name: 'parcelscanner' })"
-            />
+            /> -->
           </div>
-          <AlertPopUp
-            v-if="success"
-            :titles="'Register New Account is Successfull.'"
-            message="Success!!"
-            styleType="green"
-            operate="success"
-            @closePopUp="closePopUp"
-          /><AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          />
+
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -610,7 +787,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.trackingNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -618,7 +795,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.recipientName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -626,7 +803,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.roomNumber"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -638,7 +815,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.parcelType"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -646,16 +823,25 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.contact"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label class="block font-semibold mb-1">Status</label>
-              <input
+              <select
                 v-model="form.status"
-                type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200 text-black transition-all duration-300"
+                :class="{
+                  'bg-yellow-400': form.status === 'Pending',
+                  'bg-green-400': form.status === 'Picked Up',
+                  'bg-red-400': form.status === 'Unclaimed'
+                }"
+              >
+                <option :value="null" disabled>Select Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Picked Up">Picked Up</option>
+                <option value="Unclaimed">Unclaimed</option>
+              </select>
             </div>
           </div>
 
@@ -666,7 +852,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.pickupAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -674,7 +860,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.updateAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
@@ -688,7 +874,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.senderName"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -696,7 +882,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.companyId"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
@@ -704,14 +890,23 @@ const closePopUp = (operate) => {
               <input
                 v-model="form.receiveAt"
                 type="text"
-                class="w-100 border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
           </div>
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb
+              label="Save"
+              color="green"
+              @click="saveEditParcel"
+              :class="{
+                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+              }"
+              :disabled="isAllEmpty"
+            />
             <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>
         </form>

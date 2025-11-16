@@ -189,7 +189,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -281,13 +281,13 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
         <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
           <!-- Profile -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -304,7 +304,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -326,7 +326,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             <span>Profile</span>
           </a> -->
           <!-- Dashboard -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -341,7 +341,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -395,7 +395,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -410,7 +410,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -428,7 +428,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
+          <!-- <SidebarItem
             title="Manage Announcements"
             @click="ShowManageAnnouncementPage"
           >
@@ -446,7 +446,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -520,145 +520,192 @@ const currentUser = ref('Pimpajee SetXXXXXX')
         >
           Package Tracking System
         </div> -->
-
-        <!-- HOME -->
-        <section class="p-4">
-          <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
-            <svg
-              width="44"
-              height="44"
-              viewBox="0 0 44 44"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
-                fill="#185DC0"
-              />
-            </svg>
-
-            Staff Home Page
-          </h1>
-
-          <!-- Slider -->
-          <div
-            class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300"
-          >
-            <button
-              @click="prevSlide"
-              class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900"
-            >
-              ‹
-            </button>
-            <div
-              class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
-            >
-              {{ slides[currentIndex] }}
-            </div>
-            <button
-              @click="nextSlide"
-              class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
-            >
-              ›
-            </button>
-            <div class="absolute bottom-2 flex space-x-2">
-              <span
-                v-for="(s, i) in slides"
-                :key="i"
-                :class="{
-                  'bg-blue-700': i === currentIndex,
-                  'bg-gray-400': i !== currentIndex
-                }"
-                class="w-2 h-2 rounded-full"
-              ></span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Sections -->
-        <section class="grid grid-cols-3 gap-4 px-4 pb-4">
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
-            <div
-              class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
-            >
-              Latest News
-            </div>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-bold mb-2 text-blue-800">📅 EVENT</h2>
-            <div
-              class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
-            >
-              Upcoming Events
-            </div>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-bold mb-2 text-blue-800">💬 COMMUNITY</h2>
-            <div
-              class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
-            >
-              Community Posts
-            </div>
-          </div>
-        </section>
-        <div class="p-4">
-          <div class="flex space-x-1">
-            <svg
-              width="41"
-              height="41"
-              viewBox="0 0 41 41"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                fill="#185DC0"
-              />
-            </svg>
-
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
-          </div>
-          <!-- Tabs -->
-          <div
-            class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
-          >
-            <!-- Right: Search + Sort -->
-            <div class="flex items-center space-x-4">
-              <input
-                type="text"
-                placeholder="Search..."
-                class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                class="border border-gray-300 rounded px-3 py-1 text-gray-500"
+        <div class="bg-white p-4 rounded shadow">
+          <!-- HOME -->
+          <section class="p-4">
+            <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <option>Sort by:</option>
-              </select>
+                <path
+                  d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
+                  fill="#185DC0"
+                />
+              </svg>
+
+              Staff Home Page
+            </h1>
+
+            <!-- Slider -->
+            <div
+              class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300"
+            >
+              <button
+                @click="prevSlide"
+                class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900"
+              >
+                ‹
+              </button>
+              <div
+                class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
+              >
+                {{ slides[currentIndex] }}
+              </div>
+              <button
+                @click="nextSlide"
+                class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
+              >
+                ›
+              </button>
+              <div class="absolute bottom-2 flex space-x-2">
+                <span
+                  v-for="(s, i) in slides"
+                  :key="i"
+                  :class="{
+                    'bg-blue-700': i === currentIndex,
+                    'bg-gray-400': i !== currentIndex
+                  }"
+                  class="w-2 h-2 rounded-full"
+                ></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sections -->
+          <section class="grid grid-cols-3 gap-4 px-4 pb-4">
+            <div class="bg-white p-4 rounded shadow">
+              <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
+              <div
+                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+              >
+                Latest News
+              </div>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+              <h2 class="font-bold mb-2 text-blue-800">📅 EVENT</h2>
+              <div
+                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+              >
+                Upcoming Events
+              </div>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+              <h2 class="font-bold mb-2 text-blue-800">💬 COMMUNITY</h2>
+              <div
+                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+              >
+                Community Posts
+              </div>
+            </div>
+          </section>
+          <div class="p-4">
+            <div class="flex space-x-1">
+              <svg
+                width="41"
+                height="41"
+                viewBox="0 0 41 41"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
+                  fill="#185DC0"
+                />
+              </svg>
+
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                Resident Parcel
+              </h2>
+            </div>
+            <!-- Tabs -->
+            <div
+              class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
+            >
+              <!-- Right: Search + Sort + Add -->
+              <div class="flex items-center space-x-3">
+                <!-- Search -->
+                <div class="relative">
+                  <svg
+                    class="absolute left-2 top-1/2 -translate-y-1/2"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
+                      fill="#9A9FA7"
+                    />
+                  </svg>
+
+                  <input
+                    type="text"
+                    v-model="searchKeyword"
+                    placeholder="Search ..."
+                    class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+
+                <!-- Sort -->
+                <select
+                  class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                  v-model="selectedSort"
+                  @change="handleSort"
+                >
+                  <option>Sort by:</option>
+                  <option>Newest</option>
+                  <option>Oldest</option>
+                  <option>First Name</option>
+                  <option>Last Name</option>
+                </select>
+
+                <!-- <button
+                @click="showAddParcelPage"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                    fill="white"
+                  />
+                </svg>
+
+                <span>Add parcel</span>
+              </button> -->
+              </div>
             </div>
           </div>
 
-          <!-- Parcels Table -->
-          <div class="bg-white rounded-lg shadow overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="text-blue-700 border-t border-b border-blue-700">
+          <!-- Parcel Table -->
+          <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full text-left border-collapse">
+              <thead class="bg-white border-t border-b border-[#185DC0] my-4">
                 <tr>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Tracking
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Name
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
-                    <div class="flex items-center gap-1">
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+                    <div
+                      class="relative flex items-center justify-start space-x-3"
+                    >
                       <span>Room Number</span>
                       <svg
+                        class="cursor-pointer hover:opacity-70 transition"
+                        @click="toggleSortRoom"
                         width="17"
                         height="12"
                         viewBox="0 0 17 12"
@@ -679,17 +726,18 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       </svg>
                     </div>
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
+
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Contact
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
-                    <div class="flex items-center gap-1">
-                      <span> Status</span>
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+                    <div
+                      class="relative flex items-center justify-start space-x-3"
+                    >
+                      <span>Status</span>
                       <svg
+                        class="cursor-pointer hover:opacity-70 transition"
+                        @click="toggleSortStatus"
                         width="17"
                         height="12"
                         viewBox="0 0 17 12"
@@ -710,12 +758,14 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       </svg>
                     </div>
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
-                    <div class="flex items-center gap-1">
-                      <span> Date in</span>
+                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+                    <div
+                      class="relative flex items-center justify-start space-x-3"
+                    >
+                      <span>Date in</span>
                       <svg
+                        class="cursor-pointer hover:opacity-70 transition"
+                        @click="toggleSortDate"
                         width="17"
                         height="12"
                         viewBox="0 0 17 12"
@@ -736,26 +786,116 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       </svg>
                     </div>
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
+                  <!-- <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Operation
-                  </th>
+                  </th> -->
                 </tr>
               </thead>
+              <tbody class="divide-y">
+                <tr
+                  v-for="p in paginatedParcels"
+                  :key="p.id"
+                  class="hover:bg-gray-50"
+                >
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    {{ p.tracking }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    {{ p.recipient }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    {{ p.contact }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                      :class="{
+                        'bg-yellow-400': p.status === 'Pending',
+                        'bg-green-400': p.status === 'Picked Up',
+                        'bg-red-400': p.status === 'Unclaimed'
+                      }"
+                    >
+                      {{ p.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
+                  <!-- <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
+                    <button class="text-blue-600 hover:text-blue-800">
+                      <svg
+                        width="21"
+                        height="21"
+                        viewBox="0 0 21 21"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M10 1.99634H3C2.46957 1.99634 1.96086 2.20705 1.58579 2.58212C1.21071 2.9572 1 3.4659 1 3.99634V17.9963C1 18.5268 1.21071 19.0355 1.58579 19.4106C1.96086 19.7856 2.46957 19.9963 3 19.9963H17C17.5304 19.9963 18.0391 19.7856 18.4142 19.4106C18.7893 19.0355 19 18.5268 19 17.9963V10.9963"
+                          stroke="#185DC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M16.3751 1.62132C16.7729 1.2235 17.3125 1 17.8751 1C18.4377 1 18.9773 1.2235 19.3751 1.62132C19.7729 2.01914 19.9964 2.55871 19.9964 3.12132C19.9964 3.68393 19.7729 4.2235 19.3751 4.62132L10.3621 13.6353C10.1246 13.8726 9.8313 14.0462 9.50909 14.1403L6.63609 14.9803C6.55005 15.0054 6.45883 15.0069 6.372 14.9847C6.28517 14.9624 6.20592 14.9173 6.14254 14.8539C6.07916 14.7905 6.03398 14.7112 6.01174 14.6244C5.98949 14.5376 5.991 14.4464 6.01609 14.3603L6.85609 11.4873C6.95062 11.1654 7.12463 10.8724 7.36209 10.6353L16.3751 1.62132Z"
+                          stroke="#185DC0"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <button class="text-red-600 hover:text-red-800">
+                      <svg
+                        width="18"
+                        height="21"
+                        viewBox="0 0 18 21"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                          fill="#185DC0"
+                        />
+                      </svg>
+                    </button>
+                  </td> -->
+                </tr>
+              </tbody>
             </table>
           </div>
 
           <!-- Pagination -->
-          <div class="mt-4 flex justify-end space-x-2 text-sm">
-            <button class="px-3 py-1 rounded hover:bg-gray-200">
-              Previous
+          <div class="flex justify-end space-x-2 mt-4 text-gray-700">
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+            >
+              &lt; Previous
             </button>
-            <button class="px-3 py-1 rounded bg-blue-700 text-white">01</button>
-            <button class="px-3 py-1 rounded hover:bg-gray-200">02</button>
-            <button class="px-3 py-1 rounded hover:bg-gray-200">03</button>
-            <span>...</span>
-            <button class="px-3 py-1 rounded hover:bg-gray-200">Next</button>
+
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              @click="goToPage(page)"
+              :class="[
+                'px-3 py-1 rounded',
+                currentPage === page
+                  ? 'bg-blue-700 text-white'
+                  : 'hover:bg-gray-200'
+              ]"
+            >
+              {{ page.toString().padStart(2, '0') }}
+            </button>
+
+            <button
+              @click="nextPage"
+              :disabled="currentPage === totalPages"
+              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+            >
+              Next &gt;
+            </button>
           </div>
         </div>
       </main>

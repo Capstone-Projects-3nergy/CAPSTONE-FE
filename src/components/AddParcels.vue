@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -12,6 +12,22 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import axios from 'axios'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 import AlertPopUp from './AlertPopUp.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 const loginManager = useAuthManager()
@@ -26,23 +42,34 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const success = ref(false)
+const addSuccess = ref(false)
 const error = ref(false)
-const parcelStore = useParcelManager()
-
+const roomNumberError = ref(false)
+const SenderNameError = ref(false)
+const parcelTypeError = ref(false)
+const parcelManager = useParcelManager()
+const trackingNumberError = ref(false)
+const recipientNameError = ref(false)
+const senderNameError = ref(false)
+const companyIdError = ref(false)
+const parcelTypeErrorRequired = ref(false)
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
+const auth = useAuthManager()
+console.log(auth.user.role)
+// 🏢 สร้าง reactive variable สำหรับเก็บ companies
+const companyList = ref([])
+
 const parcelData = ref({
-  userId: null, // backend ใช้หาผู้พัก ไม่ต้องให้ผู้ใช้กรอก
+  userId: auth.user.id, // ให้มี userId ติดคงไว้
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  contact: '',
-  status: 'Pending', // default
+  status: 'pending', // default
   pickupAt: null,
   updateAt: null,
-  senderName: '',
+  senderName: null,
   companyId: '',
   receiveAt: null
 })
@@ -51,35 +78,236 @@ const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
+const isAllEmpty = computed(() => {
+  return (
+    !parcelData.value.trackingNumber &&
+    !parcelData.value.recipientName &&
+    !parcelData.value.roomNumber &&
+    !parcelData.value.parcelType &&
+    !parcelData.value.senderName &&
+    !parcelData.value.companyId &&
+    !parcelData.value.receiveAt &&
+    !parcelData.value.pickupAt &&
+    !parcelData.value.updateAt
+  )
+})
+// const emit = defineEmits(['add-success', 'add-error'])
+
+// console.log(auth.user.id)
+// 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
+const residents = ref([])
+
+// คำค้นที่ staff พิมพ์ในช่อง Recipient
+const recipientSearch = ref('')
+
+// id ของ resident ที่ถูกเลือก
+const selectedResidentId = ref(null)
+
+// object resident ที่เลือก
+const selectedResident = computed(
+  () =>
+    residents.value.find((r) => r.userId === selectedResidentId.value) || null
+)
+
+// แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
+const showSuggestions = computed(
+  () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
+)
+
+// filter จากชื่อ / email / roomNumber
+const filteredResidents = computed(() => {
+  const q = recipientSearch.value.trim().toLowerCase()
+  if (!q) return []
+  return residents.value.filter((r) => {
+    const fullName = (
+      r.fullName || `${r.firstName} ${r.lastName}`
+    ).toLowerCase()
+    return (
+      fullName.includes(q) ||
+      (r.email && r.email.toLowerCase().includes(q)) ||
+      (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+    )
+  })
+})
+
+// เวลาเลือก resident จาก list
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
+  parcelData.value.recipientName = name
+  recipientSearch.value = name // ใส่ชื่อที่เลือกกลับเข้า input
+}
+
+// ถ้า clear ช่อง search → clear selection ด้วย
+watch(recipientSearch, (val) => {
+  if (!val) {
+    selectedResidentId.value = null
+    parcelData.value.recipientName = ''
+  }
+})
+
+// โหลดรายชื่อ resident ตอนเข้าเพจ
+onMounted(async () => {
+  const auth = useAuthManager()
+  console.log('staff login id:', auth.user.id)
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+    console.log('Residents loaded:', residents.value)
+  } catch (e) {
+    console.error('Failed to load residents:', e)
+  }
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}` // ✅ ส่ง token
+      }
+    })
+    console.log('📦 Raw company response:', res.data)
+
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    if (typeof rawData === 'string') {
+      // กรณี server ส่ง string → ใช้ regex ดึง companyId และ companyName
+      const companyMatches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = companyMatches.map((str) => {
+        const idMatch = str.match(/"companyId":(\d+)/)
+        const nameMatch = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: idMatch ? Number(idMatch[1]) : null,
+          companyName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      // กรณี server ส่ง array มาเลย
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
+    console.log('✅ companyList:', companyList.value)
+  } catch (err) {
+    console.error('❌ Error fetching companies:', err)
+  }
+})
 
 // 🟩 ฟังก์ชันบันทึกข้อมูล parcelData ไป backend + store
 // ฟังก์ชันบันทึกพัสดุ
 const saveParcel = async () => {
+  // const auth = useAuthManager()
+  // console.log('staff login id:', auth.user.id)
+
+  // ❗ ต้องเลือก resident ก่อน
+  if (!selectedResidentId.value) {
+    error.value = true
+    console.error('No resident selected')
+    setTimeout(() => (error.value = false), 3000)
+    return
+  }
+  // ❗ ต้องเลือก resident ก่อน
+  // if (!selectedResidentId.value) {
+  //   error.value = true
+  //   console.error('No resident selected')
+  //   setTimeout(() => (error.value = false), 3000)
+  //   return
+  // }
+
+  // ตอนนี้คุณใช้ userId = staff ที่ล็อกอินอยู่
+  // ถ้าอยากให้ parcel เป็นของ resident จริง ๆ
+  // ต้องเปลี่ยนมาจาก resident ที่เลือก (เช่นจาก dropdown)
+  // สมมติยังใช้ของเดิมไปก่อน = auth.user.id
+  parcelData.value.userId = auth.user.id
+  if (!parcelData.value.trackingNumber) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.recipientName) {
+    recipientNameError.value = true
+    setTimeout(() => (recipientNameError.value = false), 3000)
+    return
+  }
+  if (!parcelData.value.parcelType) {
+    parcelTypeErrorRequired.value = true
+    setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
+    return
+  }
+  // if (!parcelData.value.senderName) {
+  //   senderNameError.value = true
+  //   setTimeout(() => (senderNameError.value = false), 3000)
+  //   return
+  // }
+  if (!parcelData.value.companyId) {
+    companyIdError.value = true
+    setTimeout(() => (companyIdError.value = false), 3000)
+    return
+  }
+
+  // (ถ้ายังอยาก validate senderName / parcelType เพิ่มก็ใส่ต่อได้)
+  // ตัวอย่าง:
+  // if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+  //   SenderNameError.value = true
+  //   setTimeout(() => (SenderNameError.value = false), 3000)
+  //   return
+  // }
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+    parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
+    return
+  }
+
   try {
     console.log('🚀 Sending parcel to backend...', parcelData.value)
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/parcels/add`,
-      parcelData.value
+    // ✅ payload ให้ตรงกับ CreateParcelDto
+    const requestBody = {
+      userId: selectedResidentId.value, // 👈 เจ้าของพัสดุ = resident จริง ๆ
+      trackingNumber: parcelData.value.trackingNumber,
+      recipientName: parcelData.value.recipientName,
+      parcelType: parcelData.value.parcelType,
+      senderName: parcelData.value.senderName,
+      companyId: Number(parcelData.value.companyId)
+    }
+
+    const savedParcel = await addItem(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+      requestBody,
+      router
     )
 
-    const savedParcel = response.data
+    if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
+      return
+    }
 
-    // เพิ่มเข้า Pinia store
-    parcelStore.addParcel(savedParcel)
+    parcelManager.addParcel(savedParcel)
 
+    addSuccess.value = true
+    setTimeout(() => (addSuccess.value = false), 3000)
     console.log('✅ Parcel saved successfully:', savedParcel)
-    success.value = true
 
-    // เคลียร์ form
+    // reset form
+    selectedResidentId.value = null
+    recipientSearch.value = ''
     parcelData.value = {
-      userId: null,
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
       parcelType: '',
       contact: '',
-      status: 'Pending',
+      status: 'pending',
       pickupAt: null,
       updateAt: null,
       senderName: '',
@@ -89,8 +317,126 @@ const saveParcel = async () => {
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
     error.value = true
+    setTimeout(() => (error.value = false), 3000)
   }
 }
+
+// const saveParcel = async () => {
+//   const auth = useAuthManager()
+//   console.log('staff login id:', auth.user.id)
+
+//   // ❗ ต้องเลือก resident ก่อน
+//   if (!selectedResidentId.value) {
+//     error.value = true
+//     console.error('No resident selected')
+//     setTimeout(() => (error.value = false), 3000)
+//     return
+//   }
+
+//   // ตอนนี้คุณใช้ userId = staff ที่ล็อกอินอยู่
+//   // ถ้าอยากให้ parcel เป็นของ resident จริง ๆ
+//   // ต้องเปลี่ยนมาจาก resident ที่เลือก (เช่นจาก dropdown)
+//   // สมมติยังใช้ของเดิมไปก่อน = auth.user.id
+//   parcelData.value.userId = auth.user.id
+//   if (!parcelData.value.trackingNumber) {
+//     trackingNumberError.value = true
+//     setTimeout(() => (trackingNumberError.value = false), 3000)
+//     return
+//   }
+//   if (!parcelData.value.recipientName) {
+//     recipientNameError.value = true
+//     setTimeout(() => (recipientNameError.value = false), 3000)
+//     return
+//   }
+//   if (!parcelData.value.parcelType) {
+//     parcelTypeErrorRequired.value = true
+//     setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
+//     return
+//   }
+//   if (!parcelData.value.senderName) {
+//     senderNameError.value = true
+//     setTimeout(() => (senderNameError.value = false), 3000)
+//     return
+//   }
+//   if (!parcelData.value.companyId) {
+//     companyIdError.value = true
+//     setTimeout(() => (companyIdError.value = false), 3000)
+//     return
+//   }
+//   // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+//     roomNumberError.value = true
+//     setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+//     return
+//   }
+
+//   // 2️⃣ ตรวจสอบ Sender Name
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+//     SenderNameError.value = true
+//     setTimeout(() => (SenderNameError.value = false), 3000)
+//     return
+//   }
+//   // validate ต่าง ๆ (roomNumber, senderName, parcelType) เหมือนเดิม...
+//   // 3️⃣ ตรวจสอบ Parcel Type
+//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+//     parcelTypeError.value = true
+//     setTimeout(() => (parcelTypeError.value = false), 3000)
+//     return
+//   }
+//   try {
+//     console.log('🚀 Sending parcel to backend...', parcelData.value)
+
+//     // ✅ สร้าง payload ให้ตรงกับ CreateParcelDto / Parcels
+//     const requestBody = {
+//       userId: parcelData.value.userId,
+//       trackingNumber: parcelData.value.trackingNumber,
+//       recipientName: parcelData.value.recipientName,
+//       parcelType: parcelData.value.parcelType,
+//       senderName: parcelData.value.senderName,
+//       companyId: Number(parcelData.value.companyId) // แปลงให้เป็น number
+//     }
+
+//     const savedParcel = await addItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+//       requestBody, // ❗ ส่งเฉพาะฟิลด์ที่ backend ใช้จริง
+//       router
+//     )
+
+//     if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 3000)
+//       return
+//     }
+
+//     parcelManager.addParcel(savedParcel)
+
+//     addSuccess.value = true
+//     setTimeout(() => (addSuccess.value = false), 3000)
+//     console.log('✅ Parcel saved successfully:', savedParcel)
+
+//     // reset form (อันนี้จะเก็บไว้แค่ในหน้า UI ไม่ส่งไป backend)
+//     // reset form
+//     selectedResidentId.value = null
+//     recipientSearch.value = ''
+//     parcelData.value = {
+//       userId: auth.user.id,
+//       trackingNumber: '',
+//       recipientName: '',
+//       roomNumber: '',
+//       parcelType: '',
+//       status: 'pending', // ตัวนี้ไม่ถูกใช้ใน backend ตอน add
+//       pickupAt: null,
+//       updateAt: null,
+//       senderName: '',
+//       companyId: '',
+//       receiveAt: null
+//     }
+//   } catch (err) {
+//     console.error('❌ Failed to add parcel:', err)
+//     error.value = true
+//     setTimeout(() => (error.value = false), 3000)
+//   }
+// }
 
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
@@ -133,19 +479,10 @@ const toggleSidebar = () => {
 // --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
-  if (operate === 'password') isPasswordWeak.value = false
-  if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
-  if (operate === 'dorm') isNoDorm.value = false
-  if (operate === 'notmatch') isNotMatch.value = false
-  if (operate === 'notroomrequired') isRoomRequired.value = false
-  if (operate === 'notpositionrequired') isPositionRequired.value = false
-  if (operate === 'emailform') incorrectemailform.value = false
-  if (operate === 'notnumber') roomidnotnumber.value = false
-  if (operate === 'erroeposition ') isPositionWrong.value = false
-  if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
 }
 </script>
 
@@ -217,7 +554,7 @@ const closePopUp = (operate) => {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -308,7 +645,7 @@ const closePopUp = (operate) => {
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
@@ -349,7 +686,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -366,7 +703,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -386,7 +723,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -401,7 +738,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2"
               ><svg
@@ -455,7 +792,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -470,7 +807,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -488,7 +825,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
+          <!-- <SidebarItem
             title="Manage Announcements"
             @click="ShowManageAnnouncementPage"
           >
@@ -506,7 +843,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -592,38 +929,163 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
+        <AlertPopUp
+          v-if="addSuccess"
+          :titles="'Add New Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="addSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="roomNumberError"
+          :titles="'Room Number can only be typed as number.'"
+          message="Error!!"
+          styleType="red"
+          operate="roomNumber"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="SenderNameError"
+          :titles="'Sender Name can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="SenderName"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="parcelTypeError"
+          :titles="'Parcel Type can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="parcelType "
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="trackingNumberError"
+          :titles="'Tracking Number is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="trackingNumber"
+          @closePopUp="closePopUp('trackingNumber')"
+        />
 
+        <!-- Alert สำหรับ Recipient Name -->
+        <AlertPopUp
+          v-if="recipientNameError"
+          :titles="'Recipient Name is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="recipientName"
+          @closePopUp="closePopUp('recipientName')"
+        />
+
+        <!-- Alert สำหรับ Parcel Type -->
+        <AlertPopUp
+          v-if="parcelTypeErrorRequired"
+          :titles="'Parcel Type is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="parcelType"
+          @closePopUp="closePopUp('parcelType')"
+        />
+
+        <!-- Alert สำหรับ Sender Name -->
+        <AlertPopUp
+          v-if="senderNameError"
+          :titles="'Sender Name is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="senderName"
+          @closePopUp="closePopUp('senderName')"
+        />
+
+        <!-- Alert สำหรับ Company ID -->
+        <AlertPopUp
+          v-if="companyIdError"
+          :titles="'Company ID is required.'"
+          message="Error!!"
+          styleType="red"
+          operate="companyId"
+          @closePopUp="closePopUp('companyId')"
+        />
         <!-- Form -->
-        <form
-          class="bg-white p-6 rounded-lg shadow space-y-6"
-          @submit.prevent="saveParcel"
-        >
+        <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
-            <ButtonWeb
+            <!-- <ButtonWeb
               label="Scan Parcel"
               color="blue"
               @click="showParcelScannerPage"
               class="w-full md:w-auto"
-            />
+            /> -->
           </div>
-          <AlertPopUp
-            v-if="success"
-            :titles="'Register New Account is Successfull.'"
-            message="Success!!"
-            styleType="green"
-            operate="success"
-            @closePopUp="closePopUp"
-          /><AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          />
-
           <!-- Row 1 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Tracking number -->
+            <div>
+              <label class="block font-semibold mb-1">Tracking number</label>
+              <input
+                v-model="parcelData.trackingNumber"
+                type="text"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+            </div>
+
+            <!-- Recipient: พิมพ์แล้วเลือกคน -->
+            <div class="relative">
+              <label class="block font-semibold mb-1">Recipient</label>
+              <input
+                v-model="recipientSearch"
+                type="text"
+                placeholder="name/ email / phone-number"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+
+              <!-- suggestion list -->
+              <ul
+                v-if="showSuggestions"
+                class="absolute z-10 mt-1 w-full bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+              >
+                <li
+                  v-for="r in filteredResidents"
+                  :key="r.userId"
+                  @click="selectResident(r)"
+                  class="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                >
+                  {{ r.fullName }} (Room {{ r.roomNumber }}) — {{ r.email }}
+                </li>
+                <li
+                  v-if="filteredResidents.length === 0"
+                  class="px-3 py-1 text-gray-400"
+                >
+                  No residents found matching your search terms.
+                </li>
+              </ul>
+            </div>
+
+            <!-- Room number: auto, read-only -->
+            <div>
+              <label class="block font-semibold mb-1">Room Number</label>
+              <input
+                type="text"
+                :value="selectedResident ? selectedResident.roomNumber : ''"
+                class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
+                disabled
+              />
+            </div>
+          </div>
+
+          <!-- Row 1
+           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Tracking number</label>
@@ -649,7 +1111,7 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
-          </div>
+          </div> -->
 
           <!-- Row 2 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -661,20 +1123,21 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Contact</label>
               <input
                 v-model="parcelData.contact"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <input
-                v-model="parcelData.status"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
+                value="pending"
+                disabled
               />
             </div>
           </div>
@@ -712,12 +1175,30 @@ const closePopUp = (operate) => {
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Company ID</label>
+              <label for="companySelect" class="block font-semibold mb-1"
+                >Company</label
+              >
+              <select
+                v-model="parcelData.companyId"
+                id="companySelect"
+                class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option :value="null" disabled>Select Company</option>
+                <option
+                  v-for="company in companyList"
+                  :key="company.companyId"
+                  :value="company.companyId"
+                >
+                  {{ company.companyName }}
+                </option>
+              </select>
+
+              <!-- <label class="block font-semibold mb-1">Company</label>
               <input
                 v-model="parcelData.companyId"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+              /> -->
             </div>
             <div>
               <label class="block font-semibold mb-1">Receive at</label>
@@ -731,7 +1212,18 @@ const closePopUp = (operate) => {
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
-            <ButtonWeb label="Save" color="green" @click="saveParcel" />
+            <ButtonWeb
+              type="button"
+              label="Save"
+              color="green"
+              @click="saveParcel"
+              :class="{
+                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+              }"
+              :disabled="isAllEmpty"
+            />
+
             <ButtonWeb
               label="Cancel"
               color="red"
@@ -743,7 +1235,7 @@ const closePopUp = (operate) => {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <!-- <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport> -->
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

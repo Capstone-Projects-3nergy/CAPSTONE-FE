@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -28,8 +28,8 @@ const showProfileStaff = ref(false)
 const parcelStore = useParcelManager()
 // 🔹 สร้าง ref สำหรับข้อมูลพัสดุ
 const parcel = ref(null)
-
 const route = useRoute()
+const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
 // const parcels = ref([
 //   {
 //     id: 1,
@@ -124,10 +124,10 @@ const route = useRoute()
 // ])
 // 🔹 โหลดข้อมูลจาก store หรือ backend
 onMounted(async () => {
-  const parcelId = Number(route.params.id) // รับพัสดุจาก route param เช่น /parcels/:id
+  const parcelId = Number(tid) // 👈 ใช้ tid แทน id
 
   // 1️⃣ ลองหาจาก store ก่อน
-  const localParcel = parcelStore.parcels.find((p) => p.parcelId === parcelId)
+  const localParcel = parcelStore.parcel.find((p) => p.parcelId === parcelId)
 
   if (localParcel) {
     parcel.value = localParcel
@@ -136,12 +136,11 @@ onMounted(async () => {
     // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
+        `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
       )
       parcel.value = res.data
-      console.log('📦 Loaded from backend:', parcel.value)
 
-      // ✅ เก็บไว้ใน store ด้วย
+      // บันทึกลง store
       parcelStore.addParcel(res.data)
     } catch (err) {
       console.error('❌ Failed to load parcel:', err)
@@ -270,7 +269,7 @@ const getParcelDetail = async (parcelId) => {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -361,7 +360,7 @@ const getParcelDetail = async (parcelId) => {
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
@@ -637,9 +636,15 @@ const getParcelDetail = async (parcelId) => {
             <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Details</h2>
 
             <button
-              class="bg-green-500 text-white font-semibold px-6 py-2 rounded-md shadow hover:bg-green-600 transition"
+              class="text-white font-semibold px-6 py-2 rounded-md shadow transition"
+              :class="{
+                'bg-yellow-400': parcel?.status === 'Pending',
+                'bg-green-400': parcel?.status === 'Picked Up',
+                'bg-red-400': parcel?.status === 'Unclaimed'
+              }"
+              disabled
             >
-              Picked Up
+              {{ parcel?.status || 'Unknown' }}
             </button>
           </div>
 

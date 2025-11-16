@@ -16,9 +16,15 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
+
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
+const error = ref(false)
+const roomNumberError = ref(false)
+const SenderNameError = ref(false)
+const parcelTypeError = ref(false)
 const showHomePageStaff = ref(false)
 const scanResult = ref('')
 const previewUrl = ref(null)
@@ -31,15 +37,28 @@ const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
-// ฟอร์มปัจจุบัน
-const form = reactive({
-  field1: '', // ชื่อผู้รับ
-  field2: '', // เลขพัสดุ
-  field3: '', // บริการขนส่ง
-  notes: '' // ประเภทพัสดุ
+
+// store
+const parcelStore = useParcelManager()
+
+// ✅ ฟอร์มใหม่ตามที่กำหนด
+const form = ref({
+  userId: null,
+  trackingNumber: '',
+  recipientName: '',
+  roomNumber: '',
+  parcelType: '',
+  contact: '',
+  status: 'Pending',
+  pickupAt: null,
+  updateAt: null,
+  senderName: '',
+  companyId: '',
+  receiveAt: null,
+  imageUrl: ''
 })
 
-// Array เก็บข้อมูล parcel
+// เก็บรายการพัสดุที่บันทึก
 const savedParcels = ref([])
 
 const scanningMode = ref('')
@@ -47,11 +66,13 @@ let html5QrCode = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const isCameraReady = ref(false)
-const showAddParcelPage = async function () {
+
+const showAddParcelPage = async () => {
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
-// -------- OCR function (คงเดิม) ----------
+
+// -------- OCR function ----------
 async function extractParcelInfo(imageDataUrl) {
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
@@ -82,27 +103,28 @@ async function extractParcelInfo(imageDataUrl) {
     return null
   }
 }
+
+// -------- Sidebar toggle ----------
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
-const deleteScanResult = () => {
-  scanResult.value = null
-}
+
+// -------- Delete function ----------
+const deleteScanResult = () => (scanResult.value = null)
 function deleteSaveInformation(index) {
   savedParcels.value.splice(index, 1)
   console.log(`❌ Deleted parcel at index ${index}`)
 }
-const deletePreview = () => {
-  previewUrl.value = null
-}
+const deletePreview = () => (previewUrl.value = null)
 
-const showDashBoardPage = async function () {
+// -------- Navigation ----------
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
 
-// -------- Camera functions (คงเดิม) ----------
+// -------- Camera ----------
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
     alert('กล้องไม่รองรับ')
@@ -122,6 +144,7 @@ async function startCamera() {
     alert('ไม่สามารถเปิดกล้องได้')
   }
 }
+
 function stopCameraOnly() {
   if (videoStream.value) {
     videoStream.value.getTracks().forEach((track) => track.stop())
@@ -130,7 +153,7 @@ function stopCameraOnly() {
   }
 }
 
-// -------- Photo capture + OCR (คงเดิม) ----------
+// -------- Photo capture + OCR ----------
 async function capturePhoto() {
   if (!videoRef.value || !isCameraReady.value) {
     alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
@@ -146,14 +169,14 @@ async function capturePhoto() {
 
   const parcelInfo = await extractParcelInfo(previewUrl.value)
   if (parcelInfo) {
-    form.field1 = parcelInfo.name || ''
-    form.field2 = parcelInfo.tracking || ''
-    form.field3 = parcelInfo.courier || ''
-    form.notes = parcelInfo.type || ''
+    form.value.recipientName = parcelInfo.name || ''
+    form.value.trackingNumber = parcelInfo.tracking || ''
+    form.value.companyId = parcelInfo.courier || ''
+    form.value.parcelType = parcelInfo.type || ''
   }
 }
 
-// -------- NEW: QuaggaJS2 สำหรับ Barcode ----------
+// -------- Barcode (QuaggaJS2) ----------
 function startQuagga() {
   Quagga.init(
     {
@@ -169,10 +192,7 @@ function startQuagga() {
           }
         }
       },
-      locator: {
-        patchSize: 'medium',
-        halfSample: false // ปรับเป็น false เพื่อสแกนชัด
-      },
+      locator: { patchSize: 'medium', halfSample: false },
       numOfWorkers: navigator.hardwareConcurrency || 4,
       decoder: {
         readers: [
@@ -190,10 +210,7 @@ function startQuagga() {
       locate: true
     },
     (err) => {
-      if (err) {
-        console.error('Quagga init error:', err)
-        return
-      }
+      if (err) return console.error('Quagga init error:', err)
       Quagga.start()
       console.log('📸 Quagga started for Barcode')
     }
@@ -204,8 +221,8 @@ function startQuagga() {
       const detectedCode = result.codeResult.code.trim()
       console.log('✅ Barcode detected:', detectedCode)
       scanResult.value = detectedCode
-      form.field2 = detectedCode
-      form.notes = 'Format: Barcode'
+      form.value.trackingNumber = detectedCode
+      form.value.parcelType = 'Format: Barcode'
       stopQuagga()
     }
   })
@@ -221,7 +238,7 @@ function stopQuagga() {
   }
 }
 
-// -------- สแกนเลือกตามโหมด (แก้ไขใหม่) ----------
+// -------- Scan QR/Barcode ----------
 function startScan(mode) {
   scanningMode.value = mode
   if (mode === 'qr') {
@@ -229,24 +246,7 @@ function startScan(mode) {
     const config = {
       fps: 10,
       qrbox: { width: 250, height: 350 },
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.QR_CODE,
-        Html5QrcodeSupportedFormats.AZTEC,
-        Html5QrcodeSupportedFormats.CODABAR,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.CODE_93,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.DATA_MATRIX,
-        Html5QrcodeSupportedFormats.MAXICODE,
-        Html5QrcodeSupportedFormats.ITF,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.PDF_417,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.RSS_14,
-        Html5QrcodeSupportedFormats.RSS_EXPANDED
-      ]
+      formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
     html5QrCode
       .start(
@@ -256,8 +256,8 @@ function startScan(mode) {
           const cleanText = decodedText.trim()
           console.log('✅ QR/Barcode Decoded:', cleanText)
           scanResult.value = cleanText
-          form.field2 = cleanText
-          form.notes = 'Format: QR/Barcode'
+          form.value.trackingNumber = cleanText
+          form.value.parcelType = 'Format: QR/Barcode'
         },
         (errorMsg) => console.warn('Scan error:', errorMsg)
       )
@@ -270,7 +270,6 @@ function startScan(mode) {
   }
 }
 
-// -------- หยุดสแกน (รองรับทั้งสอง lib) ----------
 function stopScan() {
   scanningMode.value = ''
   if (html5QrCode) {
@@ -282,94 +281,170 @@ function stopScan() {
   stopCameraOnly()
 }
 
-const showHomePageStaffWeb = async function () {
+// -------- Navigation --------
+const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-// --- function: save ---
-function saveParcel() {
+
+// function saveParcel() {
+//   const parcelData = {
+//     recipientName: form.value.recipientName,
+//     trackingNumber: form.value.trackingNumber,
+//     companyId: form.value.companyId,
+//     parcelType: form.value.parcelType,
+//     imageUrl: previewUrl.value || null,
+//     status: 'Pending', // กำหนดค่าเริ่มต้น
+//     roomNumber: form.value.roomNumber || '' // ถ้ามี
+//   }
+
+//   // ✅ เพิ่มพัสดุเข้า store
+//   parcelStore.addParcel(parcelData)
+//   console.log('✅ Parcel saved to store:', parcelData)
+
+//   // reset form
+//   Object.keys(form.value).forEach(
+//     (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+//   )
+
+//   // popup success
+//   greenPopup.add.state = true
+//   previewUrl.value = null
+//   setTimeout(() => (greenPopup.add.state = false), 3000)
+// }
+const saveParcel = async () => {
+  // สร้าง object จาก form
   const parcelData = {
-    name: form.field1,
-    tracking: form.field2,
-    courier: form.field3,
-    type: form.notes,
-    image: previewUrl.value || null // เพิ่มเก็บภาพที่ถ่าย
+    recipientName: form.value.recipientName,
+    trackingNumber: form.value.trackingNumber,
+    companyId: form.value.companyId,
+    parcelType: form.value.parcelType,
+    imageUrl: previewUrl.value || null,
+    status: 'Pending',
+    roomNumber: form.value.roomNumber || ''
   }
 
-  savedParcels.value.push(parcelData)
+  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
+  if (!/^[0-9]+$/.test(parcelData.roomNumber)) {
+    roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+    return
+  }
 
-  console.log('✅ Parcel saved:', parcelData)
+  // 2️⃣ ตรวจสอบ Sender Name
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.recipientName)) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 3000)
+    return
+  }
 
-  // reset form
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
+  // 3️⃣ ตรวจสอบ Parcel Type
+  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.parcelType)) {
+    parcelTypeError.value = true
+    setTimeout(() => (parcelTypeError.value = false), 3000)
+    return
+  }
 
-  // แสดง popup
-  greenPopup.add.state = true
-  previewUrl.value = null
-  // ตั้งเวลาให้ popup ปิดเองใน 3 วินาที
-  setTimeout(() => {
-    greenPopup.add.state = false
-  }, 3000)
+  try {
+    console.log('🚀 Sending parcel to backend...', parcelData)
+
+    // ส่งไป backend
+    const savedParcel = await addItem(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      parcelData,
+      router
+    )
+
+    if (!savedParcel) {
+      emit('scan-error')
+      router.replace({ name: 'staffparcels' })
+      return
+    }
+
+    // บันทึกลง Pinia
+    parcelStore.addParcel(savedParcel)
+    console.log('✅ Parcel saved to store:', savedParcel)
+
+    // ส่ง emit ไป parent แทนการแสดง popup ในไฟล์นี้
+    emit('scan-success')
+
+    // reset form
+    Object.keys(form.value).forEach(
+      (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+    )
+    previewUrl.value = null
+
+    router.replace({ name: 'staffparcels' })
+  } catch (err) {
+    console.error('❌ Failed to add parcel:', err)
+    emit('scan-error')
+    router.replace({ name: 'staffparcels' })
+  }
 }
-
-// --- function: cancel form ---
+const isAllEmpty = computed(() => {
+  return (
+    !form.value.trackingNumber &&
+    !form.value.recipientName &&
+    !form.value.roomNumber &&
+    !form.value.parcelType &&
+    !form.value.contact &&
+    !form.value.senderName &&
+    !form.value.companyId &&
+    !form.value.receiveAt &&
+    !form.value.pickupAt &&
+    !form.value.updateAt
+  )
+})
+const emit = defineEmits(['scan-success', 'scan-error'])
+// --- ปิด popup ด้วยมือ ---
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
+}
 function cancelParcel() {
-  form.field1 = ''
-  form.field2 = ''
-  form.field3 = ''
-  form.notes = ''
+  Object.keys(form.value).forEach(
+    (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+  )
   console.log('🛑 Form canceled/reset')
 }
-const greenPopup = reactive({
-  add: { state: false }
-})
-const redPopup = reactive({
-  add: { state: false }
-})
 
-// --- ปิด popup ด้วยมือ ---
+const greenPopup = reactive({ add: { state: false } })
+const redPopup = reactive({ add: { state: false } })
+
 function closeGreenPopup() {
   greenPopup.add.state = false
 }
 function closeRedPopup() {
   redPopup.add.state = false
 }
-// const showParcelScannerPage = async function () {
-//   router.replace({ name: 'parcelscanner' })
-//   showParcelScanner.value = true
-// }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
-const showManageParcelPage = async function () {
+
+const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
+
+const ShowManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
-const ShowManageResidentPage = async function () {
+
+const ShowManageResidentPage = async () => {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
 }
-const showProfileStaffPage = async function () {
+
+const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
@@ -444,7 +519,7 @@ const showProfileStaffPage = async function () {
                 v-if="!isCollapsed"
                 class="ml-3 text-2xl font-semibold text-white"
               >
-                Tractity
+                Tractify
               </span>
             </div>
           </button>
@@ -536,7 +611,7 @@ const showProfileStaffPage = async function () {
             v-if="!isCollapsed"
             class="ml-3 text-2xl font-semibold text-white"
           >
-            Tractity
+            Tractify
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
@@ -578,7 +653,7 @@ const showProfileStaffPage = async function () {
             </span>
             Home
           </a> -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
             <template #icon>
               <svg
                 width="24"
@@ -595,7 +670,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2">
               <svg
@@ -617,7 +692,7 @@ const showProfileStaffPage = async function () {
           </a> -->
 
           <!-- Dashboard -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
             <template #icon>
               <svg
                 width="24"
@@ -632,7 +707,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a
             href="#"
             class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
@@ -690,7 +765,7 @@ const showProfileStaffPage = async function () {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
             <template #icon>
               <svg
                 width="25"
@@ -705,7 +780,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -723,7 +798,7 @@ const showProfileStaffPage = async function () {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
+          <!-- <SidebarItem
             title="Manage Announcements"
             @click="ShowManageAnnouncementPage"
           >
@@ -741,7 +816,7 @@ const showProfileStaffPage = async function () {
                 />
               </svg>
             </template>
-          </SidebarItem>
+          </SidebarItem> -->
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -823,42 +898,57 @@ const showProfileStaffPage = async function () {
             />
           </svg>
 
-          <!-- 🏷️ Breadcrumb Text -->
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-
-          <!-- <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 12V9C6 8.20435 6.31607 7.44129 6.87868 6.87868C7.44129 6.31607 8.20435 6 9 6H12M6 24V27C6 27.7956 6.31607 28.5587 6.87868 29.1213C7.44129 29.6839 8.20435 30 9 30H12M24 6H27C27.7956 6 28.5587 6.31607 29.1213 6.87868C29.6839 7.44129 30 8.20435 30 9V12M24 30H27C27.7956 30 28.5587 29.6839 29.1213 29.1213C29.6839 28.5587 30 27.7956 30 27V24M10.5 18H25.5"
-              stroke="#185DC0"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg> -->
-
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
+
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <!-- Alert Popup -->
+          <!-- ✅ Alert Popup -->
           <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
+            <!-- <AlertPopUp
               v-if="greenPopup.add.state"
               :titles="'Success!!'"
               message="Successfully Added."
               styleType="green"
               :operate="'add'"
               @closePopUp="closeGreenPopup"
+            /> -->
+            <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="problem"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Room Number can only be typed as number.'"
+              message="Error!!"
+              styleType="red"
+              operate="roomNumber"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Sender Name can only be typed as text.'"
+              message="Error!!"
+              styleType="red"
+              operate="SenderName"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Parcel Type can only be typed as text.'"
+              message="Error!!"
+              styleType="red"
+              operate="parcelType "
+              @closePopUp="closePopUp"
             />
           </div>
-          <div class="fixed top-5 left-5 z-50">
+          <!-- <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="redPopup.add.state"
               :titles="'Error!!'"
@@ -867,35 +957,19 @@ const showProfileStaffPage = async function () {
               :operate="'add'"
               @closePopUp="closeRedPopup"
             />
-          </div>
-          <!-- Section Header -->
-          <!-- <div
-            class="bg-blue-700 text-white px-6 py-3 text-xl font-semibold flex items-center space-x-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M4 4h5V2H2v7h2V4zM4 15H2v7h7v-2H4v-5zM15 2v2h5v5h2V2h-7zM20 20h-5v2h7v-7h-2v5zM2 11h20v2H2z"
-              />
-            </svg>
-            <span>Parcel Scanner</span>
           </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <!-- Left side -->
+            <!-- 🟦 Left side -->
             <div class="space-y-6">
               <!-- Scanner -->
               <div
                 id="scanner"
                 class="w-full h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
               >
-                <span v-if="!scanningMode && !videoStream" class="text-white"
-                  >Scan QR/Barcode or Take Picture</span
-                >
+                <span v-if="!scanningMode && !videoStream" class="text-white">
+                  Scan QR/Barcode or Take Picture
+                </span>
 
                 <!-- Scanner Overlay -->
                 <div
@@ -906,18 +980,11 @@ const showProfileStaffPage = async function () {
                 >
                   <div id="reader" class="w-full h-full"></div>
                   <ButtonWeb
-                    label=" Cancel"
+                    label="Cancel"
                     color="red"
                     class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                     @click="stopScan"
                   />
-
-                  <!-- <button
-                    @click="stopScan"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                  >
-                    Cancel
-                  </button> -->
                 </div>
 
                 <!-- Video Preview -->
@@ -930,22 +997,15 @@ const showProfileStaffPage = async function () {
                   "
                 ></video>
                 <ButtonWeb
-                  label=" Close Camera"
+                  label="Close Camera"
                   color="red"
                   class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
                   v-if="videoStream"
                   @click="stopCameraOnly"
                 />
-                <!-- <button
-                  @click="stopCameraOnly"
-                  v-if="videoStream"
-                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                >
-                  Close Camera
-                </button> -->
               </div>
 
-              <!-- Buttons -->
+              <!-- 🟨 Buttons -->
               <div class="flex flex-wrap justify-center gap-3">
                 <ButtonWeb
                   label="Scan QR"
@@ -953,119 +1013,99 @@ const showProfileStaffPage = async function () {
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startScan('qr')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-                >
-                  Scan QR
-                </button> -->
                 <ButtonWeb
                   label="Scan Barcode"
                   color="green"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startScan('barcode')"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
-                >
-                  Scan Barcode
-                </button> -->
                 <ButtonWeb
-                  label=" Open Camera"
+                  label="Open Camera"
                   color="yellow"
                   @click="startCamera"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <button
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream"
-                  class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400"
-                >
-                  Open Camera
-                </button> -->
                 <ButtonWeb
                   label="Take Photo"
                   color="orange"
                   @click="capturePhoto"
                   :disabled="!videoStream"
                 />
-                <!-- <button
-                  @click="capturePhoto"
-                  :disabled="!videoStream"
-                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400"
-                >
-                  Take Photo
-                </button> -->
               </div>
 
-              <!-- Inputs -->
+              <!-- 🟩 Inputs -->
               <div class="space-y-3">
                 <input
-                  v-model="form.field1"
-                  placeholder="Name"
+                  v-model="form.recipientName"
+                  placeholder="Recipient Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.field2"
-                  placeholder="Tracking"
+                  v-model="form.trackingNumber"
+                  placeholder="Tracking Number"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.field3"
-                  placeholder="Service"
+                  v-model="form.senderName"
+                  placeholder="Sender Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
-                <textarea
-                  v-model="form.notes"
-                  placeholder="Type"
+                <input
+                  v-model="form.roomNumber"
+                  placeholder="Room Number"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  rows="2"
-                ></textarea>
+                />
+                <input
+                  v-model="form.parcelType"
+                  placeholder="Parcel Type"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.contact"
+                  placeholder="Contact Number"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.companyId"
+                  placeholder="Company ID"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                />
+                <input
+                  v-model="form.status"
+                  placeholder="Status (Default: Pending)"
+                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  disabled
+                />
               </div>
 
-              <!-- Save/Cancel -->
+              <!-- 🟪 Save/Cancel -->
               <div class="flex justify-end space-x-3">
-                <!-- <button
+                <!-- <ButtonWeb
+                  label="Save"
+                  color="green"
+                  :disabled="!form.recipientName || !form.trackingNumber"
                   @click="saveParcel"
-                  class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700"
-                >
-                  Save
-                </button>
-                <button
-                  @click="cancelParcel"
-                  class="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600"
-                >
-                  Cancel
-                </button> -->
+                /> -->
                 <ButtonWeb
                   label="Save"
                   color="green"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
                   @click="saveParcel"
+                  :class="{
+                    'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
+                    'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+                  }"
+                  :disabled="isAllEmpty"
                 />
                 <ButtonWeb
                   label="Cancel"
                   color="red"
-                  :disabled="
-                    form.field1.length == 0 &&
-                    form.field2.length == 0 &&
-                    form.field3.length == 0 &&
-                    form.notes.length == 0
-                  "
+                  :disabled="!form.recipientName && !form.trackingNumber"
                   @click="cancelParcel"
                 />
               </div>
             </div>
 
-            <!-- Right side -->
+            <!-- 🟥 Right side -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
                 <h2
@@ -1074,31 +1114,40 @@ const showProfileStaffPage = async function () {
                 >
                   < Go Back To Add
                 </h2>
-                <!-- <ButtonWeb
-                  label="Add Parcels Page"
-                  color="blue"
-                  @click="showAddParcelPage"
-                /> -->
               </div>
+
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
+
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
-                  <span>Name:</span><span>{{ form.field1 }}</span>
+                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span><span>{{ form.field2 }}</span>
+                  <span>Tracking:</span><span>{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Service:</span><span>{{ form.field3 }}</span>
+                  <span>Sender:</span><span>{{ form.senderName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Type:</span><span>{{ form.notes }}</span>
+                  <span>Room:</span><span>{{ form.roomNumber }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Type:</span><span>{{ form.parcelType }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Contact:</span><span>{{ form.contact }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Status:</span><span>{{ form.status }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Company ID:</span><span>{{ form.companyId }}</span>
                 </div>
               </div>
 
-              <!-- Image Preview -->
+              <!-- 🖼️ Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
                   Parcel Picture
@@ -1115,7 +1164,7 @@ const showProfileStaffPage = async function () {
                 </button>
               </div>
 
-              <!-- Saved Parcels -->
+              <!-- 💾 Saved Parcels -->
               <div class="mt-6">
                 <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
@@ -1127,14 +1176,15 @@ const showProfileStaffPage = async function () {
                     class="border p-3 rounded relative flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0"
                   >
                     <div>
-                      <div>Name: {{ p.name }}</div>
-                      <div>Tracking: {{ p.tracking }}</div>
-                      <div>Service: {{ p.courier }}</div>
-                      <div>Type: {{ p.type }}</div>
+                      <div>Recipient: {{ p.recipientName }}</div>
+                      <div>Tracking: {{ p.trackingNumber }}</div>
+                      <div>Sender: {{ p.senderName }}</div>
+                      <div>Type: {{ p.parcelType }}</div>
+                      <div>Status: {{ p.status }}</div>
                     </div>
-                    <div v-if="p.image" class="md:ml-4">
+                    <div v-if="p.imageUrl" class="md:ml-4">
                       <img
-                        :src="p.image"
+                        :src="p.imageUrl"
                         class="w-28 h-28 object-cover rounded"
                       />
                     </div>

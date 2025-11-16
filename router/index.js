@@ -16,6 +16,7 @@ import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
 import AddParcels from '@/components/AddParcels.vue'
 import EditParcels from '@/components/EditParcels.vue'
 import ParcelsDetail from '@/components/ParcelsDetail.vue'
+import DeleteParcels from '@/components/DeleteParcels.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -107,14 +108,19 @@ const routes = [
     component: AddParcels
   },
   {
-    path: '/homepage/staff/:id/manageparcel/editparcel',
+    path: '/homepage/staff/:id/manageparcel/:tid/editparcel',
     name: 'editparcels',
     component: EditParcels
   },
   {
-    path: '/homepage/staff/:id/manageparcel/detailparcel',
+    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel',
     name: 'detailparcels',
     component: ParcelsDetail
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/deleteparcel',
+    name: 'deleteparcels',
+    component: DeleteParcels
   }
 ]
 
