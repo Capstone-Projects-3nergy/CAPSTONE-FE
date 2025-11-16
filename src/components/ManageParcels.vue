@@ -54,6 +54,7 @@ import {
   editItemWithFile,
   deleteFile
 } from '@/utils/fetchUtils'
+import ParcelScannerPage from './ParcelScannerPage.vue'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -1223,6 +1224,10 @@ const closePopUp = (operate) => {
   </teleport> -->
   <div style="display: none">
     <AddParcels @add-success="addSuccess = true" @add-error="error = true" />
+    <ParcelScannerPage
+      @add-success="addSuccess = true"
+      @add-error="error = true"
+    />
     <EditParcels
       @edit-success="editSuccess = true"
       @edit-error="error = true"
