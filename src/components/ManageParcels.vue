@@ -345,12 +345,29 @@ const deleteParcel = async (parcelId) => {
   parcelManager.deleteParcels(parcelId)
 }
 
+// const closePopUp = (operate) => {
+//   if (operate === 'problem') error.value = false
+//   if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
+//   if (operate === 'addSuccessMessage ') addSuccess.value = false
+//   if (operate === 'editSuccessMessage') editSuccess.value = false
+// }
 const closePopUp = (operate) => {
-  if (operate === 'problem') error.value = false
-  if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
-  if (operate === 'addSuccessMessage ') addSuccess.value = false
-  if (operate === 'editSuccessMessage') editSuccess.value = false
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      deleteSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
 }
+
 </script>
 
 <template>
