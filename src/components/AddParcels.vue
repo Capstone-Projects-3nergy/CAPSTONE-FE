@@ -51,6 +51,7 @@ const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
+const parcelTypeErrorRequired = ref(false)
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
@@ -112,8 +113,8 @@ const saveParcel = async () => {
     return
   }
   if (!parcelData.value.parcelType) {
-    parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 3000)
+    parcelTypeErrorRequired.value = true
+    setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
     return
   }
   if (!parcelData.value.senderName) {
@@ -826,7 +827,7 @@ const closePopUp = (operate) => {
 
         <!-- Alert สำหรับ Parcel Type -->
         <AlertPopUp
-          v-if="parcelTypeError"
+          v-if="parcelTypeErrorRequired"
           :titles="'Parcel Type is required.'"
           message="Error!!"
           styleType="red"
