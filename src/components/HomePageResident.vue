@@ -17,7 +17,13 @@ const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = ['Package 1', 'Package 2', 'Package 3', 'Package 4', 'Package 5']
+const slides = ['/image/parcels.jpg','/image/parcels2.jpg']
+// const slides = [
+//   { title: "Fast Delivery", desc: "Track parcels with ease" },
+//   { title: "Secure Handling", desc: "Your packages are safe" },
+//   { title: "Smart Notifications", desc: "Never miss an update" }
+// ]
+
 const currentIndex = ref(0)
 const showParcelScanner = ref(false)
 const showResidentParcels = ref(false)
@@ -406,28 +412,38 @@ console.log(registerStore.user)
             Resident Home Page
           </h1>
 
-          <!-- Slider -->
+
+          <!-- // แถบ รูป หน้า homepage/* -->
+          
           <div
-            class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300"
-          >
-            <button
-              @click="prevSlide"
-              class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900"
-            >
-              ‹
-            </button>
-            <div
-              class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
-            >
-              {{ slides[currentIndex] }}
-            </div>
-            <button
-              @click="nextSlide"
-              class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
-            >
-              ›
-            </button>
-            <div class="absolute bottom-2 flex space-x-2">
+  class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300 overflow-hidden"
+>
+  <button
+    @click="prevSlide"
+    class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900 z-10"
+  >
+    ‹
+  </button>
+
+<div class="max-w-6xl mx-auto">
+  <img 
+    :src="slides[currentIndex]" 
+    class="w-full h-56 object-cover rounded-xl"
+  />
+</div>
+
+
+  <button
+    @click="nextSlide"
+    class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900 z-10"
+  >
+    ›
+  </button>
+</div>
+
+
+
+           <!-- // <div class="absolute bottom-2 flex space-x-2">
               <span
                 v-for="(s, i) in slides"
                 :key="i"
@@ -438,7 +454,52 @@ console.log(registerStore.user)
                 class="w-2 h-2 rounded-full"
               ></span>
             </div>
-          </div>
+          </div> 
+          
+        <div>
+   
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+<!-- Welcome Slider
+<div
+  class="relative bg-gradient-to-r from-blue-600 via-sky-600 to-blue-700 h-40 rounded-xl flex flex-col items-center justify-center shadow-md border border-blue-100 overflow-hidden text-white"
+>
+  เอฟเฟกต์แสงเบาๆ
+  <div class="absolute inset-0 bg-white/5 blur-xl"></div>
+
+  <!-- เนื้อหา -->
+  <!-- <div class="relative z-10 text-center px-4">
+    <h2 class="text-2xl font-semibold drop-shadow-sm tracking-wide">
+      Welcome to <span class="font-bold">Tractify</span>
+    </h2>
+    <p class="mt-1 text-sm text-white/80">Manage your parcels efficiently and securely</p>
+  </div> --> 
+
+  <!-- จุดประดับข้างล่าง -->
+  <!-- <div class="absolute bottom-2 flex space-x-2">
+    <span class="w-2 h-2 bg-white/70 rounded-full"></span>
+    <span class="w-2 h-2 bg-white/40 rounded-full"></span>
+    <span class="w-2 h-2 bg-white/40 rounded-full"></span>
+  </div> -->
+<!-- </div> -->
+
+
+
+
+
+
         </section>
 
         <!-- Sections -->
