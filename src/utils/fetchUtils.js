@@ -110,6 +110,26 @@ async function deleteAndTransferItem(url, id, newId, router) {
   }
 }
 
+// async function addItem(url, newItem, router) {
+//   try {
+//     const options = {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(newItem)
+//     }
+
+//     const res = await fetchWithAuth(url, options, router)
+//     if (res.ok) {
+//       return await res.json()
+//     }
+//     return res.status
+//   } catch (error) {
+//     console.error(`Network error: ${error}`)
+//     return null
+//   }
+// }
 async function addItem(url, newItem, router) {
   try {
     const options = {
@@ -121,8 +141,16 @@ async function addItem(url, newItem, router) {
     }
 
     const res = await fetchWithAuth(url, options, router)
+
     if (res.ok) {
-      return await res.json()
+      const text = await res.text() // อ่านเป็น string ก่อน
+      try {
+        const data = JSON.parse(text)
+        return data
+      } catch (err) {
+        console.error('Invalid JSON from server:', text)
+        return null
+      }
     }
     return res.status
   } catch (error) {

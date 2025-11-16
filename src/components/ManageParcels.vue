@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -15,7 +15,6 @@ import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import { getItems } from '@/utils/fetchUtils'
 import EditParcels from './EditParcels.vue'
 import {
   sortByRoomNumber,
@@ -40,6 +39,7 @@ import {
   filterByYear
 } from '@/stores/SortManager'
 import {
+  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -81,6 +81,72 @@ const showDeleteParcel = ref(false)
 
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
+// 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
+const residents = ref([])
+
+// คำค้นที่ staff พิมพ์ในช่อง Recipient
+const recipientSearch = ref('')
+
+// id ของ resident ที่ถูกเลือก
+const selectedResidentId = ref(null)
+
+// object resident ที่เลือก
+const selectedResident = computed(
+  () =>
+    residents.value.find((r) => r.userId === selectedResidentId.value) || null
+)
+
+// แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
+const showSuggestions = computed(
+  () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
+)
+
+// filter จากชื่อ / email / roomNumber
+const filteredResidents = computed(() => {
+  const q = recipientSearch.value.trim().toLowerCase()
+  if (!q) return []
+  return residents.value.filter((r) => {
+    const fullName = (
+      r.fullName || `${r.firstName} ${r.lastName}`
+    ).toLowerCase()
+    return (
+      fullName.includes(q) ||
+      (r.email && r.email.toLowerCase().includes(q)) ||
+      (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+    )
+  })
+})
+
+// เวลาเลือก resident จาก list
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
+  parcelData.value.recipientName = name
+  recipientSearch.value = name // ใส่ชื่อที่เลือกกลับเข้า input
+}
+
+// ถ้า clear ช่อง search → clear selection ด้วย
+watch(recipientSearch, (val) => {
+  if (!val) {
+    selectedResidentId.value = null
+    parcelData.value.recipientName = ''
+  }
+})
+
+// โหลดรายชื่อ resident ตอนเข้าเพจ
+// onMounted(async () => {
+//   try {
+//     const res = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/residents`,
+//       router
+//     )
+//     residents.value = res || []
+//     console.log('Residents loaded:', residents.value)
+//   } catch (e) {
+//     console.error('Failed to load residents:', e)
+//   }
+// })
+
 onMounted(async () => {
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -88,6 +154,16 @@ onMounted(async () => {
   )
   if (data) {
     parcelManager.setParcels(data)
+  }
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+    console.log('Residents loaded:', residents.value)
+  } catch (e) {
+    console.error('Failed to load residents:', e)
   }
 })
 const parcels = computed(() => parcelManager.parcel)
