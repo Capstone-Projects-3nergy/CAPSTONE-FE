@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
@@ -383,16 +383,16 @@ const saveParcel = async () => {
 }
 const isAllEmpty = computed(() => {
   return (
-    !parcelData.value.trackingNumber &&
-    !parcelData.value.recipientName &&
-    !parcelData.value.roomNumber &&
-    !parcelData.value.parcelType &&
-    !parcelData.value.contact &&
-    !parcelData.value.senderName &&
-    !parcelData.value.companyId &&
-    !parcelData.value.receiveAt &&
-    !parcelData.value.pickupAt &&
-    !parcelData.value.updateAt
+    !form.value.trackingNumber &&
+    !form.value.recipientName &&
+    !form.value.roomNumber &&
+    !form.value.parcelType &&
+    !form.value.contact &&
+    !form.value.senderName &&
+    !form.value.companyId &&
+    !form.value.receiveAt &&
+    !form.value.pickupAt &&
+    !form.value.updateAt
   )
 })
 const emit = defineEmits(['scan-success', 'scan-error'])
