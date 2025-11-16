@@ -122,8 +122,8 @@ const saveEditParcel = async () => {
     )
 
     if (!updatedParcel) {
-      emit('edit-error')
-      router.replace({ name: 'staffparcels' })
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
       return
     }
 
@@ -143,16 +143,17 @@ const saveEditParcel = async () => {
         console.log('✅ Updated status:', updatedStatus)
       } catch (errStatus) {
         console.error('❌ Failed to update status:', errStatus)
-        emit('edit-error')
-        router.replace({ name: 'staffparcels' })
+        error.value = true
+        setTimeout(() => (error.value = false), 3000)
         return
       }
     }
 
-    emit('edit-success')
-    router.replace({ name: 'staffparcels' })
+    editSuccess.value = true
+    setTimeout(() => (editSuccess.value = false), 3000)
   } catch (err) {
-    emit('edit-error')
+    error.value = true
+    setTimeout(() => (error.value = false), 3000)
     router.replace({ name: 'staffparcels' })
     console.error('❌ Failed to update parcel:', err)
   }
