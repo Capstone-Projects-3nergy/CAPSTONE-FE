@@ -141,23 +141,58 @@ async function addItem(url, newItem, router) {
     }
 
     const res = await fetchWithAuth(url, options, router)
+    if (!res) return null
 
     if (res.ok) {
-      const text = await res.text() // อ่านเป็น string ก่อน
+      // อ่านเป็น text ก่อน ไม่ parse JSON
+      const text = await res.text()
+      console.log('📦 Raw server response:', text)
+
+      // ลอง parse JSON ด้วย try-catch เพื่อดูว่าผิดตรงไหน
       try {
         const data = JSON.parse(text)
         return data
       } catch (err) {
-        console.error('Invalid JSON from server:', text)
+        console.error('❌ Invalid JSON from server:', err)
         return null
       }
     }
+
     return res.status
   } catch (error) {
     console.error(`Network error: ${error}`)
     return null
   }
 }
+
+// async function addItem(url, newItem, router) {
+//   try {
+//     const options = {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(newItem)
+//     }
+
+//     const res = await fetchWithAuth(url, options, router)
+
+//     if (res.ok) {
+//       const text = await res.text() // อ่านเป็น string ก่อน
+//       try {
+//         const data = JSON.parse(text)
+//         return data
+//       } catch (err) {
+//         console.error('Invalid JSON from server:', text)
+//         return null
+//       }
+//     }
+//     return res.status
+//   } catch (error) {
+//     console.error(`Network error: ${error}`)
+//     return null
+//   }
+// }
 
 async function editItem(url, id, editedItem, router) {
   try {
