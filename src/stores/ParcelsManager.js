@@ -43,20 +43,29 @@ export const useParcelManager = defineStore('parcelManager', () => {
   }
 
   // 🟨 Add
-  const addParcel = (newParcel) => {
-    if (!newParcel || newParcel.status >= 400) {
-      console.error('Invalid parcel data:', newParcel)
-      return null
+  const addParcel = function (newParcel) {
+    if (!newParcel) {
+      console.error('Cannot add empty parcel')
+      return
     }
-
-    const parcelWithId = {
-      parcelId: Date.now(),
-      ...newParcel
-    }
-    parcel.push(parcelWithId)
-    console.log('🆕 Parcel added:', parcelWithId)
-    return parcelWithId
+    parcel.push(newParcel)
+    console.log('Parcel added:', newParcel)
   }
+
+  // const addParcel = (newParcel) => {
+  //   if (!newParcel || newParcel.status >= 400) {
+  //     console.error('Invalid parcel data:', newParcel)
+  //     return null
+  //   }
+
+  //   const parcelWithId = {
+  //     parcelId: Date.now(),
+  //     ...newParcel
+  //   }
+  //   parcel.push(parcelWithId)
+  //   console.log('🆕 Parcel added:', parcelWithId)
+  //   return parcelWithId
+  // }
 
   // const addParcel = (newParcel) => {
   //   parcel.push({
