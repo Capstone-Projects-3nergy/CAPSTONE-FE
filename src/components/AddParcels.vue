@@ -66,7 +66,7 @@ const parcelData = ref({
   status: 'pending', // default
   pickupAt: null,
   updateAt: null,
-  senderName: '',
+  senderName: null,
   companyId: '',
   receiveAt: null
 })
@@ -173,12 +173,12 @@ const saveParcel = async () => {
     return
   }
   // ❗ ต้องเลือก resident ก่อน
-  if (!selectedResidentId.value) {
-    error.value = true
-    console.error('No resident selected')
-    setTimeout(() => (error.value = false), 3000)
-    return
-  }
+  // if (!selectedResidentId.value) {
+  //   error.value = true
+  //   console.error('No resident selected')
+  //   setTimeout(() => (error.value = false), 3000)
+  //   return
+  // }
 
   // ตอนนี้คุณใช้ userId = staff ที่ล็อกอินอยู่
   // ถ้าอยากให้ parcel เป็นของ resident จริง ๆ
@@ -200,11 +200,11 @@ const saveParcel = async () => {
     setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
     return
   }
-  if (!parcelData.value.senderName) {
-    senderNameError.value = true
-    setTimeout(() => (senderNameError.value = false), 3000)
-    return
-  }
+  // if (!parcelData.value.senderName) {
+  //   senderNameError.value = true
+  //   setTimeout(() => (senderNameError.value = false), 3000)
+  //   return
+  // }
   if (!parcelData.value.companyId) {
     companyIdError.value = true
     setTimeout(() => (companyIdError.value = false), 3000)
@@ -213,11 +213,11 @@ const saveParcel = async () => {
 
   // (ถ้ายังอยาก validate senderName / parcelType เพิ่มก็ใส่ต่อได้)
   // ตัวอย่าง:
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
-    SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 3000)
-    return
-  }
+  // if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+  //   SenderNameError.value = true
+  //   setTimeout(() => (SenderNameError.value = false), 3000)
+  //   return
+  // }
   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 3000)
@@ -975,10 +975,7 @@ const closePopUp = (operate) => {
           @closePopUp="closePopUp('companyId')"
         />
         <!-- Form -->
-        <form
-          class="bg-white p-6 rounded-lg shadow space-y-6"
-          @submit.prevent="saveParcel"
-        >
+        <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
             <!-- <ButtonWeb
@@ -1135,7 +1132,7 @@ const closePopUp = (operate) => {
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Company ID</label>
+              <label class="block font-semibold mb-1">Company</label>
               <input
                 v-model="parcelData.companyId"
                 type="text"
@@ -1155,6 +1152,7 @@ const closePopUp = (operate) => {
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
             <ButtonWeb
+              type="button"
               label="Save"
               color="green"
               @click="saveParcel"
