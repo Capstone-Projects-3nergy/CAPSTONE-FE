@@ -1031,7 +1031,9 @@ const closePopUp = (operate) => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Tracking number -->
             <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
+              <label class="block font-semibold mb-1"
+                >Tracking number <span class="text-red-500">***</span></label
+              >
               <input
                 v-model="parcelData.trackingNumber"
                 type="text"
@@ -1041,7 +1043,9 @@ const closePopUp = (operate) => {
 
             <!-- Recipient: พิมพ์แล้วเลือกคน -->
             <div class="relative">
-              <label class="block font-semibold mb-1">Recipient</label>
+              <label class="block font-semibold mb-1"
+                >Recipient <span class="text-red-500">***</span></label
+              >
               <input
                 v-model="recipientSearch"
                 type="text"
@@ -1073,7 +1077,9 @@ const closePopUp = (operate) => {
 
             <!-- Room number: auto, read-only -->
             <div>
-              <label class="block font-semibold mb-1">Room Number</label>
+              <label class="block font-semibold mb-1"
+                >Room Number <span class="text-red-500">***</span></label
+              >
               <input
                 type="text"
                 :value="selectedResident ? selectedResident.roomNumber : ''"
@@ -1115,7 +1121,9 @@ const closePopUp = (operate) => {
           <!-- Row 2 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
+              <label class="block font-semibold mb-1"
+                >Parcel Type <span class="text-red-500">***</span></label
+              >
               <select
                 v-model="parcelData.parcelType"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
@@ -1133,7 +1141,9 @@ const closePopUp = (operate) => {
               />
             </div> -->
             <div>
-              <label class="block font-semibold mb-1">Status</label>
+              <label class="block font-semibold mb-1"
+                >Status <span class="text-red-500">***</span></label
+              >
               <input
                 type="text"
                 class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
@@ -1177,7 +1187,7 @@ const closePopUp = (operate) => {
             </div>
             <div>
               <label for="companySelect" class="block font-semibold mb-1"
-                >Company</label
+                >Company <span class="text-red-500">***</span></label
               >
               <select
                 v-model="parcelData.companyId"
