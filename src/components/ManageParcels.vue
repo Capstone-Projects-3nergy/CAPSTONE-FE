@@ -23,7 +23,6 @@ import {
   sortByStatusReverse,
   sortByDate,
   sortByDateReverse,
-  searchParcels,
   sortByTracking,
   sortByTrackingReverse,
   sortByName,
@@ -34,6 +33,7 @@ import {
   sortByLastName,
   sortByFirstNameReverse,
   sortByLastNameReverse,
+  searchParcels,
   filterByDay,
   filterByMonth,
   filterByYear
@@ -369,6 +369,22 @@ function parseDate(dateStr) {
 
   return null
 }
+// //ตัวอย่างฟังก์ชัน searchParcels
+// function searchParcels(parcels, keyword) {
+//   const lowerKeyword = keyword.toLowerCase()
+//   return parcels.filter((p) => {
+//     return (
+//       (p.trackingNumber &&
+//         p.trackingNumber.toLowerCase().includes(lowerKeyword)) ||
+//       (p.recipientName &&
+//         p.recipientName.toLowerCase().includes(lowerKeyword)) ||
+//       (p.roomNumber && p.roomNumber.toLowerCase().includes(lowerKeyword)) ||
+//       (p.email && p.email.toLowerCase().includes(lowerKeyword)) ||
+//       (p.status && p.status.toLowerCase().includes(lowerKeyword))
+//     )
+//   })
+// }
+
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,

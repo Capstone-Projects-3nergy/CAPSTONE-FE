@@ -86,18 +86,34 @@ function sortByContactReverse(parcels) {
 }
 
 // ค้นหาพัสดุจากคีย์เวิร์ด
-function searchParcels(parcels, keywords) {
-  const lower = keywords.toLowerCase()
-  return parcels.filter(
-    (p) =>
-      (p.tracking && p.tracking.toLowerCase().includes(lower)) ||
-      (p.recipient && p.recipient.toLowerCase().includes(lower)) ||
-      (p.room && p.room.toString().includes(lower)) ||
-      (p.contact && p.contact.includes(lower)) ||
-      (p.status && p.status.toLowerCase().includes(lower)) ||
-      (p.date && p.date.toLowerCase().includes(lower))
-  )
+function searchParcels(parcels, keyword) {
+  const lowerKeyword = keyword.toLowerCase()
+  return parcels.filter((p) => {
+    return (
+      (p.trackingNumber &&
+        p.trackingNumber.toLowerCase().includes(lowerKeyword)) ||
+      (p.recipientName &&
+        p.recipientName.toLowerCase().includes(lowerKeyword)) ||
+      (p.roomNumber && p.roomNumber.toLowerCase().includes(lowerKeyword)) ||
+      (p.email && p.email.toLowerCase().includes(lowerKeyword)) ||
+      (p.status && p.status.toLowerCase().includes(lowerKeyword)) ||
+      (p.receiveAt && p.receiveAt.toLowerCase().includes(lowerKeyword))
+    )
+  })
 }
+// function searchParcels(parcels, keywords) {
+//   const lower = keywords.toLowerCase()
+//   return parcels.filter(
+//     (p) =>
+//       (p.tracking && p.tracking.toLowerCase().includes(lower)) ||
+//       (p.recipient && p.recipient.toLowerCase().includes(lower)) ||
+//       (p.room && p.room.toString().includes(lower)) ||
+//       (p.contact && p.contact.includes(lower)) ||
+//       (p.status && p.status.toLowerCase().includes(lower)) ||
+//       (p.date && p.date.toLowerCase().includes(lower))
+//   )
+// }
+
 // 🧩 Helper: แปลง string "05 Oct 2025" เป็น Date object
 function parseDate(dateStr) {
   return new Date(dateStr)
