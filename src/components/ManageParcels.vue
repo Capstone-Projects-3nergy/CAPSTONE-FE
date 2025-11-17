@@ -294,6 +294,8 @@ const sortStatusAsc = () => sortByStatus(parcels.value)
 const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
 
 // ===== ฟังก์ชัน toggle =====
 const toggleSortRoom = () => {
@@ -335,6 +337,12 @@ const handleSort = () => {
       break
     case 'Status (Z→A)':
       sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
       break
   }
 }
@@ -1070,12 +1078,12 @@ const closePopUp = (operate) => {
                 <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
+                <option>Name (A→Z)</option>
+                <option>Name (Z→A)</option>
                 <option>Room (A→Z)</option>
                 <option>Room (Z→A)</option>
                 <option>Status (A→Z)</option>
                 <option>Status (Z→A)</option>
-                <!-- <option>First Name</option>
-                <option>Last Name</option> -->
               </select>
 
               <!-- Add Parcel -->

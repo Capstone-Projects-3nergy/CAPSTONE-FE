@@ -52,7 +52,7 @@ function sortByTrackingReverse(parcels) {
 // เรียงตามชื่อผู้รับ (Name) (A → Z)
 function sortByName(parcels) {
   parcels.sort((a, b) =>
-    (a.recipient || '').localeCompare(b.recipient || '', 'th', {
+    (a.recipientName || '').localeCompare(b.recipientName || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -61,7 +61,7 @@ function sortByName(parcels) {
 // เรียงตามชื่อผู้รับ (Name) (Z → A)
 function sortByNameReverse(parcels) {
   parcels.sort((a, b) =>
-    (b.recipient || '').localeCompare(a.recipient || '', 'th', {
+    (b.recipientName || '').localeCompare(a.recipientName || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -164,8 +164,8 @@ function filterByYear(parcels, targetDate = new Date()) {
 // เรียงตาม First Name (A → Z)
 function sortByFirstName(parcels) {
   parcels.sort((a, b) => {
-    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
-    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    const aFirst = (a.recipientName || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipientName || '').split(' ')[0].toLowerCase()
     return aFirst.localeCompare(bFirst)
   })
 }
@@ -173,8 +173,8 @@ function sortByFirstName(parcels) {
 // เรียงตาม First Name (Z → A)
 function sortByFirstNameReverse(parcels) {
   parcels.sort((a, b) => {
-    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
-    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    const aFirst = (a.recipientName || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipientName || '').split(' ')[0].toLowerCase()
     return bFirst.localeCompare(aFirst)
   })
 }
@@ -182,8 +182,8 @@ function sortByFirstNameReverse(parcels) {
 // เรียงตาม Last Name (A → Z)
 function sortByLastName(parcels) {
   parcels.sort((a, b) => {
-    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
-    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const aLast = (a.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
     return aLast.localeCompare(bLast)
   })
 }
@@ -191,8 +191,8 @@ function sortByLastName(parcels) {
 // เรียงตาม Last Name (Z → A)
 function sortByLastNameReverse(parcels) {
   parcels.sort((a, b) => {
-    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
-    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const aLast = (a.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
     return bLast.localeCompare(aLast)
   })
 }
