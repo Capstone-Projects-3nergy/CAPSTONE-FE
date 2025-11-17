@@ -102,20 +102,20 @@ const showSuggestions = computed(
 )
 
 // filter จากชื่อ / email / roomNumber
-const filteredResidents = computed(() => {
-  const q = recipientSearch.value.trim().toLowerCase()
-  if (!q) return []
-  return residents.value.filter((r) => {
-    const fullName = (
-      r.fullName || `${r.firstName} ${r.lastName}`
-    ).toLowerCase()
-    return (
-      fullName.includes(q) ||
-      (r.email && r.email.toLowerCase().includes(q)) ||
-      (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
-    )
-  })
-})
+// const filteredResidents = computed(() => {
+//   const q = recipientSearch.value.trim().toLowerCase()
+//   if (!q) return []
+//   return residents.value.filter((r) => {
+//     const fullName = (
+//       r.fullName || `${r.firstName} ${r.lastName}`
+//     ).toLowerCase()
+//     return (
+//       fullName.includes(q) ||
+//       (r.email && r.email.toLowerCase().includes(q)) ||
+//       (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+//     )
+//   })
+// })
 
 // เวลาเลือก resident จาก list
 const selectResident = (resident) => {
@@ -400,18 +400,40 @@ const filteredParcels = computed(() => {
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
 
-  const now = new Date()
-
-  // if (activeTab.value === 'Day') result = filterByDay(result, now)
-  // else if (activeTab.value === 'Month') result = filterByMonth(result, now)
-  // else if (activeTab.value === 'Year') result = filterByYear(result, now)
-
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
   }
 
   return result
 })
+function formatDateByTab(rawDate) {
+  if (!rawDate) return rawDate
+
+  // แปลง MySQL "YYYY-MM-DD HH:mm:ss" ให้ JS อ่านได้
+  const dateObj = new Date(rawDate.replace(' ', 'T'))
+  if (isNaN(dateObj.getTime())) return rawDate
+
+  const yyyy = dateObj.getFullYear()
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const dd = String(dateObj.getDate()).padStart(2, '0')
+  const hh = String(dateObj.getHours()).padStart(2, '0')
+  const mi = String(dateObj.getMinutes()).padStart(2, '0')
+  const ss = String(dateObj.getSeconds()).padStart(2, '0')
+
+  if (activeTab.value === 'Day') {
+    return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Month') {
+    return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Year') {
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
+
+  return rawDate
+}
 
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
@@ -1244,7 +1266,7 @@ const closePopUp = (operate) => {
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.receiveAt }}
+                  {{ formatDateByTab(p.receiveAt) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
                   <button
