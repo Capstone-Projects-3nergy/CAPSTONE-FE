@@ -1124,7 +1124,7 @@ const closePopUp = (operate) => {
                     class="relative flex items-center justify-start space-x-3"
                   >
                     <span>Room Number</span>
-                    <svg
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortRoom"
                       width="17"
@@ -1144,7 +1144,7 @@ const closePopUp = (operate) => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
 
@@ -1156,7 +1156,7 @@ const closePopUp = (operate) => {
                     class="relative flex items-center justify-start space-x-3"
                   >
                     <span>Status</span>
-                    <svg
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortStatus"
                       width="17"
@@ -1176,7 +1176,7 @@ const closePopUp = (operate) => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
@@ -1184,7 +1184,7 @@ const closePopUp = (operate) => {
                     class="relative flex items-center justify-start space-x-3"
                   >
                     <span>Receive At</span>
-                    <svg
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortDate"
                       width="17"
@@ -1204,7 +1204,7 @@ const closePopUp = (operate) => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
