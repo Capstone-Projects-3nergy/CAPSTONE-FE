@@ -1071,7 +1071,7 @@ const closePopUp = (operate) => {
                 </th>
 
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Contact
+                  Email
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   <div
@@ -1105,7 +1105,7 @@ const closePopUp = (operate) => {
                   <div
                     class="relative flex items-center justify-start space-x-3"
                   >
-                    <span>Date in</span>
+                    <span>Receive At</span>
                     <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortDate"
@@ -1144,13 +1144,13 @@ const closePopUp = (operate) => {
                   @click="showParacelDetail"
                   class="px-4 py-3 text-sm text-gray-700"
                 >
-                  {{ p.tracking }}
+                  {{ p.trackingNumber }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.recipient }}
+                  {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.roomNumber }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
                 <td class="px-4 py-3">
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -1163,7 +1163,9 @@ const closePopUp = (operate) => {
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.receiveAt }}
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
                   <button
                     @click="showEditParacelDetail"
