@@ -147,17 +147,46 @@ watch(recipientSearch, (val) => {
 //   }
 // })
 
-onMounted(async () => {
-  console.log(parcelManager.getParcels())
-  // จะได้ array ของ object ที่เพิ่งเพิ่ม
+const mapStatus = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
 
+onMounted(async () => {
+  // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
   )
+
   if (data) {
-    parcelManager.setParcels(data)
+    // แปลง field ให้ตรงกับที่ตารางใช้
+    const mapped = data.map((p) => ({
+      id: p.parcelId, // backend: parcelId → frontend: id
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName, // ownerName → recipientName
+      roomNumber: p.roomNumber,
+      email: p.contactEmail, // contactEmail → email
+      status: mapStatus(p.status), // 'PENDING' → 'Pending' ฯลฯ
+
+      // ให้มี field ที่ filter/pagination ใช้
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    parcelManager.setParcels(mapped)
   }
+
+  // โหลด residents ตามเดิม
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -168,7 +197,31 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to load residents:', e)
   }
+  console.log(filteredParcels.value)
 })
+// onMounted(async () => {
+//   // จะได้ array ของ object ที่เพิ่งเพิ่ม
+
+//   const data = await getItems(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     router
+//   )
+//   console.log(parcelManager.getParcels())
+//   if (data) {
+//     parcelManager.setParcels(data)
+//   }
+//   try {
+//     const res = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/residents`,
+//       router
+//     )
+//     residents.value = res || []
+//     console.log(parcelManager.getParcels())
+//     console.log('Residents loaded:', residents.value)
+//   } catch (e) {
+//     console.error('Failed to load residents:', e)
+//   }
+// })
 const parcels = computed(() => parcelManager.getParcels())
 // ✅ ใช้ watch เพื่อ setTimeout ให้หายเอง
 // ✅ ฟังก์ชันช่วยสร้าง watch + timeout อัตโนมัติ
@@ -324,9 +377,9 @@ const filteredParcels = computed(() => {
 
   const now = new Date()
 
-  if (activeTab.value === 'Day') result = filterByDay(result, now)
-  else if (activeTab.value === 'Month') result = filterByMonth(result, now)
-  else if (activeTab.value === 'Year') result = filterByYear(result, now)
+  // if (activeTab.value === 'Day') result = filterByDay(result, now)
+  // else if (activeTab.value === 'Month') result = filterByMonth(result, now)
+  // else if (activeTab.value === 'Year') result = filterByYear(result, now)
 
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
