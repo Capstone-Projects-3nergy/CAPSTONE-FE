@@ -78,19 +78,18 @@ const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-const isAllEmpty = computed(() => {
+const isAllFilled = computed(() => {
   return (
-    !parcelData.value.trackingNumber &&
-    !parcelData.value.recipientName &&
-    !parcelData.value.roomNumber &&
-    !parcelData.value.parcelType &&
-    !parcelData.value.senderName &&
-    !parcelData.value.companyId &&
-    !parcelData.value.receiveAt &&
-    !parcelData.value.pickupAt &&
-    !parcelData.value.updateAt
+    parcelData.value.trackingNumber &&
+    parcelData.value.recipientName &&
+    parcelData.value.parcelType &&
+    parcelData.value.companyId &&
+    parcelData.value.receiveAt &&
+    parcelData.value.pickupAt &&
+    parcelData.value.updateAt
   )
 })
+
 // const emit = defineEmits(['add-success', 'add-error'])
 
 // console.log(auth.user.id)
@@ -1220,10 +1219,10 @@ const closePopUp = (operate) => {
               color="green"
               @click="saveParcel"
               :class="{
-                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
-                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+                'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
+                'bg-black hover:bg-gray-600 text-white': !isAllFilled
               }"
-              :disabled="isAllEmpty"
+              :disabled="isAllFilled"
             />
 
             <ButtonWeb
