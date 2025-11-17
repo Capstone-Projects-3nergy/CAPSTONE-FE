@@ -685,7 +685,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -702,7 +702,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -722,7 +722,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -737,7 +737,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2"
               ><svg
@@ -791,7 +791,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -806,7 +806,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -824,10 +824,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <!-- <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -842,7 +839,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -1192,7 +1189,7 @@ const closePopUp = (operate) => {
               <select
                 v-model="parcelData.companyId"
                 id="companySelect"
-                class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <option :value="null" disabled>Select Company</option>
                 <option
