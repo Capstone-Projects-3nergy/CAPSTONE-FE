@@ -17,7 +17,7 @@ const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = ['/image/parcels.jpg','/image/parcels2.jpg']
+const slides = ['/image/parcels.jpg','/image/parcels2.jpg','/image/parcels3.jpg']
 // const slides = [
 //   { title: "Fast Delivery", desc: "Track parcels with ease" },
 //   { title: "Secure Handling", desc: "Your packages are safe" },
@@ -415,31 +415,32 @@ console.log(registerStore.user)
 
           <!-- // แถบ รูป หน้า homepage/* -->
           
-          <div
-  class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300 overflow-hidden"
+<div
+  class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
 >
+  <!-- ปุ่มซ้าย -->
   <button
     @click="prevSlide"
-    class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900 z-10"
+    class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-10"
   >
     ‹
   </button>
 
-<div class="max-w-6xl mx-auto">
+  <!-- รูปภาพ -->
   <img 
     :src="slides[currentIndex]" 
-    class="w-full h-56 object-cover rounded-xl"
+    class="w-full h-full object-cover"
   />
-</div>
 
-
+  <!-- ปุ่มขวา -->
   <button
     @click="nextSlide"
-    class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900 z-10"
+    class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-10"
   >
     ›
   </button>
 </div>
+
 
 
 
