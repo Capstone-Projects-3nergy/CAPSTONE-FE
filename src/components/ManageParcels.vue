@@ -285,12 +285,13 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-// const sortStatusAsc = () => sortByStatus(parcels.value)
-// const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
+
 // ===== ฟังก์ชัน toggle =====
 const toggleSortRoom = () => {
   isRoomAsc.value
@@ -313,24 +314,47 @@ const toggleSortDate = () => {
 const selectedSort = ref('Sort by:')
 
 const handleSort = () => {
-  if (selectedSort.value === 'Newest') sortDateDesc()
-  else if (selectedSort.value === 'Oldest') sortDateAsc()
-  else if (selectedSort.value === 'Tracking (A→Z)')
-    sortByTracking(parcels.value)
-  else if (selectedSort.value === 'Tracking (Z→A)')
-    sortByTrackingReverse(parcels.value)
-  else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
-  else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
-  else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
-  else if (selectedSort.value === 'Contact (9→0)')
-    sortByContactReverse(parcels.value)
-  else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
-  else if (selectedSort.value === 'First Name (Z→A)')
-    sortByFirstNameReverse(parcels.value)
-  else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
-  else if (selectedSort.value === 'Last Name (Z→A)')
-    sortByLastNameReverse(parcels.value)
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+  }
 }
+
+// const handleSort = () => {
+//   if (selectedSort.value === 'Newest') sortDateDesc()
+//   else if (selectedSort.value === 'Oldest') sortDateAsc()
+//   // else if (selectedSort.value === 'Tracking (A→Z)')
+//   //   sortByTracking(parcels.value)
+//   // else if (selectedSort.value === 'Tracking (Z→A)')
+//   //   sortByTrackingReverse(parcels.value)
+//   // else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
+//   // else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
+//   // else if (selectedSort.value === 'Contact (9→0)')
+//   //   sortByContactReverse(parcels.value)
+//   // else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
+//   // else if (selectedSort.value === 'First Name (Z→A)')
+//   //   sortByFirstNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
+//   // else if (selectedSort.value === 'Last Name (Z→A)')
+//   //   sortByLastNameReverse(parcels.value)
+// }
 
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
@@ -1021,8 +1045,12 @@ const closePopUp = (operate) => {
                 <option>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>First Name</option>
-                <option>Last Name</option>
+                <option>Room (A→Z)</option>
+                <option>Room (Z→A)</option>
+                <option>Status (A→Z)</option>
+                <option>Status (Z→A)</option>
+                <!-- <option>First Name</option>
+                <option>Last Name</option> -->
               </select>
 
               <!-- Add Parcel -->

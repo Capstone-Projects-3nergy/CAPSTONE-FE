@@ -1,11 +1,11 @@
 // เรียงตาม Room Number (น้อย → มาก)
 function sortByRoomNumber(parcels) {
-  parcels.sort((a, b) => a.room - b.room)
+  parcels.sort((a, b) => a.roomNumber - b.roomNumber)
 }
 
 // เรียงตาม Room Number (มาก → น้อย)
 function sortByRoomNumberReverse(parcels) {
-  parcels.sort((a, b) => b.room - a.room)
+  parcels.sort((a, b) => b.roomNumber - a.roomNumber)
 }
 
 // เรียงตาม Status (A → Z)
@@ -24,12 +24,12 @@ function sortByStatusReverse(parcels) {
 
 // เรียงตามวันที่ (เก่า → ใหม่)
 function sortByDate(parcels) {
-  parcels.sort((a, b) => new Date(a.date) - new Date(b.date))
+  parcels.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
 }
 
 // เรียงตามวันที่ (ใหม่ → เก่า)
 function sortByDateReverse(parcels) {
-  parcels.sort((a, b) => new Date(b.date) - new Date(a.date))
+  parcels.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 }
 // เรียงตาม Tracking (A → Z)
 function sortByTracking(parcels) {
