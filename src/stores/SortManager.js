@@ -87,20 +87,27 @@ function sortByContactReverse(parcels) {
 
 // ค้นหาพัสดุจากคีย์เวิร์ด
 function searchParcels(parcels, keyword) {
-  const lowerKeyword = keyword.toLowerCase()
+  if (!keyword) return parcels
+
+  const lowerKeyword = keyword.toLowerCase().trim()
+
   return parcels.filter((p) => {
     return (
-      (p.trackingNumber &&
-        p.trackingNumber.toLowerCase().includes(lowerKeyword)) ||
-      (p.recipientName &&
-        p.recipientName.toLowerCase().includes(lowerKeyword)) ||
-      (p.roomNumber && p.roomNumber.toLowerCase().includes(lowerKeyword)) ||
-      (p.email && p.email.toLowerCase().includes(lowerKeyword)) ||
-      (p.status && p.status.toLowerCase().includes(lowerKeyword)) ||
-      (p.receiveAt && p.receiveAt.toLowerCase().includes(lowerKeyword))
+      p.trackingNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.recipientName?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.roomNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.email?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.status?.toString().toLowerCase().includes(lowerKeyword) ||
+      (p.receiveAt
+        ? new Date(p.receiveAt)
+            .toLocaleString()
+            .toLowerCase()
+            .includes(lowerKeyword)
+        : false)
     )
   })
 }
+
 // function searchParcels(parcels, keywords) {
 //   const lower = keywords.toLowerCase()
 //   return parcels.filter(
