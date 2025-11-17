@@ -837,7 +837,7 @@ const closePopUp = (operate) => {
                   'bg-red-400': form.status === 'Unclaimed'
                 }"
               >
-                <option :value="null" disabled>Select Status</option>
+                <option disabled>Select Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Picked Up">Picked Up</option>
                 <option value="Unclaimed">Unclaimed</option>

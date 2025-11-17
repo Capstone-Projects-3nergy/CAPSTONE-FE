@@ -1125,6 +1125,7 @@ const closePopUp = (operate) => {
                 v-model="parcelData.parcelType"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               >
+                <option disabled>Select Parcel Type</option>
                 <option value="Document">Document</option>
                 <option value="Box">Box</option>
               </select>
@@ -1191,7 +1192,7 @@ const closePopUp = (operate) => {
                 id="companySelect"
                 class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <option :value="null" disabled>Select Company</option>
+                <option disabled>Select Company</option>
                 <option
                   v-for="company in companyList"
                   :key="company.companyId"

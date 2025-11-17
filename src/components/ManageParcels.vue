@@ -1067,7 +1067,7 @@ const closePopUp = (operate) => {
                 v-model="selectedSort"
                 @change="handleSort"
               >
-                <option>Sort by:</option>
+                <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
                 <option>Room (A→Z)</option>
