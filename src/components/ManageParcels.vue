@@ -1149,7 +1149,9 @@ const closePopUp = (operate) => {
                 <td class="px-4 py-3 text-sm text-gray-700">
                   {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.roomNumber }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.roomNumber }}
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
                 <td class="px-4 py-3">
                   <span

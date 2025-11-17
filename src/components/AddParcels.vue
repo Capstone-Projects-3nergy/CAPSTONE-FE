@@ -1117,11 +1117,13 @@ const closePopUp = (operate) => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
+              <select
                 v-model="parcelData.parcelType"
-                type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+              >
+                <option value="Document">Document</option>
+                <option value="Box">Box</option>
+              </select>
             </div>
             <!-- <div>
               <label class="block font-semibold mb-1">Contact</label>
@@ -1144,7 +1146,7 @@ const closePopUp = (operate) => {
 
           <!-- Row 3 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
                 v-model="parcelData.pickupAt"
@@ -1159,7 +1161,7 @@ const closePopUp = (operate) => {
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
           </div>
 
           <!-- <hr class="border-t border-1 border-[#185DC0] my-4" /> -->
@@ -1200,14 +1202,14 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               /> -->
             </div>
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Receive at</label>
               <input
                 v-model="parcelData.receiveAt"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
           </div>
 
           <!-- Buttons -->
