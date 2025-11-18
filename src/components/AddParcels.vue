@@ -1178,8 +1178,7 @@ const closePopUp = (operate) => {
           <!-- Row 4 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label
-                class="text-[#185dc0] text-[#185dc0] block font-semibold mb-1"
+              <label class="text-[#185dc0] block font-semibold mb-1"
                 >Sender Name</label
               >
               <input

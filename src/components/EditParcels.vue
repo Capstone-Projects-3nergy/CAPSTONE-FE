@@ -50,13 +50,66 @@ const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
 
+const parcelStore = useParcelManager()
+
+// Ref สำหรับเก็บข้อมูล parcel
+const parcel = ref(null)
+
+// ฟังก์ชันโหลด parcel detail
+const getParcelDetail = async () => {
+  if (!tid) return
+
+  // 1️⃣ หาใน store ก่อน
+  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
+  if (localParcel) {
+    parcel.value = localParcel
+    console.log('📦 Loaded from store:', parcel.value)
+    return
+  }
+
+  // 2️⃣ ถ้าไม่มีใน store ดึงจาก backend
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+    )
+
+    parcel.value = {
+      id: res.data.parcelId,
+      trackingNumber: res.data.trackingNumber,
+      recipientName: res.data.ownerName,
+      roomNumber: res.data.roomNumber,
+      email: res.data.contactEmail,
+      parcelType: res.data.parcelType || '',
+      status: res.data.status,
+      receivedAt: res.data.receivedAt,
+      pickedUpAt: res.data.pickedUpAt || null,
+      updatedAt: res.data.updatedAt || null,
+      senderName: res.data.senderName || '',
+      companyId: res.data.companyId || ''
+    }
+
+    // บันทึกลง store
+    parcelStore.addParcel(parcel.value)
+    console.log('📦 Loaded from backend:', parcel.value)
+  } catch (err) {
+    console.error('❌ Failed to load parcel detail:', err)
+  }
+}
+
+// เรียกโหลดตอน mounted
+onMounted(() => {
+  getParcelDetail()
+})
+// ข้อมูลพัสดุ reactive
+const auth = useAuthManager()
+console.log(auth.user.role)
 const form = ref({
-  id: null,
+  userId: auth.user.id,
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  contact: '',
+  email: '',
   status: '',
   pickupAt: '',
   updateAt: '',
