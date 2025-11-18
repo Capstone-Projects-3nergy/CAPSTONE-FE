@@ -556,18 +556,24 @@ const pageNumbers = computed(() => {
 //   // 👉 ลบออกจาก Pinia
 //   parcelManager.deleteParcels(parcelId)
 // }
-const deleteParcelPopUp = (parcelId) => {
-  console.log('parcelId =', parcelId)
-  showDeleteParcel.value = true
-  router.replace({
+const deleteParcelPopUp = (parcel) => {
+  // เปลี่ยน URL ให้มี tid
+  router.push({
     name: 'deleteparcels',
     params: {
-      id: route.params.id,
-      tid: parcelId
+      id: route.params.id, // staff id
+      tid: parcel.id // parcel id
     }
   })
 
-  parcelDetail.value = parcelId
+  // เก็บข้อมูล parcel สำหรับ popup
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.parcelNumber
+  }
+  console.log(parcelDetail.value)
+  // เปิด popup
+  showDeleteParcel.value = true
 }
 
 const clearDeletePopUp = () => {
@@ -576,12 +582,15 @@ const clearDeletePopUp = () => {
 }
 
 const showDelComplete = () => {
+  deleteSuccess.value = true
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
 
 const openRedPopup = () => {
-  // handle red popup
+  error.value = true
+  showDeleteParcel.value = false
+  parcelDetail.value = null
 }
 
 // const closePopUp = (operate) => {
@@ -1337,7 +1346,12 @@ const closePopUp = (operate) => {
                     </svg>
                   </button>
                   <button
-                    @click="deleteParcelPopUp(p.id)"
+                    @click="
+                      deleteParcelPopUp({
+                        id: p.id,
+                        parcelNumber: p.trackingNumber
+                      })
+                    "
                     class="text-red-600 hover:text-red-800 cursor-pointer"
                   >
                     <svg
@@ -1425,7 +1439,7 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :parcelId="parcelDetail"
+      :parcelData="parcelDetail.value"
     />
   </teleport>
   <!-- <teleport to="body" v-if="showAddParcel">
