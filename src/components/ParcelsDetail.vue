@@ -60,8 +60,6 @@ const getParcelDetail = async () => {
       parcelType: res.data.parcelType || '',
       status: res.data.status,
       receivedAt: res.data.receivedAt,
-      pickedUpAt: res.data.pickedUpAt || null,
-      updatedAt: res.data.updatedAt || null,
       senderName: res.data.senderName || '',
       companyId: res.data.companyId || ''
     }
@@ -687,7 +685,7 @@ const toggleSidebar = () => {
 
             <!-- Row 3 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
+              <!-- <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
                   >Pickup At</label
                 >
@@ -697,9 +695,9 @@ const toggleSidebar = () => {
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
-              </div>
+              </div> -->
 
-              <div>
+              <!-- <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
                   >Updated At</label
                 >
@@ -709,7 +707,7 @@ const toggleSidebar = () => {
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
-              </div>
+              </div> -->
 
               <div></div>
             </div>
