@@ -608,9 +608,7 @@ const toggleSidebar = () => {
             <!-- Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Tracking Number</label
-                >
+                <label class="block font-semibold mb-1">Tracking Number</label>
                 <input
                   type="text"
                   :value="parcel?.trackingNumber || ''"
@@ -620,9 +618,7 @@ const toggleSidebar = () => {
               </div>
 
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Parcel Type</label
-                >
+                <label class="block font-semibold mb-1">Parcel Type</label>
                 <input
                   type="text"
                   :value="parcel?.parcelType || ''"
@@ -632,9 +628,7 @@ const toggleSidebar = () => {
               </div>
 
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Received At</label
-                >
+                <label class="block font-semibold mb-1">Received At</label>
                 <input
                   type="text"
                   :value="parcel?.receivedAt || ''"
@@ -647,9 +641,7 @@ const toggleSidebar = () => {
             <!-- Row 2 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Recipient Name</label
-                >
+                <label class="block font-semibold mb-1">Recipient Name</label>
                 <input
                   type="text"
                   :value="parcel?.recipientName || ''"
@@ -659,9 +651,7 @@ const toggleSidebar = () => {
               </div>
 
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Email</label
-                >
+                <label class="block font-semibold mb-1">Email</label>
                 <input
                   type="text"
                   :value="parcel?.email || ''"
@@ -671,9 +661,7 @@ const toggleSidebar = () => {
               </div>
 
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Room Number</label
-                >
+                <label class="block font-semibold mb-1">Room Number</label>
                 <input
                   type="text"
                   :value="parcel?.roomNumber || ''"
@@ -686,7 +674,7 @@ const toggleSidebar = () => {
             <!-- Row 3 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <!-- <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
+                <label class="block font-semibold mb-1"
                   >Pickup At</label
                 >
                 <input
@@ -698,7 +686,7 @@ const toggleSidebar = () => {
               </div> -->
 
               <!-- <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
+                <label class="block font-semibold mb-1"
                   >Updated At</label
                 >
                 <input
@@ -715,9 +703,7 @@ const toggleSidebar = () => {
             <!-- Row 4 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Sender Name</label
-                >
+                <label class="block font-semibold mb-1">Sender Name</label>
                 <input
                   type="text"
                   :value="parcel?.senderName || ''"
@@ -727,9 +713,7 @@ const toggleSidebar = () => {
               </div>
 
               <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Company</label
-                >
+                <label class="block font-semibold mb-1">Company</label>
                 <input
                   type="text"
                   :value="parcel?.companyId || ''"
