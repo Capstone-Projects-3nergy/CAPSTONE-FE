@@ -105,7 +105,6 @@ const getParcelDetail = async () => {
   }
 }
 
-
 // เรียกโหลดตอน mounted
 onMounted(() => {
   getParcelDetail()
@@ -121,8 +120,6 @@ const form = ref({
   parcelType: '',
   email: '',
   status: '',
-  pickupAt: '',
-  updateAt: '',
   senderName: '',
   companyId: '',
   receiveAt: ''
@@ -345,9 +342,7 @@ const isAllEmpty = computed(() => {
     !form.value.email &&
     !form.value.senderName &&
     !form.value.companyId &&
-    !form.value.receiveAt &&
-    !form.value.pickupAt &&
-    !form.value.updateAt
+    !form.value.receiveAt
   )
 })
 // --- ปิด popup ด้วยมือ ---
@@ -927,25 +922,25 @@ const closePopUp = (operate) => {
           <!-- Row 3 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold text-[#185dc0] mb-1"
+              <!-- <label class="block font-semibold text-[#185dc0] mb-1"
                 >Pickup At</label
               >
               <input
                 type="text"
                 v-model="form.pickupAt"
                 class="w-full border rounded-md p-2 text-gray-600"
-              />
+              /> -->
             </div>
 
             <div>
-              <label class="block font-semibold text-[#185dc0] mb-1"
+              <!-- <label class="block font-semibold text-[#185dc0] mb-1"
                 >Updated At</label
               >
               <input
                 type="text"
                 v-model="form.updateAt"
                 class="w-full border rounded-md p-2 text-gray-600"
-              />
+              /> -->
             </div>
 
             <div>
