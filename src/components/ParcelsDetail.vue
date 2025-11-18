@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -13,8 +14,6 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
-const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -25,128 +24,91 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 // ✅ เรียกใช้ store
-const parcelStore = useParcelManager()
-// 🔹 สร้าง ref สำหรับข้อมูลพัสดุ
-const parcel = ref(null)
+// Router & store
+const router = useRouter()
 const route = useRoute()
-const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
-// const parcels = ref([
-//   {
-//     id: 1,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 101,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 2,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH223456789X',
-//     room: 102,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 3,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH323456789X',
-//     room: 103,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 4,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH423456789X',
-//     room: 104,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 5,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 105,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 6,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 106,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 7,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 107,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 8,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 108,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 9,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 109,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 10,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 110,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   }
-// ])
-// 🔹 โหลดข้อมูลจาก store หรือ backend
-onMounted(async () => {
-  const parcelId = Number(tid) // 👈 ใช้ tid แทน id
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
 
-  // 1️⃣ ลองหาจาก store ก่อน
-  const localParcel = parcelStore.parcel.find((p) => p.parcelId === parcelId)
+// Ref สำหรับเก็บข้อมูล parcel
+const parcel = ref(null)
 
+// ฟังก์ชันโหลด parcel detail
+const getParcelDetail = async () => {
+  if (!tid) return
+
+  // 1️⃣ หาใน store ก่อน
+  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
   if (localParcel) {
     parcel.value = localParcel
     console.log('📦 Loaded from store:', parcel.value)
-  } else {
-    // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-      )
-      parcel.value = res.data
-
-      // บันทึกลง store
-      parcelStore.addParcel(res.data)
-    } catch (err) {
-      console.error('❌ Failed to load parcel:', err)
-    }
+    return
   }
+
+  // 2️⃣ ถ้าไม่มีใน store ดึงจาก backend
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+    )
+
+    parcel.value = {
+      id: res.data.parcelId,
+      trackingNumber: res.data.trackingNumber,
+      recipientName: res.data.ownerName,
+      roomNumber: res.data.roomNumber,
+      email: res.data.contactEmail,
+      parcelType: res.data.parcelType || '',
+      status: res.data.status,
+      receivedAt: res.data.receivedAt,
+      pickedUpAt: res.data.pickedUpAt || null,
+      updatedAt: res.data.updatedAt || null,
+      senderName: res.data.senderName || '',
+      companyId: res.data.companyId || ''
+    }
+
+    // บันทึกลง store
+    parcelStore.addParcel(parcel.value)
+    console.log('📦 Loaded from backend:', parcel.value)
+  } catch (err) {
+    console.error('❌ Failed to load parcel detail:', err)
+  }
+}
+
+// เรียกโหลดตอน mounted
+onMounted(() => {
+  getParcelDetail()
 })
+
+// ฟังก์ชันกลับหน้า manage parcels
+const backToManageParcels = () => {
+  router.replace({ name: 'staffparcels' })
+}
+
+// 🔹 โหลดข้อมูลจาก store หรือ backend
+// onMounted(async () => {
+//   const parcelId = Number(tid) // 👈 ใช้ tid แทน id
+
+//   // 1️⃣ ลองหาจาก store ก่อน
+//   const localParcel = parcelStore.parcel.find((p) => p.parcelId === parcelId)
+
+//   if (localParcel) {
+//     parcel.value = localParcel
+//     console.log('📦 Loaded from store:', parcel.value)
+//   } else {
+//     // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
+//     try {
+//       const res = await axios.get(
+//         `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
+//       )
+//       parcel.value = res.data
+
+//       // บันทึกลง store
+//       parcelStore.addParcel(res.data)
+//     } catch (err) {
+//       console.error('❌ Failed to load parcel:', err)
+//     }
+//   }
+// })
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -192,12 +154,6 @@ const showProfileStaffPage = async function () {
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
-}
-const getParcelDetail = async (parcelId) => {
-  const res = await axios.get(
-    `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
-  )
-  console.log('📦 Parcel detail:', res.data)
 }
 </script>
 
@@ -401,7 +357,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile">
             <template #icon>
               <svg
                 width="24"
@@ -438,7 +394,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard">
             <template #icon>
               <svg
                 width="24"
@@ -507,7 +463,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents">
             <template #icon>
               <svg
                 width="25"
@@ -540,10 +496,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements">
             <template #icon>
               <svg
                 width="24"
@@ -625,16 +578,21 @@ const getParcelDetail = async (parcelId) => {
       </aside>
 
       <main class="flex-1 p-8 bg-white rounded-lg shadow-md">
+        <div class="flex items-center space-x-2 mb-6">
+          <h2 class="text-2xl font-bold text-[#185dc0]">
+            Manage Parcel &gt; Details
+          </h2>
+        </div>
+
         <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
           <div class="flex items-center justify-between mb-8">
             <ButtonWeb
               label="Back to Manage Parcels"
               color="blue"
-              @click="showManageParcelPage"
+              @click="backToManageParcels"
               class="w-full md:w-auto"
             />
             <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Details</h2>
-
             <button
               class="text-white font-semibold px-6 py-2 rounded-md shadow transition"
               :class="{
@@ -653,7 +611,7 @@ const getParcelDetail = async (parcelId) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Tracking</label
+                  >Tracking Number</label
                 >
                 <input
                   type="text"
@@ -677,7 +635,7 @@ const getParcelDetail = async (parcelId) => {
 
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Date in</label
+                  >Received At</label
                 >
                 <input
                   type="text"
@@ -692,7 +650,7 @@ const getParcelDetail = async (parcelId) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Name</label
+                  >Recipient Name</label
                 >
                 <input
                   type="text"
@@ -704,11 +662,11 @@ const getParcelDetail = async (parcelId) => {
 
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Contact</label
+                  >Email</label
                 >
                 <input
                   type="text"
-                  :value="parcel?.contact || ''"
+                  :value="parcel?.email || ''"
                   readonly
                   class="w-full border rounded-md p-2 text-gray-600"
                 />
@@ -731,7 +689,7 @@ const getParcelDetail = async (parcelId) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Pickup at</label
+                  >Pickup At</label
                 >
                 <input
                   type="text"
@@ -743,7 +701,7 @@ const getParcelDetail = async (parcelId) => {
 
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Update at</label
+                  >Updated At</label
                 >
                 <input
                   type="text"
@@ -772,7 +730,7 @@ const getParcelDetail = async (parcelId) => {
 
               <div>
                 <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Company ID</label
+                  >Company</label
                 >
                 <input
                   type="text"

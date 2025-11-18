@@ -79,7 +79,7 @@ const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
-
+const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
 const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
@@ -504,10 +504,37 @@ const paginatedParcels = computed(() => {
   return filteredParcels.value.slice(start, end)
 })
 
-const showParacelDetail = async function (id) {
+const showParcelDetail = async function (id) {
+  // เปลี่ยน route
   router.push({ name: 'detailparcels', params: { tid: id } })
-}
 
+  try {
+    // ดึงข้อมูล parcel เดี่ยวจาก backend
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+      id
+    )
+
+    if (data) {
+      // map field ให้เหมือนกับที่ใช้ใน frontend
+      parcelsResidentDetail.value = {
+        id: data.parcelId,
+        trackingNumber: data.trackingNumber,
+        recipientName: data.ownerName,
+        roomNumber: data.roomNumber,
+        email: data.contactEmail,
+        status: mapStatus(data.status),
+        receiveAt: data.receivedAt,
+        updateAt: data.updatedAt || null,
+        pickupAt: data.pickedUpAt || null
+      }
+
+      console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+    }
+  } catch (err) {
+    console.error('Failed to load parcel detail:', err)
+  }
+}
 const showEditParacelDetail = async function (id) {
   router.push({ name: 'editparcels', params: { tid: id } })
 }
@@ -566,7 +593,7 @@ const deleteParcelPopUp = (parcel) => {
   // เปิด popup
   showDeleteParcel.value = true
   // เปลี่ยน URL ให้มี tid
-  router.replace({
+  router.push({
     name: 'deleteparcels',
     params: {
       id: route.params.id, // staff id
@@ -1291,7 +1318,7 @@ const closePopUp = (operate) => {
                 class="hover:bg-gray-50"
               >
                 <td
-                  @click="showParacelDetail"
+                  @click="showParcelDetail({ id: p.id })"
                   class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
                 >
                   {{ p.trackingNumber }}
