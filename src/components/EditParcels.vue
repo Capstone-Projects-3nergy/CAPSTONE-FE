@@ -921,42 +921,27 @@ const closePopUp = (operate) => {
 
           <!-- Row 3 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <!-- <label class="block font-semibold text-[#185dc0] mb-1"
+            <!-- <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
                 >Pickup At</label
               >
               <input
                 type="text"
                 v-model="form.pickupAt"
                 class="w-full border rounded-md p-2 text-gray-600"
-              /> -->
+              />
             </div>
 
             <div>
-              <!-- <label class="block font-semibold text-[#185dc0] mb-1"
+              <label class="block font-semibold text-[#185dc0] mb-1"
                 >Updated At</label
               >
               <input
                 type="text"
                 v-model="form.updateAt"
                 class="w-full border rounded-md p-2 text-gray-600"
-              /> -->
-            </div>
-
-            <div>
-              <label class="block font-semibold text-[#185dc0] mb-1"
-                >Status</label
-              >
-              <input
-                type="text"
-                v-model="form.status"
-                class="w-full border rounded-md p-2 text-gray-600"
               />
-            </div>
-          </div>
-
-          <!-- Row 4 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            </div> -->
             <div>
               <label class="block font-semibold text-[#185dc0] mb-1"
                 >Sender Name</label
@@ -978,7 +963,42 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Status</label
+              >
+              <input
+                type="text"
+                v-model="form.status"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
           </div>
+
+          <!-- Row 4 -->
+          <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Sender Name</label
+              >
+              <input
+                type="text"
+                v-model="form.senderName"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Company</label
+              >
+              <input
+                type="text"
+                v-model="form.companyId"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
+          </div> -->
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
