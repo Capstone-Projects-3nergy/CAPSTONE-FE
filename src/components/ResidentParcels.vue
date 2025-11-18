@@ -1,54 +1,679 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ButtonWeb from './ButtonWeb.vue'
+import HomePageStaff from '@/components/HomePageResident.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import StaffParcelsPage from '@/components/ManageParcels.vue'
+import LoginPage from './LoginPage.vue'
+import DashBoard from './DashBoard.vue'
+import { useParcelManager } from '@/stores/ParcelsManager'
+import AlertPopUp from './AlertPopUp.vue'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
+} from '@/stores/SortManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
+import ParcelScannerPage from './ParcelScannerPage.vue'
+import DeleteParcels from './DeleteParcels.vue'
 const loginManager = useAuthManager()
+const parcelManager = useParcelManager()
+const emit = defineEmits(['add-success'])
 
-const loginStore = useLoginManager()
-const showAnnouncement = ref(false)
+const deletedParcel = ref(null)
 const router = useRouter()
-const showHomePageResident = ref(false)
+const showHomePageStaff = ref(false)
+const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
+const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showProfileResident = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: '101',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: '102',
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: '103',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
+const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
+const showParcelDetailModal = ref(false)
+const error = ref(false)
+const addSuccess = ref(false)
+const editSuccess = ref(false)
+const deleteSuccess = ref(false)
+const showDeleteParcel = ref(false)
+const parcelDetail = ref(null)
+const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
+const route = useRoute()
+// Reactive state
+// onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
+// 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
+const residents = ref([])
+
+// คำค้นที่ staff พิมพ์ในช่อง Recipient
+const recipientSearch = ref('')
+
+// id ของ resident ที่ถูกเลือก
+const selectedResidentId = ref(null)
+
+// object resident ที่เลือก
+const selectedResident = computed(
+  () =>
+    residents.value.find((r) => r.userId === selectedResidentId.value) || null
+)
+
+// แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
+const showSuggestions = computed(
+  () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
+)
+
+// filter จากชื่อ / email / roomNumber
+// const filteredResidents = computed(() => {
+//   const q = recipientSearch.value.trim().toLowerCase()
+//   if (!q) return []
+//   return residents.value.filter((r) => {
+//     const fullName = (
+//       r.fullName || `${r.firstName} ${r.lastName}`
+//     ).toLowerCase()
+//     return (
+//       fullName.includes(q) ||
+//       (r.email && r.email.toLowerCase().includes(q)) ||
+//       (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+//     )
+//   })
+// })
+
+// เวลาเลือก resident จาก list
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
+  parcelData.value.recipientName = name
+  recipientSearch.value = name // ใส่ชื่อที่เลือกกลับเข้า input
+}
+
+// ถ้า clear ช่อง search → clear selection ด้วย
+watch(recipientSearch, (val) => {
+  if (!val) {
+    selectedResidentId.value = null
+    parcelData.value.recipientName = ''
   }
-  // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
-])
+})
+
+// โหลดรายชื่อ resident ตอนเข้าเพจ
+// onMounted(async () => {
+//   try {
+//     const res = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/residents`,
+//       router
+//     )
+//     residents.value = res || []
+//     console.log('Residents loaded:', residents.value)
+//   } catch (e) {
+//     console.error('Failed to load residents:', e)
+//   }
+// })
+
+const mapStatus = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
+
+onMounted(async () => {
+  // ดึงจาก backend
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
+
+  if (data) {
+    // แปลง field ให้ตรงกับที่ตารางใช้
+    const mapped = data.map((p) => ({
+      id: p.parcelId, // backend: parcelId → frontend: id
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName, // ownerName → recipientName
+      roomNumber: p.roomNumber,
+      email: p.contactEmail, // contactEmail → email
+      status: mapStatus(p.status), // 'PENDING' → 'Pending' ฯลฯ
+
+      // ให้มี field ที่ filter/pagination ใช้
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
+    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+
+    parcelManager.setParcels(mapped)
+  }
+
+  // โหลด residents ตามเดิม
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+    console.log('Residents loaded:', residents.value)
+  } catch (e) {
+    console.error('Failed to load residents:', e)
+  }
+  console.log(filteredParcels.value)
+})
+// onMounted(async () => {
+//   // จะได้ array ของ object ที่เพิ่งเพิ่ม
+
+//   const data = await getItems(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     router
+//   )
+//   console.log(parcelManager.getParcels())
+//   if (data) {
+//     parcelManager.setParcels(data)
+//   }
+//   try {
+//     const res = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/residents`,
+//       router
+//     )
+//     residents.value = res || []
+//     console.log(parcelManager.getParcels())
+//     console.log('Residents loaded:', residents.value)
+//   } catch (e) {
+//     console.error('Failed to load residents:', e)
+//   }
+// })
+const parcels = computed(() => parcelManager.getParcels())
+// ✅ ใช้ watch เพื่อ setTimeout ให้หายเอง
+// ✅ ฟังก์ชันช่วยสร้าง watch + timeout อัตโนมัติ
+function autoClose(refVar, timeout = 3000) {
+  watch(refVar, (val) => {
+    if (val) {
+      setTimeout(() => {
+        refVar.value = false
+      }, timeout)
+    }
+  })
+}
+
+// เรียกใช้กับทุก popup
+autoClose(addSuccess)
+autoClose(editSuccess)
+autoClose(deleteSuccess)
+autoClose(error)
+// const showAddSuccessPopup = () => {
+//   addSuccess.value = true
+// }
+// const showAddErrorPopup = () => {
+//   error.value = true
+// }
+// const showEditSuccessPopup = () => {
+//   editSuccess.value = true
+// }
+// const showEditErrorPopup = () => {
+//   error.value = true
+// }
 const searchKeyword = ref('')
 const activeTab = ref('Day')
 const tabs = ['Day', 'Month', 'Year']
+// const filteredParcelsDate = computed(() => {
+//   if (activeTab.value === 'Day') return filterByDay(parcels.value)
+//   if (activeTab.value === 'Month') return filterByMonth(parcels.value)
+//   if (activeTab.value === 'Year') return filterByYear(parcels.value)
+//   return parcels.value
+// })
+// Computed filtered + searched parcels
+
+// const filteredParcels = computed(() => {
+//   let result = parcels.value // ไม่ต้อง .value ถ้าเป็น reactive
+
+//   const now = new Date() // วันที่ปัจจุบัน
+
+//   // filterByDay/Month/Year ไม่ทำงานกับ "05 Jan 2024" แบบ hardcode
+//   if (activeTab.value === 'Day') result = filterByDay(result, now)
+//   else if (activeTab.value === 'Month') result = filterByMonth(result, now)
+//   else if (activeTab.value === 'Year') result = filterByYear(result, now)
+
+//   if (searchKeyword.value) {
+//     result = searchParcels(result, searchKeyword.value)
+//   }
+
+//   return result
+// })
+
+// Sort functions
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortDateAsc = () => sortByDate(parcels.value)
+const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
+
+// ===== ฟังก์ชัน toggle =====
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
+const selectedSort = ref('Sort by:')
+
+const handleSort = () => {
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
+      break
+  }
+}
+
+// const handleSort = () => {
+//   if (selectedSort.value === 'Newest') sortDateDesc()
+//   else if (selectedSort.value === 'Oldest') sortDateAsc()
+//   // else if (selectedSort.value === 'Tracking (A→Z)')
+//   //   sortByTracking(parcels.value)
+//   // else if (selectedSort.value === 'Tracking (Z→A)')
+//   //   sortByTrackingReverse(parcels.value)
+//   // else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
+//   // else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
+//   // else if (selectedSort.value === 'Contact (9→0)')
+//   //   sortByContactReverse(parcels.value)
+//   // else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
+//   // else if (selectedSort.value === 'First Name (Z→A)')
+//   //   sortByFirstNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
+//   // else if (selectedSort.value === 'Last Name (Z→A)')
+//   //   sortByLastNameReverse(parcels.value)
+// }
+
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+function parseDate(dateStr) {
+  if (!dateStr) return null
+
+  // ลองแปลงตรง ๆ ก่อน
+  let d = new Date(dateStr)
+  if (!isNaN(d)) return d
+
+  // ถ้าเป็นรูปแบบ "05 Oct 2025"
+  const parts = dateStr.split(' ')
+  if (parts.length === 3) {
+    const [day, mon, year] = parts
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+    const monthIndex = months.indexOf(mon)
+    if (monthIndex !== -1) {
+      return new Date(year, monthIndex, day)
+    }
+  }
+
+  return null
+}
+
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  return result
+})
+function formatDateByTab(rawDate) {
+  if (!rawDate) return rawDate
+
+  // แปลง MySQL "YYYY-MM-DD HH:mm:ss" ให้ JS อ่านได้
+  const dateObj = new Date(rawDate.replace(' ', 'T'))
+  if (isNaN(dateObj.getTime())) return rawDate
+
+  const yyyy = dateObj.getFullYear()
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const dd = String(dateObj.getDate()).padStart(2, '0')
+  const hh = String(dateObj.getHours()).padStart(2, '0')
+  const mi = String(dateObj.getMinutes()).padStart(2, '0')
+  const ss = String(dateObj.getSeconds()).padStart(2, '0')
+
+  if (activeTab.value === 'Day') {
+    return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Month') {
+    return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Year') {
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
+
+  return rawDate
+}
+
+// const showResidentParcelPage = async function () {
+//   router.replace({ name: 'residentparcels' })
+//   showResidentParcels.value = true
+// }
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+console.log(loginManager.userData)
+const returnLoginPage = async () => {
+  try {
+    // เรียก logoutAccount จาก store
+    await loginManager.logoutAccount(router)
+    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
+}
+const isCollapsed = ref(false)
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+// Pagination State
+const currentPage = ref(1)
+const perPage = ref(10) // จำนวนแถวต่อหน้า
+const totalPages = computed(() =>
+  Math.ceil(parcels.value.length / perPage.value)
+)
+
+// ข้อมูลที่จะแสดงบนตาราง
+const paginatedParcels = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredParcels.value.slice(start, end)
+})
+
+const showParcelDetail = async function (id) {
+  // เปลี่ยน route
+  router.push({ name: 'detailparcels', params: { tid: id } })
+
+  try {
+    // ดึงข้อมูล parcel เดี่ยวจาก backend
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+      id
+    )
+
+    if (data) {
+      // map field ให้เหมือนกับที่ใช้ใน frontend
+      parcelsResidentDetail.value = {
+        id: data.parcelId,
+        trackingNumber: data.trackingNumber,
+        recipientName: data.ownerName,
+        roomNumber: data.roomNumber,
+        email: data.contactEmail,
+        status: mapStatus(data.status),
+        receiveAt: data.receivedAt,
+        updateAt: data.updatedAt || null,
+        pickupAt: data.pickedUpAt || null
+      }
+
+      console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+    }
+  } catch (err) {
+    console.error('Failed to load parcel detail:', err)
+  }
+}
+const showEditParacelDetail = async function (id) {
+  router.push({ name: 'editparcels', params: { tid: id } })
+  try {
+    // ดึงข้อมูล parcel เดี่ยวจาก backend
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+      id
+    )
+
+    if (data) {
+      // map field ให้เหมือนกับที่ใช้ใน frontend
+      parcelsResidentDetail.value = {
+        id: data.parcelId,
+        trackingNumber: data.trackingNumber,
+        recipientName: data.ownerName,
+        roomNumber: data.roomNumber,
+        email: data.contactEmail,
+        status: mapStatus(data.status),
+        receiveAt: data.receivedAt,
+        updateAt: data.updatedAt || null,
+        pickupAt: data.pickedUpAt || null
+      }
+
+      console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+    }
+  } catch (err) {
+    console.error('Failed to load parcel detail:', err)
+  }
+}
+
+// ฟังก์ชันเปลี่ยนหน้า
+const goToPage = (page) => {
+  if (page < 1) page = 1
+  if (page > totalPages.value) page = totalPages.value
+  currentPage.value = page
+}
+
+const nextPage = () => goToPage(currentPage.value + 1)
+const prevPage = () => goToPage(currentPage.value - 1)
+
+// สร้าง array ของตัวเลขหน้าสำหรับ pagination
+const pageNumbers = computed(() => {
+  const pages = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    pages.push(i)
+  }
+  return pages
+})
+// const greenPopup = reactive({
+//   add: { state: false, parcelTitle: '' },
+//   edit: { state: false, parcelTitle: '' },
+//   delete: { state: false, parcelTitle: '' }
+// })
+// const redPopup = reactive({
+//   edit: { state: false, parcelTitle: '' },
+//   delete: { state: false, parcelTitle: '' }
+// })
+// const deleteParcel = async (parcelId) => {
+//   const resStatus = await deleteItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     parcelId,
+//     router
+//   )
+
+//   if (!resStatus) {
+//     error.value = true
+//     return
+//   }
+
+//   deleteSuccess.value = true
+
+//   // 👉 ลบออกจาก Pinia
+//   parcelManager.deleteParcels(parcelId)
+// }
+const deleteParcelPopUp = (parcel) => {
+  // เก็บข้อมูล parcel สำหรับ popup
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.parcelNumber
+  }
+  console.log(parcelDetail.value)
+  // เปิด popup
+  showDeleteParcel.value = true
+  // เปลี่ยน URL ให้มี tid
+  router.push({
+    name: 'deleteparcels',
+    params: {
+      id: route.params.id, // staff id
+      tid: parcel.id // parcel id
+    }
+  })
+}
+
+const clearDeletePopUp = () => {
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+const showDelComplete = () => {
+  deleteSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 3000)
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+// const closePopUp = (operate) => {
+//   if (operate === 'problem') error.value = false
+//   if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
+//   if (operate === 'addSuccessMessage ') addSuccess.value = false
+//   if (operate === 'editSuccessMessage') editSuccess.value = false
+// }
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      deleteSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
+}
+
+const loginStore = useLoginManager()
+const showAnnouncement = ref(false)
+
+const showHomePageResident = ref(false)
+
+const showProfileResident = ref(false)
 const currentUser = ref('Pimpajee SetXXXXXX')
 const myParcels = computed(() =>
   parcels.value.filter((p) => p.recipient === currentUser.value)
@@ -62,24 +687,12 @@ const showAnnouncementPage = async function () {
   router.replace({ name: 'announcement' })
   showAnnouncement.value = true
 }
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
-}
+
 const showProfileResidentPage = async function () {
   router.replace({
     name: 'profileresident'
   })
   showProfileResident.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 </script>
 
@@ -687,55 +1300,11 @@ const toggleSidebar = () => {
                   {{ formatDateByTab(p.receiveAt) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <button
-                    @click="showEditParacelDetail({ id: p.id })"
-                    class="text-blue-600 hover:text-blue-800"
-                  >
-                    <svg
-                      width="21"
-                      height="21"
-                      viewBox="0 0 21 21"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 1.99634H3C2.46957 1.99634 1.96086 2.20705 1.58579 2.58212C1.21071 2.9572 1 3.4659 1 3.99634V17.9963C1 18.5268 1.21071 19.0355 1.58579 19.4106C1.96086 19.7856 2.46957 19.9963 3 19.9963H17C17.5304 19.9963 18.0391 19.7856 18.4142 19.4106C18.7893 19.0355 19 18.5268 19 17.9963V10.9963"
-                        stroke="#185DC0"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                      <path
-                        d="M16.3751 1.62132C16.7729 1.2235 17.3125 1 17.8751 1C18.4377 1 18.9773 1.2235 19.3751 1.62132C19.7729 2.01914 19.9964 2.55871 19.9964 3.12132C19.9964 3.68393 19.7729 4.2235 19.3751 4.62132L10.3621 13.6353C10.1246 13.8726 9.8313 14.0462 9.50909 14.1403L6.63609 14.9803C6.55005 15.0054 6.45883 15.0069 6.372 14.9847C6.28517 14.9624 6.20592 14.9173 6.14254 14.8539C6.07916 14.7905 6.03398 14.7112 6.01174 14.6244C5.98949 14.5376 5.991 14.4464 6.01609 14.3603L6.85609 11.4873C6.95062 11.1654 7.12463 10.8724 7.36209 10.6353L16.3751 1.62132Z"
-                        stroke="#185DC0"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    @click="
-                      deleteParcelPopUp({
-                        id: p.id,
-                        parcelNumber: p.trackingNumber
-                      })
-                    "
-                    class="text-red-600 hover:text-red-800 cursor-pointer"
-                  >
-                    <svg
-                      width="18"
-                      height="21"
-                      viewBox="0 0 18 21"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                        fill="#185DC0"
-                      />
-                    </svg>
-                  </button>
+                  <ButtonWeb
+                    label="Confirm"
+                    color="blue"
+                    @click="confirmParcelReceive"
+                  />
                 </td>
               </tr>
             </tbody>
