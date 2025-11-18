@@ -32,7 +32,7 @@ const deletedParcel = ref(null)
 
 const deleteParcel = async (parcelId) => {
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/v3/parcels`, // แก้ URL ให้ตรง backend
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`, // แก้ URL ให้ตรง backend
     parcelId
   )
 

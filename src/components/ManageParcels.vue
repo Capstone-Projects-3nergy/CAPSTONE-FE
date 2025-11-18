@@ -583,12 +583,14 @@ const clearDeletePopUp = () => {
 
 const showDelComplete = () => {
   deleteSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
 
 const openRedPopup = () => {
   error.value = true
+  setTimeout(() => (error.value = false), 3000)
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
