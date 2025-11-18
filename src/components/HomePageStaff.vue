@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import ParcelScanner from '@/components/ParcelScannerPage.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AlertPopUp from './../components/AlertPopUp.vue'
@@ -11,6 +11,45 @@ import SidebarItem from './SidebarItem.vue'
 import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
+} from '@/stores/SortManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 // import { useRegisterManager } from '@/stores/RegisterManager.js'
 // import { useLoginManager } from '@/stores/LoginManager'
 const registerStore = useAuthManager()
@@ -84,38 +123,70 @@ const returnLoginPage = async () => {
   }
 }
 
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: '101',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: '102',
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: '103',
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  }
-  // เพิ่มข้อมูลอื่น ๆ ตามต้องการ
-])
-// console.log(loginStore.user.email)
+const parcelManager = useParcelManager()
+onMounted(async () => {
+  // ดึงจาก backend
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
 
+  if (data) {
+    // แปลง field ให้ตรงกับที่ตารางใช้
+    const mapped = data.map((p) => ({
+      id: p.parcelId, // backend: parcelId → frontend: id
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName, // ownerName → recipientName
+      roomNumber: p.roomNumber,
+      email: p.contactEmail, // contactEmail → email
+      status: mapStatus(p.status), // 'PENDING' → 'Pending' ฯลฯ
+
+      // ให้มี field ที่ filter/pagination ใช้
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
+    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+
+    parcelManager.setParcels(mapped)
+  }
+})
+
+const mapStatus = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
+
+const parcels = computed(() => parcelManager.getParcels())
+// Pagination State
+const currentPage = ref(1)
+const perPage = ref(10) // จำนวนแถวต่อหน้า
+const totalPages = computed(() =>
+  Math.ceil(parcels.value.length / perPage.value)
+)
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p
+  }))
+
+  return result
+})
+// ข้อมูลที่จะแสดงบนตาราง
+const paginatedParcels = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredParcels.value.slice(start, end)
+})
 console.log(registerStore.user)
 
 const currentUser = ref('Pimpajee SetXXXXXX')
@@ -634,70 +705,6 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                 Resident Parcel
               </h2>
             </div>
-            <!-- Tabs -->
-            <div
-              class="flex items-center justify-between bg-white p-4 rounded shadow mb-6"
-            >
-              <!-- Right: Search + Sort + Add -->
-              <div class="flex items-center space-x-3">
-                <!-- Search -->
-                <div class="relative">
-                  <svg
-                    class="absolute left-2 top-1/2 -translate-y-1/2"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
-                      fill="#9A9FA7"
-                    />
-                  </svg>
-
-                  <input
-                    type="text"
-                    v-model="searchKeyword"
-                    placeholder="Search ..."
-                    class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  />
-                </div>
-
-                <!-- Sort -->
-                <select
-                  class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-                  v-model="selectedSort"
-                  @change="handleSort"
-                >
-                  <option>Sort by:</option>
-                  <option>Newest</option>
-                  <option>Oldest</option>
-                  <option>First Name</option>
-                  <option>Last Name</option>
-                </select>
-
-                <!-- <button
-                @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-                    fill="white"
-                  />
-                </svg>
-
-                <span>Add parcel</span>
-              </button> -->
-              </div>
-            </div>
           </div>
 
           <!-- Parcel Table -->
@@ -716,92 +723,47 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       class="relative flex items-center justify-start space-x-3"
                     >
                       <span>Room Number</span>
-                      <svg
-                        class="cursor-pointer hover:opacity-70 transition"
-                        @click="toggleSortRoom"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
+                      <!-- <svg
+                      class="cursor-pointer hover:opacity-70 transition"
+                      @click="toggleSortRoom"
+                      width="17"
+                      height="12"
+                      viewBox="0 0 17 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                      />
+                      <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg> -->
                     </div>
                   </th>
 
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Contact
+                    Email
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     <div
                       class="relative flex items-center justify-start space-x-3"
                     >
                       <span>Status</span>
-                      <svg
-                        class="cursor-pointer hover:opacity-70 transition"
-                        @click="toggleSortStatus"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
                     </div>
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     <div
                       class="relative flex items-center justify-start space-x-3"
                     >
-                      <span>Date in</span>
-                      <svg
-                        class="cursor-pointer hover:opacity-70 transition"
-                        @click="toggleSortDate"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
+                      <span>Receive At</span>
                     </div>
                   </th>
-                  <!-- <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Operation
-                  </th> -->
                 </tr>
               </thead>
               <tbody class="divide-y">
@@ -810,16 +772,19 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                   :key="p.id"
                   class="hover:bg-gray-50"
                 >
-                  <td class="px-4 py-3 text-sm text-gray-700">
-                    {{ p.tracking }}
+                  <td
+                    @click="showParcelDetail({ id: p.id })"
+                    class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
+                  >
+                    {{ p.trackingNumber }}
                   </td>
                   <td class="px-4 py-3 text-sm text-gray-700">
-                    {{ p.recipient }}
+                    {{ p.recipientName }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
                   <td class="px-4 py-3 text-sm text-gray-700">
-                    {{ p.contact }}
+                    {{ p.roomNumber }}
                   </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
                   <td class="px-4 py-3">
                     <span
                       class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -832,47 +797,9 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       {{ p.status }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
-                  <!-- <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                    <button class="text-blue-600 hover:text-blue-800">
-                      <svg
-                        width="21"
-                        height="21"
-                        viewBox="0 0 21 21"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M10 1.99634H3C2.46957 1.99634 1.96086 2.20705 1.58579 2.58212C1.21071 2.9572 1 3.4659 1 3.99634V17.9963C1 18.5268 1.21071 19.0355 1.58579 19.4106C1.96086 19.7856 2.46957 19.9963 3 19.9963H17C17.5304 19.9963 18.0391 19.7856 18.4142 19.4106C18.7893 19.0355 19 18.5268 19 17.9963V10.9963"
-                          stroke="#185DC0"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                        <path
-                          d="M16.3751 1.62132C16.7729 1.2235 17.3125 1 17.8751 1C18.4377 1 18.9773 1.2235 19.3751 1.62132C19.7729 2.01914 19.9964 2.55871 19.9964 3.12132C19.9964 3.68393 19.7729 4.2235 19.3751 4.62132L10.3621 13.6353C10.1246 13.8726 9.8313 14.0462 9.50909 14.1403L6.63609 14.9803C6.55005 15.0054 6.45883 15.0069 6.372 14.9847C6.28517 14.9624 6.20592 14.9173 6.14254 14.8539C6.07916 14.7905 6.03398 14.7112 6.01174 14.6244C5.98949 14.5376 5.991 14.4464 6.01609 14.3603L6.85609 11.4873C6.95062 11.1654 7.12463 10.8724 7.36209 10.6353L16.3751 1.62132Z"
-                          stroke="#185DC0"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </button>
-                    <button class="text-red-600 hover:text-red-800">
-                      <svg
-                        width="18"
-                        height="21"
-                        viewBox="0 0 18 21"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                          fill="#185DC0"
-                        />
-                      </svg>
-                    </button>
-                  </td> -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    {{ p.receiveAt }}
+                  </td>
                 </tr>
               </tbody>
             </table>
