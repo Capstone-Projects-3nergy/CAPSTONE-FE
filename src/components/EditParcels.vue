@@ -63,6 +63,10 @@ const getParcelDetail = async () => {
   const localParcel = parcelStore.parcel.find((p) => p.id === tid)
   if (localParcel) {
     parcel.value = localParcel
+
+    // ✅ ยัดข้อมูลลงฟอร์ม
+    form.value = { ...form.value, ...parcel.value }
+
     console.log('📦 Loaded from store:', parcel.value)
     return
   }
@@ -88,13 +92,19 @@ const getParcelDetail = async () => {
       companyId: res.data.companyId || ''
     }
 
-    // บันทึกลง store
+    // ⛔ ปัญหาที่ทำให้ไม่แสดง: คุณยังไม่ได้อัปเดต form
+    // ✅ แก้: copy parcel → form
+    form.value = { ...form.value, ...parcel.value }
+
+    // 👉 บันทึกลง store
     parcelStore.addParcel(parcel.value)
+
     console.log('📦 Loaded from backend:', parcel.value)
   } catch (err) {
     console.error('❌ Failed to load parcel detail:', err)
   }
 }
+
 
 // เรียกโหลดตอน mounted
 onMounted(() => {
@@ -118,17 +128,17 @@ const form = ref({
   receiveAt: ''
 })
 
-onMounted(async () => {
-  const parcelId = tid
-  const parcel = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcelId,
-    router
-  )
-  if (parcel) {
-    form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
-  }
-})
+// onMounted(async () => {
+//   const parcelId = tid
+//   const parcel = await getItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     parcelId,
+//     router
+//   )
+//   if (parcel) {
+//     form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
+//   }
+// })
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 // 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
@@ -332,7 +342,7 @@ const isAllEmpty = computed(() => {
     !form.value.recipientName &&
     !form.value.roomNumber &&
     !form.value.parcelType &&
-    !form.value.contact &&
+    !form.value.email &&
     !form.value.senderName &&
     !form.value.companyId &&
     !form.value.receiveAt &&
@@ -843,7 +853,6 @@ const closePopUp = (operate) => {
           </div>
 
           <!-- Row 1 -->
-          <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block font-semibold text-[#185dc0] mb-1"
@@ -851,7 +860,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.trackingNumber || ''"
+                v-model="form.trackingNumber"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -862,7 +871,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.parcelType || ''"
+                v-model="form.parcelType"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -873,7 +882,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.receivedAt || ''"
+                v-model="form.receiveAt"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -887,7 +896,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.recipientName || ''"
+                v-model="form.recipientName"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -898,7 +907,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.email || ''"
+                v-model="form.email"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -909,7 +918,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.roomNumber || ''"
+                v-model="form.roomNumber"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -923,7 +932,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.pickedUpAt || ''"
+                v-model="form.pickupAt"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -934,22 +943,21 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.updatedAt || ''"
+                v-model="form.updateAt"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
             <div>
               <label class="block font-semibold text-[#185dc0] mb-1"
                 >Status</label
               >
               <input
                 type="text"
-                :value="parcel?.status || ''"
+                v-model="form.status"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
-
-            <div></div>
           </div>
 
           <!-- Row 4 -->
@@ -960,7 +968,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.senderName || ''"
+                v-model="form.senderName"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
@@ -971,7 +979,7 @@ const closePopUp = (operate) => {
               >
               <input
                 type="text"
-                :value="parcel?.companyId || ''"
+                v-model="form.companyId"
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
