@@ -503,37 +503,51 @@ const toggleSidebar = () => {
                 v-model="selectedSort"
                 @change="handleSort"
               >
-                <option>Sort by:</option>
+                <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>First Name</option>
-                <option>Last Name</option>
+                <option>Name (A→Z)</option>
+                <option>Name (Z→A)</option>
+                <option>Room (A→Z)</option>
+                <option>Room (Z→A)</option>
+                <option>Status (A→Z)</option>
+                <option>Status (Z→A)</option>
               </select>
-
-              <!-- Add Parcel -->
-              <!-- <button
-                @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-                    fill="white"
-                  />
-                </svg>
-
-                <span>Add parcel</span>
-              </button> -->
             </div>
           </div>
         </div>
-
+        <AlertPopUp
+          v-if="deleteSuccess"
+          :titles="'Delete Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="addSuccess"
+          :titles="'Add New Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="addSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="editSuccess"
+          :titles="'Edit Parcel  is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="editSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
         <!-- Parcel Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow">
           <table class="min-w-full text-left border-collapse">
@@ -550,7 +564,7 @@ const toggleSidebar = () => {
                     class="relative flex items-center justify-start space-x-3"
                   >
                     <span>Room Number</span>
-                    <svg
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortRoom"
                       width="17"
@@ -570,19 +584,19 @@ const toggleSidebar = () => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
 
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Contact
+                  Email
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   <div
                     class="relative flex items-center justify-start space-x-3"
                   >
                     <span>Status</span>
-                    <svg
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortStatus"
                       width="17"
@@ -602,15 +616,15 @@ const toggleSidebar = () => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   <div
                     class="relative flex items-center justify-start space-x-3"
                   >
-                    <span>Date in</span>
-                    <svg
+                    <span>Receive At</span>
+                    <!-- <svg
                       class="cursor-pointer hover:opacity-70 transition"
                       @click="toggleSortDate"
                       width="17"
@@ -630,7 +644,7 @@ const toggleSidebar = () => {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />
-                    </svg>
+                    </svg> -->
                   </div>
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
@@ -644,14 +658,19 @@ const toggleSidebar = () => {
                 :key="p.id"
                 class="hover:bg-gray-50"
               >
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.tracking }}
+                <td
+                  @click="showParcelDetail({ id: p.id })"
+                  class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
+                >
+                  {{ p.trackingNumber }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.recipient }}
+                  {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ p.roomNumber }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
                 <td class="px-4 py-3">
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -664,15 +683,14 @@ const toggleSidebar = () => {
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ formatDateByTab(p.receiveAt) }}
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <ButtonWeb
-                    label="Confirm"
-                    color="blue"
-                    class="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded shadow hover:bg-blue-600"
-                    @click=""
-                  />
-                  <!-- <button class="text-blue-600 hover:text-blue-800">
+                  <button
+                    @click="showEditParacelDetail({ id: p.id })"
+                    class="text-blue-600 hover:text-blue-800"
+                  >
                     <svg
                       width="21"
                       height="21"
@@ -696,7 +714,15 @@ const toggleSidebar = () => {
                       />
                     </svg>
                   </button>
-                  <button class="text-red-600 hover:text-red-800">
+                  <button
+                    @click="
+                      deleteParcelPopUp({
+                        id: p.id,
+                        parcelNumber: p.trackingNumber
+                      })
+                    "
+                    class="text-red-600 hover:text-red-800 cursor-pointer"
+                  >
                     <svg
                       width="18"
                       height="21"
@@ -709,7 +735,7 @@ const toggleSidebar = () => {
                         fill="#185DC0"
                       />
                     </svg>
-                  </button> -->
+                  </button>
                 </td>
               </tr>
             </tbody>
