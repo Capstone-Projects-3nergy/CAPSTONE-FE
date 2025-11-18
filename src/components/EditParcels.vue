@@ -497,7 +497,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -534,7 +534,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -603,7 +603,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -636,7 +636,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem title="Manage Announcements">
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
