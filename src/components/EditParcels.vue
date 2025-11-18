@@ -790,116 +790,136 @@ const closePopUp = (operate) => {
           </div>
 
           <!-- Row 1 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Row 1 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Tracking Number</label
+              >
               <input
-                v-model="form.trackingNumber"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.trackingNumber || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
             <div>
-              <label class="block font-semibold mb-1">Recipient Name</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Parcel Type</label
+              >
               <input
-                v-model="form.recipientName"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.parcelType || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
             <div>
-              <label class="block font-semibold mb-1">Room Number</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Received At</label
+              >
               <input
-                v-model="form.roomNumber"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.receivedAt || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
           </div>
 
           <!-- Row 2 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
-                v-model="form.parcelType"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Contact</label>
-              <input
-                v-model="form.contact"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Status</label>
-              <select
-                v-model="form.status"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200 text-black transition-all duration-300"
-                :class="{
-                  'bg-yellow-400': form.status === 'Pending',
-                  'bg-green-400': form.status === 'Picked Up',
-                  'bg-red-400': form.status === 'Unclaimed'
-                }"
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Recipient Name</label
               >
-                <option disabled>Select Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Picked Up">Picked Up</option>
-                <option value="Unclaimed">Unclaimed</option>
-              </select>
+              <input
+                type="text"
+                :value="parcel?.recipientName || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Email</label
+              >
+              <input
+                type="text"
+                :value="parcel?.email || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Room Number</label
+              >
+              <input
+                type="text"
+                :value="parcel?.roomNumber || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
             </div>
           </div>
 
           <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1">Pickup at</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Pickup At</label
+              >
               <input
-                v-model="form.pickupAt"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.pickedUpAt || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Updated At</label
+              >
+              <input
+                type="text"
+                :value="parcel?.updatedAt || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1">Update at</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Status</label
+              >
               <input
-                v-model="form.updateAt"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.status || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
+            <div></div>
           </div>
 
-          <hr class="border-t border-[#3269A8] my-4" />
-
           <!-- Row 4 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1">Sender Name</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Sender Name</label
+              >
               <input
-                v-model="form.senderName"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.senderName || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
             <div>
-              <label class="block font-semibold mb-1">Company ID</label>
+              <label class="block font-semibold text-[#185dc0] mb-1"
+                >Company</label
+              >
               <input
-                v-model="form.companyId"
                 type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Receive at</label>
-              <input
-                v-model="form.receiveAt"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                :value="parcel?.companyId || ''"
+                class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
           </div>
