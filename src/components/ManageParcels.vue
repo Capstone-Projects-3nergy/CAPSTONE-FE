@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -557,15 +557,6 @@ const pageNumbers = computed(() => {
 //   parcelManager.deleteParcels(parcelId)
 // }
 const deleteParcelPopUp = (parcel) => {
-  // เปลี่ยน URL ให้มี tid
-  router.push({
-    name: 'deleteparcels',
-    params: {
-      id: route.params.id, // staff id
-      tid: parcel.id // parcel id
-    }
-  })
-
   // เก็บข้อมูล parcel สำหรับ popup
   parcelDetail.value = {
     id: parcel.id,
@@ -574,6 +565,14 @@ const deleteParcelPopUp = (parcel) => {
   console.log(parcelDetail.value)
   // เปิด popup
   showDeleteParcel.value = true
+  // เปลี่ยน URL ให้มี tid
+  router.replace({
+    name: 'deleteparcels',
+    params: {
+      id: route.params.id, // staff id
+      tid: parcel.id // parcel id
+    }
+  })
 }
 
 const clearDeletePopUp = () => {
@@ -1441,9 +1440,10 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :parcelData="parcelDetail.value"
+      :parcelData="parcelDetail"
     />
   </teleport>
+
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels
       @cancelAdd="clearDeletePopUp"

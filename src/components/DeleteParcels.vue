@@ -1,51 +1,44 @@
 <script setup>
-import { ref, reactive } from 'vue'
-// import { deleteItemById } from '@/utils/fetchUtils'
+import { ref, computed } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import {
-  getItems,
-  getItemById,
-  deleteItemById,
-  addItem,
-  editItem,
-  deleteAndTransferItem,
-  toggleVisibility,
-  editReadWrite,
-  acceptInvite,
-  cancelInvite,
-  editInviteReadWrite,
-  declineInvite,
-  editItemWithFile,
-  deleteFile
-} from '@/utils/fetchUtils'
+import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcelData'])
-import { useParcelManager } from '@/stores/ParcelsManager'
+const props = defineProps(['parcelData']) // ไม่ใช่ ref
+
 const router = useRouter()
-const route = useRoute()
 const parcelManager = useParcelManager()
 
 const deletedParcel = ref(null)
 
-const deleteParcel = async (parcelId) => {
+// ใช้ computed เผื่อ props เป็น undefined
+const parcel = computed(() => props.parcelData || {})
+
+const deleteParcelFn = async () => {
+  if (!parcel.value.id) return
+
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`, // แก้ URL ให้ตรง backend
-    parcelId
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    parcel.value.id
   )
 
-  if (deletedParcel.value == '404') {
+  if (deletedParcel.value === '404') {
     emit('redAlert')
     emit('cancelDetail', true)
     return
   }
 
   // ลบใน Pinia
-  parcelManager.deleteParcels(parcelId)
+  parcelManager.deleteParcels(parcel.value.id)
 
   emit('confirmDetail', true)
+}
+
+const cancelFn = () => {
+  emit('cancelDetail', true)
+  router.replace({ name: 'staffparcels' })
 }
 </script>
 
@@ -62,7 +55,8 @@ const deleteParcel = async (parcelId) => {
         <div class="w-[70%] h-[100%]">
           <div class="flex pl-4 mt-5">
             Do you want to delete this tracking number
-            <b>{{ props.parcelData }}</b>
+            <b>{{ parcel.parcelNumber || '' }}</b
+            >?
           </div>
         </div>
       </div>
@@ -72,37 +66,15 @@ const deleteParcel = async (parcelId) => {
           label="Confirm"
           color="green"
           class="mr-3 mt-4 mb-2"
-          @click="deleteParcel(props.parcelData.id)"
+          @click="deleteParcelFn"
         />
 
-        <!-- <button
-          class="itbkk-button-confirm bg-green-400 rounded-[2px] w-[60px] h-[25px] mr-3 mt-4 mb-2 cursor-pointer"
-          @click="deleteParcelFn(props.parcel.parcelId)"
-        >
-          Confirm
-        </button> -->
         <ButtonWeb
-          label="Cancel "
+          label="Cancel"
           color="red"
           class="mr-3 mt-4 mb-2"
-          @click="
-            ;[
-              emit('cancelDetail', true),
-              router.replace({ name: 'staffparcels' })
-            ]
-          "
+          @click="cancelFn"
         />
-        <!-- <button
-          class="itbkk-button-cancel bg-red-400 rounded-[2px] w-[50px] h-[25px] mr-3 mt-4 mb-2 cursor-pointer"
-          @click="
-            ;[
-              emit('cancelDetail', true),
-              router.replace({ name: 'staffparcels' })
-            ]
-          "
-        >
-          Cancel
-        </button> -->
       </div>
     </div>
   </div>
