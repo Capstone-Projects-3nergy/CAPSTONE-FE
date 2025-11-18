@@ -558,8 +558,8 @@ const pageNumbers = computed(() => {
 // }
 const deleteParcelPopUp = (parcelId) => {
   console.log('parcelId =', parcelId)
-
-  router.push({
+  showDeleteParcel.value = true
+  router.replace({
     name: 'deleteparcels',
     params: {
       id: route.params.id,
@@ -568,7 +568,6 @@ const deleteParcelPopUp = (parcelId) => {
   })
 
   parcelDetail.value = parcelId
-  showDeleteParcel.value = true
 }
 
 const clearDeletePopUp = () => {
@@ -1279,11 +1278,11 @@ const closePopUp = (operate) => {
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                class="hover:bg-gray-50 cursor-pointer"
+                class="hover:bg-gray-50"
               >
                 <td
                   @click="showParacelDetail"
-                  class="px-4 py-3 text-sm text-gray-700"
+                  class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
                 >
                   {{ p.trackingNumber }}
                 </td>

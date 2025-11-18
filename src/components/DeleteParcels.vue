@@ -4,6 +4,7 @@ import { ref, reactive } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRoute, useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
+
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 const props = defineProps(['parcel']) // 👉 ของเดิม taskId
 
