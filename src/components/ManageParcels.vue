@@ -78,7 +78,7 @@ const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 const showDeleteParcel = ref(false)
-
+const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
@@ -537,22 +537,28 @@ const pageNumbers = computed(() => {
 //   edit: { state: false, parcelTitle: '' },
 //   delete: { state: false, parcelTitle: '' }
 // })
-const deleteParcel = async (parcelId) => {
-  const resStatus = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcelId,
-    router
-  )
+// const deleteParcel = async (parcelId) => {
+//   const resStatus = await deleteItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     parcelId,
+//     router
+//   )
 
-  if (!resStatus) {
-    error.value = true
-    return
-  }
+//   if (!resStatus) {
+//     error.value = true
+//     return
+//   }
 
-  deleteSuccess.value = true
+//   deleteSuccess.value = true
 
-  // 👉 ลบออกจาก Pinia
-  parcelManager.deleteParcels(parcelId)
+//   // 👉 ลบออกจาก Pinia
+//   parcelManager.deleteParcels(parcelId)
+// }
+const deleteParcelPopUp = (parcelId) => {
+  router.push({
+    name: 'deleteparcels',
+    params: { tid: parcelId }
+  })
 }
 
 // const closePopUp = (operate) => {
@@ -1308,7 +1314,7 @@ const closePopUp = (operate) => {
                     </svg>
                   </button>
                   <button
-                    @click="deleteParcel"
+                    @click="deleteParcelPopUp"
                     class="text-red-600 hover:text-red-800"
                   >
                     <svg
@@ -1396,9 +1402,8 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :parcelId="parcelDetail"
-    >
-    </DeleteParcels>
+      :parcelId="route.params.tid"
+    />
   </teleport>
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels

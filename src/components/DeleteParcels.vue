@@ -45,8 +45,7 @@ const deleteParcel = async (parcelId) => {
         <div class="w-[70%] h-[100%]">
           <div class="flex pl-4 mt-5">
             Do you want to delete the parcel
-            <b>{{ props.parcel.trackingNumber }}</b
-            >?
+            <b></b>?
           </div>
         </div>
       </div>
