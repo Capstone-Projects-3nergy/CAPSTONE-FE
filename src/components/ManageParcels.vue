@@ -537,6 +537,32 @@ const showParcelDetail = async function (id) {
 }
 const showEditParacelDetail = async function (id) {
   router.push({ name: 'editparcels', params: { tid: id } })
+  try {
+    // ดึงข้อมูล parcel เดี่ยวจาก backend
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+      id
+    )
+
+    if (data) {
+      // map field ให้เหมือนกับที่ใช้ใน frontend
+      parcelsResidentDetail.value = {
+        id: data.parcelId,
+        trackingNumber: data.trackingNumber,
+        recipientName: data.ownerName,
+        roomNumber: data.roomNumber,
+        email: data.contactEmail,
+        status: mapStatus(data.status),
+        receiveAt: data.receivedAt,
+        updateAt: data.updatedAt || null,
+        pickupAt: data.pickedUpAt || null
+      }
+
+      console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+    }
+  } catch (err) {
+    console.error('Failed to load parcel detail:', err)
+  }
 }
 
 // ฟังก์ชันเปลี่ยนหน้า
@@ -1347,7 +1373,7 @@ const closePopUp = (operate) => {
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
                   <button
-                    @click="showEditParacelDetail"
+                    @click="showEditParacelDetail({ id: p.id })"
                     class="text-blue-600 hover:text-blue-800"
                   >
                     <svg
