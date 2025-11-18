@@ -78,6 +78,8 @@ const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 const showDeleteParcel = ref(false)
+const parcelDetail = ref(null)
+
 const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
@@ -555,10 +557,21 @@ const pageNumbers = computed(() => {
 //   parcelManager.deleteParcels(parcelId)
 // }
 const deleteParcelPopUp = (parcelId) => {
-  router.push({
-    name: 'deleteparcels',
-    params: { tid: parcelId }
-  })
+  parcelDetail.value = parcelId // ส่งค่า id ให้ popup
+  showDeleteParcel.value = true // เปิด pop-up
+}
+const clearDeletePopUp = () => {
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+const showDelComplete = () => {
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+const openRedPopup = () => {
+  // handle red popup
 }
 
 // const closePopUp = (operate) => {
@@ -1315,7 +1328,7 @@ const closePopUp = (operate) => {
                   </button>
                   <button
                     @click="deleteParcelPopUp"
-                    class="text-red-600 hover:text-red-800"
+                    class="text-red-600 hover:text-red-800 cursor-pointer"
                   >
                     <svg
                       width="18"
@@ -1402,7 +1415,7 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :parcelId="route.params.tid"
+      :parcelId="parcelDetail"
     />
   </teleport>
   <!-- <teleport to="body" v-if="showAddParcel">
