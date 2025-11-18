@@ -557,9 +557,20 @@ const pageNumbers = computed(() => {
 //   parcelManager.deleteParcels(parcelId)
 // }
 const deleteParcelPopUp = (parcelId) => {
-  parcelDetail.value = parcelId // ส่งค่า id ให้ popup
-  showDeleteParcel.value = true // เปิด pop-up
+  console.log('parcelId =', parcelId)
+
+  router.push({
+    name: 'deleteparcels',
+    params: {
+      id: route.params.id,
+      tid: parcelId
+    }
+  })
+
+  parcelDetail.value = parcelId
+  showDeleteParcel.value = true
 }
+
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
@@ -1327,7 +1338,7 @@ const closePopUp = (operate) => {
                     </svg>
                   </button>
                   <button
-                    @click="deleteParcelPopUp"
+                    @click="deleteParcelPopUp(p.id)"
                     class="text-red-600 hover:text-red-800 cursor-pointer"
                   >
                     <svg
