@@ -584,38 +584,37 @@ const toggleSidebar = () => {
         </div>
 
         <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
-          <div class="flex flex-col mb-4 gap-2">
-            <!-- Title -->
-            <h2
-              class="text-center text-sm md:text-xl font-bold text-[#185dc0] truncate"
-            >
-              Parcel Details
-            </h2>
+         <div class="flex flex-col mb-4 gap-4">
+  <!-- Title -->
+  <h2 class="text-center text-sm md:text-xl font-bold text-[#185dc0] truncate">
+    Parcel Details
+  </h2>
 
-            <!-- Buttons Row -->
-            <div class="flex items-center justify-between gap-2">
-              <!-- Back Button -->
-              <ButtonWeb
-                label="Go Back"
-                color="blue"
-                @click="backToManageParcels"
-                class="flex-1 md:flex-shrink-0 px-3 py-1 text-xs md:text-sm"
-              />
+  <!-- Buttons Row -->
+  <div class="flex items-center justify-between gap-4">
+    <!-- Back Button -->
+    <ButtonWeb
+      label="Go Back"
+      color="blue"
+      @click="backToManageParcels"
+      class="flex-1 md:flex-shrink-0 px-2 py-1 text-xs md:text-sm"
+    />
 
-              <!-- Status Button -->
-              <button
-                class="flex-1 md:flex-shrink-0 px-3 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center"
-                :class="{
-                  'bg-yellow-400': parcel?.status === 'Pending',
-                  'bg-green-400': parcel?.status === 'Picked Up',
-                  'bg-red-400': parcel?.status === 'Unclaimed'
-                }"
-                disabled
-              >
-                {{ parcel?.status || 'Unknown' }}
-              </button>
-            </div>
-          </div>
+    <!-- Status Button -->
+    <button
+      class="flex-1 md:flex-shrink-0 px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center"
+      :class="{
+        'bg-yellow-400': parcel?.status === 'Pending',
+        'bg-green-400': parcel?.status === 'Picked Up',
+        'bg-red-400': parcel?.status === 'Unclaimed'
+      }"
+      disabled
+    >
+      {{ parcel?.status || 'Unknown' }}
+    </button>
+  </div>
+</div>
+
 
           <form class="space-y-8">
             <!-- Row 1 -->
