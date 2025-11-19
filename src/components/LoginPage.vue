@@ -370,9 +370,9 @@ const showResetPasswordPageWeb = async function () {
   <div class="min-h-screen flex flex-col md:flex-row">
     <!-- Left Section -->
     <div
-      class="flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex flex-col justify-center items-center p-8"
+      class="flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex flex-col justify-center items-center p-6 h-32 sm:h-40 md:h-48 lg:min-h-screen"
     >
-      <div class="max-w-md">
+      <div class="max-w-md text-center md:text-left">
         <h1 class="text-3xl font-bold mb-4">Welcome back!</h1>
         <p class="text-sm text-white mb-8">
           dormitory parcel management system — manage, check status, and stay
@@ -380,8 +380,7 @@ const showResetPasswordPageWeb = async function () {
         </p>
         <div class="flex justify-center">
           <svg
-            width="490"
-            height="569"
+            class="w-40 h-46 md:w-[490px] md:h-[569px]"
             viewBox="0 0 490 569"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -419,7 +418,7 @@ const showResetPasswordPageWeb = async function () {
     >
       <div class="w-full max-w-sm">
         <!-- Logo -->
-        <div class="flex items-center mb-8">
+        <div class="flex items-center mb-8 justify-center md:justify-start">
           <svg
             width="55"
             height="57"
@@ -460,8 +459,10 @@ const showResetPasswordPageWeb = async function () {
         </div>
 
         <!-- Title -->
-        <h2 class="text-4xl font-bold mb-2">Get Started</h2>
-        <p class="text-[#8C8F91] mb-6">
+        <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
+          Get Started
+        </h2>
+        <p class="text-[#8C8F91] mb-6 text-center md:text-left">
           Welcome to tractify - Let's get started
         </p>
 
