@@ -343,13 +343,15 @@ const toggleComfirmPasswordVisibility = () => {
 </script>
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
-    <!-- Left Side -->
+    <!-- Left Section -->
     <div
-      class="hidden md:flex w-1/2 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col p-8 pt-50"
+      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
     >
       <div class="max-w-md text-center md:text-center">
-        <h2 class="text-2xl font-bold mb-3">Welcome to Tractify!</h2>
-        <p class="text-sm text-blue-100 mb-8">
+        <h2 class="text-3xl font-bold mb-4 md:text-center">
+          Welcome to Tractify!
+        </h2>
+        <p class="text-sm text-white mb-8 md:text-left">
           Register to manage and track your dormitory parcels
         </p>
         <div class="flex md:justify-center">
