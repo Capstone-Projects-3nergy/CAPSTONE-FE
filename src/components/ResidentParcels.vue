@@ -1041,8 +1041,8 @@ const showProfileResidentPage = async function () {
       </aside>
 
       <!-- Main Content -->
-      <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-6 w-full">
+        <!-- Title -->
         <div class="flex space-x-1">
           <svg
             width="25"
@@ -1060,15 +1060,17 @@ const showProfileResidentPage = async function () {
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
 
-        <!-- 🔲 Filter Bar Wrapper -->
+        <!-- Filter Bar -->
         <div
-          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Date Tabs -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center flex-wrap gap-2">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
-              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+              <div
+                class="flex bg-gray-100 rounded-lg overflow-hidden flex-wrap"
+              >
                 <button
                   v-for="tab in tabs"
                   :key="tab"
@@ -1084,11 +1086,10 @@ const showProfileResidentPage = async function () {
                 </button>
               </div>
             </div>
-
             <!-- Right: Search + Sort + Add -->
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <!-- Search -->
-              <div class="relative">
+              <div class="relative flex-1 min-w-[120px]">
                 <svg
                   class="absolute left-2 top-1/2 -translate-y-1/2"
                   width="18"
@@ -1107,13 +1108,13 @@ const showProfileResidentPage = async function () {
                   type="text"
                   v-model="searchKeyword"
                   placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
               </div>
 
               <!-- Sort -->
               <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
                 v-model="selectedSort"
                 @change="handleSort"
               >
@@ -1127,9 +1128,31 @@ const showProfileResidentPage = async function () {
                 <option>Status (A→Z)</option>
                 <option>Status (Z→A)</option>
               </select>
+
+              <!-- Add Parcel -->
+              <button
+                @click="showAddParcelPage"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                    fill="white"
+                  />
+                </svg>
+                <span>Add parcel</span>
+              </button>
             </div>
           </div>
         </div>
+
+        <!-- Alerts -->
         <AlertPopUp
           v-if="deleteSuccess"
           :titles="'Delete Parcel is Successfull.'"
@@ -1162,10 +1185,14 @@ const showProfileResidentPage = async function () {
           operate="problem"
           @closePopUp="closePopUp"
         />
-        <!-- Parcel Table -->
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
+
+        <!-- Parcel Table (Responsive) -->
+        <div class="bg-white rounded-lg shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
-            <thead class="bg-white border-t border-b border-[#185DC0] my-4">
+            <!-- Desktop Header -->
+            <thead
+              class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+            >
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Tracking
@@ -1174,118 +1201,76 @@ const showProfileResidentPage = async function () {
                   Name
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Room Number</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Room
                 </th>
-
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Email
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Status</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortStatus"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Status
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Receive At</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortDate"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Receive At
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Operation
                 </th>
               </tr>
             </thead>
+
             <tbody class="divide-y">
+              <!-- Row -->
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                class="hover:bg-gray-50"
+                class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
               >
+                <!-- Tracking -->
                 <td
                   @click="showParcelDetail({ id: p.id })"
-                  class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                 >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Tracking:
+                  </span>
                   {{ p.trackingNumber }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Name -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Name:
+                  </span>
                   {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Room -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Room:
+                  </span>
                   {{ p.roomNumber }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
-                <td class="px-4 py-3">
+
+                <!-- Email -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Email:
+                  </span>
+                  {{ p.email }}
+                </td>
+
+                <!-- Status -->
+                <td class="px-4 py-2 md:py-3 border-b md:border-none">
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Status:
+                  </span>
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     :class="{
@@ -1297,15 +1282,71 @@ const showProfileResidentPage = async function () {
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Receive At -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Receive At:
+                  </span>
                   {{ formatDateByTab(p.receiveAt) }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
-                  <ButtonWeb
-                    label="Confirm"
-                    color="blue"
-                    @click="confirmParcelReceive"
-                  />
+
+                <!-- Operation -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
+                >
+                  <button
+                    @click="showEditParacelDetail({ id: p.id })"
+                    class="text-blue-600 hover:text-blue-800"
+                  >
+                    <svg
+                      width="21"
+                      height="21"
+                      viewBox="0 0 21 21"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10 1.99634H3C2.46957 1.99634 1.96086 2.20705 1.58579 2.58212C1.21071 2.9572 1 3.4659 1 3.99634V17.9963C1 18.5268 1.21071 19.0355 1.58579 19.4106C1.96086 19.7856 2.46957 19.9963 3 19.9963H17C17.5304 19.9963 18.0391 19.7856 18.4142 19.4106C18.7893 19.0355 19 18.5268 19 17.9963V10.9963"
+                        stroke="#185DC0"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M16.3751 1.62132C16.7729 1.2235 17.3125 1 17.8751 1C18.4377 1 18.9773 1.2235 19.3751 1.62132C19.7729 2.01914 19.9964 2.55871 19.9964 3.12132C19.9964 3.68393 19.7729 4.2235 19.3751 4.62132L10.3621 13.6353C10.1246 13.8726 9.8313 14.0462 9.50909 14.1403L6.63609 14.9803C6.55005 15.0054 6.45883 15.0069 6.372 14.9847C6.28517 14.9624 6.20592 14.9173 6.14254 14.8539C6.07916 14.7905 6.03398 14.7112 6.01174 14.6244C5.98949 14.5376 5.991 14.4464 6.01609 14.3603L6.85609 11.4873C6.95062 11.1654 7.12463 10.8724 7.36209 10.6353L16.3751 1.62132Z"
+                        stroke="#185DC0"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  <button
+                    @click="
+                      deleteParcelPopUp({
+                        id: p.id,
+                        parcelNumber: p.trackingNumber
+                      })
+                    "
+                    class="text-red-600 hover:text-red-800 cursor-pointer"
+                  >
+                    <svg
+                      width="18"
+                      height="21"
+                      viewBox="0 0 18 21"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                        fill="#185DC0"
+                      />
+                    </svg>
+                  </button>
                 </td>
               </tr>
             </tbody>
