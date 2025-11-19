@@ -415,7 +415,7 @@ const showResetPasswordPageWeb = async function () {
 
     <!-- Right Section -->
     <div
-      class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-[28rem] sm:min-h-[32rem] md:min-h-[36rem] lg:min-h-screen"
+      class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-screen"
     >
       <div class="w-full max-w-xs sm:max-w-sm">
         <!-- Logo -->
@@ -469,24 +469,25 @@ const showResetPasswordPageWeb = async function () {
           Welcome to tractify - Let's get started
         </p>
 
-        <!-- ✅ Popups อยู่ด้านบน -->
-        <AlertPopUp
-          v-if="incorrect"
-          :titles="'Username or Password is incorrect.'"
-          message="Error!!"
-          styleType="red"
-          operate="incorrect"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
-
+        <div class="space-y-2">
+          <!-- ✅ Popups อยู่ด้านบน -->
+          <AlertPopUp
+            v-if="incorrect"
+            :titles="'Username or Password is incorrect.'"
+            message="Error!!"
+            styleType="red"
+            operate="incorrect"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+        </div>
         <!-- Form -->
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">
