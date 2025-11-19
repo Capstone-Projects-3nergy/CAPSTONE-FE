@@ -163,7 +163,7 @@ const mapStatus = (status) => {
 }
 
 onMounted(async () => {
- isCollapsed.value= true
+  isCollapsed.value = true
   // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -1093,7 +1093,8 @@ const closePopUp = (operate) => {
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-6 w-full">
+        <!-- Title -->
         <div class="flex space-x-1">
           <svg
             width="25"
@@ -1111,13 +1112,15 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
 
-        <!-- 🔲 Filter Bar Wrapper -->
+        <!-- Filter Bar -->
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
-          <div class="flex items-center justify-between mb-4">
+          <div
+            class="flex flex-wrap md:flex-nowrap items-center justify-between mb-4"
+          >
             <!-- Left: Date Tabs -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 mb-2 md:mb-0">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
               <div class="flex bg-gray-100 rounded-lg overflow-hidden">
                 <button
@@ -1137,7 +1140,7 @@ const closePopUp = (operate) => {
             </div>
 
             <!-- Right: Search + Sort + Add -->
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-wrap md:flex-nowrap items-center space-x-3">
               <!-- Search -->
               <div class="relative">
                 <svg
@@ -1196,12 +1199,13 @@ const closePopUp = (operate) => {
                     fill="white"
                   />
                 </svg>
-
                 <span>Add parcel</span>
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Alerts -->
         <AlertPopUp
           v-if="deleteSuccess"
           :titles="'Delete Parcel is Successfull.'"
@@ -1234,10 +1238,14 @@ const closePopUp = (operate) => {
           operate="problem"
           @closePopUp="closePopUp"
         />
-        <!-- Parcel Table -->
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
+
+        <!-- Parcel Table (Responsive) -->
+        <div class="bg-white rounded-lg shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
-            <thead class="bg-white border-t border-b border-[#185DC0] my-4">
+            <!-- Desktop Header -->
+            <thead
+              class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+            >
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Tracking
@@ -1246,118 +1254,76 @@ const closePopUp = (operate) => {
                   Name
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Room Number</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Room
                 </th>
-
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Email
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Status</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortStatus"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Status
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Receive At</span>
-                    <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortDate"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                  </div>
+                  Receive At
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Operation
                 </th>
               </tr>
             </thead>
+
             <tbody class="divide-y">
+              <!-- Row -->
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                class="hover:bg-gray-50"
+                class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
               >
+                <!-- Tracking -->
                 <td
                   @click="showParcelDetail({ id: p.id })"
-                  class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                 >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Tracking:
+                  </span>
                   {{ p.trackingNumber }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Name -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Name:
+                  </span>
                   {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Room -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Room:
+                  </span>
                   {{ p.roomNumber }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
-                <td class="px-4 py-3">
+
+                <!-- Email -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Email:
+                  </span>
+                  {{ p.email }}
+                </td>
+
+                <!-- Status -->
+                <td class="px-4 py-2 md:py-3 border-b md:border-none">
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Status:
+                  </span>
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     :class="{
@@ -1369,10 +1335,21 @@ const closePopUp = (operate) => {
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
+
+                <!-- Receive At -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Receive At:
+                  </span>
                   {{ formatDateByTab(p.receiveAt) }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
+
+                <!-- Operation -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
+                >
                   <button
                     @click="showEditParacelDetail({ id: p.id })"
                     class="text-blue-600 hover:text-blue-800"
@@ -1400,6 +1377,7 @@ const closePopUp = (operate) => {
                       />
                     </svg>
                   </button>
+
                   <button
                     @click="
                       deleteParcelPopUp({
