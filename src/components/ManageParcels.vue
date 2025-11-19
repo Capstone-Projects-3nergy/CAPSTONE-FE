@@ -1114,15 +1114,15 @@ const closePopUp = (operate) => {
 
         <!-- Filter Bar -->
         <div
-          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
-          <div
-            class="flex flex-wrap md:flex-nowrap items-center justify-between mb-4"
-          >
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Date Tabs -->
-            <div class="flex items-center space-x-4 mb-2 md:mb-0">
+            <div class="flex items-center flex-wrap gap-2">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
-              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+              <div
+                class="flex bg-gray-100 rounded-lg overflow-hidden flex-wrap"
+              >
                 <button
                   v-for="tab in tabs"
                   :key="tab"
@@ -1138,11 +1138,10 @@ const closePopUp = (operate) => {
                 </button>
               </div>
             </div>
-
             <!-- Right: Search + Sort + Add -->
-            <div class="flex flex-wrap md:flex-nowrap items-center space-x-3">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <!-- Search -->
-              <div class="relative">
+              <div class="relative flex-1 min-w-[120px]">
                 <svg
                   class="absolute left-2 top-1/2 -translate-y-1/2"
                   width="18"
@@ -1161,13 +1160,13 @@ const closePopUp = (operate) => {
                   type="text"
                   v-model="searchKeyword"
                   placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
               </div>
 
               <!-- Sort -->
               <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
                 v-model="selectedSort"
                 @change="handleSort"
               >
@@ -1185,7 +1184,7 @@ const closePopUp = (operate) => {
               <!-- Add Parcel -->
               <button
                 @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
               >
                 <svg
                   width="24"
