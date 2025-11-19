@@ -350,7 +350,7 @@ const toggleComfirmPasswordVisibility = () => {
     >
       <!-- Left Side -->
       <div
-        class="w-1/2 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex flex-col p-8 pt-50"
+        class="hidden md:flex w-1/2 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col p-8 pt-50"
       >
         <h2 class="text-2xl font-bold mb-3">Welcome to Tractify!</h2>
         <p class="text-sm text-blue-100 mb-8">
