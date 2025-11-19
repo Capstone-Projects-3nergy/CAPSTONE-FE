@@ -343,7 +343,7 @@ const toggleComfirmPasswordVisibility = () => {
 </script>
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-200"
+    class="min-h-screen flex flex-col md:flex-row items-center justify-center bg-gradient-to-br from-blue-500 to-blue-200"
   >
     <div
       class="flex bg-white rounded-2xl shadow-2xl overflow-hidden w-[900px] max-w-full"
@@ -940,7 +940,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </option>
                 </select> -->
                 <select v-model="form.dormId" class="custom-select">
-                  <option  disabled>Select Dormitory</option>
+                  <option disabled>Select Dormitory</option>
                   <option
                     v-for="dorm in dormList"
                     :key="dorm.dormId"

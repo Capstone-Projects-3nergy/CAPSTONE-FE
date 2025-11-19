@@ -415,7 +415,7 @@ const showResetPasswordPageWeb = async function () {
 
     <!-- Right Section -->
     <div
-      class="flex-1 flex items-center justify-center bg-white px-6 py-10 md:px-12"
+      class="flex-1 flex items-center justify-center bg-white px-6 py-10 md:px-12 h-48 sm:h-56 md:h-64 lg:h-auto"
     >
       <div class="w-full max-w-sm">
         <!-- Logo -->
