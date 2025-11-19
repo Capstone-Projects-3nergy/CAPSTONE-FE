@@ -109,6 +109,7 @@ const showProfileResidentPage = async function () {
 // }
 const parcelManager = useParcelManager()
 onMounted(async () => {
+  isCollapsed.value = true
   // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,

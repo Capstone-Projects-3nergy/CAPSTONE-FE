@@ -107,6 +107,7 @@ const getParcelDetail = async () => {
 
 // เรียกโหลดตอน mounted
 onMounted(() => {
+  isCollapsed.value = true
   getParcelDetail()
 })
 // ข้อมูลพัสดุ reactive

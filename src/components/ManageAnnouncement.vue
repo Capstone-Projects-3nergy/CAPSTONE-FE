@@ -22,6 +22,9 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
+onMounted(async () => {
+  isCollapsed.value = true
+})
 const parcels = ref([
   {
     id: 1,

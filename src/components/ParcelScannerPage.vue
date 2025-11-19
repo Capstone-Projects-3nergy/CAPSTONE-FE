@@ -448,6 +448,7 @@ const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
+onMounted(async () => {isCollapsed.value= true})
 </script>
 
 <template>

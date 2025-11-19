@@ -147,6 +147,7 @@ watch(recipientSearch, (val) => {
 
 // โหลดรายชื่อ resident ตอนเข้าเพจ
 onMounted(async () => {
+   isCollapsed.value = true
   const auth = useAuthManager()
   console.log('staff login id:', auth.user.id)
   try {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
@@ -12,7 +12,9 @@ const router = useRouter()
 const parcelManager = useParcelManager()
 
 const deletedParcel = ref(null)
-
+onMounted(async () => {
+  isCollapsed.value = true
+})
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelData || {})
 

@@ -126,7 +126,7 @@ const returnLoginPage = async () => {
 const parcelManager = useParcelManager()
 
 onMounted(async () => {
-  // ดึงจาก backend
+  isCollapsed.value = true // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router

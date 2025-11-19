@@ -96,6 +96,7 @@ const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
+onMounted(async () => {isCollapsed.value= true})
 </script>
 
 <template>

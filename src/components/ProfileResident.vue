@@ -66,6 +66,7 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+onMounted(async () => {isCollapsed.value= true})
 </script>
 
 <template>
