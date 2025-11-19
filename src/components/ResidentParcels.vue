@@ -162,6 +162,7 @@ const mapStatus = (status) => {
 
 onMounted(async () => {
   // ดึงจาก backend
+  isCollapsed.value = true
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
