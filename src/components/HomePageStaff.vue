@@ -598,12 +598,6 @@ const currentUser = ref('Pimpajee SetXXXXXX')
 
       <!-- Main Content -->
       <main class="flex-1 flex flex-col">
-        <!-- Banner
-        <div
-          class="bg-gradient-to-r from-blue-500 to-blue-700 h-32 flex items-center justify-center text-white font-bold text-xl shadow"
-        >
-          Package Tracking System
-        </div> -->
         <div class="bg-white p-4 rounded shadow">
           <!-- HOME -->
           <section class="p-4">
@@ -620,7 +614,6 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                   fill="#185DC0"
                 />
               </svg>
-
               Staff Home Page
             </h1>
 
@@ -634,17 +627,20 @@ const currentUser = ref('Pimpajee SetXXXXXX')
               >
                 ‹
               </button>
+
               <div
                 class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
               >
                 {{ slides[currentIndex] }}
               </div>
+
               <button
                 @click="nextSlide"
                 class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
               >
                 ›
               </button>
+
               <div class="absolute bottom-2 flex space-x-2">
                 <span
                   v-for="(s, i) in slides"
@@ -659,8 +655,8 @@ const currentUser = ref('Pimpajee SetXXXXXX')
             </div>
           </section>
 
-          <!-- Sections -->
-          <section class="grid grid-cols-3 gap-4 px-4 pb-4">
+          <!-- Sections (Responsive: 1 column on mobile, 3 on desktop) -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 pb-4">
             <div class="bg-white p-4 rounded shadow">
               <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
               <div
@@ -686,31 +682,28 @@ const currentUser = ref('Pimpajee SetXXXXXX')
               </div>
             </div>
           </section>
+
           <div class="p-4">
             <div class="flex space-x-1">
-              <svg
-                width="41"
-                height="41"
-                viewBox="0 0 41 41"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
                   d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
                   fill="#185DC0"
                 />
               </svg>
-
               <h2 class="text-2xl font-bold text-gray-800 mb-4">
                 Resident Parcel
               </h2>
             </div>
           </div>
 
-          <!-- Parcel Table -->
-          <div class="overflow-x-auto bg-white rounded-lg shadow">
+          <!-- Parcel Table (Vertical on mobile, full table on desktop) -->
+          <div class="bg-white rounded-lg shadow">
             <table class="min-w-full text-left border-collapse">
-              <thead class="bg-white border-t border-b border-[#185DC0] my-4">
+              <!-- Desktop Header -->
+              <thead
+                class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+              >
                 <tr>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Tracking
@@ -719,73 +712,72 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                     Name
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Room Number</span>
-                      <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                    </div>
+                    Room
                   </th>
-
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Email
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Status</span>
-                    </div>
+                    Status
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Receive At</span>
-                    </div>
+                    Receive At
                   </th>
                 </tr>
               </thead>
+
               <tbody class="divide-y">
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
-                  class="hover:bg-gray-50"
+                  class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
                 >
+                  <!-- Tracking -->
                   <td
                     @click="showParcelDetail({ id: p.id })"
-                    class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                   >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Tracking:
+                    </span>
                     {{ p.trackingNumber }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Name -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Name:
+                    </span>
                     {{ p.recipientName }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Room -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Room:
+                    </span>
                     {{ p.roomNumber }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
-                  <td class="px-4 py-3">
+
+                  <!-- Email -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Email:
+                    </span>
+                    {{ p.email }}
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-4 py-2 md:py-3 border-b md:border-none">
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Status:
+                    </span>
                     <span
                       class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                       :class="{
@@ -797,7 +789,12 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                       {{ p.status }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Receive At -->
+                  <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Receive At:
+                    </span>
                     {{ p.receiveAt }}
                   </td>
                 </tr>
