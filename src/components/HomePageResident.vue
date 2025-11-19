@@ -460,13 +460,8 @@ console.log(registerStore.user)
       </aside>
 
       <!-- Main Content -->
+      <!-- Main Content -->
       <main class="flex-1 flex flex-col">
-        <!-- Banner
-        <div
-          class="bg-gradient-to-r from-blue-500 to-blue-700 h-32 flex items-center justify-center text-white font-bold text-xl shadow"
-        >
-          Package Tracking System
-        </div> -->
         <div class="bg-white p-4 rounded shadow">
           <!-- HOME -->
           <section class="p-4">
@@ -480,10 +475,8 @@ console.log(registerStore.user)
               >
                 <path
                   d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
-                  fill="#185DC0"
                 />
               </svg>
-
               Resident Home Page
             </h1>
 
@@ -497,17 +490,20 @@ console.log(registerStore.user)
               >
                 ‹
               </button>
+
               <div
                 class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
               >
                 {{ slides[currentIndex] }}
               </div>
+
               <button
                 @click="nextSlide"
                 class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
               >
                 ›
               </button>
+
               <div class="absolute bottom-2 flex space-x-2">
                 <span
                   v-for="(s, i) in slides"
@@ -522,8 +518,8 @@ console.log(registerStore.user)
             </div>
           </section>
 
-          <!-- Sections -->
-          <section class="grid grid-cols-3 gap-4 px-4 pb-4">
+          <!-- Sections (Responsive) -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 pb-4">
             <div class="bg-white p-4 rounded shadow">
               <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
               <div
@@ -532,6 +528,7 @@ console.log(registerStore.user)
                 Latest News
               </div>
             </div>
+
             <div class="bg-white p-4 rounded shadow">
               <h2 class="font-bold mb-2 text-blue-800">📅 EVENT</h2>
               <div
@@ -540,6 +537,7 @@ console.log(registerStore.user)
                 Upcoming Events
               </div>
             </div>
+
             <div class="bg-white p-4 rounded shadow">
               <h2 class="font-bold mb-2 text-blue-800">💬 COMMUNITY</h2>
               <div
@@ -549,29 +547,24 @@ console.log(registerStore.user)
               </div>
             </div>
           </section>
+
+          <!-- My Parcel Title -->
           <div class="p-4">
-            <div class="flex space-x-1">
-              <svg
-                width="41"
-                height="41"
-                viewBox="0 0 41 41"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+            <div class="flex space-x-1 items-center">
+              <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
                   d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                  fill="#185DC0"
                 />
               </svg>
-
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
+              <h2 class="text-2xl font-bold text-gray-800">My Parcel</h2>
             </div>
           </div>
 
-          <!-- Parcel Table -->
-          <div class="overflow-x-auto bg-white rounded-lg shadow">
-            <table class="min-w-full text-left border-collapse">
-              <thead class="bg-white border-t border-b border-[#185DC0] my-4">
+          <!-- Parcel Table: Full table on Desktop / Cards on Mobile -->
+          <div class="bg-white rounded-lg shadow">
+            <!-- Table Header (Desktop only) -->
+            <table class="min-w-full text-left border-collapse hidden md:table">
+              <thead class="bg-white border-t border-b border-[#185DC0]">
                 <tr>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Tracking
@@ -580,62 +573,29 @@ console.log(registerStore.user)
                     Name
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Room Number</span>
-                      <!-- <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg> -->
-                    </div>
+                    Room Number
                   </th>
-
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Email
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Status</span>
-                    </div>
+                    Status
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div
-                      class="relative flex items-center justify-start space-x-3"
-                    >
-                      <span>Receive At</span>
-                    </div>
+                    Receive At
                   </th>
                 </tr>
               </thead>
+
               <tbody class="divide-y">
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
-                  class="hover:bg-gray-50"
+                  class="hover:bg-gray-50 md:table-row hidden md:table-row"
                 >
                   <td
+                    class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
                     @click="showParcelDetail({ id: p.id })"
-                    class="px-4 py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer"
                   >
                     {{ p.trackingNumber }}
                   </td>
@@ -654,9 +614,8 @@ console.log(registerStore.user)
                         'bg-green-400': p.status === 'Picked Up',
                         'bg-red-400': p.status === 'Unclaimed'
                       }"
+                      >{{ p.status }}</span
                     >
-                      {{ p.status }}
-                    </span>
                   </td>
                   <td class="px-4 py-3 text-sm text-gray-700">
                     {{ p.receiveAt }}
@@ -664,6 +623,56 @@ console.log(registerStore.user)
                 </tr>
               </tbody>
             </table>
+
+            <!-- MOBILE VERSION as CARDS -->
+            <div
+              v-for="p in paginatedParcels"
+              :key="p.id"
+              class="md:hidden p-4 bg-gray-50 rounded-lg shadow mb-4 border border-gray-200"
+            >
+              <div class="mb-2">
+                <span class="font-semibold text-blue-700">Tracking: </span>
+                <span
+                  class="cursor-pointer"
+                  @click="showParcelDetail({ id: p.id })"
+                >
+                  {{ p.trackingNumber }}
+                </span>
+              </div>
+
+              <div class="mb-2">
+                <span class="font-semibold text-blue-700">Name: </span>
+                {{ p.recipientName }}
+              </div>
+
+              <div class="mb-2">
+                <span class="font-semibold text-blue-700">Room: </span>
+                {{ p.roomNumber }}
+              </div>
+
+              <div class="mb-2">
+                <span class="font-semibold text-blue-700">Email: </span>
+                {{ p.email }}
+              </div>
+
+              <div class="mb-2">
+                <span class="font-semibold text-blue-700">Status: </span>
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                  :class="{
+                    'bg-yellow-400': p.status === 'Pending',
+                    'bg-green-400': p.status === 'Picked Up',
+                    'bg-red-400': p.status === 'Unclaimed'
+                  }"
+                  >{{ p.status }}</span
+                >
+              </div>
+
+              <div>
+                <span class="font-semibold text-blue-700">Receive At: </span>
+                {{ p.receiveAt }}
+              </div>
+            </div>
           </div>
 
           <!-- Pagination -->

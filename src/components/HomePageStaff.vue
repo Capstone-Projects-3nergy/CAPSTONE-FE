@@ -124,6 +124,7 @@ const returnLoginPage = async () => {
 }
 
 const parcelManager = useParcelManager()
+
 onMounted(async () => {
   // ดึงจาก backend
   const data = await getItems(
