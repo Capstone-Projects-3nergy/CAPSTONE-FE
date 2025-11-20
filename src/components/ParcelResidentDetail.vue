@@ -592,19 +592,18 @@ const toggleSidebar = () => {
               Parcel Details
             </h2>
 
-            <!-- Buttons Row -->
             <div class="flex items-center justify-between gap-4">
               <!-- Back Button -->
               <ButtonWeb
                 label="Go Back"
                 color="blue"
                 @click="backToManageParcels"
-                class="flex-1 md:flex-shrink-0 px-2 py-1 text-xs md:text-sm"
+                class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
               />
 
               <!-- Status Button -->
               <button
-                class="flex-1 md:flex-shrink-0 px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center"
+                class="px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center w-auto md:w-28"
                 :class="{
                   'bg-yellow-400': parcel?.status === 'Pending',
                   'bg-green-400': parcel?.status === 'Picked Up',
