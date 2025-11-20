@@ -15,7 +15,7 @@ import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import EditParcels from './EditParcels.vue'
+import ParcelsDetail from './ParcelsDetail.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -56,6 +56,7 @@ import {
 } from '@/utils/fetchUtils'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
+import EditParcels from './EditParcels.vue'
 
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -507,36 +508,35 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
-  showParcelDetailModal.value = true
+  // showParcelDetailModal.value = true
   // เปลี่ยน route
   router.push({ name: 'detailparcels', params: { tid: id } })
+  // try {
+  //   // ดึงข้อมูล parcel เดี่ยวจาก backend
+  //   const data = await getItemById(
+  //     `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+  //     id
+  //   )
 
-  try {
-    // ดึงข้อมูล parcel เดี่ยวจาก backend
-    const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
-      id
-    )
+  //   if (data) {
+  //     // map field ให้เหมือนกับที่ใช้ใน frontend
+  //     parcelsResidentDetail.value = {
+  //       id: data.parcelId,
+  //       trackingNumber: data.trackingNumber,
+  //       recipientName: data.ownerName,
+  //       roomNumber: data.roomNumber,
+  //       email: data.contactEmail,
+  //       status: mapStatus(data.status),
+  //       receiveAt: data.receivedAt,
+  //       updateAt: data.updatedAt || null,
+  //       pickupAt: data.pickedUpAt || null
+  //     }
 
-    if (data) {
-      // map field ให้เหมือนกับที่ใช้ใน frontend
-      parcelsResidentDetail.value = {
-        id: data.parcelId,
-        trackingNumber: data.trackingNumber,
-        recipientName: data.ownerName,
-        roomNumber: data.roomNumber,
-        email: data.contactEmail,
-        status: mapStatus(data.status),
-        receiveAt: data.receivedAt,
-        updateAt: data.updatedAt || null,
-        pickupAt: data.pickedUpAt || null
-      }
-
-      console.log('Parcel detail loaded:', parcelsResidentDetail.value)
-    }
-  } catch (err) {
-    console.error('Failed to load parcel detail:', err)
-  }
+  //     console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+  //   }
+  // } catch (err) {
+  //   console.error('Failed to load parcel detail:', err)
+  // }
 }
 const showEditParacelDetail = async function (id) {
   router.push({ name: 'editparcels', params: { tid: id } })
@@ -1461,15 +1461,12 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport> -->
-  <teleport to="body" v-if="showParcelDetailModal">
-    <showParacelDetail
-      :ParcelDetail="parcelDetail"
-      @showParcelDetailModal="showParcelDetailModal = false"
-      :operate="operation"
-      @showRedPopup="openRedPopup"
-      @showGreenPopup="openGreenPopup"
-    ></showParacelDetail>
+  <!-- <teleport to="body">
+    <ParcelsDetail :ParcelIdDataDetail="parcelIdDetail"></ParcelsDetail>
   </teleport>
+  <teleport to="body">
+    <EditParcels :ParcelEditDataDetail="parcelEditDetail"></EditParcels>
+  </teleport> -->
   <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"

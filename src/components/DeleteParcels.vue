@@ -10,7 +10,8 @@ const props = defineProps(['parcelData']) // ไม่ใช่ ref
 
 const router = useRouter()
 const parcelManager = useParcelManager()
-
+const parcelEditDetail = ref(null)
+const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
 onMounted(async () => {
   isCollapsed.value = true

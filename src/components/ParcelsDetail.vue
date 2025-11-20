@@ -33,8 +33,23 @@ const parcelStore = useParcelManager()
 // Ref สำหรับเก็บข้อมูล parcel
 const parcel = ref(null)
 
+// helper function map field
+const mapParcelData = (data) => {
+  return {
+    id: data.parcelId,
+    trackingNumber: data.trackingNumber,
+    recipientName: data.ownerName,
+    roomNumber: data.roomNumber,
+    email: data.contactEmail,
+    parcelType: data.parcelType || '',
+    status: data.status,
+    receivedAt: data.receivedAt,
+    senderName: data.senderName || '',
+    companyId: data.companyId || ''
+  }
+}
 // ฟังก์ชันโหลด parcel detail
-const getParcelDetail = async () => {
+const getParcelDetail = async (tid) => {
   if (!tid) return
 
   // 1️⃣ หาใน store ก่อน
@@ -50,19 +65,7 @@ const getParcelDetail = async () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
     )
-
-    parcel.value = {
-      id: res.data.parcelId,
-      trackingNumber: res.data.trackingNumber,
-      recipientName: res.data.ownerName,
-      roomNumber: res.data.roomNumber,
-      email: res.data.contactEmail,
-      parcelType: res.data.parcelType || '',
-      status: res.data.status,
-      receivedAt: res.data.receivedAt,
-      senderName: res.data.senderName || '',
-      companyId: res.data.companyId || ''
-    }
+    parcel.value = mapParcelData(res.data)
 
     // บันทึกลง store
     parcelStore.addParcel(parcel.value)
@@ -72,12 +75,20 @@ const getParcelDetail = async () => {
   }
 }
 
-// เรียกโหลดตอน mounted
+// onMounted
 onMounted(() => {
-  isCollapsed.value = true
-  getParcelDetail()
+  const tid = Number(route.params.tid)
+  getParcelDetail(tid)
 })
 
+// watch เผื่อ route.params.tid เปลี่ยน (dynamic route)
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    const tidNum = Number(newTid)
+    getParcelDetail(tidNum)
+  }
+)
 // ฟังก์ชันกลับหน้า manage parcels
 const backToManageParcels = () => {
   router.replace({ name: 'staffparcels' })
