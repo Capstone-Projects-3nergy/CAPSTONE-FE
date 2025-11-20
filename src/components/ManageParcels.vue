@@ -614,21 +614,21 @@ const pageNumbers = computed(() => {
 // }
 const deleteParcelPopUp = (parcel) => {
   // เก็บข้อมูล parcel สำหรับ popup
+  showDeleteParcel.value = true
   parcelDetail.value = {
     id: parcel.id,
     parcelNumber: parcel.parcelNumber
   }
   console.log(parcelDetail.value)
   // เปิด popup
-  showDeleteParcel.value = true
   // เปลี่ยน URL ให้มี tid
-  router.push({
-    name: 'deleteparcels',
-    params: {
-      id: route.params.id, // staff id
-      tid: parcel.id // parcel id
-    }
-  })
+  // router.push({
+  //   name: 'deleteparcels',
+  //   params: {
+  //     id: route.params.id, // staff id
+  //     tid: parcel.id // parcel id
+  //   }
+  // })
 }
 
 const clearDeletePopUp = () => {

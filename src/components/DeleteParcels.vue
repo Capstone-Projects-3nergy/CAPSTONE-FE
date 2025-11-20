@@ -57,7 +57,7 @@ const cancelFn = () => {
         <div class="w-[70%] h-[100%]">
           <div class="flex pl-4 mt-5">
             Do you want to delete this tracking number
-            <b>{{ parcel.parcelNumber || '' }}</b
+            <b class="ml-1">{{ parcel.parcelNumber || '' }}</b
             >?
           </div>
         </div>
