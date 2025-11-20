@@ -1355,7 +1355,7 @@ const closePopUp = (operate) => {
                 >
                   <button
                     @click="showEditParacelDetail({ id: p.id })"
-                    class="text-blue-600 hover:text-blue-800"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
                   >
                     <svg
                       width="21"
