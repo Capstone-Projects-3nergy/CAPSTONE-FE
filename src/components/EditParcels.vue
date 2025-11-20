@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -55,61 +55,61 @@ const parcelStore = useParcelManager()
 // Ref สำหรับเก็บข้อมูล parcel
 const parcel = ref(null)
 
+// helper function map field
+const mapParcelData = (data) => ({
+  id: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.ownerName,
+  roomNumber: data.roomNumber,
+  email: data.contactEmail,
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || ''
+})
+
 // ฟังก์ชันโหลด parcel detail
-const getParcelDetail = async () => {
+const getParcelDetail = async (tid) => {
   if (!tid) return
 
-  // 1️⃣ หาใน store ก่อน
-  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
+  // 1️⃣ หาใน store
+  const localParcel = parcelStore.parcel.find((p) => p.id === Number(tid))
   if (localParcel) {
     parcel.value = localParcel
-
-    // ✅ ยัดข้อมูลลงฟอร์ม
-    form.value = { ...form.value, ...parcel.value }
-
-    console.log('📦 Loaded from store:', parcel.value)
+    form.value = { ...localParcel } // copy ลง form
     return
   }
 
-  // 2️⃣ ถ้าไม่มีใน store ดึงจาก backend
+  // 2️⃣ ดึงจาก backend
   try {
     const res = await axios.get(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
     )
+    parcel.value = mapParcelData(res.data)
+    form.value = { ...parcel.value }
 
-    parcel.value = {
-      id: res.data.parcelId,
-      trackingNumber: res.data.trackingNumber,
-      recipientName: res.data.ownerName,
-      roomNumber: res.data.roomNumber,
-      email: res.data.contactEmail,
-      parcelType: res.data.parcelType || '',
-      status: res.data.status,
-      receivedAt: res.data.receivedAt,
-      pickedUpAt: res.data.pickedUpAt || null,
-      updatedAt: res.data.updatedAt || null,
-      senderName: res.data.senderName || '',
-      companyId: res.data.companyId || ''
-    }
-
-    // ⛔ ปัญหาที่ทำให้ไม่แสดง: คุณยังไม่ได้อัปเดต form
-    // ✅ แก้: copy parcel → form
-    form.value = { ...form.value, ...parcel.value }
-
-    // 👉 บันทึกลง store
     parcelStore.addParcel(parcel.value)
-
-    console.log('📦 Loaded from backend:', parcel.value)
   } catch (err) {
-    console.error('❌ Failed to load parcel detail:', err)
+    console.error('❌ Failed to load parcel:', err)
   }
 }
 
-// เรียกโหลดตอน mounted
+// onMounted
 onMounted(() => {
-  isCollapsed.value = true
-  getParcelDetail()
+  const tid = route.params.tid
+  getParcelDetail(tid)
 })
+
+// watch เผื่อ route params.tid เปลี่ยน
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    getParcelDetail(newTid)
+  }
+)
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
 console.log(auth.user.role)
@@ -851,9 +851,7 @@ const closePopUp = (operate) => {
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1"
-                >Tracking Number</label
-              >
+              <label class="block font-semibold mb-1">Tracking Number</label>
               <input
                 type="text"
                 v-model="form.trackingNumber"
@@ -862,9 +860,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div>
-              <label class="block font-semibold mb-1"
-                >Parcel Type</label
-              >
+              <label class="block font-semibold mb-1">Parcel Type</label>
               <input
                 type="text"
                 v-model="form.parcelType"
@@ -873,9 +869,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div>
-              <label class="block font-semibold mb-1"
-                >Received At</label
-              >
+              <label class="block font-semibold mb-1">Received At</label>
               <input
                 type="text"
                 v-model="form.receiveAt"
@@ -887,9 +881,7 @@ const closePopUp = (operate) => {
           <!-- Row 2 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block font-semibold mb-1"
-                >Recipient Name</label
-              >
+              <label class="block font-semibold mb-1">Recipient Name</label>
               <input
                 type="text"
                 v-model="form.recipientName"
@@ -898,9 +890,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div>
-              <label class="block font-semibold mb-1"
-                >Email</label
-              >
+              <label class="block font-semibold mb-1">Email</label>
               <input
                 type="text"
                 v-model="form.email"
@@ -909,9 +899,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div>
-              <label class="block font-semibold mb-1"
-                >Room Number</label
-              >
+              <label class="block font-semibold mb-1">Room Number</label>
               <input
                 type="text"
                 v-model="form.roomNumber"
@@ -944,9 +932,7 @@ const closePopUp = (operate) => {
               />
             </div> -->
             <div>
-              <label class="block font-semibold mb-1"
-                >Sender Name</label
-              >
+              <label class="block font-semibold mb-1">Sender Name</label>
               <input
                 type="text"
                 v-model="form.senderName"
@@ -955,9 +941,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div>
-              <label class="block font-semibold mb-1"
-                >Company</label
-              >
+              <label class="block font-semibold mb-1">Company</label>
               <input
                 type="text"
                 v-model="form.companyId"
@@ -965,9 +949,7 @@ const closePopUp = (operate) => {
               />
             </div>
             <div>
-              <label class="block font-semibold mb-1"
-                >Status</label
-              >
+              <label class="block font-semibold mb-1">Status</label>
               <input
                 type="text"
                 v-model="form.status"
