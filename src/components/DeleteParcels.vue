@@ -13,9 +13,9 @@ const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-onMounted(async () => {
-  isCollapsed.value = true
-})
+// onMounted(async () => {
+//   isCollapsed.value = true
+// })
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelData || {})
 
