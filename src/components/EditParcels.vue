@@ -30,12 +30,13 @@ import {
   deleteFile,
   updateParcelStatus
 } from '@/utils/fetchUtils'
+
 const router = useRouter()
 const route = useRoute()
-const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
+const tid = route.params.tid
 const loginManager = useAuthManager()
-
 const parcelManager = useParcelManager()
+
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -53,31 +54,37 @@ const parcelTypeError = ref(false)
 
 const parcelStore = useParcelManager()
 
-// // Ref สำหรับเก็บข้อมูล parcel
-// const parcel = ref(null)
-
-// // helper function map field
-// const mapParcelData = (data) => ({
-//   id: data.parcelId,
-//   trackingNumber: data.trackingNumber,
-//   recipientName: data.ownerName,
-//   roomNumber: data.roomNumber,
-//   email: data.contactEmail,
-//   parcelType: data.parcelType || '',
-//   status: data.status,
-//   receivedAt: data.receivedAt,
-//   pickedUpAt: data.pickedUpAt || null,
-//   updatedAt: data.updatedAt || null,
-//   senderName: data.senderName || '',
-//   companyId: data.companyId || ''
-// })
+// ⚡️ Form ข้อมูลพัสดุ (แก้ให้ตรงกับ Layout ล่าสุด)
+// --- Editable fields ---
+const form = ref({
+  parcelId: '', // read-only
+  trackingNumber: '', // editable
+  recipientName: '', // editable
+  senderName: '', // editable
+  parcelType: '', // editable
+  companyId: '', // editable
+  imageUrl: '', // editable / upload
+  status: '', // editable via dropdown
+  receivedAt: '', // read-only
+  pickedUpAt: '', // read-only
+  updatedAt: '', // read-only
+  residentName: '', // read-only
+  roomNumber: '', // read-only
+  email: '' // read-only
+})
+const originalForm = ref({ ...form.value }) // หลังโหลด parcel เสร็จ
+// ⚡ เก็บ snapshot เดิม
+originalForm.value = { ...form.value }
+const isUnchanged = computed(() => {
+  return JSON.stringify(form.value) === JSON.stringify(originalForm.value)
+})
 
 // ฟังก์ชันโหลด parcel detail
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
   // หาใน store ก่อน
-  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
+  const localParcel = parcelStore.parcels?.find((p) => p.id === tid)
   if (localParcel) {
     form.value = { ...form.value, ...localParcel }
     return
@@ -91,7 +98,7 @@ const getParcelDetail = async (tid) => {
     const data = res.data
 
     form.value = {
-      id: data.parcelId,
+      parcelId: data.parcelId,
       trackingNumber: data.trackingNumber,
       recipientName: data.ownerName,
       senderName: data.senderName || '',
@@ -113,102 +120,27 @@ const getParcelDetail = async (tid) => {
   }
 }
 
-// const getParcelDetail = async (tid) => {
-//   if (!tid) return
-
-//   // 1️⃣ หาใน store
-//   const localParcel = parcelStore.parcel.find((p) => p.id === Number(tid))
-//   if (localParcel) {
-//     parcel.value = localParcel
-//     form.value = { ...localParcel } // copy ลง form
-//     return
-//   }
-
-//   // 2️⃣ ดึงจาก backend
-//   try {
-//     const res = await axios.get(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
-//     )
-//     parcel.value = mapParcelData(res.data)
-//     form.value = { ...parcel.value }
-
-//     parcelStore.addParcel(parcel.value)
-//   } catch (err) {
-//     console.error('❌ Failed to load parcel:', err)
-//   }
-// }
-
-// // onMounted
 onMounted(() => {
+  isCollapsed.value = true // ดึงจาก backend
   const tid = route.params.tid
   getParcelDetail(tid)
 })
 
-// // watch เผื่อ route params.tid เปลี่ยน
-// watch(
-//   () => route.params.tid,
-//   (newTid) => {
-//     getParcelDetail(newTid)
-//   }
-// )
-// // ข้อมูลพัสดุ reactive
-// const auth = useAuthManager()
-// console.log(auth.user.role)
-// const form = ref({
-//   userId: auth.user.id,
-//   trackingNumber: '',
-//   recipientName: '',
-//   roomNumber: '',
-//   parcelType: '',
-//   email: '',
-//   status: '',
-//   senderName: '',
-//   companyId: '',
-//   receiveAt: ''
-// })
-
-// onMounted(async () => {
-//   const parcelId = tid
-//   const parcel = await getItemById(
-//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-//     parcelId,
-//     router
-//   )
-//   if (parcel) {
-//     form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
-//   }
-// })
-
+// --- Save function, validation, status update ---
 const emit = defineEmits(['edit-success', 'edit-error'])
-// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
-// onMounted(async () => {
-//   const parcelId = route.params.id
-//   try {
-//     const res = await axios.get(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-//     )
-//     form.value = res.data
-//     console.log('📦 Loaded parcel:', res.data)
-//   } catch (err) {
-//     console.error('❌ Error loading parcel:', err)
-//   }
-// })
 const saveEditParcel = async () => {
-  // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
     setTimeout(() => (roomNumberError.value = false), 3000)
     return
   }
 
-  // 2️⃣ ตรวจสอบ Sender Name
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
 
-  // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 3000)
@@ -216,7 +148,6 @@ const saveEditParcel = async () => {
   }
 
   try {
-    // 🔹 Update parcel
     const updatedParcel = await editItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       form.value.parcelId,
@@ -230,11 +161,9 @@ const saveEditParcel = async () => {
       return
     }
 
-    // 🔹 Update store
     parcelManager.editParcel(form.value.parcelId, updatedParcel)
     console.log('✅ Updated parcel:', updatedParcel)
 
-    // 🔹 Update status ถ้ามี
     if (form.value.status) {
       const updatedStatus = await updateParcelStatus(
         `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -252,7 +181,6 @@ const saveEditParcel = async () => {
       }
     }
 
-    // 🔹 Success feedback
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 3000)
   } catch (err) {
@@ -262,82 +190,16 @@ const saveEditParcel = async () => {
   }
 }
 
-// const changeStatus = async (id, status) => {
-//   try {
-//     const updated = await updateItemPatch(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/status`,
-//       { status },
-//       router
-//     )
-
-//     parcelManager.updateParcel(updated)
-//     emit('edit-success')
-//     router.replace({ name: 'staffparcels' })
-//   } catch (e) {
-//     emit('edit-error')
-//     router.replace({ name: 'staffparcels' })
-//   }
-// }
-
-// // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
-// const saveEditParcel = async () => {
-//   // 1️⃣ ตรวจสอบ Room Number
-//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
-//     roomNumberError.value = true
-//     return
-//   }
-
-//   // 2️⃣ ตรวจสอบ Sender Name
-//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
-//     SenderNameError.value = true
-//     return
-//   }
-
-//   // 3️⃣ ตรวจสอบ Parcel Type
-//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
-//     parcelTypeError.value = true
-//     return
-//   }
-
-//   try {
-//     const updatedParcel = await editItem(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
-//       form.value.parcelId,
-//       form.value,
-//       router
-//     )
-
-//     if (!updatedParcel) {
-//       emit('edit-error')
-//       router.replace({ name: 'staffparcels' })
-//       return
-//     }
-
-//     // 👉 update Pinia
-//     parcelManager.editParcel(form.value.parcelId, updatedParcel)
-//     emit('edit-success')
-//     // editSuccess.value = true
-//     console.log('✅ Updated parcel:', updatedParcel)
-//     router.replace({ name: 'staffparcels' })
-//   } catch (err) {
-//     emit('edit-error')
-//     router.replace({ name: 'staffparcels' })
-//     console.error('❌ Failed to update parcel:', err)
-//   }
-// }
-
-// 🟥 ปุ่ม Cancel
+// --- Cancel button ---
 const cancelEdit = () => {
   router.replace({ name: 'staffparcels' })
 }
+
+// --- Sidebar / Pages / Toggle / Popups / Helpers (ไม่แก้ไข) ---
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
@@ -354,12 +216,9 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
@@ -388,7 +247,6 @@ const isAllEmpty = computed(() => {
     !form.value.receiveAt
   )
 })
-// --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'editSuccessMessage ') editSuccess.value = false
@@ -877,103 +735,157 @@ const closePopUp = (operate) => {
           @closePopUp="closePopUp"
         />
         <form
-          class="bg-white p-6 rounded-lg shadow space-y-6"
+          class="bg-white p-6 rounded-lg shadow space-y-8"
           @submit.prevent="saveEditParcel"
         >
           <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
-          </div>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Edit Parcel</h2>
 
-          <!-- Row 1 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block font-semibold mb-1">Tracking Number</label>
-              <input
-                type="text"
-                v-model="form.trackingNumber"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
+          <!-- Parcel Information -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Parcel Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Tracking Number</label>
+                <input
+                  type="text"
+                  v-model="form.trackingNumber"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Recipient Name</label>
+                <input
+                  type="text"
+                  v-model="form.recipientName"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Sender Name</label>
+                <input
+                  type="text"
+                  v-model="form.senderName"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Parcel Type</label>
+                <input
+                  type="text"
+                  v-model="form.parcelType"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Company</label>
+                <input
+                  type="text"
+                  v-model="form.companyId"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Image</label>
+                <input type="file" @change="handleImageUpload" class="w-full" />
+              </div>
             </div>
+          </section>
 
-            <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
-                type="text"
-                v-model="form.parcelType"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
+          <!-- Status Section -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Status</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Status</label>
+                <select
+                  v-model="form.status"
+                  class="w-full border rounded-md p-2"
+                >
+                  <option value="PENDING">PENDING</option>
+                  <option value="RECEIVED">RECEIVED</option>
+                  <option value="PICKED_UP">PICKED_UP</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Received At</label>
+                <input
+                  type="text"
+                  :value="form.receivedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <input
+                  type="text"
+                  :value="form.pickedUpAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
             </div>
+          </section>
 
-            <div>
-              <label class="block font-semibold mb-1">Received At</label>
-              <input
-                type="text"
-                v-model="form.receiveAt"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
+          <!-- Resident Info -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Resident Info</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Resident Name</label>
+                <input
+                  type="text"
+                  :value="form.residentName"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Room Number</label>
+                <input
+                  type="text"
+                  :value="form.roomNumber"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Email</label>
+                <input
+                  type="text"
+                  :value="form.email"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Row 2 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block font-semibold mb-1">Recipient Name</label>
-              <input
-                type="text"
-                v-model="form.recipientName"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
+          <!-- System Info -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">System Info</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Parcel ID</label>
+                <input
+                  type="text"
+                  :value="form.id"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Updated At</label>
+                <input
+                  type="text"
+                  :value="form.updatedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
             </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Email</label>
-              <input
-                type="text"
-                v-model="form.email"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Room Number</label>
-              <input
-                type="text"
-                v-model="form.roomNumber"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-          </div>
-
-          <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block font-semibold mb-1">Sender Name</label>
-              <input
-                type="text"
-                v-model="form.senderName"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Company</label>
-              <input
-                type="text"
-                v-model="form.companyId"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Status</label>
-              <input
-                type="text"
-                v-model="form.status"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-          </div>
+          </section>
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
@@ -981,12 +893,9 @@ const closePopUp = (operate) => {
               label="Save"
               color="green"
               @click="saveEditParcel"
-              :class="{
-                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
-                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
-              }"
-              :disabled="isAllEmpty"
+              :disabled="isUnchanged"
             />
+
             <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>
         </form>

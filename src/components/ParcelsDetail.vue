@@ -13,7 +13,30 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile,
+  updateParcelStatus
+} from '@/utils/fetchUtils'
+// ⚡ existing refs / store / router
 const loginManager = useAuthManager()
+const router = useRouter()
+const route = useRoute()
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
+
+// ✅ page visibility states
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -23,51 +46,47 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-// ✅ เรียกใช้ store
-// Router & store
-const router = useRouter()
-const route = useRoute()
-const tid = Number(route.params.tid)
-const parcelStore = useParcelManager()
+const isCollapsed = ref(false)
 
-// Ref สำหรับเก็บข้อมูล parcel
+// ⚡ Parcel detail
 const parcel = ref(null)
 
-// helper function map field
-const mapParcelData = (data) => {
-  return {
-    id: data.parcelId,
-    trackingNumber: data.trackingNumber,
-    recipientName: data.ownerName,
-    roomNumber: data.roomNumber,
-    email: data.contactEmail,
-    parcelType: data.parcelType || '',
-    status: data.status,
-    receivedAt: data.receivedAt,
-    senderName: data.senderName || '',
-    companyId: data.companyId || ''
-  }
-}
-// ฟังก์ชันโหลด parcel detail
+// ⚡ helper map backend data → form
+const mapParcelData = (data) => ({
+  id: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.ownerName,
+  roomNumber: data.roomNumber,
+  email: data.contactEmail,
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || '',
+  residentName: data.residentName || '',
+  imageUrl: data.imageUrl || ''
+})
+
+// ⚡ Load parcel detail (store → backend)
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
-  // 1️⃣ หาใน store ก่อน
-  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
+  // 1️⃣ Check store first
+  const localParcel = parcelStore.parcel?.find((p) => p.id === tid)
   if (localParcel) {
     parcel.value = localParcel
     console.log('📦 Loaded from store:', parcel.value)
     return
   }
 
-  // 2️⃣ ถ้าไม่มีใน store ดึงจาก backend
+  // 2️⃣ Fetch from backend
   try {
     const res = await axios.get(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
     )
     parcel.value = mapParcelData(res.data)
-
-    // บันทึกลง store
     parcelStore.addParcel(parcel.value)
     console.log('📦 Loaded from backend:', parcel.value)
   } catch (err) {
@@ -75,13 +94,13 @@ const getParcelDetail = async (tid) => {
   }
 }
 
-// onMounted
+// ⚡ onMounted / watch
 onMounted(() => {
-  const tid = Number(route.params.tid)
-  getParcelDetail(tid)
+  isCollapsed.value = true // ดึงจาก backend
+  const tidNum = Number(route.params.tid)
+  getParcelDetail(tidNum)
 })
 
-// watch เผื่อ route.params.tid เปลี่ยน (dynamic route)
 watch(
   () => route.params.tid,
   (newTid) => {
@@ -89,53 +108,22 @@ watch(
     getParcelDetail(tidNum)
   }
 )
-// ฟังก์ชันกลับหน้า manage parcels
-const backToManageParcels = () => {
-  router.replace({ name: 'staffparcels' })
-}
 
-// 🔹 โหลดข้อมูลจาก store หรือ backend
-// onMounted(async () => {
-//   const parcelId = Number(tid) // 👈 ใช้ tid แทน id
-
-//   // 1️⃣ ลองหาจาก store ก่อน
-//   const localParcel = parcelStore.parcel.find((p) => p.parcelId === parcelId)
-
-//   if (localParcel) {
-//     parcel.value = localParcel
-//     console.log('📦 Loaded from store:', parcel.value)
-//   } else {
-//     // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
-//     try {
-//       const res = await axios.get(
-//         `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-//       )
-//       parcel.value = res.data
-
-//       // บันทึกลง store
-//       parcelStore.addParcel(res.data)
-//     } catch (err) {
-//       console.error('❌ Failed to load parcel:', err)
-//     }
-//   }
-// })
-const showParcelScannerPage = async function () {
+// ⚡ Page navigation functions (keep all)
+const backToManageParcels = () => router.replace({ name: 'staffparcels' })
+const showParcelScannerPage = async () => {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
-const showManageParcelPage = async function () {
+const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const ShowManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
-const ShowManageResidentPage = async function () {
+const ShowManageResidentPage = async () => {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
@@ -143,25 +131,21 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
 }
-const showDashBoardPage = async function () {
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-const showProfileStaffPage = async function () {
+const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
@@ -596,38 +580,37 @@ const toggleSidebar = () => {
 
         <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
           <div class="flex flex-col mb-4 gap-4">
+            <div class="flex items-center gap-4">
+              <!-- Back Button -->
+              <ButtonWeb
+                label="Go Back"
+                color="blue"
+                @click="backToManageParcels"
+                class="ml-auto px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+              />
+
+              <!-- Status Button (ถ้าต้องการแสดงต่อไป) -->
+              <!-- <button
+      class="px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center w-auto md:w-28"
+      :class="{
+        'bg-yellow-400': parcel?.status === 'Pending',
+        'bg-green-400': parcel?.status === 'Picked Up',
+        'bg-red-400': parcel?.status === 'Unclaimed'
+      }"
+      disabled
+    >
+      {{ parcel?.status || 'Unknown' }}
+    </button> -->
+            </div>
             <!-- Title -->
             <h2
               class="text-center text-sm md:text-xl font-bold text-[#185dc0] truncate"
             >
               Parcel Details
             </h2>
-
-            <div class="flex items-center justify-between gap-4">
-              <!-- Back Button -->
-              <ButtonWeb
-                label="Go Back"
-                color="blue"
-                @click="backToManageParcels"
-                class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
-              />
-
-              <!-- Status Button -->
-              <button
-                class="px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center w-auto md:w-28"
-                :class="{
-                  'bg-yellow-400': parcel?.status === 'Pending',
-                  'bg-green-400': parcel?.status === 'Picked Up',
-                  'bg-red-400': parcel?.status === 'Unclaimed'
-                }"
-                disabled
-              >
-                {{ parcel?.status || 'Unknown' }}
-              </button>
-            </div>
           </div>
 
-          <form class="space-y-8">
+          <form class="bg-white p-6 rounded-lg shadow space-y-6">
             <!-- Row 1 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -636,7 +619,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.trackingNumber || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
 
@@ -646,7 +629,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.parcelType || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
 
@@ -656,7 +639,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.receivedAt || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
             </div>
@@ -669,7 +652,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.recipientName || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
 
@@ -679,7 +662,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.email || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
 
@@ -689,41 +672,12 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.roomNumber || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
             </div>
 
             <!-- Row 3 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <!-- <div>
-                <label class="block font-semibold mb-1"
-                  >Pickup At</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.pickedUpAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div> -->
-
-              <!-- <div>
-                <label class="block font-semibold mb-1"
-                  >Updated At</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.updatedAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div> -->
-
-              <div></div>
-            </div>
-
-            <!-- Row 4 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Sender Name</label>
@@ -731,7 +685,7 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.senderName || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
 
@@ -741,9 +695,70 @@ const toggleSidebar = () => {
                   type="text"
                   :value="parcel?.companyId || ''"
                   readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
                 />
               </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Status</label>
+                <input
+                  type="text"
+                  :value="parcel?.status || ''"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
+                  :class="{
+                    'bg-yellow-400': parcel?.status === 'Pending',
+                    'bg-green-400': parcel?.status === 'Picked Up',
+                    'bg-red-400': parcel?.status === 'Unclaimed'
+                  }"
+                />
+              </div>
+            </div>
+
+            <!-- Row 4: System Info -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Parcel ID</label>
+                <input
+                  type="text"
+                  :value="parcel?.id || ''"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <input
+                  type="text"
+                  :value="parcel?.pickedUpAt || ''"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Updated At</label>
+                <input
+                  type="text"
+                  :value="parcel?.updatedAt || ''"
+                  readonly
+                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
+                />
+              </div>
+            </div>
+
+            <!-- Row 5: Image Preview -->
+            <div>
+              <label class="block font-semibold mb-1">Parcel Image</label>
+              <div v-if="parcel?.imageUrl">
+                <img
+                  :src="parcel.imageUrl"
+                  alt="Parcel Image"
+                  class="w-48 h-48 object-cover border rounded-md"
+                />
+              </div>
+              <div v-else class="text-gray-400">No image available</div>
             </div>
           </form>
         </div>
