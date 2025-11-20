@@ -1265,7 +1265,7 @@ const closePopUp = (operate) => {
                   Receive At
                 </th>
                 <th
-                  class="px-4 py-3 text-sm text-center font-semibold text-center text-[#185DC0]"
+                  class="px-4 py-3 text-sm font-semibold text-center text-[#185DC0]"
                 >
                   Operation
                 </th>
