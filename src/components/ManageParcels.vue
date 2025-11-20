@@ -56,6 +56,7 @@ import {
 } from '@/utils/fetchUtils'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
+
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -506,6 +507,7 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
+  showParcelDetailModal.value = true
   // เปลี่ยน route
   router.push({ name: 'detailparcels', params: { tid: id } })
 
