@@ -1264,7 +1264,9 @@ const closePopUp = (operate) => {
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Receive At
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+                <th
+                  class="px-4 py-3 text-sm text-center font-semibold text-center text-[#185DC0]"
+                >
                   Operation
                 </th>
               </tr>
@@ -1347,7 +1349,7 @@ const closePopUp = (operate) => {
 
                 <!-- Operation -->
                 <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2 text-center"
                 >
                   <button
                     @click="showEditParacelDetail({ id: p.id })"
