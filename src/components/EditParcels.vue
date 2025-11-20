@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch, relet } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -71,38 +71,6 @@ const parcelStore = useParcelManager()
 //   senderName: data.senderName || '',
 //   companyId: data.companyId || ''
 // })
-const form = reactive({
-  trackingNumber: '',
-  parcelType: '',
-  receiveAt: '',
-  recipientName: '',
-  email: '',
-  roomNumber: '',
-  senderName: '',
-  companyId: '',
-  status: ''
-})
-const loadParcelDetail = async () => {
-  try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
-    )
-
-    Object.assign(form, {
-      trackingNumber: res.data.trackingNumber || '',
-      parcelType: res.data.parcelType || '',
-      receiveAt: res.data.receivedAt || '',
-      recipientName: res.data.ownerName || '',
-      email: res.data.contactEmail || '',
-      roomNumber: res.data.roomNumber || '',
-      senderName: res.data.senderName || '',
-      companyId: res.data.companyId || '',
-      status: res.data.status || ''
-    })
-  } catch (err) {
-    console.error(err)
-  }
-}
 
 // ฟังก์ชันโหลด parcel detail
 const getParcelDetail = async (tid) => {
@@ -172,7 +140,6 @@ const getParcelDetail = async (tid) => {
 
 // // onMounted
 onMounted(() => {
-  loadParcelDetail()
   const tid = route.params.tid
   getParcelDetail(tid)
 })
