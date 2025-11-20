@@ -592,7 +592,7 @@ console.log(registerStore.user)
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
-                  class="hover:bg-gray-50 md:table-row hidden md:table-row"
+                  class="hover:bg-gray-50  hidden md:table-row"
                 >
                   <td
                     class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
