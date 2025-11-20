@@ -696,22 +696,22 @@ const showProfileResidentPage = async function () {
   showProfileResident.value = true
 }
 
-
 // === Confirm Parcel ===
 const confirmParcel = async () => {
-  if (!parcelsResidentDetail.value?.id) return
+  const parcel = parcelsResidentDetail.value
+  if (!parcel?.id) return
 
-  const parcelId = parcelsResidentDetail.value.id
+  const parcelId = parcel.id
 
-  // เงื่อนไข: ต้องอยู่ในสถานะ Ready for Pickup
-  if (parcelsResidentDetail.value.status !== 'Ready for Pickup') {
+  // ต้องเป็น Ready for Pickup ก่อนถึงจะกดยืนยันได้
+  if (parcel.status !== 'Ready for Pickup') {
     error.value = true
     console.error('Parcel is not ready for pickup.')
     return
   }
 
   try {
-    const token = loginManager.token // JWT token จาก store
+    const token = loginManager.token
 
     const res = await fetch(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}/status`,
@@ -725,17 +725,24 @@ const confirmParcel = async () => {
       }
     )
 
-    if (res.status === 401) throw new Error('Unauthorized')
-    if (res.status === 403) throw new Error('Forbidden')
-    if (res.status === 404) throw new Error('Parcel not found')
-    if (!res.ok) throw new Error('Failed to confirm parcel')
+    if (!res.ok) {
+      const message =
+        res.status === 401
+          ? 'Unauthorized'
+          : res.status === 403
+          ? 'Forbidden'
+          : res.status === 404
+          ? 'Parcel not found'
+          : 'Failed to confirm parcel'
+      throw new Error(message)
+    }
 
     const data = await res.json()
 
-    // อัปเดตสถานะบนหน้า FE
+    // อัปเดตสถานะในหน้า detail
     parcelsResidentDetail.value.status = 'Received'
 
-    // อัปเดตใน store ด้วย (Pinia)
+    // อัปเดตใน Pinia Store
     parcelManager.updateParcelStatus(parcelId, 'Received')
 
     // popup success
@@ -743,13 +750,17 @@ const confirmParcel = async () => {
 
     console.log('Parcel confirmed:', data)
   } catch (err) {
-    error.value = true
     console.error('Error confirming parcel:', err)
+    error.value = true
   }
 }
+
+// === Cancel Parcel (Delete Parcel) ===
 const cancelParcel = async () => {
-  if (!parcelsResidentDetail.value?.id) return
-  const parcelId = parcelsResidentDetail.value.id
+  const parcel = parcelsResidentDetail.value
+  if (!parcel?.id) return
+
+  const parcelId = parcel.id
 
   try {
     const token = loginManager.token
@@ -764,21 +775,29 @@ const cancelParcel = async () => {
       }
     )
 
-    if (res.status === 401) throw new Error('Unauthorized')
-    if (res.status === 403) throw new Error('Forbidden')
-    if (res.status === 404) throw new Error('Parcel not found')
-    if (!res.ok) throw new Error('Failed to delete parcel')
+    if (!res.ok) {
+      const message =
+        res.status === 401
+          ? 'Unauthorized'
+          : res.status === 403
+          ? 'Forbidden'
+          : res.status === 404
+          ? 'Parcel not found'
+          : 'Failed to delete parcel'
+      throw new Error(message)
+    }
 
     // ลบจาก store
     parcelManager.deleteParcels(parcelId)
 
+    // popup success
     deleteSuccess.value = true
 
-    // กลับไปหน้า list
+    // กลับหน้า list
     router.replace({ name: 'residentparcels' })
   } catch (err) {
-    error.value = true
     console.error('Error deleting parcel:', err)
+    error.value = true
   }
 }
 </script>
@@ -1386,14 +1405,12 @@ const cancelParcel = async () => {
                   class="px-4 py-2 md:py-3 text-sm text-center text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
                 >
                   <ButtonWeb
-                    v-if="parcelsResidentDetail?.status === 'Ready for Pickup'"
                     label="Confirm"
                     color="blue"
                     class="mr-3 mt-4 mb-2"
                     @click="confirmParcel"
                   />
                   <ButtonWeb
-                    v-if="parcelsResidentDetail?.status === 'Ready for Pickup'"
                     label="Canceled"
                     color="red"
                     class="mr-3 mt-4 mb-2"

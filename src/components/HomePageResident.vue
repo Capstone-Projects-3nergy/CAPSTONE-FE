@@ -588,11 +588,11 @@ console.log(registerStore.user)
                 </tr>
               </thead>
 
-              <tbody class="divide-y">
+              <tbody v-if="p?.status === 'Received'" class="divide-y">
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
-                  class="hover:bg-gray-50  hidden md:table-row"
+                  class="hover:bg-gray-50 hidden md:table-row"
                 >
                   <td
                     class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
