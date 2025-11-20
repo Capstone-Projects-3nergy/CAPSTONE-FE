@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, relet } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -27,7 +27,8 @@ import {
   editInviteReadWrite,
   declineInvite,
   editItemWithFile,
-  deleteFile
+  deleteFile,
+  updateParcelStatus
 } from '@/utils/fetchUtils'
 const router = useRouter()
 const route = useRoute()
@@ -52,79 +53,152 @@ const parcelTypeError = ref(false)
 
 const parcelStore = useParcelManager()
 
-// Ref สำหรับเก็บข้อมูล parcel
-const parcel = ref(null)
+// // Ref สำหรับเก็บข้อมูล parcel
+// const parcel = ref(null)
 
-// helper function map field
-const mapParcelData = (data) => ({
-  id: data.parcelId,
-  trackingNumber: data.trackingNumber,
-  recipientName: data.ownerName,
-  roomNumber: data.roomNumber,
-  email: data.contactEmail,
-  parcelType: data.parcelType || '',
-  status: data.status,
-  receivedAt: data.receivedAt,
-  pickedUpAt: data.pickedUpAt || null,
-  updatedAt: data.updatedAt || null,
-  senderName: data.senderName || '',
-  companyId: data.companyId || ''
+// // helper function map field
+// const mapParcelData = (data) => ({
+//   id: data.parcelId,
+//   trackingNumber: data.trackingNumber,
+//   recipientName: data.ownerName,
+//   roomNumber: data.roomNumber,
+//   email: data.contactEmail,
+//   parcelType: data.parcelType || '',
+//   status: data.status,
+//   receivedAt: data.receivedAt,
+//   pickedUpAt: data.pickedUpAt || null,
+//   updatedAt: data.updatedAt || null,
+//   senderName: data.senderName || '',
+//   companyId: data.companyId || ''
+// })
+const form = reactive({
+  trackingNumber: '',
+  parcelType: '',
+  receiveAt: '',
+  recipientName: '',
+  email: '',
+  roomNumber: '',
+  senderName: '',
+  companyId: '',
+  status: ''
 })
+const loadParcelDetail = async () => {
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+    )
+
+    Object.assign(form, {
+      trackingNumber: res.data.trackingNumber || '',
+      parcelType: res.data.parcelType || '',
+      receiveAt: res.data.receivedAt || '',
+      recipientName: res.data.ownerName || '',
+      email: res.data.contactEmail || '',
+      roomNumber: res.data.roomNumber || '',
+      senderName: res.data.senderName || '',
+      companyId: res.data.companyId || '',
+      status: res.data.status || ''
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 // ฟังก์ชันโหลด parcel detail
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
-  // 1️⃣ หาใน store
-  const localParcel = parcelStore.parcel.find((p) => p.id === Number(tid))
+  // หาใน store ก่อน
+  const localParcel = parcelStore.parcel.find((p) => p.id === tid)
   if (localParcel) {
-    parcel.value = localParcel
-    form.value = { ...localParcel } // copy ลง form
+    form.value = { ...form.value, ...localParcel }
     return
   }
 
-  // 2️⃣ ดึงจาก backend
+  // ดึงจาก backend
   try {
     const res = await axios.get(
       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
     )
-    parcel.value = mapParcelData(res.data)
-    form.value = { ...parcel.value }
+    const data = res.data
 
-    parcelStore.addParcel(parcel.value)
+    form.value = {
+      id: data.parcelId,
+      trackingNumber: data.trackingNumber,
+      recipientName: data.ownerName,
+      senderName: data.senderName || '',
+      parcelType: data.parcelType || '',
+      companyId: data.companyId || '',
+      imageUrl: data.imageUrl || '',
+      status: data.status,
+      receivedAt: data.receivedAt,
+      pickedUpAt: data.pickedUpAt || null,
+      updatedAt: data.updatedAt || null,
+      residentName: data.residentName,
+      roomNumber: data.roomNumber,
+      email: data.contactEmail
+    }
+
+    parcelStore.addParcel(form.value)
   } catch (err) {
-    console.error('❌ Failed to load parcel:', err)
+    console.error('Failed to load parcel detail', err)
   }
 }
 
-// onMounted
+// const getParcelDetail = async (tid) => {
+//   if (!tid) return
+
+//   // 1️⃣ หาใน store
+//   const localParcel = parcelStore.parcel.find((p) => p.id === Number(tid))
+//   if (localParcel) {
+//     parcel.value = localParcel
+//     form.value = { ...localParcel } // copy ลง form
+//     return
+//   }
+
+//   // 2️⃣ ดึงจาก backend
+//   try {
+//     const res = await axios.get(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+//     )
+//     parcel.value = mapParcelData(res.data)
+//     form.value = { ...parcel.value }
+
+//     parcelStore.addParcel(parcel.value)
+//   } catch (err) {
+//     console.error('❌ Failed to load parcel:', err)
+//   }
+// }
+
+// // onMounted
 onMounted(() => {
+  loadParcelDetail()
   const tid = route.params.tid
   getParcelDetail(tid)
 })
 
-// watch เผื่อ route params.tid เปลี่ยน
-watch(
-  () => route.params.tid,
-  (newTid) => {
-    getParcelDetail(newTid)
-  }
-)
-// ข้อมูลพัสดุ reactive
-const auth = useAuthManager()
-console.log(auth.user.role)
-const form = ref({
-  userId: auth.user.id,
-  trackingNumber: '',
-  recipientName: '',
-  roomNumber: '',
-  parcelType: '',
-  email: '',
-  status: '',
-  senderName: '',
-  companyId: '',
-  receiveAt: ''
-})
+// // watch เผื่อ route params.tid เปลี่ยน
+// watch(
+//   () => route.params.tid,
+//   (newTid) => {
+//     getParcelDetail(newTid)
+//   }
+// )
+// // ข้อมูลพัสดุ reactive
+// const auth = useAuthManager()
+// console.log(auth.user.role)
+// const form = ref({
+//   userId: auth.user.id,
+//   trackingNumber: '',
+//   recipientName: '',
+//   roomNumber: '',
+//   parcelType: '',
+//   email: '',
+//   status: '',
+//   senderName: '',
+//   companyId: '',
+//   receiveAt: ''
+// })
 
 // onMounted(async () => {
 //   const parcelId = tid
@@ -156,7 +230,7 @@ const saveEditParcel = async () => {
   // 1️⃣ ตรวจสอบ Room Number
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+    setTimeout(() => (roomNumberError.value = false), 3000)
     return
   }
 
@@ -175,8 +249,9 @@ const saveEditParcel = async () => {
   }
 
   try {
+    // 🔹 Update parcel
     const updatedParcel = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       form.value.parcelId,
       form.value,
       router
@@ -188,35 +263,35 @@ const saveEditParcel = async () => {
       return
     }
 
+    // 🔹 Update store
     parcelManager.editParcel(form.value.parcelId, updatedParcel)
     console.log('✅ Updated parcel:', updatedParcel)
 
+    // 🔹 Update status ถ้ามี
     if (form.value.status) {
-      try {
-        const updatedStatus = await updateItemPatch(
-          `${import.meta.env.VITE_BASE_URL}/api/parcels/${
-            form.value.id
-          }/status`,
-          { status: form.value.status },
-          router
+      const updatedStatus = await updateParcelStatus(
+        `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+        form.value.parcelId,
+        form.value.status,
+        router
+      )
+
+      if (updatedStatus) {
+        parcelManager.updateParcelStatus(
+          form.value.parcelId,
+          updatedStatus.status || form.value.status
         )
-        parcelManager.updateParcel(updatedStatus)
         console.log('✅ Updated status:', updatedStatus)
-      } catch (errStatus) {
-        console.error('❌ Failed to update status:', errStatus)
-        error.value = true
-        setTimeout(() => (error.value = false), 3000)
-        return
       }
     }
 
+    // 🔹 Success feedback
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 3000)
   } catch (err) {
+    console.error('❌ Failed to save parcel:', err)
     error.value = true
     setTimeout(() => (error.value = false), 3000)
-    router.replace({ name: 'staffparcels' })
-    console.error('❌ Failed to update parcel:', err)
   }
 }
 
@@ -841,11 +916,6 @@ const closePopUp = (operate) => {
           <!-- Header -->
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
-            <!-- <ButtonWeb
-              label="Scan Parcel"
-              color="blue"
-              @click="() => router.replace({ name: 'parcelscanner' })"
-            /> -->
           </div>
 
           <!-- Row 1 -->
@@ -910,27 +980,6 @@ const closePopUp = (operate) => {
 
           <!-- Row 3 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- <div>
-              <label class="block font-semibold mb-1"
-                >Pickup At</label
-              >
-              <input
-                type="text"
-                v-model="form.pickupAt"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1"
-                >Updated At</label
-              >
-              <input
-                type="text"
-                v-model="form.updateAt"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div> -->
             <div>
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
@@ -948,6 +997,7 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 text-gray-600"
               />
             </div>
+
             <div>
               <label class="block font-semibold mb-1">Status</label>
               <input
@@ -957,31 +1007,6 @@ const closePopUp = (operate) => {
               />
             </div>
           </div>
-
-          <!-- Row 4 -->
-          <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block font-semibold mb-1"
-                >Sender Name</label
-              >
-              <input
-                type="text"
-                v-model="form.senderName"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1"
-                >Company</label
-              >
-              <input
-                type="text"
-                v-model="form.companyId"
-                class="w-full border rounded-md p-2 text-gray-600"
-              />
-            </div>
-          </div> -->
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
