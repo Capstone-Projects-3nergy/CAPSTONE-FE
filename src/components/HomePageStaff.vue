@@ -190,7 +190,10 @@ const paginatedParcels = computed(() => {
 })
 console.log(registerStore.user)
 
-const currentUser = ref('Pimpajee SetXXXXXX')
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
+}
 </script>
 
 <template>
@@ -796,7 +799,7 @@ const currentUser = ref('Pimpajee SetXXXXXX')
                     <span class="md:hidden font-semibold text-blue-700"
                       >Receive At:
                     </span>
-                    {{ p.receiveAt }}
+                    {{ formatDateTime(p.receiveAt) }}
                   </td>
                 </tr>
               </tbody>
