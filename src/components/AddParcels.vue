@@ -1033,6 +1033,7 @@ const closePopUp = (operate) => {
                 >Tracking number <span class="text-red-500">*</span></label
               >
               <input
+                placeholder="Enter tracking number"
                 v-model="parcelData.trackingNumber"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
@@ -1047,7 +1048,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="recipientSearch"
                 type="text"
-                placeholder="name/ email / phone-number"
+                placeholder="Enter name/ email / phone-number"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
 
@@ -1126,7 +1127,7 @@ const closePopUp = (operate) => {
                 v-model="parcelData.parcelType"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               >
-                <option disabled>Select Parcel Type</option>
+                <option disabled value="">Select Parcel Type</option>
                 <option value="Document">Document</option>
                 <option value="Box">Box</option>
               </select>
@@ -1180,6 +1181,7 @@ const closePopUp = (operate) => {
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
                 v-model="parcelData.senderName"
+                placeholder="Enter sender name"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
@@ -1193,7 +1195,7 @@ const closePopUp = (operate) => {
                 id="companySelect"
                 class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <option disabled>Select Company</option>
+                <option disabled value="">Select Company</option>
                 <option
                   v-for="company in companyList"
                   :key="company.companyId"
