@@ -37,6 +37,7 @@ const tid = Number(route.params.tid)
 const parcelStore = useParcelManager()
 
 // ✅ page visibility states
+const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)

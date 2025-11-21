@@ -64,13 +64,25 @@ const form = ref({
   parcelType: '', // editable
   companyId: '', // editable
   imageUrl: '', // editable / upload
-  status: '', // editable via dropdown
+  status: 'PENDING', // editable via dropdown
   receivedAt: '', // read-only
   pickedUpAt: '', // read-only
   updatedAt: '', // read-only
   residentName: '', // read-only
   roomNumber: '', // read-only
   email: '' // read-only
+})
+const statusOptions = computed(() => {
+  if (form.value.status === 'PENDING') {
+    return ['PENDING', 'RECEIVED']
+  }
+  if (form.value.status === 'RECEIVED') {
+    return ['RECEIVED', 'PICKED_UP']
+  }
+  if (form.value.status === 'PICKED_UP') {
+    return ['PICKED_UP'] // หรือ [] แล้ว disable dropdown
+  }
+  return ['PENDING', 'RECEIVED', 'PICKED_UP']
 })
 const originalForm = ref({ ...form.value }) // หลังโหลด parcel เสร็จ
 // ⚡ เก็บ snapshot เดิม
@@ -797,15 +809,20 @@ const closePopUp = (operate) => {
             <h3 class="font-semibold text-lg mb-2">Status</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Status</label>
                 <select
                   v-model="form.status"
-                  class="w-full border rounded-md p-2"
+                  class="border rounded-md p-2 w-full"
+                  :disabled="form.status === 'PICKED_UP'"
                 >
-                  <option value="PENDING">PENDING</option>
-                  <option value="RECEIVED">RECEIVED</option>
-                  <option value="PICKED_UP">PICKED_UP</option>
+                  <option v-for="s in statusOptions" :key="s" :value="s">
+                    {{ s }}
+                  </option>
                 </select>
+
+                <p class="text-xs text-red-500 mt-1">
+                  * You can only update the status in order: PENDING → RECEIVED
+                  → PICKED_UP
+                </p>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Received At</label>
