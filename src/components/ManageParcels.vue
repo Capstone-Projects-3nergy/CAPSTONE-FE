@@ -510,7 +510,14 @@ const paginatedParcels = computed(() => {
 const showParcelDetail = async function (id) {
   // showParcelDetailModal.value = true
   // เปลี่ยน route
-  router.push({ name: 'detailparcels', params: { tid: id } })
+  router.push({
+    name: 'detailparcels',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+
   // try {
   //   // ดึงข้อมูล parcel เดี่ยวจาก backend
   //   const data = await getItemById(
@@ -539,7 +546,14 @@ const showParcelDetail = async function (id) {
   // }
 }
 const showEditParacelDetail = async function (id) {
-  router.push({ name: 'editparcels', params: { tid: id } })
+  router.push({
+    name: 'editparcels',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+
   // try {
   //   // ดึงข้อมูล parcel เดี่ยวจาก backend
   //   const data = await getItemById(
