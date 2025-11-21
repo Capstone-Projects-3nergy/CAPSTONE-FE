@@ -47,35 +47,39 @@ const cancelFn = () => {
 
 <template>
   <div
-    class="message bg-grey-500 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 pt-[10px]"
+    class="message bg-gray-500/50 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 flex items-center justify-center p-2"
   >
-    <div class="w-[59%] m-[auto] border border-green-700 mt-[20%]">
-      <div class="flex flex-col justify-between bg-white p-4 h-[10%]">
-        <div class="itbkk-title w-full h-[40px] mt-1 border-b">
-          <h1 class="text-xl font-bold text-justify">Delete Parcel</h1>
-        </div>
-
-        <div class="w-[70%] h-[100%]">
-          <div class="flex pl-4 mt-5">
-            Do you want to delete this tracking number
-            <b class="ml-1">{{ parcel.parcelNumber || '' }}</b
-            >?
-          </div>
-        </div>
+    <div
+      class="bg-white border border-green-700 w-full max-w-lg rounded-md overflow-hidden"
+    >
+      <!-- Header -->
+      <div class="flex flex-col justify-between p-4 border-b">
+        <h1 class="text-xl font-bold text-center sm:text-left">
+          Delete Parcel
+        </h1>
       </div>
 
-      <div class="flex flex-row w-full justify-end border-t h-[60%]">
+      <!-- Body -->
+      <div class="p-4 text-center sm:text-left">
+        <p class="mb-4">
+          Do you want to delete this tracking number
+          <b>{{ parcel.parcelNumber || '' }}</b
+          >?
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
         <ButtonWeb
           label="Confirm"
           color="green"
-          class="mr-3 mt-4 mb-2"
+          class="w-full sm:w-auto"
           @click="deleteParcelFn"
         />
-
         <ButtonWeb
           label="Cancel"
           color="red"
-          class="mr-3 mt-4 mb-2"
+          class="w-full sm:w-auto"
           @click="cancelFn"
         />
       </div>
