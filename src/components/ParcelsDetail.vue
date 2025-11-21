@@ -618,122 +618,147 @@ const toggleSidebar = () => {
             </h2>
           </div>
 
-          <form class="bg-white p-6 rounded-lg shadow space-y-6">
-            <!-- Row 1 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.trackingNumber || '-' }}
-                </p>
-              </div>
+          <form class="bg-white p-6 rounded-lg shadow space-y-8">
+            <!-- Header -->
+            <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
+              Parcel Detail
+            </h2>
 
-              <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.parcelType || '-' }}
-                </p>
-              </div>
+            <!-- Parcel Information -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Parcel Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1"
+                    >Tracking Number</label
+                  >
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.trackingNumber || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold mb-1">Received At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.receivedAt || '-' }}
-                </p>
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Recipient Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.recipientName || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 2 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.recipientName || '-' }}
-                </p>
-              </div>
+                <div>
+                  <label class="block font-semibold mb-1">Sender Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.senderName || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.email || '-' }}
-                </p>
-              </div>
+                <div>
+                  <label class="block font-semibold mb-1">Parcel Type</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.parcelType || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold mb-1">Room Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.roomNumber || '-' }}
-                </p>
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Company</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.companyName || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 3 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.senderName || '-' }}
-                </p>
+                <div>
+                  <label class="block font-semibold mb-1">Parcel Image</label>
+                  <div v-if="parcel?.imageUrl">
+                    <img
+                      :src="parcel.imageUrl"
+                      alt="Parcel Image"
+                      class="w-48 h-48 object-cover border rounded-md"
+                    />
+                  </div>
+                  <div v-else class="text-gray-400">No image available</div>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <label class="block font-semibold mb-1">Company</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.companyName || '-' }}
-                </p>
-              </div>
+            <!-- Status Section -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Status</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Status</label>
+                  <p
+                    class="w-full p-2 text-gray-700 rounded-md"
+                    :class="{
+                      'bg-yellow-400': parcel?.status === 'PENDING',
+                      'bg-blue-400': parcel?.status === 'RECEIVED',
+                      'bg-green-400': parcel?.status === 'PICKED_UP'
+                    }"
+                  >
+                    {{ parcel?.status || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold mb-1">Status</label>
-                <p
-                  class="w-full p-2 text-gray-700 rounded-md"
-                  :class="{
-                    'bg-yellow-400': parcel?.status === 'PENDING',
-                    'bg-blue-400': parcel?.status === 'RECEIVED',
-                    'bg-green-400': parcel?.status === 'PICKED_UP'
-                  }"
-                >
-                  {{ parcel?.status || '-' }}
-                </p>
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Received At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.receivedAt || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 4 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Parcel ID</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.parcelId || '-' }}
-                </p>
+                <div>
+                  <label class="block font-semibold mb-1">Picked Up At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.pickedUpAt || '-' }}
+                  </p>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.pickedUpAt || '-' }}
-                </p>
-              </div>
+            <!-- Resident Info -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Resident Info</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Resident Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.recipientName || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold mb-1">Updated At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.updatedAt || '-' }}
-                </p>
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Room Number</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.roomNumber || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 5: Image -->
-            <div>
-              <label class="block font-semibold mb-1">Parcel Image</label>
-              <div v-if="parcel?.imageUrl">
-                <img
-                  :src="parcel.imageUrl"
-                  alt="Parcel Image"
-                  class="w-48 h-48 object-cover border rounded-md"
-                />
+                <div>
+                  <label class="block font-semibold mb-1">Email</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.email || '-' }}
+                  </p>
+                </div>
               </div>
-              <div v-else class="text-gray-400">No image available</div>
-            </div>
+            </section>
+
+            <!-- System Info -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">System Info</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Parcel ID</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.parcelId || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Updated At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.updatedAt || '-' }}
+                  </p>
+                </div>
+              </div>
+            </section>
           </form>
         </div>
       </main>
