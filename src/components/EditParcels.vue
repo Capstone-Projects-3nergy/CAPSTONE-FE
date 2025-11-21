@@ -825,8 +825,11 @@ const closePopUp = (operate) => {
           <!-- Status Section -->
           <section>
             <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
+
+            <div class="flex gap-6 items-start">
+              <!-- Status -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Status</label>
                 <select
                   v-model="form.status"
                   class="border rounded-md p-2 w-full"
@@ -842,7 +845,9 @@ const closePopUp = (operate) => {
                   → PICKED_UP
                 </p>
               </div>
-              <div>
+
+              <!-- Received At -->
+              <div class="flex-1">
                 <label class="block font-semibold mb-1">Received At</label>
                 <input
                   type="text"
@@ -851,7 +856,9 @@ const closePopUp = (operate) => {
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
-              <div>
+
+              <!-- Picked Up At -->
+              <div class="flex-1">
                 <label class="block font-semibold mb-1">Picked Up At</label>
                 <input
                   type="text"
