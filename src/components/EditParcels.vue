@@ -155,7 +155,7 @@ const getParcelDetail = async (tid) => {
     originalForm.value = { ...form.value }
     return
   }
-  await loadCompanies()
+
   // 2️⃣ ดึงจาก backend → GET /api/parcels/{id}
   try {
     const data = await getItemById(
@@ -166,13 +166,18 @@ const getParcelDetail = async (tid) => {
 
     if (!data) return
 
+    // 🔹 map parcelType ให้ตรงกับ <option>
+    const mapParcelType = {
+      box: 'Box',
+      Document: 'Document'
+    }
     // map ให้ตรง ParcelDetailDto
     form.value = {
       parcelId: data.parcelId,
       trackingNumber: data.trackingNumber,
       recipientName: data.recipientName,
       senderName: data.senderName || '',
-      parcelType: data.parcelType || '',
+      parcelType: mapParcelType[data.parcelType] || '',
       companyId: Number(data.companyId) ?? '',
       imageUrl: data.imageUrl ?? '',
       status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
@@ -191,6 +196,7 @@ const getParcelDetail = async (tid) => {
   } catch (err) {
     console.error('Failed to load parcel detail', err)
   }
+  await loadCompanies()
 }
 
 onMounted(() => {
@@ -926,8 +932,9 @@ const closePopUp = (operate) => {
                   class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                 >
                   <option disabled value="">Select Parcel Type</option>
-                  <option value="DOCUMENT">Document</option>
-                  <option value="BOX">Box</option>
+                  <option value="Document">Document</option>
+                  <option value="Box">Box</option>
+                  <option value="Envelope">Envelope</option>
                 </select>
               </div>
               <div>
