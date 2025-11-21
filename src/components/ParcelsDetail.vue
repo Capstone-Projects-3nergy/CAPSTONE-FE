@@ -720,7 +720,7 @@ const toggleSidebar = () => {
                 <div>
                   <label class="block font-semibold mb-1">Resident Name</label>
                   <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.recipientName || '-' }}
+                    {{ parcel?.residentName || '-' }}
                   </p>
                 </div>
 

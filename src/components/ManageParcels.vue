@@ -171,6 +171,7 @@ onMounted(async () => {
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
   )
+  console.log(data)
 
   if (data) {
     // แปลง field ให้ตรงกับที่ตารางใช้

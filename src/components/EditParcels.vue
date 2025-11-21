@@ -279,6 +279,34 @@ const saveEditParcel = async () => {
     setTimeout(() => (error.value = false), 3000)
   }
 }
+const previewUrl = ref(null) // เก็บ URL สำหรับ preview / download
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    alert('Only JPEG, PNG, or WEBP images are allowed.')
+    return
+  }
+
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    alert('File size should be less than 5MB.')
+    return
+  }
+
+  // เก็บไฟล์ใน form
+  form.value.imageUrl = file
+
+  // สร้าง preview URL สำหรับ <img> และ <a download>
+  previewUrl.value = URL.createObjectURL(file)
+}
+const removeImage = () => {
+  form.value.imageUrl = null
+  previewUrl.value = null
+}
 
 // const saveEditParcel = async () => {
 //   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
@@ -960,15 +988,12 @@ const closePopUp = (operate) => {
                   </option>
                 </select>
               </div>
-              <div class="mb-4">
+              <!-- <div class="mb-4">
                 <label class="block font-semibold mb-1">Image</label>
-
-                <!-- Custom upload button -->
                 <label
                   for="file-upload"
                   class="flex items-center justify-center cursor-pointer border border-dashed border-gray-400 rounded-md py-2 px-3 hover:bg-gray-100 transition-colors w-full"
                 >
-                  <!-- SVG icon -->
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -989,14 +1014,53 @@ const closePopUp = (operate) => {
                   <span class="text-gray-700">Click to upload image</span>
                 </label>
 
-                <!-- Hidden file input -->
                 <input
                   id="file-upload"
                   type="file"
                   class="hidden"
                   @change="handleImageUpload"
                 />
-              </div>
+
+             
+                <div v-if="previewUrl" class="mt-2 relative inline-block">
+       
+                  <button
+                    @click="removeImage"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+
+                  <img
+                    :src="previewUrl"
+                    alt="Preview"
+                    class="w-32 h-32 object-cover rounded-md border"
+                  />
+                </div>
+
+                <div v-if="previewUrl" class="mt-2">
+                  <a
+                    :href="previewUrl"
+                    :download="form.imageUrl?.name"
+                    class="text-blue-600 hover:underline"
+                  >
+                    Download {{ form.imageUrl?.name }}
+                  </a>
+                </div>
+              </div> -->
             </div>
           </section>
 
