@@ -610,12 +610,12 @@ const toggleSidebar = () => {
       {{ parcel?.status || 'Unknown' }}
     </button> -->
             </div>
-            <!-- Title -->
-            <h2
+
+            <!-- <h2
               class="text-center text-sm md:text-xl font-bold text-[#185dc0] truncate"
             >
               Parcel Details
-            </h2>
+            </h2> -->
           </div>
 
           <form class="bg-white p-6 rounded-lg shadow space-y-8">

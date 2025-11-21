@@ -1186,7 +1186,7 @@ const closePopUp = (operate) => {
             </div>
             <div>
               <label for="companySelect" class="block font-semibold mb-1"
-                >Company <span class="text-red-500">***</span></label
+                >Company <span class="text-red-500">*</span></label
               >
               <select
                 v-model="parcelData.companyId"
