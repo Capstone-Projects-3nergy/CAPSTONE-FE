@@ -939,7 +939,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </option>
                 </select> -->
                 <select v-model="form.dormId" class="custom-select">
-                  <option disabled>Select Dormitory</option>
+                  <option disabled value="null">Select Dormitory</option>
                   <option
                     v-for="dorm in dormList"
                     :key="dorm.dormId"
