@@ -53,7 +53,7 @@ const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
 
 const parcelStore = useParcelManager()
-
+const companyList = ref([])
 // ⚡️ Form ข้อมูลพัสดุ (ให้ตรง ParcelDetailDto)
 const form = ref({
   parcelId: '', // read-only
@@ -91,6 +91,51 @@ const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
+const loadCompanies = async () => {
+  const auth = useAuthManager()
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}`
+      }
+    })
+
+    console.log('📦 Raw company response:', res.data)
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    // server ส่ง string
+    if (typeof rawData === 'string') {
+      const matches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = matches.map((str) => {
+        const id = str.match(/"companyId":(\d+)/)
+        const name = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: id ? Number(id[1]) : null,
+          companyName: name ? name[1] : ''
+        }
+      })
+    }
+    // server ส่ง array
+    else if (Array.isArray(rawData)) {
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
+    console.log('✅ companyList:', companyList.value)
+  } catch (err) {
+    console.error('❌ Error fetching companies:', err)
+  }
+}
 
 // ⚡ ฟังก์ชันโหลด parcel detail
 const getParcelDetail = async (tid) => {
@@ -110,7 +155,7 @@ const getParcelDetail = async (tid) => {
     originalForm.value = { ...form.value }
     return
   }
-
+  await loadCompanies()
   // 2️⃣ ดึงจาก backend → GET /api/parcels/{id}
   try {
     const data = await getItemById(
@@ -128,7 +173,7 @@ const getParcelDetail = async (tid) => {
       recipientName: data.recipientName,
       senderName: data.senderName || '',
       parcelType: data.parcelType || '',
-      companyId: data.companyName ?? '',
+      companyId: Number(data.companyId) ?? '',
       imageUrl: data.imageUrl ?? '',
       status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
 
@@ -152,6 +197,9 @@ onMounted(() => {
   isCollapsed.value = true
   const tid = route.params.tid
   getParcelDetail(tid)
+  console.log('➡️ form.companyId:', form.value.companyId)
+  console.log('➡️ typeof form.companyId:', typeof form.value.companyId)
+  console.log('➡️ companyList:', companyList.value)
 })
 
 // --- Save function ---
@@ -868,19 +916,41 @@ const closePopUp = (operate) => {
               </div>
               <div>
                 <label class="block font-semibold mb-1">Parcel Type</label>
-                <input
+                <!-- <input
                   type="text"
                   v-model="form.parcelType"
                   class="w-full border rounded-md p-2"
-                />
+                /> -->
+                <select
+                  v-model="form.parcelType"
+                  class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                >
+                  <option disabled value="">Select Parcel Type</option>
+                  <option value="DOCUMENT">Document</option>
+                  <option value="BOX">Box</option>
+                </select>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Company</label>
-                <input
+                <!-- <input
                   type="text"
                   v-model="form.companyId"
                   class="w-full border rounded-md p-2"
-                />
+                /> -->
+                <select
+                  v-model="form.companyId"
+                  class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  <option disabled value="">Select Company</option>
+
+                  <option
+                    v-for="company in companyList"
+                    :key="company.companyId"
+                    :value="company.companyId"
+                  >
+                    {{ company.companyName }}
+                  </option>
+                </select>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Image</label>
