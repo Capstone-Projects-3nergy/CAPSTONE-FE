@@ -1283,7 +1283,7 @@ const closePopUp = (operate) => {
               >
                 <!-- Tracking -->
                 <td
-                  @click="showParcelDetail({ id: p.id })"
+                  @click="showParcelDetail(p.id)"
                   class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                 >
                   <span class="md:hidden font-semibold text-blue-700"
@@ -1354,7 +1354,7 @@ const closePopUp = (operate) => {
                   class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2 text-center"
                 >
                   <button
-                    @click="showEditParacelDetail({ id: p.id })"
+                    @click="showEditParacelDetail(p.id)"
                     class="text-blue-600 hover:text-blue-800 cursor-pointer"
                   >
                     <svg
