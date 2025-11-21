@@ -159,6 +159,8 @@ onMounted(() => {
 // parcelType, senderName, status, companyId, imageUrl
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
+  // ❗ roomNumber เป็น read-only จาก user → validation นี้อาจไม่จำเป็น
+  // ถ้ายังอยากกัน input แปลก ๆ ก็ปล่อยไว้ได้ แต่มันไม่ได้มีผลอะไรกับ backend
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
     setTimeout(() => (roomNumberError.value = false), 3000)
@@ -178,10 +180,21 @@ const saveEditParcel = async () => {
   }
 
   try {
+    // ส่งเฉพาะ field ที่อยู่ใน UpdateParcelDto
+    const body = {
+      trackingNumber: form.value.trackingNumber,
+      recipientName: form.value.recipientName,
+      parcelType: form.value.parcelType,
+      senderName: form.value.senderName,
+      status: form.value.status,
+      companyId: form.value.companyId ? Number(form.value.companyId) : null,
+      imageUrl: form.value.imageUrl
+    }
+
     const updatedParcel = await editItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       form.value.parcelId,
-      form.value,
+      body,
       router
     )
 
@@ -191,25 +204,17 @@ const saveEditParcel = async () => {
       return
     }
 
-    parcelManager.editParcel(form.value.parcelId, updatedParcel)
-    console.log('✅ Updated parcel:', updatedParcel)
+    // อัปเดตใน store
+    parcelStore.editParcel(form.value.parcelId, updatedParcel)
 
-    if (form.value.status) {
-      const updatedStatus = await updateParcelStatus(
-        `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`,
-        form.value.parcelId,
-        form.value.status,
-        router
-      )
-
-      if (updatedStatus) {
-        parcelManager.updateParcelStatus(
-          form.value.parcelId,
-          updatedStatus.status || form.value.status
-        )
-        console.log('✅ Updated status:', updatedStatus)
-      }
+    // sync form + originalForm ให้ตรงกับค่าที่ backend ส่งกลับ
+    form.value = {
+      ...form.value,
+      ...updatedParcel
     }
+    originalForm.value = { ...form.value }
+
+    console.log('✅ Updated parcel:', updatedParcel)
 
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 3000)
@@ -219,6 +224,68 @@ const saveEditParcel = async () => {
     setTimeout(() => (error.value = false), 3000)
   }
 }
+
+// const saveEditParcel = async () => {
+//   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+//     roomNumberError.value = true
+//     setTimeout(() => (roomNumberError.value = false), 3000)
+//     return
+//   }
+
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+//     SenderNameError.value = true
+//     setTimeout(() => (SenderNameError.value = false), 3000)
+//     return
+//   }
+
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
+//     parcelTypeError.value = true
+//     setTimeout(() => (parcelTypeError.value = false), 3000)
+//     return
+//   }
+
+//   try {
+//     const updatedParcel = await editItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//       form.value.parcelId,
+//       form.value,
+//       router
+//     )
+
+//     if (!updatedParcel) {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 3000)
+//       return
+//     }
+
+//     parcelManager.editParcel(form.value.parcelId, updatedParcel)
+//     console.log('✅ Updated parcel:', updatedParcel)
+
+//     if (form.value.status) {
+//       const updatedStatus = await updateParcelStatus(
+//         `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`,
+//         form.value.parcelId,
+//         form.value.status,
+//         router
+//       )
+
+//       if (updatedStatus) {
+//         parcelManager.updateParcelStatus(
+//           form.value.parcelId,
+//           updatedStatus.status || form.value.status
+//         )
+//         console.log('✅ Updated status:', updatedStatus)
+//       }
+//     }
+
+//     editSuccess.value = true
+//     setTimeout(() => (editSuccess.value = false), 3000)
+//   } catch (err) {
+//     console.error('❌ Failed to save parcel:', err)
+//     error.value = true
+//     setTimeout(() => (error.value = false), 3000)
+//   }
+// }
 
 // --- Cancel button ---
 const cancelEdit = () => {

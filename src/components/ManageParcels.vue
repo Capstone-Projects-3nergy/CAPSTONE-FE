@@ -1346,7 +1346,7 @@ const closePopUp = (operate) => {
                     :class="{
                       'bg-yellow-400': p.status === 'Pending',
                       'bg-green-400': p.status === 'Picked Up',
-                      'bg-red-400': p.status === 'Unclaimed'
+                      'bg-blue-400': p.status === 'Received'
                     }"
                   >
                     {{ p.status }}
