@@ -178,7 +178,7 @@ const saveEditParcel = async () => {
 
     if (form.value.status) {
       const updatedStatus = await updateParcelStatus(
-        `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+        `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`,
         form.value.parcelId,
         form.value.status,
         router

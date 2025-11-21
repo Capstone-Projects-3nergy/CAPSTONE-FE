@@ -100,6 +100,7 @@ onMounted(() => {
   isCollapsed.value = true // ดึงจาก backend
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
+  console.log(getParcelDetail(tidNum))
 })
 
 watch(
