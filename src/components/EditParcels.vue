@@ -169,7 +169,8 @@ const getParcelDetail = async (tid) => {
     // 🔹 map parcelType ให้ตรงกับ <option>
     const mapParcelType = {
       box: 'Box',
-      Document: 'Document'
+      Document: 'Document',
+      Envelope: 'Envelope'
     }
     // map ให้ตรง ParcelDetailDto
     form.value = {
