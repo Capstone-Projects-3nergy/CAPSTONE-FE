@@ -54,24 +54,26 @@ const parcelTypeError = ref(false)
 
 const parcelStore = useParcelManager()
 
-// ⚡️ Form ข้อมูลพัสดุ (แก้ให้ตรงกับ Layout ล่าสุด)
-// --- Editable fields ---
+// ⚡️ Form ข้อมูลพัสดุ (ให้ตรง ParcelDetailDto)
 const form = ref({
   parcelId: '', // read-only
   trackingNumber: '', // editable
   recipientName: '', // editable
   senderName: '', // editable
   parcelType: '', // editable
-  companyId: '', // editable
+  companyId: '', // editable (id ขนส่ง)
   imageUrl: '', // editable / upload
-  status: 'PENDING', // editable via dropdown
+  status: 'PENDING', // editable via dropdown (enum จาก backend)
+
   receivedAt: '', // read-only
   pickedUpAt: '', // read-only
   updatedAt: '', // read-only
+
   residentName: '', // read-only
   roomNumber: '', // read-only
   email: '' // read-only
 })
+
 const statusOptions = computed(() => {
   if (form.value.status === 'PENDING') {
     return ['PENDING', 'RECEIVED']
@@ -84,61 +86,77 @@ const statusOptions = computed(() => {
   }
   return ['PENDING', 'RECEIVED', 'PICKED_UP']
 })
-const originalForm = ref({ ...form.value }) // หลังโหลด parcel เสร็จ
-// ⚡ เก็บ snapshot เดิม
-originalForm.value = { ...form.value }
-const isUnchanged = computed(() => {
-  return JSON.stringify(form.value) === JSON.stringify(originalForm.value)
-})
+// เอาไว้เช็คว่ามีแก้อะไรไหม
+const originalForm = ref({ ...form.value })
+const isUnchanged = computed(
+  () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
+)
 
-// ฟังก์ชันโหลด parcel detail
+// ⚡ ฟังก์ชันโหลด parcel detail
 const getParcelDetail = async (tid) => {
   if (!tid) return
+  const tidNum = Number(tid)
 
-  // หาใน store ก่อน
-  const localParcel = parcelStore.parcels?.find((p) => p.id === tid)
+  // 1️⃣ หาใน store ก่อน (ใช้ getParcels + parcelId)
+  const localParcel = parcelStore
+    .getParcels()
+    .find((p) => p.parcelId === tidNum)
+
   if (localParcel) {
-    form.value = { ...form.value, ...localParcel }
+    form.value = {
+      ...form.value,
+      ...localParcel
+    }
+    originalForm.value = { ...form.value }
     return
   }
 
-  // ดึงจาก backend
+  // 2️⃣ ดึงจาก backend → GET /api/parcels/{id}
   try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tidNum,
+      router
     )
-    const data = res.data
 
+    if (!data) return
+
+    // map ให้ตรง ParcelDetailDto
     form.value = {
       parcelId: data.parcelId,
       trackingNumber: data.trackingNumber,
-      recipientName: data.ownerName,
+      recipientName: data.recipientName,
       senderName: data.senderName || '',
       parcelType: data.parcelType || '',
-      companyId: data.companyId || '',
-      imageUrl: data.imageUrl || '',
-      status: data.status,
+      companyId: data.companyName ?? '',
+      imageUrl: data.imageUrl ?? '',
+      status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
+
       receivedAt: data.receivedAt,
-      pickedUpAt: data.pickedUpAt || null,
-      updatedAt: data.updatedAt || null,
+      pickedUpAt: data.pickedUpAt,
+      updatedAt: data.updatedAt,
+
       residentName: data.residentName,
       roomNumber: data.roomNumber,
-      email: data.contactEmail
+      email: data.email
     }
 
     parcelStore.addParcel(form.value)
+    originalForm.value = { ...form.value }
   } catch (err) {
     console.error('Failed to load parcel detail', err)
   }
 }
 
 onMounted(() => {
-  isCollapsed.value = true // ดึงจาก backend
+  isCollapsed.value = true
   const tid = route.params.tid
   getParcelDetail(tid)
 })
 
-// --- Save function, validation, status update ---
+// --- Save function ---
+// ตอนนี้ backend UpdateParcelDto รองรับเฉพาะ field: trackingNumber, recipientName,
+// parcelType, senderName, status, companyId, imageUrl
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
@@ -256,7 +274,7 @@ const isAllEmpty = computed(() => {
     !form.value.email &&
     !form.value.senderName &&
     !form.value.companyId &&
-    !form.value.receiveAt
+    !form.value.receivedAt
   )
 })
 const closePopUp = (operate) => {
@@ -755,7 +773,7 @@ const closePopUp = (operate) => {
 
           <!-- Parcel Information -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information</h3>
+            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Tracking Number</label>
@@ -806,7 +824,7 @@ const closePopUp = (operate) => {
 
           <!-- Status Section -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">Status</h3>
+            <h3 class="font-semibold text-lg mb-2">Status:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <select
@@ -847,7 +865,7 @@ const closePopUp = (operate) => {
 
           <!-- Resident Info -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info</h3>
+            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Resident Name</label>
@@ -881,13 +899,13 @@ const closePopUp = (operate) => {
 
           <!-- System Info -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">System Info</h3>
+            <h3 class="font-semibold text-lg mb-2">System Info:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Parcel ID</label>
                 <input
                   type="text"
-                  :value="form.id"
+                  :value="form.parcelId"
                   readonly
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />

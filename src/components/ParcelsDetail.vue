@@ -626,7 +626,7 @@ const toggleSidebar = () => {
 
             <!-- Parcel Information -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Parcel Information</h3>
+              <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block font-semibold mb-1"
@@ -681,7 +681,7 @@ const toggleSidebar = () => {
 
             <!-- Status Section -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Status</h3>
+              <h3 class="font-semibold text-lg mb-2">Status:</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block font-semibold mb-1">Status</label>
@@ -715,7 +715,7 @@ const toggleSidebar = () => {
 
             <!-- Resident Info -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Resident Info</h3>
+              <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block font-semibold mb-1">Resident Name</label>
@@ -742,7 +742,7 @@ const toggleSidebar = () => {
 
             <!-- System Info -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">System Info</h3>
+              <h3 class="font-semibold text-lg mb-2">System Info:</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block font-semibold mb-1">Parcel ID</label>
