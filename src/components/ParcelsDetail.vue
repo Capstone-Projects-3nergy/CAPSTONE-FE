@@ -54,53 +54,60 @@ const parcel = ref(null)
 
 // ⚡ helper map backend data → form
 const mapParcelData = (data) => ({
-  id: data.parcelId,
+  // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
+  parcelId: data.parcelId,
   trackingNumber: data.trackingNumber,
-  recipientName: data.ownerName,
+  recipientName: data.recipientName, // ✅ ตรงกับ ParcelDetailDto
   roomNumber: data.roomNumber,
-  email: data.contactEmail,
+  email: data.email, // ✅ ตรงกับ ParcelDetailDto
   parcelType: data.parcelType || '',
   status: data.status,
   receivedAt: data.receivedAt,
   pickedUpAt: data.pickedUpAt || null,
   updatedAt: data.updatedAt || null,
   senderName: data.senderName || '',
-  companyId: data.companyId || '',
+  companyId: data.companyId || null,
+  companyName: data.companyName || '', // ถ้าอยากใช้ชื่อบริษัทด้วย
+  residentId: data.residentId || null,
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
 
-// ⚡ Load parcel detail (store → backend)
+// ✅ ใช้ store + backend ร่วมกัน
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
-  // 1️⃣ Check store first
-  const localParcel = parcelStore.parcel?.find((p) => p.id === tid)
+  // 1️⃣ เช็คใน store ก่อน
+  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
     console.log('📦 Loaded from store:', parcel.value)
     return
   }
 
-  // 2️⃣ Fetch from backend
+  // 2️⃣ ดึงจาก backend
   try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tid,
+      router
     )
-    parcel.value = mapParcelData(res.data)
-    parcelStore.addParcel(parcel.value)
-    console.log('📦 Loaded from backend:', parcel.value)
+
+    if (data) {
+      const mapped = mapParcelData(data)
+      parcel.value = mapped
+      parcelStore.addParcel(mapped)
+      console.log('📦 Loaded from backend:', mapped)
+    }
   } catch (err) {
     console.error('❌ Failed to load parcel detail:', err)
   }
 }
 
-// ⚡ onMounted / watch
 onMounted(() => {
-  isCollapsed.value = true // ดึงจาก backend
+  isCollapsed.value = true
   const tidNum = Number(route.params.tid)
-  getParcelDetail(tidNum)
-  console.log(getParcelDetail(tidNum))
+  getParcelDetail(tidNum) // 🔥 เรียกครั้งเดียวพอ
 })
 
 watch(
@@ -110,7 +117,6 @@ watch(
     getParcelDetail(tidNum)
   }
 )
-
 // ⚡ Page navigation functions (keep all)
 const backToManageParcels = () => router.replace({ name: 'staffparcels' })
 const showParcelScannerPage = async () => {
@@ -673,7 +679,7 @@ const toggleSidebar = () => {
               <div>
                 <label class="block font-semibold mb-1">Company</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.companyId || '-' }}
+                  {{ parcel?.companyName || '-' }}
                 </p>
               </div>
 
@@ -682,10 +688,9 @@ const toggleSidebar = () => {
                 <p
                   class="w-full p-2 text-gray-700 rounded-md"
                   :class="{
-                    'bg-yellow-300': parcel?.status === 'Pending',
-                    'bg-green-300': parcel?.status === 'Picked Up',
-                    'bg-red-300': parcel?.status === 'Unclaimed',
-                    'bg-gray-100': !parcel?.status
+                    'bg-yellow-400': parcel?.status === 'PENDING',
+                    'bg-blue-400': parcel?.status === 'RECEIVED',
+                    'bg-green-400': parcel?.status === 'PICKED_UP'
                   }"
                 >
                   {{ parcel?.status || '-' }}
@@ -698,7 +703,7 @@ const toggleSidebar = () => {
               <div>
                 <label class="block font-semibold mb-1">Parcel ID</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.id || '-' }}
+                  {{ parcel?.parcelId || '-' }}
                 </p>
               </div>
 

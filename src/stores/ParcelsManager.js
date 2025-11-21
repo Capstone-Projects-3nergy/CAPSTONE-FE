@@ -101,19 +101,19 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const findByTracking = (trackingNumber) =>
     parcel.find((el) => el.trackingNumber === trackingNumber)
 
-const updateParcelStatus = (parcelId, newStatus) => {
-  const index = findIndexByParcelId(parcelId)
-  if (index !== -1) {
-    parcel[index].status = newStatus
-    parcel[index].updateAt = new Date().toISOString() // อัปเดตเวลา
-    console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
-  } else {
-    console.warn(`Parcel with id ${parcelId} not found`)
+  const updateParcelStatus = (parcelId, newStatus) => {
+    const index = findIndexByParcelId(parcelId)
+    if (index !== -1) {
+      parcel[index].status = newStatus
+      parcel[index].updatedAt = new Date().toISOString()
+      console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
+    } else {
+      console.warn(`Parcel with id ${parcelId} not found`)
+    }
   }
-}
 
   return {
-    updateParcelStatus ,
+    updateParcelStatus,
     getParcels,
     setParcels,
     addParcel,
