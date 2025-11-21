@@ -1048,7 +1048,7 @@ const closePopUp = (operate) => {
               <input
                 v-model="recipientSearch"
                 type="text"
-                placeholder="Enter name/ email / phone-number"
+                placeholder="Enter name/ email / room number"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
 
@@ -1080,6 +1080,7 @@ const closePopUp = (operate) => {
                 >Room Number <span class="text-red-500">*</span></label
               >
               <input
+                placeholder="Select recipient first"
                 type="text"
                 :value="selectedResident ? selectedResident.roomNumber : ''"
                 class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"

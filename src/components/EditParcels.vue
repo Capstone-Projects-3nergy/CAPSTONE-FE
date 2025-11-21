@@ -1103,6 +1103,7 @@ const closePopUp = (operate) => {
               <div class="flex-1">
                 <label class="block font-semibold mb-1">Picked Up At</label>
                 <input
+                  placeholder="-"
                   type="text"
                   :value="form.pickedUpAt"
                   readonly
