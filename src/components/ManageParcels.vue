@@ -177,7 +177,7 @@ onMounted(async () => {
     const mapped = data.map((p) => ({
       id: p.parcelId, // backend: parcelId → frontend: id
       trackingNumber: p.trackingNumber,
-      recipientName: p.ownerName, // ownerName → recipientName
+      recipientName: p.ownerName, // ownerName → recipientName ตัวเเปรไม่เหมือนกัน
       roomNumber: p.roomNumber,
       email: p.contactEmail, // contactEmail → email
       status: mapStatus(p.status), // 'PENDING' → 'Pending' ฯลฯ
