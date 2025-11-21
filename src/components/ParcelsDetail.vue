@@ -681,7 +681,7 @@ const toggleSidebar = () => {
 
             <!-- Status Section -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Status:</h3>
+              <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label class="block font-semibold mb-1">Status</label>
