@@ -617,32 +617,23 @@ const toggleSidebar = () => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Tracking Number</label>
-                <input
-                  type="text"
-                  :value="parcel?.trackingNumber || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.trackingNumber || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Parcel Type</label>
-                <input
-                  type="text"
-                  :value="parcel?.parcelType || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.parcelType || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Received At</label>
-                <input
-                  type="text"
-                  :value="parcel?.receivedAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.receivedAt || '-' }}
+                </p>
               </div>
             </div>
 
@@ -650,32 +641,23 @@ const toggleSidebar = () => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Recipient Name</label>
-                <input
-                  type="text"
-                  :value="parcel?.recipientName || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.recipientName || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Email</label>
-                <input
-                  type="text"
-                  :value="parcel?.email || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.email || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Room Number</label>
-                <input
-                  type="text"
-                  :value="parcel?.roomNumber || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.roomNumber || '-' }}
+                </p>
               </div>
             </div>
 
@@ -683,74 +665,59 @@ const toggleSidebar = () => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Sender Name</label>
-                <input
-                  type="text"
-                  :value="parcel?.senderName || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.senderName || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Company</label>
-                <input
-                  type="text"
-                  :value="parcel?.companyId || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.companyId || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Status</label>
-                <input
-                  type="text"
-                  :value="parcel?.status || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
+                <p
+                  class="w-full p-2 text-gray-700 rounded-md"
                   :class="{
-                    'bg-yellow-400': parcel?.status === 'Pending',
-                    'bg-green-400': parcel?.status === 'Picked Up',
-                    'bg-red-400': parcel?.status === 'Unclaimed'
+                    'bg-yellow-300': parcel?.status === 'Pending',
+                    'bg-green-300': parcel?.status === 'Picked Up',
+                    'bg-red-300': parcel?.status === 'Unclaimed',
+                    'bg-gray-100': !parcel?.status
                   }"
-                />
+                >
+                  {{ parcel?.status || '-' }}
+                </p>
               </div>
             </div>
 
-            <!-- Row 4: System Info -->
+            <!-- Row 4 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Parcel ID</label>
-                <input
-                  type="text"
-                  :value="parcel?.id || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.id || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Picked Up At</label>
-                <input
-                  type="text"
-                  :value="parcel?.pickedUpAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.pickedUpAt || '-' }}
+                </p>
               </div>
 
               <div>
                 <label class="block font-semibold mb-1">Updated At</label>
-                <input
-                  type="text"
-                  :value="parcel?.updatedAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600 bg-gray-100"
-                />
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.updatedAt || '-' }}
+                </p>
               </div>
             </div>
 
-            <!-- Row 5: Image Preview -->
+            <!-- Row 5: Image -->
             <div>
               <label class="block font-semibold mb-1">Parcel Image</label>
               <div v-if="parcel?.imageUrl">
