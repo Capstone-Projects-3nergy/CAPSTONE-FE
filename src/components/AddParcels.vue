@@ -1124,14 +1124,20 @@ const closePopUp = (operate) => {
               <label class="block font-semibold mb-1"
                 >Parcel Type <span class="text-red-500">*</span></label
               >
-              <select
+              <input
+                v-model="parcelData.parcelType"
+                type="text"
+                placeholder="Enter Parcel Type: Box / Document / Envelope"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              />
+              <!-- <select
                 v-model="parcelData.parcelType"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               >
                 <option disabled value="">Select Parcel Type</option>
                 <option value="Document">Document</option>
                 <option value="Box">Box</option>
-              </select>
+              </select> -->
             </div>
             <!-- <div>
               <label class="block font-semibold mb-1">Contact</label>

@@ -167,18 +167,18 @@ const getParcelDetail = async (tid) => {
     if (!data) return
 
     // 🔹 map parcelType ให้ตรงกับ <option>
-    const mapParcelType = {
-      box: 'Box',
-      Document: 'Document',
-      Envelope: 'Envelope'
-    }
+    // const mapParcelType = {
+    //   box: 'Box',
+    //   Document: 'Document',
+    //   Envelope: 'Envelope'
+    // }
     // map ให้ตรง ParcelDetailDto
     form.value = {
       parcelId: data.parcelId,
       trackingNumber: data.trackingNumber,
       recipientName: data.recipientName,
       senderName: data.senderName || '',
-      parcelType: mapParcelType[data.parcelType] || '',
+      parcelType: data.parcelType || '',
       companyId: Number(data.companyId) ?? '',
       imageUrl: data.imageUrl ?? '',
       status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
@@ -951,12 +951,13 @@ const closePopUp = (operate) => {
               </div>
               <div>
                 <label class="block font-semibold mb-1">Parcel Type</label>
-                <!-- <input
+                <input
+                  placeholder="Enter Parcel Type: Box / Document / Envelope"
                   type="text"
                   v-model="form.parcelType"
                   class="w-full border rounded-md p-2"
-                /> -->
-                <select
+                />
+                <!-- <select
                   v-model="form.parcelType"
                   class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                 >
@@ -964,7 +965,7 @@ const closePopUp = (operate) => {
                   <option value="Document">Document</option>
                   <option value="Box">Box</option>
                   <option value="Envelope">Envelope</option>
-                </select>
+                </select> -->
               </div>
               <div>
                 <label class="block font-semibold mb-1">Company</label>
