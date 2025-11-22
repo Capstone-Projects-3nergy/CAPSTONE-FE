@@ -756,50 +756,50 @@ const confirmParcel = async () => {
 }
 
 // === Cancel Parcel (Delete Parcel) ===
-const cancelParcel = async () => {
-  const parcel = parcelsResidentDetail.value
-  if (!parcel?.id) return
+// const cancelParcel = async () => {
+//   const parcel = parcelsResidentDetail.value
+//   if (!parcel?.id) return
 
-  const parcelId = parcel.id
+//   const parcelId = parcel.id
 
-  try {
-    const token = loginManager.token
+//   try {
+//     const token = loginManager.token
 
-    const res = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
+//     const res = await fetch(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`,
+//       {
+//         method: 'DELETE',
+//         headers: {
+//           Authorization: `Bearer ${token}`
+//         }
+//       }
+//     )
 
-    if (!res.ok) {
-      const message =
-        res.status === 401
-          ? 'Unauthorized'
-          : res.status === 403
-          ? 'Forbidden'
-          : res.status === 404
-          ? 'Parcel not found'
-          : 'Failed to delete parcel'
-      throw new Error(message)
-    }
+//     if (!res.ok) {
+//       const message =
+//         res.status === 401
+//           ? 'Unauthorized'
+//           : res.status === 403
+//           ? 'Forbidden'
+//           : res.status === 404
+//           ? 'Parcel not found'
+//           : 'Failed to delete parcel'
+//       throw new Error(message)
+//     }
 
-    // ลบจาก store
-    parcelManager.deleteParcels(parcelId)
+//     // ลบจาก store
+//     parcelManager.deleteParcels(parcelId)
 
-    // popup success
-    deleteSuccess.value = true
+//     // popup success
+//     deleteSuccess.value = true
 
-    // กลับหน้า list
-    router.replace({ name: 'residentparcels' })
-  } catch (err) {
-    console.error('Error deleting parcel:', err)
-    error.value = true
-  }
-}
+//     // กลับหน้า list
+//     router.replace({ name: 'residentparcels' })
+//   } catch (err) {
+//     console.error('Error deleting parcel:', err)
+//     error.value = true
+//   }
+// }
 </script>
 
 <template>
@@ -1410,12 +1410,12 @@ const cancelParcel = async () => {
                     class="mr-3 mt-4 mb-2"
                     @click="confirmParcel"
                   />
-                  <ButtonWeb
+                  <!-- <ButtonWeb
                     label="Canceled"
                     color="red"
                     class="mr-3 mt-4 mb-2"
                     @click="cancelParcel"
-                  />
+                  /> -->
                 </td>
               </tr>
             </tbody>
