@@ -22,21 +22,33 @@ const parcel = computed(() => props.parcelConfirmData || {})
 const confirmParcelFn = async () => {
   if (!parcel.value.id) return
 
-  deletedParcel.value = await deleteItemById(
+  const res = await updateParcelStatus(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcel.value.id
+    parcel.value.id,
+    'Received',
+    router
   )
 
-  if (deletedParcel.value === '404') {
+  // ❌ ไม่พบพัสดุ
+  if (res?.status === 404 || res?.error) {
+    emit('redAlert') // popup error
+    emit('cancelParcel', true)
+    return
+  }
+
+  // ❌ ไม่มีสิทธิ์
+  if (res?.status === 401) {
     emit('redAlert')
     emit('cancelParcel', true)
     return
   }
 
-  // ลบใน Pinia
-  parcelManager.deleteParcels(parcel.id)
-
-  emit('confirmParcel', true)
+  // ✅ สำเร็จ  (Server ส่ง status = "Received" หรือ message)
+  if (res?.status === 'Received' || res?.message === 'Parcel confirmed') {
+    parcelManager.updateParcelStatus(parcel.value.id, 'Received')
+    emit('confirmParcel', true) // popup success
+    return
+  }
 }
 
 const cancelFn = () => {

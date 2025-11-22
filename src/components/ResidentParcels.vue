@@ -1337,7 +1337,12 @@ const showProfileResidentPage = async function () {
               >
                 <!-- Tracking -->
                 <td
-                  @click="showParcelDetail({ id: p.id })"
+                  @click="
+                    deleteParcelPopUp({
+                      id: p.id,
+                      parcelNumber: p.trackingNumber
+                    })
+                  "
                   class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                 >
                   <span class="md:hidden font-semibold text-blue-700"
