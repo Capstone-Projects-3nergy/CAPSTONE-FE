@@ -14,6 +14,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
+import AlertPopUp from './AlertPopUp.vue'
 import {
   getItemById,
   deleteItemById,
@@ -52,7 +53,7 @@ const isCollapsed = ref(false)
 const parcelConfirmDetail = ref(null)
 // ⚡ Parcel detail
 const parcel = ref(null)
-
+const confirmSuccess = ref(false)
 // ⚡ helper map backend data → form
 const mapParcelData = (data) => ({
   // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
@@ -622,7 +623,23 @@ const toggleSidebar = () => {
             Manage Parcel &gt; Details
           </h2>
         </div>
-
+        <!-- Alerts -->
+        <AlertPopUp
+          v-if="confirmSuccess"
+          :titles="'Confirm Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
         <!-- Main Form Container -->
         <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
           <form class="space-y-10">
