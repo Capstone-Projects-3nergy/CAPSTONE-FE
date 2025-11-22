@@ -6,7 +6,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcelData']) // ไม่ใช่ ref
+const props = defineProps(['parcelConfirmData']) // ไม่ใช่ ref
 
 const router = useRouter()
 const parcelManager = useParcelManager()
@@ -17,7 +17,7 @@ const deletedParcel = ref(null)
 //   isCollapsed.value = true
 // })
 // ใช้ computed เผื่อ props เป็น undefined
-const parcel = computed(() => props.parcelData || {})
+const parcel = computed(() => props.parcelConfirmData || {})
 
 const confirmParcelFn = async () => {
   if (!parcel.value.id) return

@@ -12,6 +12,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import {
@@ -54,6 +55,7 @@ import {
 } from '@/utils/fetchUtils'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -75,6 +77,7 @@ const error = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
+const confirmSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
@@ -608,42 +611,42 @@ const pageNumbers = computed(() => {
 //   // 👉 ลบออกจาก Pinia
 //   parcelManager.deleteParcels(parcelId)
 // }
-const deleteParcelPopUp = (parcel) => {
+const confirmParcelPopUp = (parcel) => {
   // เก็บข้อมูล parcel สำหรับ popup
-  parcelDetail.value = {
+  parcelConfirmDetail.value = {
     id: parcel.id,
     parcelNumber: parcel.parcelNumber
   }
-  console.log(parcelDetail.value)
+  console.log(parcelConfirmDetail.value)
   // เปิด popup
-  showDeleteParcel.value = true
+  showConfirmParcel.value = true
   // เปลี่ยน URL ให้มี tid
-  router.push({
-    name: 'deleteparcels',
-    params: {
-      id: route.params.id, // staff id
-      tid: parcel.id // parcel id
-    }
-  })
+  // router.push({
+  //   name: 'residentparcelsConfirm',
+  //   params: {
+  //     id: route.params.id, // staff id
+  //     tid: parcel.id // parcel id
+  //   }
+  // })
 }
 
-const clearDeletePopUp = () => {
-  showDeleteParcel.value = false
-  parcelDetail.value = null
+const clearConfirmPopUp = () => {
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 
-const showDelComplete = () => {
-  deleteSuccess.value = true
+const showConfirmComplete = () => {
+  confirmSuccess.value = true
   setTimeout(() => (deleteSuccess.value = false), 3000)
-  showDeleteParcel.value = false
-  parcelDetail.value = null
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 
 const openRedPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 3000)
-  showDeleteParcel.value = false
-  parcelDetail.value = null
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 
 // const closePopUp = (operate) => {
@@ -1408,7 +1411,7 @@ const showProfileResidentPage = async function () {
                     label="Confirm"
                     color="blue"
                     class="mr-3 mt-4 mb-2"
-                    @click="confirmParcel"
+                    @click="confirmParcelPopUp"
                   />
                   <!-- <ButtonWeb
                     label="Canceled"
@@ -1466,9 +1469,9 @@ const showProfileResidentPage = async function () {
     <LoginPage> </LoginPage>
   </Teleport>
   <teleport to="body" v-if="showConfirmParcel">
-    <DeleteParcels
-      @cancelParcel="clearDeletePopUp"
-      @confirmParcel="showDelComplete"
+    <ConfirmParcels
+      @cancelParcel="clearConfirmPopUp"
+      @confirmParcel="showConfirmComplete"
       @redAlert="openRedPopup"
       :parcelConfirmData="parcelConfirmDetail"
     />
