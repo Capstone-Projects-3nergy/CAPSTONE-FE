@@ -53,7 +53,7 @@ const confirmParcelFn = async () => {
 
 const cancelFn = () => {
   emit('cancelParcel', true)
-  router.replace({ name: 'residentparcels' })
+  router.replace({ name: 'residentparcelsDetail' })
 }
 </script>
 
