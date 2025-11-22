@@ -620,9 +620,9 @@ const toggleSidebar = () => {
 
           <form class="bg-white p-6 rounded-lg shadow space-y-8">
             <!-- Header -->
-            <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
+            <!-- <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
               Parcel Detail
-            </h2>
+            </h2> -->
 
             <!-- Parcel Information -->
             <section>

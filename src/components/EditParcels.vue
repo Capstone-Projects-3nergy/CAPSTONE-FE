@@ -919,7 +919,7 @@ const closePopUp = (operate) => {
           @submit.prevent="saveEditParcel"
         >
           <!-- Header -->
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Edit Parcel</h2>
+          <!-- <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Edit Parcel</h2> -->
 
           <!-- Parcel Information -->
           <section>
