@@ -588,7 +588,7 @@ console.log(registerStore.user)
                 </tr>
               </thead>
 
-              <tbody v-if="parcels.status === 'Received'" class="divide-y">
+              <tbody class="divide-y">
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
