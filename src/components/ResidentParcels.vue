@@ -55,6 +55,11 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
+
+// 🧠 ดึงข้อมูลผู้ใช้จาก Pinia store
+const authStore = useAuthManager()
+// ✅ Computed สำหรับชื่อผู้ใช้
+// const userName = computed(() => authStore.user.fullName)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -163,6 +168,7 @@ const mapStatus = (status) => {
 }
 
 onMounted(async () => {
+  console.log(authStore.user.fullName)
   // ดึงจาก backend
   isCollapsed.value = true
   const data = await getItems(
@@ -191,7 +197,6 @@ onMounted(async () => {
 
     parcelManager.setParcels(mapped)
   }
-
   // โหลด residents ตามเดิม
   try {
     const res = await getItems(
@@ -413,6 +418,10 @@ const filteredParcels = computed(() => {
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
+ // 🔍 filter เฉพาะพัสดุของ user คนนี้
+  result = result.filter(
+    (p) => p.recipientName === authStore.user.fullName
+  )
 
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)

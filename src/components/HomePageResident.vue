@@ -65,7 +65,7 @@ const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const loginManager = useAuthManager()
 const registerStore = useAuthManager()
-
+const authStore = useAuthManager()
 const currentUser = ref('Pimpajee SetXXXXXX')
 const showProfileResident = ref(false)
 function prevSlide() {
@@ -163,7 +163,7 @@ const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p
   }))
-
+  result = result.filter((p) => p.recipientName === authStore.user.fullName)
   return result
 })
 // ข้อมูลที่จะแสดงบนตาราง
