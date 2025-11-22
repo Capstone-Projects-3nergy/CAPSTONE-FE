@@ -8,6 +8,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
@@ -35,7 +36,7 @@ const router = useRouter()
 const route = useRoute()
 const tid = Number(route.params.tid)
 const parcelStore = useParcelManager()
-
+const showConfirmParcel = ref(false)
 // ✅ page visibility states
 const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
@@ -122,6 +123,41 @@ const backToManageParcels = () => router.replace({ name: 'staffparcels' })
 const showParcelScannerPage = async () => {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
+}
+const confirmParcelPopUp = (parcel) => {
+  // เก็บข้อมูล parcel สำหรับ popup
+  parcelConfirmDetail.value = {
+    id: parcel.id
+  }
+  console.log(parcelConfirmDetail.value)
+  // เปิด popup
+  showConfirmParcel.value = true
+  // เปลี่ยน URL ให้มี tid
+  // router.push({
+  //   name: 'residentparcelsConfirm',
+  //   params: {
+  //     id: route.params.id, // staff id
+  //     tid: parcel.id // parcel id
+  //   }
+  // })
+}
+const clearConfirmPopUp = () => {
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const showConfirmComplete = () => {
+  confirmSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 3000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 const showManageParcelPage = async () => {
   router.replace({ name: 'residentparcels' })
@@ -736,14 +772,9 @@ const toggleSidebar = () => {
               />
               <ButtonWeb
                 type="button"
-                label="Save"
-                color="green"
-                @click=""
-                :class="{
-                  'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
-                  'bg-black hover:bg-gray-600 text-white': !isAllFilled
-                }"
-                :disabled="isAllFilled"
+                label="Confirm"
+                color="blue"
+                @click="confirmParcelPopUp"
               />
             </div>
           </form>
@@ -751,7 +782,14 @@ const toggleSidebar = () => {
       </main>
     </div>
   </div>
-
+  <teleport to="body" v-if="showConfirmParcel">
+    <ConfirmParcels
+      @cancelParcel="clearConfirmPopUp"
+      @confirmParcel="showConfirmComplete"
+      @redAlert="openRedPopup"
+      :parcelConfirmData="parcelConfirmDetail"
+    />
+  </teleport>
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>

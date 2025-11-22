@@ -590,24 +590,24 @@ const pageNumbers = computed(() => {
 //   // 👉 ลบออกจาก Pinia
 //   parcelManager.deleteParcels(parcelId)
 // }
-const confirmParcelPopUp = (parcel) => {
-  // เก็บข้อมูล parcel สำหรับ popup
-  parcelConfirmDetail.value = {
-    id: parcel.id,
-    parcelNumber: parcel.parcelNumber
-  }
-  console.log(parcelConfirmDetail.value)
-  // เปิด popup
-  showConfirmParcel.value = true
-  // เปลี่ยน URL ให้มี tid
-  // router.push({
-  //   name: 'residentparcelsConfirm',
-  //   params: {
-  //     id: route.params.id, // staff id
-  //     tid: parcel.id // parcel id
-  //   }
-  // })
-}
+// const confirmParcelPopUp = (parcel) => {
+//   // เก็บข้อมูล parcel สำหรับ popup
+//   parcelConfirmDetail.value = {
+//     id: parcel.id,
+//     parcelNumber: parcel.parcelNumber
+//   }
+//   console.log(parcelConfirmDetail.value)
+//   // เปิด popup
+//   showConfirmParcel.value = true
+//   // เปลี่ยน URL ให้มี tid
+//   // router.push({
+//   //   name: 'residentparcelsConfirm',
+//   //   params: {
+//   //     id: route.params.id, // staff id
+//   //     tid: parcel.id // parcel id
+//   //   }
+//   // })
+// }
 
 const clearConfirmPopUp = () => {
   showConfirmParcel.value = false

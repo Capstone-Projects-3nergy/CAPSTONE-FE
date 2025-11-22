@@ -25,7 +25,7 @@ const bgClass = computed(() => {
   if (props.color === 'black')
     return 'bg-black hover:bg-gray-700 disabled:bg-gray-400'
   if (props.color === 'gray')
-    return 'bg-gray hover:bg-gray-700 disabled:bg-gray-400'
+    return 'bg-[#898989] hover:bg-gray-700 disabled:bg-gray-400'
 })
 </script>
 
