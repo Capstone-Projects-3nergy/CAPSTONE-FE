@@ -18,6 +18,7 @@ import EditParcels from '@/components/EditParcels.vue'
 import ParcelsDetail from '@/components/ParcelsDetail.vue'
 import DeleteParcels from '@/components/DeleteParcels.vue'
 import ParcelResidentDetail from '@/components/ParcelResidentDetail.vue'
+import ConfirmParcels from '@/components/ConfirmParcels.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -60,6 +61,11 @@ const routes = [
     path: '/homepage/resident/:id/parcelspage/:tid/detailparcel',
     name: 'residentparcelsDetail',
     component: ParcelResidentDetail
+  },
+  {
+    path: '/homepage/resident/:id/parcelspage/:tid/detailparcel/confirmparcel',
+    name: 'residentparcelsConfirm',
+    component: ConfirmParcels
   },
   {
     path: '/homepage/resident/:id/announcement',

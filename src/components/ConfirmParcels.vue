@@ -19,7 +19,7 @@ const deletedParcel = ref(null)
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelData || {})
 
-const deleteParcelFn = async () => {
+const confirmParcelFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
@@ -29,19 +29,19 @@ const deleteParcelFn = async () => {
 
   if (deletedParcel.value === '404') {
     emit('redAlert')
-    emit('cancelDetail', true)
+    emit('cancelParcel', true)
     return
   }
 
   // ลบใน Pinia
   parcelManager.deleteParcels(parcel.id)
 
-  emit('confirmDetail', true)
+  emit('confirmParcel', true)
 }
 
 const cancelFn = () => {
-  emit('cancelDetail', true)
-  router.replace({ name: 'staffparcels' })
+  emit('cancelParcel', true)
+  router.replace({ name: 'residentparcels' })
 }
 </script>
 
@@ -55,7 +55,7 @@ const cancelFn = () => {
       <!-- Header -->
       <div class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
-          Delete Parcel
+          Confirm Parcel
         </h1>
       </div>
 
@@ -75,7 +75,7 @@ const cancelFn = () => {
           label="Confirm"
           color="green"
           class="w-full sm:w-auto"
-          @click="deleteParcelFn"
+          @click="confirmParcelFn"
         />
         <ButtonWeb
           label="Cancel"

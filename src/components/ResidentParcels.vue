@@ -673,7 +673,7 @@ const loginStore = useLoginManager()
 const showAnnouncement = ref(false)
 
 const showHomePageResident = ref(false)
-
+const showConfirmParcel = ref(false)
 const showProfileResident = ref(false)
 const currentUser = ref('Pimpajee SetXXXXXX')
 const myParcels = computed(() =>
@@ -696,64 +696,64 @@ const showProfileResidentPage = async function () {
   showProfileResident.value = true
 }
 
-// === Confirm Parcel ===
-const confirmParcel = async () => {
-  const parcel = parcelsResidentDetail.value
-  if (!parcel?.id) return
+// // === Confirm Parcel ===
+// const confirmParcel = async () => {
+//   const parcel = parcelsResidentDetail.value
+//   if (!parcel?.id) return
 
-  const parcelId = parcel.id
+//   const parcelId = parcel.id
 
-  // ต้องเป็น Ready for Pickup ก่อนถึงจะกดยืนยันได้
-  if (parcel.status !== 'Ready for Pickup') {
-    error.value = true
-    console.error('Parcel is not ready for pickup.')
-    return
-  }
+//   // ต้องเป็น Ready for Pickup ก่อนถึงจะกดยืนยันได้
+//   if (parcel.status !== 'Ready for Pickup') {
+//     error.value = true
+//     console.error('Parcel is not ready for pickup.')
+//     return
+//   }
 
-  try {
-    const token = loginManager.token
+//   try {
+//     const token = loginManager.token
 
-    const res = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}/status`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: 'Received' })
-      }
-    )
+//     const res = await fetch(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}/status`,
+//       {
+//         method: 'PATCH',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`
+//         },
+//         body: JSON.stringify({ status: 'Received' })
+//       }
+//     )
 
-    if (!res.ok) {
-      const message =
-        res.status === 401
-          ? 'Unauthorized'
-          : res.status === 403
-          ? 'Forbidden'
-          : res.status === 404
-          ? 'Parcel not found'
-          : 'Failed to confirm parcel'
-      throw new Error(message)
-    }
+//     if (!res.ok) {
+//       const message =
+//         res.status === 401
+//           ? 'Unauthorized'
+//           : res.status === 403
+//           ? 'Forbidden'
+//           : res.status === 404
+//           ? 'Parcel not found'
+//           : 'Failed to confirm parcel'
+//       throw new Error(message)
+//     }
 
-    const data = await res.json()
+//     const data = await res.json()
 
-    // อัปเดตสถานะในหน้า detail
-    parcelsResidentDetail.value.status = 'Received'
+//     // อัปเดตสถานะในหน้า detail
+//     parcelsResidentDetail.value.status = 'Received'
 
-    // อัปเดตใน Pinia Store
-    parcelManager.updateParcelStatus(parcelId, 'Received')
+//     // อัปเดตใน Pinia Store
+//     parcelManager.updateParcelStatus(parcelId, 'Received')
 
-    // popup success
-    addSuccess.value = true
+//     // popup success
+//     addSuccess.value = true
 
-    console.log('Parcel confirmed:', data)
-  } catch (err) {
-    console.error('Error confirming parcel:', err)
-    error.value = true
-  }
-}
+//     console.log('Parcel confirmed:', data)
+//   } catch (err) {
+//     console.error('Error confirming parcel:', err)
+//     error.value = true
+//   }
+// }
 
 // === Cancel Parcel (Delete Parcel) ===
 // const cancelParcel = async () => {
@@ -1465,6 +1465,14 @@ const confirmParcel = async () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
+  <teleport to="body" v-if="showConfirmParcel">
+    <DeleteParcels
+      @cancelParcel="clearDeletePopUp"
+      @confirmParcel="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelConfirmData="parcelConfirmDetail"
+    />
+  </teleport>
 </template>
 
 <style scoped>
