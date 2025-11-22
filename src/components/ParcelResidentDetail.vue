@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
@@ -75,6 +75,9 @@ const mapParcelData = (data) => ({
   imageUrl: data.imageUrl || ''
 })
 
+const currentParcelStatus = computed(() => {
+  return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
+})
 // ✅ ใช้ store + backend ร่วมกัน
 const getParcelDetail = async (tid) => {
   if (!tid) return
@@ -772,6 +775,7 @@ const toggleSidebar = () => {
                 @click="showManageParcelPage"
               />
               <ButtonWeb
+                v-if="currentParcelStatus === 'PICKED_UP'"
                 type="button"
                 label="Confirm"
                 color="blue"
