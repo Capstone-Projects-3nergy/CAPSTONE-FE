@@ -588,7 +588,7 @@ console.log(registerStore.user)
                 </tr>
               </thead>
 
-              <tbody v-if="p?.status === 'Received'" class="divide-y">
+              <tbody v-if="parcels.status === 'Received'" class="divide-y">
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
@@ -613,7 +613,7 @@ console.log(registerStore.user)
                       :class="{
                         'bg-yellow-400': p.status === 'Pending',
                         'bg-green-400': p.status === 'Picked Up',
-                        'bg-red-400': p.status === 'Unclaimed'
+                        'bg-blue-400': p.status === 'Received'
                       }"
                       >{{ p.status }}</span
                     >
