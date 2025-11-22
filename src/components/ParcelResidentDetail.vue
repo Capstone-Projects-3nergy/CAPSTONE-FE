@@ -49,7 +49,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const isCollapsed = ref(false)
-
+const parcelConfirmDetail = ref(null)
 // ⚡ Parcel detail
 const parcel = ref(null)
 
@@ -127,7 +127,7 @@ const showParcelScannerPage = async () => {
 const confirmParcelPopUp = (parcel) => {
   // เก็บข้อมูล parcel สำหรับ popup
   parcelConfirmDetail.value = {
-    id: parcel.id
+    id: parcel.parcelId
   }
   console.log(parcelConfirmDetail.value)
   // เปิด popup
@@ -615,87 +615,103 @@ const toggleSidebar = () => {
         </SidebarItem>
       </aside>
 
-      <main class="flex-1 p-8 bg-white rounded-lg shadow-md">
-        <div class="flex items-center space-x-2 mb-6">
+      <main class="flex-1 p-10 bg-[#f8f9fb]">
+        <!-- Title -->
+        <div class="mb-6">
           <h2 class="text-2xl font-bold text-[#185dc0]">
             Manage Parcel &gt; Details
           </h2>
         </div>
 
-        <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
-          <form class="bg-white p-6 rounded-lg shadow space-y-8">
+        <!-- Main Form Container -->
+        <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
+          <form class="space-y-10">
             <!-- Header -->
-            <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
-              Parcel Detail
-            </h2>
+            <!-- <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Detail</h2> -->
 
-            <!-- Parcel Information -->
+            <!-- SECTION 1 -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
+              <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label class="block font-semibold mb-1"
-                    >Tracking Number</label
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >trackingNumber</label
                   >
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.trackingNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Recipient Name</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >recipient Name</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.recipientName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Sender Name</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.senderName || '-' }}
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >roomNumber</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.roomNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Parcel Type</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <label class="block text-sm text-gray-500 mb-1">email</label>
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.email || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >parcel type</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.parcelType || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Company</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >company</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.companyName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Parcel Image</label>
-                  <div v-if="parcel?.imageUrl">
-                    <img
-                      :src="parcel.imageUrl"
-                      alt="Parcel Image"
-                      class="w-48 h-48 object-cover border rounded-md"
-                    />
-                  </div>
-                  <div v-else class="text-gray-400">No image available</div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >sender name</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.senderName || '-' }}
+                  </p>
                 </div>
               </div>
             </section>
 
-            <!-- Status Section -->
+            <!-- SECTION 2 -->
             <section>
-              <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
+              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label class="block font-semibold mb-1">Status</label>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >current status</label
+                  >
                   <p
-                    class="w-full p-2 text-gray-700 rounded-md"
+                    class="w-full p-2 rounded-md text-gray-800"
                     :class="{
-                      'bg-yellow-400': parcel?.status === 'PENDING',
-                      'bg-blue-400': parcel?.status === 'RECEIVED',
-                      'bg-green-400': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-300': parcel?.status === 'PENDING',
+                      'bg-blue-300': parcel?.status === 'RECEIVED',
+                      'bg-green-300': parcel?.status === 'PICKED_UP'
                     }"
                   >
                     {{ parcel?.status || '-' }}
@@ -703,68 +719,36 @@ const toggleSidebar = () => {
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Received At</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >recieved at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.receivedAt || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Picked Up At</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >pick up at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.pickedUpAt || '-' }}
                   </p>
                 </div>
-              </div>
-            </section>
-
-            <!-- Resident Info -->
-            <section>
-              <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label class="block font-semibold mb-1">Resident Name</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.residentName || '-' }}
-                  </p>
-                </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Room Number</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.roomNumber || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block font-semibold mb-1">Email</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.email || '-' }}
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >confirm at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.confirmAt || '-' }}
                   </p>
                 </div>
               </div>
             </section>
 
-            <!-- System Info -->
-            <section>
-              <h3 class="font-semibold text-lg mb-2">System Info:</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label class="block font-semibold mb-1">Parcel ID</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.parcelId || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block font-semibold mb-1">Updated At</label>
-                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                    {{ parcel?.updatedAt || '-' }}
-                  </p>
-                </div>
-              </div>
-            </section>
-            <div class="flex justify-end space-x-2 mt-6">
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-3 pt-4">
               <ButtonWeb
                 label="Back"
                 color="gray"
@@ -774,7 +758,7 @@ const toggleSidebar = () => {
                 type="button"
                 label="Confirm"
                 color="blue"
-                @click="confirmParcelPopUp"
+                @click="confirmParcelPopUp(parcel.parcelId)"
               />
             </div>
           </form>
