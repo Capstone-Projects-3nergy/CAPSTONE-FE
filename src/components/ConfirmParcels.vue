@@ -59,41 +59,37 @@ const cancelFn = () => {
 
 <template>
   <div
-    class="message bg-gray-500/50 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 flex items-center justify-center p-2"
+    class="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
   >
-    <div
-      class="bg-white border border-green-700 w-full max-w-lg rounded-md overflow-hidden"
-    >
+    <div class="bg-white w-full max-w-md rounded-lg shadow-lg overflow-hidden">
       <!-- Header -->
-      <div class="flex flex-col justify-between p-4 border-b">
-        <h1 class="text-xl font-bold text-center sm:text-left">
-          Confirm Parcel
+      <div class="px-6 py-4 border-b">
+        <h1 class="text-lg font-bold text-gray-900 text-center">
+          Confirm Parcel Pickup
         </h1>
       </div>
 
       <!-- Body -->
-      <div class="p-4 text-center sm:text-left">
-        <p class="mb-4">
-          Are you sure you want to confirm the receipt of the parcel with
-          tracking number
-          <b>{{ parcel.parcelNumber || '' }}</b
-          >?
+      <div class="px-6 py-4 text-center text-gray-600">
+        <p>
+          Are you sure you want to confirm that you have received this parcel?
+          This action cannot be undone.
         </p>
       </div>
 
       <!-- Footer -->
-      <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
-        <ButtonWeb
-          label="Confirm"
-          color="green"
-          class="w-full sm:w-auto"
-          @click="confirmParcelFn"
-        />
+      <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
         <ButtonWeb
           label="Cancel"
-          color="red"
+          color="gray"
           class="w-full sm:w-auto"
           @click="cancelFn"
+        />
+        <ButtonWeb
+          label="Save"
+          color="blue"
+          class="w-full sm:w-auto"
+          @click="confirmParcelFn"
         />
       </div>
     </div>

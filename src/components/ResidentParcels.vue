@@ -12,7 +12,6 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import ConfirmParcels from './ConfirmParcels.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import {
@@ -1238,7 +1237,7 @@ const showProfileResidentPage = async function () {
               </select>
 
               <!-- Add Parcel -->
-              <button
+              <!-- <button
                 @click="showAddParcelPage"
                 class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
               >
@@ -1255,7 +1254,7 @@ const showProfileResidentPage = async function () {
                   />
                 </svg>
                 <span>Add parcel</span>
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
@@ -1323,7 +1322,7 @@ const showProfileResidentPage = async function () {
                 <th
                   class="px-4 py-3 text-sm text-center font-semibold text-[#185DC0]"
                 >
-                  Operation
+                 Action
                 </th>
               </tr>
             </thead>
@@ -1391,7 +1390,7 @@ const showProfileResidentPage = async function () {
                     :class="{
                       'bg-yellow-400': p.status === 'Pending',
                       'bg-green-400': p.status === 'Picked Up',
-                      'bg-red-400': p.status === 'Unclaimed'
+                      'bg-blue-400': p.status === 'Received'
                     }"
                   >
                     {{ p.status }}
@@ -1412,12 +1411,29 @@ const showProfileResidentPage = async function () {
                 <td
                   class="px-4 py-2 md:py-3 text-sm text-center text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
                 >
-                  <ButtonWeb
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                      fill="#107EFF"
+                    />
+                    <path
+                      d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                      fill="#107EFF"
+                    />
+                  </svg>
+
+                  <!-- <ButtonWeb
                     label="Confirm"
                     color="blue"
                     class="mr-3 mt-4 mb-2"
                     @click="confirmParcelPopUp"
-                  />
+                  /> -->
                   <!-- <ButtonWeb
                     label="Canceled"
                     color="red"

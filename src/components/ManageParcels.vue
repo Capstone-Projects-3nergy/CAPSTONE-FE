@@ -1284,7 +1284,7 @@ const closePopUp = (operate) => {
                 <th
                   class="px-4 py-3 text-sm font-semibold text-center text-[#185DC0]"
                 >
-                  Operation
+                  Action
                 </th>
               </tr>
             </thead>
