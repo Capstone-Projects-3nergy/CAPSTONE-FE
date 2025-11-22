@@ -50,6 +50,12 @@ import {
   editItemWithFile,
   deleteFile
 } from '@/utils/fetchUtils'
+import package1 from '@/assets/images/Package1.png'
+import package2 from '@/assets/images/Package2.png'
+import package3 from '@/assets/images/Package3.png'
+import newsImg from '@/assets/images/New.png'
+import eventImg from '@/assets/images/Event.png'
+import communityImg from '@/assets/images/COMMUNITY.png'
 // import { useRegisterManager } from '@/stores/RegisterManager.js'
 // import { useLoginManager } from '@/stores/LoginManager'
 const registerStore = useAuthManager()
@@ -58,7 +64,7 @@ const loginManager = useAuthManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = ['Package 1', 'Package 2', 'Package 3', 'Package 4', 'Package 5']
+const slides = [package1, package2, package3]
 const currentIndex = ref(0)
 const showParcelScanner = ref(false)
 const showResidentParcels = ref(false)
@@ -620,69 +626,89 @@ function formatDateTime(datetimeStr) {
               </svg>
               Staff Home Page
             </h1>
-
             <!-- Slider -->
             <div
-              class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300"
+              class="relative bg-white h-48 rounded-xl flex items-center justify-center shadow border border-gray-300 px-8"
             >
+              <!-- Prev -->
               <button
                 @click="prevSlide"
-                class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900"
+                class="absolute left-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
               >
                 ‹
               </button>
 
+              <!-- Image Box -->
               <div
-                class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
+                class="w-full max-w-2xl h-32 rounded-xl overflow-hidden shadow-md flex items-center justify-center"
               >
-                {{ slides[currentIndex] }}
+                <img
+                  :src="slides[currentIndex]"
+                  alt="slide"
+                  class="w-full h-full object-cover object-center"
+                />
               </div>
 
+              <!-- Next -->
               <button
                 @click="nextSlide"
-                class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
+                class="absolute right-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
               >
                 ›
               </button>
 
+              <!-- Dots -->
               <div class="absolute bottom-2 flex space-x-2">
                 <span
                   v-for="(s, i) in slides"
                   :key="i"
                   :class="{
-                    'bg-blue-700': i === currentIndex,
+                    'bg-blue-700 scale-110': i === currentIndex,
                     'bg-gray-400': i !== currentIndex
                   }"
-                  class="w-2 h-2 rounded-full"
+                  class="w-2.5 h-2.5 rounded-full transition-all"
                 ></span>
               </div>
             </div>
           </section>
 
-          <!-- Sections (Responsive: 1 column on mobile, 3 on desktop) -->
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 pb-4">
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
+          <!-- Content Boxes -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
+            <!-- NEWS -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Latest News
+                <img :src="newsImg" class="w-full h-full object-cover" />
               </div>
             </div>
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">📅 EVENT</h2>
+
+            <!-- EVENT -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Upcoming Events
+                <img :src="eventImg" class="w-full h-full object-cover" />
               </div>
             </div>
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">💬 COMMUNITY</h2>
+
+            <!-- COMMUNITY -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">
+                💬 COMMUNITY
+              </h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Community Posts
+                <img :src="communityImg" class="w-full h-full object-cover" />
               </div>
             </div>
           </section>

@@ -51,11 +51,17 @@ import {
   editItemWithFile,
   deleteFile
 } from '@/utils/fetchUtils'
+import package1 from '@/assets/images/Package1.png'
+import package2 from '@/assets/images/Package2.png'
+import package3 from '@/assets/images/Package3.png'
+import newsImg from '@/assets/images/New.png'
+import eventImg from '@/assets/images/Event.png'
+import communityImg from '@/assets/images/COMMUNITY.png'
 const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = ['Package 1', 'Package 2', 'Package 3', 'Package 4', 'Package 5']
+const slides = [package1, package2, package3]
 const currentIndex = ref(0)
 const showParcelScanner = ref(false)
 const showResidentParcels = ref(false)
@@ -476,6 +482,7 @@ console.log(registerStore.user)
               >
                 <path
                   d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
+                  fill="#185DC0"
                 />
               </svg>
               Resident Home Page
@@ -483,68 +490,87 @@ console.log(registerStore.user)
 
             <!-- Slider -->
             <div
-              class="relative bg-white h-48 rounded flex items-center justify-center shadow border border-gray-300"
+              class="relative bg-white h-48 rounded-xl flex items-center justify-center shadow border border-gray-300 px-8"
             >
+              <!-- Prev -->
               <button
                 @click="prevSlide"
-                class="absolute left-4 text-3xl text-blue-700 hover:text-blue-900"
+                class="absolute left-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
               >
                 ‹
               </button>
 
+              <!-- Image Box -->
               <div
-                class="w-2/3 h-32 bg-blue-200 flex items-center justify-center rounded text-blue-800 font-semibold text-lg"
+                class="w-full max-w-2xl h-32 rounded-xl overflow-hidden shadow-md flex items-center justify-center"
               >
-                {{ slides[currentIndex] }}
+                <img
+                  :src="slides[currentIndex]"
+                  alt="slide"
+                  class="w-full h-full object-cover object-center"
+                />
               </div>
 
+              <!-- Next -->
               <button
                 @click="nextSlide"
-                class="absolute right-4 text-3xl text-blue-700 hover:text-blue-900"
+                class="absolute right-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
               >
                 ›
               </button>
 
+              <!-- Dots -->
               <div class="absolute bottom-2 flex space-x-2">
                 <span
                   v-for="(s, i) in slides"
                   :key="i"
                   :class="{
-                    'bg-blue-700': i === currentIndex,
+                    'bg-blue-700 scale-110': i === currentIndex,
                     'bg-gray-400': i !== currentIndex
                   }"
-                  class="w-2 h-2 rounded-full"
+                  class="w-2.5 h-2.5 rounded-full transition-all"
                 ></span>
               </div>
             </div>
           </section>
 
-          <!-- Sections (Responsive) -->
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 pb-4">
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
+          <!-- Content Boxes -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
+            <!-- NEWS -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Latest News
+                <img :src="newsImg" class="w-full h-full object-cover" />
               </div>
             </div>
 
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">📅 EVENT</h2>
+            <!-- EVENT -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Upcoming Events
+                <img :src="eventImg" class="w-full h-full object-cover" />
               </div>
             </div>
 
-            <div class="bg-white p-4 rounded shadow">
-              <h2 class="font-bold mb-2 text-blue-800">💬 COMMUNITY</h2>
+            <!-- COMMUNITY -->
+            <div
+              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+            >
+              <h2 class="font-bold mb-2 text-blue-800 text-base">
+                💬 COMMUNITY
+              </h2>
               <div
-                class="bg-blue-100 h-24 rounded flex items-center justify-center text-blue-700"
+                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
               >
-                Community Posts
+                <img :src="communityImg" class="w-full h-full object-cover" />
               </div>
             </div>
           </section>
@@ -555,6 +581,7 @@ console.log(registerStore.user)
               <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
                   d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
+                  fill="#185DC0"
                 />
               </svg>
               <h2 class="text-2xl font-bold text-gray-800">My Parcel</h2>
