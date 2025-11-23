@@ -153,7 +153,7 @@ const clearConfirmPopUp = () => {
 
 const showConfirmComplete = () => {
   confirmSuccess.value = true
-  setTimeout(() => (deleteSuccess.value = false), 3000)
+  setTimeout(() => (confirmSuccess.value = false), 3000)
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
