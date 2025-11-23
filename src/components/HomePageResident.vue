@@ -491,7 +491,7 @@ function formatDateTime(datetimeStr) {
                   fill="#185DC0"
                 />
               </svg>
-              Resident Home PageHome Page
+              Resident Home Page
             </h1>
             <!-- Slider -->
             <div
