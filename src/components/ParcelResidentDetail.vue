@@ -776,7 +776,7 @@ const toggleSidebar = () => {
                 @click="showManageParcelPage"
               />
               <ButtonWeb
-                v-if="currentParcelStatus === 'PICKED_UP'"
+                v-if="currentParcelStatus === 'RECEIVED'"
                 type="button"
                 label="Confirm"
                 color="blue"

@@ -13,18 +13,18 @@ const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-onMounted(async () => {
-  console.log(parcel.value.id)
+onMounted(() => {
+  if (parcel.value?.id) console.log(parcel.value.id)
 })
+
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelConfirmData || {})
 const confirmParcelFn = async () => {
   if (!parcel.value.id) return
 
   const res = await confirmParcelReceived(
-    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels/${
-      parcel.value.id
-    }/confirm`,
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
+    parcel.value.id,
     router
   )
 
@@ -42,9 +42,10 @@ const confirmParcelFn = async () => {
     return
   }
 
-  // ✅ สำเร็จ (backend ส่ง ParcelDetailDto กลับมา)
+  // ✅ สำเร็จ: backend ส่ง parcelId หรือ status 'RECEIVED'
   if (res?.parcelId || res?.status === 'RECEIVED') {
-    parcelManager.updateParcelStatus(parcel.value.id, 'Received')
+    // เปลี่ยนสถานะเป็น PICKED_UP
+    parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
     emit('confirmParcel', true)
     return
   }

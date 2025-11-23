@@ -347,7 +347,7 @@ function startScan(mode) {
           console.log('✅ QR/Barcode Decoded:', cleanText)
           scanResult.value = cleanText
           form.value.trackingNumber = cleanText
-          form.value.parcelType = 'Format: QR/Barcode'
+          // form.value.parcelType = 'Format: QR/Barcode'
         },
         (errorMsg) => console.warn('Scan error:', errorMsg)
       )

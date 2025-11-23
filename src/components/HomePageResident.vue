@@ -629,8 +629,7 @@ function formatDateTime(datetimeStr) {
                 >
                   <!-- Tracking -->
                   <td
-                    @click="showParcelDetail({ id: p.id })"
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 border-b md:border-none"
                   >
                     <span class="md:hidden font-semibold text-blue-700"
                       >Tracking:
@@ -690,7 +689,7 @@ function formatDateTime(datetimeStr) {
                     <span class="md:hidden font-semibold text-blue-700"
                       >Receive At:
                     </span>
-                    {{ p.receiveAt }}
+                    {{ formatDateTime(p.receiveAt) }}
                   </td>
                 </tr>
               </tbody>
