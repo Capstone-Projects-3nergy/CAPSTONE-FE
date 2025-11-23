@@ -118,7 +118,7 @@ onMounted(async () => {
   isCollapsed.value = true
   // ดึงจาก backend
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
   )
 
@@ -169,7 +169,7 @@ const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p
   }))
-  result = result.filter((p) => p.recipientName === authStore.user.fullName)
+  // result = result.filter((p) => p.recipientName === authStore.user.fullName)
   return result
 })
 // ข้อมูลที่จะแสดงบนตาราง

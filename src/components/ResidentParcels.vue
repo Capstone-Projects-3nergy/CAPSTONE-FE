@@ -172,7 +172,7 @@ onMounted(async () => {
   // ดึงจาก backend
   isCollapsed.value = true
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
   )
 
@@ -418,10 +418,8 @@ const filteredParcels = computed(() => {
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
- // 🔍 filter เฉพาะพัสดุของ user คนนี้
-  result = result.filter(
-    (p) => p.recipientName === authStore.user.fullName
-  )
+  // 🔍 filter เฉพาะพัสดุของ user คนนี้
+  // result = result.filter((p) => p.recipientName === authStore.user.fullName)
 
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
