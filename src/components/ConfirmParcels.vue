@@ -22,8 +22,9 @@ const confirmParcelFn = async () => {
   if (!parcel.value.id) return
 
   const res = await confirmParcelReceived(
-    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
-    parcel.value.id,
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels/${
+      parcel.value.id
+    }/confirm`,
     router
   )
 

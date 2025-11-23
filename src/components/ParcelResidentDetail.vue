@@ -54,6 +54,7 @@ const parcelConfirmDetail = ref(null)
 // ⚡ Parcel detail
 const parcel = ref(null)
 const confirmSuccess = ref(false)
+const error = ref(false)
 // ⚡ helper map backend data → form
 const mapParcelData = (data) => ({
   // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
