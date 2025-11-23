@@ -7,7 +7,7 @@ import ResetPasswordPage from './ResetPasswordPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useLoginManager
 import AlertPopUp from './AlertPopUp.vue'
-
+import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
 const authManager = useAuthManager() // ✅ ใช้ AuthManager ตัวเดียว
 
@@ -23,7 +23,7 @@ const showResetPasswordPage = ref(false)
 const incorrect = ref(false)
 const success = ref(false)
 const error = ref(false)
-
+const loading = ref(false)
 // --------------------- LIMIT CONFIG ---------------------
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
@@ -31,7 +31,7 @@ const MAX_PASSWORD_LENGTH = 14
 // --------------------- COMPUTED ---------------------
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
-const loading = computed(() => authManager.loading)
+// const loading = computed(() => authManager.loading)
 
 // --------------------- POPUP ---------------------
 const closePopUp = (operate) => {
@@ -670,6 +670,7 @@ const showResetPasswordPageWeb = async function () {
   </div>
   <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>
   <Teleport to="body" v-if="showRegisterPage"><RegisterPage /></Teleport>
+  <Teleport to="body" v-if="showloading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>
