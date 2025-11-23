@@ -491,7 +491,7 @@ function formatDateTime(datetimeStr) {
                   fill="#185DC0"
                 />
               </svg>
-              Staff Home Page
+              Resident Home PageHome Page
             </h1>
             <!-- Slider -->
             <div
@@ -588,9 +588,7 @@ function formatDateTime(datetimeStr) {
                   fill="#185DC0"
                 />
               </svg>
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                Resident Parcel
-              </h2>
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
             </div>
           </div>
 
