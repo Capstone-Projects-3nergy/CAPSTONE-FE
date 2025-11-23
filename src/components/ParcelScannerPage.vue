@@ -1087,7 +1087,7 @@ onMounted(async () => {
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
           <!-- Alert Popups -->
-          <div class="fixed top-5 left-5 z-50">
+          <!-- <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="addSuccess"
               :titles="'Add New Parcel is Successfull.'"
@@ -1136,8 +1136,6 @@ onMounted(async () => {
               operate="trackingNumber"
               @closePopUp="closePopUp('trackingNumber')"
             />
-
-            <!-- Alert สำหรับ Recipient Name -->
             <AlertPopUp
               v-if="recipientNameError"
               :titles="'Recipient Name is required.'"
@@ -1147,7 +1145,7 @@ onMounted(async () => {
               @closePopUp="closePopUp('recipientName')"
             />
 
-            <!-- Alert สำหรับ Parcel Type -->
+           
             <AlertPopUp
               v-if="parcelTypeErrorRequired"
               :titles="'Parcel Type is required.'"
@@ -1157,7 +1155,7 @@ onMounted(async () => {
               @closePopUp="closePopUp('parcelType')"
             />
 
-            <!-- Alert สำหรับ Sender Name -->
+          
             <AlertPopUp
               v-if="senderNameError"
               :titles="'Sender Name is required.'"
@@ -1167,7 +1165,7 @@ onMounted(async () => {
               @closePopUp="closePopUp('senderName')"
             />
 
-            <!-- Alert สำหรับ Company ID -->
+           
             <AlertPopUp
               v-if="companyIdError"
               :titles="'Company ID is required.'"
@@ -1176,7 +1174,7 @@ onMounted(async () => {
               operate="companyId"
               @closePopUp="closePopUp('companyId')"
             />
-          </div>
+          </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
             <!-- Left side: Scanner & Form -->
@@ -1402,7 +1400,94 @@ onMounted(async () => {
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
+              <AlertPopUp
+                v-if="addSuccess"
+                :titles="'Add New Parcel is Successfull.'"
+                message="Success!!"
+                styleType="green"
+                operate="addSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="error"
+                :titles="'There is a problem. Please try again later.'"
+                message="Error!!"
+                styleType="red"
+                operate="problem"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="roomNumberError"
+                :titles="'Room Number can only be typed as number.'"
+                message="Error!!"
+                styleType="red"
+                operate="roomNumber"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="SenderNameError"
+                :titles="'Sender Name can only be typed as text.'"
+                message="Error!!"
+                styleType="red"
+                operate="SenderName"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="parcelTypeError"
+                :titles="'Parcel Type can only be typed as text.'"
+                message="Error!!"
+                styleType="red"
+                operate="parcelType "
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="trackingNumberError"
+                :titles="'Tracking Number is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="trackingNumber"
+                @closePopUp="closePopUp('trackingNumber')"
+              />
 
+              <!-- Alert สำหรับ Recipient Name -->
+              <AlertPopUp
+                v-if="recipientNameError"
+                :titles="'Recipient Name is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="recipientName"
+                @closePopUp="closePopUp('recipientName')"
+              />
+
+              <!-- Alert สำหรับ Parcel Type -->
+              <AlertPopUp
+                v-if="parcelTypeErrorRequired"
+                :titles="'Parcel Type is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="parcelType"
+                @closePopUp="closePopUp('parcelType')"
+              />
+
+              <!-- Alert สำหรับ Sender Name -->
+              <AlertPopUp
+                v-if="senderNameError"
+                :titles="'Sender Name is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="senderName"
+                @closePopUp="closePopUp('senderName')"
+              />
+
+              <!-- Alert สำหรับ Company ID -->
+              <AlertPopUp
+                v-if="companyIdError"
+                :titles="'Company ID is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="companyId"
+                @closePopUp="closePopUp('companyId')"
+              />
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
                   <span>Tracking:</span>
