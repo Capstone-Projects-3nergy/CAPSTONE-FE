@@ -1215,10 +1215,10 @@ const showProfileResidentPage = async function () {
                 <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>Name (A→Z)</option>
+                <!-- <option>Name (A→Z)</option>
                 <option>Name (Z→A)</option>
                 <option>Room (A→Z)</option>
-                <option>Room (Z→A)</option>
+                <option>Room (Z→A)</option> -->
                 <option>Status (A→Z)</option>
                 <option>Status (Z→A)</option>
               </select>
