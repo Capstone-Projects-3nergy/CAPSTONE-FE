@@ -1405,25 +1405,43 @@ onMounted(async () => {
 
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span><span>{{ form.trackingNumber }}</span>
+                  <span>Tracking:</span>
+                  <span>{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
+                  <span>Recipient:</span>
+                  <span>{{
+                    selectedResident
+                      ? selectedResident.fullName
+                      : form.recipientName
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Room:</span><span>{{ form.roomNumber }}</span>
+                  <span>Room:</span>
+                  <span>{{
+                    selectedResident ? selectedResident.roomNumber : ''
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Type:</span><span>{{ form.parcelType }}</span>
+                  <span>Type:</span>
+                  <span>{{ form.parcelType }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Status:</span><span>{{ form.status }}</span>
+                  <span>Status:</span>
+                  <span>{{ form.status }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Company :</span><span>{{ form.companyName }}</span>
+                  <span>Company:</span>
+                  <span>
+                    {{
+                      companyList.find((c) => c.companyId === form.companyId)
+                        ?.companyName || ''
+                    }}
+                  </span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Sender:</span><span>{{ form.senderName }}</span>
+                  <span>Sender:</span>
+                  <span>{{ form.senderName }}</span>
                 </div>
               </div>
 
@@ -1446,9 +1464,9 @@ onMounted(async () => {
 
               <!-- Saved Parcels -->
               <div class="mt-6">
-                <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
+                <!-- <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
-                </h3>
+                </h3> -->
                 <ul class="space-y-2">
                   <li
                     v-for="(p, i) in savedParcels"
