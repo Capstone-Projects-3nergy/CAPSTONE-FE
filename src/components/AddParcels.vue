@@ -145,6 +145,8 @@ watch(recipientSearch, (val) => {
   }
 })
 
+
+
 // โหลดรายชื่อ resident ตอนเข้าเพจ
 onMounted(async () => {
   isCollapsed.value = true
