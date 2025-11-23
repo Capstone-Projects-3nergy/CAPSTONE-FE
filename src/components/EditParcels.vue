@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -27,14 +27,16 @@ import {
   editInviteReadWrite,
   declineInvite,
   editItemWithFile,
-  deleteFile
+  deleteFile,
+  updateParcelStatus
 } from '@/utils/fetchUtils'
+
 const router = useRouter()
 const route = useRoute()
-const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
+const tid = route.params.tid
 const loginManager = useAuthManager()
-
 const parcelManager = useParcelManager()
+
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -50,63 +52,182 @@ const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
 
+const parcelStore = useParcelManager()
+const companyList = ref([])
+// ⚡️ Form ข้อมูลพัสดุ (ให้ตรง ParcelDetailDto)
 const form = ref({
-  id: null,
-  trackingNumber: '',
-  recipientName: '',
-  roomNumber: '',
-  parcelType: '',
-  contact: '',
-  status: '',
-  pickupAt: '',
-  updateAt: '',
-  senderName: '',
-  companyId: '',
-  receiveAt: ''
+  parcelId: '', // read-only
+  trackingNumber: '', // editable
+  recipientName: '', // editable
+  senderName: '', // editable
+  parcelType: '', // editable
+  companyId: '', // editable (id ขนส่ง)
+  imageUrl: '', // editable / upload
+  status: 'PENDING', // editable via dropdown (enum จาก backend)
+
+  receivedAt: '', // read-only
+  pickedUpAt: '', // read-only
+  updatedAt: '', // read-only
+
+  residentName: '', // read-only
+  roomNumber: '', // read-only
+  email: '' // read-only
 })
 
-onMounted(async () => {
-  const parcelId = tid
-  const parcel = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcelId,
-    router
-  )
-  if (parcel) {
-    form.value = { ...parcel } // copy ข้อมูลทั้งหมดไป form
+const statusOptions = computed(() => {
+  if (form.value.status === 'PENDING') {
+    return ['PENDING', 'RECEIVED']
   }
+  if (form.value.status === 'RECEIVED') {
+    return ['RECEIVED', 'PICKED_UP']
+  }
+  if (form.value.status === 'PICKED_UP') {
+    return ['PICKED_UP'] // หรือ [] แล้ว disable dropdown
+  }
+  return ['PENDING', 'RECEIVED', 'PICKED_UP']
 })
+// เอาไว้เช็คว่ามีแก้อะไรไหม
+const originalForm = ref({ ...form.value })
+const isUnchanged = computed(
+  () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
+)
+const loadCompanies = async () => {
+  const auth = useAuthManager()
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
 
-const emit = defineEmits(['edit-success', 'edit-error'])
-// 🟨 โหลดข้อมูลพัสดุตาม ID จาก backend (ตอนเข้าหน้านี้)
-// onMounted(async () => {
-//   const parcelId = route.params.id
-//   try {
-//     const res = await axios.get(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-//     )
-//     form.value = res.data
-//     console.log('📦 Loaded parcel:', res.data)
-//   } catch (err) {
-//     console.error('❌ Error loading parcel:', err)
-//   }
-// })
-const saveEditParcel = async () => {
-  // 1️⃣ ตรวจสอบ Room Number
-  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
-    roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}`
+      }
+    })
+
+    console.log('📦 Raw company response:', res.data)
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    // server ส่ง string
+    if (typeof rawData === 'string') {
+      const matches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = matches.map((str) => {
+        const id = str.match(/"companyId":(\d+)/)
+        const name = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: id ? Number(id[1]) : null,
+          companyName: name ? name[1] : ''
+        }
+      })
+    }
+    // server ส่ง array
+    else if (Array.isArray(rawData)) {
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
+    console.log('✅ companyList:', companyList.value)
+  } catch (err) {
+    console.error('❌ Error fetching companies:', err)
+  }
+}
+
+// ⚡ ฟังก์ชันโหลด parcel detail
+const getParcelDetail = async (tid) => {
+  if (!tid) return
+  const tidNum = Number(tid)
+
+  // 1️⃣ หาใน store ก่อน (ใช้ getParcels + parcelId)
+  const localParcel = parcelStore
+    .getParcels()
+    .find((p) => p.parcelId === tidNum)
+
+  if (localParcel) {
+    form.value = {
+      ...form.value,
+      ...localParcel
+    }
+    originalForm.value = { ...form.value }
     return
   }
 
-  // 2️⃣ ตรวจสอบ Sender Name
+  // 2️⃣ ดึงจาก backend → GET /api/parcels/{id}
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tidNum,
+      router
+    )
+
+    if (!data) return
+
+    // 🔹 map parcelType ให้ตรงกับ <option>
+    // const mapParcelType = {
+    //   box: 'Box',
+    //   Document: 'Document',
+    //   Envelope: 'Envelope'
+    // }
+    // map ให้ตรง ParcelDetailDto
+    form.value = {
+      parcelId: data.parcelId,
+      trackingNumber: data.trackingNumber,
+      recipientName: data.recipientName,
+      senderName: data.senderName || '',
+      parcelType: data.parcelType || '',
+      companyId: Number(data.companyId) ?? '',
+      imageUrl: data.imageUrl ?? '',
+      status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
+
+      receivedAt: data.receivedAt,
+      pickedUpAt: data.pickedUpAt,
+      updatedAt: data.updatedAt,
+
+      residentName: data.residentName,
+      roomNumber: data.roomNumber,
+      email: data.email
+    }
+
+    parcelStore.addParcel(form.value)
+    originalForm.value = { ...form.value }
+  } catch (err) {
+    console.error('Failed to load parcel detail', err)
+  }
+  await loadCompanies()
+}
+
+onMounted(() => {
+  isCollapsed.value = true
+  const tid = route.params.tid
+  getParcelDetail(tid)
+  console.log('➡️ form.companyId:', form.value.companyId)
+  console.log('➡️ typeof form.companyId:', typeof form.value.companyId)
+  console.log('➡️ companyList:', companyList.value)
+})
+
+// --- Save function ---
+// ตอนนี้ backend UpdateParcelDto รองรับเฉพาะ field: trackingNumber, recipientName,
+// parcelType, senderName, status, companyId, imageUrl
+const emit = defineEmits(['edit-success', 'edit-error'])
+const saveEditParcel = async () => {
+  // ❗ roomNumber เป็น read-only จาก user → validation นี้อาจไม่จำเป็น
+  // ถ้ายังอยากกัน input แปลก ๆ ก็ปล่อยไว้ได้ แต่มันไม่ได้มีผลอะไรกับ backend
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    roomNumberError.value = true
+    setTimeout(() => (roomNumberError.value = false), 3000)
+    return
+  }
+
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
 
-  // 3️⃣ ตรวจสอบ Parcel Type
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 3000)
@@ -114,10 +235,21 @@ const saveEditParcel = async () => {
   }
 
   try {
+    // ส่งเฉพาะ field ที่อยู่ใน UpdateParcelDto
+    const body = {
+      trackingNumber: form.value.trackingNumber,
+      recipientName: form.value.recipientName,
+      parcelType: form.value.parcelType,
+      senderName: form.value.senderName,
+      status: form.value.status,
+      companyId: form.value.companyId ? Number(form.value.companyId) : null,
+      imageUrl: form.value.imageUrl
+    }
+
     const updatedParcel = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       form.value.parcelId,
-      form.value,
+      body,
       router
     )
 
@@ -127,114 +259,127 @@ const saveEditParcel = async () => {
       return
     }
 
-    parcelManager.editParcel(form.value.parcelId, updatedParcel)
-    console.log('✅ Updated parcel:', updatedParcel)
+    // อัปเดตใน store
+    parcelStore.editParcel(form.value.parcelId, updatedParcel)
 
-    if (form.value.status) {
-      try {
-        const updatedStatus = await updateItemPatch(
-          `${import.meta.env.VITE_BASE_URL}/api/parcels/${
-            form.value.id
-          }/status`,
-          { status: form.value.status },
-          router
-        )
-        parcelManager.updateParcel(updatedStatus)
-        console.log('✅ Updated status:', updatedStatus)
-      } catch (errStatus) {
-        console.error('❌ Failed to update status:', errStatus)
-        error.value = true
-        setTimeout(() => (error.value = false), 3000)
-        return
-      }
+    // sync form + originalForm ให้ตรงกับค่าที่ backend ส่งกลับ
+    form.value = {
+      ...form.value,
+      ...updatedParcel
     }
+    originalForm.value = { ...form.value }
+
+    console.log('✅ Updated parcel:', updatedParcel)
 
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 3000)
   } catch (err) {
+    console.error('❌ Failed to save parcel:', err)
     error.value = true
     setTimeout(() => (error.value = false), 3000)
-    router.replace({ name: 'staffparcels' })
-    console.error('❌ Failed to update parcel:', err)
   }
 }
+const previewUrl = ref(null) // เก็บ URL สำหรับ preview / download
 
-// const changeStatus = async (id, status) => {
-//   try {
-//     const updated = await updateItemPatch(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/status`,
-//       { status },
-//       router
-//     )
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
 
-//     parcelManager.updateParcel(updated)
-//     emit('edit-success')
-//     router.replace({ name: 'staffparcels' })
-//   } catch (e) {
-//     emit('edit-error')
-//     router.replace({ name: 'staffparcels' })
-//   }
-// }
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    alert('Only JPEG, PNG, or WEBP images are allowed.')
+    return
+  }
 
-// // 🟩 ฟังก์ชัน Save (อัปเดตข้อมูล)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    alert('File size should be less than 5MB.')
+    return
+  }
+
+  // เก็บไฟล์ใน form
+  form.value.imageUrl = file
+
+  // สร้าง preview URL สำหรับ <img> และ <a download>
+  previewUrl.value = URL.createObjectURL(file)
+}
+const removeImage = () => {
+  form.value.imageUrl = null
+  previewUrl.value = null
+}
+
 // const saveEditParcel = async () => {
-//   // 1️⃣ ตรวจสอบ Room Number
-//   if (!/^[0-9]+$/.test(parcelData.value.roomNumber)) {
+//   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
 //     roomNumberError.value = true
+//     setTimeout(() => (roomNumberError.value = false), 3000)
 //     return
 //   }
 
-//   // 2️⃣ ตรวจสอบ Sender Name
-//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.senderName)) {
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
 //     SenderNameError.value = true
+//     setTimeout(() => (SenderNameError.value = false), 3000)
 //     return
 //   }
 
-//   // 3️⃣ ตรวจสอบ Parcel Type
-//   if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.value.parcelType)) {
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
 //     parcelTypeError.value = true
+//     setTimeout(() => (parcelTypeError.value = false), 3000)
 //     return
 //   }
 
 //   try {
 //     const updatedParcel = await editItem(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${form.value.id}`,
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
 //       form.value.parcelId,
 //       form.value,
 //       router
 //     )
 
 //     if (!updatedParcel) {
-//       emit('edit-error')
-//       router.replace({ name: 'staffparcels' })
+//       error.value = true
+//       setTimeout(() => (error.value = false), 3000)
 //       return
 //     }
 
-//     // 👉 update Pinia
 //     parcelManager.editParcel(form.value.parcelId, updatedParcel)
-//     emit('edit-success')
-//     // editSuccess.value = true
 //     console.log('✅ Updated parcel:', updatedParcel)
-//     router.replace({ name: 'staffparcels' })
+
+//     if (form.value.status) {
+//       const updatedStatus = await updateParcelStatus(
+//         `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`,
+//         form.value.parcelId,
+//         form.value.status,
+//         router
+//       )
+
+//       if (updatedStatus) {
+//         parcelManager.updateParcelStatus(
+//           form.value.parcelId,
+//           updatedStatus.status || form.value.status
+//         )
+//         console.log('✅ Updated status:', updatedStatus)
+//       }
+//     }
+
+//     editSuccess.value = true
+//     setTimeout(() => (editSuccess.value = false), 3000)
 //   } catch (err) {
-//     emit('edit-error')
-//     router.replace({ name: 'staffparcels' })
-//     console.error('❌ Failed to update parcel:', err)
+//     console.error('❌ Failed to save parcel:', err)
+//     error.value = true
+//     setTimeout(() => (error.value = false), 3000)
 //   }
 // }
 
-// 🟥 ปุ่ม Cancel
+// --- Cancel button ---
 const cancelEdit = () => {
   router.replace({ name: 'staffparcels' })
 }
+
+// --- Sidebar / Pages / Toggle / Popups / Helpers (ไม่แก้ไข) ---
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
@@ -251,12 +396,9 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
@@ -279,15 +421,12 @@ const isAllEmpty = computed(() => {
     !form.value.recipientName &&
     !form.value.roomNumber &&
     !form.value.parcelType &&
-    !form.value.contact &&
+    !form.value.email &&
     !form.value.senderName &&
     !form.value.companyId &&
-    !form.value.receiveAt &&
-    !form.value.pickupAt &&
-    !form.value.updateAt
+    !form.value.receivedAt
   )
 })
-// --- ปิด popup ด้วยมือ ---
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'editSuccessMessage ') editSuccess.value = false
@@ -497,7 +636,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -534,7 +673,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -603,7 +742,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -636,10 +775,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -723,6 +859,18 @@ const closePopUp = (operate) => {
       <!-- Main Content -->
       <main class="flex-1 p-6">
         <div class="flex items-center space-x-2 mb-6">
+          <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+              fill="#185DC0"
+            />
+          </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
@@ -767,133 +915,263 @@ const closePopUp = (operate) => {
           @closePopUp="closePopUp"
         />
         <form
-          class="bg-white p-6 rounded-lg shadow space-y-6"
+          class="bg-white p-6 rounded-lg shadow space-y-8"
           @submit.prevent="saveEditParcel"
         >
           <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Edit Parcel</h2>
-            <!-- <ButtonWeb
-              label="Scan Parcel"
-              color="blue"
-              @click="() => router.replace({ name: 'parcelscanner' })"
-            /> -->
-          </div>
+          <!-- <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Edit Parcel</h2> -->
 
-          <!-- Row 1 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
-              <input
-                v-model="form.trackingNumber"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Recipient Name</label>
-              <input
-                v-model="form.recipientName"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Room Number</label>
-              <input
-                v-model="form.roomNumber"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
+          <!-- Parcel Information -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Tracking Number</label>
+                <input
+                  type="text"
+                  v-model="form.trackingNumber"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Recipient Name</label>
+                <input
+                  type="text"
+                  v-model="form.recipientName"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Sender Name</label>
+                <input
+                  type="text"
+                  v-model="form.senderName"
+                  class="w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Parcel Type</label>
+                <input
+                  placeholder="Enter Parcel Type: Box / Document / Envelope"
+                  type="text"
+                  v-model="form.parcelType"
+                  class="w-full border rounded-md p-2"
+                />
+                <!-- <select
+                  v-model="form.parcelType"
+                  class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                >
+                  <option disabled value="">Select Parcel Type</option>
+                  <option value="Document">Document</option>
+                  <option value="Box">Box</option>
+                  <option value="Envelope">Envelope</option>
+                </select> -->
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Company</label>
+                <!-- <input
+                  type="text"
+                  v-model="form.companyId"
+                  class="w-full border rounded-md p-2"
+                /> -->
+                <select
+                  v-model="form.companyId"
+                  class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  <option disabled value="">Select Company</option>
 
-          <!-- Row 2 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
-              <input
-                v-model="form.parcelType"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Contact</label>
-              <input
-                v-model="form.contact"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Status</label>
-              <select
-                v-model="form.status"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200 text-black transition-all duration-300"
-                :class="{
-                  'bg-yellow-400': form.status === 'Pending',
-                  'bg-green-400': form.status === 'Picked Up',
-                  'bg-red-400': form.status === 'Unclaimed'
-                }"
-              >
-                <option :value="null" disabled>Select Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Picked Up">Picked Up</option>
-                <option value="Unclaimed">Unclaimed</option>
-              </select>
-            </div>
-          </div>
+                  <option
+                    v-for="company in companyList"
+                    :key="company.companyId"
+                    :value="company.companyId"
+                  >
+                    {{ company.companyName }}
+                  </option>
+                </select>
+              </div>
+              <!-- <div class="mb-4">
+                <label class="block font-semibold mb-1">Image</label>
+                <label
+                  for="file-upload"
+                  class="flex items-center justify-center cursor-pointer border border-dashed border-gray-400 rounded-md py-2 px-3 hover:bg-gray-100 transition-colors w-full"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="mr-2"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                    <path d="M7 9l5 -5l5 5" />
+                    <path d="M12 4l0 12" />
+                  </svg>
+                  <span class="text-gray-700">Click to upload image</span>
+                </label>
 
-          <!-- Row 3 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Pickup at</label>
-              <input
-                v-model="form.pickupAt"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label class="block font-semibold mb-1">Update at</label>
-              <input
-                v-model="form.updateAt"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
+                <input
+                  id="file-upload"
+                  type="file"
+                  class="hidden"
+                  @change="handleImageUpload"
+                />
 
-          <hr class="border-t border-[#3269A8] my-4" />
+             
+                <div v-if="previewUrl" class="mt-2 relative inline-block">
+       
+                  <button
+                    @click="removeImage"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
 
-          <!-- Row 4 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block font-semibold mb-1">Sender Name</label>
-              <input
-                v-model="form.senderName"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+                  <img
+                    :src="previewUrl"
+                    alt="Preview"
+                    class="w-32 h-32 object-cover rounded-md border"
+                  />
+                </div>
+
+                <div v-if="previewUrl" class="mt-2">
+                  <a
+                    :href="previewUrl"
+                    :download="form.imageUrl?.name"
+                    class="text-blue-600 hover:underline"
+                  >
+                    Download {{ form.imageUrl?.name }}
+                  </a>
+                </div>
+              </div> -->
             </div>
-            <div>
-              <label class="block font-semibold mb-1">Company ID</label>
-              <input
-                v-model="form.companyId"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+          </section>
+
+          <!-- Status Section -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
+
+            <div class="flex gap-6 items-start">
+              <!-- Status -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Status</label>
+                <select
+                  v-model="form.status"
+                  class="border rounded-md p-2 w-full"
+                  :disabled="form.status === 'PICKED_UP'"
+                >
+                  <option v-for="s in statusOptions" :key="s" :value="s">
+                    {{ s }}
+                  </option>
+                </select>
+
+                <p class="text-xs text-red-500 mt-1">
+                  * You can only update the status in order: PENDING → RECEIVED
+                  → PICKED_UP
+                </p>
+              </div>
+
+              <!-- Received At -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Received At</label>
+                <input
+                  type="text"
+                  :value="form.receivedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <!-- Picked Up At -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <input
+                  placeholder="-"
+                  type="text"
+                  :value="form.pickedUpAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
             </div>
-            <div>
-              <label class="block font-semibold mb-1">Receive at</label>
-              <input
-                v-model="form.receiveAt"
-                type="text"
-                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-              />
+          </section>
+
+          <!-- Resident Info -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Resident Name</label>
+                <input
+                  type="text"
+                  :value="form.residentName"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Room Number</label>
+                <input
+                  type="text"
+                  :value="form.roomNumber"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Email</label>
+                <input
+                  type="text"
+                  :value="form.email"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
             </div>
-          </div>
+          </section>
+
+          <!-- System Info -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">System Info:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Parcel ID</label>
+                <input
+                  type="text"
+                  :value="form.parcelId"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">Updated At</label>
+                <input
+                  type="text"
+                  :value="form.updatedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+            </div>
+          </section>
 
           <!-- Buttons -->
           <div class="flex justify-end space-x-2 mt-6">
@@ -901,12 +1179,9 @@ const closePopUp = (operate) => {
               label="Save"
               color="green"
               @click="saveEditParcel"
-              :class="{
-                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
-                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
-              }"
-              :disabled="isAllEmpty"
+              :disabled="isUnchanged"
             />
+
             <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
           </div>
         </form>

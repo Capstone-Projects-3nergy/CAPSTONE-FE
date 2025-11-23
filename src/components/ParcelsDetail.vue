@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -12,9 +13,31 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile,
+  updateParcelStatus
+} from '@/utils/fetchUtils'
+// ⚡ existing refs / store / router
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
+const route = useRoute()
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
+
+// ✅ page visibility states
+const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -24,146 +47,91 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-// ✅ เรียกใช้ store
-const parcelStore = useParcelManager()
-// 🔹 สร้าง ref สำหรับข้อมูลพัสดุ
+const isCollapsed = ref(false)
+
+// ⚡ Parcel detail
 const parcel = ref(null)
-const route = useRoute()
-const tid = route.params.tid // ← ดึงค่าที่ส่งจาก router.push()
-// const parcels = ref([
-//   {
-//     id: 1,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 101,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 2,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH223456789X',
-//     room: 102,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 3,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH323456789X',
-//     room: 103,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 4,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH423456789X',
-//     room: 104,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 5,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 105,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 6,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 106,
-//     contact: '097-230-XXXX',
-//     status: 'Picked Up',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 7,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 107,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 8,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 108,
-//     contact: '097-230-XXXX',
-//     status: 'Pending',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 9,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 109,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   },
-//   {
-//     id: 10,
-//     recipient: 'Pimpajee SetXXXXXX',
-//     tracking: 'TH123456789X',
-//     room: 110,
-//     contact: '097-230-XXXX',
-//     status: 'Unclaimed',
-//     date: '05 Oct 2025'
-//   }
-// ])
-// 🔹 โหลดข้อมูลจาก store หรือ backend
-onMounted(async () => {
-  const parcelId = Number(tid) // 👈 ใช้ tid แทน id
 
-  // 1️⃣ ลองหาจาก store ก่อน
-  const localParcel = parcelStore.parcel.find((p) => p.parcelId === parcelId)
+// ⚡ helper map backend data → form
+const mapParcelData = (data) => ({
+  // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
+  parcelId: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.recipientName, // ✅ ตรงกับ ParcelDetailDto
+  roomNumber: data.roomNumber,
+  email: data.email, // ✅ ตรงกับ ParcelDetailDto
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || null,
+  companyName: data.companyName || '', // ถ้าอยากใช้ชื่อบริษัทด้วย
+  residentId: data.residentId || null,
+  residentName: data.residentName || '',
+  imageUrl: data.imageUrl || ''
+})
 
+// ✅ ใช้ store + backend ร่วมกัน
+const getParcelDetail = async (tid) => {
+  if (!tid) return
+
+  // 1️⃣ เช็คใน store ก่อน
+  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
     console.log('📦 Loaded from store:', parcel.value)
-  } else {
-    // 2️⃣ ถ้าไม่มีใน store ให้ดึงจาก backend
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}`
-      )
-      parcel.value = res.data
-
-      // บันทึกลง store
-      parcelStore.addParcel(res.data)
-    } catch (err) {
-      console.error('❌ Failed to load parcel:', err)
-    }
+    return
   }
+
+  // 2️⃣ ดึงจาก backend
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tid,
+      router
+    )
+
+    if (data) {
+      const mapped = mapParcelData(data)
+      parcel.value = mapped
+      parcelStore.addParcel(mapped)
+      console.log('📦 Loaded from backend:', mapped)
+    }
+  } catch (err) {
+    console.error('❌ Failed to load parcel detail:', err)
+  }
+}
+
+onMounted(() => {
+  isCollapsed.value = true
+  const tidNum = Number(route.params.tid)
+  getParcelDetail(tidNum) // 🔥 เรียกครั้งเดียวพอ
 })
-const showParcelScannerPage = async function () {
+
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    const tidNum = Number(newTid)
+    getParcelDetail(tidNum)
+  }
+)
+// ⚡ Page navigation functions (keep all)
+const backToManageParcels = () => router.replace({ name: 'staffparcels' })
+const showParcelScannerPage = async () => {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-// const showResidentParcelPage = async function () {
-//   router.replace({ name: 'residentparcels' })
-//   showResidentParcels.value = true
-// }
-const showManageParcelPage = async function () {
+const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const ShowManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
-const ShowManageResidentPage = async function () {
+const ShowManageResidentPage = async () => {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
@@ -171,33 +139,23 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
 }
-const showDashBoardPage = async function () {
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-const showProfileStaffPage = async function () {
+const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
-}
-const getParcelDetail = async (parcelId) => {
-  const res = await axios.get(
-    `${import.meta.env.VITE_BASE_URL}/parcels/${parcelId}`
-  )
-  console.log('📦 Parcel detail:', res.data)
 }
 </script>
 
@@ -401,7 +359,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -438,7 +396,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -507,7 +465,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -540,10 +498,7 @@ const getParcelDetail = async (parcelId) => {
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -625,163 +580,185 @@ const getParcelDetail = async (parcelId) => {
       </aside>
 
       <main class="flex-1 p-8 bg-white rounded-lg shadow-md">
-        <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
-          <div class="flex items-center justify-between mb-8">
-            <ButtonWeb
-              label="Back to Manage Parcels"
-              color="blue"
-              @click="showManageParcelPage"
-              class="w-full md:w-auto"
-            />
-            <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Details</h2>
+        <div class="flex items-center space-x-2 mb-6">
+          <h2 class="text-2xl font-bold text-[#185dc0]">
+            Manage Parcel &gt; Details
+          </h2>
+        </div>
 
-            <button
-              class="text-white font-semibold px-6 py-2 rounded-md shadow transition"
-              :class="{
-                'bg-yellow-400': parcel?.status === 'Pending',
-                'bg-green-400': parcel?.status === 'Picked Up',
-                'bg-red-400': parcel?.status === 'Unclaimed'
-              }"
-              disabled
+        <div class="border border-gray-300 rounded-lg shadow-lg bg-white p-8">
+          <div class="flex flex-col mb-4 gap-4">
+            <div class="flex items-center gap-4">
+              <!-- Back Button -->
+              <ButtonWeb
+                label="Go Back"
+                color="blue"
+                @click="backToManageParcels"
+                class="ml-auto px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+              />
+
+              <!-- Status Button (ถ้าต้องการแสดงต่อไป) -->
+              <!-- <button
+      class="px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center w-auto md:w-28"
+      :class="{
+        'bg-yellow-400': parcel?.status === 'Pending',
+        'bg-green-400': parcel?.status === 'Picked Up',
+        'bg-red-400': parcel?.status === 'Unclaimed'
+      }"
+      disabled
+    >
+      {{ parcel?.status || 'Unknown' }}
+    </button> -->
+            </div>
+
+            <!-- <h2
+              class="text-center text-sm md:text-xl font-bold text-[#185dc0] truncate"
             >
-              {{ parcel?.status || 'Unknown' }}
-            </button>
+              Parcel Details
+            </h2> -->
           </div>
 
-          <form class="space-y-8">
-            <!-- Row 1 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Tracking</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.trackingNumber || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
+          <form class="bg-white p-6 rounded-lg shadow space-y-8">
+            <!-- Header -->
+            <!-- <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
+              Parcel Detail
+            </h2> -->
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Parcel Type</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.parcelType || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
+            <!-- Parcel Information -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1"
+                    >Tracking Number</label
+                  >
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.trackingNumber || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Date in</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.receivedAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Recipient Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.recipientName || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 2 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Name</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.recipientName || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
+                <div>
+                  <label class="block font-semibold mb-1">Sender Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.senderName || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Contact</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.contact || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
+                <div>
+                  <label class="block font-semibold mb-1">Parcel Type</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.parcelType || '-' }}
+                  </p>
+                </div>
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Room Number</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.roomNumber || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
-              </div>
-            </div>
+                <div>
+                  <label class="block font-semibold mb-1">Company</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.companyName || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 3 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Pickup at</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.pickedUpAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
+                <div>
+                  <label class="block font-semibold mb-1">Parcel Image</label>
+                  <div v-if="parcel?.imageUrl">
+                    <img
+                      :src="parcel.imageUrl"
+                      alt="Parcel Image"
+                      class="w-48 h-48 object-cover border rounded-md"
+                    />
+                  </div>
+                  <div v-else class="text-gray-400">No image available</div>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Update at</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.updatedAt || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
+            <!-- Status Section -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Status</label>
+                  <p
+                    class="w-full p-2 text-gray-700 rounded-md"
+                    :class="{
+                      'bg-yellow-400': parcel?.status === 'PENDING',
+                      'bg-blue-400': parcel?.status === 'RECEIVED',
+                      'bg-green-400': parcel?.status === 'PICKED_UP'
+                    }"
+                  >
+                    {{ parcel?.status || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Received At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.receivedAt || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Picked Up At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.pickedUpAt || '-' }}
+                  </p>
+                </div>
               </div>
+            </section>
 
-              <div></div>
-            </div>
+            <!-- Resident Info -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Resident Name</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.residentName || '-' }}
+                  </p>
+                </div>
 
-            <!-- Row 4 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Sender Name</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.senderName || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
+                <div>
+                  <label class="block font-semibold mb-1">Room Number</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.roomNumber || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Email</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.email || '-' }}
+                  </p>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <label class="block font-semibold text-[#185dc0] mb-1"
-                  >Company ID</label
-                >
-                <input
-                  type="text"
-                  :value="parcel?.companyId || ''"
-                  readonly
-                  class="w-full border rounded-md p-2 text-gray-600"
-                />
+            <!-- System Info -->
+            <section>
+              <h3 class="font-semibold text-lg mb-2">System Info:</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block font-semibold mb-1">Parcel ID</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.parcelId || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Updated At</label>
+                  <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                    {{ parcel?.updatedAt || '-' }}
+                  </p>
+                </div>
               </div>
-            </div>
+            </section>
           </form>
         </div>
       </main>

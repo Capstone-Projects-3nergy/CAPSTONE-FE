@@ -1,11 +1,11 @@
 // เรียงตาม Room Number (น้อย → มาก)
 function sortByRoomNumber(parcels) {
-  parcels.sort((a, b) => a.room - b.room)
+  parcels.sort((a, b) => a.roomNumber - b.roomNumber)
 }
 
 // เรียงตาม Room Number (มาก → น้อย)
 function sortByRoomNumberReverse(parcels) {
-  parcels.sort((a, b) => b.room - a.room)
+  parcels.sort((a, b) => b.roomNumber - a.roomNumber)
 }
 
 // เรียงตาม Status (A → Z)
@@ -24,12 +24,12 @@ function sortByStatusReverse(parcels) {
 
 // เรียงตามวันที่ (เก่า → ใหม่)
 function sortByDate(parcels) {
-  parcels.sort((a, b) => new Date(a.date) - new Date(b.date))
+  parcels.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
 }
 
 // เรียงตามวันที่ (ใหม่ → เก่า)
 function sortByDateReverse(parcels) {
-  parcels.sort((a, b) => new Date(b.date) - new Date(a.date))
+  parcels.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 }
 // เรียงตาม Tracking (A → Z)
 function sortByTracking(parcels) {
@@ -52,7 +52,7 @@ function sortByTrackingReverse(parcels) {
 // เรียงตามชื่อผู้รับ (Name) (A → Z)
 function sortByName(parcels) {
   parcels.sort((a, b) =>
-    (a.recipient || '').localeCompare(b.recipient || '', 'th', {
+    (a.recipientName || '').localeCompare(b.recipientName || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -61,7 +61,7 @@ function sortByName(parcels) {
 // เรียงตามชื่อผู้รับ (Name) (Z → A)
 function sortByNameReverse(parcels) {
   parcels.sort((a, b) =>
-    (b.recipient || '').localeCompare(a.recipient || '', 'th', {
+    (b.recipientName || '').localeCompare(a.recipientName || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -86,18 +86,41 @@ function sortByContactReverse(parcels) {
 }
 
 // ค้นหาพัสดุจากคีย์เวิร์ด
-function searchParcels(parcels, keywords) {
-  const lower = keywords.toLowerCase()
-  return parcels.filter(
-    (p) =>
-      (p.tracking && p.tracking.toLowerCase().includes(lower)) ||
-      (p.recipient && p.recipient.toLowerCase().includes(lower)) ||
-      (p.room && p.room.toString().includes(lower)) ||
-      (p.contact && p.contact.includes(lower)) ||
-      (p.status && p.status.toLowerCase().includes(lower)) ||
-      (p.date && p.date.toLowerCase().includes(lower))
-  )
+function searchParcels(parcels, keyword) {
+  if (!keyword) return parcels
+
+  const lowerKeyword = keyword.toLowerCase().trim()
+
+  return parcels.filter((p) => {
+    return (
+      p.trackingNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.recipientName?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.roomNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.email?.toString().toLowerCase().includes(lowerKeyword) ||
+      p.status?.toString().toLowerCase().includes(lowerKeyword) ||
+      (p.receiveAt
+        ? new Date(p.receiveAt)
+            .toLocaleString()
+            .toLowerCase()
+            .includes(lowerKeyword)
+        : false)
+    )
+  })
 }
+
+// function searchParcels(parcels, keywords) {
+//   const lower = keywords.toLowerCase()
+//   return parcels.filter(
+//     (p) =>
+//       (p.tracking && p.tracking.toLowerCase().includes(lower)) ||
+//       (p.recipient && p.recipient.toLowerCase().includes(lower)) ||
+//       (p.room && p.room.toString().includes(lower)) ||
+//       (p.contact && p.contact.includes(lower)) ||
+//       (p.status && p.status.toLowerCase().includes(lower)) ||
+//       (p.date && p.date.toLowerCase().includes(lower))
+//   )
+// }
+
 // 🧩 Helper: แปลง string "05 Oct 2025" เป็น Date object
 function parseDate(dateStr) {
   return new Date(dateStr)
@@ -148,8 +171,8 @@ function filterByYear(parcels, targetDate = new Date()) {
 // เรียงตาม First Name (A → Z)
 function sortByFirstName(parcels) {
   parcels.sort((a, b) => {
-    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
-    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    const aFirst = (a.recipientName || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipientName || '').split(' ')[0].toLowerCase()
     return aFirst.localeCompare(bFirst)
   })
 }
@@ -157,8 +180,8 @@ function sortByFirstName(parcels) {
 // เรียงตาม First Name (Z → A)
 function sortByFirstNameReverse(parcels) {
   parcels.sort((a, b) => {
-    const aFirst = (a.recipient || '').split(' ')[0].toLowerCase()
-    const bFirst = (b.recipient || '').split(' ')[0].toLowerCase()
+    const aFirst = (a.recipientName || '').split(' ')[0].toLowerCase()
+    const bFirst = (b.recipientName || '').split(' ')[0].toLowerCase()
     return bFirst.localeCompare(aFirst)
   })
 }
@@ -166,8 +189,8 @@ function sortByFirstNameReverse(parcels) {
 // เรียงตาม Last Name (A → Z)
 function sortByLastName(parcels) {
   parcels.sort((a, b) => {
-    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
-    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const aLast = (a.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
     return aLast.localeCompare(bLast)
   })
 }
@@ -175,8 +198,8 @@ function sortByLastName(parcels) {
 // เรียงตาม Last Name (Z → A)
 function sortByLastNameReverse(parcels) {
   parcels.sort((a, b) => {
-    const aLast = (a.recipient || '').split(' ').slice(-1)[0].toLowerCase()
-    const bLast = (b.recipient || '').split(' ').slice(-1)[0].toLowerCase()
+    const aLast = (a.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
+    const bLast = (b.recipientName || '').split(' ').slice(-1)[0].toLowerCase()
     return bLast.localeCompare(aLast)
   })
 }

@@ -1,107 +1,206 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
+import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import HomePageStaff from './HomePageStaff.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
+import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
-// import { useLoginManager } from '@/stores/LoginManager'
+import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-
+import { useParcelManager } from '@/stores/ParcelsManager.js'
+import AlertPopUp from './AlertPopUp.vue'
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile,
+  updateParcelStatus
+} from '@/utils/fetchUtils'
+// ⚡ existing refs / store / router
 const loginManager = useAuthManager()
-// ✅ Computed สำหรับชื่อผู้ใช้
-
-// const loginStore = useLoginManager()
 const router = useRouter()
+const route = useRoute()
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
+const showConfirmParcel = ref(false)
+// ✅ page visibility states
+const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-// First name
-const firstName = computed(() => {
-  return loginManager.user.fullName.split(' ')[0] || ''
-})
-
-// Last name
-const lastName = computed(() => {
-  const parts = loginManager.user.fullName.split(' ')
-  return parts.slice(1).join(' ') || ''
-})
-// const staff = ref({
-//   name: 'John Doe',
-//   email: 'john.doe@example.com',
-//   phone: '081-234-5678',
-//   position: 'Support Staff'
-// })
-
-// const saveProfile = () => {
-//   console.log('Saving profile...', staff.value)
-//   alert('Profile updated successfully!')
-// }
-
-// const cancelEdit = () => {
-//   // ตัวอย่างรีเซ็ตกลับค่าเดิม
-//   staff.value = {
-//     name: 'John Doe',
-//     email: 'john.doe@example.com',
-//     phone: '081-234-5678',
-//     position: 'Support Staff'
-//   }
-// }
+const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
 const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+const parcelConfirmDetail = ref(null)
+// ⚡ Parcel detail
+const parcel = ref(null)
+const confirmSuccess = ref(false)
+// ⚡ helper map backend data → form
+const mapParcelData = (data) => ({
+  // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
+  parcelId: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.recipientName, // ✅ ตรงกับ ParcelDetailDto
+  roomNumber: data.roomNumber,
+  email: data.email, // ✅ ตรงกับ ParcelDetailDto
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || null,
+  companyName: data.companyName || '', // ถ้าอยากใช้ชื่อบริษัทด้วย
+  residentId: data.residentId || null,
+  residentName: data.residentName || '',
+  imageUrl: data.imageUrl || ''
+})
+
+const currentParcelStatus = computed(() => {
+  return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
+})
+// ✅ ใช้ store + backend ร่วมกัน
+const getParcelDetail = async (tid) => {
+  if (!tid) return
+
+  // 1️⃣ เช็คใน store ก่อน
+  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+  if (localParcel) {
+    parcel.value = localParcel
+    console.log('📦 Loaded from store:', parcel.value)
+    return
+  }
+
+  // 2️⃣ ดึงจาก backend
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tid,
+      router
+    )
+
+    if (data) {
+      const mapped = mapParcelData(data)
+      parcel.value = mapped
+      parcelStore.addParcel(mapped)
+      console.log('📦 Loaded from backend:', mapped)
+    }
+  } catch (err) {
+    console.error('❌ Failed to load parcel detail:', err)
+  }
+}
+
+onMounted(() => {
+  isCollapsed.value = true
+  const tidNum = Number(route.params.tid)
+  getParcelDetail(tidNum) // 🔥 เรียกครั้งเดียวพอ
+})
+
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    const tidNum = Number(newTid)
+    getParcelDetail(tidNum)
+  }
+)
+// ⚡ Page navigation functions (keep all)
+const backToManageParcels = () => router.replace({ name: 'staffparcels' })
+const showParcelScannerPage = async () => {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+const confirmParcelPopUp = (parcel) => {
+  // เก็บข้อมูล parcel สำหรับ popup
+  parcelConfirmDetail.value = {
+    id: parcel.parcelId
+  }
+  console.log(parcelConfirmDetail.value)
+  // เปิด popup
+  showConfirmParcel.value = true
+  // เปลี่ยน URL ให้มี tid
+  // router.push({
+  //   name: 'residentparcelsConfirm',
+  //   params: {
+  //     id: route.params.id, // staff id
+  //     tid: parcel.id // parcel id
+  //   }
+  // })
+}
+const clearConfirmPopUp = () => {
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const showConfirmComplete = () => {
+  confirmSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 3000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+const showManageParcelPage = async () => {
+  router.replace({ name: 'residentparcels' })
+  showResidentParcels.value = true
+}
+const ShowManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async () => {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
 }
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
-  showParcelScanner.value = true
-}
-
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
-}
-const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
-  showManageAnnouncement.value = true
-}
-const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' })
-  showManageResident.value = true
-}
-
 const returnLoginPage = async () => {
   try {
-    // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
   } catch (err) {
     console.error('Logout failed:', err)
   }
 }
-const showDashBoardPage = async function () {
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-onMounted(async () => {isCollapsed.value= true})
+const showProfileStaffPage = async () => {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
+}
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
-    <!-- Header -->
     <!-- Header -->
     <header class="flex items-center w-full h-16">
       <!-- <button
@@ -174,7 +273,6 @@ onMounted(async () => {isCollapsed.value= true})
           </button>
         </div>
       </div>
-      <!-- <h1 class="text-xl font-bold right-0">My Parcel</h1> -->
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -217,7 +315,7 @@ onMounted(async () => {isCollapsed.value= true})
     </header>
 
     <!-- Body (Sidebar + Main) -->
-    <div class="flex flex-1">
+    <div class="flex flex-1 border-[#3269A8]">
       <!-- Sidebar -->
       <aside
         :class="[
@@ -264,7 +362,7 @@ onMounted(async () => {isCollapsed.value= true})
           </span>
         </div> -->
         <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -301,7 +399,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Home</a
           > -->
-          <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -338,7 +436,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Profile</a
           > -->
-          <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -371,7 +469,10 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Dashboard</a
           > -->
-          <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+          <SidebarItem
+            title=" Manage Parcel"
+            class="bg-[#81AFEA] cursor-default"
+          >
             <template #icon>
               <svg
                 width="25"
@@ -404,7 +505,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Parcel</a
           > -->
-          <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -437,10 +538,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Residents</a
           > -->
-          <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -521,130 +619,182 @@ onMounted(async () => {isCollapsed.value= true})
         </SidebarItem>
       </aside>
 
-      <!-- Main Content -->
-      <main class="flex-1 p-6">
-        <!-- Header -->
-        <div class="flex items-center space-x-2 mb-6">
-          <svg
-            class="w-6 h-6 text-blue-800"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Profile Staff</h2>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
-          <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
-            Personal Information
+      <main class="flex-1 p-10 bg-[#f8f9fb]">
+        <!-- Title -->
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-[#185dc0]">
+            Manage Parcel &gt; Details
           </h2>
+        </div>
+        <!-- Alerts -->
+        <AlertPopUp
+          v-if="confirmSuccess"
+          :titles="'Confirm Parcel is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+        />
+        <!-- Main Form Container -->
+        <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
+          <form class="space-y-10">
+            <!-- Header -->
+            <!-- <h2 class="text-2xl font-bold text-[#185dc0]">Parcel Detail</h2> -->
 
-          <div
-            class="flex flex-col md:flex-row items-center md:items-start gap-10"
-          >
-            <!-- Left Section -->
-            <div class="flex flex-col items-center w-full md:w-1/3">
-              <!-- Profile Image -->
-              <div
-                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-600 mb-4 md:mb-0"
-              >
-                <img
-                  src="https://i.pravatar.cc/150?img=8"
-                  alt="Profile"
-                  class="w-full h-full object-cover"
-                />
+            <!-- SECTION 1 -->
+            <section>
+              <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >trackingNumber</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.trackingNumber || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >recipient Name</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.recipientName || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >roomNumber</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.roomNumber || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1">email</label>
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.email || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >parcel type</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.parcelType || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >company</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.companyName || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >sender name</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.senderName || '-' }}
+                  </p>
+                </div>
               </div>
+            </section>
 
-              <p class="mt-3 text-gray-600 font-medium">
-                {{ loginManager.user.fullName }}
-              </p>
+            <!-- SECTION 2 -->
+            <section>
+              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >current status</label
+                  >
+                  <p
+                    class="w-full p-2 rounded-md text-gray-800"
+                    :class="{
+                      'bg-yellow-300': parcel?.status === 'PENDING',
+                      'bg-blue-300': parcel?.status === 'RECEIVED',
+                      'bg-green-300': parcel?.status === 'PICKED_UP'
+                    }"
+                  >
+                    {{ parcel?.status || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >recieved at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.receivedAt || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >pick up at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.pickedUpAt || '-' }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >confirm at</label
+                  >
+                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                    {{ parcel?.confirmAt || '-' }}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-3 pt-4">
+              <ButtonWeb
+                label="Back"
+                color="gray"
+                @click="showManageParcelPage"
+              />
+              <ButtonWeb
+                v-if="currentParcelStatus === 'PICKED_UP'"
+                type="button"
+                label="Confirm"
+                color="blue"
+                @click="confirmParcelPopUp(parcel.parcelId)"
+              />
             </div>
-
-            <!-- Right Section -->
-            <div
-              class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
-            >
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Firstname</label
-                >
-                <!-- <input
-                  type="text"
-                  value="Pimpajee"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                /> -->
-                {{ firstName }}
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Lastname</label
-                >
-                <input
-                  type="text"
-                  value="SetXXXXXX"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Email</label
-                >
-                <input
-                  type="email"
-                  value="abcd@gmail.com"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >LineID</label
-                >
-                <input
-                  type="text"
-                  value="abcdef555"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Contact</label
-                >
-                <input
-                  type="text"
-                  value="097-230-XXXX"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Room Number</label
-                >
-                <input
-                  type="text"
-                  value="101"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
       </main>
     </div>
   </div>
+  <teleport to="body" v-if="showConfirmParcel">
+    <ConfirmParcels
+      @cancelParcel="clearConfirmPopUp"
+      @confirmParcel="showConfirmComplete"
+      @redAlert="openRedPopup"
+      :parcelConfirmData="parcelConfirmDetail"
+    />
+  </teleport>
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>

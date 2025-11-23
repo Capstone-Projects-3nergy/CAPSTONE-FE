@@ -1,75 +1,87 @@
 <script setup>
-import { ref, reactive } from 'vue'
-// import { deleteItemById } from '@/utils/fetchUtils'
+import { ref, computed, onMounted } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import ButtonWeb from './ButtonWeb.vue'
+import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcel']) // 👉 ของเดิม taskId
+const props = defineProps(['parcelData']) // ไม่ใช่ ref
 
 const router = useRouter()
-const route = useRoute()
 const parcelManager = useParcelManager()
-
+const parcelEditDetail = ref(null)
+const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
+// onMounted(async () => {
+//   isCollapsed.value = true
+// })
+// ใช้ computed เผื่อ props เป็น undefined
+const parcel = computed(() => props.parcelData || {})
 
-const deleteParcel = async (parcelId) => {
+const deleteParcelFn = async () => {
+  if (!parcel.value.id) return
+
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/v3/parcels`, // แก้ URL ให้ตรง backend
-    parcelId
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    parcel.value.id
   )
 
-  if (deletedParcel.value == '404') {
+  if (deletedParcel.value === '404') {
     emit('redAlert')
     emit('cancelDetail', true)
     return
   }
 
   // ลบใน Pinia
-  parcelManager.deleteParcel(parcelId)
+  parcelManager.deleteParcels(parcel.id)
 
   emit('confirmDetail', true)
+}
+
+const cancelFn = () => {
+  emit('cancelDetail', true)
+  router.replace({ name: 'staffparcels' })
 }
 </script>
 
 <template>
   <div
-    class="itbkk-message bg-grey-500 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 pt-[10px]"
+    class="message bg-gray-500/50 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 flex items-center justify-center p-2"
   >
-    <div class="w-[59%] m-[auto] border border-green-700 mt-[20%]">
-      <div class="flex flex-col justify-between bg-white p-4 h-[10%]">
-        <div class="itbkk-title w-full h-[40px] mt-1 border-b">
-          <h1 class="text-xl font-bold text-justify">Delete Parcel</h1>
-        </div>
-
-        <div class="w-[70%] h-[100%]">
-          <div class="flex pl-4 mt-5">
-            Do you want to delete the parcel
-            <b>{{ props.parcel.trackingNumber }}</b
-            >?
-          </div>
-        </div>
+    <div
+      class="bg-white border border-green-700 w-full max-w-lg rounded-md overflow-hidden"
+    >
+      <!-- Header -->
+      <div class="flex flex-col justify-between p-4 border-b">
+        <h1 class="text-xl font-bold text-center sm:text-left">
+          Delete Parcel
+        </h1>
       </div>
 
-      <div class="flex flex-row w-full justify-end border-t h-[60%]">
-        <button
-          class="itbkk-button-confirm bg-green-400 rounded-[2px] w-[60px] h-[25px] mr-3 mt-4 mb-2"
-          @click="deleteParcelFn(props.parcel.parcelId)"
-        >
-          Confirm
-        </button>
+      <!-- Body -->
+      <div class="p-4 text-center sm:text-left">
+        <p class="mb-4">
+          Do you want to delete this tracking number
+          <b>{{ parcel.parcelNumber || '' }}</b
+          >?
+        </p>
+      </div>
 
-        <button
-          class="itbkk-button-cancel bg-red-400 rounded-[2px] w-[50px] h-[25px] mr-3 mt-4 mb-2"
-          @click="
-            ;[
-              emit('cancelDetail', true),
-              router.replace({ name: 'staffparcels' })
-            ]
-          "
-        >
-          Cancel
-        </button>
+      <!-- Footer -->
+      <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
+        <ButtonWeb
+          label="Confirm"
+          color="green"
+          class="w-full sm:w-auto"
+          @click="deleteParcelFn"
+        />
+        <ButtonWeb
+          label="Cancel"
+          color="red"
+          class="w-full sm:w-auto"
+          @click="cancelFn"
+        />
       </div>
     </div>
   </div>

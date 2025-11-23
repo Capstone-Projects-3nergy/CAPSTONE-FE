@@ -22,7 +22,10 @@ export const useParcelManager = defineStore('parcelManager', () => {
   // }
 
   // 🟦 Getter
-  const getParcels = () => parcel
+  // const getParcels = () => parcel
+  const getParcels = function () {
+    return parcel
+  }
 
   // 🟩 Setter
   // const setParcels = (parcelList = []) => {
@@ -40,20 +43,29 @@ export const useParcelManager = defineStore('parcelManager', () => {
   }
 
   // 🟨 Add
-  const addParcel = (newParcel) => {
-    if (!newParcel || newParcel.status >= 400) {
-      console.error('Invalid parcel data:', newParcel)
-      return null
+  const addParcel = function (newParcel) {
+    if (!newParcel) {
+      console.error('Cannot add empty parcel')
+      return
     }
-
-    const parcelWithId = {
-      parcelId: Date.now(),
-      ...newParcel
-    }
-    parcel.push(parcelWithId)
-    console.log('🆕 Parcel added:', parcelWithId)
-    return parcelWithId
+    parcel.push(newParcel)
+    console.log('Parcel added:', newParcel)
   }
+
+  // const addParcel = (newParcel) => {
+  //   if (!newParcel || newParcel.status >= 400) {
+  //     console.error('Invalid parcel data:', newParcel)
+  //     return null
+  //   }
+
+  //   const parcelWithId = {
+  //     parcelId: Date.now(),
+  //     ...newParcel
+  //   }
+  //   parcel.push(parcelWithId)
+  //   console.log('🆕 Parcel added:', parcelWithId)
+  //   return parcelWithId
+  // }
 
   // const addParcel = (newParcel) => {
   //   parcel.push({
@@ -89,7 +101,34 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const findByTracking = (trackingNumber) =>
     parcel.find((el) => el.trackingNumber === trackingNumber)
 
+  // const updateParcelStatus = (parcelId, newStatus) => {
+  //   const index = findIndexByParcelId(parcelId)
+  //   if (index !== -1) {
+  //     parcel[index].status = newStatus
+  //     parcel[index].updatedAt = new Date().toISOString()
+  //     console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
+  //   } else {
+  //     console.warn(`Parcel with id ${parcelId} not found`)
+  //   }
+  // }
+  const updateParcelStatus = (parcelId, newStatus) => {
+    const index = findIndexByParcelId(parcelId)
+    if (index !== -1) {
+      parcel[index].status = newStatus
+      parcel[index].updatedAt = new Date().toISOString()
+
+      if (newStatus === 'Received') {
+        parcel[index].receivedAt = new Date().toISOString()
+      }
+
+      console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
+    } else {
+      console.warn(`Parcel with id ${parcelId} not found`)
+    }
+  }
+
   return {
+    updateParcelStatus,
     getParcels,
     setParcels,
     addParcel,

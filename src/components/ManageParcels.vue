@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -15,7 +15,7 @@ import { useRegisterManager } from '@/stores/RegisterManager.js'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import EditParcels from './EditParcels.vue'
+import ParcelsDetail from './ParcelsDetail.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -23,7 +23,6 @@ import {
   sortByStatusReverse,
   sortByDate,
   sortByDateReverse,
-  searchParcels,
   sortByTracking,
   sortByTrackingReverse,
   sortByName,
@@ -34,6 +33,7 @@ import {
   sortByLastName,
   sortByFirstNameReverse,
   sortByLastNameReverse,
+  searchParcels,
   filterByDay,
   filterByMonth,
   filterByYear
@@ -56,6 +56,8 @@ import {
 } from '@/utils/fetchUtils'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
+import EditParcels from './EditParcels.vue'
+
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -78,7 +80,9 @@ const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 const showDeleteParcel = ref(false)
-
+const parcelDetail = ref(null)
+const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
+const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
@@ -102,20 +106,20 @@ const showSuggestions = computed(
 )
 
 // filter จากชื่อ / email / roomNumber
-const filteredResidents = computed(() => {
-  const q = recipientSearch.value.trim().toLowerCase()
-  if (!q) return []
-  return residents.value.filter((r) => {
-    const fullName = (
-      r.fullName || `${r.firstName} ${r.lastName}`
-    ).toLowerCase()
-    return (
-      fullName.includes(q) ||
-      (r.email && r.email.toLowerCase().includes(q)) ||
-      (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
-    )
-  })
-})
+// const filteredResidents = computed(() => {
+//   const q = recipientSearch.value.trim().toLowerCase()
+//   if (!q) return []
+//   return residents.value.filter((r) => {
+//     const fullName = (
+//       r.fullName || `${r.firstName} ${r.lastName}`
+//     ).toLowerCase()
+//     return (
+//       fullName.includes(q) ||
+//       (r.email && r.email.toLowerCase().includes(q)) ||
+//       (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+//     )
+//   })
+// })
 
 // เวลาเลือก resident จาก list
 const selectResident = (resident) => {
@@ -147,17 +151,51 @@ watch(recipientSearch, (val) => {
 //   }
 // })
 
-onMounted(async () => {
-  console.log(parcelManager.getParcels())
-  // จะได้ array ของ object ที่เพิ่งเพิ่ม
+const mapStatus = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
 
+onMounted(async () => {
+  isCollapsed.value = true
+  // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
   )
+  console.log(data)
+
   if (data) {
-    parcelManager.setParcels(data)
+    // แปลง field ให้ตรงกับที่ตารางใช้
+    const mapped = data.map((p) => ({
+      id: p.parcelId, // backend: parcelId → frontend: id
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName, // ownerName → recipientName ตัวเเปรไม่เหมือนกัน
+      roomNumber: p.roomNumber,
+      email: p.contactEmail, // contactEmail → email
+      status: mapStatus(p.status), // 'PENDING' → 'Pending' ฯลฯ
+
+      // ให้มี field ที่ filter/pagination ใช้
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
+    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+
+    parcelManager.setParcels(mapped)
   }
+
+  // โหลด residents ตามเดิม
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -168,7 +206,31 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to load residents:', e)
   }
+  console.log(filteredParcels.value)
 })
+// onMounted(async () => {
+//   // จะได้ array ของ object ที่เพิ่งเพิ่ม
+
+//   const data = await getItems(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     router
+//   )
+//   console.log(parcelManager.getParcels())
+//   if (data) {
+//     parcelManager.setParcels(data)
+//   }
+//   try {
+//     const res = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/residents`,
+//       router
+//     )
+//     residents.value = res || []
+//     console.log(parcelManager.getParcels())
+//     console.log('Residents loaded:', residents.value)
+//   } catch (e) {
+//     console.error('Failed to load residents:', e)
+//   }
+// })
 const parcels = computed(() => parcelManager.getParcels())
 // ✅ ใช้ watch เพื่อ setTimeout ให้หายเอง
 // ✅ ฟังก์ชันช่วยสร้าง watch + timeout อัตโนมัติ
@@ -232,12 +294,15 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-// const sortStatusAsc = () => sortByStatus(parcels.value)
-// const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
+
 // ===== ฟังก์ชัน toggle =====
 const toggleSortRoom = () => {
   isRoomAsc.value
@@ -260,24 +325,53 @@ const toggleSortDate = () => {
 const selectedSort = ref('Sort by:')
 
 const handleSort = () => {
-  if (selectedSort.value === 'Newest') sortDateDesc()
-  else if (selectedSort.value === 'Oldest') sortDateAsc()
-  else if (selectedSort.value === 'Tracking (A→Z)')
-    sortByTracking(parcels.value)
-  else if (selectedSort.value === 'Tracking (Z→A)')
-    sortByTrackingReverse(parcels.value)
-  else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
-  else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
-  else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
-  else if (selectedSort.value === 'Contact (9→0)')
-    sortByContactReverse(parcels.value)
-  else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
-  else if (selectedSort.value === 'First Name (Z→A)')
-    sortByFirstNameReverse(parcels.value)
-  else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
-  else if (selectedSort.value === 'Last Name (Z→A)')
-    sortByLastNameReverse(parcels.value)
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
+      break
+  }
 }
+
+// const handleSort = () => {
+//   if (selectedSort.value === 'Newest') sortDateDesc()
+//   else if (selectedSort.value === 'Oldest') sortDateAsc()
+//   // else if (selectedSort.value === 'Tracking (A→Z)')
+//   //   sortByTracking(parcels.value)
+//   // else if (selectedSort.value === 'Tracking (Z→A)')
+//   //   sortByTrackingReverse(parcels.value)
+//   // else if (selectedSort.value === 'Name (A→Z)') sortByName(parcels.value)
+//   // else if (selectedSort.value === 'Name (Z→A)') sortByNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Contact (0→9)') sortByContact(parcels.value)
+//   // else if (selectedSort.value === 'Contact (9→0)')
+//   //   sortByContactReverse(parcels.value)
+//   // else if (selectedSort.value === 'First Name') sortByFirstName(parcels.value)
+//   // else if (selectedSort.value === 'First Name (Z→A)')
+//   //   sortByFirstNameReverse(parcels.value)
+//   // else if (selectedSort.value === 'Last Name') sortByLastName(parcels.value)
+//   // else if (selectedSort.value === 'Last Name (Z→A)')
+//   //   sortByLastNameReverse(parcels.value)
+// }
 
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
@@ -316,17 +410,12 @@ function parseDate(dateStr) {
 
   return null
 }
+
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
-
-  const now = new Date()
-
-  if (activeTab.value === 'Day') result = filterByDay(result, now)
-  else if (activeTab.value === 'Month') result = filterByMonth(result, now)
-  else if (activeTab.value === 'Year') result = filterByYear(result, now)
 
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
@@ -334,6 +423,34 @@ const filteredParcels = computed(() => {
 
   return result
 })
+function formatDateByTab(rawDate) {
+  if (!rawDate) return rawDate
+
+  // แปลง MySQL "YYYY-MM-DD HH:mm:ss" ให้ JS อ่านได้
+  const dateObj = new Date(rawDate.replace(' ', 'T'))
+  if (isNaN(dateObj.getTime())) return rawDate
+
+  const yyyy = dateObj.getFullYear()
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const dd = String(dateObj.getDate()).padStart(2, '0')
+  const hh = String(dateObj.getHours()).padStart(2, '0')
+  const mi = String(dateObj.getMinutes()).padStart(2, '0')
+  const ss = String(dateObj.getSeconds()).padStart(2, '0')
+
+  if (activeTab.value === 'Day') {
+    return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Month') {
+    return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Year') {
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
+
+  return rawDate
+}
 
 // const showResidentParcelPage = async function () {
 //   router.replace({ name: 'residentparcels' })
@@ -391,12 +508,79 @@ const paginatedParcels = computed(() => {
   return filteredParcels.value.slice(start, end)
 })
 
-const showParacelDetail = async function (id) {
-  router.push({ name: 'detailparcels', params: { tid: id } })
-}
+const showParcelDetail = async function (id) {
+  // showParcelDetailModal.value = true
+  // เปลี่ยน route
+  router.push({
+    name: 'detailparcels',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
 
+  // try {
+  //   // ดึงข้อมูล parcel เดี่ยวจาก backend
+  //   const data = await getItemById(
+  //     `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+  //     id
+  //   )
+
+  //   if (data) {
+  //     // map field ให้เหมือนกับที่ใช้ใน frontend
+  //     parcelsResidentDetail.value = {
+  //       id: data.parcelId,
+  //       trackingNumber: data.trackingNumber,
+  //       recipientName: data.ownerName,
+  //       roomNumber: data.roomNumber,
+  //       email: data.contactEmail,
+  //       status: mapStatus(data.status),
+  //       receiveAt: data.receivedAt,
+  //       updateAt: data.updatedAt || null,
+  //       pickupAt: data.pickedUpAt || null
+  //     }
+
+  //     console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+  //   }
+  // } catch (err) {
+  //   console.error('Failed to load parcel detail:', err)
+  // }
+}
 const showEditParacelDetail = async function (id) {
-  router.push({ name: 'editparcels', params: { tid: id } })
+  router.push({
+    name: 'editparcels',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+
+  // try {
+  //   // ดึงข้อมูล parcel เดี่ยวจาก backend
+  //   const data = await getItemById(
+  //     `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+  //     id
+  //   )
+
+  //   if (data) {
+  //     // map field ให้เหมือนกับที่ใช้ใน frontend
+  //     parcelsResidentDetail.value = {
+  //       id: data.parcelId,
+  //       trackingNumber: data.trackingNumber,
+  //       recipientName: data.ownerName,
+  //       roomNumber: data.roomNumber,
+  //       email: data.contactEmail,
+  //       status: mapStatus(data.status),
+  //       receiveAt: data.receivedAt,
+  //       updateAt: data.updatedAt || null,
+  //       pickupAt: data.pickedUpAt || null
+  //     }
+
+  //     console.log('Parcel detail loaded:', parcelsResidentDetail.value)
+  //   }
+  // } catch (err) {
+  //   console.error('Failed to load parcel detail:', err)
+  // }
 }
 
 // ฟังก์ชันเปลี่ยนหน้า
@@ -426,22 +610,59 @@ const pageNumbers = computed(() => {
 //   edit: { state: false, parcelTitle: '' },
 //   delete: { state: false, parcelTitle: '' }
 // })
-const deleteParcel = async (parcelId) => {
-  const resStatus = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcelId,
-    router
-  )
+// const deleteParcel = async (parcelId) => {
+//   const resStatus = await deleteItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     parcelId,
+//     router
+//   )
 
-  if (!resStatus) {
-    error.value = true
-    return
+//   if (!resStatus) {
+//     error.value = true
+//     return
+//   }
+
+//   deleteSuccess.value = true
+
+//   // 👉 ลบออกจาก Pinia
+//   parcelManager.deleteParcels(parcelId)
+// }
+const deleteParcelPopUp = (parcel) => {
+  // เก็บข้อมูล parcel สำหรับ popup
+  showDeleteParcel.value = true
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.parcelNumber
   }
+  console.log(parcelDetail.value)
+  // เปิด popup
+  // เปลี่ยน URL ให้มี tid
+  // router.push({
+  //   name: 'deleteparcels',
+  //   params: {
+  //     id: route.params.id, // staff id
+  //     tid: parcel.id // parcel id
+  //   }
+  // })
+}
 
+const clearDeletePopUp = () => {
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+
+const showDelComplete = () => {
   deleteSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
+  showDeleteParcel.value = false
+  parcelDetail.value = null
+}
 
-  // 👉 ลบออกจาก Pinia
-  parcelManager.deleteParcels(parcelId)
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 3000)
+  showDeleteParcel.value = false
+  parcelDetail.value = null
 }
 
 // const closePopUp = (operate) => {
@@ -668,7 +889,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -684,9 +905,8 @@ const closePopUp = (operate) => {
                   fill="white"
                 />
               </svg>
-              
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -706,7 +926,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -721,7 +941,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2"
               ><svg
@@ -775,7 +995,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -790,7 +1010,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -808,10 +1028,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <!-- <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -826,7 +1043,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -893,7 +1110,8 @@ const closePopUp = (operate) => {
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-6 w-full">
+        <!-- Title -->
         <div class="flex space-x-1">
           <svg
             width="25"
@@ -911,15 +1129,17 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
 
-        <!-- 🔲 Filter Bar Wrapper -->
+        <!-- Filter Bar -->
         <div
-          class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Date Tabs -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center flex-wrap gap-2">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
-              <div class="flex bg-gray-100 rounded-lg overflow-hidden">
+              <div
+                class="flex bg-gray-100 rounded-lg overflow-hidden flex-wrap"
+              >
                 <button
                   v-for="tab in tabs"
                   :key="tab"
@@ -935,11 +1155,10 @@ const closePopUp = (operate) => {
                 </button>
               </div>
             </div>
-
             <!-- Right: Search + Sort + Add -->
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <!-- Search -->
-              <div class="relative">
+              <div class="relative flex-1 min-w-[120px]">
                 <svg
                   class="absolute left-2 top-1/2 -translate-y-1/2"
                   width="18"
@@ -958,27 +1177,31 @@ const closePopUp = (operate) => {
                   type="text"
                   v-model="searchKeyword"
                   placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
               </div>
 
               <!-- Sort -->
               <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
                 v-model="selectedSort"
                 @change="handleSort"
               >
-                <option>Sort by:</option>
+                <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>First Name</option>
-                <option>Last Name</option>
+                <option>Name (A→Z)</option>
+                <option>Name (Z→A)</option>
+                <option>Room (A→Z)</option>
+                <option>Room (Z→A)</option>
+                <option>Status (A→Z)</option>
+                <option>Status (Z→A)</option>
               </select>
 
               <!-- Add Parcel -->
               <button
                 @click="showAddParcelPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer"
+                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
               >
                 <svg
                   width="24"
@@ -992,12 +1215,13 @@ const closePopUp = (operate) => {
                     fill="white"
                   />
                 </svg>
-
                 <span>Add parcel</span>
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Alerts -->
         <AlertPopUp
           v-if="deleteSuccess"
           :titles="'Delete Parcel is Successfull.'"
@@ -1030,10 +1254,14 @@ const closePopUp = (operate) => {
           operate="problem"
           @closePopUp="closePopUp"
         />
-        <!-- Parcel Table -->
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
+
+        <!-- Parcel Table (Responsive) -->
+        <div class="bg-white rounded-lg shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
-            <thead class="bg-white border-t border-b border-[#185DC0] my-4">
+            <!-- Desktop Header -->
+            <thead
+              class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+            >
               <tr>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Tracking
@@ -1042,132 +1270,107 @@ const closePopUp = (operate) => {
                   Name
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Room Number</span>
-                    <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Contact
+                  Room
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Status</span>
-                    <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortStatus"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
+                  Email
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div
-                    class="relative flex items-center justify-start space-x-3"
-                  >
-                    <span>Date in</span>
-                    <svg
-                      class="cursor-pointer hover:opacity-70 transition"
-                      @click="toggleSortDate"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
+                  Status
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Operation
+                  Receive At
+                </th>
+                <th
+                  class="px-4 py-3 text-sm font-semibold text-center text-[#185DC0]"
+                >
+                  Action
                 </th>
               </tr>
             </thead>
+
             <tbody class="divide-y">
+              <!-- Row -->
               <tr
                 v-for="p in paginatedParcels"
                 :key="p.id"
-                class="hover:bg-gray-50 cursor-pointer"
+                class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
               >
+                <!-- Tracking -->
                 <td
-                  @click="showParacelDetail"
-                  class="px-4 py-3 text-sm text-gray-700"
+                  @click="showParcelDetail(p.id)"
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                 >
-                  {{ p.tracking }}
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Tracking:
+                  </span>
+                  {{ p.trackingNumber }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ p.recipient }}
+
+                <!-- Name -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Name:
+                  </span>
+                  {{ p.recipientName }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.room }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.contact }}</td>
-                <td class="px-4 py-3">
+
+                <!-- Room -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Room:
+                  </span>
+                  {{ p.roomNumber }}
+                </td>
+
+                <!-- Email -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Email:
+                  </span>
+                  {{ p.email }}
+                </td>
+
+                <!-- Status -->
+                <td class="px-4 py-2 md:py-3 border-b md:border-none">
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Status:
+                  </span>
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     :class="{
                       'bg-yellow-400': p.status === 'Pending',
                       'bg-green-400': p.status === 'Picked Up',
-                      'bg-red-400': p.status === 'Unclaimed'
+                      'bg-blue-400': p.status === 'Received'
                     }"
                   >
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-700">{{ p.date }}</td>
-                <td class="px-4 py-3 text-sm text-gray-700 flex space-x-2">
+
+                <!-- Receive At -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                >
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Receive At:
+                  </span>
+                  {{ formatDateByTab(p.receiveAt) }}
+                </td>
+
+                <!-- Operation -->
+                <td
+                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2 text-center"
+                >
                   <button
-                    @click="showEditParacelDetail"
-                    class="text-blue-600 hover:text-blue-800"
+                    @click="showEditParacelDetail(p.id)"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
                   >
                     <svg
                       width="21"
@@ -1192,9 +1395,15 @@ const closePopUp = (operate) => {
                       />
                     </svg>
                   </button>
+
                   <button
-                    @click="deleteParcel"
-                    class="text-red-600 hover:text-red-800"
+                    @click="
+                      deleteParcelPopUp({
+                        id: p.id,
+                        parcelNumber: p.trackingNumber
+                      })
+                    "
+                    class="text-red-600 hover:text-red-800 cursor-pointer"
                   >
                     <svg
                       width="18"
@@ -1267,24 +1476,21 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport> -->
-  <teleport to="body" v-if="showParcelDetailModal">
-    <showParacelDetail
-      :ParcelDetail="parcelDetail"
-      @showParcelDetailModal="showParcelDetailModal = false"
-      :operate="operation"
-      @showRedPopup="openRedPopup"
-      @showGreenPopup="openGreenPopup"
-    ></showParacelDetail>
+  <!-- <teleport to="body">
+    <ParcelsDetail :ParcelIdDataDetail="parcelIdDetail"></ParcelsDetail>
   </teleport>
+  <teleport to="body">
+    <EditParcels :ParcelEditDataDetail="parcelEditDetail"></EditParcels>
+  </teleport> -->
   <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
-      :parcelId="parcelDetail"
-    >
-    </DeleteParcels>
+      :parcelData="parcelDetail"
+    />
   </teleport>
+
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels
       @cancelAdd="clearDeletePopUp"

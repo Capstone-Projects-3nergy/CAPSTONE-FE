@@ -78,19 +78,18 @@ const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
 }
-const isAllEmpty = computed(() => {
+const isAllFilled = computed(() => {
   return (
-    !parcelData.value.trackingNumber &&
-    !parcelData.value.recipientName &&
-    !parcelData.value.roomNumber &&
-    !parcelData.value.parcelType &&
-    !parcelData.value.senderName &&
-    !parcelData.value.companyId &&
-    !parcelData.value.receiveAt &&
-    !parcelData.value.pickupAt &&
-    !parcelData.value.updateAt
+    parcelData.value.trackingNumber &&
+    parcelData.value.recipientName &&
+    parcelData.value.parcelType &&
+    parcelData.value.companyId &&
+    parcelData.value.receiveAt &&
+    parcelData.value.pickupAt &&
+    parcelData.value.updateAt
   )
 })
+
 // const emit = defineEmits(['add-success', 'add-error'])
 
 // console.log(auth.user.id)
@@ -148,6 +147,7 @@ watch(recipientSearch, (val) => {
 
 // โหลดรายชื่อ resident ตอนเข้าเพจ
 onMounted(async () => {
+  isCollapsed.value = true
   const auth = useAuthManager()
   console.log('staff login id:', auth.user.id)
   try {
@@ -686,7 +686,7 @@ const closePopUp = (operate) => {
             </span>
             Home</a
           > -->
-          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -703,7 +703,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -723,7 +723,7 @@ const closePopUp = (operate) => {
             </span>
             Profile</a
           > -->
-          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -738,7 +738,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
             <span class="mr-2"
               ><svg
@@ -792,7 +792,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Parcel</a
           > -->
-          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -807,7 +807,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -825,10 +825,7 @@ const closePopUp = (operate) => {
             </span>
             Manage Residents</a
           > -->
-          <!-- <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -843,7 +840,7 @@ const closePopUp = (operate) => {
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -1020,7 +1017,7 @@ const closePopUp = (operate) => {
         <!-- Form -->
         <form class="bg-white p-6 rounded-lg shadow space-y-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
+            <!-- <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2> -->
             <!-- <ButtonWeb
               label="Scan Parcel"
               color="blue"
@@ -1032,8 +1029,11 @@ const closePopUp = (operate) => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Tracking number -->
             <div>
-              <label class="block font-semibold mb-1">Tracking number</label>
+              <label class="block font-semibold mb-1"
+                >Tracking number <span class="text-red-500">*</span></label
+              >
               <input
+                placeholder="Enter tracking number"
                 v-model="parcelData.trackingNumber"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
@@ -1042,11 +1042,13 @@ const closePopUp = (operate) => {
 
             <!-- Recipient: พิมพ์แล้วเลือกคน -->
             <div class="relative">
-              <label class="block font-semibold mb-1">Recipient</label>
+              <label class="block font-semibold mb-1"
+                >Recipient <span class="text-red-500">*</span></label
+              >
               <input
                 v-model="recipientSearch"
                 type="text"
-                placeholder="name/ email / phone-number"
+                placeholder="Enter name/ email / room number"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
 
@@ -1074,8 +1076,11 @@ const closePopUp = (operate) => {
 
             <!-- Room number: auto, read-only -->
             <div>
-              <label class="block font-semibold mb-1">Room Number</label>
+              <label class="block font-semibold mb-1"
+                >Room Number <span class="text-red-500">*</span></label
+              >
               <input
+                placeholder="Select recipient first"
                 type="text"
                 :value="selectedResident ? selectedResident.roomNumber : ''"
                 class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
@@ -1116,12 +1121,23 @@ const closePopUp = (operate) => {
           <!-- Row 2 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block font-semibold mb-1">Parcel Type</label>
+              <label class="block font-semibold mb-1"
+                >Parcel Type <span class="text-red-500">*</span></label
+              >
               <input
                 v-model="parcelData.parcelType"
                 type="text"
+                placeholder="Enter Parcel Type: Box / Document / Envelope"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
+              <!-- <select
+                v-model="parcelData.parcelType"
+                class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+              >
+                <option disabled value="">Select Parcel Type</option>
+                <option value="Document">Document</option>
+                <option value="Box">Box</option>
+              </select> -->
             </div>
             <!-- <div>
               <label class="block font-semibold mb-1">Contact</label>
@@ -1132,7 +1148,9 @@ const closePopUp = (operate) => {
               />
             </div> -->
             <div>
-              <label class="block font-semibold mb-1">Status</label>
+              <label class="block font-semibold mb-1"
+                >Status <span class="text-red-500">*</span></label
+              >
               <input
                 type="text"
                 class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
@@ -1144,7 +1162,7 @@ const closePopUp = (operate) => {
 
           <!-- Row 3 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Pickup at</label>
               <input
                 v-model="parcelData.pickupAt"
@@ -1159,7 +1177,7 @@ const closePopUp = (operate) => {
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
           </div>
 
           <!-- <hr class="border-t border-1 border-[#185DC0] my-4" /> -->
@@ -1170,20 +1188,21 @@ const closePopUp = (operate) => {
               <label class="block font-semibold mb-1">Sender Name</label>
               <input
                 v-model="parcelData.senderName"
+                placeholder="Enter sender name"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
             </div>
             <div>
               <label for="companySelect" class="block font-semibold mb-1"
-                >Company</label
+                >Company <span class="text-red-500">*</span></label
               >
               <select
                 v-model="parcelData.companyId"
                 id="companySelect"
-                class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <option :value="null" disabled>Select Company</option>
+                <option disabled value="">Select Company</option>
                 <option
                   v-for="company in companyList"
                   :key="company.companyId"
@@ -1200,14 +1219,14 @@ const closePopUp = (operate) => {
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               /> -->
             </div>
-            <div>
+            <!-- <div>
               <label class="block font-semibold mb-1">Receive at</label>
               <input
                 v-model="parcelData.receiveAt"
                 type="text"
                 class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
               />
-            </div>
+            </div> -->
           </div>
 
           <!-- Buttons -->
@@ -1218,10 +1237,10 @@ const closePopUp = (operate) => {
               color="green"
               @click="saveParcel"
               :class="{
-                'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
-                'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+                'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
+                'bg-black hover:bg-gray-600 text-white': !isAllFilled
               }"
-              :disabled="isAllEmpty"
+              :disabled="isAllFilled"
             />
 
             <ButtonWeb

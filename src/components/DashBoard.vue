@@ -44,6 +44,7 @@ const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
 ]
 onMounted(() => {
+  isCollapsed.value = true
   const ctx = document.getElementById('parcelChart')
   new Chart(ctx, {
     type: 'bar',

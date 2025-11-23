@@ -360,6 +360,30 @@ async function updateParcelStatus(url, id, newStatus, router) {
     return null
   }
 }
+async function confirmParcelPickup(url, id, router) {
+  try {
+    const options = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        status: 'PICKED_UP',
+        pickedUpAt: new Date().toISOString()
+      })
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/pickup`, options, router)
+
+    if (res?.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error(`Network error: ${error}`)
+    return null
+  }
+}
 
 export {
   getItemById,
@@ -375,5 +399,6 @@ export {
   declineInvite,
   editItemWithFile,
   deleteFile,
-  updateParcelStatus
+  updateParcelStatus,
+  confirmParcelPickup
 }
