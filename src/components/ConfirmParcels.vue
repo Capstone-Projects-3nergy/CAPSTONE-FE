@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import { deleteItemById } from '@/utils/fetchUtils'
+import { confirmParcelReceived } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 const props = defineProps(['parcelConfirmData']) // ไม่ใช่ ref
@@ -13,25 +13,24 @@ const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-// onMounted(async () => {
-//   isCollapsed.value = true
-// })
+onMounted(() => {
+  if (parcel.value?.id) console.log(parcel.value.id)
+})
+
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelConfirmData || {})
-
 const confirmParcelFn = async () => {
   if (!parcel.value.id) return
 
-  const res = await updateParcelStatus(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+  const res = await confirmParcelReceived(
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     parcel.value.id,
-    'Received',
     router
   )
 
   // ❌ ไม่พบพัสดุ
-  if (res?.status === 404 || res?.error) {
-    emit('redAlert') // popup error
+  if (!res || res?.status === 404 || res?.error) {
+    emit('redAlert')
     emit('cancelParcel', true)
     return
   }
@@ -43,10 +42,11 @@ const confirmParcelFn = async () => {
     return
   }
 
-  // ✅ สำเร็จ  (Server ส่ง status = "Received" หรือ message)
-  if (res?.status === 'Received' || res?.message === 'Parcel confirmed') {
-    parcelManager.updateParcelStatus(parcel.value.id, 'Received')
-    emit('confirmParcel', true) // popup success
+  // ✅ สำเร็จ: backend ส่ง parcelId หรือ status 'RECEIVED'
+  if (res?.parcelId || res?.status === 'RECEIVED') {
+    // เปลี่ยนสถานะเป็น PICKED_UP
+    parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
+    emit('confirmParcel', true)
     return
   }
 }
@@ -86,7 +86,7 @@ const cancelFn = () => {
           @click="cancelFn"
         />
         <ButtonWeb
-          label="Save"
+          label="Confirm"
           color="blue"
           class="w-full sm:w-auto"
           @click="confirmParcelFn"

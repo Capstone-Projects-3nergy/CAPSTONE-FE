@@ -54,6 +54,7 @@ const parcelConfirmDetail = ref(null)
 // ⚡ Parcel detail
 const parcel = ref(null)
 const confirmSuccess = ref(false)
+const error = ref(false)
 // ⚡ helper map backend data → form
 const mapParcelData = (data) => ({
   // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
@@ -775,11 +776,11 @@ const toggleSidebar = () => {
                 @click="showManageParcelPage"
               />
               <ButtonWeb
-                v-if="currentParcelStatus === 'PICKED_UP'"
+                v-if="currentParcelStatus === 'RECEIVED'"
                 type="button"
                 label="Confirm"
                 color="blue"
-                @click="confirmParcelPopUp(parcel.parcelId)"
+                @click="confirmParcelPopUp(parcel)"
               />
             </div>
           </form>

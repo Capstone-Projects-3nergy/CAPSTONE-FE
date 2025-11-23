@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
@@ -17,7 +17,39 @@ import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 
+// const loginStore = useLoginManager()
+
+const addSuccess = ref(false)
+
+const parcelManager = useParcelManager()
+const trackingNumberError = ref(false)
+const recipientNameError = ref(false)
+const senderNameError = ref(false)
+const companyIdError = ref(false)
+const parcelTypeErrorRequired = ref(false)
+// 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
+// ข้อมูลพัสดุ reactive
+const auth = useAuthManager()
+console.log(auth.user.role)
+// 🏢 สร้าง reactive variable สำหรับเก็บ companies
+const companyList = ref([])
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -40,22 +72,80 @@ const showAddParcels = ref(false)
 
 // store
 const parcelStore = useParcelManager()
-
+const isAllFilled = computed(() => {
+  return (
+    form.value.trackingNumber &&
+    form.value.recipientName &&
+    form.value.parcelType &&
+    form.value.companyId &&
+    form.value.receiveAt &&
+    form.value.pickupAt &&
+    form.value.updateAt
+  )
+})
 // ✅ ฟอร์มใหม่ตามที่กำหนด
 const form = ref({
-  userId: null,
+  userId: auth.user.id, // ให้มี userId ติดคงไว้
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  contact: '',
-  status: 'Pending',
+  status: 'pending', // default
   pickupAt: null,
   updateAt: null,
-  senderName: '',
+  senderName: null,
   companyId: '',
-  receiveAt: null,
-  imageUrl: ''
+  receiveAt: null
+})
+const residents = ref([])
+
+// คำค้นที่ staff พิมพ์ในช่อง Recipient
+const recipientSearch = ref('')
+
+// id ของ resident ที่ถูกเลือก
+const selectedResidentId = ref(null)
+
+// object resident ที่เลือก
+const selectedResident = computed(
+  () =>
+    residents.value.find((r) => r.userId === selectedResidentId.value) || null
+)
+
+// แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
+const showSuggestions = computed(
+  () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
+)
+
+// filter จากชื่อ / email / roomNumber
+const filteredResidents = computed(() => {
+  const q = recipientSearch.value.trim().toLowerCase()
+  if (!q) return []
+  return residents.value.filter((r) => {
+    const fullName = (
+      r.fullName || `${r.firstName} ${r.lastName}`
+    ).toLowerCase()
+    return (
+      fullName.includes(q) ||
+      (r.email && r.email.toLowerCase().includes(q)) ||
+      (r.roomNumber && r.roomNumber.toLowerCase().includes(q))
+    )
+  })
+})
+
+// เวลาเลือก resident จาก list
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
+  form.value.recipientName = name
+  recipientSearch.value = name // ใส่ชื่อที่เลือกกลับเข้า input
+}
+
+// ถ้า clear ช่อง search → clear selection ด้วย
+watch(recipientSearch, (val) => {
+  if (!val) {
+    selectedResidentId.value = null
+    form.value.recipientName = ''
+  }
 })
 
 // เก็บรายการพัสดุที่บันทึก
@@ -245,7 +335,7 @@ function startScan(mode) {
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: { width: 250, height: 350 },
+      qrbox: { width: 250, height: 450 },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
     html5QrCode
@@ -257,7 +347,7 @@ function startScan(mode) {
           console.log('✅ QR/Barcode Decoded:', cleanText)
           scanResult.value = cleanText
           form.value.trackingNumber = cleanText
-          form.value.parcelType = 'Format: QR/Barcode'
+          // form.value.parcelType = 'Format: QR/Barcode'
         },
         (errorMsg) => console.warn('Scan error:', errorMsg)
       )
@@ -288,7 +378,7 @@ const showHomePageStaffWeb = async () => {
 }
 
 // function saveParcel() {
-//   const parcelData = {
+//   const form = {
 //     recipientName: form.value.recipientName,
 //     trackingNumber: form.value.trackingNumber,
 //     companyId: form.value.companyId,
@@ -299,8 +389,8 @@ const showHomePageStaffWeb = async () => {
 //   }
 
 //   // ✅ เพิ่มพัสดุเข้า store
-//   parcelStore.addParcel(parcelData)
-//   console.log('✅ Parcel saved to store:', parcelData)
+//   parcelStore.addParcel(form)
+//   console.log('✅ Parcel saved to store:', form)
 
 //   // reset form
 //   Object.keys(form.value).forEach(
@@ -313,72 +403,119 @@ const showHomePageStaffWeb = async () => {
 //   setTimeout(() => (greenPopup.add.state = false), 3000)
 // }
 const saveParcel = async () => {
-  // สร้าง object จาก form
-  const parcelData = {
-    recipientName: form.value.recipientName,
-    trackingNumber: form.value.trackingNumber,
-    companyId: form.value.companyId,
-    parcelType: form.value.parcelType,
-    imageUrl: previewUrl.value || null,
-    status: 'Pending',
-    roomNumber: form.value.roomNumber || ''
-  }
+  // const auth = useAuthManager()
+  // console.log('staff login id:', auth.user.id)
 
-  // 1️⃣ ตรวจสอบ Room Number → ต้องเป็นตัวเลขเท่านั้น
-  if (!/^[0-9]+$/.test(parcelData.roomNumber)) {
-    roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 3000) // หายหลัง 3 วินาที
+  // ❗ ต้องเลือก resident ก่อน
+  if (!selectedResidentId.value) {
+    error.value = true
+    console.error('No resident selected')
+    setTimeout(() => (error.value = false), 3000)
+    return
+  }
+  // ❗ ต้องเลือก resident ก่อน
+  // if (!selectedResidentId.value) {
+  //   error.value = true
+  //   console.error('No resident selected')
+  //   setTimeout(() => (error.value = false), 3000)
+  //   return
+  // }
+
+  // ตอนนี้คุณใช้ userId = staff ที่ล็อกอินอยู่
+  // ถ้าอยากให้ parcel เป็นของ resident จริง ๆ
+  // ต้องเปลี่ยนมาจาก resident ที่เลือก (เช่นจาก dropdown)
+  // สมมติยังใช้ของเดิมไปก่อน = auth.user.id
+  form.value.userId = auth.user.id
+  if (!form.value.trackingNumber) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 3000)
+    return
+  }
+  if (!form.value.recipientName) {
+    recipientNameError.value = true
+    setTimeout(() => (recipientNameError.value = false), 3000)
+    return
+  }
+  if (!form.value.parcelType) {
+    parcelTypeErrorRequired.value = true
+    setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
+    return
+  }
+  // if (!form.value.senderName) {
+  //   senderNameError.value = true
+  //   setTimeout(() => (senderNameError.value = false), 3000)
+  //   return
+  // }
+  if (!form.value.companyId) {
+    companyIdError.value = true
+    setTimeout(() => (companyIdError.value = false), 3000)
     return
   }
 
-  // 2️⃣ ตรวจสอบ Sender Name
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.recipientName)) {
-    SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 3000)
-    return
-  }
-
-  // 3️⃣ ตรวจสอบ Parcel Type
-  if (!/^[A-Za-zก-๙\s]+$/.test(parcelData.parcelType)) {
+  // (ถ้ายังอยาก validate senderName / parcelType เพิ่มก็ใส่ต่อได้)
+  // ตัวอย่าง:
+  // if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+  //   SenderNameError.value = true
+  //   setTimeout(() => (SenderNameError.value = false), 3000)
+  //   return
+  // }
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
 
   try {
-    console.log('🚀 Sending parcel to backend...', parcelData)
+    console.log('🚀 Sending parcel to backend...', form.value)
 
-    // ส่งไป backend
+    // ✅ payload ให้ตรงกับ CreateParcelDto
+    const requestBody = {
+      userId: selectedResidentId.value, // 👈 เจ้าของพัสดุ = resident จริง ๆ
+      trackingNumber: form.value.trackingNumber,
+      recipientName: form.value.recipientName,
+      parcelType: form.value.parcelType,
+      senderName: form.value.senderName,
+      companyId: Number(form.value.companyId)
+    }
+
     const savedParcel = await addItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      parcelData,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+      requestBody,
       router
     )
 
-    if (!savedParcel) {
-      emit('scan-error')
-      router.replace({ name: 'staffparcels' })
+    if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
       return
     }
 
-    // บันทึกลง Pinia
-    parcelStore.addParcel(savedParcel)
-    console.log('✅ Parcel saved to store:', savedParcel)
+    parcelManager.addParcel(savedParcel)
 
-    // ส่ง emit ไป parent แทนการแสดง popup ในไฟล์นี้
-    emit('scan-success')
+    addSuccess.value = true
+    setTimeout(() => (addSuccess.value = false), 3000)
+    console.log('✅ Parcel saved successfully:', savedParcel)
 
     // reset form
-    Object.keys(form.value).forEach(
-      (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
-    )
-    previewUrl.value = null
-
-    router.replace({ name: 'staffparcels' })
+    selectedResidentId.value = null
+    recipientSearch.value = ''
+    form.value = {
+      trackingNumber: '',
+      recipientName: '',
+      roomNumber: '',
+      parcelType: '',
+      contact: '',
+      status: 'pending',
+      pickupAt: null,
+      updateAt: null,
+      senderName: '',
+      companyId: '',
+      receiveAt: null
+    }
   } catch (err) {
     console.error('❌ Failed to add parcel:', err)
-    emit('scan-error')
-    router.replace({ name: 'staffparcels' })
+    error.value = true
+    setTimeout(() => (error.value = false), 3000)
   }
 }
 const isAllEmpty = computed(() => {
@@ -448,7 +585,62 @@ const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-onMounted(async () => {isCollapsed.value= true})
+// โหลดรายชื่อ resident ตอนเข้าเพจ
+onMounted(async () => {
+  isCollapsed.value = true
+  const auth = useAuthManager()
+  console.log('staff login id:', auth.user.id)
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+    console.log('Residents loaded:', residents.value)
+  } catch (e) {
+    console.error('Failed to load residents:', e)
+  }
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}` // ✅ ส่ง token
+      }
+    })
+    console.log('📦 Raw company response:', res.data)
+
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    if (typeof rawData === 'string') {
+      // กรณี server ส่ง string → ใช้ regex ดึง companyId และ companyName
+      const companyMatches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = companyMatches.map((str) => {
+        const idMatch = str.match(/"companyId":(\d+)/)
+        const nameMatch = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: idMatch ? Number(idMatch[1]) : null,
+          companyName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      // กรณี server ส่ง array มาเลย
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
+    console.log('✅ companyList:', companyList.value)
+  } catch (err) {
+    console.error('❌ Error fetching companies:', err)
+  }
+})
 </script>
 
 <template>
@@ -615,8 +807,7 @@ onMounted(async () => {isCollapsed.value= true})
             Tractify
           </span>
         </div> -->
-        <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y bg-[#0E4B90] divide-[#0e4b90] space-y-1">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -636,10 +827,9 @@ onMounted(async () => {isCollapsed.value= true})
           <!-- <a
             href="#"
             class="flex items-center p-2 rounded hover:bg-blue-700"
-            @click="showHomePageWebStaff"
-          >
-            <span class="mr-2">
-              <svg
+            @click="showHomePageWeb"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -652,9 +842,9 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </span>
-            Home
-          </a> -->
-          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
+            Home</a
+          > -->
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -671,10 +861,10 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
-          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-            <span class="mr-2">
-              <svg
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -689,11 +879,9 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </span>
-            Profile
-          </a> -->
-
-          <!-- Dashboard -->
-          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            Profile</a
+          > -->
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -708,30 +896,26 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showDashBoardPage"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>Dashboard</span>
-          </a> -->
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Dashboard</a
+          > -->
           <SidebarItem
             title=" Manage Parcel"
-            @click="showManageParcelPage"
             class="bg-[#81AFEA] cursor-default"
           >
             <template #icon>
@@ -766,7 +950,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Parcel</a
           > -->
-          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -781,7 +965,7 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -799,10 +983,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Residents</a
           > -->
-          <!-- <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -817,7 +998,7 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -836,7 +1017,7 @@ onMounted(async () => {isCollapsed.value= true})
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <!-- <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -883,9 +1064,9 @@ onMounted(async () => {isCollapsed.value= true})
         </SidebarItem>
       </aside>
 
-      <!-- Content -->
       <main class="flex-1 p-6">
-        <div class="flex space-x-1">
+        <!-- Header -->
+        <div class="flex space-x-1 mb-4">
           <svg
             width="25"
             height="25"
@@ -898,24 +1079,23 @@ onMounted(async () => {isCollapsed.value= true})
               fill="#185DC0"
             />
           </svg>
-
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Add</h2>
         </div>
 
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <!-- ✅ Alert Popup -->
-          <div class="fixed top-5 left-5 z-50">
-            <!-- <AlertPopUp
-              v-if="greenPopup.add.state"
-              :titles="'Success!!'"
-              message="Successfully Added."
+          <!-- Alert Popups -->
+          <!-- <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp
+              v-if="addSuccess"
+              :titles="'Add New Parcel is Successfull.'"
+              message="Success!!"
               styleType="green"
-              :operate="'add'"
-              @closePopUp="closeGreenPopup"
-            /> -->
+              operate="addSuccessMessage"
+              @closePopUp="closePopUp"
+            />
             <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -925,7 +1105,7 @@ onMounted(async () => {isCollapsed.value= true})
               @closePopUp="closePopUp"
             />
             <AlertPopUp
-              v-if="error"
+              v-if="roomNumberError"
               :titles="'Room Number can only be typed as number.'"
               message="Error!!"
               styleType="red"
@@ -933,7 +1113,7 @@ onMounted(async () => {isCollapsed.value= true})
               @closePopUp="closePopUp"
             />
             <AlertPopUp
-              v-if="error"
+              v-if="SenderNameError"
               :titles="'Sender Name can only be typed as text.'"
               message="Error!!"
               styleType="red"
@@ -941,29 +1121,65 @@ onMounted(async () => {isCollapsed.value= true})
               @closePopUp="closePopUp"
             />
             <AlertPopUp
-              v-if="error"
+              v-if="parcelTypeError"
               :titles="'Parcel Type can only be typed as text.'"
               message="Error!!"
               styleType="red"
               operate="parcelType "
               @closePopUp="closePopUp"
             />
-          </div>
-          <!-- <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
-              v-if="redPopup.add.state"
-              :titles="'Error!!'"
-              message="Can Not Added."
+              v-if="trackingNumberError"
+              :titles="'Tracking Number is required.'"
+              message="Error!!"
               styleType="red"
-              :operate="'add'"
-              @closePopUp="closeRedPopup"
+              operate="trackingNumber"
+              @closePopUp="closePopUp('trackingNumber')"
+            />
+            <AlertPopUp
+              v-if="recipientNameError"
+              :titles="'Recipient Name is required.'"
+              message="Error!!"
+              styleType="red"
+              operate="recipientName"
+              @closePopUp="closePopUp('recipientName')"
+            />
+
+           
+            <AlertPopUp
+              v-if="parcelTypeErrorRequired"
+              :titles="'Parcel Type is required.'"
+              message="Error!!"
+              styleType="red"
+              operate="parcelType"
+              @closePopUp="closePopUp('parcelType')"
+            />
+
+          
+            <AlertPopUp
+              v-if="senderNameError"
+              :titles="'Sender Name is required.'"
+              message="Error!!"
+              styleType="red"
+              operate="senderName"
+              @closePopUp="closePopUp('senderName')"
+            />
+
+           
+            <AlertPopUp
+              v-if="companyIdError"
+              :titles="'Company ID is required.'"
+              message="Error!!"
+              styleType="red"
+              operate="companyId"
+              @closePopUp="closePopUp('companyId')"
             />
           </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <!-- 🟦 Left side -->
+            <!-- Left side: Scanner & Form -->
             <div class="space-y-6">
-              <!-- Scanner -->
+              <!-- Scanner Box -->
               <div
                 id="scanner"
                 class="w-full h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
@@ -971,7 +1187,6 @@ onMounted(async () => {isCollapsed.value= true})
                 <span v-if="!scanningMode && !videoStream" class="text-white">
                   Scan QR/Barcode or Take Picture
                 </span>
-
                 <!-- Scanner Overlay -->
                 <div
                   id="scanner-overlay"
@@ -987,7 +1202,6 @@ onMounted(async () => {isCollapsed.value= true})
                     @click="stopScan"
                   />
                 </div>
-
                 <!-- Video Preview -->
                 <video
                   ref="videoRef"
@@ -1006,15 +1220,15 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </div>
 
-              <!-- 🟨 Buttons -->
-              <div class="flex flex-wrap justify-center gap-3">
+              <!-- Scanner Buttons -->
+              <div class="flex flex-wrap gap-3">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <ButtonWeb
+                <!-- <ButtonWeb
                   label="Scan Barcode"
                   color="green"
                   @click="startScan('barcode')"
@@ -1031,124 +1245,287 @@ onMounted(async () => {isCollapsed.value= true})
                   color="orange"
                   @click="capturePhoto"
                   :disabled="!videoStream"
-                />
-              </div>
-
-              <!-- 🟩 Inputs -->
-              <div class="space-y-3">
-                <input
-                  v-model="form.recipientName"
-                  placeholder="Recipient Name"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.trackingNumber"
-                  placeholder="Tracking Number"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.senderName"
-                  placeholder="Sender Name"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.roomNumber"
-                  placeholder="Room Number"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.parcelType"
-                  placeholder="Parcel Type"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.contact"
-                  placeholder="Contact Number"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.companyId"
-                  placeholder="Company ID"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
-                <input
-                  v-model="form.status"
-                  placeholder="Status (Default: Pending)"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  disabled
-                />
-              </div>
-
-              <!-- 🟪 Save/Cancel -->
-              <div class="flex justify-end space-x-3">
-                <!-- <ButtonWeb
-                  label="Save"
-                  color="green"
-                  :disabled="!form.recipientName || !form.trackingNumber"
-                  @click="saveParcel"
                 /> -->
+              </div>
+
+              <!-- Form Inputs -->
+              <div class="space-y-3">
+                <!-- Tracking number -->
+                <div>
+                  <label class="block font-semibold mb-1">
+                    Tracking number <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="form.trackingNumber"
+                    placeholder="Enter tracking number"
+                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  />
+                </div>
+
+                <!-- Recipient -->
+                <div>
+                  <label class="block font-semibold mb-1">
+                    Recipient <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="recipientSearch"
+                    type="text"
+                    placeholder="Enter name/ email / room number"
+                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                  />
+
+                  <!-- suggestion list -->
+                  <ul
+                    v-if="showSuggestions"
+                    class="absolute z-10 mt-1 w-full bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                  >
+                    <li
+                      v-for="r in filteredResidents"
+                      :key="r.userId"
+                      @click="selectResident(r)"
+                      class="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                    >
+                      {{ r.fullName }} (Room {{ r.roomNumber }}) — {{ r.email }}
+                    </li>
+                    <li
+                      v-if="filteredResidents.length === 0"
+                      class="px-3 py-1 text-gray-400"
+                    >
+                      No residents found matching your search terms.
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Room number -->
+                <div>
+                  <label class="block font-semibold mb-1"
+                    >Room Number <span class="text-red-500">*</span></label
+                  >
+                  <input
+                    placeholder="Select recipient first"
+                    type="text"
+                    :value="selectedResident ? selectedResident.roomNumber : ''"
+                    class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
+                    disabled
+                  />
+                </div>
+
+                <!-- Parcel type -->
+                <div>
+                  <label class="block font-semibold mb-1">
+                    Parcel Type <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="form.parcelType"
+                    placeholder="Enter Parcel Type: Box / Document / Envelope"
+                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  />
+                </div>
+
+                <!-- Status -->
+                <div>
+                  <label class="block font-semibold mb-1">
+                    Status <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="form.status"
+                    class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
+                    disabled
+                  />
+                </div>
+
+                <!-- Sender Name -->
+                <div>
+                  <label class="block font-semibold mb-1">Sender Name</label>
+                  <input
+                    v-model="form.senderName"
+                    placeholder="Enter sender name"
+                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  />
+                </div>
+
+                <!-- Company -->
+                <div>
+                  <label class="block font-semibold mb-1">
+                    Company <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    v-model="form.companyId"
+                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  >
+                    <option disabled value="">Select Company</option>
+                    <option
+                      v-for="company in companyList"
+                      :key="company.companyId"
+                      :value="company.companyId"
+                    >
+                      {{ company.companyName }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Save / Cancel Buttons -->
+              <div class="flex justify-end space-x-3 mt-3">
                 <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
                   :class="{
-                    'bg-gray-400 text-gray-200 cursor-default': isAllEmpty,
-                    'bg-black hover:bg-gray-600 text-white': !isAllEmpty
+                    'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
+                    'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
-                  :disabled="isAllEmpty"
+                  :disabled="isAllFilled"
                 />
-                <ButtonWeb
-                  label="Cancel"
-                  color="red"
-                  :disabled="!form.recipientName && !form.trackingNumber"
-                  @click="cancelParcel"
-                />
+                <ButtonWeb label="Cancel" color="red" @click="cancelParcel" />
               </div>
             </div>
 
-            <!-- 🟥 Right side -->
+            <!-- Right side: Display Parcel Information -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
-                <h2
-                  @click="showAddParcelPage"
-                  class="text-2xl font-bold text-[#185dc0] mb-4 cursor-pointer"
-                >
-                  < Go Back To Add
-                </h2>
+                <ButtonWeb
+                  label="Go Back"
+                  color="blue"
+                  @click="showManageParcelPage"
+                  class="w-full md:w-auto"
+                />
               </div>
 
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
               </h2>
+              <AlertPopUp
+                v-if="addSuccess"
+                :titles="'Add New Parcel is Successfull.'"
+                message="Success!!"
+                styleType="green"
+                operate="addSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="error"
+                :titles="'There is a problem. Please try again later.'"
+                message="Error!!"
+                styleType="red"
+                operate="problem"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="roomNumberError"
+                :titles="'Room Number can only be typed as number.'"
+                message="Error!!"
+                styleType="red"
+                operate="roomNumber"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="SenderNameError"
+                :titles="'Sender Name can only be typed as text.'"
+                message="Error!!"
+                styleType="red"
+                operate="SenderName"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="parcelTypeError"
+                :titles="'Parcel Type can only be typed as text.'"
+                message="Error!!"
+                styleType="red"
+                operate="parcelType "
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="trackingNumberError"
+                :titles="'Tracking Number is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="trackingNumber"
+                @closePopUp="closePopUp('trackingNumber')"
+              />
 
+              <!-- Alert สำหรับ Recipient Name -->
+              <AlertPopUp
+                v-if="recipientNameError"
+                :titles="'Recipient Name is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="recipientName"
+                @closePopUp="closePopUp('recipientName')"
+              />
+
+              <!-- Alert สำหรับ Parcel Type -->
+              <AlertPopUp
+                v-if="parcelTypeErrorRequired"
+                :titles="'Parcel Type is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="parcelType"
+                @closePopUp="closePopUp('parcelType')"
+              />
+
+              <!-- Alert สำหรับ Sender Name -->
+              <AlertPopUp
+                v-if="senderNameError"
+                :titles="'Sender Name is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="senderName"
+                @closePopUp="closePopUp('senderName')"
+              />
+
+              <!-- Alert สำหรับ Company ID -->
+              <AlertPopUp
+                v-if="companyIdError"
+                :titles="'Company ID is required.'"
+                message="Error!!"
+                styleType="red"
+                operate="companyId"
+                @closePopUp="closePopUp('companyId')"
+              />
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
-                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
+                  <span>Tracking:</span>
+                  <span>{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span><span>{{ form.trackingNumber }}</span>
+                  <span>Recipient:</span>
+                  <span>{{
+                    selectedResident
+                      ? selectedResident.fullName
+                      : form.recipientName
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Sender:</span><span>{{ form.senderName }}</span>
+                  <span>Room:</span>
+                  <span>{{
+                    selectedResident ? selectedResident.roomNumber : ''
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Room:</span><span>{{ form.roomNumber }}</span>
+                  <span>Type:</span>
+                  <span>{{ form.parcelType }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Type:</span><span>{{ form.parcelType }}</span>
+                  <span>Status:</span>
+                  <span>{{ form.status }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Contact:</span><span>{{ form.contact }}</span>
+                  <span>Company:</span>
+                  <span>
+                    {{
+                      companyList.find((c) => c.companyId === form.companyId)
+                        ?.companyName || ''
+                    }}
+                  </span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Status:</span><span>{{ form.status }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Company ID:</span><span>{{ form.companyId }}</span>
+                  <span>Sender:</span>
+                  <span>{{ form.senderName }}</span>
                 </div>
               </div>
 
-              <!-- 🖼️ Image Preview -->
+              <!-- Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
                   Parcel Picture
@@ -1165,11 +1542,11 @@ onMounted(async () => {isCollapsed.value= true})
                 </button>
               </div>
 
-              <!-- 💾 Saved Parcels -->
+              <!-- Saved Parcels -->
               <div class="mt-6">
-                <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
+                <!-- <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
-                </h3>
+                </h3> -->
                 <ul class="space-y-2">
                   <li
                     v-for="(p, i) in savedParcels"

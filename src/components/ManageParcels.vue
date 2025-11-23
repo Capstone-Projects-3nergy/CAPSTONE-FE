@@ -1200,7 +1200,7 @@ const closePopUp = (operate) => {
 
               <!-- Add Parcel -->
               <button
-                @click="showAddParcelPage"
+                @click="showParcelScannerPage"
                 class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
               >
                 <svg

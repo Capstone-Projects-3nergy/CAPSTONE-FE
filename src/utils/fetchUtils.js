@@ -384,6 +384,30 @@ async function confirmParcelPickup(url, id, router) {
     return null
   }
 }
+async function confirmParcelReceived(url, id, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/confirm`, options, router)
+
+    if (!res) return null
+
+    if (res.ok) {
+      return await res.json() // backend return ParcelDetailDto
+    }
+
+    return { status: res.status }
+  } catch (error) {
+    console.error(`Network error: ${error}`)
+    return null
+  }
+}
+
 
 export {
   getItemById,
@@ -400,5 +424,6 @@ export {
   editItemWithFile,
   deleteFile,
   updateParcelStatus,
-  confirmParcelPickup
+  confirmParcelPickup,
+  confirmParcelReceived
 }

@@ -89,7 +89,7 @@ const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
-const residents = ref([])
+// const residents = ref([])
 
 // คำค้นที่ staff พิมพ์ในช่อง Recipient
 const recipientSearch = ref('')
@@ -98,10 +98,10 @@ const recipientSearch = ref('')
 const selectedResidentId = ref(null)
 
 // object resident ที่เลือก
-const selectedResident = computed(
-  () =>
-    residents.value.find((r) => r.userId === selectedResidentId.value) || null
-)
+// const selectedResident = computed(
+//   () =>
+//     residents.value.find((r) => r.userId === selectedResidentId.value) || null
+// )
 
 // แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
 const showSuggestions = computed(
@@ -172,7 +172,7 @@ onMounted(async () => {
   // ดึงจาก backend
   isCollapsed.value = true
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
   )
 
@@ -198,16 +198,16 @@ onMounted(async () => {
     parcelManager.setParcels(mapped)
   }
   // โหลด residents ตามเดิม
-  try {
-    const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
-      router
-    )
-    residents.value = res || []
-    console.log('Residents loaded:', residents.value)
-  } catch (e) {
-    console.error('Failed to load residents:', e)
-  }
+  // try {
+  //   const res = await getItems(
+  //     `${import.meta.env.VITE_BASE_URL}/api/residents`,
+  //     router
+  //   )
+  //   residents.value = res || []
+  //   console.log('Residents loaded:', residents.value)
+  // } catch (e) {
+  //   console.error('Failed to load residents:', e)
+  // }
   console.log(filteredParcels.value)
 })
 // onMounted(async () => {
@@ -418,10 +418,8 @@ const filteredParcels = computed(() => {
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
- // 🔍 filter เฉพาะพัสดุของ user คนนี้
-  result = result.filter(
-    (p) => p.recipientName === authStore.user.fullName
-  )
+  // 🔍 filter เฉพาะพัสดุของ user คนนี้
+  // result = result.filter((p) => p.recipientName === authStore.user.fullName)
 
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
@@ -1217,10 +1215,10 @@ const showProfileResidentPage = async function () {
                 <option disabled>Sort by:</option>
                 <option>Newest</option>
                 <option>Oldest</option>
-                <option>Name (A→Z)</option>
+                <!-- <option>Name (A→Z)</option>
                 <option>Name (Z→A)</option>
                 <option>Room (A→Z)</option>
-                <option>Room (Z→A)</option>
+                <option>Room (Z→A)</option> -->
                 <option>Status (A→Z)</option>
                 <option>Status (Z→A)</option>
               </select>

@@ -1016,14 +1016,14 @@ const closePopUp = (operate) => {
         />
         <!-- Form -->
         <form class="bg-white p-6 rounded-lg shadow space-y-6">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-end mb-4">
             <!-- <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2> -->
-            <!-- <ButtonWeb
+            <ButtonWeb
               label="Scan Parcel"
               color="blue"
               @click="showParcelScannerPage"
               class="w-full md:w-auto"
-            /> -->
+            />
           </div>
           <!-- Row 1 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

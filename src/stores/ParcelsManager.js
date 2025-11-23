@@ -117,7 +117,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
       parcel[index].status = newStatus
       parcel[index].updatedAt = new Date().toISOString()
 
-      if (newStatus === 'Received') {
+      if (newStatus === 'Received' || newStatus === 'RECEIVED') {
         parcel[index].receivedAt = new Date().toISOString()
       }
 
