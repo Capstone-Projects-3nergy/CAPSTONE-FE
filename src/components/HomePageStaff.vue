@@ -53,6 +53,10 @@ import {
 import package1 from '@/assets/images/Package1.png'
 import package2 from '@/assets/images/Package2.png'
 import package3 from '@/assets/images/Package3.png'
+import parcels1 from '@/assets/images/parcels.jpg'
+import parcels2 from '@/assets/images/parcels2.jpg'
+import parcels3 from '@/assets/images/parcels3.jpg'
+import parcels4 from '@/assets/images/parcels4.jpg'
 import newsImg from '@/assets/images/New.png'
 import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
@@ -64,7 +68,7 @@ const loginManager = useAuthManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = [package1, package2, package3]
+const slides = [parcels1, parcels2, parcels3, parcels4]
 const currentIndex = ref(0)
 const showParcelScanner = ref(false)
 const showResidentParcels = ref(false)
@@ -628,18 +632,63 @@ function formatDateTime(datetimeStr) {
             </h1>
             <!-- Slider -->
             <div
-              class="relative bg-white h-48 rounded-xl flex items-center justify-center shadow border border-gray-300 px-8"
+              class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
             >
-              <!-- Prev -->
+              <!-- ปุ่มซ้าย -->
               <button
                 @click="prevSlide"
-                class="absolute left-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
+                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
               >
                 ‹
               </button>
 
-              <!-- Image Box -->
-              <div
+              <!-- รูปภาพ + overlay + ข้อความ -->
+              <div class="relative w-full h-full">
+                <img
+                  :src="slides[currentIndex]"
+                  class="w-full h-full object-cover"
+                />
+
+                <!-- overlay ไล่สี -->
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"
+                ></div>
+
+                <!-- ข้อความบนรูป -->
+                <div
+                  class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20"
+                >
+                  <h1 class="text-2xl font-bold drop-shadow-lg">
+                    Welcome to Tractify
+                  </h1>
+                  <p class="text-sm opacity-90">
+                    Track and manage your parcels easily
+                  </p>
+                </div>
+              </div>
+
+              <!-- ปุ่มขวา -->
+              <button
+                @click="nextSlide"
+                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
+              >
+                ›
+              </button>
+            </div>
+
+            <!-- <div
+              class="relative bg-white h-48 rounded-xl flex items-center justify-center shadow border border-gray-300 px-8"
+            > -->
+            <!-- Prev -->
+            <!-- <button
+                @click="prevSlide"
+                class="absolute left-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
+              >
+                ‹
+              </button> -->
+
+            <!-- Image Box -->
+            <!-- <div
                 class="w-full max-w-2xl h-32 rounded-xl overflow-hidden shadow-md flex items-center justify-center"
               >
                 <img
@@ -647,18 +696,18 @@ function formatDateTime(datetimeStr) {
                   alt="slide"
                   class="w-full h-full object-cover object-center"
                 />
-              </div>
+              </div> -->
 
-              <!-- Next -->
-              <button
+            <!-- Next -->
+            <!-- <button
                 @click="nextSlide"
                 class="absolute right-3 bg-white/70 hover:bg-white text-blue-700 p-2 rounded-full shadow text-2xl transition"
               >
                 ›
-              </button>
+              </button> -->
 
-              <!-- Dots -->
-              <div class="absolute bottom-2 flex space-x-2">
+            <!-- Dots -->
+            <!-- <div class="absolute bottom-2 flex space-x-2">
                 <span
                   v-for="(s, i) in slides"
                   :key="i"
@@ -669,14 +718,14 @@ function formatDateTime(datetimeStr) {
                   class="w-2.5 h-2.5 rounded-full transition-all"
                 ></span>
               </div>
-            </div>
+            </div> -->
           </section>
 
           <!-- Content Boxes -->
           <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
             <!-- NEWS -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
               <div
@@ -688,7 +737,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- EVENT -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
               <div
@@ -700,7 +749,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- COMMUNITY -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">
                 💬 COMMUNITY

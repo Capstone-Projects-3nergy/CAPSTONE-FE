@@ -54,10 +54,10 @@ import {
 import package1 from '@/assets/images/Package1.png'
 import package2 from '@/assets/images/Package2.png'
 import package3 from '@/assets/images/Package3.png'
-import parcels1 from '@/assets/images/parcels .png'
-import parcels2 from '@/assets/images/parcels2 .png'
-import parcels3 from '@/assets/images/parcels3 .png'
-import parcels4 from '@/assets/images/parcels4 .png'
+import parcels1 from '@/assets/images/parcels.jpg'
+import parcels2 from '@/assets/images/parcels2.jpg'
+import parcels3 from '@/assets/images/parcels3.jpg'
+import parcels4 from '@/assets/images/parcels4.jpg'
 import newsImg from '@/assets/images/New.png'
 import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
@@ -592,7 +592,7 @@ function formatDateTime(datetimeStr) {
           <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
             <!-- NEWS -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
               <div
@@ -604,7 +604,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- EVENT -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
               <div
@@ -616,7 +616,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- COMMUNITY -->
             <div
-              class="bg-white p-2.5 rounded-xl shadow border border-gray-200 flex flex-col"
+              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
               <h2 class="font-bold mb-2 text-blue-800 text-base">
                 💬 COMMUNITY
