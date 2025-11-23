@@ -1377,12 +1377,7 @@ onMounted(async () => {
                   }"
                   :disabled="isAllFilled"
                 />
-                <ButtonWeb
-                  label="Cancel"
-                  color="red"
-                  :disabled="!form.recipientName && !form.trackingNumber"
-                  @click="cancelParcel"
-                />
+                <ButtonWeb label="Cancel" color="red" @click="cancelParcel" />
               </div>
             </div>
 

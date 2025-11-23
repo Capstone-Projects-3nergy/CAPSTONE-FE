@@ -89,7 +89,7 @@ const route = useRoute()
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
-const residents = ref([])
+// const residents = ref([])
 
 // คำค้นที่ staff พิมพ์ในช่อง Recipient
 const recipientSearch = ref('')
@@ -98,10 +98,10 @@ const recipientSearch = ref('')
 const selectedResidentId = ref(null)
 
 // object resident ที่เลือก
-const selectedResident = computed(
-  () =>
-    residents.value.find((r) => r.userId === selectedResidentId.value) || null
-)
+// const selectedResident = computed(
+//   () =>
+//     residents.value.find((r) => r.userId === selectedResidentId.value) || null
+// )
 
 // แสดง suggestion เฉพาะตอนมีคำค้น และยังไม่ได้เลือกเป๊ะ ๆ
 const showSuggestions = computed(
@@ -198,16 +198,16 @@ onMounted(async () => {
     parcelManager.setParcels(mapped)
   }
   // โหลด residents ตามเดิม
-  try {
-    const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
-      router
-    )
-    residents.value = res || []
-    console.log('Residents loaded:', residents.value)
-  } catch (e) {
-    console.error('Failed to load residents:', e)
-  }
+  // try {
+  //   const res = await getItems(
+  //     `${import.meta.env.VITE_BASE_URL}/api/residents`,
+  //     router
+  //   )
+  //   residents.value = res || []
+  //   console.log('Residents loaded:', residents.value)
+  // } catch (e) {
+  //   console.error('Failed to load residents:', e)
+  // }
   console.log(filteredParcels.value)
 })
 // onMounted(async () => {
