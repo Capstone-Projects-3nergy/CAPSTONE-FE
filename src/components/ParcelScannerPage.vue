@@ -1080,7 +1080,7 @@ onMounted(async () => {
             />
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Add</h2>
         </div>
 
         <div
@@ -1390,9 +1390,9 @@ onMounted(async () => {
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
                 <ButtonWeb
-                  label="Go Back To Add"
+                  label="Go Back"
                   color="blue"
-                  @click="showAddParcelPage"
+                  @click="showManageParcelPage"
                   class="w-full md:w-auto"
                 />
               </div>
