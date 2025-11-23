@@ -779,7 +779,7 @@ const toggleSidebar = () => {
                 type="button"
                 label="Confirm"
                 color="blue"
-                @click="confirmParcelPopUp(parcel.parcelId)"
+                @click="confirmParcelPopUp(parcel)"
               />
             </div>
           </form>
