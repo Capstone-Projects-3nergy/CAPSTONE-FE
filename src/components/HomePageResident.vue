@@ -17,7 +17,7 @@ const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
-const slides = ['/image/parcels.jpg','/image/parcels2.jpg','/image/parcels3.jpg']
+const slides = ['/image/parcels.jpg','/image/parcels2.jpg','/image/parcels3.jpg','/image/parcels4.jpg']
 // const slides = [
 //   { title: "Fast Delivery", desc: "Track parcels with ease" },
 //   { title: "Secure Handling", desc: "Your packages are safe" },
@@ -73,6 +73,11 @@ function prevSlide() {
 function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
 }
+
+
+
+
+
 // const showParcelScannerPage = async function () {
 //   router.replace({ name: 'parceldcanner' })
 //   showParcelScanner.value = true
@@ -413,33 +418,75 @@ console.log(registerStore.user)
           </h1>
 
 
+
+
           <!-- // แถบ รูป หน้า homepage/* -->
-          
-<div
+          <div
   class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
 >
   <!-- ปุ่มซ้าย -->
   <button
     @click="prevSlide"
-    class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-10"
+    class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
   >
     ‹
   </button>
 
-  <!-- รูปภาพ -->
-  <img 
-    :src="slides[currentIndex]" 
-    class="w-full h-full object-cover"
-  />
+  <!-- รูปภาพ + overlay + ข้อความ -->
+  <div class="relative w-full h-full">
+    <img 
+      :src="slides[currentIndex]" 
+      class="w-full h-full object-cover"
+    />
+
+    <!-- overlay ไล่สี -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+
+    <!-- ข้อความบนรูป -->
+    <div class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20">
+      <h1 class="text-2xl font-bold drop-shadow-lg">Welcome to Tractify</h1>
+      <p class="text-sm opacity-90">Track and manage your parcels easily</p>
+    </div>
+  </div>
 
   <!-- ปุ่มขวา -->
   <button
+    @click="nextSlide"
+    class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
+  >
+    ›
+  </button>
+</div>
+
+
+
+          <!-- // แถบ รูป หน้า homepage/* เดิม -->
+          
+<!-- <div
+  class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
+> -->
+  <!-- ปุ่มซ้าย -->
+  <!-- <button
+    @click="prevSlide"
+    class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-10"
+  >
+    ‹
+  </button> -->
+
+  <!-- รูปภาพ -->
+  <!-- <img 
+    :src="slides[currentIndex]" 
+    class="w-full h-full object-cover"
+  /> -->
+
+  <!-- ปุ่มขวา -->
+  <!-- <button
     @click="nextSlide"
     class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-10"
   >
     ›
   </button>
-</div>
+</div> -->
 
 
 
@@ -497,14 +544,15 @@ console.log(registerStore.user)
 <!-- </div> -->
 
 
+</section>
+
+    
 
 
-
-
-        </section>
+<!-- แบบเดิม -->
 
         <!-- Sections -->
-        <section class="grid grid-cols-3 gap-4 px-4 pb-4">
+        <!-- <section class="grid grid-cols-3 gap-4 px-4 pb-4">
           <div class="bg-white p-4 rounded shadow">
             <h2 class="font-bold mb-2 text-blue-800">📰 NEWS</h2>
             <div
@@ -529,7 +577,9 @@ console.log(registerStore.user)
               Community Posts
             </div>
           </div>
-        </section>
+        </section> -->
+
+
         <div class="p-4">
           <div class="flex space-x-1">
             <svg
