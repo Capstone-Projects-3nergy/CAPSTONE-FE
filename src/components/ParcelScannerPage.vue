@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import Quagga from 'quagga'
@@ -448,7 +448,9 @@ const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-onMounted(async () => {isCollapsed.value= true})
+onMounted(async () => {
+  isCollapsed.value = true
+})
 </script>
 
 <template>
@@ -615,8 +617,7 @@ onMounted(async () => {isCollapsed.value= true})
             Tractify
           </span>
         </div> -->
-        <!-- เนื้อหาใน Sidebar -->
-        <nav class="flex-1 divide-y bg-[#0E4B90] divide-[#0e4b90] space-y-1">
+        <nav class="flex-1 divide-y divide-[#0E4B90] space-y-1">
           <SidebarItem title="Home" @click="showHomePageStaffWeb">
             <template #icon>
               <svg
@@ -636,10 +637,9 @@ onMounted(async () => {isCollapsed.value= true})
           <!-- <a
             href="#"
             class="flex items-center p-2 rounded hover:bg-blue-700"
-            @click="showHomePageWebStaff"
-          >
-            <span class="mr-2">
-              <svg
+            @click="showHomePageWeb"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -652,9 +652,9 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </span>
-            Home
-          </a> -->
-          <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
+            Home</a
+          > -->
+          <SidebarItem title="Profile (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -671,10 +671,10 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
-          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-            <span class="mr-2">
-              <svg
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
+            ><span class="mr-2"
+              ><svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -689,11 +689,9 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </span>
-            Profile
-          </a> -->
-
-          <!-- Dashboard -->
-          <!-- <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            Profile</a
+          > -->
+          <SidebarItem title="Dashboard (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -708,30 +706,26 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
-          <!-- <a
-            href="#"
-            class="flex items-center gap-3 p-4 hover:bg-blue-600 rounded"
-            @click="showDashBoardPage"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                fill="white"
-              />
-            </svg>
-
-            <span>Dashboard</span>
-          </a> -->
+          </SidebarItem>
+          <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+            <span class="mr-2"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                  fill="white"
+                />
+              </svg>
+            </span>
+            Dashboard</a
+          > -->
           <SidebarItem
             title=" Manage Parcel"
-            @click="showManageParcelPage"
             class="bg-[#81AFEA] cursor-default"
           >
             <template #icon>
@@ -766,7 +760,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Parcel</a
           > -->
-          <!-- <SidebarItem title="Manage Residents" @click="ShowManageResidentPage">
+          <SidebarItem title="Manage Residents (Next Release)">
             <template #icon>
               <svg
                 width="25"
@@ -781,7 +775,7 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -799,10 +793,7 @@ onMounted(async () => {isCollapsed.value= true})
             </span>
             Manage Residents</a
           > -->
-          <!-- <SidebarItem
-            title="Manage Announcements"
-            @click="ShowManageAnnouncementPage"
-          >
+          <SidebarItem title="Manage Announcements (Next Release)">
             <template #icon>
               <svg
                 width="24"
@@ -817,7 +808,7 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </svg>
             </template>
-          </SidebarItem> -->
+          </SidebarItem>
           <!-- <a href="#" class="flex items-center p-2 rounded v hover:bg-blue-700"
             ><span class="mr-2"
               ><svg
@@ -836,7 +827,7 @@ onMounted(async () => {isCollapsed.value= true})
             Manage Announcements</a
           > -->
           <!-- 🟢 Scarn Parcel -->
-          <!-- <SidebarItem title="Scarn parcel" class="bg-[#81AFEA] cursor-default">
+          <!-- <SidebarItem title="Scarn parcel" @click="showParcelScannerPage">
             <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -883,9 +874,9 @@ onMounted(async () => {isCollapsed.value= true})
         </SidebarItem>
       </aside>
 
-      <!-- Content -->
       <main class="flex-1 p-6">
-        <div class="flex space-x-1">
+        <!-- Header -->
+        <div class="flex space-x-1 mb-4">
           <svg
             width="25"
             height="25"
@@ -898,7 +889,6 @@ onMounted(async () => {isCollapsed.value= true})
               fill="#185DC0"
             />
           </svg>
-
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Parcel Scanner</h2>
         </div>
@@ -906,16 +896,8 @@ onMounted(async () => {isCollapsed.value= true})
         <div
           class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <!-- ✅ Alert Popup -->
+          <!-- Alert Popups -->
           <div class="fixed top-5 left-5 z-50">
-            <!-- <AlertPopUp
-              v-if="greenPopup.add.state"
-              :titles="'Success!!'"
-              message="Successfully Added."
-              styleType="green"
-              :operate="'add'"
-              @closePopUp="closeGreenPopup"
-            /> -->
             <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -924,46 +906,12 @@ onMounted(async () => {isCollapsed.value= true})
               operate="problem"
               @closePopUp="closePopUp"
             />
-            <AlertPopUp
-              v-if="error"
-              :titles="'Room Number can only be typed as number.'"
-              message="Error!!"
-              styleType="red"
-              operate="roomNumber"
-              @closePopUp="closePopUp"
-            />
-            <AlertPopUp
-              v-if="error"
-              :titles="'Sender Name can only be typed as text.'"
-              message="Error!!"
-              styleType="red"
-              operate="SenderName"
-              @closePopUp="closePopUp"
-            />
-            <AlertPopUp
-              v-if="error"
-              :titles="'Parcel Type can only be typed as text.'"
-              message="Error!!"
-              styleType="red"
-              operate="parcelType "
-              @closePopUp="closePopUp"
-            />
           </div>
-          <!-- <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
-              v-if="redPopup.add.state"
-              :titles="'Error!!'"
-              message="Can Not Added."
-              styleType="red"
-              :operate="'add'"
-              @closePopUp="closeRedPopup"
-            />
-          </div> -->
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <!-- 🟦 Left side -->
+            <!-- Left side: Scanner & Form -->
             <div class="space-y-6">
-              <!-- Scanner -->
+              <!-- Scanner Box -->
               <div
                 id="scanner"
                 class="w-full h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
@@ -971,7 +919,6 @@ onMounted(async () => {isCollapsed.value= true})
                 <span v-if="!scanningMode && !videoStream" class="text-white">
                   Scan QR/Barcode or Take Picture
                 </span>
-
                 <!-- Scanner Overlay -->
                 <div
                   id="scanner-overlay"
@@ -987,7 +934,6 @@ onMounted(async () => {isCollapsed.value= true})
                     @click="stopScan"
                   />
                 </div>
-
                 <!-- Video Preview -->
                 <video
                   ref="videoRef"
@@ -1006,7 +952,7 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </div>
 
-              <!-- 🟨 Buttons -->
+              <!-- Scanner Buttons -->
               <div class="flex flex-wrap justify-center gap-3">
                 <ButtonWeb
                   label="Scan QR"
@@ -1034,21 +980,16 @@ onMounted(async () => {isCollapsed.value= true})
                 />
               </div>
 
-              <!-- 🟩 Inputs -->
+              <!-- Form Inputs -->
               <div class="space-y-3">
-                <input
-                  v-model="form.recipientName"
-                  placeholder="Recipient Name"
-                  class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                />
                 <input
                   v-model="form.trackingNumber"
                   placeholder="Tracking Number"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.senderName"
-                  placeholder="Sender Name"
+                  v-model="form.recipientName"
+                  placeholder="Recipient Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
@@ -1062,9 +1003,10 @@ onMounted(async () => {isCollapsed.value= true})
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.contact"
-                  placeholder="Contact Number"
+                  v-model="form.status"
+                  placeholder="Status (Default: Pending)"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                  disabled
                 />
                 <input
                   v-model="form.companyId"
@@ -1072,21 +1014,14 @@ onMounted(async () => {isCollapsed.value= true})
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                 />
                 <input
-                  v-model="form.status"
-                  placeholder="Status (Default: Pending)"
+                  v-model="form.senderName"
+                  placeholder="Sender Name"
                   class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  disabled
                 />
               </div>
 
-              <!-- 🟪 Save/Cancel -->
-              <div class="flex justify-end space-x-3">
-                <!-- <ButtonWeb
-                  label="Save"
-                  color="green"
-                  :disabled="!form.recipientName || !form.trackingNumber"
-                  @click="saveParcel"
-                /> -->
+              <!-- Save / Cancel Buttons -->
+              <div class="flex justify-end space-x-3 mt-3">
                 <ButtonWeb
                   label="Save"
                   color="green"
@@ -1106,15 +1041,15 @@ onMounted(async () => {isCollapsed.value= true})
               </div>
             </div>
 
-            <!-- 🟥 Right side -->
+            <!-- Right side: Display Parcel Information -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
-                <h2
+                <ButtonWeb
+                  label="Go Back To Add"
+                  color="blue"
                   @click="showAddParcelPage"
-                  class="text-2xl font-bold text-[#185dc0] mb-4 cursor-pointer"
-                >
-                  < Go Back To Add
-                </h2>
+                  class="w-full md:w-auto"
+                />
               </div>
 
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
@@ -1123,13 +1058,10 @@ onMounted(async () => {isCollapsed.value= true})
 
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
-                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
                   <span>Tracking:</span><span>{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Sender:</span><span>{{ form.senderName }}</span>
+                  <span>Recipient:</span><span>{{ form.recipientName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Room:</span><span>{{ form.roomNumber }}</span>
@@ -1138,17 +1070,17 @@ onMounted(async () => {isCollapsed.value= true})
                   <span>Type:</span><span>{{ form.parcelType }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
-                  <span>Contact:</span><span>{{ form.contact }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
                   <span>Status:</span><span>{{ form.status }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Company ID:</span><span>{{ form.companyId }}</span>
                 </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Sender:</span><span>{{ form.senderName }}</span>
+                </div>
               </div>
 
-              <!-- 🖼️ Image Preview -->
+              <!-- Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
                   Parcel Picture
@@ -1165,7 +1097,7 @@ onMounted(async () => {isCollapsed.value= true})
                 </button>
               </div>
 
-              <!-- 💾 Saved Parcels -->
+              <!-- Saved Parcels -->
               <div class="mt-6">
                 <h3 class="text-lg font-semibold text-[#185DC0] mb-2">
                   Saved Parcels
