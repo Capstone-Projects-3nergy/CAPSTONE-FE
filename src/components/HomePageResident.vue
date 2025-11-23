@@ -192,6 +192,11 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 console.log(registerStore.user)
+
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
+}
 </script>
 
 <template>
@@ -468,6 +473,7 @@ console.log(registerStore.user)
 
       <!-- Main Content -->
       <!-- Main Content -->
+      <!-- Main Content -->
       <main class="flex-1 flex flex-col">
         <div class="bg-white p-4 rounded shadow">
           <!-- HOME -->
@@ -485,9 +491,8 @@ console.log(registerStore.user)
                   fill="#185DC0"
                 />
               </svg>
-              Resident Home Page
+              Staff Home Page
             </h1>
-
             <!-- Slider -->
             <div
               class="relative bg-white h-48 rounded-xl flex items-center justify-center shadow border border-gray-300 px-8"
@@ -575,24 +580,27 @@ console.log(registerStore.user)
             </div>
           </section>
 
-          <!-- My Parcel Title -->
           <div class="p-4">
-            <div class="flex space-x-1 items-center">
+            <div class="flex space-x-1">
               <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
                   d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
                   fill="#185DC0"
                 />
               </svg>
-              <h2 class="text-2xl font-bold text-gray-800">My Parcel</h2>
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                Resident Parcel
+              </h2>
             </div>
           </div>
 
-          <!-- Parcel Table: Full table on Desktop / Cards on Mobile -->
+          <!-- Parcel Table (Vertical on mobile, full table on desktop) -->
           <div class="bg-white rounded-lg shadow">
-            <!-- Table Header (Desktop only) -->
-            <table class="min-w-full text-left border-collapse hidden md:table">
-              <thead class="bg-white border-t border-b border-[#185DC0]">
+            <table class="min-w-full text-left border-collapse">
+              <!-- Desktop Header -->
+              <thead
+                class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+              >
                 <tr>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Tracking
@@ -601,7 +609,7 @@ console.log(registerStore.user)
                     Name
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Room Number
+                    Room
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Email
@@ -619,22 +627,54 @@ console.log(registerStore.user)
                 <tr
                   v-for="p in paginatedParcels"
                   :key="p.id"
-                  class="hover:bg-gray-50 hidden md:table-row"
+                  class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
                 >
+                  <!-- Tracking -->
                   <td
-                    class="px-4 py-3 text-sm text-gray-700 cursor-pointer"
                     @click="showParcelDetail({ id: p.id })"
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 cursor-pointer border-b md:border-none"
                   >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Tracking:
+                    </span>
                     {{ p.trackingNumber }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Name -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Name:
+                    </span>
                     {{ p.recipientName }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Room -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Room:
+                    </span>
                     {{ p.roomNumber }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">{{ p.email }}</td>
-                  <td class="px-4 py-3">
+
+                  <!-- Email -->
+                  <td
+                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+                  >
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Email:
+                    </span>
+                    {{ p.email }}
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-4 py-2 md:py-3 border-b md:border-none">
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Status:
+                    </span>
                     <span
                       class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                       :class="{
@@ -642,65 +682,21 @@ console.log(registerStore.user)
                         'bg-green-400': p.status === 'Picked Up',
                         'bg-blue-400': p.status === 'Received'
                       }"
-                      >{{ p.status }}</span
                     >
+                      {{ p.status }}
+                    </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-700">
+
+                  <!-- Receive At -->
+                  <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
+                    <span class="md:hidden font-semibold text-blue-700"
+                      >Receive At:
+                    </span>
                     {{ p.receiveAt }}
                   </td>
                 </tr>
               </tbody>
             </table>
-
-            <!-- MOBILE VERSION as CARDS -->
-            <div
-              v-for="p in paginatedParcels"
-              :key="p.id"
-              class="md:hidden p-4 bg-gray-50 rounded-lg shadow mb-4 border border-gray-200"
-            >
-              <div class="mb-2">
-                <span class="font-semibold text-blue-700">Tracking: </span>
-                <span
-                  class="cursor-pointer"
-                  @click="showParcelDetail({ id: p.id })"
-                >
-                  {{ p.trackingNumber }}
-                </span>
-              </div>
-
-              <div class="mb-2">
-                <span class="font-semibold text-blue-700">Name: </span>
-                {{ p.recipientName }}
-              </div>
-
-              <div class="mb-2">
-                <span class="font-semibold text-blue-700">Room: </span>
-                {{ p.roomNumber }}
-              </div>
-
-              <div class="mb-2">
-                <span class="font-semibold text-blue-700">Email: </span>
-                {{ p.email }}
-              </div>
-
-              <div class="mb-2">
-                <span class="font-semibold text-blue-700">Status: </span>
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                  :class="{
-                    'bg-yellow-400': p.status === 'Pending',
-                    'bg-green-400': p.status === 'Picked Up',
-                    'bg-red-400': p.status === 'Unclaimed'
-                  }"
-                  >{{ p.status }}</span
-                >
-              </div>
-
-              <div>
-                <span class="font-semibold text-blue-700">Receive At: </span>
-                {{ p.receiveAt }}
-              </div>
-            </div>
           </div>
 
           <!-- Pagination -->
