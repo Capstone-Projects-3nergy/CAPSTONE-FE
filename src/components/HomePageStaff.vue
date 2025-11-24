@@ -330,7 +330,7 @@ function formatDateTime(datetimeStr) {
       <!-- Sidebar -->
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
-          class="fixed top-0 left-0 h-screen flex flex-col"
+          class="fixed top-0 left-0 h-screen flex flex-col z-50"
           :class="[
             'bg-[#0E4B90] text-white flex flex-col transition-all duration-300 border-t border-[#3269A8]',
             isCollapsed ? 'w-16' : 'w-56'
