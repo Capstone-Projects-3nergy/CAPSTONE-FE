@@ -208,8 +208,8 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    :class="isCollapsed ? 'ml-10' : 'ml-50'"
-    class="min-h-screen flex flex-col bg-gray-100 ml-10 p-4"
+    :class="isCollapsed ? 'ml-10' : 'md:ml-50'"
+    class="min-h-screen flex flex-col bg-gray-100 ml-0 p-4"
   >
     <!-- Header -->
     <header class="flex items-center w-full h-16">
