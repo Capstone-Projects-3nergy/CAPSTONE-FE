@@ -12,6 +12,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import axios from 'axios'
+import ConfirmLogout from './ConfirmLogout.vue'
 import {
   getItems,
   getItemById,
@@ -53,6 +54,7 @@ const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+const showLogoutConfirm = ref(false)
 // 🧾 ข้อมูลพัสดุแบบ reactive ที่ผูกกับ input ด้วย v-model
 // ข้อมูลพัสดุ reactive
 const auth = useAuthManager()
@@ -144,8 +146,6 @@ watch(recipientSearch, (val) => {
     parcelData.value.recipientName = ''
   }
 })
-
-
 
 // โหลดรายชื่อ resident ตอนเข้าเพจ
 onMounted(async () => {
@@ -457,14 +457,11 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -1272,4 +1269,7 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

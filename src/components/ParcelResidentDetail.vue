@@ -15,6 +15,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import ConfirmLogout from './ConfirmLogout.vue'
 import {
   getItemById,
   deleteItemById,
@@ -55,6 +56,7 @@ const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
 const error = ref(false)
+const showLogoutConfirm = ref(false)
 // ⚡ helper map backend data → form
 const mapParcelData = (data) => ({
   // ใช้ชื่อให้ตรงกับ store ที่ใช้ parcelId
@@ -180,12 +182,11 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-const returnLoginPage = async () => {
-  try {
-    await loginManager.logoutAccount(router)
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
@@ -853,4 +854,7 @@ const toggleSidebar = () => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

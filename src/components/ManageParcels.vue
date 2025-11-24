@@ -57,11 +57,11 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
-
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
-
+const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -473,14 +473,11 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 console.log(loginManager.userData)
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -1517,6 +1514,9 @@ const closePopUp = (operate) => {
       :parcelData="parcelDetail"
     />
   </teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels

@@ -14,6 +14,7 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
+import ConfirmLogout from './ConfirmLogout.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -86,6 +87,7 @@ const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
 const route = useRoute()
+const showLogoutConfirm = ref(false)
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
@@ -477,14 +479,11 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 console.log(loginManager.userData)
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -1519,6 +1518,9 @@ const showProfileResidentPage = async function () {
       :parcelConfirmData="parcelConfirmDetail"
     />
   </teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
 
 <style scoped>

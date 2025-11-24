@@ -15,6 +15,7 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
+import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import {
@@ -37,7 +38,7 @@ import {
 // const loginStore = useLoginManager()
 
 const addSuccess = ref(false)
-
+const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
@@ -573,12 +574,11 @@ const ShowManageResidentPage = async () => {
   showManageResident.value = true
 }
 
-const returnLoginPage = async () => {
-  try {
-    await loginManager.logoutAccount(router)
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 
 const showProfileStaffPage = async () => {
@@ -1390,7 +1390,7 @@ onMounted(async () => {
 
               <!-- Save / Cancel Buttons -->
               <div class="flex justify-end space-x-3 mt-3">
-                <ButtonWeb
+                <!-- <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
@@ -1399,20 +1399,20 @@ onMounted(async () => {
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                />
-                <ButtonWeb label="Cancel" color="red" @click="cancelParcel" />
+                /> -->
+                <ButtonWeb label="Reset" color="red" @click="cancelParcel" />
               </div>
             </div>
 
             <!-- Right side: Display Parcel Information -->
             <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
               <div class="flex items-center justify-end mb-4">
-                <ButtonWeb
+                <!-- <ButtonWeb
                   label="Go Back"
                   color="blue"
                   @click="showManageParcelPage"
                   class="w-full md:w-auto"
-                />
+                /> -->
               </div>
 
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
@@ -1547,7 +1547,24 @@ onMounted(async () => {
                   <span>{{ form.senderName }}</span>
                 </div>
               </div>
-
+              <div class="flex justify-end space-x-3 mt-3">
+                <ButtonWeb
+                  label="Save"
+                  color="green"
+                  @click="saveParcel"
+                  :class="{
+                    'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
+                    'bg-black hover:bg-gray-600 text-white': !isAllFilled
+                  }"
+                  :disabled="isAllFilled"
+                />
+                <ButtonWeb
+                  label="Cancel"
+                  color="blue"
+                  @click="showManageParcelPage"
+                  class="w-full md:w-auto"
+                />
+              </div>
               <!-- Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
@@ -1620,6 +1637,9 @@ onMounted(async () => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
 
 <style scoped>
