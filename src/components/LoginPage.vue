@@ -47,6 +47,7 @@ onMounted(async () => {
 // --------------------- LOGIN FUNCTION ---------------------
 const loginHomePageWeb = async () => {
   try {
+    loading.value = true
     // 🔹 เรียก login จาก Pinia store
     const userData = await authManager.loginAccount(
       email.value.trim(),
@@ -56,6 +57,7 @@ const loginHomePageWeb = async () => {
 
     // ❌ ถ้า login ไม่สำเร็จ
     if (!userData) {
+      loading.value = false
       incorrect.value = true
       console.warn('⚠️ Login failed: invalid credentials')
       setTimeout(() => (incorrect.value = false), 2000)
@@ -65,6 +67,8 @@ const loginHomePageWeb = async () => {
     // ✅ ตรวจสอบ token จาก Pinia state
     const token = authManager.user?.accessToken
     if (!token) {
+      error.value = true
+      loading.value = false
       console.error('🚫 Missing access token, please log in again.')
       await authManager.logoutAccount(router)
       return
@@ -84,12 +88,16 @@ const loginHomePageWeb = async () => {
           : null
 
         if (!newToken) {
+          error.value = true
+          loading.value = false
           console.error('🚫 Token refresh failed, logging out...')
           await authManager.logoutAccount(router)
           return
         }
       }
     } catch (decodeErr) {
+      error.value = true
+      loading.value = false
       console.error('⚠️ Failed to decode or refresh token:', decodeErr)
       await authManager.logoutAccount(router)
       return
@@ -99,6 +107,8 @@ const loginHomePageWeb = async () => {
     success.value = true
     setTimeout(() => (success.value = false), 2000)
   } catch (err) {
+    error.value = true
+    loading.value = false
     console.error('❌ Login error:', err)
 
     // ตรวจสอบว่าเป็น error ด้าน auth หรือไม่
@@ -109,9 +119,11 @@ const loginHomePageWeb = async () => {
       err.message?.toLowerCase()?.includes('auth')
 
     if (isAuthError) {
-      incorrect.value = true
-      setTimeout(() => (incorrect.value = false), 2000)
+      loading.value = false
+      error.value = true
+      setTimeout(() => (error.value = true), 2000)
     } else {
+      loading.value = false
       error.value = true
       setTimeout(() => (error.value = false), 2000)
     }
@@ -670,7 +682,7 @@ const showResetPasswordPageWeb = async function () {
   </div>
   <Teleport to="body" v-if="showHomePage"><HomePage /></Teleport>
   <Teleport to="body" v-if="showRegisterPage"><RegisterPage /></Teleport>
-  <Teleport to="body" v-if="showloading"><LoadingPopUp /></Teleport>
+  <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>
