@@ -34,7 +34,7 @@ const deleteParcelFn = async () => {
   }
 
   // ลบใน Pinia
-  parcelManager.deleteParcels(parcel.id)
+  parcelManager.deleteParcels(parcel.value.id)
 
   emit('confirmDetail', true)
 }
