@@ -667,7 +667,7 @@ function formatDateTime(datetimeStr) {
                   fill="#185DC0"
                 />
               </svg>
-              Staff Home Page
+              Home Page
             </h1>
             <!-- Slider -->
             <div
