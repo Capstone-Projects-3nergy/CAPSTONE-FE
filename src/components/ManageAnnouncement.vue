@@ -10,6 +10,7 @@ import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -22,6 +23,7 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
+const showLogoutConfirm = ref(false)
 onMounted(async () => {
   isCollapsed.value = true
 })
@@ -147,14 +149,11 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -780,4 +779,7 @@ const showProfileStaffPage = async function () {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

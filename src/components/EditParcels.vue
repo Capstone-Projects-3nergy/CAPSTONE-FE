@@ -12,6 +12,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
+import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js' // ⬅️ store สำหรับจัดการ parcel
 import axios from 'axios'
 import {
@@ -51,7 +52,7 @@ const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
-
+const showLogoutConfirm = ref(false)
 const parcelStore = useParcelManager()
 const companyList = ref([])
 // ⚡️ Form ข้อมูลพัสดุ (ให้ตรง ParcelDetailDto)
@@ -396,12 +397,11 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-const returnLoginPage = async () => {
-  try {
-    await loginManager.logoutAccount(router)
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
@@ -1232,4 +1232,7 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

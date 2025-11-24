@@ -7,7 +7,9 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
+const showLogoutConfirm = ref(false)
 const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
@@ -26,14 +28,11 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showProfileResidentPage = async function () {
   router.replace({
@@ -522,4 +521,7 @@ onMounted(async () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

@@ -11,6 +11,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -23,6 +24,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const showLogoutConfirm = ref(false)
 // ข้อมูลตัวอย่าง — แก้เป็นข้อมูลจริงของคุณได้
 const monthsTH = [
   'ม.ค.',
@@ -91,9 +93,11 @@ const showHomePageStaffWeb = async function () {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-const returnLoginPage = async function () {
-  router.replace({ name: 'login' })
-  returnLogin.value = true
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
@@ -767,6 +771,9 @@ const toggleSidebar = () => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
 
 <style scoped>

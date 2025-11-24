@@ -7,6 +7,7 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -15,6 +16,7 @@ const tab = ref('event')
 const currentSlide = ref(1)
 const showResidentParcels = ref(false)
 const returnLogin = ref(false)
+const showLogoutConfirm = ref(false)
 const resident = ref({
   name: 'Somchai Suksan',
   email: 'somchai.suksan@example.com',
@@ -53,14 +55,11 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
@@ -523,4 +522,7 @@ onMounted(async () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
