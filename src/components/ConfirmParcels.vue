@@ -61,7 +61,9 @@ const cancelFn = () => {
   <div
     class="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
   >
-    <div class="bg-white w-full max-w-md rounded-lg shadow-lg overflow-hidden">
+    <div
+      class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
+    >
       <!-- Header -->
       <div class="px-6 py-4 border-b">
         <h1 class="text-lg font-bold text-gray-900 text-center">

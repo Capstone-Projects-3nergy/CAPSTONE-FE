@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 
-const emit = defineEmits(['confirmLogout', 'cancelLogout'])
+const emit = defineEmits('cancelLogout')
 const router = useRouter()
 const authManager = useAuthManager()
 
@@ -11,7 +11,6 @@ const authManager = useAuthManager()
 const confirmLogoutFn = async () => {
   try {
     await authManager.logoutAccount(router)
-    emit('confirmLogout', true)
   } catch (err) {
     console.error('❌ Logout failed:', err)
   }
@@ -20,8 +19,6 @@ const confirmLogoutFn = async () => {
 // ฟังก์ชันยกเลิก logout
 const cancelLogoutFn = () => {
   emit('cancelLogout', true)
-  // กลับหน้าเดิม (ถ้าต้องการ)
-  router.back()
 }
 </script>
 
@@ -29,7 +26,9 @@ const cancelLogoutFn = () => {
   <div
     class="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
   >
-    <div class="bg-white w-full max-w-md rounded-lg shadow-lg overflow-hidden">
+    <div
+      class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
+    >
       <!-- Header -->
       <div class="px-6 py-4 border-b">
         <h1 class="text-lg font-bold text-gray-900 text-center">
@@ -55,7 +54,7 @@ const cancelLogoutFn = () => {
         />
         <ButtonWeb
           label="Logout"
-          color="red"
+          color="blue"
           class="w-full sm:w-auto"
           @click="confirmLogoutFn"
         />

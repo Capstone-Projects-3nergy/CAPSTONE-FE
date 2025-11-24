@@ -62,6 +62,7 @@ import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
 // import { useRegisterManager } from '@/stores/RegisterManager.js'
 // import { useLoginManager } from '@/stores/LoginManager'
+import ConfirmLogout from './ConfirmLogout.vue'
 const registerStore = useAuthManager()
 const loginStore = useAuthManager()
 const loginManager = useAuthManager()
@@ -123,14 +124,14 @@ const showProfileStaffPage = async function () {
 //   router.replace({ name: 'login' })
 //   returnLogin.value = true
 // }
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+// สถานะ popup
+const showLogoutConfirm = ref(false)
+// ฟังก์ชันเรียกเพื่อเปิด confirm logout
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 
 const parcelManager = useParcelManager()
@@ -973,6 +974,9 @@ function formatDateTime(datetimeStr) {
   <Teleport to="body" v-if="showProfileStaff">
     <ProfileStaff> </ProfileStaff>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
 
 <style scoped></style>

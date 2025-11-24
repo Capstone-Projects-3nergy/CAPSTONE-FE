@@ -61,6 +61,7 @@ import parcels4 from '@/assets/images/parcels4.jpg'
 import newsImg from '@/assets/images/New.png'
 import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
+import ConfirmLogout from './ConfirmLogout.vue'
 const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
@@ -78,6 +79,7 @@ const registerStore = useAuthManager()
 const authStore = useAuthManager()
 const currentUser = ref('Pimpajee SetXXXXXX')
 const showProfileResident = ref(false)
+const showLogoutConfirm = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }
@@ -182,14 +184,8 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-const returnLoginPage = async () => {
-  try {
-    // เรียก logoutAccount จาก store
-    await loginManager.logoutAccount(router)
-    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
 }
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
@@ -200,6 +196,9 @@ console.log(registerStore.user)
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
 }
 </script>
 
@@ -842,6 +841,9 @@ function formatDateTime(datetimeStr) {
   <Teleport to="body" v-if="showProfileStaff">
     <ProfileResident> </ProfileResident>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>
 
 <style scoped></style>

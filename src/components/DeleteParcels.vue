@@ -50,7 +50,7 @@ const cancelFn = () => {
     class="message bg-gray-500/50 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 flex items-center justify-center p-2"
   >
     <div
-      class="bg-white border border-green-700 w-full max-w-lg rounded-md overflow-hidden"
+      class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
       <!-- Header -->
       <div class="flex flex-col justify-between p-4 border-b">
