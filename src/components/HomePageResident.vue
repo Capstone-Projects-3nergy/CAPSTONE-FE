@@ -200,6 +200,14 @@ function formatDateTime(datetimeStr) {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
+// ฟังก์ชันเปลี่ยนหน้า
+const goToPage = (page) => {
+  if (page < 1) page = 1
+  if (page > totalPages.value) page = totalPages.value
+  currentPage.value = page
+}
+const nextPage = () => goToPage(currentPage.value + 1)
+const prevPage = () => goToPage(currentPage.value - 1)
 </script>
 
 <template>
@@ -707,7 +715,7 @@ const returnHomepage = () => {
                     Status
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Receive At
+                    Update At
                   </th>
                 </tr>
               </thead>
@@ -777,8 +785,8 @@ const returnHomepage = () => {
 
                   <!-- Receive At -->
                   <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Receive At:
+                    <span class="md:hidden font-semibold text-blue-700">
+                      Update At:
                     </span>
                     {{ formatDateTime(p.receiveAt) }}
                   </td>
