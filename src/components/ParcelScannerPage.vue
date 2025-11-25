@@ -1338,11 +1338,20 @@ onMounted(async () => {
                   <label class="block font-semibold mb-1">
                     Parcel Type <span class="text-red-500">*</span>
                   </label>
-                  <input
+                  <select
+                    v-model="form.parcelType"
+                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                  >
+                    <option disabled value="">Select Parcel Type</option>
+                    <option value="Document">Document</option>
+                    <option value="Box">Box</option>
+                    <option value="Box">Envelope</option>
+                  </select>
+                  <!-- <input
                     v-model="form.parcelType"
                     placeholder="Enter Parcel Type: Box / Document / Envelope"
                     class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  />
+                  /> -->
                 </div>
 
                 <!-- Status -->

@@ -978,13 +978,13 @@ const closePopUp = (operate) => {
               </div>
               <div>
                 <label class="block font-semibold mb-1">Parcel Type</label>
-                <input
+                <!-- <input
                   placeholder="Enter Parcel Type: Box / Document / Envelope"
                   type="text"
                   v-model="form.parcelType"
                   class="w-full border rounded-md p-2"
-                />
-                <!-- <select
+                /> -->
+                <select
                   v-model="form.parcelType"
                   class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                 >
@@ -992,7 +992,7 @@ const closePopUp = (operate) => {
                   <option value="Document">Document</option>
                   <option value="Box">Box</option>
                   <option value="Envelope">Envelope</option>
-                </select> -->
+                </select>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Company</label>
