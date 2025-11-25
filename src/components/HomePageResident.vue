@@ -14,28 +14,6 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useLoginManager } from '@/stores/LoginManager'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import {
-  sortByRoomNumber,
-  sortByRoomNumberReverse,
-  sortByStatus,
-  sortByStatusReverse,
-  sortByDate,
-  sortByDateReverse,
-  sortByTracking,
-  sortByTrackingReverse,
-  sortByName,
-  sortByNameReverse,
-  sortByContact,
-  sortByContactReverse,
-  sortByFirstName,
-  sortByLastName,
-  sortByFirstNameReverse,
-  sortByLastNameReverse,
-  searchParcels,
-  filterByDay,
-  filterByMonth,
-  filterByYear
-} from '@/stores/SortManager'
-import {
   getItems,
   getItemById,
   deleteItemById,
@@ -62,6 +40,28 @@ import newsImg from '@/assets/images/New.png'
 import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
 import ConfirmLogout from './ConfirmLogout.vue'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
+} from '@/stores/SortManager'
 const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
@@ -145,8 +145,7 @@ onMounted(async () => {
     }))
 
     // ✅ sort ตาม receiveAt: ใหม่ → เก่า (Descending)
-mapped.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
-
+    mapped.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -209,6 +208,30 @@ const goToPage = (page) => {
 }
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
+// Sort functions
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
+// ===== ฟังก์ชัน toggle =====
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
 </script>
 
 <template>
@@ -707,16 +730,85 @@ const prevPage = () => goToPage(currentPage.value - 1)
                     Name
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Room
+                    <div class="flex items-center gap-2">
+                      Room
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortRoom"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Email
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Status
+                    <div class="flex items-center gap-2">
+                      Status
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortStatus"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Update At
+                    <div class="flex items-center gap-2">
+                      Update At
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortDate"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                 </tr>
               </thead>

@@ -213,6 +213,25 @@ const goToPage = (page) => {
 }
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
+// ===== ฟังก์ชัน toggle =====
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
 </script>
 
 <template>
@@ -839,16 +858,85 @@ const prevPage = () => goToPage(currentPage.value - 1)
                     Name
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Room
+                    <div class="flex items-center gap-2">
+                      Room
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortRoom"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                     Email
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Status
+                    <div class="flex items-center gap-2">
+                      Status
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortStatus"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                   <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Update At
+                    <div class="flex items-center gap-2">
+                      Update At
+                      <svg
+                        class="cursor-pointer"
+                        @click="toggleSortDate"
+                        width="17"
+                        height="12"
+                        viewBox="0 0 17 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                          fill="#185DC0"
+                        />
+                        <path
+                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                          stroke="#5C9BEB"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </div>
                   </th>
                 </tr>
               </thead>
