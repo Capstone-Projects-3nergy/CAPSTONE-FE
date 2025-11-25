@@ -184,9 +184,9 @@ const getParcelDetail = async (tid) => {
       imageUrl: data.imageUrl ?? '',
       status: data.status, // "PENDING" | "RECEIVED" | "PICKED_UP"
 
-      receivedAt: data.receivedAt,
-      pickedUpAt: data.pickedUpAt,
-      updatedAt: data.updatedAt,
+      receivedAt: formatDateTime(data.receivedAt),
+      pickedUpAt: formatDateTime(data.pickedUpAt),
+      updatedAt: formatDateTime(data.updatedAt),
 
       residentName: data.residentName,
       roomNumber: data.roomNumber,
@@ -434,6 +434,10 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+}
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
 }
 </script>
 

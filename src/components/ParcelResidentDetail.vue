@@ -199,6 +199,10 @@ const showProfileStaffPage = async () => {
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
+}
 </script>
 
 <template>
@@ -786,7 +790,7 @@ const toggleSidebar = () => {
                     >recieved at</label
                   >
                   <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.receivedAt || '-' }}
+                    {{ formatDateTime(parcel?.receivedAt || '-') }}
                   </p>
                 </div>
 
@@ -795,7 +799,7 @@ const toggleSidebar = () => {
                     >pick up at</label
                   >
                   <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.pickedUpAt || '-' }}
+                    {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                   </p>
                 </div>
 
@@ -804,7 +808,7 @@ const toggleSidebar = () => {
                     >confirm at</label
                   >
                   <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.confirmAt || '-' }}
+                    {{ formatDateTime(parcel?.confirmAt || '-') }}
                   </p>
                 </div>
               </div>

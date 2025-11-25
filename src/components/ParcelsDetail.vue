@@ -166,6 +166,10 @@ const showEditParacelDetail = async function (parcelId) {
     }
   })
 }
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
+}
 </script>
 
 <template>
@@ -762,19 +766,19 @@ const showEditParacelDetail = async function (parcelId) {
               <div>
                 <label class="block font-semibold mb-1">Received At</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.receivedAt || '-' }}
+                  {{ formatDateTime(parcel?.receivedAt || '-') }}
                 </p>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Updated At</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.updatedAt || '-' }}
+                  {{ formatDateTime(parcel?.updatedAt || '-') }}
                 </p>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Picked Up At</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.pickedUpAt || '-' }}
+                  {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                 </p>
               </div>
             </div>
