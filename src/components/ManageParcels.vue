@@ -1395,6 +1395,7 @@ const closePopUp = (operate) => {
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"
+                    @click="openStatusPopup(p)"
                   >
                     {{ p.status }}
                   </span>

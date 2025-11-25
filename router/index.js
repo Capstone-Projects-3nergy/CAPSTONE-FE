@@ -121,6 +121,11 @@ const routes = [
     component: AddParcels
   },
   {
+    path: '/edit-parcel-status/:tid',
+    name: 'editparcelstatus',
+    component: ChangeStatus
+  },
+  {
     path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/editparcel',
     name: 'editparcels',
     component: EditParcels
