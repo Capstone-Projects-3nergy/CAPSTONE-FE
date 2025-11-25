@@ -762,10 +762,10 @@ const toggleSidebar = () => {
 
             <!-- SECTION 2 -->
             <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+              <h3 class="font-semibold text-lg mb-4">Date</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
+                <!-- <div>
                   <label class="block text-sm text-gray-500 mb-1"
                     >current status</label
                   >
@@ -779,7 +779,7 @@ const toggleSidebar = () => {
                   >
                     {{ parcel?.status || '-' }}
                   </p>
-                </div>
+                </div> -->
 
                 <div>
                   <label class="block text-sm text-gray-500 mb-1"
@@ -805,6 +805,27 @@ const toggleSidebar = () => {
                   >
                   <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
                     {{ parcel?.confirmAt || '-' }}
+                  </p>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm text-gray-500 mb-1"
+                    >current status</label
+                  >
+                  <p
+                    class="w-full p-2 rounded-md text-gray-800"
+                    :class="{
+                      'bg-yellow-300': parcel?.status === 'PENDING',
+                      'bg-blue-300': parcel?.status === 'RECEIVED',
+                      'bg-green-300': parcel?.status === 'PICKED_UP'
+                    }"
+                  >
+                    {{ parcel?.status || '-' }}
                   </p>
                 </div>
               </div>

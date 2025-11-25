@@ -713,41 +713,6 @@ const toggleSidebar = () => {
               </div>
             </div>
           </section>
-
-          <!-- Status Section -->
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Status</label>
-                <p
-                  class="w-full p-2 text-gray-700 rounded-md"
-                  :class="{
-                    'bg-yellow-400': parcel?.status === 'PENDING',
-                    'bg-blue-400': parcel?.status === 'RECEIVED',
-                    'bg-green-400': parcel?.status === 'PICKED_UP'
-                  }"
-                >
-                  {{ parcel?.status || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Received At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.receivedAt || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.pickedUpAt || '-' }}
-                </p>
-              </div>
-            </div>
-          </section>
-
           <!-- Resident Info -->
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
@@ -777,21 +742,65 @@ const toggleSidebar = () => {
 
           <!-- System Info -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">System Info:</h3>
+            <h3 class="font-semibold text-lg mb-2">Date:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
+              <!-- <div>
                 <label class="block font-semibold mb-1">Parcel ID</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
                   {{ parcel?.parcelId || '-' }}
                 </p>
+              </div> -->
+              <div>
+                <label class="block font-semibold mb-1">Received At</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.receivedAt || '-' }}
+                </p>
               </div>
-
               <div>
                 <label class="block font-semibold mb-1">Updated At</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
                   {{ parcel?.updatedAt || '-' }}
                 </p>
               </div>
+              <div>
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.pickedUpAt || '-' }}
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- Status Section -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Status:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <!-- <label class="block font-semibold mb-1">Status</label> -->
+                <p
+                  class="w-full p-2 text-gray-700 rounded-md"
+                  :class="{
+                    'bg-yellow-400': parcel?.status === 'PENDING',
+                    'bg-blue-400': parcel?.status === 'RECEIVED',
+                    'bg-green-400': parcel?.status === 'PICKED_UP'
+                  }"
+                >
+                  {{ parcel?.status || '-' }}
+                </p>
+              </div>
+
+              <!-- <div>
+                <label class="block font-semibold mb-1">Received At</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.receivedAt || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.pickedUpAt || '-' }}
+                </p>
+              </div> -->
             </div>
           </section>
         </form>

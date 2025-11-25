@@ -1091,56 +1091,6 @@ const closePopUp = (operate) => {
               </div> -->
             </div>
           </section>
-
-          <!-- Status Section -->
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Status & Date:</h3>
-
-            <div class="flex gap-6 items-start">
-              <!-- Status -->
-              <div class="flex-1">
-                <label class="block font-semibold mb-1">Status</label>
-                <select
-                  v-model="form.status"
-                  class="border rounded-md p-2 w-full"
-                  :disabled="form.status === 'PICKED_UP'"
-                >
-                  <option v-for="s in statusOptions" :key="s" :value="s">
-                    {{ s }}
-                  </option>
-                </select>
-
-                <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: PENDING → RECEIVED
-                  → PICKED_UP
-                </p>
-              </div>
-
-              <!-- Received At -->
-              <div class="flex-1">
-                <label class="block font-semibold mb-1">Received At</label>
-                <input
-                  type="text"
-                  :value="form.receivedAt"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-
-              <!-- Picked Up At -->
-              <div class="flex-1">
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <input
-                  placeholder="-"
-                  type="text"
-                  :value="form.pickedUpAt"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-            </div>
-          </section>
-
           <!-- Resident Info -->
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
@@ -1175,11 +1125,11 @@ const closePopUp = (operate) => {
             </div>
           </section>
 
-          <!-- System Info -->
+          <!-- Date -->
           <section>
-            <h3 class="font-semibold text-lg mb-2">System Info:</h3>
+            <h3 class="font-semibold text-lg mb-2">Date:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
+              <!-- <div>
                 <label class="block font-semibold mb-1">Parcel ID</label>
                 <input
                   type="text"
@@ -1187,7 +1137,18 @@ const closePopUp = (operate) => {
                   readonly
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
+              </div> -->
+              <!-- Received At -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Received At</label>
+                <input
+                  type="text"
+                  :value="form.receivedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
               </div>
+
               <div>
                 <label class="block font-semibold mb-1">Updated At</label>
                 <input
@@ -1197,6 +1158,65 @@ const closePopUp = (operate) => {
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
+              <!-- Picked Up At -->
+              <div class="flex-1">
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <input
+                  placeholder="-"
+                  type="text"
+                  :value="form.pickedUpAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+            </div>
+          </section>
+          <!-- Status Section -->
+          <section>
+            <h3 class="font-semibold text-lg mb-2">Status:</h3>
+
+            <div class="flex gap-6 items-start">
+              <!-- Status -->
+              <div class="flex-1">
+                <!-- <label class="block font-semibold mb-1">Status</label> -->
+                <select
+                  v-model="form.status"
+                  class="border rounded-md p-2 w-auto"
+                  :disabled="form.status === 'PICKED_UP'"
+                >
+                  <option v-for="s in statusOptions" :key="s" :value="s">
+                    {{ s }}
+                  </option>
+                </select>
+
+                <p class="text-xs text-red-500 mt-1">
+                  * You can only update the status in order: PENDING → RECEIVED
+                  → PICKED_UP
+                </p>
+              </div>
+
+              <!-- Received At -->
+              <!-- <div class="flex-1">
+                <label class="block font-semibold mb-1">Received At</label>
+                <input
+                  type="text"
+                  :value="form.receivedAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div> -->
+
+              <!-- Picked Up At -->
+              <!-- <div class="flex-1">
+                <label class="block font-semibold mb-1">Picked Up At</label>
+                <input
+                  placeholder="-"
+                  type="text"
+                  :value="form.pickedUpAt"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div> -->
             </div>
           </section>
 
