@@ -13,9 +13,9 @@ const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-// onMounted(async () => {
-//   isCollapsed.value = true
-// })
+onMounted(async () => {
+  console.log(parcel.value.id)
+})
 // ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelData || {})
 
@@ -34,7 +34,7 @@ const deleteParcelFn = async () => {
   }
 
   // ลบใน Pinia
-  parcelManager.deleteParcels(parcel.id)
+  parcelManager.deleteParcels(parcel.value.id)
 
   emit('confirmDetail', true)
 }
