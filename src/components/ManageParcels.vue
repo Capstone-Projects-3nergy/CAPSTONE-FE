@@ -83,6 +83,7 @@ const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
 const route = useRoute()
+
 // Reactive state
 // onMounted: ดึงข้อมูลจาก backend แล้วใส่ store
 // 🧑‍🤝‍🧑 รายชื่อ resident ทั้งหมดจาก backend
@@ -411,18 +412,31 @@ function parseDate(dateStr) {
   return null
 }
 
+const selectedDate = ref('') // v-model จาก date picker
+
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
 
+  // กรองตาม search keyword
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
   }
 
+  // กรองตาม selected date
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toISOString().split('T')[0] // yyyy-mm-dd
+      return parcelDate === selectedDate.value
+    })
+  }
+
   return result
 })
+
 function formatDateByTab(rawDate) {
   if (!rawDate) return rawDate
 
@@ -1159,7 +1173,16 @@ const closePopUp = (operate) => {
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Date Tabs -->
-            <div class="flex items-center flex-wrap gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
+              <input
+                type="date"
+                v-model="selectedDate"
+                class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <!-- <div class="flex items-center flex-wrap gap-2">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
               <div
                 class="flex bg-gray-100 rounded-lg overflow-hidden flex-wrap"
@@ -1178,7 +1201,7 @@ const closePopUp = (operate) => {
                   {{ tab }}
                 </button>
               </div>
-            </div>
+            </div> -->
             <!-- Right: Search + Sort + Add -->
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <!-- Search -->

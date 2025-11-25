@@ -415,16 +415,26 @@ function parseDate(dateStr) {
   return null
 }
 
+const selectedDate = ref('') // v-model จาก date picker
+
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
     parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
   }))
-  // 🔍 filter เฉพาะพัสดุของ user คนนี้
-  // result = result.filter((p) => p.recipientName === authStore.user.fullName)
 
+  // กรองตาม search keyword
   if (searchKeyword.value) {
     result = searchParcels(result, searchKeyword.value)
+  }
+
+  // กรองตาม selected date
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toISOString().split('T')[0] // yyyy-mm-dd
+      return parcelDate === selectedDate.value
+    })
   }
 
   return result
@@ -1198,24 +1208,15 @@ const showProfileResidentPage = async function () {
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <!-- Left: Date Tabs -->
-            <div class="flex items-center flex-wrap gap-2">
-              <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
-              <div
-                class="flex bg-gray-100 rounded-lg overflow-hidden flex-wrap"
-              >
-                <button
-                  v-for="tab in tabs"
-                  :key="tab"
-                  @click="activeTab = tab"
-                  :class="[
-                    'px-4 py-1 font-medium transition cursor-pointer',
-                    activeTab === tab
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-500 hover:bg-gray-200'
-                  ]"
-                >
-                  {{ tab }}
-                </button>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <!-- Left: Date Tabs -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
+                <input
+                  type="date"
+                  v-model="selectedDate"
+                  class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
             <!-- Right: Search + Sort + Add -->
