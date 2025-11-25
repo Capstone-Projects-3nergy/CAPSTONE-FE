@@ -92,12 +92,11 @@ function searchParcels(parcels, keyword) {
   const lowerKeyword = keyword.toLowerCase().trim()
 
   return parcels.filter((p) => {
-    // แปลง receiveAt เป็น DD-MM-YYYY HH:mm:ss
     let formattedReceiveAt = ''
     if (p.receiveAt) {
       const date = new Date(p.receiveAt)
       const dd = String(date.getDate()).padStart(2, '0')
-      const mm = String(date.getMonth() + 1).padStart(2, '0') // เดือนเริ่มจาก 0
+      const mm = String(date.getMonth() + 1).padStart(2, '0')
       const yyyy = date.getFullYear()
       const hh = String(date.getHours()).padStart(2, '0')
       const min = String(date.getMinutes()).padStart(2, '0')
@@ -105,13 +104,32 @@ function searchParcels(parcels, keyword) {
       formattedReceiveAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
     }
 
+    // ตรวจสอบเลขห้องตรงตัวหรือ partial ของเลขห้องเท่านั้น
+    const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+    // ตรวจสอบ field อื่น ๆ
+    const trackingMatch = p.trackingNumber
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+    const nameMatch = p.recipientName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+    const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+    const statusMatch = p.status
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+    const dateMatch = formattedReceiveAt.toLowerCase().includes(lowerKeyword)
+
     return (
-      p.trackingNumber?.toString().toLowerCase().includes(lowerKeyword) ||
-      p.recipientName?.toString().toLowerCase().includes(lowerKeyword) ||
-      p.roomNumber?.toString().toLowerCase().includes(lowerKeyword) ||
-      p.email?.toString().toLowerCase().includes(lowerKeyword) ||
-      p.status?.toString().toLowerCase().includes(lowerKeyword) ||
-      formattedReceiveAt.toLowerCase().includes(lowerKeyword)
+      roomMatch ||
+      trackingMatch ||
+      nameMatch ||
+      emailMatch ||
+      statusMatch ||
+      dateMatch
     )
   })
 }
