@@ -157,6 +157,15 @@ const showProfileStaffPage = async () => {
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const showEditParacelDetail = async function (parcelId) {
+  router.push({
+    name: 'editparcels',
+    params: {
+      id: route.params.id,
+      tid: parcelId
+    }
+  })
+}
 </script>
 
 <template>
@@ -633,17 +642,17 @@ const toggleSidebar = () => {
         </div>
 
         <form class="bg-white p-6 rounded-lg shadow space-y-8">
-          <div class="flex items-center gap-4">
-            <!-- Back Button -->
+          <!-- <div class="flex items-center gap-4">
+            Back Button
             <ButtonWeb
               label="Go Back"
               color="blue"
               @click="backToManageParcels"
               class="ml-auto px-2 py-1 text-xs md:text-sm w-auto md:w-28"
-            />
+            /> -->
 
-            <!-- Status Button (ถ้าต้องการแสดงต่อไป) -->
-            <!-- <button
+          <!-- Status Button (ถ้าต้องการแสดงต่อไป) -->
+          <!-- <button
       class="px-2 py-1 text-xs md:text-sm font-semibold rounded-md shadow text-white text-center w-auto md:w-28"
       :class="{
         'bg-yellow-400': parcel?.status === 'Pending',
@@ -654,7 +663,7 @@ const toggleSidebar = () => {
     >
       {{ parcel?.status || 'Unknown' }}
     </button> -->
-          </div>
+          <!-- </div> -->
 
           <!-- Header -->
           <!-- <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
@@ -803,6 +812,20 @@ const toggleSidebar = () => {
               </div> -->
             </div>
           </section>
+          <div class="flex items-center gap-3 ml-auto justify-end">
+            <ButtonWeb
+              label="Edit"
+              color="red"
+              @click="showEditParacelDetail(parcel.parcelId)"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+            />
+            <ButtonWeb
+              label="Go Back"
+              color="blue"
+              @click="backToManageParcels"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+            />
+          </div>
         </form>
       </main>
     </div>

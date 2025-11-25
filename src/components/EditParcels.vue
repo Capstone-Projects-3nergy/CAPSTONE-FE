@@ -202,6 +202,7 @@ const getParcelDetail = async (tid) => {
 }
 
 onMounted(() => {
+  loadCompanies() // ← โหลดบริษัทก่อน render UI
   isCollapsed.value = true
   const tid = route.params.tid
   getParcelDetail(tid)
@@ -373,7 +374,7 @@ const removeImage = () => {
 
 // --- Cancel button ---
 const cancelEdit = () => {
-  router.replace({ name: 'staffparcels' })
+  router.replace({ name: 'detailparcels' })
 }
 
 // --- Sidebar / Pages / Toggle / Popups / Helpers (ไม่แก้ไข) ---
