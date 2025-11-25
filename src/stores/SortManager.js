@@ -92,21 +92,51 @@ function searchParcels(parcels, keyword) {
   const lowerKeyword = keyword.toLowerCase().trim()
 
   return parcels.filter((p) => {
+    // แปลง receiveAt เป็น DD-MM-YYYY HH:mm:ss
+    let formattedReceiveAt = ''
+    if (p.receiveAt) {
+      const date = new Date(p.receiveAt)
+      const dd = String(date.getDate()).padStart(2, '0')
+      const mm = String(date.getMonth() + 1).padStart(2, '0') // เดือนเริ่มจาก 0
+      const yyyy = date.getFullYear()
+      const hh = String(date.getHours()).padStart(2, '0')
+      const min = String(date.getMinutes()).padStart(2, '0')
+      const ss = String(date.getSeconds()).padStart(2, '0')
+      formattedReceiveAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+    }
+
     return (
       p.trackingNumber?.toString().toLowerCase().includes(lowerKeyword) ||
       p.recipientName?.toString().toLowerCase().includes(lowerKeyword) ||
       p.roomNumber?.toString().toLowerCase().includes(lowerKeyword) ||
       p.email?.toString().toLowerCase().includes(lowerKeyword) ||
       p.status?.toString().toLowerCase().includes(lowerKeyword) ||
-      (p.receiveAt
-        ? new Date(p.receiveAt)
-            .toLocaleString()
-            .toLowerCase()
-            .includes(lowerKeyword)
-        : false)
+      formattedReceiveAt.toLowerCase().includes(lowerKeyword)
     )
   })
 }
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     return (
+//       p.trackingNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+//       p.recipientName?.toString().toLowerCase().includes(lowerKeyword) ||
+//       p.roomNumber?.toString().toLowerCase().includes(lowerKeyword) ||
+//       p.email?.toString().toLowerCase().includes(lowerKeyword) ||
+//       p.status?.toString().toLowerCase().includes(lowerKeyword) ||
+//       (p.receiveAt
+//         ? new Date(p.receiveAt)
+//             .toLocaleString()
+//             .toLowerCase()
+//             .includes(lowerKeyword)
+//         : false)
+//     )
+//   })
+// }
 
 // function searchParcels(parcels, keywords) {
 //   const lower = keywords.toLowerCase()
