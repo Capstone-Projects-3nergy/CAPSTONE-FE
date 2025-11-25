@@ -1345,7 +1345,7 @@ onMounted(async () => {
                     <option disabled value="">Select Parcel Type</option>
                     <option value="Document">Document</option>
                     <option value="Box">Box</option>
-                    <option value="Box">Envelope</option>
+                    <option value="Envelope">Envelope</option>
                   </select>
                   <!-- <input
                     v-model="form.parcelType"
