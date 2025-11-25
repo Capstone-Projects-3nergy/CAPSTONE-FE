@@ -144,8 +144,9 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
-    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+    // ✅ sort ตาม receiveAt: ใหม่ → เก่า (Descending)
+mapped.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
+
 
     parcelManager.setParcels(mapped)
   }
