@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { updateParcelStatus } from '@/utils/fetchUtils'
-
+import ButtonWeb from './ButtonWeb.vue'
 const props = defineProps({
   parcelDataStatus: { type: Object, required: true }
 })
@@ -74,13 +74,27 @@ const cancel = () => {
       </select>
 
       <div class="flex justify-end gap-2">
-        <button @click="cancel" class="px-4 py-2 border rounded">Cancel</button>
+        <ButtonWeb
+          label=" Cancel"
+          color="gray"
+          class="w-full sm:w-auto"
+          @click="cancel"
+        />
+        <ButtonWeb
+          label=" Save"
+          color="blue"
+          class="w-full sm:w-auto"
+          @click="saveStatusChange"
+        />
+        <!-- <button @click="cancel" class="px-4 py-2 border rounded pointer">
+          Cancel
+        </button>
         <button
           @click="saveStatusChange"
-          class="px-4 py-2 bg-blue-600 text-white rounded"
+          class="px-4 py-2 bg-blue-600 text-white rounded pointer"
         >
           Save
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
