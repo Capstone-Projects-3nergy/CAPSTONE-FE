@@ -91,7 +91,7 @@ const form = ref({
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  status: 'pending', // default
+  status: 'received', // default
   pickupAt: null,
   updateAt: null,
   senderName: null,
@@ -506,7 +506,7 @@ const saveParcel = async () => {
       roomNumber: '',
       parcelType: '',
       contact: '',
-      status: 'pending',
+      status: 'received',
       pickupAt: null,
       updateAt: null,
       senderName: '',
@@ -544,7 +544,7 @@ const closePopUp = (operate) => {
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Pending' : '')
+    (key) => (form.value[key] = key === 'status' ? 'Received' : '')
   )
   console.log('🛑 Form canceled/reset')
 }
