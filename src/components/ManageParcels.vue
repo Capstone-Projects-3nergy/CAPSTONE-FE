@@ -16,6 +16,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import ParcelsDetail from './ParcelsDetail.vue'
+import ChangeParcelStatus from './ChangeParcelStatus.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -79,8 +80,11 @@ const error = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
+const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
+const showStatusParcel = ref(false)
 const parcelDetail = ref(null)
+const parcelStatusDetail = ref(null)
 const parcelsResidentDetail = ref(null) // สำหรับเก็บข้อมูล parcel detail
 const route = useRoute()
 
@@ -656,23 +660,46 @@ const deleteParcelPopUp = (parcel) => {
   //   }
   // })
 }
+const openStatusPopup = (parcel) => {
+  showStatusParcel.value = true
+  parcelStatusDetail.value = {
+    id: parcel.id,
+    parcelStatus: parcel.parcelStatus
+  }
+  console.log(parcelDetail.value)
+}
 
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
-
+const clearStatusPopUp = () => {
+  showStatusParcel.value = false
+  parcelDetail.value = null
+}
 const showDelComplete = () => {
   deleteSuccess.value = true
   setTimeout(() => (deleteSuccess.value = false), 3000)
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
+const showStatusComplete = () => {
+  statusSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 3000)
+  showStatusParcel.value = false
+  parcelStatusDetail.value = null
+}
 
 const openRedPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 3000)
   showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+const openRedStatusPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 3000)
+  showStatusParcel.value = false
   parcelDetail.value = null
 }
 
@@ -1278,6 +1305,14 @@ const closePopUp = (operate) => {
           @closePopUp="closePopUp"
         />
         <AlertPopUp
+          v-if="statusSuccess"
+          :titles="'Change Status is Successfull.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
           v-if="addSuccess"
           :titles="'Add New Parcel is Successfull.'"
           message="Success!!"
@@ -1389,13 +1424,18 @@ const closePopUp = (operate) => {
                     >Status:
                   </span>
                   <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    class="px-3 py-1 rounded-full text-xs font-semibold text-white cursor-pointer"
                     :class="{
                       'bg-yellow-400': p.status === 'Pending',
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"
-                    @click="openStatusPopup(p)"
+                    @click="
+                      openStatusPopup({
+                        id: p.id,
+                        parcelStatus: p.status
+                      })
+                    "
                   >
                     {{ p.status }}
                   </span>
@@ -1555,6 +1595,14 @@ const closePopUp = (operate) => {
   </teleport>
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
+  <Teleport to="body" v-if="showStatusParcel"
+    ><ChangeParcelStatus
+      @cancelStatusDetail="clearStatusPopUp"
+      @confirmStatusDetail="showStatusComplete"
+      @redStatusAlert="openRedStatusPopup"
+      :parcelDataStatus="parcelStatusDetail"
+    ></ChangeParcelStatus
   ></Teleport>
 
   <!-- <teleport to="body" v-if="showAddParcel">

@@ -19,6 +19,7 @@ import ParcelsDetail from '@/components/ParcelsDetail.vue'
 import DeleteParcels from '@/components/DeleteParcels.vue'
 import ParcelResidentDetail from '@/components/ParcelResidentDetail.vue'
 import ConfirmParcels from '@/components/ConfirmParcels.vue'
+import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -121,9 +122,9 @@ const routes = [
     component: AddParcels
   },
   {
-    path: '/edit-parcel-status/:tid',
+    path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',
     name: 'editparcelstatus',
-    component: ChangeStatus
+    component: ChangeParcelStatus
   },
   {
     path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/editparcel',
