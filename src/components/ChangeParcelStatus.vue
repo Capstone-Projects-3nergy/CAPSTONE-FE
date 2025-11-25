@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { updateParcelStatus } from '@/utils/fetchUtils'
 import ButtonWeb from './ButtonWeb.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
 const props = defineProps({
   parcelDataStatus: { type: Object, required: true }
 })
@@ -38,11 +39,13 @@ const statusOptions = computed(() => {
 
 const saveStatusChange = async () => {
   try {
-    const tid = props.parcelDataStatus.id
+    const tid = props.parcelDataStatus.parcelId // ใช้ parcelId ให้ถูก!!
+
     const updatedStatus = await updateParcelStatus(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${tid}`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       tid,
-      newStatus.value
+      newStatus.value,
+      useAuthManager().user.accessToken // ส่ง token เข้าไปด้วย
     )
 
     if (updatedStatus) {

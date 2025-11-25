@@ -339,27 +339,41 @@ async function deleteFile(url, id, file, router) {
     return null
   }
 }
-async function updateParcelStatus(url, id, newStatus, router) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newStatus })
-    }
+async function updateParcelStatus(baseUrl, id, newStatus, token) {
+  const res = await fetch(`${baseUrl}/${id}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ status: newStatus })
+  })
 
-    const res = await fetchWithAuth(`${url}/${id}/status`, options, router)
-
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
+  if (!res.ok) throw new Error('Update status failed')
+  return await res.json()
 }
+
+// async function updateParcelStatus(url, id, newStatus, router) {
+//   try {
+//     const options = {
+//       method: 'PATCH',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({ status: newStatus })
+//     }
+
+//     const res = await fetchWithAuth(`${url}/${id}/status`, options, router)
+
+//     if (res.ok) {
+//       return await res.json()
+//     }
+//     return null
+//   } catch (error) {
+//     console.error(`Network error: ${error}`)
+//     return null
+//   }
+// }
 async function confirmParcelPickup(url, id, router) {
   try {
     const options = {
@@ -407,7 +421,6 @@ async function confirmParcelReceived(url, id, router) {
     return null
   }
 }
-
 
 export {
   getItemById,

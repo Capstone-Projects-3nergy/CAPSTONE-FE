@@ -666,7 +666,7 @@ const openStatusPopup = (parcel) => {
     id: parcel.id,
     parcelStatus: parcel.parcelStatus
   }
-  console.log(parcelDetail.value)
+  console.log(parcelStatusDetail.value)
 }
 
 const clearDeletePopUp = () => {
