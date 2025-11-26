@@ -31,7 +31,6 @@ watch(
 
 // เลือก status ตามลำดับ
 const statusOptions = computed(() => {
-  if (currentStatus.value === 'PENDING') return ['PENDING', 'RECEIVED']
   if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
   if (currentStatus.value === 'PICKED_UP') return ['PICKED_UP']
   return ['PENDING', 'RECEIVED', 'PICKED_UP']

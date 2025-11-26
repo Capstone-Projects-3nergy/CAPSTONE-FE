@@ -390,7 +390,7 @@ const toggleComfirmPasswordVisibility = () => {
     <div
       class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-[28rem] sm:min-h-[32rem] md:min-h-[36rem] lg:min-h-screen"
     >
-      <div class="w-full max-w-xs sm:max-w-sm lg:max-w-2xl">
+      <div class="w-full max-w-xs sm:max-w-sm">
         <!-- เพิ่ม max-w-3xl -->
         <div class="flex items-center gap-2 mb-2">
           <svg

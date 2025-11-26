@@ -1242,7 +1242,7 @@ const closePopUp = (operate) => {
                 </svg>
                 <span>Add parcel</span>
               </button>
-              <button
+              <!-- <button
                 @click="showParcelTrashPage"
                 class="text-blue-600 hover:text-blue-800 cursor-pointer"
               >
@@ -1258,7 +1258,7 @@ const closePopUp = (operate) => {
                     fill="#185DC0"
                   />
                 </svg>
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
@@ -1536,7 +1536,7 @@ const closePopUp = (operate) => {
                     </svg> -->
                   </button>
 
-                  <button
+                  <!-- <button
                     @click="
                       deleteParcelPopUp({
                         id: p.id,
@@ -1557,7 +1557,7 @@ const closePopUp = (operate) => {
                         fill="red"
                       />
                     </svg>
-                  </button>
+                  </button> -->
                 </td>
               </tr>
             </tbody>
