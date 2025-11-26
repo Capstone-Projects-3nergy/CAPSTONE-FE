@@ -64,9 +64,9 @@ const form = ref({
   parcelType: '', // editable
   companyId: '', // editable (id ขนส่ง)
   imageUrl: '', // editable / upload
-  status: 'PENDING', // editable via dropdown (enum จาก backend)
+  status: '', // editable via dropdown (enum จาก backend)
 
-  receivedAt: '', // read-only
+  receivedAt: 'RECEIVED', // read-only
   pickedUpAt: '', // read-only
   updatedAt: '', // read-only
 
@@ -76,16 +76,16 @@ const form = ref({
 })
 
 const statusOptions = computed(() => {
-  if (form.value.status === 'PENDING') {
-    return ['PENDING', 'RECEIVED']
-  }
+  // if (form.value.status === 'PENDING') {
+  //   return ['PENDI 'RECEIVED']
+  // }
   if (form.value.status === 'RECEIVED') {
     return ['RECEIVED', 'PICKED_UP']
   }
   if (form.value.status === 'PICKED_UP') {
     return ['PICKED_UP'] // หรือ [] แล้ว disable dropdown
   }
-  return ['PENDING', 'RECEIVED', 'PICKED_UP']
+  return ['RECEIVED', 'PICKED_UP']
 })
 // เอาไว้เช็คว่ามีแก้อะไรไหม
 const originalForm = ref({ ...form.value })
