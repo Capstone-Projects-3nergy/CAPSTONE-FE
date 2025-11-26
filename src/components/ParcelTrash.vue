@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useParcelStore } from '@/stores/parcelStore'
+import { useParcelManager } from '@/stores/ParcelsManager.js'
 import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
-const parcelStore = useParcelStore()
+const parcelStore = useParcelManager()
 const trashList = ref([])
 const deleteSuccess = ref(false)
 const error = ref(false)

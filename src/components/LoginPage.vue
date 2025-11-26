@@ -115,6 +115,7 @@ const loginHomePageWeb = async () => {
     const isAuthError =
       err.response?.status === 400 ||
       err.response?.status === 401 ||
+      err.response?.status === 403 ||
       authManager.errorMessage?.includes('Invalid') ||
       err.message?.toLowerCase()?.includes('auth')
 
