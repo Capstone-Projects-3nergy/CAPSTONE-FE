@@ -240,7 +240,7 @@ const toggleSortDate = () => {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
-    <header class="flex items-center w-full h-16 px-4 bg-white">
+    <header class="flex items-center w-full h-16 bg-white">
       <!-- Hamburger (แสดงเฉพาะ mobile) -->
       <button @click="toggleSidebar" class="md:hidden mr-4">
         <!-- ICON -->
