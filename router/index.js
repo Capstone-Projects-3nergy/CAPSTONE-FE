@@ -20,6 +20,7 @@ import DeleteParcels from '@/components/DeleteParcels.vue'
 import ParcelResidentDetail from '@/components/ParcelResidentDetail.vue'
 import ConfirmParcels from '@/components/ConfirmParcels.vue'
 import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
+import ParcelTrash from '@/components/ParcelTrash.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   // Default redirect
@@ -140,6 +141,11 @@ const routes = [
     path: '/homepage/staff/:id/manageparcel/:tid/deleteparcel',
     name: 'deleteparcels',
     component: DeleteParcels
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/trashparcel',
+    name: 'trashparcels',
+    component: ParcelTrash
   }
 ]
 

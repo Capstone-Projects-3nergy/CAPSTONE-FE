@@ -17,6 +17,7 @@ import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import ParcelsDetail from './ParcelsDetail.vue'
 import ChangeParcelStatus from './ChangeParcelStatus.vue'
+import ParcelTrash from './ParcelTrash.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -381,6 +382,9 @@ const handleSort = () => {
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
+}
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels' })
 }
 function parseDate(dateStr) {
   if (!dateStr) return null
@@ -1237,6 +1241,23 @@ const closePopUp = (operate) => {
                   />
                 </svg>
                 <span>Add parcel</span>
+              </button>
+              <button
+                @click="showParcelTrashPage"
+                class="text-blue-600 hover:text-blue-800 cursor-pointer"
+              >
+                <svg
+                  width="18"
+                  height="21"
+                  viewBox="0 0 18 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                    fill="#185DC0"
+                  />
+                </svg>
               </button>
             </div>
           </div>
