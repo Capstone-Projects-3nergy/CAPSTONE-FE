@@ -785,16 +785,16 @@ function formatDateTime(datetimeStr) {
             <!-- Buttons -->
             <div class="flex justify-end space-x-3 pt-4">
               <ButtonWeb
-                label="Back"
-                color="gray"
-                @click="showManageParcelPage"
-              />
-              <ButtonWeb
                 v-if="currentParcelStatus === 'RECEIVED'"
                 type="button"
                 label="Confirm"
                 color="blue"
                 @click="confirmParcelPopUp(parcel)"
+              />
+              <ButtonWeb
+                label="Back"
+                color="gray"
+                @click="showManageParcelPage"
               />
             </div>
           </form>

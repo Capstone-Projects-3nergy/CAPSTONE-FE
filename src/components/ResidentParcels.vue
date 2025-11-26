@@ -420,7 +420,7 @@ const selectedDate = ref('') // v-model จาก date picker
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
-    parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
+    parsedDate: parseDate(p.updateAt)
   }))
 
   // กรองตาม search keyword
@@ -1440,7 +1440,7 @@ const showProfileResidentPage = async function () {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Update:
                   </span>
-                  {{ formatDateByTab(p.updatedAt) }}
+                  {{ formatDateByTab(p.updateAt) }}
                 </td>
 
                 <!-- Operation -->

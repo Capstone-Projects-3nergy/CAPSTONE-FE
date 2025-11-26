@@ -82,16 +82,16 @@ const cancelFn = () => {
       <!-- Footer -->
       <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
         <ButtonWeb
-          label="Cancel"
-          color="gray"
-          class="w-full sm:w-auto"
-          @click="cancelFn"
-        />
-        <ButtonWeb
           label="Confirm"
           color="blue"
           class="w-full sm:w-auto"
           @click="confirmParcelFn"
+        />
+        <ButtonWeb
+          label="Cancel"
+          color="gray"
+          class="w-full sm:w-auto"
+          @click="cancelFn"
         />
       </div>
     </div>

@@ -425,7 +425,7 @@ const selectedDate = ref('') // v-model จาก date picker
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
-    parsedDate: parseDate(p.receiveAt || p.updateAt || p.pickupAt)
+    parsedDate: parseDate( p.updateAt)
   }))
 
   // กรองตาม search keyword

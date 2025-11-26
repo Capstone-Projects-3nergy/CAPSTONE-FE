@@ -828,7 +828,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700">
                       Update:
                     </span>
-                    {{ formatDateTime(p.updatedAt) }}
+                    {{ formatDateTime(p.updateAt) }}
                   </td>
                 </tr>
               </tbody>

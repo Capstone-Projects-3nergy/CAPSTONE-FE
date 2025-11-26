@@ -178,7 +178,6 @@ const mapStatus = (status) => {
       return status
   }
 }
-
 const parcels = computed(() => parcelManager.getParcels())
 // Pagination State
 const currentPage = ref(1)
@@ -213,6 +212,10 @@ const goToPage = (page) => {
 }
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
+// Sort functions
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
 // ===== ฟังก์ชัน toggle =====
 const toggleSortRoom = () => {
   isRoomAsc.value
@@ -960,7 +963,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700">
                       Update:
                     </span>
-                    {{ formatDateTime(p.updatedAt) }}
+                    {{ formatDateTime(p.updateAt) }}
                   </td>
                 </tr>
               </tbody>
