@@ -62,9 +62,9 @@ const cancelFn = () => {
       <!-- Body -->
       <div class="p-4 text-center sm:text-left">
         <p class="mb-4">
-          Do you want to delete this tracking number
-          <b>{{ parcel.parcelNumber || '' }}</b
-          >?
+          Do you want to move this tracking number
+          <b>{{ parcel.parcelNumber || '' }}</b>
+          to trash?
         </p>
       </div>
 

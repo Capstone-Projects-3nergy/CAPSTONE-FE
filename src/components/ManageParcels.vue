@@ -1245,7 +1245,7 @@ const closePopUp = (operate) => {
         <!-- Alerts -->
         <AlertPopUp
           v-if="deleteSuccess"
-          :titles="'Delete Parcel is Successfull.'"
+          :titles="'Delete Parcel to Trash is Successfull.'"
           message="Success!!"
           styleType="green"
           operate="deleteSuccessMessage"
