@@ -4,6 +4,7 @@ import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { updateParcelStatus } from '@/utils/fetchUtils'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+
 const props = defineProps({
   parcelDataStatus: { type: Object, required: true }
 })
@@ -36,15 +37,17 @@ const statusOptions = computed(() => {
   return ['PENDING', 'RECEIVED', 'PICKED_UP']
 })
 
+const isPickUp = computed(() => currentStatus.value === 'PICKED_UP')
+
 const saveStatusChange = async () => {
   try {
-    const tid = props.parcelDataStatus.parcelId // ใช้ parcelId ให้ถูก!!
+    const tid = props.parcelDataStatus.parcelId
 
     const updatedStatus = await updateParcelStatus(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       tid,
       newStatus.value,
-      useAuthManager().user.accessToken // ส่ง token เข้าไปด้วย
+      useAuthManager().user.accessToken
     )
 
     if (updatedStatus) {
@@ -66,12 +69,22 @@ const cancel = () => {
   <div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
     <div class="bg-white p-6 rounded shadow-md w-80">
       <h3 class="font-semibold text-lg mb-4">Change Status</h3>
-      <p class="text-sm text-red-600 mb-2">
+
+      <p v-if="!isPickUp" class="text-sm text-red-600 mb-2">
         * You can only update the status in order: PENDING → RECEIVED →
         PICKED_UP
       </p>
 
-      <select v-model="newStatus" class="border p-2 rounded w-full mb-4">
+      <!-- ถ้าเป็น PICKED_UP บอกว่าเปลี่ยนไม่ได้ -->
+      <p v-if="isPickUp" class="text-sm text-red-600 mb-4">
+        This parcel has already been PICKED_UP. Status cannot be changed.
+      </p>
+
+      <select
+        v-model="newStatus"
+        class="border p-2 rounded w-full mb-4"
+        :disabled="isPickUp"
+      >
         <option v-for="s in statusOptions" :key="s" :value="s">{{ s }}</option>
       </select>
 
@@ -82,21 +95,14 @@ const cancel = () => {
           class="w-full sm:w-auto"
           @click="cancel"
         />
+        <!-- ซ่อนปุ่ม Save ถ้า PICKED_UP -->
         <ButtonWeb
+          v-if="!isPickUp"
           label=" Save"
           color="blue"
           class="w-full sm:w-auto"
           @click="saveStatusChange"
         />
-        <!-- <button @click="cancel" class="px-4 py-2 border rounded pointer">
-          Cancel
-        </button>
-        <button
-          @click="saveStatusChange"
-          class="px-4 py-2 bg-blue-600 text-white rounded pointer"
-        >
-          Save
-        </button> -->
       </div>
     </div>
   </div>
