@@ -1376,7 +1376,7 @@ const closePopUp = (operate) => {
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   <div class="flex items-center gap-2">
-                    Receive At
+                    Update
                     <svg
                       class="cursor-pointer"
                       @click="toggleSortDate"
@@ -1478,14 +1478,14 @@ const closePopUp = (operate) => {
                   </span>
                 </td>
 
-                <!-- Receive At -->
+                <!-- Update -->
                 <td
                   class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
                 >
                   <span class="md:hidden font-semibold text-blue-700"
-                    >Receive At:
+                    >Update:
                   </span>
-                  {{ formatDateByTab(p.receiveAt) }}
+                  {{ formatDateByTab(p.updateAt) }}
                 </td>
 
                 <!-- Operation -->
