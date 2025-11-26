@@ -185,6 +185,9 @@ const saveStatusChange = async () => {
     emit('redStatusAlert', err)
   }
 }
+const isSaveDisabled = computed(() => {
+  return !newStatus.value || newStatus.value === currentStatus.value
+})
 
 const cancel = () => {
   router.replace({ name: 'staffparcels' })
@@ -229,6 +232,7 @@ const cancel = () => {
           color="blue"
           class="w-full sm:w-auto"
           @click="saveStatusChange"
+          :disabled="isSaveDisabled"
         />
       </div>
     </div>
