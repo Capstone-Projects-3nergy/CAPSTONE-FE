@@ -194,8 +194,8 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
-    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+    // ✅ sort ตาม updatedAt: เก่า → ใหม่ (Ascending)
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -1337,7 +1337,7 @@ const showProfileResidentPage = async function () {
                 </th>
                 <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   <div class="flex items-center gap-2">
-                    Receive At
+                    Update
                     <svg
                       class="cursor-pointer"
                       @click="toggleSortDate"
@@ -1433,14 +1433,14 @@ const showProfileResidentPage = async function () {
                   </span>
                 </td>
 
-                <!-- Receive At -->
+                <!-- Update -->
                 <td
                   class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
                 >
                   <span class="md:hidden font-semibold text-blue-700"
-                    >Receive At:
+                    >Update:
                   </span>
-                  {{ formatDateByTab(p.receiveAt) }}
+                  {{ formatDateByTab(p.updatedAt) }}
                 </td>
 
                 <!-- Operation -->

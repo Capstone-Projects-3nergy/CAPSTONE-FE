@@ -1181,7 +1181,7 @@ function formatDateTime(datetimeStr) {
               :disabled="isUnchanged"
             />
 
-            <ButtonWeb label="Cancel" color="red" @click="cancelEdit" />
+            <ButtonWeb label="Cancel" color="gray" @click="cancelEdit" />
           </div>
         </form>
       </main>

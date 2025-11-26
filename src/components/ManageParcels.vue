@@ -195,8 +195,8 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    // ✅ sort ตาม receiveAt: เก่า → ใหม่ (Ascending)
-    mapped.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+    // ✅ sort ตาม updatedAt: เก่า → ใหม่ (Ascending)
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -554,7 +554,7 @@ const showParcelDetail = async function (id) {
   //       roomNumber: data.roomNumber,
   //       email: data.contactEmail,
   //       status: mapStatus(data.status),
-  //       receiveAt: data.receivedAt,
+  //       updatedAt: data.receivedAt,
   //       updateAt: data.updatedAt || null,
   //       pickupAt: data.pickedUpAt || null
   //     }
@@ -590,7 +590,7 @@ const showEditParacelDetail = async function (id) {
   //       roomNumber: data.roomNumber,
   //       email: data.contactEmail,
   //       status: mapStatus(data.status),
-  //       receiveAt: data.receivedAt,
+  //       updatedAt: data.receivedAt,
   //       updateAt: data.updatedAt || null,
   //       pickupAt: data.pickedUpAt || null
   //     }

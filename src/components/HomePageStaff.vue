@@ -159,8 +159,8 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    // ✅ sort ตาม receiveAt: ใหม่ → เก่า (Descending)
-    mapped.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
+    // ✅ sort ตาม updatedAt: ใหม่ → เก่า (Descending)
+    mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -955,12 +955,12 @@ const toggleSortDate = () => {
                     </span>
                   </td>
 
-                  <!-- Receive At -->
+                  <!-- Update -->
                   <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
                     <span class="md:hidden font-semibold text-blue-700">
-                      Update At:
+                      Update:
                     </span>
-                    {{ formatDateTime(p.receiveAt) }}
+                    {{ formatDateTime(p.updatedAt) }}
                   </td>
                 </tr>
               </tbody>
