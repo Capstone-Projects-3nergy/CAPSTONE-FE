@@ -51,7 +51,6 @@ const auth = useAuthManager()
 console.log(auth.user.role)
 // 🏢 สร้าง reactive variable สำหรับเก็บ companies
 const companyList = ref([])
-const statusList = ref([])
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -586,10 +585,8 @@ const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-
 // โหลดรายชื่อ resident ตอนเข้าเพจ
 onMounted(async () => {
-  console.log(parcelStore)
   isCollapsed.value = true
   const auth = useAuthManager()
   console.log('staff login id:', auth.user.id)
@@ -603,7 +600,6 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to load residents:', e)
   }
-  console.log(residents.value)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
@@ -613,7 +609,9 @@ onMounted(async () => {
       }
     })
     console.log('📦 Raw company response:', res.data)
+
     const rawData = res.data
+
     let parsedCompanies = []
 
     if (typeof rawData === 'string') {
@@ -1287,42 +1285,16 @@ onMounted(async () => {
                   <label class="block font-semibold mb-1">
                     Parcel Type <span class="text-red-500">*</span>
                   </label>
+
                   <select
-                    v-model="form.parcelType"
-                    class="border rounded-md p-2 w-auto"
-                  >
-                    <option disabled value="">Select Parcel Type</option>
-                    <option
-                      v-for="type in parcelTypes"
-                      :key="type"
-                      :value="type"
-                    >
-                      {{ type }}
-                    </option>
-                  </select>
-
-                  <!-- <select
-                    v-model="form.parcelType"
-                    class="border rounded-md p-2 w-auto"
-                  >
-                    <option
-                      v-for="company in companyList"
-                      :key="company.companyId"
-                      :value="company.form.parcelType"
-                    >
-                      {{ form.parcelType }}
-                    </option>
-                  </select> -->
-
-                  <!-- <select
                     v-model="form.parcelType"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   >
                     <option disabled value="">Select Parcel Type</option>
-                    <option value="Document">Document</option>
-                    <option value="Box">Box</option>
-                    <option value="Envelope">Envelope</option>
-                  </select> -->
+                    <option value="DOCUMENT">Document</option>
+                    <option value="BOX">Box</option>
+                    <option value="ELECTRONIC">Electronic</option>
+                  </select>
                   <!-- <input
                     v-model="form.parcelType"
                     placeholder="Enter Parcel Type: Box / Document / Envelope"

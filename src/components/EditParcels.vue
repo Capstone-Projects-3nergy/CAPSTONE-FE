@@ -941,9 +941,9 @@ function formatDateTime(datetimeStr) {
                   class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                 >
                   <option disabled value="">Select Parcel Type</option>
-                  <option value="Document">Document</option>
-                  <option value="Box">Box</option>
-                  <option value="Envelope">Envelope</option>
+                  <option value="DOCUMENT">Document</option>
+                  <option value="BOX">Box</option>
+                  <option value="ELECTRONIC">Electronic</option>
                 </select>
               </div>
               <div>
