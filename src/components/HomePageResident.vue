@@ -184,8 +184,17 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-const returnLoginPage = () => {
-  showLogoutConfirm.value = true
+// const returnLoginPage = () => {
+//   showLogoutConfirm.value = true
+// }
+const returnLoginPage = async () => {
+  try {
+    // เรียก logoutAccount จาก store
+    await loginManager.logoutAccount(router)
+    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
 }
 const isCollapsed = ref(false)
 const toggleSidebar = () => {

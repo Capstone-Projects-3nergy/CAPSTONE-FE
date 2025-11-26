@@ -47,16 +47,16 @@ const cancelLogoutFn = () => {
       <!-- Footer -->
       <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
         <ButtonWeb
-          label="Cancel"
-          color="gray"
-          class="w-full sm:w-auto"
-          @click="cancelLogoutFn"
-        />
-        <ButtonWeb
           label="Logout"
           color="blue"
           class="w-full sm:w-auto"
           @click="confirmLogoutFn"
+        />
+        <ButtonWeb
+          label="Cancel"
+          color="gray"
+          class="w-full sm:w-auto"
+          @click="cancelLogoutFn"
         />
       </div>
     </div>

@@ -28,8 +28,17 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
-const returnLoginPage = () => {
-  showLogoutConfirm.value = true
+// const returnLoginPage = () => {
+//   showLogoutConfirm.value = true
+// }
+const returnLoginPage = async () => {
+  try {
+    // เรียก logoutAccount จาก store
+    await loginManager.logoutAccount(router)
+    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false

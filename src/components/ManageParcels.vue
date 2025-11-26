@@ -425,7 +425,7 @@ const selectedDate = ref('') // v-model จาก date picker
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
     ...p,
-    parsedDate: parseDate( p.updateAt)
+    parsedDate: parseDate(p.updateAt)
   }))
 
   // กรองตาม search keyword
@@ -495,8 +495,17 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 console.log(loginManager.userData)
-const returnLoginPage = () => {
-  showLogoutConfirm.value = true
+// const returnLoginPage = () => {
+//   showLogoutConfirm.value = true
+// }
+const returnLoginPage = async () => {
+  try {
+    // เรียก logoutAccount จาก store
+    await loginManager.logoutAccount(router)
+    // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
+  } catch (err) {
+    console.error('Logout failed:', err)
+  }
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false
