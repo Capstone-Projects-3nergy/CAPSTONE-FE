@@ -1587,7 +1587,6 @@ onMounted(async () => {
       </main>
     </div>
   </div>
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

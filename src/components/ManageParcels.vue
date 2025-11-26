@@ -698,7 +698,7 @@ const showDelComplete = () => {
 }
 const showStatusComplete = () => {
   statusSuccess.value = true
-  setTimeout(() => (deleteSuccess.value = false), 3000)
+  setTimeout(() => (statusSuccess.value = false), 3000)
   showStatusParcel.value = false
   parcelStatusDetail.value = null
 }
