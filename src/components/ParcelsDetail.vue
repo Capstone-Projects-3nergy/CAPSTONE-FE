@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
@@ -104,9 +104,21 @@ const getParcelDetail = async (tid) => {
     console.error('❌ Failed to load parcel detail:', err)
   }
 }
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
+onMounted(async () => {
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
 
-onMounted(() => {
-  isCollapsed.value = true
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum) // 🔥 เรียกครั้งเดียวพอ
 })
@@ -182,7 +194,7 @@ function formatDateTime(datetimeStr) {
 </script>
 
 <template>
-   <div
+  <div
     class="min-h-screen bg-gray-100 flex flex-col pl-4"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
@@ -245,7 +257,6 @@ function formatDateTime(datetimeStr) {
         </div>
       </div>
     </header>
-
 
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">
