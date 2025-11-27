@@ -13,6 +13,7 @@ const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
 const isEmailOverLimit = ref(false)
+const isPasswordMax = ref(false)
 const isPasswordOverLimit = ref(false)
 const isPasswordTooShort = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
@@ -153,9 +154,9 @@ const submitForm = async (roleType) => {
     //   setTimeout(() => (isPasswordWeak.value = false), 3000)
     //   return
     // }
-    if (!form.password || form.password.length < 6) {
-      isPasswordOverLimit.value = true
-      setTimeout(() => (isPasswordOverLimit.value = false), 3000)
+    if (!form.password || form.password.length > 14) {
+      isPasswordMax.value = true
+      setTimeout(() => (isPasswordMax.value = false), 3000)
       return
     }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
@@ -291,7 +292,7 @@ const checkInputLength = (field) => {
     // ตรวจความยาวสูงสุด
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
-      form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
+      // form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
       setTimeout(() => (isPasswordOverLimit.value = false), 1000)
     } else {
       isPasswordOverLimit.value = false
@@ -306,7 +307,7 @@ const checkInputLength = (field) => {
     // ตรวจความยาวสูงสุด
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = true
-      form.confirmPassword = trimmed.substring(0, MAX_PASSWORD_LENGTH)
+      // form.confirmPassword = trimmed.substring(0, MAX_PASSWORD_LENGTH)
       setTimeout(() => (isConfirmPasswordOverLimit.value = false), 1000)
     } else {
       isConfirmPasswordOverLimit.value = false
@@ -518,7 +519,7 @@ const toggleComfirmPasswordVisibility = () => {
 
         <!-- Weak Password -->
         <AlertPopUp
-          v-if="isPasswordOverLimit"
+          v-if="isPasswordMax"
           titles="Limit password to 14 characters or less."
           message="Error!!"
           styleType="red"
