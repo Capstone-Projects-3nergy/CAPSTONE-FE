@@ -1317,7 +1317,7 @@ const closePopUp = (operate) => {
         />
 
         <!-- Parcel Table (Responsive) -->
-        <div class="bg-white rounded-lg shadow w-full overflow-hidden">
+        <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
             <!-- Desktop Header -->
             <thead

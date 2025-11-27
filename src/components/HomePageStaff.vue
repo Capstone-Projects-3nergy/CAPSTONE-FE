@@ -642,7 +642,7 @@ const toggleSortDate = () => {
       </button>
       <!-- Main Content -->
       <main class="flex-1 flex flex-col">
-        <div class="bg-white p-4 rounded shadow">
+        <div class="sm:bg-white p-4 sm:rounded sm:shadow">
           <!-- HOME -->
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
@@ -807,7 +807,9 @@ const toggleSortDate = () => {
           </div>
 
           <!-- Parcel Table (Vertical on mobile, full table on desktop) -->
-          <div class="bg-white rounded-lg shadow">
+          <div
+            class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
+          >
             <table class="min-w-full text-left border-collapse">
               <!-- Desktop Header -->
               <thead
