@@ -580,7 +580,7 @@ const closePopUp = (operate) => {
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
-            isCollapsed ? 'w-0 md:w-16' : 'w-56'
+            isCollapsed ? 'w-0 md:w-16' : 'w-60'
             // mobile overlay
           ]"
           class="overflow-hidden"

@@ -329,7 +329,7 @@ const toggleSortDate = () => {
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
-            isCollapsed ? 'w-0 md:w-16' : 'w-56'
+            isCollapsed ? 'w-0 md:w-16' : 'w-60'
             // mobile overlay
           ]"
           class="overflow-hidden"
@@ -521,7 +521,7 @@ const toggleSortDate = () => {
 
       <!-- Main Content -->
       <main class="flex-1 flex flex-col">
-        <div class="sm:bg-white p-4 sm:rounded sm:shadow">
+        <div class="sm:bg-white p-4 sm:shadow">
           <!-- HOME -->
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
