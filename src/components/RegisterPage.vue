@@ -137,11 +137,11 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isNotMatch.value = false), 3000)
       return
     }
-    if (!form.fullName || form.fullName.trim().length < 6) {
-      isFullNameWeak.value = true
-      setTimeout(() => (isFullNameWeak.value = false), 3000)
-      return
-    }
+    // if (!form.fullName || form.fullName.trim().length < 6) {
+    //   isFullNameWeak.value = true
+    //   setTimeout(() => (isFullNameWeak.value = false), 3000)
+    //   return
+    // }
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
       setTimeout(() => (isFullNameWrong.value = false), 3000)
@@ -367,6 +367,7 @@ const checkInputLength = (field) => {
   const MAX_STAFFPOSITION_LENGTH = 30
   const MAX_ROMNUMBER_LENGTH = 11
   const MIN_PASSWORD_LENGTH = 6
+  const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
     if (trimmed.length > MAX_NAME_LENGTH) {
@@ -378,6 +379,10 @@ const checkInputLength = (field) => {
     } else {
       isNameOverLimit.value = false
     }
+    // ตรวจความยาวขั้นต่ำแบบ realtime (ไม่นับช่องว่าง)
+    const lettersOnly = trimmed.replace(/\s+/g, '')
+    isFullNameWeak.value =
+      lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH
   } else if (field === 'email') {
     const trimmed = form.email.trim()
     if (trimmed.length > MAX_EMAIL_LENGTH) {
@@ -451,7 +456,7 @@ const closePopUp = (operate) => {
   if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
+  // if (operate === 'fullname') isFullNameWeak.value = false
   if (operate === 'dorm') isNoDorm.value = false
   if (operate === 'notmatch') isNotMatch.value = false
   if (operate === 'notroomrequired') isRoomRequired.value = false
@@ -648,14 +653,14 @@ const toggleComfirmPasswordVisibility = () => {
           operate="success"
           @closePopUp="closePopUp"
         />
-        <AlertPopUp
+        <!-- <AlertPopUp
           v-if="isFullNameWeak"
           :titles="'Full Name must be at least 6 characters.'"
           message="Error!!"
           styleType="red"
           operate="fullname"
           @closePopUp="closePopUp"
-        />
+        /> -->
         <AlertPopUp
           v-if="isNoDorm"
           :titles="'Please select a dormitory.'"
@@ -770,7 +775,10 @@ const toggleComfirmPasswordVisibility = () => {
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('fullName')"
-                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                  :class="{
+                    'border-red-600 text-red-600':
+                      isNameOverLimit || isFullNameWeak
+                  }"
                 />
                 <div
                   style="display: flex; align-items: center"
@@ -791,6 +799,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit Full Name to 30 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isFullNameWeak"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Full Name must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1148,7 +1176,10 @@ const toggleComfirmPasswordVisibility = () => {
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('fullName')"
-                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                  :class="{
+                    'border-red-600 text-red-600':
+                      isNameOverLimit || isFullNameWeak
+                  }"
                 />
                 <div
                   style="display: flex; align-items: center"
@@ -1169,6 +1200,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit Full Name to 30 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isFullNameWeak"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Full Name must be at least 6 characters.
                   </div>
                 </div>
               </div>
