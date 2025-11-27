@@ -1356,7 +1356,17 @@ onMounted(async () => {
 
               <!-- Save / Cancel Buttons -->
               <div class="flex justify-end space-x-3 mt-3">
-                <!-- <ButtonWeb
+                <!-- Reset (แสดงเฉพาะบน mobile) -->
+                <div class="flex-1 flex justify-start md:justify-end">
+                  <ButtonWeb
+                    label="Reset"
+                    color="red"
+                    @click="cancelParcel"
+                    class="w-auto"
+                  />
+                </div>
+                <!-- Save -->
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
@@ -1365,13 +1375,23 @@ onMounted(async () => {
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                /> -->
-                <ButtonWeb label="Reset" color="red" @click="cancelParcel" />
+                  class="block md:hidden"
+                />
+
+                <!-- Back -->
+                <ButtonWeb
+                  label="Back"
+                  color="gray"
+                  @click="showManageParcelPage"
+                  class="block md:hidden"
+                />
               </div>
             </div>
 
             <!-- Right side: Display Parcel Information -->
-            <div class="bg-gray-50 border-l border-gray-200 p-6 rounded-lg">
+            <div
+              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg"
+            >
               <div class="flex items-center justify-end mb-4">
                 <!-- <ButtonWeb
                   label="Go Back"
