@@ -14,7 +14,9 @@ const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
+const isPasswordTooShort = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
+const isConfirmPasswordTooShort = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
@@ -244,6 +246,7 @@ const checkInputLength = (field) => {
   const MAX_PASSWORD_LENGTH = 14
   const MAX_STAFFPOSITION_LENGTH = 30
   const MAX_ROMNUMBER_LENGTH = 11
+  const MIN_PASSWORD_LENGTH = 6
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
     if (trimmed.length > MAX_NAME_LENGTH) {
@@ -279,26 +282,34 @@ const checkInputLength = (field) => {
     }
   } else if (field === 'password') {
     const trimmed = form.password.trim()
+
+    // ตรวจความยาวสูงสุด
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
       form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => {
-        isPasswordOverLimit.value = false
-      }, 1000)
+      setTimeout(() => (isPasswordOverLimit.value = false), 1000)
     } else {
       isPasswordOverLimit.value = false
     }
+
+    // ตรวจความยาวขั้นต่ำแบบ realtime
+    isPasswordTooShort.value =
+      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'confirmPassword') {
     const trimmed = form.confirmPassword.trim()
+
+    // ตรวจความยาวสูงสุด
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = true
       form.confirmPassword = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => {
-        isConfirmPasswordOverLimit.value = false
-      }, 1000)
+      setTimeout(() => (isConfirmPasswordOverLimit.value = false), 1000)
     } else {
       isConfirmPasswordOverLimit.value = false
     }
+
+    // ตรวจความยาวขั้นต่ำแบบ realtime
+    isConfirmPasswordTooShort.value =
+      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'roomNumber') {
     const trimmed = form.roomNumber.trim()
     if (trimmed.length > MAX_ROMNUMBER_LENGTH) {
@@ -648,7 +659,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -694,7 +705,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -739,7 +750,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -776,7 +787,8 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600': isPasswordOverLimit
+                    'border-red-600 text-red-600':
+                      isPasswordOverLimit || isPasswordTooShort
                   }"
                 />
                 <button
@@ -812,7 +824,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     class="w-[15px] text-red-600"
                   >
                     <path
@@ -825,6 +837,26 @@ const toggleComfirmPasswordVisibility = () => {
                     Limit password to 14 characters or less.
                   </div>
                 </div>
+                <div
+                  v-if="isPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Password must be at least 6 characters.
+                  </div>
+                </div>
               </div>
               <div class="relative">
                 <svg
@@ -833,7 +865,7 @@ const toggleComfirmPasswordVisibility = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#918c8c]"
                 >
                   <path
                     d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -848,7 +880,8 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600': isConfirmPasswordOverLimit
+                    'border-red-600 text-red-600':
+                      isConfirmPasswordOverLimit || isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -884,7 +917,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     class="w-[15px] text-red-600"
                   >
                     <path
@@ -895,6 +928,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isConfirmPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -986,7 +1039,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -1056,7 +1109,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -1100,7 +1153,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -1136,7 +1189,8 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600': isPasswordOverLimit
+                    'border-red-600 text-red-600':
+                      isPasswordOverLimit || isPasswordTooShort
                   }"
                 />
                 <button
@@ -1172,7 +1226,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -1184,6 +1238,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1209,7 +1283,8 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600': isConfirmPasswordOverLimit
+                    'border-red-600 text-red-600':
+                      isConfirmPasswordOverLimit || isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -1245,7 +1320,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     class="w-[15px] text-red-600"
                   >
                     <path
@@ -1256,6 +1331,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isConfirmPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1293,7 +1388,9 @@ const toggleComfirmPasswordVisibility = () => {
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
-              isConfirmPasswordOverLimit
+              isPasswordTooShort ||
+              isConfirmPasswordOverLimit ||
+              isConfirmPasswordTooShort
             "
           />
           <ButtonWeb
@@ -1326,8 +1423,10 @@ const toggleComfirmPasswordVisibility = () => {
               isNameOverLimit ||
               isEmailOverLimit ||
               isPasswordOverLimit ||
+              isPasswordTooShort ||
               isStaffPositionOverLimit ||
-              isConfirmPasswordOverLimit
+              isConfirmPasswordOverLimit ||
+              isConfirmPasswordTooShort
             "
           />
         </form>
