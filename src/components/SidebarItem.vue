@@ -13,7 +13,7 @@ defineProps({
     <slot name="icon"></slot>
     <span
       v-if="!collapsed"
-      class="whitespace-nowrap overflow-hidden text-ellipsis flex-1"
+      class="whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left"
       >{{ title }}</span
     >
   </div>
