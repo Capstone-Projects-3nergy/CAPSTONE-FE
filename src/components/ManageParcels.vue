@@ -450,7 +450,7 @@ const filteredParcels = computed(() => {
   if (selectedDate.value) {
     result = result.filter((p) => {
       if (!p.parsedDate) return false
-      const parcelDate = p.parsedDate.toISOString().split('T')[0] // yyyy-mm-dd
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA') // yyyy-mm-dd
       return parcelDate === selectedDate.value
     })
   }

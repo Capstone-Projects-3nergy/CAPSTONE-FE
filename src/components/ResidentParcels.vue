@@ -443,7 +443,7 @@ const filteredParcels = computed(() => {
   if (selectedDate.value) {
     result = result.filter((p) => {
       if (!p.parsedDate) return false
-      const parcelDate = p.parsedDate.toISOString().split('T')[0] // yyyy-mm-dd
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA') // yyyy-mm-dd
       return parcelDate === selectedDate.value
     })
   }
@@ -822,7 +822,7 @@ const showProfileResidentPage = async function () {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
