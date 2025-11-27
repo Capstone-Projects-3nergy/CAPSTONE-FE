@@ -129,11 +129,9 @@ onMounted(async () => {
   }
 })
 // ---------------- REGISTER FUNCTION ----------------
-
 const submitForm = async (roleType) => {
-  console.log(form.dormId)
   try {
-    // ✅ validations เดิม
+    // ---------------- VALIDATIONS ----------------
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       setTimeout(() => (isNotMatch.value = false), 3000)
@@ -149,11 +147,6 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isFullNameWrong.value = false), 3000)
       return
     }
-    // if (!form.password || form.password.length < 6) {
-    //   isPasswordWeak.value = true
-    //   setTimeout(() => (isPasswordWeak.value = false), 3000)
-    //   return
-    // }
     if (!form.password || form.password.length > 14) {
       isPasswordMax.value = true
       setTimeout(() => (isPasswordMax.value = false), 3000)
@@ -170,7 +163,6 @@ const submitForm = async (roleType) => {
       .split(/\s+/, 2)
     const roleUpper = String(roleType).toUpperCase()
 
-    // ⬇⬇⬇ เปลี่ยนจาก dormId → dormId ⬇⬇⬇
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -178,7 +170,7 @@ const submitForm = async (roleType) => {
             firstName,
             lastName,
             role: roleUpper,
-            dormId: form.dormId || '', // ⬅ ใช้ชื่อนี้
+            dormId: form.dormId || '',
             roomNumber: (form.roomNumber || '').trim(),
             password: form.password,
             fullName: form.fullName.trim()
@@ -193,7 +185,7 @@ const submitForm = async (roleType) => {
             fullName: form.fullName.trim()
           }
 
-    // ✅ validation ฝั่ง RESIDENT ตาม dormId
+    // ---------------- RESIDENT/STAFF VALIDATION ----------------
     if (roleUpper === 'RESIDENT') {
       if (!payload.dormId) {
         isNoDorm.value = true
@@ -218,32 +210,151 @@ const submitForm = async (roleType) => {
       }
     }
 
-    // ✅ เรียก register ผ่าน AuthManager (ไม่ต้องแนบ Authorization)
-    await authManager.registerAccount(payload)
+    // ---------------- CALL REGISTER ----------------
+    const res = await authManager.registerAccount(payload)
 
-    authManager.loadUserFromBackend()
+    // ---------------- CHECK STATUS ----------------
+    if (res.status === 201 || res.status === 200) {
+      // ✅ สมัครสำเร็จ
+      success.value = true
+      setTimeout(() => (success.value = false), 3000)
 
-    if (authManager.status === 409) {
-      success.value = false
+      // ล้างฟอร์ม
+      Object.keys(form).forEach((key) => {
+        if (key === 'dormId') form[key] = null
+        else form[key] = ''
+      })
+    } else if (res.status === 409) {
+      // ⚠️ อีเมลซ้ำ
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
-      return
+    } else {
+      // ❌ ข้อผิดพลาดอื่น ๆ
+      // error.value = true
+      // setTimeout(() => (error.value = false), 3000)
+      console.error('Register error:', res.error)
     }
-
-    // ✅ ล้างฟอร์ม
-    Object.keys(form).forEach((key) => {
-      if (key === 'dormId') form[key] = null
-      else form[key] = ''
-    })
-
-    success.value = true
-    setTimeout(() => (success.value = false), 3000)
   } catch (err) {
-    console.error('❌ Register error:', err)
-    error.value = true
+    // console.error('❌ Submit form error:', err)
+    // error.value = true
     setTimeout(() => (error.value = false), 3000)
   }
 }
+
+// const submitForm = async (roleType) => {
+//   console.log(form.dormId)
+//   try {
+//     // ✅ validations เดิม
+//     if (form.password !== form.confirmPassword) {
+//       isNotMatch.value = true
+//       setTimeout(() => (isNotMatch.value = false), 3000)
+//       return
+//     }
+//     if (!form.fullName || form.fullName.trim().length < 6) {
+//       isFullNameWeak.value = true
+//       setTimeout(() => (isFullNameWeak.value = false), 3000)
+//       return
+//     }
+//     if (/\d/.test(form.fullName)) {
+//       isFullNameWrong.value = true
+//       setTimeout(() => (isFullNameWrong.value = false), 3000)
+//       return
+//     }
+//     // if (!form.password || form.password.length < 6) {
+//     //   isPasswordWeak.value = true
+//     //   setTimeout(() => (isPasswordWeak.value = false), 3000)
+//     //   return
+//     // }
+//     if (!form.password || form.password.length > 14) {
+//       isPasswordMax.value = true
+//       setTimeout(() => (isPasswordMax.value = false), 3000)
+//       return
+//     }
+//     if (!form.email || !form.email.endsWith('@gmail.com')) {
+//       incorrectemailform.value = true
+//       setTimeout(() => (incorrectemailform.value = false), 3000)
+//       return
+//     }
+
+//     const [firstName = '', lastName = ''] = (form.fullName || '')
+//       .trim()
+//       .split(/\s+/, 2)
+//     const roleUpper = String(roleType).toUpperCase()
+
+//     // ⬇⬇⬇ เปลี่ยนจาก dormId → dormId ⬇⬇⬇
+//     const payload =
+//       roleUpper === 'RESIDENT'
+//         ? {
+//             email: form.email.trim(),
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             dormId: form.dormId || '', // ⬅ ใช้ชื่อนี้
+//             roomNumber: (form.roomNumber || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName.trim()
+//           }
+//         : {
+//             email: form.email.trim(),
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             position: (form.position || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName.trim()
+//           }
+
+//     // ✅ validation ฝั่ง RESIDENT ตาม dormId
+//     if (roleUpper === 'RESIDENT') {
+//       if (!payload.dormId) {
+//         isNoDorm.value = true
+//         setTimeout(() => (isNoDorm.value = false), 3000)
+//         return
+//       }
+//       if (!payload.roomNumber) {
+//         isRoomRequired.value = true
+//         setTimeout(() => (isRoomRequired.value = false), 3000)
+//         return
+//       }
+//     } else if (roleUpper === 'STAFF') {
+//       if (!payload.position) {
+//         isPositionRequired.value = true
+//         setTimeout(() => (isPositionRequired.value = false), 3000)
+//         return
+//       }
+//       if (/\d/.test(payload.position)) {
+//         isPositionWrong.value = true
+//         setTimeout(() => (isPositionWrong.value = false), 3000)
+//         return
+//       }
+//     }
+
+//     // ✅ เรียก register ผ่าน AuthManager (ไม่ต้องแนบ Authorization)
+//     await authManager.registerAccount(payload)
+
+//     authManager.loadUserFromBackend()
+
+//     if (authManager.status === 409) {
+//       success.value = false
+//       isEmailDuplicate.value = true
+//       setTimeout(() => (isEmailDuplicate.value = false), 3000)
+//       return
+//     }
+
+//     // ✅ ล้างฟอร์ม
+//     Object.keys(form).forEach((key) => {
+//       if (key === 'dormId') form[key] = null
+//       else form[key] = ''
+//     })
+
+//     success.value = true
+//     setTimeout(() => (success.value = false), 3000)
+//   } catch (err) {
+//     console.error('❌ Register error:', err)
+//     error.value = true
+//     setTimeout(() => (error.value = false), 3000)
+//   }
+// }
 
 // ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
