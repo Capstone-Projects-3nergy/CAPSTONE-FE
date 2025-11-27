@@ -228,6 +228,9 @@ const submitForm = async (roleType) => {
       // ⚠️ อีเมลซ้ำ
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
+    } else if (res.status === 500) {
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
     } else {
       // ❌ ข้อผิดพลาดอื่น ๆ
       // error.value = true
@@ -237,7 +240,7 @@ const submitForm = async (roleType) => {
   } catch (err) {
     // console.error('❌ Submit form error:', err)
     // error.value = true
-    setTimeout(() => (error.value = false), 3000)
+    // setTimeout(() => (error.value = false), 3000)
   }
 }
 
