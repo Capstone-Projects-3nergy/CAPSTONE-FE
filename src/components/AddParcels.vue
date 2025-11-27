@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -148,8 +148,22 @@ watch(recipientSearch, (val) => {
 })
 
 // โหลดรายชื่อ resident ตอนเข้าเพจ
+
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
 onMounted(async () => {
-  isCollapsed.value = true
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
+
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
   const auth = useAuthManager()
   console.log('staff login id:', auth.user.id)
   try {
@@ -495,7 +509,7 @@ const closePopUp = (operate) => {
 </script>
 
 <template>
-   <div
+  <div
     class="min-h-screen bg-gray-100 flex flex-col pl-4"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
@@ -558,7 +572,6 @@ const closePopUp = (operate) => {
         </div>
       </div>
     </header>
-
 
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">

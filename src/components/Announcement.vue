@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -53,8 +53,21 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
 onMounted(async () => {
-  isCollapsed.value = true
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
+
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
 })
 </script>
 

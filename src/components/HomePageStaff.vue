@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ParcelScanner from '@/components/ParcelScannerPage.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AlertPopUp from './../components/AlertPopUp.vue'
@@ -144,9 +144,21 @@ const returnHomepage = () => {
 }
 
 const parcelManager = useParcelManager()
-
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
 onMounted(async () => {
-  isCollapsed.value = true // ดึงจาก backend
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
+
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
@@ -174,7 +186,6 @@ onMounted(async () => {
     parcelManager.setParcels(mapped)
   }
 })
-
 const mapStatus = (status) => {
   switch (status) {
     case 'PENDING':

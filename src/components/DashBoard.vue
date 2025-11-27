@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto' // ✅ ต้อง import chart.js ก่อนใช้
 import SidebarItem from './SidebarItem.vue'
@@ -45,8 +45,21 @@ const monthsTH = [
 const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
 ]
-onMounted(() => {
-  isCollapsed.value = true
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
+onMounted(async () => {
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
+
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
   new Chart(ctx, {
     type: 'bar',
@@ -146,7 +159,7 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-   <div
+  <div
     class="min-h-screen bg-gray-100 flex flex-col pl-4"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
@@ -209,7 +222,6 @@ const toggleSidebar = () => {
         </div>
       </div>
     </header>
-
 
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">

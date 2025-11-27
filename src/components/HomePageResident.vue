@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ParcelScanner from '@/components/ParcelScannerPage.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AlertPopUp from './../components/AlertPopUp.vue'
@@ -120,8 +120,22 @@ const showProfileResidentPage = async function () {
 //   returnLogin.value = true
 // }
 const parcelManager = useParcelManager()
+
+const checkScreen = () => {
+  // mobile: width < 768px
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  // ลบ listener เวลา component ถูกทำลาย
+  window.removeEventListener('resize', checkScreen)
+})
 onMounted(async () => {
-  isCollapsed.value = true
+  // ตรวจสอบว่าเป็น mobile หรือไม่ (ตัวอย่างใช้ width < 768px)
+  // ตั้งค่าครั้งแรก
+  checkScreen()
+
+  // ฟัง event resize เพื่อปรับ auto
+  window.addEventListener('resize', checkScreen)
   // ดึงจาก backend
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
@@ -244,7 +258,7 @@ const toggleSortDate = () => {
 </script>
 
 <template>
-   <div
+  <div
     class="min-h-screen bg-gray-100 flex flex-col pl-4"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
@@ -307,7 +321,6 @@ const toggleSortDate = () => {
         </div>
       </div>
     </header>
-
 
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">
