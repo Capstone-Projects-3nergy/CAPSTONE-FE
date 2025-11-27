@@ -212,7 +212,7 @@ const submitForm = async (roleType) => {
 
     // ---------------- CALL REGISTER ----------------
     const res = await authManager.registerAccount(payload)
-
+    console.log(res.status)
     // ---------------- CHECK STATUS ----------------
     if (res.status === 201 || res.status === 200) {
       // ✅ สมัครสำเร็จ
