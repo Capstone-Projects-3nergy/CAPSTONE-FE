@@ -1513,7 +1513,7 @@ onMounted(async () => {
                   <span>{{ form.senderName }}</span>
                 </div>
               </div>
-              <div class="flex justify-end space-x-3 mt-3">
+              <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
                 <ButtonWeb
                   label="Save"
                   color="green"
@@ -1523,14 +1523,16 @@ onMounted(async () => {
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
+                  class="w-auto"
                 />
                 <ButtonWeb
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="w-full md:w-auto"
+                  class="w-auto"
                 />
               </div>
+
               <!-- Image Preview -->
               <div v-if="previewUrl" class="mt-4 relative">
                 <h3 class="font-semibold text-[#185DC0] mb-2">
