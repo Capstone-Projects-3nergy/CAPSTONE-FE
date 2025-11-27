@@ -148,9 +148,14 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isFullNameWrong.value = false), 3000)
       return
     }
+    // if (!form.password || form.password.length < 6) {
+    //   isPasswordWeak.value = true
+    //   setTimeout(() => (isPasswordWeak.value = false), 3000)
+    //   return
+    // }
     if (!form.password || form.password.length < 6) {
-      isPasswordWeak.value = true
-      setTimeout(() => (isPasswordWeak.value = false), 3000)
+      isPasswordOverLimit.value = true
+      setTimeout(() => (isPasswordOverLimit.value = false), 3000)
       return
     }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
@@ -513,8 +518,8 @@ const toggleComfirmPasswordVisibility = () => {
 
         <!-- Weak Password -->
         <AlertPopUp
-          v-if="isPasswordWeak"
-          titles="Password must be at least 6 characters"
+          v-if="isPasswordOverLimit"
+          titles="Limit password to 14 characters or less."
           message="Error!!"
           styleType="red"
           operate="password"
