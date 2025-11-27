@@ -667,7 +667,7 @@ const toggleSortDate = () => {
               <!-- ปุ่มซ้าย -->
               <button
                 @click="prevSlide"
-                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
+                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
               >
                 ‹
               </button>
@@ -700,7 +700,7 @@ const toggleSortDate = () => {
               <!-- ปุ่มขวา -->
               <button
                 @click="nextSlide"
-                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20"
+                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
               >
                 ›
               </button>
