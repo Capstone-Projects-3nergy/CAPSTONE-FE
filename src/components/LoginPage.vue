@@ -66,7 +66,7 @@ const loginHomePageWeb = async () => {
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
-
+    console.log(res.status)
     if (res.status === 200 || res.status === 201) {
       // ✅ Login สำเร็จ
       success.value = true
@@ -96,7 +96,7 @@ const loginHomePageWeb = async () => {
         console.error('⚠️ Failed to decode token:', decodeErr)
         await authManager.logoutAccount(router)
       }
-    } else if ([400, 401, 403].includes(res.status)) {
+    } else if ([400, 401, 403, 500].includes(res.status)) {
       // ⚠️ Email/Password ผิด
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 2000)
