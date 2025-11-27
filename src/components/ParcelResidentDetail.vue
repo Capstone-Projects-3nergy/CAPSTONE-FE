@@ -229,7 +229,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col pl-4"
+      class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
