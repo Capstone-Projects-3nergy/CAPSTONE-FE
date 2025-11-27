@@ -87,6 +87,16 @@ export const useParcelManager = defineStore('parcelManager', () => {
     }
   }
 
+  // ⬅⬅⬅ เพิ่มอันนี้
+  const updateParcel = (updatedParcel) => {
+    const index = parcel.findIndex((p) => p.parcelId === updatedParcel.parcelId)
+    if (index !== -1) {
+      // 🔹 ใช้ splice เพื่อให้ reactive detect การเปลี่ยนแปลง
+      parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
+      console.log('Parcel updated via splice:', parcel[index])
+    }
+  }
+
   // 🟥 Delete
   const deleteParcels = (parcelId) => {
     const index = findIndexByParcelId(parcelId)
@@ -129,6 +139,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
 
   return {
     updateParcelStatus,
+    updateParcel,
     getParcels,
     setParcels,
     addParcel,

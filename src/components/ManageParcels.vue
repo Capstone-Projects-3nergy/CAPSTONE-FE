@@ -696,13 +696,15 @@ const showDelComplete = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
-const showStatusComplete = () => {
+const showStatusComplete = (updatedParcel) => {
+  parcelManager.updateParcel(updatedParcel) // 👈 อัปเดต store ให้ reactive
+
   statusSuccess.value = true
   setTimeout(() => (statusSuccess.value = false), 3000)
+
   showStatusParcel.value = false
   parcelStatusDetail.value = null
 }
-
 const openRedPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 3000)

@@ -146,20 +146,19 @@ watch(
 )
 const saveStatusChange = async () => {
   try {
-    // สร้าง body สำหรับอัปเดตข้อมูลพัสดุ
     const body = {
       trackingNumber: form.value.trackingNumber,
       recipientName: form.value.recipientName,
       parcelType: form.value.parcelType,
       senderName: form.value.senderName,
-      status: newStatus.value, // ใช้ status ใหม่จาก dropdown
+      status: newStatus.value,
       companyId: form.value.companyId ? Number(form.value.companyId) : null,
       imageUrl: form.value.imageUrl
     }
 
     const updatedParcel = await editItem(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      form.value.parcelId, // ใช้ parcelId ของ form เป็น id
+      form.value.parcelId,
       body,
       router
     )
@@ -170,10 +169,10 @@ const saveStatusChange = async () => {
       return
     }
 
-    // อัปเดตข้อมูลใน store
-    parcelStore.updateParcelStatus(form.value.parcelId, updatedParcel.status)
+    // 🔹 อัปเดตทั้ง object ให้ reactive
+    parcelStore.updateParcel(updatedParcel)
 
-    // ซิงค์ข้อมูล form กับข้อมูลที่ backend ส่งกลับ
+    // 🔹 ซิงค์ form
     form.value = { ...form.value, ...updatedParcel }
     originalForm.value = { ...form.value }
 
@@ -185,6 +184,7 @@ const saveStatusChange = async () => {
     emit('redStatusAlert', err)
   }
 }
+
 const isSaveDisabled = computed(() => {
   return !newStatus.value || newStatus.value === currentStatus.value
 })
