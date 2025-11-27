@@ -787,8 +787,7 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600':
-                      isPasswordOverLimit || isPasswordTooShort
+                    'border-red-600 text-red-600': isPasswordTooShort
                   }"
                 />
                 <button
@@ -817,7 +816,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-                <div
+                <!-- <div
                   style="display: flex; align-items: center"
                   v-if="isPasswordOverLimit"
                 >
@@ -836,7 +835,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
                   </div>
-                </div>
+                </div> -->
                 <div
                   v-if="isPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -880,8 +879,7 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600':
-                      isConfirmPasswordOverLimit || isConfirmPasswordTooShort
+                    'border-red-600 text-red-600': isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -910,7 +908,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-                <div
+                <!-- <div
                   style="display: flex; align-items: center"
                   v-if="isConfirmPasswordOverLimit"
                 >
@@ -929,7 +927,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
                   </div>
-                </div>
+                </div> -->
                 <div
                   v-if="isConfirmPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -1189,8 +1187,7 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600':
-                      isPasswordOverLimit || isPasswordTooShort
+                    'border-red-600 text-red-600': isPasswordTooShort
                   }"
                 />
                 <button
@@ -1219,7 +1216,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-                <div
+                <!-- <div
                   style="display: flex; align-items: center"
                   v-if="isPasswordOverLimit"
                 >
@@ -1239,7 +1236,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
                   </div>
-                </div>
+                </div> -->
                 <div
                   v-if="isPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -1283,8 +1280,7 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600':
-                      isConfirmPasswordOverLimit || isConfirmPasswordTooShort
+                    'border-red-600 text-red-600': isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -1313,7 +1309,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-                <div
+                <!-- <div
                   style="display: flex; align-items: center"
                   v-if="isConfirmPasswordOverLimit"
                 >
@@ -1332,7 +1328,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <div class="text-sm text-red-600">
                     Limit password to 14 characters or less.
                   </div>
-                </div>
+                </div> -->
                 <div
                   v-if="isConfirmPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -1387,9 +1383,7 @@ const toggleComfirmPasswordVisibility = () => {
               isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
-              isPasswordOverLimit ||
               isPasswordTooShort ||
-              isConfirmPasswordOverLimit ||
               isConfirmPasswordTooShort
             "
           />
@@ -1422,10 +1416,8 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedConfirmPassword.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
-              isPasswordOverLimit ||
               isPasswordTooShort ||
               isStaffPositionOverLimit ||
-              isConfirmPasswordOverLimit ||
               isConfirmPasswordTooShort
             "
           />
