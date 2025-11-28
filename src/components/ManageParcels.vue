@@ -684,13 +684,31 @@ const deleteParcelPopUp = (parcel) => {
   //   }
   // })
 }
+// const openStatusPopup = (parcel) => {
+//   showStatusParcel.value = true
+//   parcelStatusDetail.value = {
+//     id: parcel.id,
+//     parcelStatus: parcel.parcelStatus
+//   }
+//   console.log(parcelStatusDetail.value)
+// }
 const openStatusPopup = (parcel) => {
-  showStatusParcel.value = true
   parcelStatusDetail.value = {
     id: parcel.id,
     parcelStatus: parcel.parcelStatus
   }
-  console.log(parcelStatusDetail.value)
+
+  // ใช้ router.push
+  router.push({
+    name: 'editparcelstatus',
+    params: {
+      id: route.params.id,
+      tid: parcel.id
+    }
+  })
+
+  // เปิด popup
+  showStatusParcel.value = true
 }
 
 const clearDeletePopUp = () => {
@@ -1658,14 +1676,15 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
-  <Teleport to="body" v-if="showStatusParcel"
-    ><ChangeParcelStatus
+  <Teleport to="body">
+    <ChangeParcelStatus
+      v-if="showStatusParcel"
       @cancelStatusDetail="clearStatusPopUp"
       @confirmStatusDetail="showStatusComplete"
       @redStatusAlert="openRedStatusPopup"
       :parcelDataStatus="parcelStatusDetail"
-    ></ChangeParcelStatus
-  ></Teleport>
+    />
+  </Teleport>
 
   <!-- <teleport to="body" v-if="showAddParcel">
     <AddParcels

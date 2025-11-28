@@ -1,149 +1,81 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import ButtonWeb from './ButtonWeb.vue'
-import { useAuthManager } from '@/stores/AuthManager.js'
-import { useRouter, useRoute } from 'vue-router'
-import {
-  getItemById,
-  deleteItemById,
-  addItem,
-  editItem,
-  deleteAndTransferItem,
-  toggleVisibility,
-  editReadWrite,
-  acceptInvite,
-  cancelInvite,
-  editInviteReadWrite,
-  declineInvite,
-  editItemWithFile,
-  deleteFile,
-  updateParcelStatus
-} from '@/utils/fetchUtils'
-const props = defineProps({
-  parcelDataStatus: { type: Object, required: true }
-})
+import { getItemById, editItem } from '@/utils/fetchUtils'
+
+// ใช้ route แทน props
+const route = useRoute()
 const router = useRouter()
+
+const parcelStore = useParcelManager()
+
+const parcelId = route.params.tid // parcelId
+const residentId = route.params.id // residentId
 const emit = defineEmits([
   'cancelStatusDetail',
   'confirmStatusDetail',
   'redStatusAlert'
 ])
-// const parcelManager = useParcelManager()
-const parcelStore = useParcelManager()
 const newStatus = ref('')
 const currentStatus = ref('')
 
-// watch prop อัปเดตค่า select
-// watch prop parcelDataStatus เพื่อโหลดข้อมูลจาก backend
+const form = ref({
+  parcelId: '',
+  trackingNumber: '',
+  recipientName: '',
+  senderName: '',
+  parcelType: '',
+  companyId: '',
+  imageUrl: '',
+  status: '',
+  receivedAt: '',
+  pickedUpAt: '',
+  updatedAt: '',
+  residentName: '',
+  roomNumber: '',
+  email: ''
+})
+const originalForm = ref({ ...form.value })
 
-// เลือก status ตามลำดับ
 const statusOptions = computed(() => {
-  if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
   if (currentStatus.value === 'PICKED_UP') return ['PICKED_UP']
+  if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
   return ['RECEIVED', 'PICKED_UP']
 })
 
 const isPickUp = computed(() => currentStatus.value === 'PICKED_UP')
 
-// ⚡️ Form ข้อมูลพัสดุ (ให้ตรง ParcelDetailDto)
-const form = ref({
-  parcelId: '', // read-only
-  trackingNumber: '', // editable
-  recipientName: '', // editable
-  senderName: '', // editable
-  parcelType: '', // editable
-  companyId: '', // editable (id ขนส่ง)
-  imageUrl: '', // editable / upload
-  status: '', // editable via dropdown (enum จาก backend)
-
-  receivedAt: '', // read-only
-  pickedUpAt: '', // read-only
-  updatedAt: '', // read-only
-
-  residentName: '', // read-only
-  roomNumber: '', // read-only
-  email: '' // read-only
-})
-const originalForm = ref({ ...form.value })
-
-// const saveStatusChange = async () => {
-//   try {
-//     const tid = props.parcelDataStatus.parcelId
-
-//     const updatedStatus = await updateParcelStatus(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-//       tid,
-//       newStatus.value,
-//       useAuthManager().user.accessToken
-//     )
-
-//     if (updatedStatus) {
-//       parcelManager.updateParcelStatus(tid, updatedStatus.status)
-//       emit('confirmStatusDetail', updatedStatus)
-//     }
-//   } catch (err) {
-//     console.error(err)
-//     emit('redStatusAlert', err)
-//   }
-// }
-// ⚡ ฟังก์ชันโหลด parcel detail
-// ⚡ ฟังก์ชันโหลด parcel detail จาก backend เสมอ
 const getParcelDetail = async (id) => {
-  if (!id) return
-  const parcelIdNum = Number(id)
-
   try {
     const data = await getItemById(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      parcelIdNum,
+      Number(id),
       router
     )
 
-    if (!data) return
-
-    form.value = {
-      parcelId: data.parcelId,
-      trackingNumber: data.trackingNumber,
-      recipientName: data.recipientName,
-      senderName: data.senderName || '',
-      parcelType: data.parcelType || '',
-      companyId: Number(data.companyId) ?? '',
-      imageUrl: data.imageUrl ?? '',
-      status: data.status,
-      receivedAt: data.receivedAt,
-      pickedUpAt: data.pickedUpAt,
-      updatedAt: data.updatedAt,
-      residentName: data.residentName,
-      roomNumber: data.roomNumber,
-      email: data.email
-    }
-
+    form.value = { ...data }
     parcelStore.addParcel(form.value)
     originalForm.value = { ...form.value }
   } catch (err) {
-    console.error('Failed to load parcel detail', err)
+    console.error(err)
   }
 }
-// onMounted(() => {
-//   const parcelIdNum = Number(id)
-//   getParcelDetail(parcelIdNum) // 🔥 เรียกครั้งเดียวพอ
-// })
+
 watch(
-  () => props.parcelDataStatus,
-  async (val) => {
-    if (!val || !val.id) return
+  () => route.params.tid,
+  async (tid) => {
+    if (!tid) return
+    await getParcelDetail(tid)
 
-    // ดึงข้อมูลจาก backend ตาม id
-    await getParcelDetail(val.id)
-
-    // ตั้งค่า currentStatus / newStatus จาก form.value.status
     const status = form.value.status.toUpperCase().replace(' ', '_')
     newStatus.value = status
     currentStatus.value = status
   },
   { immediate: true }
 )
+
 const saveStatusChange = async () => {
   try {
     const body = {
@@ -163,24 +95,11 @@ const saveStatusChange = async () => {
       router
     )
 
-    if (!updatedParcel) {
-      error.value = true
-      setTimeout(() => (error.value = false), 3000)
-      return
-    }
-
-    // 🔹 อัปเดตทั้ง object ให้ reactive
     parcelStore.updateParcel(updatedParcel)
-
-    // 🔹 ซิงค์ form
     form.value = { ...form.value, ...updatedParcel }
-    originalForm.value = { ...form.value }
-
-    console.log('✅ Updated parcel:', updatedParcel)
-
-    emit('confirmStatusDetail', updatedParcel)
+    emit('confirmStatusDetail')
+    router.replace({ name: 'staffparcels' })
   } catch (err) {
-    console.error('❌ Failed to save parcel status:', err)
     emit('redStatusAlert', err)
   }
 }
@@ -191,7 +110,6 @@ const isSaveDisabled = computed(() => {
 
 const cancel = () => {
   router.replace({ name: 'staffparcels' })
-  emit('cancelStatusDetail')
 }
 </script>
 
