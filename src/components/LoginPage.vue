@@ -3,7 +3,6 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
-import ResetPasswordPage from './ResetPasswordPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useLoginManager
 import AlertPopUp from './AlertPopUp.vue'
