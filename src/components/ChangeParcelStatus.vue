@@ -116,16 +116,18 @@ const cancel = () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-    <div class="bg-white p-6 rounded shadow-md w-80">
+  <div
+    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
+  >
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 sm:p-8">
       <!-- ถ้าเปลี่ยนสำเร็จ แสดง full message -->
       <div
         v-if="statusChangedSuccessfully"
-        class="flex flex-col items-center justify-center h-40"
+        class="flex flex-col items-center justify-center space-y-4 py-6"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-12 w-12 text-green-500 mb-4"
+          class="h-14 w-14 text-green-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -137,20 +139,20 @@ const cancel = () => {
             d="M5 13l4 4L19 7"
           />
         </svg>
-        <p class="text-green-600 font-semibold text-lg text-center">
+        <p class="text-green-700 font-semibold text-center text-lg sm:text-xl">
           Status updated successfully!
         </p>
         <ButtonWeb
           label="Close"
           color="green"
-          class="mt-4 w-full sm:w-auto"
+          class="mt-2 w-full sm:w-auto px-6 py-2 rounded-lg hover:bg-green-600 transition"
           @click="cancel"
         />
       </div>
 
       <!-- ปกติแสดง form เลือกสถานะ -->
       <div v-else>
-        <h3 class="font-semibold text-lg mb-4">Change Status</h3>
+        <h3 class="font-bold text-xl mb-4 text-gray-800">Change Status</h3>
 
         <p v-if="!isPickUp" class="text-sm text-red-600 mb-2">
           * You can only update the status in order: PENDING → RECEIVED →
@@ -163,7 +165,7 @@ const cancel = () => {
 
         <select
           v-model="newStatus"
-          class="border p-2 rounded w-full mb-4"
+          class="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           :disabled="isPickUp"
         >
           <option v-for="s in statusOptions" :key="s" :value="s">
@@ -171,18 +173,18 @@ const cancel = () => {
           </option>
         </select>
 
-        <div class="flex justify-end gap-2">
+        <div class="flex flex-col sm:flex-row justify-end gap-3">
           <ButtonWeb
             label="Cancel"
             color="gray"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg hover:bg-gray-300 transition"
             @click="cancel"
           />
           <ButtonWeb
             v-if="!isPickUp"
             label="Save"
             color="blue"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg hover:bg-blue-600 transition"
             @click="saveStatusChange"
             :disabled="isSaveDisabled"
           />
