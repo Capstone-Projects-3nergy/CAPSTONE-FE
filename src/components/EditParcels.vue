@@ -219,7 +219,6 @@ onMounted(async () => {
   // ฟัง event resize เพื่อปรับ auto
   window.addEventListener('resize', checkScreen)
   loadCompanies() // ← โหลดบริษัทก่อน render UI
-  isCollapsed.value = true
   const tid = route.params.tid
   getParcelDetail(tid)
   console.log('➡️ form.companyId:', form.value.companyId)
