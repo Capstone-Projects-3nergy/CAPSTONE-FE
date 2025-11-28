@@ -465,6 +465,16 @@ const saveParcel = async () => {
     setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 3000)
+    return
+  }
+  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 3000)
+    return
+  }
 
   try {
     console.log('🚀 Sending parcel to backend...', form.value)
@@ -667,7 +677,7 @@ onMounted(async () => {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
@@ -1125,7 +1135,7 @@ onMounted(async () => {
             />
             <AlertPopUp
               v-if="trackingNumberError"
-              :titles="'Tracking Number is required.'"
+              :titles="'Thai characters are not allowed in the Tracking Number.'"
               message="Error!!"
               styleType="red"
               operate="trackingNumber"

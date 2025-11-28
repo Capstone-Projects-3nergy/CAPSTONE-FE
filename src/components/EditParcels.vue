@@ -51,7 +51,9 @@ const editSuccess = ref(false)
 const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
+const recipientNameError = ref(false)
 const parcelTypeError = ref(false)
+const trackingNumberError = ref(false)
 const showLogoutConfirm = ref(false)
 const parcelStore = useParcelManager()
 const companyList = ref([])
@@ -243,13 +245,22 @@ const saveEditParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 3000)
     return
   }
+  if (!/^[A-Za-z0-9]+$/.test(form.value.recipientName)) {
+    recipientNameError.value = true
+    setTimeout(() => (recipientNameError.value = false), 3000)
+    return
+  }
 
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 3000)
     return
   }
-
+  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 3000)
+    return
+  }
   try {
     // ส่งเฉพาะ field ที่อยู่ใน UpdateParcelDto
     const body = {
@@ -457,6 +468,8 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+  if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'RecipientName') recipientNameError.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -894,7 +907,7 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="error"
+            v-if="roomNumberError"
             :titles="'Room Number can only be typed as number.'"
             message="Error!!"
             styleType="red"
@@ -902,7 +915,15 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="error"
+            v-if="trackingNumberError"
+            :titles="'Thai characters are not allowed in the Tracking Number.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumber"
+            @closePopUp="closePopUp('trackingNumber')"
+          />
+          <AlertPopUp
+            v-if="SenderNameError"
             :titles="'Sender Name can only be typed as text.'"
             message="Error!!"
             styleType="red"
@@ -910,7 +931,15 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="error"
+            v-if="recipientNameError"
+            :titles="'Recipient Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="RecipientName"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="parcelTypeError"
             :titles="'Parcel Type can only be typed as text.'"
             message="Error!!"
             styleType="red"
