@@ -198,7 +198,7 @@ export const useAuthManager = defineStore('authManager', () => {
           router.replace({ name: 'home', params: { id: data.userId } })
         else if (data.role === 'STAFF')
           router.replace({ name: 'homestaff', params: { id: data.userId } })
-        else router.replace({ name: 'dashboard' })
+        else router.replace({ name: 'parcelscanner' })
       }
 
       return {

@@ -11,11 +11,11 @@ const userRole = computed(() => {
   if (!role) return 'Unknown'
   switch (role.toUpperCase()) {
     case 'STAFF':
-      return 'Dormitory Admin'
+      return 'Dormitory Staff'
     case 'RESIDENT':
       return 'Resident'
     default:
-      return 'Unknown'
+      return 'Parcel Sender'
   }
 })
 </script>
