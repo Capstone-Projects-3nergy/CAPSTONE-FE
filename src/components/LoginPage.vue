@@ -4,13 +4,11 @@ import { useRouter } from 'vue-router'
 import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
-import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useLoginManager
+import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
-const authManager = useAuthManager() // ✅ ใช้ AuthManager ตัวเดียว
-
-// --------------------- UI STATE ---------------------
+const authManager = useAuthManager() 
 const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -23,32 +21,24 @@ const incorrect = ref(false)
 const success = ref(false)
 const error = ref(false)
 const loading = ref(false)
-// --------------------- LIMIT CONFIG ---------------------
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
-
-// --------------------- COMPUTED ---------------------
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
-// const loading = computed(() => authManager.loading)
-
-// --------------------- POPUP ---------------------
 const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
 }
 
-// --------------------- LIFE CYCLE ---------------------
 onMounted(async () => {
   await authManager.loadUserFromBackend()
 })
 
-// --------------------- LOGIN FUNCTION ---------------------
+
 const loginHomePageWeb = async () => {
   loading.value = true
 
   try {
-    // 🔹 เรียก login ผ่าน AuthManager
     const res = await authManager.loginAccount(
       email.value.trim(),
       password.value.trim(),
@@ -57,57 +47,54 @@ const loginHomePageWeb = async () => {
 
     loading.value = false
 
-    // ---------------- CHECK STATUS ----------------
+   
     if (!res) {
-      // ไม่มีข้อมูล user → Email/Password ผิด
+   
       incorrect.value = true
-      console.warn('⚠️ Email or Password incorrect')
+     
       setTimeout(() => (incorrect.value = false), 2000)
       return
     }
-    console.log(res.status)
     if (res.status === 200 || res.status === 201) {
-      // ✅ Login สำเร็จ
+     
       success.value = true
       setTimeout(() => (success.value = false), 2000)
 
-      // ตรวจ token
+  
       const token = res.data?.accessToken || authManager.user?.accessToken
       if (!token) {
         error.value = true
-        console.error('🚫 Missing access token after login')
+      
         await authManager.logoutAccount(router)
         return
       }
 
-      // 🔍 ตรวจสอบ token หมดอายุ
+
       try {
         const decoded = authManager.decodeJWT
           ? authManager.decodeJWT(token)
           : null
         const currentTime = Math.floor(Date.now() / 1000)
         if (decoded?.exp && decoded.exp < currentTime) {
-          console.warn('⚠️ Token expired, logging out...')
+         
           await authManager.logoutAccount(router)
         }
       } catch (decodeErr) {
         error.value = true
-        console.error('⚠️ Failed to decode token:', decodeErr)
+      
         await authManager.logoutAccount(router)
       }
     } else if ([400, 401, 403, 500].includes(res.status)) {
-      // ⚠️ Email/Password ผิด
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 2000)
     } else {
-      // ❌ Error อื่น ๆ
+  
       error.value = true
       setTimeout(() => (error.value = false), 2000)
-      console.error('Login failed with status:', res.status)
+    
     }
   } catch (err) {
     loading.value = false
-    console.error('❌ Login error:', err)
 
     const status = err.response?.status
     const message =
@@ -116,114 +103,28 @@ const loginHomePageWeb = async () => {
       ''
     const firebaseCode = err.code || ''
 
-    // -------- เช็ค Email/Password ผิด --------
+   
     if (
-      [400, 401, 403].includes(status) || // server status
+      [400, 401, 403].includes(status) || 
       message.includes('invalid') ||
-      message.includes('credentials') || // response message
+      message.includes('credentials') ||
       [
         'auth/invalid-credential',
         'auth/wrong-password',
         'auth/user-not-found'
-      ].includes(firebaseCode) // firebase
+      ].includes(firebaseCode) 
     ) {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 2000)
     } else {
-      // Error อื่น ๆ (network, server)
+  
       error.value = true
       setTimeout(() => (error.value = false), 2000)
     }
   }
 }
 
-// const loginHomePageWeb = async () => {
-//   try {
-//     loading.value = true
-//     // 🔹 เรียก login จาก Pinia store
-//     const userData = await authManager.loginAccount(
-//       email.value.trim(),
-//       password.value.trim(),
-//       router
-//     )
 
-//     // ❌ ถ้า login ไม่สำเร็จ
-//     if (!userData) {
-//       loading.value = false
-//       incorrect.value = true
-//       console.warn('⚠️ Login failed: invalid credentials')
-//       setTimeout(() => (incorrect.value = false), 2000)
-//       return
-//     }
-
-//     // ✅ ตรวจสอบ token จาก Pinia state
-//     const token = authManager.user?.accessToken
-//     if (!token) {
-//       error.value = true
-//       loading.value = false
-//       console.error('🚫 Missing access token, please log in again.')
-//       await authManager.logoutAccount(router)
-//       return
-//     }
-
-//     // 🔍 ตรวจสอบว่า token หมดอายุหรือยัง
-//     try {
-//       const decoded = authManager.decodeJWT
-//         ? authManager.decodeJWT(token)
-//         : null
-//       const currentTime = Math.floor(Date.now() / 1000)
-
-//       if (decoded?.exp && decoded.exp < currentTime) {
-//         console.warn('⚠️ Token expired, refreshing...')
-//         const newToken = authManager.refreshToken
-//           ? await authManager.refreshToken()
-//           : null
-
-//         if (!newToken) {
-//           error.value = true
-//           loading.value = false
-//           console.error('🚫 Token refresh failed, logging out...')
-//           await authManager.logoutAccount(router)
-//           return
-//         }
-//       }
-//     } catch (decodeErr) {
-//       error.value = true
-//       loading.value = false
-//       console.error('⚠️ Failed to decode or refresh token:', decodeErr)
-//       await authManager.logoutAccount(router)
-//       return
-//     }
-
-//     // ✅ แสดง popup สำเร็จ
-//     success.value = true
-//     setTimeout(() => (success.value = false), 2000)
-//   } catch (err) {
-//     error.value = true
-//     loading.value = false
-//     console.error('❌ Login error:', err)
-
-//     // ตรวจสอบว่าเป็น error ด้าน auth หรือไม่
-//     const isAuthError =
-//       err.response?.status === 400 ||
-//       err.response?.status === 401 ||
-//       err.response?.status === 403 ||
-//       authManager.errorMessage?.includes('Invalid') ||
-//       err.message?.toLowerCase()?.includes('auth')
-
-//     if (isAuthError) {
-//       loading.value = false
-//       error.value = true
-//       setTimeout(() => (error.value = true), 2000)
-//     } else {
-//       loading.value = false
-//       error.value = true
-//       setTimeout(() => (error.value = false), 2000)
-//     }
-//   }
-// }
-
-// --------------------- FORM VALIDATION ---------------------
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
     isEmailOverLimit.value = true
@@ -239,7 +140,7 @@ const checkEmailLength = () => {
 const checkPasswordLength = () => {
   if (trimmedPassword.value.length > MAX_PASSWORD_LENGTH) {
     isPasswordOverLimit.value = true
-    // password.value = trimmedPassword.value.substring(0, MAX_PASSWORD_LENGTH)
+   
     setTimeout(() => {
       isPasswordOverLimit.value = false
     }, 1000)
@@ -248,7 +149,7 @@ const checkPasswordLength = () => {
   }
 }
 
-// --------------------- UI EVENT ---------------------
+
 const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
@@ -266,7 +167,7 @@ const showResetPasswordPageWeb = async function () {
 
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
-    <!-- Left Section -->
+ 
     <div
       class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
     >
@@ -276,7 +177,7 @@ const showResetPasswordPageWeb = async function () {
           dormitory parcel management system — manage, check status, and stay
           updated anytime with Tractify.
         </p>
-        <!-- ปรับตรงกลางเฉพาะบน desktop -->
+      
         <div class="flex md:justify-center">
           <svg
             class="hidden md:block w-[490px] h-[569px]"
@@ -311,12 +212,12 @@ const showResetPasswordPageWeb = async function () {
       </div>
     </div>
 
-    <!-- Right Section -->
+
     <div
       class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-screen"
     >
       <div class="w-full max-w-xs sm:max-w-sm">
-        <!-- Logo -->
+      
         <div class="flex items-center mb-8 justify-center md:justify-start">
           <svg
             width="138"
@@ -359,7 +260,7 @@ const showResetPasswordPageWeb = async function () {
           </svg>
         </div>
 
-        <!-- Title -->
+  
         <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
           Get Started
         </h2>
@@ -368,7 +269,7 @@ const showResetPasswordPageWeb = async function () {
         </p>
 
         <div class="space-y-2">
-          <!-- ✅ Popups อยู่ด้านบน -->
+        
           <AlertPopUp
             v-if="incorrect"
             :titles="'Username or Password is incorrect.'"
@@ -386,10 +287,10 @@ const showResetPasswordPageWeb = async function () {
             @closePopUp="closePopUp"
           />
         </div>
-        <!-- Form -->
+     
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">
-            <!-- ไอคอน SVG -->
+          
             <svg
               width="22"
               height="22"
@@ -404,7 +305,6 @@ const showResetPasswordPageWeb = async function () {
               />
             </svg>
 
-            <!-- input -->
             <input
               v-model="email"
               type="email"
@@ -486,32 +386,9 @@ const showResetPasswordPageWeb = async function () {
               </svg>
             </button>
           </div>
-          <!-- <div
-            style="display: flex; align-items: center"
-            v-if="isPasswordOverLimit"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="w-[15px] text-red-600"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <div class="text-sm text-red-600">
-              Limit password to 14 characters or less.
-            </div>
-          </div> -->
+        
           <div class="flex justify-end">
-            <!-- <a
-              @click="showResetPasswordPageWeb"
-              class="text-sm text-black hover:text-gray-600 cursor-pointer"
-              >Reset password?</a
-            > -->
+           
           </div>
           <ButtonWeb
             label="Sign In"
@@ -531,28 +408,10 @@ const showResetPasswordPageWeb = async function () {
               isEmailOverLimit
             "
           />
-          <!-- <button
-            @click="loginHomePageWeb"
-            type="submit"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
-                trimmedEmail.length === 0 || trimmedPassword.length === 0,
-              'bg-blue-500 hover:bg-blue-600 text-white':
-                trimmedEmail.length > 0 && trimmedPassword.length > 0
-            }"
-            :disabled="
-              trimmedEmail.length === 0 ||
-              trimmedPassword.length === 0 ||
-              isEmailOverLimit ||
-              isPasswordOverLimit
-            "
-          >
-            Sign In
-          </button> -->
+        
         </form>
 
-        <!-- Sign Up -->
+      
         <p class="text-sm text-center text-[#8C8F91] mt-6">
           Don’t have an account?
           <a
