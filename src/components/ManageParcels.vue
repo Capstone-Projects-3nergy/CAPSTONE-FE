@@ -631,7 +631,30 @@ const goToPage = (page) => {
 
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
+// คำนวณเลขหน้าที่จะแสดง
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
 
+  if (total <= 5) {
+    // ถ้าน้อยกว่า 5 หน้า แสดงทั้งหมด
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    if (current <= 3) {
+      // หน้าแรกถึงหน้า 3
+      pages.push(1, 2, 3, 4, '...', total)
+    } else if (current >= total - 2) {
+      // หน้าใกล้ท้าย
+      pages.push(1, '...', total - 3, total - 2, total - 1, total)
+    } else {
+      // หน้าอยู่กลาง
+      pages.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
+  }
+
+  return pages
+})
 // สร้าง array ของตัวเลขหน้าสำหรับ pagination
 const pageNumbers = computed(() => {
   const pages = []
@@ -1607,7 +1630,6 @@ const closePopUp = (operate) => {
           </table>
         </div>
 
-        <!-- Pagination -->
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
           <button
             @click="prevPage"
@@ -1618,17 +1640,19 @@ const closePopUp = (operate) => {
           </button>
 
           <button
-            v-for="page in totalPages"
-            :key="page"
+            v-for="page in visiblePages"
+            :key="page + Math.random()"
             @click="goToPage(page)"
             :class="[
               'px-3 py-1 rounded',
               currentPage === page
                 ? 'bg-blue-700 text-white'
-                : 'hover:bg-gray-200'
+                : 'hover:bg-gray-200',
+              page === '...' ? 'cursor-default' : ''
             ]"
+            :disabled="page === '...'"
           >
-            {{ page.toString().padStart(2, '0') }}
+            {{ page }}
           </button>
 
           <button
