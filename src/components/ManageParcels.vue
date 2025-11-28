@@ -643,10 +643,10 @@ const visiblePages = computed(() => {
   } else {
     if (current <= 3) {
       // หน้าแรกถึงหน้า 3
-      pages.push(1, 2, 3, 4, '...', total)
+      pages.push(1, 2, 3, '...', total)
     } else if (current >= total - 2) {
       // หน้าใกล้ท้าย
-      pages.push(1, '...', total - 3, total - 2, total - 1, total)
+      pages.push(1, '...', total - 2, total - 1, total)
     } else {
       // หน้าอยู่กลาง
       pages.push(1, '...', current - 1, current, current + 1, '...', total)
@@ -655,6 +655,7 @@ const visiblePages = computed(() => {
 
   return pages
 })
+
 // สร้าง array ของตัวเลขหน้าสำหรับ pagination
 const pageNumbers = computed(() => {
   const pages = []
