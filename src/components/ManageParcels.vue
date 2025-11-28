@@ -1424,9 +1424,7 @@ const closePopUp = (operate) => {
                     </svg>
                   </div>
                 </th>
-                <th
-                  class="px-4 py-3 text-sm font-semibold text-center text-[#185DC0]"
-                >
+                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
                   Action
                 </th>
               </tr>
