@@ -164,9 +164,7 @@ const returnLoginPage = async () => {
     // เรียก logoutAccount จาก store
     await loginManager.logoutAccount(router)
     // router.replace และลบ localStorage จะถูกจัดการใน logoutAccount เอง
-  } catch (err) {
-    console.error('Logout failed:', err)
-  }
+  } catch (err) {}
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false

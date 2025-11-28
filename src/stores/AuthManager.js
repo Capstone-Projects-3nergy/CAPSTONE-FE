@@ -27,7 +27,6 @@ export const useAuthManager = defineStore('authManager', () => {
     try {
       const currentUser = auth.currentUser
       if (!currentUser) {
-        console.warn('⚠️ No Firebase user yet, skipping verify.')
         return null
       }
 
@@ -42,7 +41,6 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const data = response.data
       if (!data || !data.userId || !data.email) {
-        console.error('❌ Backend verify failed:', data)
         throw new Error('User verification failed.')
       }
 
@@ -62,7 +60,6 @@ export const useAuthManager = defineStore('authManager', () => {
 
       return user.value
     } catch (err) {
-      console.error('fetchUserFromBackend error:', err)
       user.value = null
       return null
     }
@@ -75,7 +72,6 @@ export const useAuthManager = defineStore('authManager', () => {
       const userData = await fetchUserFromBackend()
       return !!userData
     } catch (err) {
-      console.error('loadUserFromBackend error:', err)
       return false
     }
   }
@@ -86,7 +82,6 @@ export const useAuthManager = defineStore('authManager', () => {
         if (firebaseUser) {
           let ok = await loadUserFromBackend()
           if (!ok) {
-            console.warn('Retry loading user from backend...')
             await new Promise((r) => setTimeout(r, 500))
             ok = await loadUserFromBackend()
           }
@@ -212,7 +207,6 @@ export const useAuthManager = defineStore('authManager', () => {
         message: successMessage.value
       }
     } catch (err) {
-      console.error('❌ Login error:', err)
       const msg =
         err.response?.data?.message ||
         (err.code === 'auth/user-not-found'
@@ -235,7 +229,6 @@ export const useAuthManager = defineStore('authManager', () => {
     try {
       await signOut(auth)
     } catch (err) {
-      console.error('Logout error:', err)
     } finally {
       user.value = null
       await router?.replace({ name: 'login' })
@@ -251,7 +244,6 @@ export const useAuthManager = defineStore('authManager', () => {
       }
       return null
     } catch (err) {
-      console.error('Refresh token error:', err)
       await logoutAccount()
       return null
     }
@@ -273,7 +265,6 @@ export const useAuthManager = defineStore('authManager', () => {
       const response = await axios({ url, ...options, headers })
       return response.data
     } catch (err) {
-      console.error('API request error:', err)
       throw err
     }
   }

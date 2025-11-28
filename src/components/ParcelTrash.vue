@@ -12,17 +12,6 @@ const fetchTrash = async () => {
   trashList.value = await res.json()
 }
 
-// const restoreParcel = async (id) => {
-//   const res = await fetch(
-//     `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/restore`,
-//     { method: 'PUT' }
-//   )
-
-//   if (res.ok) {
-//     await fetchTrash()
-//   }
-// }
-
 const deleteForever = async (id) => {
   if (!confirm('Delete permanently? This action cannot be undone.')) {
     error.value = true
@@ -55,7 +44,6 @@ const closePopUp = (operate) => {
   <div class="p-5">
     <h1 class="text-2xl font-bold mb-4">🗑 Trash (Deleted Parcels)</h1>
 
-    <!-- ไม่มีข้อมูล -->
     <div v-if="trashList.length === 0" class="text-gray-500 text-center py-10">
       No Parcels In Trash
       <div class="fixed top-5 left-5 z-50">
@@ -78,7 +66,6 @@ const closePopUp = (operate) => {
       </div>
     </div>
 
-    <!-- ตาราง -->
     <div v-else class="overflow-x-auto">
       <table class="min-w-full bg-white shadow-md rounded-xl">
         <thead class="bg-gray-100">
@@ -104,27 +91,6 @@ const closePopUp = (operate) => {
             </td>
 
             <td class="px-4 py-2 flex gap-2">
-              <!-- Restore -->
-              <!-- <button
-                @click="restoreParcel(p.id)"
-                class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
-              >
-                Restore
-              </button> -->
-              <!-- <ButtonWeb
-                label=" Restore"
-                color="green"
-                @click="restoreParcel(p.id)"
-                class="w-full md:w-auto"
-              /> -->
-
-              <!-- Delete forever -->
-              <!-- <button
-                @click="deleteForever(p.id)"
-                class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
-              >
-                Delete Permanently
-              </button> -->
               <ButtonWeb
                 label="Delete Permanently"
                 color="red"

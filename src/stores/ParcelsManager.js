@@ -11,16 +11,13 @@ export const useParcelManager = defineStore('parcelManager', () => {
     parcel.length = 0
     const list = Array.isArray(parcelList) ? parcelList : [parcelList]
     list.forEach((p) => parcel.push(p))
-    console.log('✅ Parcels set:', parcel)
   }
 
   const addParcel = function (newParcel) {
     if (!newParcel) {
-      console.error('Cannot add empty parcel')
       return
     }
     parcel.push(newParcel)
-    console.log('Parcel added:', newParcel)
   }
 
   const findIndexByParcelId = (parcelId) =>
@@ -30,7 +27,6 @@ export const useParcelManager = defineStore('parcelManager', () => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
       parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
-      console.log('✏️ Edited parcel:', parcel[index])
     }
   }
 
@@ -38,14 +34,12 @@ export const useParcelManager = defineStore('parcelManager', () => {
     const index = parcel.findIndex((p) => p.parcelId === updatedParcel.parcelId)
     if (index !== -1) {
       parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
-      console.log('Parcel updated via splice:', parcel[index])
     }
   }
 
   const deleteParcels = (parcelId) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
-      console.log('🗑️ Deleted parcel:', parcel[index])
       parcel.splice(index, 1)
     }
   }
@@ -67,7 +61,6 @@ export const useParcelManager = defineStore('parcelManager', () => {
             : parcel[index].receivedAt
       }
       parcel.splice(index, 1, updated)
-      console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
     }
   }
 

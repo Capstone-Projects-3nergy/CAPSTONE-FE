@@ -14,8 +14,6 @@ async function fetchWithAuth(url, options, router) {
   const res = await fetch(url, options)
 
   if (res.status === 401) {
-    console.log('Access token expired, refreshing...')
-
     const newToken = await authManager.refreshToken()
 
     if (newToken) {
@@ -23,11 +21,10 @@ async function fetchWithAuth(url, options, router) {
       const retryRes = await fetch(url, options)
 
       if (retryRes.ok) return retryRes
-      console.error(`Retry failed: ${retryRes.status}`)
+
       return retryRes
     }
 
-    console.error('Token refresh failed, logging out...')
     authManager.logoutAccount(router)
     return null
   }
@@ -48,7 +45,6 @@ export async function getItems(url, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -66,7 +62,6 @@ async function getItemById(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -84,7 +79,6 @@ async function deleteItemById(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -102,7 +96,6 @@ async function deleteAndTransferItem(url, id, newId, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -122,20 +115,17 @@ async function addItem(url, newItem, router) {
 
     if (res.ok) {
       const text = await res.text()
-      console.log('📦 Raw server response:', text)
 
       try {
         const data = JSON.parse(text)
         return data
       } catch (err) {
-        console.error('❌ Invalid JSON from server:', err)
         return null
       }
     }
 
     return res.status
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -156,7 +146,6 @@ async function editItem(url, id, editedItem, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -209,7 +198,6 @@ async function acceptInvite(url, router) {
     }
     return res.status
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -236,7 +224,7 @@ async function declineInvite(url, router) {
 
 async function editItemWithFile(url, id, file = null, editedItem, router) {
   const formData = new FormData()
-  console.log(file)
+
   if (file) {
     file.forEach((file) => {
       formData.append('file', file)
@@ -253,7 +241,6 @@ async function editItemWithFile(url, id, file = null, editedItem, router) {
       method: 'PUT',
       body: formData
     }
-    console.log(options)
 
     const res = await fetchWithAuth(`${url}/${id}`, options, router)
     if (res) {
@@ -261,7 +248,6 @@ async function editItemWithFile(url, id, file = null, editedItem, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -281,7 +267,6 @@ async function deleteFile(url, id, file, router) {
       return await res.json()
     }
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -319,7 +304,6 @@ async function confirmParcelPickup(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -342,7 +326,6 @@ async function confirmParcelReceived(url, id, router) {
 
     return { status: res.status }
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
