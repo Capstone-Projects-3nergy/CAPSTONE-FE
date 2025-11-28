@@ -194,6 +194,22 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      deleteSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
+}
 </script>
 
 <template>

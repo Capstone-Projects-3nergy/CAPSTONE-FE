@@ -5,7 +5,12 @@ import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { confirmParcelReceived } from '@/utils/fetchUtils'
 
-const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
+const emit = defineEmits([
+  'confirmDetail',
+  'cancelDetail',
+  'redAlert',
+  'confirmParcel'
+])
 const props = defineProps(['parcelConfirmData'])
 const router = useRouter()
 const parcelManager = useParcelManager()

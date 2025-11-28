@@ -788,9 +788,6 @@ const toggleSortDate = () => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
-  <Teleport to="body" v-if="showProfileStaff">
-    <ProfileResident> </ProfileResident>
-  </Teleport>
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
