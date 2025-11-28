@@ -82,10 +82,18 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const editParcel = (parcelId, updatedParcel) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
-      parcel[index] = { ...parcel[index], ...updatedParcel }
+      parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
       console.log('✏️ Edited parcel:', parcel[index])
     }
   }
+
+  // const editParcel = (parcelId, updatedParcel) => {
+  //   const index = findIndexByParcelId(parcelId)
+  //   if (index !== -1) {
+  //     parcel[index] = { ...parcel[index], ...updatedParcel }
+  //     console.log('✏️ Edited parcel:', parcel[index])
+  //   }
+  // }
 
   // ⬅⬅⬅ เพิ่มอันนี้
   const updateParcel = (updatedParcel) => {
@@ -124,18 +132,35 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const updateParcelStatus = (parcelId, newStatus) => {
     const index = findIndexByParcelId(parcelId)
     if (index !== -1) {
-      parcel[index].status = newStatus
-      parcel[index].updatedAt = new Date().toISOString()
-
-      if (newStatus === 'Received' || newStatus === 'RECEIVED') {
-        parcel[index].receivedAt = new Date().toISOString()
+      const updated = {
+        ...parcel[index],
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+        receivedAt:
+          newStatus.toUpperCase() === 'RECEIVED'
+            ? new Date().toISOString()
+            : parcel[index].receivedAt
       }
-
+      parcel.splice(index, 1, updated)
       console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
-    } else {
-      console.warn(`Parcel with id ${parcelId} not found`)
     }
   }
+
+  // const updateParcelStatus = (parcelId, newStatus) => {
+  //   const index = findIndexByParcelId(parcelId)
+  //   if (index !== -1) {
+  //     parcel[index].status = newStatus
+  //     parcel[index].updatedAt = new Date().toISOString()
+
+  //     if (newStatus === 'Received' || newStatus === 'RECEIVED') {
+  //       parcel[index].receivedAt = new Date().toISOString()
+  //     }
+
+  //     console.log(`📦 Updated status of parcel ${parcelId} → ${newStatus}`)
+  //   } else {
+  //     console.warn(`Parcel with id ${parcelId} not found`)
+  //   }
+  // }
 
   return {
     updateParcelStatus,
