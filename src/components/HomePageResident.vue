@@ -518,7 +518,7 @@ const toggleSortDate = () => {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 flex flex-col">
+      <main class="flex-1 p-6 w-full">
         <div class="sm:bg-white p-4 sm:shadow">
           <!-- HOME -->
           <section class="p-4">
