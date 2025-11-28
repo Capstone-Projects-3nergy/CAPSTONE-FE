@@ -119,9 +119,7 @@ const showLogoutConfirm = ref(false)
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
-  } catch (err) {
-
-  }
+  } catch (err) {}
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false
@@ -192,7 +190,6 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-
 
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -456,7 +453,7 @@ const toggleSortDate = () => {
               </template>
             </SidebarItem>
           </nav>
-         
+
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -486,10 +483,9 @@ const toggleSortDate = () => {
           </SidebarItem>
         </aside>
       </button>
-     
+
       <main class="flex-1 p-9 w-full">
         <div class="sm:bg-white p-6 sm:shadow">
-         
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
               <svg
@@ -506,11 +502,10 @@ const toggleSortDate = () => {
               </svg>
               Home Page
             </h1>
-           
+
             <div
               class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
             >
-             
               <button
                 @click="prevSlide"
                 class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
@@ -518,19 +513,16 @@ const toggleSortDate = () => {
                 ‹
               </button>
 
-           
               <div class="relative w-full h-full">
                 <img
                   :src="slides[currentIndex]"
                   class="w-full h-full object-cover"
                 />
 
-              
                 <div
                   class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"
                 ></div>
 
-               
                 <div
                   class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20"
                 >
@@ -543,7 +535,6 @@ const toggleSortDate = () => {
                 </div>
               </div>
 
-            
               <button
                 @click="nextSlide"
                 class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
@@ -551,13 +542,9 @@ const toggleSortDate = () => {
                 ›
               </button>
             </div>
-
-          
           </section>
 
-       
           <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
-        
             <div
               class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
@@ -569,7 +556,6 @@ const toggleSortDate = () => {
               </div>
             </div>
 
-         
             <div
               class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
             >
@@ -609,12 +595,10 @@ const toggleSortDate = () => {
             </div>
           </div>
 
-      
           <div
             class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
           >
             <table class="min-w-full text-left border-collapse">
-             
               <thead
                 class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
               >
@@ -715,7 +699,6 @@ const toggleSortDate = () => {
                   :key="p.id"
                   class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
                 >
-                 
                   <td
                     class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 border-b md:border-none"
                   >
@@ -734,7 +717,6 @@ const toggleSortDate = () => {
                     {{ p.recipientName }}
                   </td>
 
-                 
                   <td
                     class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
                   >
@@ -744,7 +726,6 @@ const toggleSortDate = () => {
                     {{ p.roomNumber }}
                   </td>
 
-               
                   <td
                     class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
                   >
@@ -754,7 +735,6 @@ const toggleSortDate = () => {
                     {{ p.email }}
                   </td>
 
-               
                   <td class="px-4 py-2 md:py-3 border-b md:border-none">
                     <span class="md:hidden font-semibold text-blue-700"
                       >Status:
@@ -771,7 +751,6 @@ const toggleSortDate = () => {
                     </span>
                   </td>
 
-              
                   <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
                     <span class="md:hidden font-semibold text-blue-700">
                       Update:
@@ -783,17 +762,17 @@ const toggleSortDate = () => {
             </table>
           </div>
 
-         
           <div class="flex justify-end space-x-2 mt-4 text-gray-700">
             <button
               @click="prevPage"
               :disabled="currentPage === 1"
-              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
             >
               &lt; Previous
             </button>
 
             <button
+              class="cursor-pointer"
               v-for="page in visiblePages"
               :key="page + Math.random()"
               @click="goToPage(page)"
@@ -812,7 +791,7 @@ const toggleSortDate = () => {
             <button
               @click="nextPage"
               :disabled="currentPage === totalPages"
-              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
             >
               Next &gt;
             </button>
