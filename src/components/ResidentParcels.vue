@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ButtonWeb from './ButtonWeb.vue'
 import HomePageStaff from '@/components/HomePageResident.vue'
@@ -687,7 +686,6 @@ const closePopUp = (operate) => {
   }
 }
 
-const loginStore = useLoginManager()
 const showAnnouncement = ref(false)
 
 const showHomePageResident = ref(false)

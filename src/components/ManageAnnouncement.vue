@@ -8,11 +8,9 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -189,7 +187,7 @@ const showProfileStaffPage = async function () {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->

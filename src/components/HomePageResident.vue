@@ -11,7 +11,6 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileResident from './ProfileResident.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import {
   getItems,
@@ -62,7 +61,6 @@ import {
   filterByMonth,
   filterByYear
 } from '@/stores/SortManager'
-const loginStore = useLoginManager()
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()

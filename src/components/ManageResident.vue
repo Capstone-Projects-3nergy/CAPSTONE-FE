@@ -7,12 +7,10 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)

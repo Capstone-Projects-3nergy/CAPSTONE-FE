@@ -5,12 +5,10 @@ import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const showLogoutConfirm = ref(false)
-const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
@@ -72,8 +70,8 @@ onMounted(async () => {
 </script>
 
 <template>
-   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+  <div
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
@@ -135,7 +133,6 @@ onMounted(async () => {
         </div>
       </div>
     </header>
-
 
     <!-- Body (Sidebar + Main) -->
     <div class="flex flex-1">

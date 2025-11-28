@@ -8,7 +8,6 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -195,7 +194,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->

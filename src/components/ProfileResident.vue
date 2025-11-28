@@ -5,11 +5,9 @@ import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')

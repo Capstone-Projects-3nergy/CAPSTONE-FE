@@ -10,7 +10,6 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
@@ -160,7 +159,7 @@ const toggleSidebar = () => {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->

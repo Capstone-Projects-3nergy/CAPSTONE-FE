@@ -13,7 +13,6 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import { useLoginManager } from '@/stores/LoginManager'
 import AddParcels from '@/components/AddParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -52,7 +51,6 @@ console.log(auth.user.role)
 // 🏢 สร้าง reactive variable สำหรับเก็บ companies
 const companyList = ref([])
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
 const router = useRouter()
 const error = ref(false)
 const roomNumberError = ref(false)
