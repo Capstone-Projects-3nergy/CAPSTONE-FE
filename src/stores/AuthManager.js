@@ -213,19 +213,20 @@ export const useAuthManager = defineStore('authManager', () => {
         message: successMessage.value
       }
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        (err.code === 'auth/user-not-found'
-          ? 'Account not found. Please sign up first.'
-          : null) ||
-        err.message ||
-        'Login failed.'
+      if (err.response) {
+        status.value = err.response.status
+        errorMessage.value =
+          err.response.data?.message || err.message || 'Login failed.'
+      } else if (err.request) {
+        status.value = null
+        errorMessage.value = 'Network error. Please check your connection.'
+      } else {
+        status.value = null
+        errorMessage.value = err.message || 'Login failed.'
+      }
 
-      errorMessage.value = msg
-      status.value = err.response?.status || 500
       user.value = null
-
-      return { status: status.value, error: msg }
+      return { status: status.value, error: errorMessage.value }
     } finally {
       isLoading.value = false
     }
