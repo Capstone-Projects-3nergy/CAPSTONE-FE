@@ -6,17 +6,14 @@ import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcelData']) // ไม่ใช่ ref
-
+const props = defineProps(['parcelData'])
 const router = useRouter()
 const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-onMounted(async () => {
-  console.log(parcel.value.id)
-})
-// ใช้ computed เผื่อ props เป็น undefined
+onMounted(async () => {})
+
 const parcel = computed(() => props.parcelData || {})
 
 const deleteParcelFn = async () => {
@@ -33,7 +30,6 @@ const deleteParcelFn = async () => {
     return
   }
 
-  // ลบใน Pinia
   parcelManager.deleteParcels(parcel.value.id)
 
   emit('confirmDetail', true)
@@ -52,14 +48,12 @@ const cancelFn = () => {
     <div
       class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
-      <!-- Header -->
       <div class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
           Delete Parcel
         </h1>
       </div>
 
-      <!-- Body -->
       <div class="p-4 text-center sm:text-left">
         <p class="mb-4">
           Do you want to move this tracking number
@@ -68,7 +62,6 @@ const cancelFn = () => {
         </p>
       </div>
 
-      <!-- Footer -->
       <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
         <ButtonWeb
           label="Confirm"

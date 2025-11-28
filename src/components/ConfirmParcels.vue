@@ -6,18 +6,14 @@ import ButtonWeb from './ButtonWeb.vue'
 import { confirmParcelReceived } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcelConfirmData']) // ไม่ใช่ ref
-
+const props = defineProps(['parcelConfirmData'])
 const router = useRouter()
 const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
-onMounted(() => {
-  if (parcel.value?.id) console.log(parcel.value.id)
-})
+onMounted(() => {})
 
-// ใช้ computed เผื่อ props เป็น undefined
 const parcel = computed(() => props.parcelConfirmData || {})
 const confirmParcelFn = async () => {
   if (!parcel.value.id) return
@@ -28,23 +24,19 @@ const confirmParcelFn = async () => {
     router
   )
 
-  // ❌ ไม่พบพัสดุ
   if (!res || res?.status === 404 || res?.error) {
     emit('redAlert')
     emit('cancelParcel', true)
     return
   }
 
-  // ❌ ไม่มีสิทธิ์
   if (res?.status === 401) {
     emit('redAlert')
     emit('cancelParcel', true)
     return
   }
 
-  // ✅ สำเร็จ: backend ส่ง parcelId หรือ status 'RECEIVED'
   if (res?.parcelId || res?.status === 'RECEIVED') {
-    // เปลี่ยนสถานะเป็น PICKED_UP
     parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
     emit('confirmParcel', true)
     return
@@ -64,14 +56,12 @@ const cancelFn = () => {
     <div
       class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
-      <!-- Header -->
       <div class="px-6 py-4 border-b">
         <h1 class="text-lg font-bold text-gray-900 text-center">
           Confirm Parcel Pickup
         </h1>
       </div>
 
-      <!-- Body -->
       <div class="px-6 py-4 text-center text-gray-600">
         <p>
           Are you sure you want to confirm that you have received this parcel?
@@ -79,7 +69,6 @@ const cancelFn = () => {
         </p>
       </div>
 
-      <!-- Footer -->
       <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
         <ButtonWeb
           label="Confirm"

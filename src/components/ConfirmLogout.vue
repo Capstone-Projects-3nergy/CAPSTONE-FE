@@ -7,16 +7,12 @@ const emit = defineEmits('cancelLogout')
 const router = useRouter()
 const authManager = useAuthManager()
 
-// ฟังก์ชันยืนยัน logout
 const confirmLogoutFn = async () => {
   try {
     await authManager.logoutAccount(router)
-  } catch (err) {
-    console.error('❌ Logout failed:', err)
-  }
+  } catch (err) {}
 }
 
-// ฟังก์ชันยกเลิก logout
 const cancelLogoutFn = () => {
   emit('cancelLogout', true)
 }
@@ -29,14 +25,12 @@ const cancelLogoutFn = () => {
     <div
       class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
-      <!-- Header -->
       <div class="px-6 py-4 border-b">
         <h1 class="text-lg font-bold text-gray-900 text-center">
           Confirm Logout
         </h1>
       </div>
 
-      <!-- Body -->
       <div class="px-6 py-4 text-center text-gray-600">
         <p>
           Are you sure you want to logout? You will need to login again to
@@ -44,7 +38,6 @@ const cancelLogoutFn = () => {
         </p>
       </div>
 
-      <!-- Footer -->
       <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
         <ButtonWeb
           label="Logout"

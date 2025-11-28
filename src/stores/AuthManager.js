@@ -10,9 +10,6 @@ import {
 import { jwtDecode } from 'jwt-decode'
 
 export const useAuthManager = defineStore('authManager', () => {
-  // -----------------------
-  // STATE
-  // -----------------------
   const user = ref(null)
   const isLoading = ref(false)
   const errorMessage = ref('')
@@ -26,10 +23,6 @@ export const useAuthManager = defineStore('authManager', () => {
       return null
     }
   }
-
-  // -----------------------
-  // FETCH USER จาก backend
-  // -----------------------
   const fetchUserFromBackend = async () => {
     try {
       const currentUser = auth.currentUser
@@ -43,7 +36,7 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const response = await axios.post(
         `${baseURL}/api/auth/login`,
-        {}, // ไม่มี body
+        {},
         { headers: { Authorization: `Bearer ${idToken}` } }
       )
 
@@ -106,9 +99,6 @@ export const useAuthManager = defineStore('authManager', () => {
     })
   }
 
-  // -----------------------
-  // REGISTER
-  // -----------------------
   const registerAccount = async (formData, router) => {
     isLoading.value = true
     errorMessage.value = ''
@@ -147,7 +137,7 @@ export const useAuthManager = defineStore('authManager', () => {
       status.value = res.status
       successMessage.value = 'Account registered successfully! Please login.'
 
-      return { status: res.status, message: successMessage.value } // ⭐ RETURN เพิ่มตรงนี้
+      return { status: res.status, message: successMessage.value }
     } catch (error) {
       status.value = error.response?.status || 500
       if (status.value === 409) errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
@@ -157,68 +147,12 @@ export const useAuthManager = defineStore('authManager', () => {
           error.message ||
           'Registration failed.'
 
-      return { status: status.value, error: errorMessage.value } // ⭐ RETURN ERROR
+      return { status: status.value, error: errorMessage.value }
     } finally {
       isLoading.value = false
     }
   }
 
-  // const registerAccount = async (formData, router) => {
-  //   isLoading.value = true
-  //   errorMessage.value = ''
-  //   successMessage.value = ''
-  //   user.value = null
-  //   status.value = null
-
-  //   try {
-  //     const role = String(formData.role || '').toUpperCase()
-  //     if (!['RESIDENT', 'STAFF'].includes(role))
-  //       throw new Error('Invalid role.')
-
-  //     const payload = {
-  //       email: formData.email?.trim(),
-  //       password: formData.password,
-  //       firstName: formData.firstName?.trim(),
-  //       lastName: formData.lastName?.trim(),
-  //       role
-  //     }
-
-  //     if (role === 'RESIDENT') {
-  //       if (!formData.dormId)
-  //         throw new Error('Dormitory selection is required.')
-  //       payload.dormId = formData.dormId
-  //       if (formData.roomNumber?.trim())
-  //         payload.roomNumber = formData.roomNumber.trim()
-  //     } else if (role === 'STAFF') {
-  //       if (!formData.position?.trim())
-  //         throw new Error('Position is required for staff.')
-  //       payload.position = formData.position.trim()
-  //     }
-
-  //     const baseURL = import.meta.env.VITE_BASE_URL
-  //     console.log(payload)
-  //     const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
-
-  //     status.value = res.status
-  //     console.log('✅ Backend response:', res.data)
-
-  //     successMessage.value = 'Account registered successfully! Please login.'
-  //   } catch (error) {
-  //     status.value = error.response?.status || 500
-  //     if (status.value === 409) errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
-  //     else
-  //       errorMessage.value =
-  //         error.response?.data?.message ||
-  //         error.message ||
-  //         'Registration failed.'
-  //   } finally {
-  //     isLoading.value = false
-  //   }
-  // }
-
-  // -----------------------
-  // LOGIN
-  // -----------------------
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
     errorMessage.value = ''
@@ -264,7 +198,6 @@ export const useAuthManager = defineStore('authManager', () => {
       status.value = res.status
       successMessage.value = data.message || `Login successful as ${data.role}!`
 
-      // router redirect ตามเดิม
       if (router) {
         if (data.role === 'RESIDENT')
           router.replace({ name: 'home', params: { id: data.userId } })
@@ -277,7 +210,7 @@ export const useAuthManager = defineStore('authManager', () => {
         status: res.status,
         user: user.value,
         message: successMessage.value
-      } // ⭐ RETURN เพิ่มตรงนี้
+      }
     } catch (err) {
       console.error('❌ Login error:', err)
       const msg =
@@ -292,85 +225,12 @@ export const useAuthManager = defineStore('authManager', () => {
       status.value = err.response?.status || 500
       user.value = null
 
-      return { status: status.value, error: msg } // ⭐ RETURN ERROR
+      return { status: status.value, error: msg }
     } finally {
       isLoading.value = false
     }
   }
 
-  // const loginAccount = async (email, password, router) => {
-  //   isLoading.value = true
-  //   errorMessage.value = ''
-  //   successMessage.value = ''
-  //   user.value = null
-  //   status.value = null
-
-  //   try {
-  //     if (!email || !password)
-  //       throw new Error('Email and password are required')
-
-  //     const cred = await signInWithEmailAndPassword(auth, email, password)
-  //     const idToken = await cred.user.getIdToken()
-  //     const baseURL = import.meta.env.VITE_BASE_URL
-
-  //     const res = await axios.post(
-  //       `${baseURL}/api/auth/login`,
-  //       {},
-  //       { headers: { Authorization: `Bearer ${idToken}` } }
-  //     )
-
-  //     const data = res.data
-  //     if (!data?.userId || !data?.role)
-  //       throw new Error('Backend verification failed: missing userId/role')
-
-  //     const fullName = `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim()
-  //     user.value = {
-  //       id: data.userId,
-  //       uid: data.firebaseUid,
-  //       email: data.email,
-  //       fullName,
-  //       role: data.role,
-  //       accessToken: idToken,
-  //       ...(data.role === 'STAFF' ? { position: data.position ?? null } : {}),
-  //       ...(data.role === 'RESIDENT'
-  //         ? {
-  //             dormId: data.dormId ?? null,
-  //             roomNumber: data.roomNumber ?? null
-  //           }
-  //         : {})
-  //     }
-
-  //     successMessage.value = data.message || `Login successful as ${data.role}!`
-
-  //     if (router) {
-  //       if (data.role === 'RESIDENT')
-  //         router.replace({ name: 'home', params: { id: data.userId } })
-  //       else if (data.role === 'STAFF')
-  //         router.replace({ name: 'homestaff', params: { id: data.userId } })
-  //       else router.replace({ name: 'dashboard' })
-  //     }
-
-  //     return user.value
-  //   } catch (err) {
-  //     console.error('❌ Login error:', err)
-  //     const msg =
-  //       err.response?.data?.message ||
-  //       (err.code === 'auth/user-not-found'
-  //         ? 'Account not found. Please sign up first.'
-  //         : null) ||
-  //       err.message ||
-  //       'Login failed.'
-  //     errorMessage.value = msg
-  //     user.value = null
-  //     return null
-  //   } finally {
-  //     isLoading.value = false
-  //   }
-  // }
-
-  // -----------------------
-  // LOGOUT
-  // -----------------------
   const logoutAccount = async (router) => {
     try {
       await signOut(auth)
@@ -382,9 +242,6 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // -----------------------
-  // REFRESH TOKEN
-  // -----------------------
   const refreshToken = async () => {
     try {
       if (auth.currentUser) {
@@ -400,9 +257,6 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // -----------------------
-  // API REQUEST
-  // -----------------------
   const apiRequest = async (url, options = {}) => {
     try {
       if (!user.value) await initUser()
@@ -424,9 +278,6 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
 
-  // -----------------------
-  // NAVIGATION GUARD
-  // -----------------------
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
       const publicPages = ['login', 'register', 'resetpassword']

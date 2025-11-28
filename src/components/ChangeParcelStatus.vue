@@ -9,9 +9,6 @@ const route = useRoute()
 const router = useRouter()
 const parcelStore = useParcelManager()
 
-const parcelId = route.params.tid
-const residentId = route.params.id
-
 const emit = defineEmits([
   'cancelStatusDetail',
   'confirmStatusDetail',
@@ -59,9 +56,7 @@ const getParcelDetail = async (id) => {
     form.value = { ...data }
     parcelStore.addParcel(form.value)
     originalForm.value = { ...form.value }
-  } catch (err) {
-    console.error(err)
-  }
+  } catch (err) {}
 }
 
 watch(
@@ -120,7 +115,6 @@ const cancel = () => {
     class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
   >
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 sm:p-8">
-      <!-- ถ้าเปลี่ยนสำเร็จ แสดง full message -->
       <div
         v-if="statusChangedSuccessfully"
         class="flex flex-col items-center justify-center space-y-4 py-6"
@@ -150,7 +144,6 @@ const cancel = () => {
         />
       </div>
 
-      <!-- ปกติแสดง form เลือกสถานะ -->
       <div v-else>
         <h3 class="font-bold text-xl mb-4 text-gray-800">Change Status</h3>
 
