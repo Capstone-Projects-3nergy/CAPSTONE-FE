@@ -586,7 +586,7 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-8 bg-gray-100">
+      <main class="flex-1 p-9 bg-gray-100">
         <div class="flex items-center space-x-2 mb-6">
           <h2 class="text-2xl font-bold text-[#185dc0]">
             Manage Parcel &gt; Details

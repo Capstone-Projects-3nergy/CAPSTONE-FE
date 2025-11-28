@@ -1067,7 +1067,7 @@ onMounted(async () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-9">
         <!-- Header -->
         <div class="flex space-x-1 mb-4">
           <svg

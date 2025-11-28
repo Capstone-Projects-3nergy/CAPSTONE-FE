@@ -1172,7 +1172,7 @@ const showProfileResidentPage = async function () {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 w-full">
+      <main class="flex-1 p-9 w-full">
         <!-- Title -->
         <div class="flex space-x-1">
           <svg

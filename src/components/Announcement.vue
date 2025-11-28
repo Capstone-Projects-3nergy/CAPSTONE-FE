@@ -343,7 +343,7 @@ onMounted(async () => {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-8 overflow-y-auto">
+      <main class="flex-1 p-9 overflow-y-auto">
         <!-- Announcement Section -->
         <section>
           <h2

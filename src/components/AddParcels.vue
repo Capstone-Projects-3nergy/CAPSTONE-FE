@@ -882,7 +882,7 @@ const closePopUp = (operate) => {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-9">
         <div class="flex items-center space-x-2 mb-6">
           <!-- 📦 ไอคอน -->
           <svg

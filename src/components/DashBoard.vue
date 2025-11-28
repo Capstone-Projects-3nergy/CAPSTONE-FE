@@ -573,7 +573,7 @@ const toggleSidebar = () => {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 bg-gray-50 min-h-screen">
+      <main class="flex-1 p-9 bg-gray-50 min-h-screen">
         <!-- หัวข้อ -->
         <div class="flex items-center space-x-2 mb-6">
           <svg

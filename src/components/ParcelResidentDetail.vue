@@ -634,7 +634,7 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-10 bg-[#f8f9fb]">
+      <main class="flex-1 p-9 bg-[#f8f9fb]">
         <!-- Title -->
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-[#185dc0]">

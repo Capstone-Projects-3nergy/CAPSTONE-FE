@@ -597,7 +597,7 @@ const showProfileStaffPage = async function () {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-9">
         <div class="flex space-x-1">
           <svg
             width="25"

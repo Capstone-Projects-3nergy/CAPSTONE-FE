@@ -677,8 +677,8 @@ const toggleSortDate = () => {
         </aside>
       </button>
       <!-- Main Content -->
-      <main class="flex-1 p-6 w-full">
-        <div class="sm:bg-white p-4 sm:shadow">
+      <main class="flex-1 p-9 w-full">
+        <div class="sm:bg-white p-6 sm:shadow">
           <!-- HOME -->
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
