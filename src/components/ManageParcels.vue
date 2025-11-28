@@ -1287,47 +1287,49 @@ const closePopUp = (operate) => {
           </div>
         </div>
 
-        <!-- Alerts -->
-        <AlertPopUp
-          v-if="deleteSuccess"
-          :titles="'Delete Parcel to Trash is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="deleteSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="statusSuccess"
-          :titles="'Change Status is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="deleteSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="addSuccess"
-          :titles="'Add New Parcel is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="addSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="editSuccess"
-          :titles="'Edit Parcel  is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="editSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
+        <div class="fixed top-5 left-5 z-50">
+          <!-- Alerts -->
+          <AlertPopUp
+            v-if="deleteSuccess"
+            :titles="'Delete Parcel to Trash is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="statusSuccess"
+            :titles="'Change Status is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="addSuccess"
+            :titles="'Add New Parcel is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="addSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="editSuccess"
+            :titles="'Edit Parcel  is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+        </div>
 
         <!-- Parcel Table (Responsive) -->
         <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">

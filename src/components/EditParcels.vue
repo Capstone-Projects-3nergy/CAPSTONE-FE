@@ -466,7 +466,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
@@ -876,46 +876,48 @@ function formatDateTime(datetimeStr) {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
-        <AlertPopUp
-          v-if="editSuccess"
-          :titles="'Edit Parcel  is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="editSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'Room Number can only be typed as number.'"
-          message="Error!!"
-          styleType="red"
-          operate="roomNumber"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'Sender Name can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="SenderName"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'Parcel Type can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="parcelType "
-          @closePopUp="closePopUp"
-        />
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="editSuccess"
+            :titles="'Edit Parcel  is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'Sender Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="SenderName"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'Parcel Type can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="parcelType "
+            @closePopUp="closePopUp"
+          />
+        </div>
         <form
           class="bg-white p-6 rounded-lg shadow space-y-8"
           @submit.prevent="saveEditParcel"

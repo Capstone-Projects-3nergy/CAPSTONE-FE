@@ -229,7 +229,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-      class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <!-- Header -->
@@ -643,22 +643,24 @@ function formatDateTime(datetimeStr) {
           </h2>
         </div>
         <!-- Alerts -->
-        <AlertPopUp
-          v-if="confirmSuccess"
-          :titles="'Confirm Parcel is Successfull.'"
-          message="Success!!"
-          styleType="green"
-          operate="deleteSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="confirmSuccess"
+            :titles="'Confirm Parcel is Successfull.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+        </div>
         <!-- Main Form Container -->
         <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
           <form class="space-y-10">
