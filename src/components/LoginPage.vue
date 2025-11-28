@@ -271,30 +271,32 @@ const showResetPasswordPageWeb = async function () {
         </div>
 
         <form @submit.prevent="signIn" class="space-y-4">
-          <div class="relative">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 22 22"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
-            >
-              <path
-                d="M18.3333 3.66667H3.66659C2.65825 3.66667 1.84242 4.49167 1.84242 5.50001L1.83325 16.5C1.83325 17.5083 2.65825 18.3333 3.66659 18.3333H18.3333C19.3416 18.3333 20.1666 17.5083 20.1666 16.5V5.50001C20.1666 4.49167 19.3416 3.66667 18.3333 3.66667ZM18.3333 7.33334L10.9999 11.9167L3.66659 7.33334V5.50001L10.9999 10.0833L18.3333 5.50001V7.33334Z"
-                fill="#8C8F91"
-              />
-            </svg>
+          <div class="mb-1">
+            <div class="relative">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+              >
+                <path
+                  d="M18.3333 3.66667H3.66659C2.65825 3.66667 1.84242 4.49167 1.84242 5.50001L1.83325 16.5C1.83325 17.5083 2.65825 18.3333 3.66659 18.3333H18.3333C19.3416 18.3333 20.1666 17.5083 20.1666 16.5V5.50001C20.1666 4.49167 19.3416 3.66667 18.3333 3.66667ZM18.3333 7.33334L10.9999 11.9167L3.66659 7.33334V5.50001L10.9999 10.0833L18.3333 5.50001V7.33334Z"
+                  fill="#8C8F91"
+                />
+              </svg>
 
-            <input
-              v-model="email"
-              type="email"
-              required
-              placeholder="Email"
-              class="w-full pl-10 pr-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              @input="checkEmailLength"
-              :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
-            />
+              <input
+                v-model="email"
+                type="email"
+                required
+                placeholder="Email"
+                class="w-full pl-10 pr-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                @input="checkEmailLength"
+                :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
+              />
+            </div>
           </div>
           <div
             style="display: flex; align-items: center"
