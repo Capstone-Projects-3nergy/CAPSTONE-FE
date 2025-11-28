@@ -57,6 +57,7 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
@@ -1149,6 +1150,7 @@ const closePopUp = (operate) => {
   ></Teleport>
   <Teleport to="body">
     <ChangeParcelStatus
+      v-bind="{ parcelDataStatus }"
       v-if="showStatusParcel"
       @cancelStatusDetail="clearStatusPopUp"
       @confirmStatusDetail="showStatusComplete"

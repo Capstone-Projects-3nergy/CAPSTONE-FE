@@ -74,7 +74,7 @@ const cancelFn = () => {
         </p>
       </div>
 
-      <div class="px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+      <div class="px-6 py-4 flex flex-row sm:flex-row justify-end gap-3 pt-4">
         <ButtonWeb
           label="Confirm"
           color="blue"

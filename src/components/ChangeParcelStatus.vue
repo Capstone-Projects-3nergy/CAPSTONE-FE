@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import ButtonWeb from './ButtonWeb.vue'
 import { getItemById, editItem } from '@/utils/fetchUtils'
-
+import ManageParcels from './ManageParcels.vue'
 const route = useRoute()
 const router = useRouter()
 const parcelStore = useParcelManager()
@@ -14,7 +14,12 @@ const emit = defineEmits([
   'confirmStatusDetail',
   'redStatusAlert'
 ])
-
+defineProps({
+  parcelDataStatus: {
+    type: Object,
+    required: false
+  }
+})
 const newStatus = ref('')
 const currentStatus = ref('')
 const statusChangedSuccessfully = ref(false)
@@ -166,23 +171,26 @@ const cancel = () => {
           </option>
         </select>
 
-        <div class="flex flex-col sm:flex-row justify-end gap-3">
-          <ButtonWeb
-            label="Cancel"
-            color="gray"
-            class="w-full sm:w-auto px-6 py-2 rounded-lg hover:bg-gray-300 transition"
-            @click="cancel"
-          />
+        <div class="px-6 py-4 flex flex-row sm:flex-row justify-end gap-3 pt-4">
           <ButtonWeb
             v-if="!isPickUp"
             label="Save"
             color="blue"
-            class="w-full sm:w-auto px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+            class="w-full sm:w-auto px-3 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition text-sm sm:text-base"
             @click="saveStatusChange"
             :disabled="isSaveDisabled"
+          />
+          <ButtonWeb
+            label="Cancel"
+            color="gray"
+            class="w-full sm:w-auto px-3 sm:px-6 py-2 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base"
+            @click="cancel"
           />
         </div>
       </div>
     </div>
   </div>
+  <Teleport to="body">
+    <ManageParcels />
+  </Teleport>
 </template>
