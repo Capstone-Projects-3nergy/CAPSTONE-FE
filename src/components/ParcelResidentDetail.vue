@@ -143,14 +143,14 @@ const clearConfirmPopUp = () => {
 
 const showConfirmComplete = () => {
   confirmSuccess.value = true
-  setTimeout(() => (confirmSuccess.value = false), 3000)
+  setTimeout(() => (confirmSuccess.value = false), 10000)
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
 
 const openRedPopup = () => {
   error.value = true
-  setTimeout(() => (error.value = false), 3000)
+  setTimeout(() => (error.value = false), 10000)
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }

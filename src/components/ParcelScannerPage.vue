@@ -339,46 +339,46 @@ const showHomePageStaffWeb = async () => {
 const saveParcel = async () => {
   if (!selectedResidentId.value) {
     error.value = true
-    setTimeout(() => (error.value = false), 3000)
+    setTimeout(() => (error.value = false), 10000)
     return
   }
 
   form.value.userId = auth.user.id
   if (!form.value.trackingNumber) {
     trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 3000)
+    setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
   if (!form.value.recipientName) {
     recipientNameError.value = true
-    setTimeout(() => (recipientNameError.value = false), 3000)
+    setTimeout(() => (recipientNameError.value = false), 10000)
     return
   }
   if (!form.value.parcelType) {
     parcelTypeErrorRequired.value = true
-    setTimeout(() => (parcelTypeErrorRequired.value = false), 3000)
+    setTimeout(() => (parcelTypeErrorRequired.value = false), 10000)
     return
   }
 
   if (!form.value.companyId) {
     companyIdError.value = true
-    setTimeout(() => (companyIdError.value = false), 3000)
+    setTimeout(() => (companyIdError.value = false), 10000)
     return
   }
 
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 3000)
+    setTimeout(() => (parcelTypeError.value = false), 10000)
     return
   }
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 3000)
+    setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 3000)
+    setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
 
@@ -400,14 +400,14 @@ const saveParcel = async () => {
 
     if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
       error.value = true
-      setTimeout(() => (error.value = false), 3000)
+      setTimeout(() => (error.value = false), 10000)
       return
     }
 
     parcelManager.addParcel(savedParcel)
 
     addSuccess.value = true
-    setTimeout(() => (addSuccess.value = false), 3000)
+    setTimeout(() => (addSuccess.value = false), 10000)
 
     selectedResidentId.value = null
     recipientSearch.value = ''
@@ -426,7 +426,7 @@ const saveParcel = async () => {
     }
   } catch (err) {
     error.value = true
-    setTimeout(() => (error.value = false), 3000)
+    setTimeout(() => (error.value = false), 10000)
   }
 }
 const isAllEmpty = computed(() => {

@@ -100,23 +100,23 @@ const submitForm = async (roleType) => {
    
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
-      setTimeout(() => (isNotMatch.value = false), 3000)
+      setTimeout(() => (isNotMatch.value = false), 10000)
       return
     }
    
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
-      setTimeout(() => (isFullNameWrong.value = false), 3000)
+      setTimeout(() => (isFullNameWrong.value = false), 10000)
       return
     }
     if (!form.password || form.password.length > 14) {
       isPasswordMax.value = true
-      setTimeout(() => (isPasswordMax.value = false), 3000)
+      setTimeout(() => (isPasswordMax.value = false), 10000)
       return
     }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
       incorrectemailform.value = true
-      setTimeout(() => (incorrectemailform.value = false), 3000)
+      setTimeout(() => (incorrectemailform.value = false), 10000)
       return
     }
 
@@ -151,23 +151,23 @@ const submitForm = async (roleType) => {
     if (roleUpper === 'RESIDENT') {
       if (!payload.dormId) {
         isNoDorm.value = true
-        setTimeout(() => (isNoDorm.value = false), 3000)
+        setTimeout(() => (isNoDorm.value = false), 10000)
         return
       }
       if (!payload.roomNumber) {
         isRoomRequired.value = true
-        setTimeout(() => (isRoomRequired.value = false), 3000)
+        setTimeout(() => (isRoomRequired.value = false), 10000)
         return
       }
     } else if (roleUpper === 'STAFF') {
       if (!payload.position) {
         isPositionRequired.value = true
-        setTimeout(() => (isPositionRequired.value = false), 3000)
+        setTimeout(() => (isPositionRequired.value = false), 10000)
         return
       }
       if (/\d/.test(payload.position)) {
         isPositionWrong.value = true
-        setTimeout(() => (isPositionWrong.value = false), 3000)
+        setTimeout(() => (isPositionWrong.value = false), 10000)
         return
       }
     }
@@ -179,7 +179,7 @@ const submitForm = async (roleType) => {
     if (res.status === 201 || res.status === 200) {
      
       success.value = true
-      setTimeout(() => (success.value = false), 3000)
+      setTimeout(() => (success.value = false), 10000)
 
     
       Object.keys(form).forEach((key) => {
@@ -189,10 +189,10 @@ const submitForm = async (roleType) => {
     } else if (res.status === 409) {
     
       isEmailDuplicate.value = true
-      setTimeout(() => (isEmailDuplicate.value = false), 3000)
+      setTimeout(() => (isEmailDuplicate.value = false), 10000)
     } else if (res.status === 500) {
       error.value = true
-      setTimeout(() => (error.value = false), 3000)
+      setTimeout(() => (error.value = false), 10000)
     } else {
      
     }

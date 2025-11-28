@@ -92,7 +92,6 @@ const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
 )
 
-
 const mapStatus = (status) => {
   switch (status) {
     case 'PENDING':
@@ -144,18 +143,17 @@ const parcels = computed(() => parcelManager.getParcels())
 const selectResident = (resident) => {
   selectedResidentId.value = resident.userId
   const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
-   parcels.value.recipientName = name
-  recipientSearch.value = name 
+  parcels.value.recipientName = name
+  recipientSearch.value = name
 }
-
 
 watch(recipientSearch, (val) => {
   if (!val) {
     selectedResidentId.value = null
-     parcels.value.recipientName = ''
+    parcels.value.recipientName = ''
   }
 })
-function autoClose(refVar, timeout = 3000) {
+function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
       setTimeout(() => {
@@ -399,12 +397,8 @@ const showEditParacelDetail = async function (id) {
         updateAt: data.updatedAt || null,
         pickupAt: data.pickedUpAt || null
       }
-
-    
     }
-  } catch (err) {
-   
-  }
+  } catch (err) {}
 }
 
 const goToPage = (page) => {
@@ -451,14 +445,14 @@ const clearConfirmPopUp = () => {
 
 const showConfirmComplete = () => {
   confirmSuccess.value = true
-  setTimeout(() => (deleteSuccess.value = false), 3000)
+  setTimeout(() => (deleteSuccess.value = false), 10000)
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
 
 const openRedPopup = () => {
   error.value = true
-  setTimeout(() => (error.value = false), 3000)
+  setTimeout(() => (error.value = false), 10000)
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }

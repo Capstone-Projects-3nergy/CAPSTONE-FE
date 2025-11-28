@@ -172,7 +172,7 @@ onMounted(async () => {
 })
 
 const parcels = computed(() => parcelManager.getParcels())
-function autoClose(refVar, timeout = 3000) {
+function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
       setTimeout(() => {
@@ -475,7 +475,7 @@ const clearStatusPopUp = () => {
 }
 const showDelComplete = () => {
   deleteSuccess.value = true
-  setTimeout(() => (deleteSuccess.value = false), 3000)
+  setTimeout(() => (deleteSuccess.value = false), 10000)
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
@@ -483,20 +483,20 @@ const showStatusComplete = (updatedParcel) => {
   parcelManager.updateParcel(updatedParcel)
 
   statusSuccess.value = true
-  setTimeout(() => (statusSuccess.value = false), 3000)
+  setTimeout(() => (statusSuccess.value = false), 10000)
 
   showStatusParcel.value = false
   parcelStatusDetail.value = null
 }
 const openRedPopup = () => {
   error.value = true
-  setTimeout(() => (error.value = false), 3000)
+  setTimeout(() => (error.value = false), 10000)
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
 const openRedStatusPopup = () => {
   error.value = true
-  setTimeout(() => (error.value = false), 3000)
+  setTimeout(() => (error.value = false), 10000)
   showStatusParcel.value = false
   parcelDetail.value = null
 }

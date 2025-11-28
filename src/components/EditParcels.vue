@@ -199,29 +199,29 @@ const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 3000)
+    setTimeout(() => (roomNumberError.value = false), 10000)
     return
   }
 
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 3000)
+    setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
     recipientNameError.value = true
-    setTimeout(() => (recipientNameError.value = false), 3000)
+    setTimeout(() => (recipientNameError.value = false), 10000)
     return
   }
 
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 3000)
+    setTimeout(() => (parcelTypeError.value = false), 10000)
     return
   }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 3000)
+    setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
   try {
@@ -244,7 +244,7 @@ const saveEditParcel = async () => {
 
     if (!updatedParcel) {
       error.value = true
-      setTimeout(() => (error.value = false), 3000)
+      setTimeout(() => (error.value = false), 10000)
       return
     }
 
@@ -257,10 +257,10 @@ const saveEditParcel = async () => {
     originalForm.value = { ...form.value }
 
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 3000)
+    setTimeout(() => (editSuccess.value = false), 10000)
   } catch (err) {
     error.value = true
-    setTimeout(() => (error.value = false), 3000)
+    setTimeout(() => (error.value = false), 10000)
   }
 }
 const previewUrl = ref(null)
