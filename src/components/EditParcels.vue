@@ -1227,7 +1227,9 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <!-- Buttons -->
-          <div class="flex justify-end space-x-2 mt-6">
+          <div
+            class="flex flex-col md:flex-row md:justify-end space-y-2 md:space-y-0 md:space-x-2 mt-6"
+          >
             <ButtonWeb
               label="Save"
               color="green"
