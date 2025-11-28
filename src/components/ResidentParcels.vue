@@ -1464,10 +1464,15 @@ const showProfileResidentPage = async function () {
 
                 <!-- Operation -->
                 <td
-                  @click="showParcelDetail(p.id)"
                   class="px-4 py-2 md:py-3 text-sm text-center text-gray-700 flex md:table-cell space-x-2 md:space-x-2 cursor-pointer"
                 >
-                  <div class="flex justify-center items-center w-full">
+                  <span class="md:hidden font-semibold text-blue-700"
+                    >Action:</span
+                  >
+                  <button
+                    @click="showParcelDetail(p.id)"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
+                  >
                     <svg
                       width="16"
                       height="16"
@@ -1484,7 +1489,7 @@ const showProfileResidentPage = async function () {
                         fill="#107EFF"
                       />
                     </svg>
-                  </div>
+                  </button>
                   <!-- <ButtonWeb
                     label="Confirm"
                     color="blue"
