@@ -8,7 +8,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
-const authManager = useAuthManager() 
+const authManager = useAuthManager()
 const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -34,7 +34,6 @@ onMounted(async () => {
   await authManager.loadUserFromBackend()
 })
 
-
 const loginHomePageWeb = async () => {
   loading.value = true
 
@@ -47,28 +46,23 @@ const loginHomePageWeb = async () => {
 
     loading.value = false
 
-   
     if (!res) {
-   
       incorrect.value = true
-     
-      setTimeout(() => (incorrect.value = false), 2000)
+
+      setTimeout(() => (incorrect.value = false), 10000)
       return
     }
     if (res.status === 200 || res.status === 201) {
-     
       success.value = true
-      setTimeout(() => (success.value = false), 2000)
+      setTimeout(() => (success.value = false), 10000)
 
-  
       const token = res.data?.accessToken || authManager.user?.accessToken
       if (!token) {
         error.value = true
-      
+
         await authManager.logoutAccount(router)
         return
       }
-
 
       try {
         const decoded = authManager.decodeJWT
@@ -76,22 +70,19 @@ const loginHomePageWeb = async () => {
           : null
         const currentTime = Math.floor(Date.now() / 1000)
         if (decoded?.exp && decoded.exp < currentTime) {
-         
           await authManager.logoutAccount(router)
         }
       } catch (decodeErr) {
         error.value = true
-      
+
         await authManager.logoutAccount(router)
       }
-    } else if ([400, 401, 403, 500].includes(res.status)) {
+    } else if ([400, 401, 403].includes(res.status)) {
       incorrect.value = true
-      setTimeout(() => (incorrect.value = false), 2000)
+      setTimeout(() => (incorrect.value = false), 10000)
     } else {
-  
       error.value = true
-      setTimeout(() => (error.value = false), 2000)
-    
+      setTimeout(() => (error.value = false), 10000)
     }
   } catch (err) {
     loading.value = false
@@ -103,27 +94,24 @@ const loginHomePageWeb = async () => {
       ''
     const firebaseCode = err.code || ''
 
-   
     if (
-      [400, 401, 403].includes(status) || 
+      [400, 401, 403].includes(status) ||
       message.includes('invalid') ||
       message.includes('credentials') ||
       [
         'auth/invalid-credential',
         'auth/wrong-password',
         'auth/user-not-found'
-      ].includes(firebaseCode) 
+      ].includes(firebaseCode)
     ) {
       incorrect.value = true
-      setTimeout(() => (incorrect.value = false), 2000)
+      setTimeout(() => (incorrect.value = false), 10000)
     } else {
-  
       error.value = true
-      setTimeout(() => (error.value = false), 2000)
+      setTimeout(() => (error.value = false), 10000)
     }
   }
 }
-
 
 const checkEmailLength = () => {
   if (trimmedEmail.value.length > MAX_EMAIL_LENGTH) {
@@ -140,7 +128,7 @@ const checkEmailLength = () => {
 const checkPasswordLength = () => {
   if (trimmedPassword.value.length > MAX_PASSWORD_LENGTH) {
     isPasswordOverLimit.value = true
-   
+
     setTimeout(() => {
       isPasswordOverLimit.value = false
     }, 1000)
@@ -148,7 +136,6 @@ const checkPasswordLength = () => {
     isPasswordOverLimit.value = false
   }
 }
-
 
 const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
@@ -167,7 +154,6 @@ const showResetPasswordPageWeb = async function () {
 
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
- 
     <div
       class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
     >
@@ -177,7 +163,7 @@ const showResetPasswordPageWeb = async function () {
           dormitory parcel management system — manage, check status, and stay
           updated anytime with Tractify.
         </p>
-      
+
         <div class="flex md:justify-center">
           <svg
             class="hidden md:block w-[490px] h-[569px]"
@@ -212,12 +198,10 @@ const showResetPasswordPageWeb = async function () {
       </div>
     </div>
 
-
     <div
       class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-screen"
     >
       <div class="w-full max-w-xs sm:max-w-sm">
-      
         <div class="flex items-center mb-8 justify-center md:justify-start">
           <svg
             width="138"
@@ -260,7 +244,6 @@ const showResetPasswordPageWeb = async function () {
           </svg>
         </div>
 
-  
         <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
           Get Started
         </h2>
@@ -269,7 +252,6 @@ const showResetPasswordPageWeb = async function () {
         </p>
 
         <div class="space-y-2">
-        
           <AlertPopUp
             v-if="incorrect"
             :titles="'Username or Password is incorrect.'"
@@ -287,10 +269,9 @@ const showResetPasswordPageWeb = async function () {
             @closePopUp="closePopUp"
           />
         </div>
-     
+
         <form @submit.prevent="signIn" class="space-y-4">
           <div class="relative">
-          
             <svg
               width="22"
               height="22"
@@ -386,10 +367,8 @@ const showResetPasswordPageWeb = async function () {
               </svg>
             </button>
           </div>
-        
-          <div class="flex justify-end">
-           
-          </div>
+
+          <div class="flex justify-end"></div>
           <ButtonWeb
             label="Sign In"
             type="submit"
@@ -408,10 +387,8 @@ const showResetPasswordPageWeb = async function () {
               isEmailOverLimit
             "
           />
-        
         </form>
 
-      
         <p class="text-sm text-center text-[#8C8F91] mt-6">
           Don’t have an account?
           <a

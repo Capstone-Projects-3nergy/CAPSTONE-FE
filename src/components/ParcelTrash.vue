@@ -15,7 +15,7 @@ const fetchTrash = async () => {
 const deleteForever = async (id) => {
   if (!confirm('Delete permanently? This action cannot be undone.')) {
     error.value = true
-    setTimeout(() => (error.value = false), 3000)
+    setTimeout(() => (error.value = false), 10000)
     return
   }
   const res = await fetch(
@@ -25,7 +25,7 @@ const deleteForever = async (id) => {
 
   if (res.ok) {
     await fetchTrash()
-    setTimeout(() => (deleteSuccess.value = false), 3000)
+    setTimeout(() => (deleteSuccess.value = false), 10000)
     deleteSuccess.value = true
   }
 }

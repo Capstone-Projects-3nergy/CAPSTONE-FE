@@ -134,13 +134,19 @@ export const useAuthManager = defineStore('authManager', () => {
 
       return { status: res.status, message: successMessage.value }
     } catch (error) {
-      status.value = error.response?.status || 500
-      if (status.value === 409) errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
-      else
+      if (error.response) {
+        status.value = error.response.status
         errorMessage.value =
-          error.response?.data?.message ||
+          error.response.data?.message ||
           error.message ||
           'Registration failed.'
+      } else if (error.request) {
+        status.value = null
+        errorMessage.value = 'Network error. Please try again.'
+      } else {
+        status.value = null
+        errorMessage.value = error.message
+      }
 
       return { status: status.value, error: errorMessage.value }
     } finally {
@@ -207,19 +213,20 @@ export const useAuthManager = defineStore('authManager', () => {
         message: successMessage.value
       }
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        (err.code === 'auth/user-not-found'
-          ? 'Account not found. Please sign up first.'
-          : null) ||
-        err.message ||
-        'Login failed.'
+      if (err.response) {
+        status.value = err.response.status
+        errorMessage.value =
+          err.response.data?.message || err.message || 'Login failed.'
+      } else if (err.request) {
+        status.value = null
+        errorMessage.value = 'Network error. Please check your connection.'
+      } else {
+        status.value = null
+        errorMessage.value = err.message || 'Login failed.'
+      }
 
-      errorMessage.value = msg
-      status.value = err.response?.status || 500
       user.value = null
-
-      return { status: status.value, error: msg }
+      return { status: status.value, error: errorMessage.value }
     } finally {
       isLoading.value = false
     }
