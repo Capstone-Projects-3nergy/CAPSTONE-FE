@@ -4,9 +4,9 @@ import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import { useAuthManager } from '@/stores/AuthManager.js' 
+import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-const authManager = useAuthManager() 
+const authManager = useAuthManager()
 const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
@@ -47,15 +47,13 @@ const isComfirmPasswordVisible = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
-  password: '', 
+  password: '',
   confirmPassword: '',
-  role: 'RESIDENT', 
+  role: 'RESIDENT',
   dormId: null,
-  roomNumber: '', 
-  position: '' 
+  roomNumber: '',
+  position: ''
 })
-
-
 
 const dormList = ref([])
 
@@ -66,13 +64,11 @@ onMounted(async () => {
       headers: { Accept: 'application/json' }
     })
 
-
     const rawData = res.data
 
     let parsedDorms = []
 
     if (typeof rawData === 'string') {
-     
       const dormMatches =
         rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
 
@@ -89,21 +85,17 @@ onMounted(async () => {
     }
 
     dormList.value = parsedDorms
-   
-  } catch (err) {
-   
-  }
+  } catch (err) {}
 })
 
 const submitForm = async (roleType) => {
   try {
-   
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       setTimeout(() => (isNotMatch.value = false), 10000)
       return
     }
-   
+
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
       setTimeout(() => (isFullNameWrong.value = false), 10000)
@@ -147,7 +139,6 @@ const submitForm = async (roleType) => {
             fullName: form.fullName.trim()
           }
 
-
     if (roleUpper === 'RESIDENT') {
       if (!payload.dormId) {
         isNoDorm.value = true
@@ -172,35 +163,26 @@ const submitForm = async (roleType) => {
       }
     }
 
-  
     const res = await authManager.registerAccount(payload)
- 
-   
+
     if (res.status === 201 || res.status === 200) {
-     
       success.value = true
       setTimeout(() => (success.value = false), 10000)
 
-    
       Object.keys(form).forEach((key) => {
         if (key === 'dormId') form[key] = null
         else form[key] = ''
       })
     } else if (res.status === 409) {
-    
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 10000)
     } else if (res.status === 500) {
       error.value = true
       setTimeout(() => (error.value = false), 10000)
     } else {
-     
     }
-  } catch (err) {
-  
-  }
+  } catch (err) {}
 }
-
 
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
@@ -221,7 +203,7 @@ const checkInputLength = (field) => {
     } else {
       isNameOverLimit.value = false
     }
-  
+
     const lettersOnly = trimmed.replace(/\s+/g, '')
     isFullNameWeak.value =
       lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH
@@ -250,25 +232,22 @@ const checkInputLength = (field) => {
   } else if (field === 'password') {
     const trimmed = form.password.trim()
 
-   
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
-    
+
       setTimeout(() => (isPasswordOverLimit.value = false), 1000)
     } else {
       isPasswordOverLimit.value = false
     }
 
-    
     isPasswordTooShort.value =
       trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'confirmPassword') {
     const trimmed = form.confirmPassword.trim()
 
-    
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = true
-    
+
       setTimeout(() => (isConfirmPasswordOverLimit.value = false), 1000)
     } else {
       isConfirmPasswordOverLimit.value = false
@@ -289,7 +268,6 @@ const checkInputLength = (field) => {
     }
   }
 }
-
 
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
@@ -406,15 +384,13 @@ const toggleComfirmPasswordVisibility = () => {
               />
             </defs>
           </svg>
-
-       
         </div>
 
         <h2 class="text-2xl font-bold mb-1">Create your account</h2>
         <p class="text-[#8C8F91] text-sm mb-6">
           Welcome to Tractify — Create your account below
         </p>
-       
+
         <AlertPopUp
           v-if="isPasswordNotMatch"
           :titles="'Password is not Match'"
@@ -447,7 +423,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="notnumber"
           @closePopUp="closePopUp"
         />
-      
+
         <AlertPopUp
           v-if="isEmailDuplicate"
           :titles="`This email is already registered`"
@@ -465,7 +441,6 @@ const toggleComfirmPasswordVisibility = () => {
           @closePopUp="closePopUp"
         />
 
-      
         <AlertPopUp
           v-if="isPasswordMax"
           titles="Limit password to 14 characters or less."
@@ -482,7 +457,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="success"
           @closePopUp="closePopUp"
         />
-      
+
         <AlertPopUp
           v-if="isNoDorm"
           :titles="'Please select a dormitory.'"
@@ -523,7 +498,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="notpositionrequired"
           @closePopUp="closePopUp"
         />
-     
+
         <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
           <button
             @click="role = 'resident'"
@@ -549,12 +524,9 @@ const toggleComfirmPasswordVisibility = () => {
           </button>
         </div>
 
-      
         <form @submit.prevent="submitForm" class="space-y-4">
-         
           <transition name="fade" mode="out-in">
             <div v-if="role === 'resident'" key="resident">
-            
               <div class="relative">
                 <svg
                   width="24"
@@ -767,7 +739,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-              
+
                 <div
                   v-if="isPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -840,7 +812,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-             
+
                 <div
                   v-if="isConfirmPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -863,7 +835,6 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
               </div>
               <div class="relative">
-             
                 <svg
                   width="21"
                   height="17"
@@ -878,7 +849,6 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </svg>
 
-            
                 <select v-model="form.dormId" class="custom-select">
                   <option disabled value="null">Select Dormitory</option>
                   <option
@@ -887,13 +857,11 @@ const toggleComfirmPasswordVisibility = () => {
                     :value="dorm.dormId"
                   >
                     {{ dorm.dormName }}
-                 
                   </option>
                 </select>
               </div>
             </div>
 
-      
             <div v-else key="staff">
               <div class="relative">
                 <svg
@@ -1129,7 +1097,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-              
+
                 <div
                   v-if="isPasswordTooShort"
                   class="flex items-center text-sm text-red-600"
@@ -1202,7 +1170,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
-             
+
                 <div
                   v-if="isConfirmPasswordTooShort"
                   class="flex items-center text-sm text-red-600"

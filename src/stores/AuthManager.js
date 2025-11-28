@@ -134,13 +134,19 @@ export const useAuthManager = defineStore('authManager', () => {
 
       return { status: res.status, message: successMessage.value }
     } catch (error) {
-      status.value = error.response?.status || 500
-      if (status.value === 409) errorMessage.value = 'อีเมลนี้ถูกใช้แล้ว'
-      else
+      if (error.response) {
+        status.value = error.response.status
         errorMessage.value =
-          error.response?.data?.message ||
+          error.response.data?.message ||
           error.message ||
           'Registration failed.'
+      } else if (error.request) {
+        status.value = null
+        errorMessage.value = 'Network error. Please try again.'
+      } else {
+        status.value = null
+        errorMessage.value = error.message
+      }
 
       return { status: status.value, error: errorMessage.value }
     } finally {
