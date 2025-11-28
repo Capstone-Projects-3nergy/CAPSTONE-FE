@@ -3,7 +3,6 @@ import { reactive, ref, computed } from 'vue'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import { useRegisterManager } from '@/stores/RegisterManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import { useResetPasswordManager } from '@/stores/ResetPasswordManager.js'
 

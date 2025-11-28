@@ -1,16 +1,14 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 const props = defineProps({
-  label: String, // ข้อความบนปุ่ม
+  label: String,
   color: {
-    // สีหลักของปุ่ม
     type: String,
     default: 'green'
   }
 })
 const emit = defineEmits(['click'])
 
-// Map สีพื้นหลังและ hover
 const bgClass = computed(() => {
   if (props.color === 'green')
     return 'bg-green-600 hover:bg-green-700 disabled:bg-gray-400'

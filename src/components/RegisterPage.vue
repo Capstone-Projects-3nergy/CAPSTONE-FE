@@ -4,22 +4,22 @@ import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-// import { useRegisterManager } from '@/stores/RegisterManager.js'
-import { useAuthManager } from '@/stores/AuthManager.js' // ✅ เปลี่ยนจาก useRegisterManager
+import { useAuthManager } from '@/stores/AuthManager.js' 
 import AlertPopUp from './AlertPopUp.vue'
-// const registerStore = useRegisterManager()
-const authManager = useAuthManager() // ✅ ใช้ store เดียว
+const authManager = useAuthManager() 
 const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
 const isEmailOverLimit = ref(false)
+const isPasswordMax = ref(false)
 const isPasswordOverLimit = ref(false)
+const isPasswordTooShort = ref(false)
 const isConfirmPasswordOverLimit = ref(false)
+const isConfirmPasswordTooShort = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
 const isFullNameWrong = ref(false)
-// ใช้ computed สำหรับ trim ค่าอัตโนมัติ
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
 const trimmedPassword = computed(() => form.password?.trim() || '')
@@ -47,46 +47,15 @@ const isComfirmPasswordVisible = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
-  password: '', // ใช้กับ Firebase เท่านั้น (อย่าส่งไป backend)
+  password: '', 
   confirmPassword: '',
-  role: 'RESIDENT', // 'RESIDENT' | 'STAFF'
-  dormId: null, // number, เลือกจาก dropdown (เฉพาะ RESIDENT)
-  // dormType: 'female dormitory',
-  roomNumber: '', // เฉพาะ RESIDENT
-  position: '' // เฉพาะ STAFF
+  role: 'RESIDENT', 
+  dormId: null,
+  roomNumber: '', 
+  position: '' 
 })
 
-// onMounted(async () => {
-//   authManager.loadUserFromBackend()
-//   // console.log(authManager.user.email)
-//   try {
-//     const baseURL = import.meta.env.VITE_BASE_URL
-//     console.log('Base URL:', baseURL)
-//     if (!baseURL) throw new Error('VITE_BASE_URL not set')
 
-//     const res = await axios.get(`${baseURL}/api/dorms`, {
-//       headers: { Accept: 'application/json' }
-//     })
-
-//     const dataList = res.data?.data ?? res.data
-//     dormList.value =
-//       Array.isArray(dataList) && dataList.length > 0
-//         ? dataList.map((d) => ({
-//             dormId: Number(d.dormId),
-//             dormId: d.dormId
-//           }))
-//         : [
-//             { dormId: 1, dormId: 'Dhammaraksa Residence Hall 1' },
-//             { dormId: 2, dormId: 'Dhammaraksa Residence Hall 2' }
-//           ]
-//   } catch (err) {
-//     console.error('❌ Cannot fetch dorm list', err)
-//     dormList.value = [
-//       { dormId: 1, dormId: 'Dhammaraksa Residence Hall 1' },
-//       { dormId: 2, dormId: 'Dhammaraksa Residence Hall 2' }
-//     ]
-//   }
-// })
 
 const dormList = ref([])
 
@@ -96,14 +65,14 @@ onMounted(async () => {
     const res = await axios.get(`${baseURL}/api/dorms/list`, {
       headers: { Accept: 'application/json' }
     })
-    console.log('📦 Raw response:', res.data)
+
 
     const rawData = res.data
 
     let parsedDorms = []
 
     if (typeof rawData === 'string') {
-      // ใช้ regex ดึง dormId และ dormName
+     
       const dormMatches =
         rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
 
@@ -120,35 +89,29 @@ onMounted(async () => {
     }
 
     dormList.value = parsedDorms
-    console.log('✅ dormList:', dormList.value)
+   
   } catch (err) {
-    console.error('❌ Error fetching dorms:', err)
+   
   }
 })
-// ---------------- REGISTER FUNCTION ----------------
 
 const submitForm = async (roleType) => {
-  console.log(form.dormId)
   try {
-    // ✅ validations เดิม
+   
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       setTimeout(() => (isNotMatch.value = false), 3000)
       return
     }
-    if (!form.fullName || form.fullName.trim().length < 6) {
-      isFullNameWeak.value = true
-      setTimeout(() => (isFullNameWeak.value = false), 3000)
-      return
-    }
+   
     if (/\d/.test(form.fullName)) {
       isFullNameWrong.value = true
       setTimeout(() => (isFullNameWrong.value = false), 3000)
       return
     }
-    if (!form.password || form.password.length < 6) {
-      isPasswordWeak.value = true
-      setTimeout(() => (isPasswordWeak.value = false), 3000)
+    if (!form.password || form.password.length > 14) {
+      isPasswordMax.value = true
+      setTimeout(() => (isPasswordMax.value = false), 3000)
       return
     }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
@@ -162,7 +125,6 @@ const submitForm = async (roleType) => {
       .split(/\s+/, 2)
     const roleUpper = String(roleType).toUpperCase()
 
-    // ⬇⬇⬇ เปลี่ยนจาก dormId → dormId ⬇⬇⬇
     const payload =
       roleUpper === 'RESIDENT'
         ? {
@@ -170,7 +132,7 @@ const submitForm = async (roleType) => {
             firstName,
             lastName,
             role: roleUpper,
-            dormId: form.dormId || '', // ⬅ ใช้ชื่อนี้
+            dormId: form.dormId || '',
             roomNumber: (form.roomNumber || '').trim(),
             password: form.password,
             fullName: form.fullName.trim()
@@ -185,7 +147,7 @@ const submitForm = async (roleType) => {
             fullName: form.fullName.trim()
           }
 
-    // ✅ validation ฝั่ง RESIDENT ตาม dormId
+
     if (roleUpper === 'RESIDENT') {
       if (!payload.dormId) {
         isNoDorm.value = true
@@ -210,40 +172,44 @@ const submitForm = async (roleType) => {
       }
     }
 
-    // ✅ เรียก register ผ่าน AuthManager (ไม่ต้องแนบ Authorization)
-    await authManager.registerAccount(payload)
+  
+    const res = await authManager.registerAccount(payload)
+ 
+   
+    if (res.status === 201 || res.status === 200) {
+     
+      success.value = true
+      setTimeout(() => (success.value = false), 3000)
 
-    authManager.loadUserFromBackend()
-
-    if (authManager.status === 409) {
-      success.value = false
+    
+      Object.keys(form).forEach((key) => {
+        if (key === 'dormId') form[key] = null
+        else form[key] = ''
+      })
+    } else if (res.status === 409) {
+    
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 3000)
-      return
+    } else if (res.status === 500) {
+      error.value = true
+      setTimeout(() => (error.value = false), 3000)
+    } else {
+     
     }
-
-    // ✅ ล้างฟอร์ม
-    Object.keys(form).forEach((key) => {
-      if (key === 'dormId') form[key] = null
-      else form[key] = ''
-    })
-
-    success.value = true
-    setTimeout(() => (success.value = false), 3000)
   } catch (err) {
-    console.error('❌ Register error:', err)
-    error.value = true
-    setTimeout(() => (error.value = false), 3000)
+  
   }
 }
 
-// ฟังก์ชันรวมสำหรับตรวจความยาว input
+
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
   const MAX_EMAIL_LENGTH = 30
   const MAX_PASSWORD_LENGTH = 14
   const MAX_STAFFPOSITION_LENGTH = 30
   const MAX_ROMNUMBER_LENGTH = 11
+  const MIN_PASSWORD_LENGTH = 6
+  const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
     if (trimmed.length > MAX_NAME_LENGTH) {
@@ -255,6 +221,10 @@ const checkInputLength = (field) => {
     } else {
       isNameOverLimit.value = false
     }
+  
+    const lettersOnly = trimmed.replace(/\s+/g, '')
+    isFullNameWeak.value =
+      lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH
   } else if (field === 'email') {
     const trimmed = form.email.trim()
     if (trimmed.length > MAX_EMAIL_LENGTH) {
@@ -279,26 +249,33 @@ const checkInputLength = (field) => {
     }
   } else if (field === 'password') {
     const trimmed = form.password.trim()
+
+   
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
-      form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => {
-        isPasswordOverLimit.value = false
-      }, 1000)
+    
+      setTimeout(() => (isPasswordOverLimit.value = false), 1000)
     } else {
       isPasswordOverLimit.value = false
     }
+
+    
+    isPasswordTooShort.value =
+      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'confirmPassword') {
     const trimmed = form.confirmPassword.trim()
+
+    
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = true
-      form.confirmPassword = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => {
-        isConfirmPasswordOverLimit.value = false
-      }, 1000)
+    
+      setTimeout(() => (isConfirmPasswordOverLimit.value = false), 1000)
     } else {
       isConfirmPasswordOverLimit.value = false
     }
+
+    isConfirmPasswordTooShort.value =
+      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'roomNumber') {
     const trimmed = form.roomNumber.trim()
     if (trimmed.length > MAX_ROMNUMBER_LENGTH) {
@@ -313,14 +290,13 @@ const checkInputLength = (field) => {
   }
 }
 
-// --- ปิด popup ด้วยมือ ---
+
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
   if (operate === 'email ') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  if (operate === 'fullname') isFullNameWeak.value = false
   if (operate === 'dorm') isNoDorm.value = false
   if (operate === 'notmatch') isNotMatch.value = false
   if (operate === 'notroomrequired') isRoomRequired.value = false
@@ -343,7 +319,6 @@ const toggleComfirmPasswordVisibility = () => {
 </script>
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
-    <!-- Left Section -->
     <div
       class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
     >
@@ -390,8 +365,7 @@ const toggleComfirmPasswordVisibility = () => {
     <div
       class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-[28rem] sm:min-h-[32rem] md:min-h-[36rem] lg:min-h-screen"
     >
-      <div class="w-full max-w-xs sm:max-w-sm lg:max-w-2xl">
-        <!-- เพิ่ม max-w-3xl -->
+      <div class="w-full max-w-xs sm:max-w-sm">
         <div class="flex items-center gap-2 mb-2">
           <svg
             width="138"
@@ -433,23 +407,14 @@ const toggleComfirmPasswordVisibility = () => {
             </defs>
           </svg>
 
-          <!-- <h1 class="text-xl font-semibold">Tractify</h1> -->
+       
         </div>
 
         <h2 class="text-2xl font-bold mb-1">Create your account</h2>
         <p class="text-[#8C8F91] text-sm mb-6">
           Welcome to Tractify — Create your account below
         </p>
-        <!-- ✅ Popups อยู่ด้านบน -->
-
-        <!-- <AlertPopUp
-          v-if="incorrect"
-          :titles="'Username or Password is incorrect.'"
-          message="Error!!"
-          styleType="red"
-          operate="incorrect"
-          @closePopUp="closePopUp"
-        /> -->
+       
         <AlertPopUp
           v-if="isPasswordNotMatch"
           :titles="'Password is not Match'"
@@ -482,7 +447,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="notnumber"
           @closePopUp="closePopUp"
         />
-        <!-- Duplicate Email -->
+      
         <AlertPopUp
           v-if="isEmailDuplicate"
           :titles="`This email is already registered`"
@@ -500,10 +465,10 @@ const toggleComfirmPasswordVisibility = () => {
           @closePopUp="closePopUp"
         />
 
-        <!-- Weak Password -->
+      
         <AlertPopUp
-          v-if="isPasswordWeak"
-          titles="Password must be at least 6 characters"
+          v-if="isPasswordMax"
+          titles="Limit password to 14 characters or less."
           message="Error!!"
           styleType="red"
           operate="password"
@@ -517,14 +482,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="success"
           @closePopUp="closePopUp"
         />
-        <AlertPopUp
-          v-if="isFullNameWeak"
-          :titles="'Full Name must be at least 6 characters.'"
-          message="Error!!"
-          styleType="red"
-          operate="fullname"
-          @closePopUp="closePopUp"
-        />
+      
         <AlertPopUp
           v-if="isNoDorm"
           :titles="'Please select a dormitory.'"
@@ -565,7 +523,7 @@ const toggleComfirmPasswordVisibility = () => {
           operate="notpositionrequired"
           @closePopUp="closePopUp"
         />
-        <!-- Toggle Buttons -->
+     
         <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
           <button
             @click="role = 'resident'"
@@ -591,31 +549,12 @@ const toggleComfirmPasswordVisibility = () => {
           </button>
         </div>
 
-        <!-- Form Fields -->
+      
         <form @submit.prevent="submitForm" class="space-y-4">
-          <!-- Resident -->
+         
           <transition name="fade" mode="out-in">
             <div v-if="role === 'resident'" key="resident">
-              <!-- <div class="relative flex items-center space-x-4 mb-3">
-                <label class="flex items-center text-sm">
-                  <input
-                    type="radio"
-                    value="female dormitory"
-                    v-model="form.dormType"
-                    class="mr-2"
-                  />
-                  Female Dormitory
-                </label>
-                <label class="flex items-center text-sm">
-                  <input
-                    type="radio"
-                    value="male dormitory"
-                    v-model="form.dormType"
-                    class="mr-2"
-                  />
-                  Male Dormitory
-                </label>
-              </div> -->
+            
               <div class="relative">
                 <svg
                   width="24"
@@ -639,7 +578,10 @@ const toggleComfirmPasswordVisibility = () => {
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('fullName')"
-                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                  :class="{
+                    'border-red-600 text-red-600':
+                      isNameOverLimit || isFullNameWeak
+                  }"
                 />
                 <div
                   style="display: flex; align-items: center"
@@ -648,7 +590,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -660,6 +602,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit Full Name to 30 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isFullNameWeak"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Full Name must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -694,7 +656,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -739,7 +701,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -776,7 +738,7 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600': isPasswordOverLimit
+                    'border-red-600 text-red-600': isPasswordTooShort
                   }"
                 />
                 <button
@@ -805,15 +767,16 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
+              
                 <div
-                  style="display: flex; align-items: center"
-                  v-if="isPasswordOverLimit"
+                  v-if="isPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="w-[15px] text-red-600"
+                    fill="red"
+                    class="w-[15px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -822,7 +785,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit password to 14 characters or less.
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -833,7 +796,7 @@ const toggleComfirmPasswordVisibility = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#918c8c]"
                 >
                   <path
                     d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -848,7 +811,7 @@ const toggleComfirmPasswordVisibility = () => {
                   required
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600': isConfirmPasswordOverLimit
+                    'border-red-600 text-red-600': isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -877,15 +840,16 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
+             
                 <div
-                  style="display: flex; align-items: center"
-                  v-if="isConfirmPasswordOverLimit"
+                  v-if="isConfirmPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="w-[15px] text-red-600"
+                    fill="red"
+                    class="w-[15px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -894,12 +858,12 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit password to 14 characters or less.
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
               <div class="relative">
-                <!-- ไอคอนบ้าน -->
+             
                 <svg
                   width="21"
                   height="17"
@@ -914,30 +878,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </svg>
 
-                <!-- dropdown -->
-                <!-- <select v-model="form.dormId" class="custom-select">
-                  <option value="" disabled selected hidden>
-                    Name Dormitory
-                  </option>
-                  <option value="Hall 1">Dhammaraksa Residence Hall 1</option>
-                  <option value="Hall 2">Dhammaraksa Residence Hall 2</option>
-                </select> -->
-                <!-- <select v-model.number="form.dormId" class="custom-select">
-                  <option :value="null" disabled>Select Dormitory</option>
-                  <option
-                    v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
-                  >
-                    {{ dorm.dormId }}
-                  </option>
-                </select> -->
-                <!-- <select v-model="form.dormId" class="custom-select">
-                  <option :value="null" disabled>Select Dormitory</option>
-                  <option v-for="name in dormList" :key="name" :value="name">
-                    {{ name }}
-                  </option>
-                </select> -->
+            
                 <select v-model="form.dormId" class="custom-select">
                   <option disabled value="null">Select Dormitory</option>
                   <option
@@ -946,13 +887,13 @@ const toggleComfirmPasswordVisibility = () => {
                     :value="dorm.dormId"
                   >
                     {{ dorm.dormName }}
-                    <!-- แสดงชื่อหอ -->
+                 
                   </option>
                 </select>
               </div>
             </div>
 
-            <!-- Staff -->
+      
             <div v-else key="staff">
               <div class="relative">
                 <svg
@@ -977,7 +918,10 @@ const toggleComfirmPasswordVisibility = () => {
                   placeholder="Full Name"
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('fullName')"
-                  :class="{ 'border-red-600 text-red-600': isNameOverLimit }"
+                  :class="{
+                    'border-red-600 text-red-600':
+                      isNameOverLimit || isFullNameWeak
+                  }"
                 />
                 <div
                   style="display: flex; align-items: center"
@@ -986,7 +930,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="red"
                     className="-mt-px h-4 w-[20rem]"
                     class="w-[15px] text-red-600"
                   >
@@ -998,6 +942,26 @@ const toggleComfirmPasswordVisibility = () => {
                   </svg>
                   <div class="text-sm text-red-600">
                     Limit Full Name to 30 characters or less.
+                  </div>
+                </div>
+                <div
+                  v-if="isFullNameWeak"
+                  class="flex items-center text-sm text-red-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Full Name must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1056,7 +1020,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -1100,7 +1064,7 @@ const toggleComfirmPasswordVisibility = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
+                  fill="red"
                   className="-mt-px h-4 w-[20rem]"
                   class="w-[15px] text-red-600"
                 >
@@ -1136,7 +1100,7 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('password')"
                   :class="{
-                    'border-red-600 text-red-600': isPasswordOverLimit
+                    'border-red-600 text-red-600': isPasswordTooShort
                   }"
                 />
                 <button
@@ -1165,25 +1129,25 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
+              
                 <div
-                  style="display: flex; align-items: center"
-                  v-if="isPasswordOverLimit"
+                  v-if="isPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="-mt-px h-4 w-[20rem]"
-                    class="w-[15px] text-red-600"
+                    fill="red"
+                    class="w-[15px] mr-1"
                   >
                     <path
-                      fillRule="evenodd"
+                      fill-rule="evenodd"
                       d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                      clipRule="evenodd"
+                      clip-rule="evenodd"
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit password to 14 characters or less.
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1209,7 +1173,7 @@ const toggleComfirmPasswordVisibility = () => {
                   class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                   @input="checkInputLength('confirmPassword')"
                   :class="{
-                    'border-red-600 text-red-600': isConfirmPasswordOverLimit
+                    'border-red-600 text-red-600': isConfirmPasswordTooShort
                   }"
                 />
                 <button
@@ -1238,15 +1202,16 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                 </button>
+             
                 <div
-                  style="display: flex; align-items: center"
-                  v-if="isConfirmPasswordOverLimit"
+                  v-if="isConfirmPasswordTooShort"
+                  class="flex items-center text-sm text-red-600"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="w-[15px] text-red-600"
+                    fill="red"
+                    class="w-[15px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -1255,7 +1220,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit password to 14 characters or less.
+                    Password must be at least 6 characters.
                   </div>
                 </div>
               </div>
@@ -1292,8 +1257,8 @@ const toggleComfirmPasswordVisibility = () => {
               isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
-              isPasswordOverLimit ||
-              isConfirmPasswordOverLimit
+              isPasswordTooShort ||
+              isConfirmPasswordTooShort
             "
           />
           <ButtonWeb
@@ -1325,9 +1290,9 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedConfirmPassword.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
-              isPasswordOverLimit ||
+              isPasswordTooShort ||
               isStaffPositionOverLimit ||
-              isConfirmPasswordOverLimit
+              isConfirmPasswordTooShort
             "
           />
         </form>

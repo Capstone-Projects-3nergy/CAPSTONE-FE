@@ -2,7 +2,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 
 async function fetchWithAuth(url, options, router) {
   const authManager = useAuthManager()
-  const token = authManager.user?.accessToken // ✔ ใช้ token จาก Pinia
+  const token = authManager.user?.accessToken
 
   if (token) {
     options.headers = {
@@ -13,25 +13,19 @@ async function fetchWithAuth(url, options, router) {
 
   const res = await fetch(url, options)
 
-  // 401 Unauthorized → try refresh token
   if (res.status === 401) {
-    console.log('Access token expired, refreshing...')
-
-    const newToken = await authManager.refreshToken() // ✔ ไม่ส่ง router แล้ว
+    const newToken = await authManager.refreshToken()
 
     if (newToken) {
-      // retry request
       options.headers.Authorization = `Bearer ${newToken}`
       const retryRes = await fetch(url, options)
 
       if (retryRes.ok) return retryRes
-      console.error(`Retry failed: ${retryRes.status}`)
+
       return retryRes
     }
 
-    // refresh failed → logout
-    console.error('Token refresh failed, logging out...')
-    authManager.logoutAccount(router) // ✔ ใช้ logout จาก pinia
+    authManager.logoutAccount(router)
     return null
   }
 
@@ -51,7 +45,6 @@ export async function getItems(url, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -69,7 +62,6 @@ async function getItemById(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -87,7 +79,6 @@ async function deleteItemById(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -105,31 +96,10 @@ async function deleteAndTransferItem(url, id, newId, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
 
-// async function addItem(url, newItem, router) {
-//   try {
-//     const options = {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(newItem)
-//     }
-
-//     const res = await fetchWithAuth(url, options, router)
-//     if (res.ok) {
-//       return await res.json()
-//     }
-//     return res.status
-//   } catch (error) {
-//     console.error(`Network error: ${error}`)
-//     return null
-//   }
-// }
 async function addItem(url, newItem, router) {
   try {
     const options = {
@@ -144,55 +114,21 @@ async function addItem(url, newItem, router) {
     if (!res) return null
 
     if (res.ok) {
-      // อ่านเป็น text ก่อน ไม่ parse JSON
       const text = await res.text()
-      console.log('📦 Raw server response:', text)
 
-      // ลอง parse JSON ด้วย try-catch เพื่อดูว่าผิดตรงไหน
       try {
         const data = JSON.parse(text)
         return data
       } catch (err) {
-        console.error('❌ Invalid JSON from server:', err)
         return null
       }
     }
 
     return res.status
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
-
-// async function addItem(url, newItem, router) {
-//   try {
-//     const options = {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(newItem)
-//     }
-
-//     const res = await fetchWithAuth(url, options, router)
-
-//     if (res.ok) {
-//       const text = await res.text() // อ่านเป็น string ก่อน
-//       try {
-//         const data = JSON.parse(text)
-//         return data
-//       } catch (err) {
-//         console.error('Invalid JSON from server:', text)
-//         return null
-//       }
-//     }
-//     return res.status
-//   } catch (error) {
-//     console.error(`Network error: ${error}`)
-//     return null
-//   }
-// }
 
 async function editItem(url, id, editedItem, router) {
   try {
@@ -210,7 +146,6 @@ async function editItem(url, id, editedItem, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -263,7 +198,6 @@ async function acceptInvite(url, router) {
     }
     return res.status
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -290,7 +224,7 @@ async function declineInvite(url, router) {
 
 async function editItemWithFile(url, id, file = null, editedItem, router) {
   const formData = new FormData()
-  console.log(file)
+
   if (file) {
     file.forEach((file) => {
       formData.append('file', file)
@@ -307,7 +241,6 @@ async function editItemWithFile(url, id, file = null, editedItem, router) {
       method: 'PUT',
       body: formData
     }
-    console.log(options)
 
     const res = await fetchWithAuth(`${url}/${id}`, options, router)
     if (res) {
@@ -315,7 +248,6 @@ async function editItemWithFile(url, id, file = null, editedItem, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -335,31 +267,23 @@ async function deleteFile(url, id, file, router) {
       return await res.json()
     }
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
-async function updateParcelStatus(url, id, newStatus, router) {
-  try {
-    const options = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newStatus })
-    }
+async function updateParcelStatus(baseUrl, id, newStatus, token) {
+  const res = await fetch(`${baseUrl}/${id}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ status: newStatus })
+  })
 
-    const res = await fetchWithAuth(`${url}/${id}/status`, options, router)
-
-    if (res.ok) {
-      return await res.json()
-    }
-    return null
-  } catch (error) {
-    console.error(`Network error: ${error}`)
-    return null
-  }
+  if (!res.ok) throw new Error('Update status failed')
+  return await res.json()
 }
+
 async function confirmParcelPickup(url, id, router) {
   try {
     const options = {
@@ -380,7 +304,6 @@ async function confirmParcelPickup(url, id, router) {
     }
     return null
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
@@ -398,16 +321,14 @@ async function confirmParcelReceived(url, id, router) {
     if (!res) return null
 
     if (res.ok) {
-      return await res.json() // backend return ParcelDetailDto
+      return await res.json()
     }
 
     return { status: res.status }
   } catch (error) {
-    console.error(`Network error: ${error}`)
     return null
   }
 }
-
 
 export {
   getItemById,

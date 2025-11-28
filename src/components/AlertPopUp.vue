@@ -37,7 +37,6 @@ const emit = defineEmits(['closePopUp'])
         <span class="itbkk-message block sm:inline">{{ titles }}</span>
       </p>
 
-      <!-- ปุ่ม X -->
       <span
         class="absolute top-2 right-2 cursor-pointer transition-transform duration-150 hover:scale-110"
         @click="emit('closePopUp', props.operate)"
