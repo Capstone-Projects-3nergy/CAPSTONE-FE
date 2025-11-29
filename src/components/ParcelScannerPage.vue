@@ -562,7 +562,7 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
-  if(operate === 'ineligible') notStaff.value = false
+  if (operate === 'ineligible') notStaff.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
