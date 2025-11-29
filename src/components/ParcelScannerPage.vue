@@ -1125,7 +1125,7 @@ onMounted(async () => {
 
                   <ul
                     v-if="showSuggestions"
-                    class="absolute z-10 mt-1 w-[310px] md:w-[650px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                    class="absolute z-10 mt-1 w-[310px] md:w-[510px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
                   >
                     <li
                       v-for="r in filteredResidents"
