@@ -94,6 +94,8 @@ const showSuggestions = computed(
 
 const mapStatus = (status) => {
   switch (status) {
+    case 'WAITING_FOR_STAFF':
+      return 'waiting for staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -955,6 +957,7 @@ const showProfileResidentPage = async function () {
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     :class="{
+                      'bg-yellow-400': p.status === 'waiting for staff',
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"
