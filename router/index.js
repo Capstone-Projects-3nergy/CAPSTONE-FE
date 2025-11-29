@@ -96,6 +96,12 @@ const routes = [
     name: 'parcelscanner',
     component: ParcelScannerPage
   },
+  ,
+  {
+    path: '/homepage/shipping/:id/parcelscannerpage',
+    name: 'parcelscannershipping',
+    component: ParcelScannerPage
+  },
   {
     path: '/homepage/staff/:id/dashboardpage',
     name: 'dashboard',
