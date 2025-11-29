@@ -451,7 +451,7 @@ const toggleComfirmPasswordVisibility = () => {
         />
         <AlertPopUp
           v-if="success"
-          :titles="'Register New Account is Successfull.'"
+          :titles="'Register New Account is Successful.'"
           message="Success!!"
           styleType="green"
           operate="success"

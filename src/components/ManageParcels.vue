@@ -868,7 +868,7 @@ const closePopUp = (operate) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="deleteSuccess"
-            :titles="'Delete Parcel to Trash is Successfull.'"
+            :titles="'Delete Parcel to Trash is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -876,7 +876,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="statusSuccess"
-            :titles="'Change Status is Successfull.'"
+            :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -884,7 +884,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="addSuccess"
-            :titles="'Add New Parcel is Successfull.'"
+            :titles="'Add New Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="addSuccessMessage"
@@ -892,7 +892,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Parcel  is Successfull.'"
+            :titles="'Edit Parcel  is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"

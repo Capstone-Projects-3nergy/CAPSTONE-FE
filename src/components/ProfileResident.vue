@@ -26,7 +26,7 @@ const resident = ref({
 })
 
 const saveProfile = () => {
-  alert('Resident profile updated successfully!')
+  alert('Resident profile updated Successfuly!')
 }
 
 const cancelEdit = () => {

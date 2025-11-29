@@ -22,7 +22,7 @@ defineProps({
 })
 const newStatus = ref('')
 const currentStatus = ref('')
-const statusChangedSuccessfully = ref(false)
+const statusChangedSuccessfuly = ref(false)
 
 const form = ref({
   parcelId: '',
@@ -99,7 +99,7 @@ const saveStatusChange = async () => {
     parcelStore.updateParcel(updatedParcel)
     form.value = { ...form.value, ...updatedParcel }
     currentStatus.value = newStatus.value
-    statusChangedSuccessfully.value = true
+    statusChangedSuccessfuly.value = true
     emit('confirmStatusDetail')
   } catch (err) {
     emit('redStatusAlert', err)
@@ -121,7 +121,7 @@ const cancel = () => {
   >
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 sm:p-8">
       <div
-        v-if="statusChangedSuccessfully"
+        v-if="statusChangedSuccessfuly"
         class="flex flex-col items-center justify-center space-y-4 py-6"
       >
         <svg
@@ -139,7 +139,7 @@ const cancel = () => {
           />
         </svg>
         <p class="text-green-700 font-semibold text-center text-lg sm:text-xl">
-          Status updated successfully!
+          Status updated Successfuly!
         </p>
         <ButtonWeb
           label="Close"

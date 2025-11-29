@@ -49,7 +49,7 @@ const closePopUp = (operate) => {
       <div class="fixed top-5 left-5 z-50">
         <AlertPopUp
           v-if="deleteSuccess"
-          :titles="'Add New Parcel is Successfull.'"
+          :titles="'Add New Parcel is Successful.'"
           message="Success!!"
           styleType="green"
           operate="errorSuccessMessage"
