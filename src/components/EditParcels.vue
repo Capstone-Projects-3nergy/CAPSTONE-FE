@@ -829,8 +829,8 @@ function formatDateTime(datetimeStr) {
                 </select>
 
                 <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: PENDING → RECEIVED
-                  → PICKED_UP
+                  * You can only update the status in order: RECEIVED →
+                  PICKED_UP
                 </p>
               </div>
             </div>
