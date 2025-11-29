@@ -67,7 +67,7 @@ const form = ref({
   imageUrl: '',
   status: '',
 
-  receivedAt: 'RECEIVED',
+  receivedAt: '',
   pickedUpAt: '',
   updatedAt: '',
 
@@ -77,6 +77,9 @@ const form = ref({
 })
 
 const statusOptions = computed(() => {
+  if (form.value.status === 'WAITING_FOR_STAFF') {
+    return ['WAITING_FOR_STAFF', 'RECEIVED']
+  }
   if (form.value.status === 'RECEIVED') {
     return ['RECEIVED', 'PICKED_UP']
   }
@@ -829,8 +832,8 @@ function formatDateTime(datetimeStr) {
                 </select>
 
                 <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: RECEIVED →
-                  PICKED_UP
+                  * You can only update the status in order: WAITING_FOR_STAFF →
+                  RECEIVED → PICKED_UP
                 </p>
               </div>
             </div>

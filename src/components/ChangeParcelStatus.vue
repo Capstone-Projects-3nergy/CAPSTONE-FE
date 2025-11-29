@@ -44,7 +44,8 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  if (currentStatus.value === 'PICKED_UP') return ['PICKED_UP']
+  if (currentStatus.value === 'WAITING_FOR_STAFF')
+    return ['WAITING_FOR_STAFF', 'RECEIVED']
   if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
   return ['RECEIVED', 'PICKED_UP']
 })
