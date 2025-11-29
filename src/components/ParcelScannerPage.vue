@@ -695,6 +695,7 @@ onMounted(async () => {
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
         <svg
+          v-if="auth.user.role === 'STAFF'"
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
           width="24"
