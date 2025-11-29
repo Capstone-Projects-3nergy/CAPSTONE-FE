@@ -19,6 +19,7 @@ import ParcelResidentDetail from '@/components/ParcelResidentDetail.vue'
 import ConfirmParcels from '@/components/ConfirmParcels.vue'
 import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 import ParcelTrash from '@/components/ParcelTrash.vue'
+import ParcelScannerPageSender from '@/components/ParcelScannerPageSender.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -100,7 +101,7 @@ const routes = [
   {
     path: '/loginpage/shipping/parcelscannerpage',
     name: 'parcelscannershipping',
-    component: ParcelScannerPage
+    component: ParcelScannerPageSender
   },
   {
     path: '/homepage/staff/:id/dashboardpage',
