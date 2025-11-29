@@ -20,6 +20,7 @@ const showResetPasswordPage = ref(false)
 const incorrect = ref(false)
 const success = ref(false)
 const error = ref(false)
+const notRegisterError = ref(false)
 const loading = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
@@ -28,6 +29,7 @@ const trimmedPassword = computed(() => password.value.trim())
 const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
+  if (operate === 'notRegister') notRegisterError.value = false
 }
 
 onMounted(async () => {
@@ -43,13 +45,18 @@ const loginHomePageWeb = async () => {
       password.value.trim(),
       router
     )
-
     loading.value = false
 
     if (!res) {
       incorrect.value = true
 
       setTimeout(() => (incorrect.value = false), 10000)
+      return
+    }
+    if (res.status === 400) {
+      notRegisterError.value = true
+
+      setTimeout(() => (notRegisterError.value = false), 10000)
       return
     }
     if (res.status === 200 || res.status === 201) {
@@ -77,7 +84,7 @@ const loginHomePageWeb = async () => {
 
         await authManager.logoutAccount(router)
       }
-    } else if ([400, 401, 403].includes(res.status)) {
+    } else if ([401, 403].includes(res.status)) {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 10000)
     } else {
@@ -95,7 +102,7 @@ const loginHomePageWeb = async () => {
     const firebaseCode = err.code || ''
 
     if (
-      [400, 401, 403].includes(status) ||
+      [401, 403].includes(status) ||
       message.includes('invalid') ||
       message.includes('credentials') ||
       [
@@ -266,6 +273,14 @@ const showResetPasswordPageWeb = async function () {
             message="Error!!"
             styleType="red"
             operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="notRegisterError"
+            :titles="'Please register before login.'"
+            message="Error!!"
+            styleType="red"
+            operate="notRegister"
             @closePopUp="closePopUp"
           />
         </div>
