@@ -60,7 +60,6 @@ const isAllFilled = computed(() => {
 })
 
 const form = ref({
-  userId: auth.user?.id || null,
   trackingNumber: '',
   recipientName: '',
   roomNumber: '',
@@ -348,16 +347,15 @@ const saveParcel = async () => {
 
   try {
     const requestBody = {
-      userId: selectedResidentId.value,
       trackingNumber: form.value.trackingNumber,
       recipientName: form.value.recipientName,
       parcelType: form.value.parcelType,
-      senderName: form.value.senderName,
+      senderName: form.value.senderName || '',
       companyId: Number(form.value.companyId)
     }
 
     const savedParcel = await addItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+      `${import.meta.env.VITE_BASE_URL}/api/public/parcels`,
       requestBody,
       router
     )
@@ -369,25 +367,24 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-
+    console.log(savedParcel)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
     selectedResidentId.value = null
     recipientSearch.value = ''
-    form.value = {
+    const form = ref({
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
       parcelType: '',
-      contact: '',
       status: 'received',
       pickupAt: null,
       updateAt: null,
-      senderName: '',
+      senderName: null,
       companyId: '',
       receiveAt: null
-    }
+    })
   } catch (err) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
@@ -396,23 +393,15 @@ const saveParcel = async () => {
 
 onMounted(async () => {
   try {
-    const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/public/parcels`,
-      router
-    )
-    residents.value = res || []
-  } catch (e) {}
-  try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
       headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${auth.user.accessToken}`
+        Accept: 'application/json'
       }
     })
 
     const rawData = res.data
-
+    console.log(rawData)
     let parsedCompanies = []
 
     if (typeof rawData === 'string') {
@@ -439,6 +428,13 @@ onMounted(async () => {
 })
 const showManageParcelPage = async () => {
   router.replace({ name: 'login' })
+}
+const closePopUp = (operate) => {
+  if (operate === 'problem') error.value = false
+  if (operate === 'addSuccessMessage ') addSuccess.value = false
+  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'parcelType') parcelTypeError.value = false
 }
 </script>
 
