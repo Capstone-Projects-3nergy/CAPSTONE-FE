@@ -57,7 +57,6 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
-const notStaff = ref(null)
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -396,11 +395,6 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
-  if (loginManager.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.push({
     name: 'detailparcels',
     params: {
@@ -456,11 +450,6 @@ const deleteParcelPopUp = (parcel) => {
 }
 
 const openStatusPopup = (parcel) => {
-  if (loginManager.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   parcelStatusDetail.value = {
     id: parcel.id,
     parcelStatus: parcel.parcelStatus
@@ -526,9 +515,6 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       editSuccess.value = false
-      break
-    case 'ineligible':
-      notStaff.value = false
       break
   }
 }
@@ -1037,12 +1023,7 @@ const closePopUp = (operate) => {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Room:
                   </span>
-                  <span v-if="loginManager.user.role === 'STAFF'">
-                    {{ p.roomNumber }}
-                  </span>
-                  <span v-else class="text-red-600 font-semibold">
-                    Resident info hidden
-                  </span>
+                  {{ p.roomNumber }}
                 </td>
 
                 <td
@@ -1051,12 +1032,7 @@ const closePopUp = (operate) => {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Email:
                   </span>
-                  <span v-if="loginManager.user.role === 'STAFF'">
-                    {{ p.email }}
-                  </span>
-                  <span v-else class="text-red-600 font-semibold">
-                    Resident info hidden
-                  </span>
+                  {{ p.email }}
                 </td>
 
                 <td class="px-4 py-2 md:py-3 border-b md:border-none">

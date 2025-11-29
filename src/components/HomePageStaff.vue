@@ -723,12 +723,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700"
                       >Room:
                     </span>
-                    <span v-if="loginStore.user.role === 'STAFF'">
-                      {{ p.roomNumber }}
-                    </span>
-                    <span v-else class="text-red-600 font-semibold">
-                      Resident info hidden
-                    </span>
+                    {{ p.roomNumber }}
                   </td>
 
                   <td
@@ -737,12 +732,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700"
                       >Email:
                     </span>
-                    <span v-if="loginStore.user.role === 'STAFF'">
-                      {{ p.email }}
-                    </span>
-                    <span v-else class="text-red-600 font-semibold">
-                      Resident info hidden
-                    </span>
+                    {{ p.email }}
                   </td>
 
                   <td class="px-4 py-2 md:py-3 border-b md:border-none">
