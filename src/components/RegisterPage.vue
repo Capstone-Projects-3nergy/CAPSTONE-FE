@@ -101,11 +101,11 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isFullNameWrong.value = false), 10000)
       return
     }
-    if (!form.password || form.password.length > 14) {
-      isPasswordMax.value = true
-      setTimeout(() => (isPasswordMax.value = false), 10000)
-      return
-    }
+    // if (!form.password || form.password.length > 14) {
+    //   isPasswordMax.value = true
+    //   setTimeout(() => (isPasswordMax.value = false), 10000)
+    //   return
+    // }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
       incorrectemailform.value = true
       setTimeout(() => (incorrectemailform.value = false), 10000)
@@ -1188,7 +1188,6 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedDormId.length > 0 &&
                 trimmedRoomNumber.length > 0
             }"
             :disabled="
@@ -1196,7 +1195,6 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
-              trimmedDormId.length === 0 ||
               isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
