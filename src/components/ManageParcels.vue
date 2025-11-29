@@ -57,6 +57,7 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+const notStaff = ref(null)
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -395,6 +396,11 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
+  if (loginManager.user.role !== 'STAFF') {
+    notStaff.value = true
+    setTimeout(() => (notStaff.value = false), 10000)
+    return
+  }
   router.push({
     name: 'detailparcels',
     params: {
@@ -450,6 +456,11 @@ const deleteParcelPopUp = (parcel) => {
 }
 
 const openStatusPopup = (parcel) => {
+  if (loginManager.user.role !== 'STAFF') {
+    notStaff.value = true
+    setTimeout(() => (notStaff.value = false), 10000)
+    return
+  }
   parcelStatusDetail.value = {
     id: parcel.id,
     parcelStatus: parcel.parcelStatus
@@ -515,6 +526,9 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       editSuccess.value = false
+      break
+    case 'ineligible':
+      notStaff.value = false
       break
   }
 }
