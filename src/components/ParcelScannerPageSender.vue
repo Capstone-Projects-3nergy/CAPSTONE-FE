@@ -627,31 +627,11 @@ const showManageParcelPage = async () => {
                     Recipient <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="recipientSearch"
+                    v-model="form.recipientName"
                     type="text"
-                    placeholder="Enter name/ email / room number"
+                    placeholder="Enter Resident Name"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
-
-                  <ul
-                    v-if="showSuggestions"
-                    class="absolute z-10 mt-1 w-[310px] md:w-[650px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
-                  >
-                    <li
-                      v-for="r in filteredResidents"
-                      :key="r.userId"
-                      @click="selectResident(r)"
-                      class="px-3 py-1 cursor-pointer hover:bg-blue-100"
-                    >
-                      {{ r.fullName }} (Room {{ r.roomNumber }}) — {{ r.email }}
-                    </li>
-                    <li
-                      v-if="filteredResidents.length === 0"
-                      class="px-3 py-1 text-gray-400"
-                    >
-                      No residents found matching your search terms.
-                    </li>
-                  </ul>
                 </div>
                 <div>
                   <label class="block font-semibold mb-1">
@@ -755,11 +735,7 @@ const showManageParcelPage = async () => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Recipient:</span>
-                  <span>{{
-                    selectedResident
-                      ? selectedResident.fullName
-                      : form.recipientName
-                  }}</span>
+                  <span>{{ form.recipientName }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Type:</span>
