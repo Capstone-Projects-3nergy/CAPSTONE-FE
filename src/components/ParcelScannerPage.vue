@@ -1301,9 +1301,17 @@ onMounted(async () => {
                   class="w-auto"
                 />
                 <ButtonWeb
+                  v-if="auth.user.role === 'STAFF'"
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
+                  class="w-auto"
+                />
+                <ButtonWeb
+                  v-if="auth.user.role !== 'STAFF'"
+                  label="Log out"
+                  color="blue"
+                  @click="returnLoginPage"
                   class="w-auto"
                 />
               </div>
