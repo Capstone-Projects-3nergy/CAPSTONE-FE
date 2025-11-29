@@ -41,6 +41,11 @@ const confirmParcelFn = async () => {
     return
   }
 
+  if (res?.parcelId || res?.status === 'WAITING_FOR_STAFF') {
+    parcelManager.updateParcelStatus(parcel.value.id, 'RECEIVED')
+    emit('confirmParcel', true)
+    return
+  }
   if (res?.parcelId || res?.status === 'RECEIVED') {
     parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
     emit('confirmParcel', true)
