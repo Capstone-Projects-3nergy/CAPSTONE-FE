@@ -397,17 +397,44 @@ const saveParcel = async () => {
 onMounted(async () => {
   try {
     const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      `${import.meta.env.VITE_BASE_URL}/api/public/parcels`,
       router
     )
     residents.value = res || []
   } catch (e) {}
-
   try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/api/companies`
-    )
-    companyList.value = Array.isArray(res.data) ? res.data : []
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/companies`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${auth.user.accessToken}`
+      }
+    })
+
+    const rawData = res.data
+
+    let parsedCompanies = []
+
+    if (typeof rawData === 'string') {
+      const companyMatches =
+        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+
+      parsedCompanies = companyMatches.map((str) => {
+        const idMatch = str.match(/"companyId":(\d+)/)
+        const nameMatch = str.match(/"companyName":"(.*?)"/)
+        return {
+          companyId: idMatch ? Number(idMatch[1]) : null,
+          companyName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedCompanies = rawData.map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName
+      }))
+    }
+
+    companyList.value = parsedCompanies
   } catch (err) {}
 })
 const showManageParcelPage = async () => {
@@ -661,7 +688,6 @@ const showManageParcelPage = async () => {
                     class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                   />
                 </div>
-
                 <div>
                   <label class="block font-semibold mb-1">
                     Company <span class="text-red-500">*</span>
