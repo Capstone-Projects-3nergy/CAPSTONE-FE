@@ -21,6 +21,9 @@ const incorrect = ref(false)
 const success = ref(false)
 const error = ref(false)
 const notRegisterError = ref(false)
+const emailRequire = ref(false)
+const passwordRequire = ref(false)
+const emailPasswordRequire = ref(false)
 const loading = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
@@ -30,6 +33,9 @@ const closePopUp = (operate) => {
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'notRegister') notRegisterError.value = false
+  if (operate === 'emailEmpty') emailRequire.value = false
+  if (operate === 'passwordEmpty') passwordRequire.value = false
+  if (operate === 'emailPasswordEmpty') emailPasswordRequire.value = false
 }
 
 onMounted(async () => {
@@ -38,6 +44,28 @@ onMounted(async () => {
 
 const loginHomePageWeb = async () => {
   loading.value = true
+  if (!email.value.trim() && !password.value.trim()) {
+    emailPasswordRequire.value = true
+    setTimeout(() => (emailPasswordRequire.value = false), 10000)
+    loading.value = false
+    return
+  }
+
+  if (!email.value.trim()) {
+    emailRequire.value = true
+    setTimeout(() => (emailRequire.value = false), 10000)
+
+    loading.value = false
+    return
+  }
+
+  if (!password.value.trim()) {
+    passwordRequire.value = true
+    setTimeout(() => (passwordRequire.value = false), 10000)
+
+    loading.value = false
+    return
+  }
 
   try {
     const res = await authManager.loginAccount(
@@ -261,7 +289,7 @@ const showResetPasswordPageWeb = async function () {
         <div class="space-y-2">
           <AlertPopUp
             v-if="incorrect"
-            :titles="'Username or Password is incorrect.'"
+            :titles="'Email or Password is incorrect.'"
             message="Error!!"
             styleType="red"
             operate="incorrect"
@@ -281,6 +309,30 @@ const showResetPasswordPageWeb = async function () {
             message="Error!!"
             styleType="red"
             operate="notRegister"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="emailRequire"
+            :titles="'Please enter your email'"
+            message="Error!!"
+            styleType="red"
+            operate="emailEmpty"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="passwordRequire"
+            :titles="'Please enter your password'"
+            message="Error!!"
+            styleType="red"
+            operate="passwordEmpty"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="emailPasswordRequire"
+            :titles="'Please enter your email and password'"
+            message="Error!!"
+            styleType="red"
+            operate="emailPasswordEmpty"
             @closePopUp="closePopUp"
           />
         </div>
@@ -394,15 +446,11 @@ const showResetPasswordPageWeb = async function () {
             @click="loginHomePageWeb"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
-                trimmedEmail.length === 0 || trimmedPassword.length === 0,
+                isEmailOverLimit,
               'bg-black hover:bg-gray-600 text-white':
-                trimmedEmail.length > 0 && trimmedPassword.length > 0
+                trimmedEmail && trimmedPassword
             }"
-            :disabled="
-              trimmedEmail.length === 0 ||
-              trimmedPassword.length === 0 ||
-              isEmailOverLimit
-            "
+            :disabled="isEmailOverLimit"
           />
         </form>
 
