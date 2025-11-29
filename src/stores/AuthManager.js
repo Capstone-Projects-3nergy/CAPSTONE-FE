@@ -457,10 +457,14 @@ export const useAuthManager = defineStore('authManager', () => {
       throw err
     }
   }
-
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
-      const publicPages = ['login', 'register', 'resetpassword']
+      const publicPages = [
+        'login',
+        'register',
+        'resetpassword',
+        'parcelscannershipping'
+      ]
       if (publicPages.includes(to.name)) return next()
 
       const isLoggedIn = user.value || (await initUser())
@@ -484,6 +488,33 @@ export const useAuthManager = defineStore('authManager', () => {
       next()
     })
   }
+
+  // const useAuthGuard = (router) => {
+  //   router.beforeEach(async (to, from, next) => {
+  //     const publicPages = ['login', 'register', 'resetpassword']
+  //     if (publicPages.includes(to.name)) return next()
+
+  //     const isLoggedIn = user.value || (await initUser())
+  //     if (!isLoggedIn || !user.value?.accessToken)
+  //       return next({ name: 'login' })
+
+  //     const decoded = decodeJWT(user.value.accessToken)
+  //     const now = Math.floor(Date.now() / 1000)
+  //     if (decoded?.exp && decoded.exp < now) {
+  //       const newToken = await refreshToken()
+  //       if (!newToken) return next({ name: 'login' })
+  //     }
+
+  //     if (
+  //       (to.name === 'home' && user.value.role !== 'RESIDENT') ||
+  //       (to.name === 'homestaff' && user.value.role !== 'STAFF')
+  //     ) {
+  //       return next({ name: 'login' })
+  //     }
+
+  //     next()
+  //   })
+  // }
 
   return {
     user,

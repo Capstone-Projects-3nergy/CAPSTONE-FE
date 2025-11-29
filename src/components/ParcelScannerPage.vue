@@ -48,7 +48,6 @@ const companyList = ref([])
 const loginManager = useAuthManager()
 const router = useRouter()
 const error = ref(false)
-const notStaff = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const parcelTypeError = ref(false)
@@ -144,11 +143,6 @@ const videoRef = ref(null)
 const isCameraReady = ref(false)
 
 const showAddParcelPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
@@ -184,11 +178,6 @@ async function extractParcelInfo(imageDataUrl) {
 
 const isCollapsed = ref(false)
 const toggleSidebar = () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   isCollapsed.value = !isCollapsed.value
 }
 
@@ -199,11 +188,6 @@ function deleteSaveInformation(index) {
 const deletePreview = () => (previewUrl.value = null)
 
 const showDashBoardPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
@@ -348,14 +332,10 @@ function stopScan() {
 }
 
 const showHomePageStaffWeb = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
+
 const saveParcel = async () => {
   if (!selectedResidentId.value) {
     error.value = true
@@ -364,7 +344,6 @@ const saveParcel = async () => {
   }
 
   form.value.userId = auth.user.id
-
   if (!form.value.trackingNumber) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -380,6 +359,7 @@ const saveParcel = async () => {
     setTimeout(() => (parcelTypeErrorRequired.value = false), 10000)
     return
   }
+
   if (!form.value.companyId) {
     companyIdError.value = true
     setTimeout(() => (companyIdError.value = false), 10000)
@@ -412,22 +392,11 @@ const saveParcel = async () => {
       companyId: Number(form.value.companyId)
     }
 
-    // ⭐ เพิ่มเงื่อนไข role เพื่อเลือก API
-    let apiPath = ''
-
-    if (auth.user.role === 'STAFF') {
-      apiPath = `${import.meta.env.VITE_BASE_URL}/api/parcels/add`
-    } else if (auth.user.role === 'SHIPPING') {
-      apiPath = `${import.meta.env.VITE_BASE_URL}/api/parcels/add-shipping`
-      // แก้เป็น path ที่คุณต้องการ เช่น
-      // /api/shipping/parcels/add หรืออะไรก็ได้
-    } else {
-      error.value = true
-      setTimeout(() => (error.value = false), 10000)
-      return
-    }
-
-    const savedParcel = await addItem(apiPath, requestBody, router)
+    const savedParcel = await addItem(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+      requestBody,
+      router
+    )
 
     if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
       error.value = true
@@ -460,100 +429,20 @@ const saveParcel = async () => {
     setTimeout(() => (error.value = false), 10000)
   }
 }
-
-// const saveParcel = async () => {
-//   if (!selectedResidentId.value) {
-//     error.value = true
-//     setTimeout(() => (error.value = false), 10000)
-//     return
-//   }
-
-//   form.value.userId = auth.user.id
-//   if (!form.value.trackingNumber) {
-//     trackingNumberError.value = true
-//     setTimeout(() => (trackingNumberError.value = false), 10000)
-//     return
-//   }
-//   if (!form.value.recipientName) {
-//     recipientNameError.value = true
-//     setTimeout(() => (recipientNameError.value = false), 10000)
-//     return
-//   }
-//   if (!form.value.parcelType) {
-//     parcelTypeErrorRequired.value = true
-//     setTimeout(() => (parcelTypeErrorRequired.value = false), 10000)
-//     return
-//   }
-
-//   if (!form.value.companyId) {
-//     companyIdError.value = true
-//     setTimeout(() => (companyIdError.value = false), 10000)
-//     return
-//   }
-
-//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
-//     parcelTypeError.value = true
-//     setTimeout(() => (parcelTypeError.value = false), 10000)
-//     return
-//   }
-//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
-//     SenderNameError.value = true
-//     setTimeout(() => (SenderNameError.value = false), 10000)
-//     return
-//   }
-//   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
-//     trackingNumberError.value = true
-//     setTimeout(() => (trackingNumberError.value = false), 10000)
-//     return
-//   }
-
-//   try {
-//     const requestBody = {
-//       userId: selectedResidentId.value,
-//       trackingNumber: form.value.trackingNumber,
-//       recipientName: form.value.recipientName,
-//       parcelType: form.value.parcelType,
-//       senderName: form.value.senderName,
-//       companyId: Number(form.value.companyId)
-//     }
-
-//     const savedParcel = await addItem(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
-//       requestBody,
-//       router
-//     )
-
-//     if (!savedParcel || savedParcel === 400 || savedParcel === 500) {
-//       error.value = true
-//       setTimeout(() => (error.value = false), 10000)
-//       return
-//     }
-
-//     parcelManager.addParcel(savedParcel)
-
-//     addSuccess.value = true
-//     setTimeout(() => (addSuccess.value = false), 10000)
-
-//     selectedResidentId.value = null
-//     recipientSearch.value = ''
-//     form.value = {
-//       trackingNumber: '',
-//       recipientName: '',
-//       roomNumber: '',
-//       parcelType: '',
-//       contact: '',
-//       status: 'received',
-//       pickupAt: null,
-//       updateAt: null,
-//       senderName: '',
-//       companyId: '',
-//       receiveAt: null
-//     }
-//   } catch (err) {
-//     error.value = true
-//     setTimeout(() => (error.value = false), 10000)
-//   }
-// }
+const isAllEmpty = computed(() => {
+  return (
+    !form.value.trackingNumber &&
+    !form.value.recipientName &&
+    !form.value.roomNumber &&
+    !form.value.parcelType &&
+    !form.value.contact &&
+    !form.value.senderName &&
+    !form.value.companyId &&
+    !form.value.receiveAt &&
+    !form.value.pickupAt &&
+    !form.value.updateAt
+  )
+})
 const emit = defineEmits(['scan-success', 'scan-error'])
 
 const closePopUp = (operate) => {
@@ -562,7 +451,6 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
-  if (operate === 'ineligible') notStaff.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -570,61 +458,41 @@ function cancelParcel() {
   )
 }
 
+const greenPopup = reactive({ add: { state: false } })
+const redPopup = reactive({ add: { state: false } })
+
+function closeGreenPopup() {
+  greenPopup.add.state = false
+}
+function closeRedPopup() {
+  redPopup.add.state = false
+}
+
 const showManageParcelPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
 
 const ShowManageAnnouncementPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
 
 const ShowManageResidentPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
 
 const returnLoginPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
 const returnHomepage = () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   showLogoutConfirm.value = false
 }
 
 const showProfileStaffPage = async () => {
-  if (auth.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
@@ -695,7 +563,6 @@ onMounted(async () => {
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
         <svg
-          v-if="auth.user?.role === 'STAFF'"
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
           width="24"
@@ -942,14 +809,8 @@ onMounted(async () => {
               fill="#185DC0"
             />
           </svg>
-          <span v-if="auth.user?.role === 'STAFF'" class="flex">
-            <h2 class="text-2xl font-bold text-[#185dc0]">
-              Manage Parcels > Add
-            </h2>
-          </span>
-          <span v-if="auth.user?.role === 'SHIPPING'" class="flex">
-            <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
-          </span>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
+          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Add</h2>
         </div>
 
         <div
@@ -958,7 +819,7 @@ onMounted(async () => {
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="addSuccess"
-              :titles="'Add New Parcel is Successful.'"
+              :titles="'Add New Parcel is Successfull.'"
               message="Success!!"
               styleType="green"
               operate="addSuccessMessage"
@@ -1039,14 +900,6 @@ onMounted(async () => {
               operate="companyId"
               @closePopUp="closePopUp('companyId')"
             />
-            <AlertPopUp
-              v-if="notStaff"
-              :titles="'The sender does not have permission to access this action'"
-              message="Error!!"
-              styleType="red"
-              operate="ineligible"
-              @closePopUp="closePopUp"
-            />
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -1112,7 +965,7 @@ onMounted(async () => {
                   />
                 </div>
 
-                <div v-if="auth.user?.role === 'STAFF'">
+                <div>
                   <label class="block font-semibold mb-1">
                     Recipient <span class="text-red-500">*</span>
                   </label>
@@ -1125,7 +978,7 @@ onMounted(async () => {
 
                   <ul
                     v-if="showSuggestions"
-                    class="absolute z-10 mt-1 w-[310px] md:w-[510px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                    class="absolute z-10 mt-1 w-[310px] md:w-[650px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
                   >
                     <li
                       v-for="r in filteredResidents"
@@ -1144,7 +997,7 @@ onMounted(async () => {
                   </ul>
                 </div>
 
-                <div v-if="auth.user?.role === 'STAFF'">
+                <div>
                   <label class="block font-semibold mb-1"
                     >Room Number <span class="text-red-500">*</span></label
                   >
@@ -1307,17 +1160,9 @@ onMounted(async () => {
                   class="w-auto"
                 />
                 <ButtonWeb
-                  v-if="auth.user?.role === 'STAFF'"
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="w-auto"
-                />
-                <ButtonWeb
-                  v-if="auth.user?.role !== 'STAFF'"
-                  label="Log out"
-                  color="blue"
-                  @click="returnLoginPage"
                   class="w-auto"
                 />
               </div>

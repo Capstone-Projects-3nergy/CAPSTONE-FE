@@ -4,11 +4,11 @@ import { useAuthManager } from '@/stores/AuthManager'
 
 const authStore = useAuthManager()
 
-const userName = computed(() => authStore.user?.fullName || 'Guest')
+const userName = computed(() => authStore.user?.fullName || 'Parcel Sender')
 
 const userRole = computed(() => {
   const role = authStore.user?.role
-  if (!role) return 'Unknown'
+  if (!role) return ''
   switch (role.toUpperCase()) {
     case 'STAFF':
       return 'Dormitory Staff'
