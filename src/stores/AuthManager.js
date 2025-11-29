@@ -153,7 +153,6 @@ export const useAuthManager = defineStore('authManager', () => {
       isLoading.value = false
     }
   }
-
   const loginAccount = async (email, password, router) => {
     isLoading.value = true
     errorMessage.value = ''
@@ -162,10 +161,38 @@ export const useAuthManager = defineStore('authManager', () => {
     status.value = null
 
     try {
-      if (!email || !password)
-        throw new Error('Email and password are required')
+      if (!email || !password) {
+        throw {
+          response: {
+            status: 400,
+            data: { message: 'Email and password are required' }
+          }
+        }
+      }
 
-      const cred = await signInWithEmailAndPassword(auth, email, password)
+      let cred
+      try {
+        cred = await signInWithEmailAndPassword(auth, email, password)
+      } catch (firebaseErr) {
+        const firebaseCodes = [
+          'auth/invalid-credential',
+          'auth/wrong-password',
+          'auth/user-not-found',
+          'auth/invalid-email'
+        ]
+
+        if (firebaseCodes.includes(firebaseErr.code)) {
+          throw {
+            response: {
+              status: 400,
+              data: { message: 'Invalid email or password.' }
+            }
+          }
+        }
+
+        throw firebaseErr
+      }
+
       const idToken = await cred.user.getIdToken()
       const baseURL = import.meta.env.VITE_BASE_URL
 
@@ -176,8 +203,17 @@ export const useAuthManager = defineStore('authManager', () => {
       )
 
       const data = res.data
-      if (!data?.userId || !data?.role)
-        throw new Error('Backend verification failed: missing userId/role')
+
+      if (!data?.userId || !data?.role) {
+        throw {
+          response: {
+            status: 500,
+            data: {
+              message: 'Backend verification failed: missing userId/role'
+            }
+          }
+        }
+      }
 
       const fullName = `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim()
       user.value = {
@@ -218,15 +254,19 @@ export const useAuthManager = defineStore('authManager', () => {
         errorMessage.value =
           err.response.data?.message || err.message || 'Login failed.'
       } else if (err.request) {
-        status.value = null
+        status.value = 500
         errorMessage.value = 'Network error. Please check your connection.'
       } else {
-        status.value = null
+        status.value = 500
         errorMessage.value = err.message || 'Login failed.'
       }
 
       user.value = null
-      return { status: status.value, error: errorMessage.value }
+
+      return {
+        status: status.value,
+        error: errorMessage.value
+      }
     } finally {
       isLoading.value = false
     }

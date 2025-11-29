@@ -740,12 +740,13 @@ const toggleSortDate = () => {
             <button
               @click="prevPage"
               :disabled="currentPage === 1"
-              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
             >
               &lt; Previous
             </button>
 
             <button
+              class="cursor-pointer"
               v-for="page in visiblePages"
               :key="page + Math.random()"
               @click="goToPage(page)"
@@ -764,7 +765,7 @@ const toggleSortDate = () => {
             <button
               @click="nextPage"
               :disabled="currentPage === totalPages"
-              class="px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
             >
               Next &gt;
             </button>

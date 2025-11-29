@@ -101,11 +101,11 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isFullNameWrong.value = false), 10000)
       return
     }
-    if (!form.password || form.password.length > 14) {
-      isPasswordMax.value = true
-      setTimeout(() => (isPasswordMax.value = false), 10000)
-      return
-    }
+    // if (!form.password || form.password.length > 20) {
+    //   isPasswordMax.value = true
+    //   setTimeout(() => (isPasswordMax.value = false), 10000)
+    //   return
+    // }
     if (!form.email || !form.email.endsWith('@gmail.com')) {
       incorrectemailform.value = true
       setTimeout(() => (incorrectemailform.value = false), 10000)
@@ -187,9 +187,9 @@ const submitForm = async (roleType) => {
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
   const MAX_EMAIL_LENGTH = 30
-  const MAX_PASSWORD_LENGTH = 14
+  const MAX_PASSWORD_LENGTH = 20
   const MAX_STAFFPOSITION_LENGTH = 30
-  const MAX_ROMNUMBER_LENGTH = 11
+  const MAX_ROMNUMBER_LENGTH = 20
   const MIN_PASSWORD_LENGTH = 6
   const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
@@ -443,7 +443,7 @@ const toggleComfirmPasswordVisibility = () => {
 
         <AlertPopUp
           v-if="isPasswordMax"
-          titles="Limit password to 14 characters or less."
+          titles="Limit password to 20 characters or less."
           message="Error!!"
           styleType="red"
           operate="password"
@@ -622,7 +622,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit Room Number Max is 11.
+                    Limit Room Number Max is 20.
                   </div>
                 </div>
               </div>
@@ -1188,7 +1188,6 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedDormId.length > 0 &&
                 trimmedRoomNumber.length > 0
             }"
             :disabled="
@@ -1196,7 +1195,6 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
-              trimmedDormId.length === 0 ||
               isRoomNumberOverLimit ||
               isNameOverLimit ||
               isEmailOverLimit ||
@@ -1216,12 +1214,10 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
-                trimmedStaffPosition.length === 0 ||
                 trimmedConfirmPassword.length === 0,
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
-                trimmedStaffPosition.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0
             }"
@@ -1229,7 +1225,6 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
-              trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
