@@ -101,7 +101,7 @@ const submitForm = async (roleType) => {
       setTimeout(() => (isFullNameWrong.value = false), 10000)
       return
     }
-    // if (!form.password || form.password.length > 14) {
+    // if (!form.password || form.password.length > 20) {
     //   isPasswordMax.value = true
     //   setTimeout(() => (isPasswordMax.value = false), 10000)
     //   return
@@ -187,9 +187,9 @@ const submitForm = async (roleType) => {
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
   const MAX_EMAIL_LENGTH = 30
-  const MAX_PASSWORD_LENGTH = 14
+  const MAX_PASSWORD_LENGTH = 20
   const MAX_STAFFPOSITION_LENGTH = 30
-  const MAX_ROMNUMBER_LENGTH = 11
+  const MAX_ROMNUMBER_LENGTH = 20
   const MIN_PASSWORD_LENGTH = 6
   const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
@@ -443,7 +443,7 @@ const toggleComfirmPasswordVisibility = () => {
 
         <AlertPopUp
           v-if="isPasswordMax"
-          titles="Limit password to 14 characters or less."
+          titles="Limit password to 20 characters or less."
           message="Error!!"
           styleType="red"
           operate="password"
@@ -622,7 +622,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Limit Room Number Max is 11.
+                    Limit Room Number Max is 20.
                   </div>
                 </div>
               </div>
