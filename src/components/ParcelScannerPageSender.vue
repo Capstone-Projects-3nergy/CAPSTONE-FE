@@ -27,8 +27,6 @@ const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 
-const auth = useAuthManager() // ใช้แค่ข้อมูลผู้ใช้แบบ public
-
 const companyList = ref([])
 const router = useRouter()
 const error = ref(false)
@@ -64,7 +62,7 @@ const form = ref({
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  status: 'received',
+  status: 'waiting for staff',
   pickupAt: null,
   updateAt: null,
   senderName: null,
@@ -77,7 +75,7 @@ const recipientSearch = ref('')
 const selectedResidentId = ref(null)
 function cancelParcel() {
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Received' : '')
+    (key) => (form.value[key] = key === 'status' ? 'Waiting for staff' : '')
   )
 }
 const selectedResident = computed(
@@ -252,7 +250,17 @@ function startQuagga() {
 
       scanResult.value = detectedCode
       form.value.trackingNumber = detectedCode
-      form.value.parcelType = 'Format: Barcode'
+
+      // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
+      if (detectedCode.startsWith('B')) {
+        // ตัวอย่าง logic
+        form.value.parcelType = 'BOX'
+      } else if (detectedCode.startsWith('D')) {
+        form.value.parcelType = 'DOCUMENT'
+      } else {
+        form.value.parcelType = 'ELECTRONIC'
+      }
+
       stopQuagga()
     }
   })
@@ -300,14 +308,6 @@ function stopScan() {
 }
 
 const saveParcel = async () => {
-  if (!selectedResidentId.value) {
-    error.value = true
-    setTimeout(() => (error.value = false), 10000)
-    return
-  }
-
-  form.value.userId = auth.user?.id || null
-
   if (!form.value.trackingNumber) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -329,11 +329,6 @@ const saveParcel = async () => {
     return
   }
 
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
-    parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 10000)
-    return
-  }
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName || '')) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -367,25 +362,24 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-    console.log(savedParcel)
+    console.log('✅ savedParcel', savedParcel)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
-    selectedResidentId.value = null
-    recipientSearch.value = ''
-    const form = ref({
+    form.value = {
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
       parcelType: '',
-      status: 'received',
+      status: 'waiting for staff',
       pickupAt: null,
       updateAt: null,
       senderName: null,
       companyId: '',
       receiveAt: null
-    })
+    }
   } catch (err) {
+    console.error('❌ saveParcel error', err)
     error.value = true
     setTimeout(() => (error.value = false), 10000)
   }
