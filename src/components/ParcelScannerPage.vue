@@ -695,7 +695,7 @@ onMounted(async () => {
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
         <svg
-          v-if="auth.user.role === 'STAFF'"
+          v-if="auth.user?.role === 'STAFF'"
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
           width="24"
@@ -942,12 +942,12 @@ onMounted(async () => {
               fill="#185DC0"
             />
           </svg>
-          <span v-if="auth.user.role === 'STAFF'" class="flex">
+          <span v-if="auth.user?.role === 'STAFF'" class="flex">
             <h2 class="text-2xl font-bold text-[#185dc0]">
               Manage Parcels > Add
             </h2>
           </span>
-          <span v-if="auth.user.role === 'SHIPPING'" class="flex">
+          <span v-if="auth.user?.role === 'SHIPPING'" class="flex">
             <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
           </span>
         </div>
@@ -1112,7 +1112,7 @@ onMounted(async () => {
                   />
                 </div>
 
-                <div>
+                <div v-if="auth.user?.role === 'STAFF'">
                   <label class="block font-semibold mb-1">
                     Recipient <span class="text-red-500">*</span>
                   </label>
@@ -1144,7 +1144,7 @@ onMounted(async () => {
                   </ul>
                 </div>
 
-                <div>
+                <div v-if="auth.user?.role === 'STAFF'">
                   <label class="block font-semibold mb-1"
                     >Room Number <span class="text-red-500">*</span></label
                   >
@@ -1307,14 +1307,14 @@ onMounted(async () => {
                   class="w-auto"
                 />
                 <ButtonWeb
-                  v-if="auth.user.role === 'STAFF'"
+                  v-if="auth.user?.role === 'STAFF'"
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
                   class="w-auto"
                 />
                 <ButtonWeb
-                  v-if="auth.user.role !== 'STAFF'"
+                  v-if="auth.user?.role !== 'STAFF'"
                   label="Log out"
                   color="blue"
                   @click="returnLoginPage"
