@@ -942,8 +942,14 @@ onMounted(async () => {
               fill="#185DC0"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Add</h2>
+          <span v-if="auth.user.role === 'STAFF'" class="flex">
+            <h2 class="text-2xl font-bold text-[#185dc0]">
+              Manage Parcels > Add
+            </h2>
+          </span>
+          <span v-if="auth.user.role === 'SHIPPING'" class="flex">
+            <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
+          </span>
         </div>
 
         <div
