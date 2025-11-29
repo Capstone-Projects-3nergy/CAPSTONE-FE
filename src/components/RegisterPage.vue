@@ -1214,12 +1214,10 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
-                trimmedStaffPosition.length === 0 ||
                 trimmedConfirmPassword.length === 0,
               'bg-black hover:bg-gray-600 text-white':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
-                trimmedStaffPosition.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0
             }"
@@ -1227,7 +1225,6 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedFullName.length === 0 ||
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
-              trimmedStaffPosition.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               isNameOverLimit ||
               isEmailOverLimit ||
