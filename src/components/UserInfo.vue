@@ -4,7 +4,7 @@ import { useAuthManager } from '@/stores/AuthManager'
 
 const authStore = useAuthManager()
 
-const userName = computed(() => authStore.user?.fullName || 'Parcel Sender')
+const userName = computed(() => authStore.user?.fullName || 'Shipping')
 
 const userRole = computed(() => {
   const role = authStore.user?.role
