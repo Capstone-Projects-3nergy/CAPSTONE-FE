@@ -14,8 +14,10 @@ const userRole = computed(() => {
       return 'Dormitory Staff'
     case 'RESIDENT':
       return 'Resident'
-    default:
+    case 'SHIPPING':
       return 'Parcel Sender'
+    default:
+      return 'User'
   }
 })
 </script>
