@@ -69,7 +69,7 @@ const mapParcelData = (data) => ({
 
 const getParcelDetail = async (tid) => {
   if (!tid) return
-
+  console.log('🧾 Detail page for parcelId =', tid)
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
