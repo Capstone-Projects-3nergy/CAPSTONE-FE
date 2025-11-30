@@ -154,7 +154,8 @@ const cancel = () => {
         <h3 class="font-bold text-xl mb-4 text-gray-800">Change Status</h3>
 
         <p v-if="!isPickUp" class="text-sm text-red-600 mb-2">
-          * You can only update the status in order: -> RECEIVED → PICKED_UP
+          * You can only update the status in order: Waiting for Staff →
+          Received → Picked Up
         </p>
 
         <p v-if="isPickUp" class="text-sm text-red-600 mb-4">
