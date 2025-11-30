@@ -15,6 +15,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import {
+  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -829,6 +830,7 @@ function formatDateTime(datetimeStr) {
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
+
               <div>
                 <label class="block font-semibold mb-1">Room Number</label>
                 <input
