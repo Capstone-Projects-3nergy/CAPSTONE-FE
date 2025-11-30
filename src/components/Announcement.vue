@@ -264,9 +264,7 @@ onMounted(async () => {
         </aside>
       </button>
 
-      <!-- Main Content -->
       <main class="flex-1 p-9 overflow-y-auto">
-        <!-- Announcement Section -->
         <section>
           <h2
             class="text-xl font-bold flex items-center gap-2 mb-4 text-[#185dc0]"

@@ -677,15 +677,6 @@ const closePopUp = (operate) => {
               </div>
 
               <div class="flex justify-end space-x-3 mt-3">
-                <div class="flex-1 flex justify-start md:justify-end">
-                  <ButtonWeb
-                    label="Reset"
-                    color="red"
-                    @click="cancelParcel"
-                    class="w-auto"
-                  />
-                </div>
-
                 <ButtonWeb
                   label="Save"
                   color="green"
@@ -697,11 +688,10 @@ const closePopUp = (operate) => {
                   :disabled="isAllFilled"
                   class="block md:hidden"
                 />
-
                 <ButtonWeb
-                  label="Back"
-                  color="gray"
-                  @click="showManageParcelPage"
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
                   class="block md:hidden"
                 />
               </div>
@@ -760,9 +750,9 @@ const closePopUp = (operate) => {
                   class="w-auto"
                 />
                 <ButtonWeb
-                  label="Back"
-                  color="gray"
-                  @click="showManageParcelPage"
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
                   class="w-auto"
                 />
               </div>
