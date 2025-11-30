@@ -161,6 +161,7 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
+    console.log(data)
   }
 
   try {

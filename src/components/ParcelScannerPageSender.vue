@@ -703,7 +703,7 @@ const closePopUp = (operate) => {
                 <ButtonWeb
                   label="Back"
                   color="gray"
-                  @click="showLogoutConfirm"
+                  @click="showManageParcelPage"
                   class="block md:hidden"
                 />
               </div>
