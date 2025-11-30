@@ -52,6 +52,7 @@ const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const recipientNameError = ref(false)
+const selectName = ref(false)
 const parcelTypeError = ref(false)
 const trackingNumberError = ref(false)
 const showLogoutConfirm = ref(false)
@@ -248,12 +249,11 @@ const filteredResidents = computed(() => {
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
-  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
-    roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 10000)
+  if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
+    selectName.value = true
+    setTimeout(() => (selectName.value = false), 10000)
     return
   }
-
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -265,11 +265,6 @@ const saveEditParcel = async () => {
     return
   }
 
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
-    parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 10000)
-    return
-  }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -407,6 +402,7 @@ const closePopUp = (operate) => {
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
+  if (operate === 'select') selectName.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -728,6 +724,14 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="parcelType "
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="selectName"
+            :titles="'Please Select Resident Name'"
+            message="Error!!"
+            styleType="red"
+            operate="selectName"
             @closePopUp="closePopUp"
           />
         </div>
