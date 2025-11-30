@@ -463,9 +463,7 @@ const closePopUp = (operate) => {
               fill="#185DC0"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">
-            Add Parcels for Shipping
-          </h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Add Parcel</h2>
         </div>
 
         <div
