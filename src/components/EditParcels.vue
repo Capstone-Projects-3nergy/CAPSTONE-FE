@@ -141,6 +141,7 @@ const selectResident = (resident) => {
     `${resident.firstName || ''} ${resident.lastName || ''}`.trim()
 
   form.value.userId = resident.userId
+  form.value.residentName = name
   form.value.roomNumber = resident.roomNumber
   form.value.email = resident.email
   recipientSearch.value = name
