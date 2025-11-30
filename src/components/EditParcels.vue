@@ -144,8 +144,10 @@ const selectResident = (resident) => {
   form.value.residentName = name
   form.value.roomNumber = resident.roomNumber
   form.value.email = resident.email
-  recipientSearch.value = name
+
+  recipientSearch.value = ''
 }
+
 const loadResidents = async () => {
   try {
     const res = await getItems(
@@ -809,18 +811,20 @@ function formatDateTime(datetimeStr) {
               />
 
               <ul
-                v-if="recipientSearch && filteredResidents.length"
+                v-if="recipientSearch"
                 class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
               >
                 <li
                   v-for="r in filteredResidents"
                   :key="r.userId"
                   class="px-2 py-1 cursor-pointer hover:bg-blue-100"
+                  v-if="filteredResidents.length > 0"
                   @click="selectResident(r)"
                 >
                   {{ r.fullName || r.firstName + ' ' + r.lastName }}
                   (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
                 </li>
+
                 <li
                   v-if="filteredResidents.length === 0"
                   class="px-3 py-1 text-gray-400"
