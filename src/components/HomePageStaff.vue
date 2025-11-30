@@ -161,8 +161,8 @@ onMounted(async () => {
 })
 const mapStatus = (status) => {
   switch (status) {
-    case 'PENDING':
-      return 'Pending'
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -742,7 +742,7 @@ const toggleSortDate = () => {
                     <span
                       class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                       :class="{
-                        'bg-yellow-400': p.status === 'Pending',
+                        'bg-yellow-400': p.status === 'Waiting for Staff',
                         'bg-green-400': p.status === 'Picked Up',
                         'bg-blue-400': p.status === 'Received'
                       }"

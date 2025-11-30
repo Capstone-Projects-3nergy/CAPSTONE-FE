@@ -119,7 +119,7 @@ watch(recipientSearch, (val) => {
 const mapStatus = (status) => {
   switch (status) {
     case 'WAITING_FOR_STAFF':
-      return 'waiting for staff'
+       return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -1043,7 +1043,7 @@ const closePopUp = (operate) => {
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white cursor-pointer"
                     :class="{
-                      'bg-yellow-400': p.status === 'waiting for staff',
+                      'bg-yellow-400': p.status === 'Waiting for Staff',
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"

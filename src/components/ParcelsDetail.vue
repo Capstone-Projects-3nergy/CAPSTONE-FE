@@ -83,7 +83,7 @@ const getParcelDetail = async (tid) => {
       tid,
       router
     )
-
+    console.log(data)
     if (data) {
       const mapped = mapParcelData(data)
       parcel.value = mapped
