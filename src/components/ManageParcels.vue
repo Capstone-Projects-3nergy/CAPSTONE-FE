@@ -119,7 +119,7 @@ watch(recipientSearch, (val) => {
 const mapStatus = (status) => {
   switch (status) {
     case 'WAITING_FOR_STAFF':
-       return 'Waiting for Staff'
+      return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
