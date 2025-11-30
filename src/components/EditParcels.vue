@@ -797,7 +797,9 @@ function formatDateTime(datetimeStr) {
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
             <div class="mb-4">
-              <label class="block font-semibold mb-1">Resident Name</label>
+              <label class="block font-semibold mb-1"
+                >Search Resident Name</label
+              >
               <input
                 type="text"
                 v-model="recipientSearch"
