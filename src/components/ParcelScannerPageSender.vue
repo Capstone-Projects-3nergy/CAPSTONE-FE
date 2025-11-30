@@ -362,7 +362,6 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-    console.log('✅ savedParcel', savedParcel)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
@@ -379,7 +378,6 @@ const saveParcel = async () => {
       receiveAt: null
     }
   } catch (err) {
-    console.error('❌ saveParcel error', err)
     error.value = true
     setTimeout(() => (error.value = false), 10000)
   }
@@ -395,7 +393,6 @@ onMounted(async () => {
     })
 
     const rawData = res.data
-    console.log(rawData)
     let parsedCompanies = []
 
     if (typeof rawData === 'string') {

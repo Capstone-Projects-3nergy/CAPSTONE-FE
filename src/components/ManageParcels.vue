@@ -161,7 +161,6 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
-    console.log(data)
   }
 
   try {
@@ -396,7 +395,6 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
-  console.log('📦 Go to detail, parcelId =', id)
   router.push({
     name: 'detailparcels',
     params: {

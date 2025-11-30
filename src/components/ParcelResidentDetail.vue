@@ -48,6 +48,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const showHomePageResident = ref(false)
 const isCollapsed = ref(false)
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
@@ -147,7 +148,10 @@ const showConfirmComplete = () => {
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
-
+const showHomePageResidentWeb = async function () {
+  router.replace({ name: 'home' })
+  showHomePageResident.value = true
+}
 const openRedPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)
@@ -202,8 +206,8 @@ const closePopUp = (operate) => {
     case 'deleteSuccessMessage':
       deleteSuccess.value = false
       break
-    case 'addSuccessMessage':
-      addSuccess.value = false
+    case ' confirmSuccessMessage':
+      confirmSuccess.value = false
       break
     case 'editSuccessMessage':
       editSuccess.value = false
@@ -316,7 +320,7 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+            <SidebarItem title="Home" @click="showHomePageResidentWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -352,27 +356,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-
-            <SidebarItem
-              title=" Manage Parcel"
-              class="bg-[#81AFEA] cursor-default"
-            >
+            <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
               <template #icon>
                 <svg
                   width="25"
@@ -389,24 +373,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents (Next Release)">
-              <template #icon>
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -423,7 +390,6 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
           </nav>
-
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -467,7 +433,7 @@ const closePopUp = (operate) => {
             :titles="'Confirm Parcel is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="confirmSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp

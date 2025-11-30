@@ -74,7 +74,6 @@ const loginHomePageWeb = async () => {
       router
     )
     loading.value = false
-    console.log(res.status)
     if (!res) {
       incorrect.value = true
 

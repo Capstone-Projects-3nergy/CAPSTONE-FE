@@ -15,23 +15,19 @@ const isEmailDuplicate = ref(false)
 const isPasswordWeak = ref(false)
 const success = ref(false)
 const email = ref('')
-// --- ปิด popup ด้วยมือ ---
-// --- ปิด popup ด้วยมือ ---
+
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'success ') success.value = false
-  // if (operate === 'email ') isEmailDuplicate.value = false
+
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
-  // if (operate === 'fullname') isFullNameWeak.value = false
-  // if (operate === 'dorm') isNoDorm.value = false
+
   if (operate === 'notmatch') isNotMatch.value = false
-  // if (operate === 'notroomrequired') isRoomRequired.value = false
-  // if (operate === 'notpositionrequired') isPositionRequired.value = false
+
   if (operate === 'emailform') incorrectemailform.value = false
-  // if (operate === 'notnumber') roomidnotnumber.value = false
 }
-// --- ส่งลิงก์รีเซ็ตรหัสผ่าน ---
+
 const sendResetEmail = async () => {
   if (!trimmedEmail.value || !/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
     isEmailInvalid.value = true
@@ -46,7 +42,6 @@ const sendResetEmail = async () => {
       error.value = true
     }
   } catch (err) {
-    console.error('❌ Reset password error:', err)
     error.value = true
   }
 }
@@ -66,7 +61,7 @@ const isConfirmPasswordOverLimit = ref(false)
 const isStaffIdOverLimit = ref(false)
 const isNameOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
-// ใช้ computed สำหรับ trim ค่าอัตโนมัติ
+
 const trimmedFullName = computed(() => form.fullName.trim())
 const trimmedEmail = computed(() => form.email.trim())
 const trimmedPassword = computed(() => form.password.trim())
@@ -74,9 +69,6 @@ const trimmedStaffID = computed(() => form.staffId.trim())
 const trimmedConfirmPassword = computed(() => form.confirmPassword.trim())
 const trimmedStaffPosition = computed(() => form.position.trim())
 
-// function submitForm() {
-//   alert(`Account created for ${userType.value.toUpperCase()} ✅`)
-// }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
   returnLogin.value = true
@@ -88,7 +80,6 @@ const toggleComfirmPasswordVisibility = () => {
   isComfirmPasswordVisible.value = !isComfirmPasswordVisible.value
 }
 
-// ฟังก์ชันรวมสำหรับตรวจความยาว input
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 30
   const MAX_EMAIL_LENGTH = 30
@@ -171,7 +162,6 @@ const checkInputLength = (field) => {
     <div
       class="flex bg-white rounded-2xl shadow-2xl overflow-hidden w-[900px] max-w-full"
     >
-      <!-- Left Side -->
       <div
         class="w-1/2 bg-gradient-to-b from-[#0047B1] to-[#7BB8FF] text-white flex flex-col p-8 pt-50"
       >
@@ -214,7 +204,6 @@ const checkInputLength = (field) => {
         </div>
       </div>
 
-      <!-- Right Side (Form) -->
       <div class="w-1/2 p-10 flex flex-col justify-center">
         <div class="flex items-center gap-2 mb-2">
           <svg
@@ -262,7 +251,6 @@ const checkInputLength = (field) => {
         <p class="text-[#8C8F91] text-sm mb-6">
           Enter your email and new password below to reset your password.
         </p>
-        <!-- ✅ Popups อยู่ด้านบน -->
 
         <AlertPopUp
           v-if="error"
@@ -297,7 +285,6 @@ const checkInputLength = (field) => {
           @closePopUp="closePopUp"
         />
 
-        <!-- Email Input with icon -->
         <form @submit.prevent="submitReset" class="space-y-4">
           <div class="relative">
             <span
@@ -491,7 +478,6 @@ const checkInputLength = (field) => {
               </div>
             </div>
           </div>
-          <!-- Submit Button with hover animation -->
           <button
             type="submit"
             @click="sendResetEmail"
