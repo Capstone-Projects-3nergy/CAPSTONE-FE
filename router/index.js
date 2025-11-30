@@ -99,7 +99,7 @@ const routes = [
   },
   ,
   {
-    path: '/loginpage/shipping/parcelscannerpage',
+    path: '/loginpage/courier/parcelscannerpage',
     name: 'parcelscannershipping',
     component: ParcelScannerPageSender
   },
