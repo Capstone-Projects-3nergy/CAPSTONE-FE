@@ -796,7 +796,7 @@ function formatDateTime(datetimeStr) {
 
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="mb-4">
+            <div class="mb-4" v-if="form.status === 'WAITING_FOR_STAFF'">
               <label class="block font-semibold mb-1"
                 >Search Resident Name</label
               >
@@ -804,13 +804,13 @@ function formatDateTime(datetimeStr) {
                 type="text"
                 v-model="recipientSearch"
                 placeholder="Type name, room or email..."
-                class="md:w-[425px] w-full border rounded-md p-2"
+                class="md:w-[325px] w-full border rounded-md p-2"
                 :disabled="form.status === 'PICKED_UP'"
               />
 
               <ul
                 v-if="recipientSearch && filteredResidents.length"
-                class="absolute z-10 mt-1 w-[310px] md:w-[425px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
               >
                 <li
                   v-for="r in filteredResidents"
