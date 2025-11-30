@@ -58,6 +58,7 @@ const parcelStore = useParcelManager()
 const companyList = ref([])
 
 const form = ref({
+  userId: null,
   parcelId: '',
   trackingNumber: '',
   recipientName: '',
@@ -132,6 +133,28 @@ const loadCompanies = async () => {
   } catch (err) {}
 }
 
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name =
+    resident.fullName ||
+    `${resident.firstName || ''} ${resident.lastName || ''}`.trim()
+
+  form.value.userId = resident.userId
+  form.value.roomNumber = resident.roomNumber
+  form.value.email = resident.email
+  recipientSearch.value = name
+}
+const loadResidents = async () => {
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {
+    residents.value = []
+  }
+}
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const tidNum = Number(tid)
@@ -171,7 +194,7 @@ const getParcelDetail = async (tid) => {
       receivedAt: formatDateTime(data.receivedAt),
       pickedUpAt: formatDateTime(data.pickedUpAt),
       updatedAt: formatDateTime(data.updatedAt),
-
+      userId: data.residentId || null,
       residentName: data.residentName,
       roomNumber: data.roomNumber,
       email: data.email
@@ -181,6 +204,7 @@ const getParcelDetail = async (tid) => {
     originalForm.value = { ...form.value }
   } catch (err) {}
   await loadCompanies()
+  await loadResidents()
 }
 
 const checkScreen = () => {
@@ -194,8 +218,28 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
   loadCompanies()
+  loadResidents()
   const tid = route.params.tid
   getParcelDetail(tid)
+})
+const residents = ref([])
+const recipientSearch = ref('')
+const selectedResidentId = ref(null)
+const filteredResidents = computed(() => {
+  const q = recipientSearch.value?.trim().toLowerCase() || ''
+  if (!q) return []
+  return residents.value.filter((r) => {
+    const fullName = (
+      r.fullName || `${r.firstName || ''} ${r.lastName || ''}`
+    ).trim()
+    const roomNumber = (r.roomNumber?.toString() || '').toLowerCase()
+    const email = (r.email || '').toLowerCase()
+    return (
+      fullName.toLowerCase().includes(q) ||
+      roomNumber.includes(q) ||
+      email.includes(q)
+    )
+  })
 })
 
 const emit = defineEmits(['edit-success', 'edit-error'])
@@ -235,7 +279,8 @@ const saveEditParcel = async () => {
       senderName: form.value.senderName,
       status: form.value.status,
       companyId: form.value.companyId ? Number(form.value.companyId) : null,
-      imageUrl: form.value.imageUrl
+      imageUrl: form.value.imageUrl,
+      userId: form.value.userId || null
     }
 
     const updatedParcel = await editItem(
@@ -749,6 +794,31 @@ function formatDateTime(datetimeStr) {
 
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <div class="mb-4">
+              <label class="block font-semibold mb-1">Search Resident</label>
+              <input
+                type="text"
+                v-model="recipientSearch"
+                placeholder="Type name, room or email..."
+                class="md:w-[425px] w-full border rounded-md p-2"
+                :disabled="form.status === 'PICKED_UP'"
+              />
+
+              <ul
+                v-if="recipientSearch && filteredResidents.length"
+                class="border rounded-md bg-white mt-1 max-h-40 overflow-auto text-sm"
+              >
+                <li
+                  v-for="r in filteredResidents"
+                  :key="r.userId"
+                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
+                  @click="selectResident(r)"
+                >
+                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
+                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                </li>
+              </ul>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Resident Name</label>
