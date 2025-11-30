@@ -68,22 +68,6 @@ async function getItemById(url, id, router) {
     return null
   }
 }
-// async function getItemById(url, id, router) {
-//   try {
-//     const options = {
-//       method: 'GET',
-//       headers: {}
-//     }
-
-//     const res = await fetchWithAuth(`${url}/${id}`, options, router)
-//     if (res) {
-//       return await res.json()
-//     }
-//     return null
-//   } catch (error) {
-//     return null
-//   }
-// }
 
 async function deleteItemById(url, id, router) {
   try {
