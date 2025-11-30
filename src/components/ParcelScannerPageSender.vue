@@ -617,7 +617,7 @@ const closePopUp = (operate) => {
                   <input
                     v-model="form.recipientName"
                     type="text"
-                    placeholder="Enter Resident Name"
+                    placeholder="Enter Recipient Name"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
                 </div>

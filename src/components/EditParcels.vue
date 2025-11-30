@@ -796,7 +796,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
             <div class="mb-4">
-              <label class="block font-semibold mb-1">Search Resident</label>
+              <label class="block font-semibold mb-1">Resident Name</label>
               <input
                 type="text"
                 v-model="recipientSearch"
@@ -807,7 +807,7 @@ function formatDateTime(datetimeStr) {
 
               <ul
                 v-if="recipientSearch && filteredResidents.length"
-                class="border rounded-md bg-white mt-1 max-h-40 overflow-auto text-sm"
+                class="absolute z-10 mt-1 w-[310px] md:w-[425px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
               >
                 <li
                   v-for="r in filteredResidents"
@@ -817,6 +817,12 @@ function formatDateTime(datetimeStr) {
                 >
                   {{ r.fullName || r.firstName + ' ' + r.lastName }}
                   (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                </li>
+                <li
+                  v-if="filteredResidents.length === 0"
+                  class="px-3 py-1 text-gray-400"
+                >
+                  No residents found matching your search terms.
                 </li>
               </ul>
             </div>
