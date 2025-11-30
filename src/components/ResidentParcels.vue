@@ -94,8 +94,8 @@ const showSuggestions = computed(
 
 const mapStatus = (status) => {
   switch (status) {
-    case 'PENDING':
-      return 'Pending'
+    case 'WAITING_FOR_STAFF':
+      return 'waiting for staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -777,7 +777,7 @@ const showProfileResidentPage = async function () {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="deleteSuccess"
-            :titles="'Delete Parcel is Successfull.'"
+            :titles="'Delete Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -785,7 +785,7 @@ const showProfileResidentPage = async function () {
           />
           <AlertPopUp
             v-if="addSuccess"
-            :titles="'Add New Parcel is Successfull.'"
+            :titles="'Add New Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="addSuccessMessage"
@@ -793,7 +793,7 @@ const showProfileResidentPage = async function () {
           />
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Parcel  is Successfull.'"
+            :titles="'Edit Parcel  is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
@@ -957,7 +957,7 @@ const showProfileResidentPage = async function () {
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     :class="{
-                      'bg-yellow-400': p.status === 'Pending',
+                      'bg-yellow-400': p.status === 'waiting for staff',
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"

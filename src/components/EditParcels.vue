@@ -15,6 +15,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import {
+  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -51,6 +52,7 @@ const error = ref(false)
 const roomNumberError = ref(false)
 const SenderNameError = ref(false)
 const recipientNameError = ref(false)
+const selectName = ref(false)
 const parcelTypeError = ref(false)
 const trackingNumberError = ref(false)
 const showLogoutConfirm = ref(false)
@@ -58,6 +60,7 @@ const parcelStore = useParcelManager()
 const companyList = ref([])
 
 const form = ref({
+  userId: null,
   parcelId: '',
   trackingNumber: '',
   recipientName: '',
@@ -67,7 +70,7 @@ const form = ref({
   imageUrl: '',
   status: '',
 
-  receivedAt: 'RECEIVED',
+  receivedAt: '',
   pickedUpAt: '',
   updatedAt: '',
 
@@ -77,6 +80,9 @@ const form = ref({
 })
 
 const statusOptions = computed(() => {
+  if (form.value.status === 'WAITING_FOR_STAFF') {
+    return ['WAITING_FOR_STAFF', 'RECEIVED']
+  }
   if (form.value.status === 'RECEIVED') {
     return ['RECEIVED', 'PICKED_UP']
   }
@@ -129,6 +135,31 @@ const loadCompanies = async () => {
   } catch (err) {}
 }
 
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name =
+    resident.fullName ||
+    `${resident.firstName || ''} ${resident.lastName || ''}`.trim()
+
+  form.value.userId = resident.userId
+  form.value.residentName = name
+  form.value.roomNumber = resident.roomNumber
+  form.value.email = resident.email
+
+  recipientSearch.value = ''
+}
+
+const loadResidents = async () => {
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {
+    residents.value = []
+  }
+}
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const tidNum = Number(tid)
@@ -168,7 +199,7 @@ const getParcelDetail = async (tid) => {
       receivedAt: formatDateTime(data.receivedAt),
       pickedUpAt: formatDateTime(data.pickedUpAt),
       updatedAt: formatDateTime(data.updatedAt),
-
+      userId: data.residentId || null,
       residentName: data.residentName,
       roomNumber: data.roomNumber,
       email: data.email
@@ -178,6 +209,7 @@ const getParcelDetail = async (tid) => {
     originalForm.value = { ...form.value }
   } catch (err) {}
   await loadCompanies()
+  await loadResidents()
 }
 
 const checkScreen = () => {
@@ -191,18 +223,37 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
   loadCompanies()
+  loadResidents()
   const tid = route.params.tid
   getParcelDetail(tid)
+})
+const residents = ref([])
+const recipientSearch = ref('')
+const selectedResidentId = ref(null)
+const filteredResidents = computed(() => {
+  const q = recipientSearch.value?.trim().toLowerCase() || ''
+  if (!q) return []
+  return residents.value.filter((r) => {
+    const fullName = (
+      r.fullName || `${r.firstName || ''} ${r.lastName || ''}`
+    ).trim()
+    const roomNumber = (r.roomNumber?.toString() || '').toLowerCase()
+    const email = (r.email || '').toLowerCase()
+    return (
+      fullName.toLowerCase().includes(q) ||
+      roomNumber.includes(q) ||
+      email.includes(q)
+    )
+  })
 })
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
-  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
-    roomNumberError.value = true
-    setTimeout(() => (roomNumberError.value = false), 10000)
+  if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
+    selectName.value = true
+    setTimeout(() => (selectName.value = false), 10000)
     return
   }
-
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -214,11 +265,6 @@ const saveEditParcel = async () => {
     return
   }
 
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
-    parcelTypeError.value = true
-    setTimeout(() => (parcelTypeError.value = false), 10000)
-    return
-  }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -232,7 +278,8 @@ const saveEditParcel = async () => {
       senderName: form.value.senderName,
       status: form.value.status,
       companyId: form.value.companyId ? Number(form.value.companyId) : null,
-      imageUrl: form.value.imageUrl
+      imageUrl: form.value.imageUrl,
+      userId: form.value.userId || null
     }
 
     const updatedParcel = await editItem(
@@ -355,6 +402,7 @@ const closePopUp = (operate) => {
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
+  if (operate === 'select') selectName.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -624,7 +672,7 @@ function formatDateTime(datetimeStr) {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Parcel is Successfull.'"
+            :titles="'Edit Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
@@ -676,6 +724,14 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="parcelType "
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="selectName"
+            :titles="'Please Select Resident Name'"
+            message="Error!!"
+            styleType="red"
+            operate="selectName"
             @closePopUp="closePopUp"
           />
         </div>
@@ -746,6 +802,41 @@ function formatDateTime(datetimeStr) {
 
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <div class="mb-4">
+              <label class="block font-semibold mb-1"
+                >Search Resident Name</label
+              >
+              <input
+                type="text"
+                v-model="recipientSearch"
+                placeholder="Type name, room or email..."
+                class="md:w-[325px] w-full border rounded-md p-2"
+                :disabled="form.status === 'PICKED_UP'"
+              />
+
+              <ul
+                v-if="recipientSearch"
+                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+              >
+                <li
+                  v-for="r in filteredResidents"
+                  :key="r.userId"
+                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
+                  v-if="filteredResidents.length > 0"
+                  @click="selectResident(r)"
+                >
+                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
+                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                </li>
+
+                <li
+                  v-if="filteredResidents.length === 0"
+                  class="px-3 py-1 text-gray-400"
+                >
+                  No residents found matching your search terms.
+                </li>
+              </ul>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">Resident Name</label>
@@ -756,6 +847,7 @@ function formatDateTime(datetimeStr) {
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
+
               <div>
                 <label class="block font-semibold mb-1">Room Number</label>
                 <input
@@ -829,8 +921,8 @@ function formatDateTime(datetimeStr) {
                 </select>
 
                 <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: PENDING → RECEIVED
-                  → PICKED_UP
+                  * You can only update the status in order: Waiting for Staff →
+                  Received → Picked Up
                 </p>
               </div>
             </div>

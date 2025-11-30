@@ -236,11 +236,34 @@ export const useAuthManager = defineStore('authManager', () => {
       successMessage.value = data.message || `Login successful as ${data.role}!`
 
       if (router) {
-        if (data.role === 'RESIDENT')
-          router.replace({ name: 'home', params: { id: data.userId } })
-        else if (data.role === 'STAFF')
-          router.replace({ name: 'homestaff', params: { id: data.userId } })
-        else router.replace({ name: 'parcelscanner' })
+        switch (data.role) {
+          case 'RESIDENT':
+            router.replace({
+              name: 'home',
+              params: { id: data.userId }
+            })
+            break
+
+          case 'STAFF':
+            router.replace({
+              name: 'homestaff',
+              params: { id: data.userId }
+            })
+            break
+
+          case 'SHIPPING':
+            router.replace({
+              name: 'parcelscannershipping',
+              params: { id: data.userId }
+            })
+            break
+
+          default:
+            router.replace({
+              name: 'parcelscanner'
+            })
+            break
+        }
       }
 
       return {
@@ -315,10 +338,14 @@ export const useAuthManager = defineStore('authManager', () => {
       throw err
     }
   }
-
   const useAuthGuard = (router) => {
     router.beforeEach(async (to, from, next) => {
-      const publicPages = ['login', 'register', 'resetpassword']
+      const publicPages = [
+        'login',
+        'register',
+        'resetpassword',
+        'parcelscannershipping'
+      ]
       if (publicPages.includes(to.name)) return next()
 
       const isLoggedIn = user.value || (await initUser())
@@ -342,6 +369,33 @@ export const useAuthManager = defineStore('authManager', () => {
       next()
     })
   }
+
+  // const useAuthGuard = (router) => {
+  //   router.beforeEach(async (to, from, next) => {
+  //     const publicPages = ['login', 'register', 'resetpassword']
+  //     if (publicPages.includes(to.name)) return next()
+
+  //     const isLoggedIn = user.value || (await initUser())
+  //     if (!isLoggedIn || !user.value?.accessToken)
+  //       return next({ name: 'login' })
+
+  //     const decoded = decodeJWT(user.value.accessToken)
+  //     const now = Math.floor(Date.now() / 1000)
+  //     if (decoded?.exp && decoded.exp < now) {
+  //       const newToken = await refreshToken()
+  //       if (!newToken) return next({ name: 'login' })
+  //     }
+
+  //     if (
+  //       (to.name === 'home' && user.value.role !== 'RESIDENT') ||
+  //       (to.name === 'homestaff' && user.value.role !== 'STAFF')
+  //     ) {
+  //       return next({ name: 'login' })
+  //     }
+
+  //     next()
+  //   })
+  // }
 
   return {
     user,

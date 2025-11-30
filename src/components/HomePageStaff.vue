@@ -161,8 +161,8 @@ onMounted(async () => {
 })
 const mapStatus = (status) => {
   switch (status) {
-    case 'PENDING':
-      return 'Pending'
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -723,12 +723,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700"
                       >Room:
                     </span>
-                    <span v-if="loginStore.user.role === 'STAFF'">
-                      {{ p.roomNumber }}
-                    </span>
-                    <span v-else class="text-red-600 font-semibold">
-                      Resident info hidden
-                    </span>
+                    {{ p.roomNumber }}
                   </td>
 
                   <td
@@ -737,12 +732,7 @@ const toggleSortDate = () => {
                     <span class="md:hidden font-semibold text-blue-700"
                       >Email:
                     </span>
-                    <span v-if="loginStore.user.role === 'STAFF'">
-                      {{ p.email }}
-                    </span>
-                    <span v-else class="text-red-600 font-semibold">
-                      Resident info hidden
-                    </span>
+                    {{ p.email }}
                   </td>
 
                   <td class="px-4 py-2 md:py-3 border-b md:border-none">
@@ -752,7 +742,7 @@ const toggleSortDate = () => {
                     <span
                       class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                       :class="{
-                        'bg-yellow-400': p.status === 'Pending',
+                        'bg-yellow-400': p.status === 'Waiting for Staff',
                         'bg-green-400': p.status === 'Picked Up',
                         'bg-blue-400': p.status === 'Received'
                       }"

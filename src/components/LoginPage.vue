@@ -74,7 +74,7 @@ const loginHomePageWeb = async () => {
       router
     )
     loading.value = false
-
+    console.log(res.status)
     if (!res) {
       incorrect.value = true
 
@@ -82,9 +82,9 @@ const loginHomePageWeb = async () => {
       return
     }
     if (res.status === 400) {
-      notRegisterError.value = true
+      incorrect.value = true
 
-      setTimeout(() => (notRegisterError.value = false), 10000)
+      setTimeout(() => (incorrect.value = false), 10000)
       return
     }
     if (res.status === 200 || res.status === 201) {

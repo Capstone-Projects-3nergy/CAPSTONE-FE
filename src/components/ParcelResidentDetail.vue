@@ -464,7 +464,7 @@ const closePopUp = (operate) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="confirmSuccess"
-            :titles="'Confirm Parcel is Successfull.'"
+            :titles="'Confirm Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -592,7 +592,7 @@ const closePopUp = (operate) => {
                   <p
                     class="w-full p-2 rounded-md text-gray-800"
                     :class="{
-                      'bg-yellow-300': parcel?.status === 'PENDING',
+                      'bg-yellow-300': parcel?.status === 'WAITING_FOR_STAFF',
                       'bg-blue-300': parcel?.status === 'RECEIVED',
                       'bg-green-300': parcel?.status === 'PICKED_UP'
                     }"

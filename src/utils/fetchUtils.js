@@ -48,7 +48,6 @@ export async function getItems(url, router) {
     return null
   }
 }
-
 async function getItemById(url, id, router) {
   try {
     const options = {
@@ -57,14 +56,34 @@ async function getItemById(url, id, router) {
     }
 
     const res = await fetchWithAuth(`${url}/${id}`, options, router)
-    if (res) {
-      return await res.json()
+    if (!res) return null
+    if (!res.ok) {
+      console.error('getItemById failed:', res.status)
+      return null
     }
-    return null
+
+    return await res.json()
   } catch (error) {
+    console.error('getItemById error:', error)
     return null
   }
 }
+// async function getItemById(url, id, router) {
+//   try {
+//     const options = {
+//       method: 'GET',
+//       headers: {}
+//     }
+
+//     const res = await fetchWithAuth(`${url}/${id}`, options, router)
+//     if (res) {
+//       return await res.json()
+//     }
+//     return null
+//   } catch (error) {
+//     return null
+//   }
+// }
 
 async function deleteItemById(url, id, router) {
   try {

@@ -57,7 +57,6 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
-const notStaff = ref(null)
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -119,8 +118,8 @@ watch(recipientSearch, (val) => {
 
 const mapStatus = (status) => {
   switch (status) {
-    case 'PENDING':
-      return 'Pending'
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
@@ -162,6 +161,7 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
+    console.log(data)
   }
 
   try {
@@ -396,11 +396,7 @@ const paginatedParcels = computed(() => {
 })
 
 const showParcelDetail = async function (id) {
-  if (loginManager.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
+  console.log('📦 Go to detail, parcelId =', id)
   router.push({
     name: 'detailparcels',
     params: {
@@ -456,11 +452,6 @@ const deleteParcelPopUp = (parcel) => {
 }
 
 const openStatusPopup = (parcel) => {
-  if (loginManager.user.role !== 'STAFF') {
-    notStaff.value = true
-    setTimeout(() => (notStaff.value = false), 10000)
-    return
-  }
   parcelStatusDetail.value = {
     id: parcel.id,
     parcelStatus: parcel.parcelStatus
@@ -526,9 +517,6 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       editSuccess.value = false
-      break
-    case 'ineligible':
-      notStaff.value = false
       break
   }
 }
@@ -868,7 +856,7 @@ const closePopUp = (operate) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="deleteSuccess"
-            :titles="'Delete Parcel to Trash is Successfull.'"
+            :titles="'Delete Parcel to Trash is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -876,7 +864,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="statusSuccess"
-            :titles="'Change Status is Successfull.'"
+            :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -884,7 +872,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="addSuccess"
-            :titles="'Add New Parcel is Successfull.'"
+            :titles="'Add New Parcel is Successful.'"
             message="Success!!"
             styleType="green"
             operate="addSuccessMessage"
@@ -892,7 +880,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Parcel  is Successfull.'"
+            :titles="'Edit Parcel  is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
@@ -1037,12 +1025,7 @@ const closePopUp = (operate) => {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Room:
                   </span>
-                  <span v-if="loginManager.user.role === 'STAFF'">
-                    {{ p.roomNumber }}
-                  </span>
-                  <span v-else class="text-red-600 font-semibold">
-                    Resident info hidden
-                  </span>
+                  {{ p.roomNumber }}
                 </td>
 
                 <td
@@ -1051,12 +1034,7 @@ const closePopUp = (operate) => {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Email:
                   </span>
-                  <span v-if="loginManager.user.role === 'STAFF'">
-                    {{ p.email }}
-                  </span>
-                  <span v-else class="text-red-600 font-semibold">
-                    Resident info hidden
-                  </span>
+                  {{ p.email }}
                 </td>
 
                 <td class="px-4 py-2 md:py-3 border-b md:border-none">
@@ -1066,7 +1044,7 @@ const closePopUp = (operate) => {
                   <span
                     class="px-3 py-1 rounded-full text-xs font-semibold text-white cursor-pointer"
                     :class="{
-                      'bg-yellow-400': p.status === 'Pending',
+                      'bg-yellow-400': p.status === 'Waiting for Staff',
                       'bg-green-400': p.status === 'Picked Up',
                       'bg-blue-400': p.status === 'Received'
                     }"

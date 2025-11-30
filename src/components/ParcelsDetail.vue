@@ -69,11 +69,11 @@ const mapParcelData = (data) => ({
 
 const getParcelDetail = async (tid) => {
   if (!tid) return
-
+  console.log('🧾 Detail page for parcelId =', tid)
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
-   
+
     return
   }
 
@@ -83,15 +83,13 @@ const getParcelDetail = async (tid) => {
       tid,
       router
     )
-
+    console.log(data)
     if (data) {
       const mapped = mapParcelData(data)
       parcel.value = mapped
       parcelStore.addParcel(mapped)
-     
     }
-  } catch (err) {
-  }
+  } catch (err) {}
 }
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
@@ -140,8 +138,7 @@ const showHomePageStaffWeb = async () => {
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
-  } catch (err) {
-  }
+  } catch (err) {}
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false
@@ -533,7 +530,7 @@ function formatDateTime(datetimeStr) {
                 <p
                   class="w-full p-2 text-gray-700 rounded-md"
                   :class="{
-                    'bg-yellow-400': parcel?.status === 'PENDING',
+                    'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
                     'bg-blue-400': parcel?.status === 'RECEIVED',
                     'bg-green-400': parcel?.status === 'PICKED_UP'
                   }"

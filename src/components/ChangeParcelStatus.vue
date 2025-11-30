@@ -22,7 +22,7 @@ defineProps({
 })
 const newStatus = ref('')
 const currentStatus = ref('')
-const statusChangedSuccessfully = ref(false)
+const statusChangedSuccessfuly = ref(false)
 
 const form = ref({
   parcelId: '',
@@ -44,7 +44,8 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  if (currentStatus.value === 'PICKED_UP') return ['PICKED_UP']
+  if (currentStatus.value === 'WAITING_FOR_STAFF')
+    return ['WAITING_FOR_STAFF', 'RECEIVED']
   if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
   return ['RECEIVED', 'PICKED_UP']
 })
@@ -99,7 +100,7 @@ const saveStatusChange = async () => {
     parcelStore.updateParcel(updatedParcel)
     form.value = { ...form.value, ...updatedParcel }
     currentStatus.value = newStatus.value
-    statusChangedSuccessfully.value = true
+    statusChangedSuccessfuly.value = true
     emit('confirmStatusDetail')
   } catch (err) {
     emit('redStatusAlert', err)
@@ -121,7 +122,7 @@ const cancel = () => {
   >
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 sm:p-8">
       <div
-        v-if="statusChangedSuccessfully"
+        v-if="statusChangedSuccessfuly"
         class="flex flex-col items-center justify-center space-y-4 py-6"
       >
         <svg
@@ -139,7 +140,7 @@ const cancel = () => {
           />
         </svg>
         <p class="text-green-700 font-semibold text-center text-lg sm:text-xl">
-          Status updated successfully!
+          Status updated Successfuly!
         </p>
         <ButtonWeb
           label="Close"
@@ -153,8 +154,8 @@ const cancel = () => {
         <h3 class="font-bold text-xl mb-4 text-gray-800">Change Status</h3>
 
         <p v-if="!isPickUp" class="text-sm text-red-600 mb-2">
-          * You can only update the status in order: PENDING → RECEIVED →
-          PICKED_UP
+          * You can only update the status in order: Waiting for Staff →
+          Received → Picked Up
         </p>
 
         <p v-if="isPickUp" class="text-sm text-red-600 mb-4">
