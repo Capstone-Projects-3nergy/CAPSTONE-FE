@@ -48,6 +48,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
+const showHomePageResident = ref(false)
 const isCollapsed = ref(false)
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
@@ -205,8 +206,8 @@ const closePopUp = (operate) => {
     case 'deleteSuccessMessage':
       deleteSuccess.value = false
       break
-    case 'addSuccessMessage':
-      addSuccess.value = false
+    case ' confirmSuccessMessage':
+      confirmSuccess.value = false
       break
     case 'editSuccessMessage':
       editSuccess.value = false
@@ -432,7 +433,7 @@ const closePopUp = (operate) => {
             :titles="'Confirm Parcel is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="confirmSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
