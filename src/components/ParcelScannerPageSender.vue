@@ -558,7 +558,7 @@ const closePopUp = (operate) => {
             <div class="space-y-6">
               <div
                 id="scanner"
-                class="w-full h-58 sm:h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
+                class="w-full h-58 sm:h-64 md:w-200 md:h-80 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
               >
                 <span v-if="!scanningMode && !videoStream" class="text-white">
                   Scan QR/Barcode or Take Picture
