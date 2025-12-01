@@ -341,7 +341,7 @@ const toggleComfirmPasswordVisibility = () => {
       </div>
     </div>
     <div
-      class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-auto min-h-[28rem] sm:min-h-[32rem] md:min-h-[36rem] lg:min-h-screen"
+      class="flex-1 flex items-center justify-center bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 h-[100px] min-h-[28rem] sm:min-h-[32rem] md:min-h-[36rem] lg:min-h-screen"
     >
       <div class="w-full max-w-xs sm:max-w-sm">
         <div class="flex items-center gap-2 mb-2">
@@ -386,8 +386,8 @@ const toggleComfirmPasswordVisibility = () => {
           </svg>
         </div>
 
-        <h2 class="text-2xl font-bold mb-1">Create your account</h2>
-        <p class="text-[#8C8F91] text-sm mb-6">
+        <h2 class="text-xl font-bold mb-1">Create your account</h2>
+        <p class="text-[#8C8F91] text-sm mb-4">
           Welcome to Tractify — Create your account below
         </p>
 
@@ -499,7 +499,7 @@ const toggleComfirmPasswordVisibility = () => {
           @closePopUp="closePopUp"
         />
 
-        <div class="flex bg-[#EAF0F5] rounded-lg mb-6 p-1">
+        <div class="flex bg-[#EAF0F5] rounded-lg mb-4 p-1">
           <button
             @click="role = 'resident'"
             :class="[
