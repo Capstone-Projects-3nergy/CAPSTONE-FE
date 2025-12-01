@@ -556,7 +556,7 @@ const closePopUp = (operate) => {
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <div class="space-y-6 px-1">
+            <div class="space-y-6">
               <div
                 id="scanner"
                 class="w-full h-58 sm:h-64 md:w-175 md:h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
