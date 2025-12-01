@@ -275,13 +275,23 @@ function stopQuagga() {
 
 function startScan(mode) {
   scanningMode.value = mode
+
   if (mode === 'qr') {
+    html5QrCode = new Html5Qrcode('reader')
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: { width: 250, height: 450 },
+      qrbox: function (viewW, viewH) {
+        const isMobile = viewW < 600
+        if (isMobile) {
+          return { width: 110, height: 110 }
+        } else {
+          return { width: 290, height: 550 }
+        }
+      },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
+
     html5QrCode
       .start({ facingMode: 'environment' }, config, (decodedText) => {
         const cleanText = decodedText.trim()
@@ -810,5 +820,10 @@ const closePopUp = (operate) => {
 <style scoped>
 body {
   background-color: #f3f4f6;
+}
+#scanner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
