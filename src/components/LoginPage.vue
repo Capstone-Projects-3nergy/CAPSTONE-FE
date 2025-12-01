@@ -189,7 +189,7 @@ const showResetPasswordPageWeb = async function () {
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <div
-      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
+      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 min-h-screen"
     >
       <div class="max-w-md text-center md:text-center">
         <h1 class="text-3xl font-bold mb-4 md:text-center">Welcome back!</h1>
@@ -200,7 +200,7 @@ const showResetPasswordPageWeb = async function () {
 
         <div class="flex md:justify-center">
           <svg
-            class="hidden md:block w-[490px] h-[569px]"
+            class="hidden md:block w-[400px] h-[450px]"
             viewBox="0 0 490 569"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

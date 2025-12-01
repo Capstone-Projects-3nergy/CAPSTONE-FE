@@ -298,7 +298,7 @@ const toggleComfirmPasswordVisibility = () => {
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <div
-      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 h-20 sm:h-28 md:h-36 lg:min-h-screen"
+      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4"
     >
       <div class="max-w-md text-center md:text-center">
         <h2 class="text-3xl font-bold mb-4 md:text-center">
@@ -309,7 +309,7 @@ const toggleComfirmPasswordVisibility = () => {
         </p>
         <div class="flex md:justify-center">
           <svg
-            class="hidden md:block w-[490px] h-[569px]"
+            class="hidden md:block w-[400px] h-[450px]"
             viewBox="0 0 490 569"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -1123,22 +1123,19 @@ const toggleComfirmPasswordVisibility = () => {
 }
 .custom-select {
   width: 100%;
-  font-size: 0.875rem; /* ขนาดตัวอักษรเล็กลง ~14px */
+  font-size: 0.875rem;
   color: #181820;
   border: 1px solid #000000;
   border-radius: 0.6em;
   background-color: #fff;
 
-  /* ปรับ padding ให้เว้นที่ไอคอนซ้ายและลูกศรขวา */
-  padding: 0.55rem 2.5rem 0.55rem 2.6rem; /* top right bottom left */
+  padding: 0.55rem 2.5rem 0.55rem 2.6rem;
 
-  /* ลบลูกศร default ของ browser */
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   -ms-appearance: none;
 
-  /* เพิ่มไอคอนลูกศรด้านขวา */
   background: url('https://cdn1.iconfinder.com/data/icons/arrows-vol-1-4/24/dropdown_arrow-512.png')
     no-repeat right 0.9rem center;
   background-size: 15px 15px;
@@ -1148,20 +1145,18 @@ const toggleComfirmPasswordVisibility = () => {
 
 .custom-select:focus {
   outline: none;
-  border-color: #3b82f6; /* ฟ้าเมื่อ focus */
+  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
-/* ปรับตำแหน่ง svg ด้านหน้า */
 .relative svg {
-  left: 0.75rem; /* ระยะห่างจากขอบซ้าย */
+  left: 0.75rem;
   width: 18px;
   height: 18px;
   color: #8c8f91;
-  pointer-events: none; /* ไม่รบกวนการคลิก select */
+  pointer-events: none;
 }
 
-/* ปรับตัวเลือกใน dropdown */
 .custom-select option {
   font-size: 0.875rem;
 }
