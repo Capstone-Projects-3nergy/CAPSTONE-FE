@@ -287,7 +287,7 @@ function startScan(mode) {
         if (isMobile) {
           return { width: 120, height: 100 }
         } else {
-          return { width: 220, height: 420 }
+          return { width: 170, height: 200 }
         }
       },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)

@@ -309,7 +309,7 @@ function startScan(mode) {
         if (isMobile) {
           return { width: 100, height: 100 }
         } else {
-          return { width: 150, height: 320 }
+          return { width: 150, height: 120 }
         }
       },
 
