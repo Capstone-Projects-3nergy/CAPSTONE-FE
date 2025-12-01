@@ -282,11 +282,12 @@ function startScan(mode) {
     const config = {
       fps: 10,
       qrbox: function (viewW, viewH) {
-        const isMobile = viewW < 600
+        const isMobile = window.innerWidth < 600
+
         if (isMobile) {
-          return { width: 110, height: 110 }
+          return { width: 120, height: 100 }
         } else {
-          return { width: 290, height: 550 }
+          return { width: 220, height: 400 }
         }
       },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
@@ -555,10 +556,10 @@ const closePopUp = (operate) => {
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
-            <div class="space-y-6">
+            <div class="space-y-6 px-1">
               <div
                 id="scanner"
-                class="w-full h-58 sm:h-64 md:w-140 md:h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
+                class="w-full h-58 sm:h-64 md:w-175 md:h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
               >
                 <span v-if="!scanningMode && !videoStream" class="text-white">
                   Scan QR/Barcode or Take Picture
@@ -596,7 +597,7 @@ const closePopUp = (operate) => {
                 />
               </div>
 
-              <div class="flex flex-wrap gap-3">
+              <div class="flex flex-wrap gap-3 px-7">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
@@ -605,7 +606,7 @@ const closePopUp = (operate) => {
                 />
               </div>
 
-              <div class="space-y-3">
+              <div class="space-y-3 px-7">
                 <div>
                   <label class="block font-semibold mb-1">
                     Tracking number <span class="text-red-500">*</span>
@@ -683,7 +684,7 @@ const closePopUp = (operate) => {
                 </div>
               </div>
 
-              <div class="flex justify-end space-x-3 mt-3">
+              <div class="flex justify-end space-x-3 mt-3 px-7">
                 <ButtonWeb
                   label="Save"
                   color="green"
@@ -705,7 +706,7 @@ const closePopUp = (operate) => {
             </div>
 
             <div
-              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg"
+              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg px-15"
             >
               <div class="flex items-center justify-end mb-4"></div>
 

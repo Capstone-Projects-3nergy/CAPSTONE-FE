@@ -304,12 +304,12 @@ function startScan(mode) {
     const config = {
       fps: 10,
       qrbox: function (viewW, viewH) {
-        const isMobile = viewW < 600
+        const isMobile = window.innerWidth < 600
 
         if (isMobile) {
-          return { width: 110, height: 110 }
+          return { width: 100, height: 100 }
         } else {
-          return { width: 290, height: 470 }
+          return { width: 150, height: 320 }
         }
       },
 
