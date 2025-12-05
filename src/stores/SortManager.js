@@ -19,11 +19,11 @@ function sortByStatusReverse(parcels) {
 }
 
 function sortByDate(parcels) {
-  parcels.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+  parcels.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
 }
 
 function sortByDateReverse(parcels) {
-  parcels.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
+  parcels.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 }
 
 function sortByTracking(parcels) {
@@ -80,7 +80,7 @@ function searchParcels(parcels, keyword) {
   const lowerKeyword = keyword.toLowerCase().trim()
 
   return parcels.filter((p) => {
-    let formattedReceiveAt = ''
+    let formattedupdateAt = ''
     if (p.updateAt) {
       const date = new Date(p.updateAt)
       const dd = String(date.getDate()).padStart(2, '0')
@@ -89,7 +89,7 @@ function searchParcels(parcels, keyword) {
       const hh = String(date.getHours()).padStart(2, '0')
       const min = String(date.getMinutes()).padStart(2, '0')
       const ss = String(date.getSeconds()).padStart(2, '0')
-      formattedReceiveAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+      formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
     }
 
     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
@@ -107,7 +107,7 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
-    const dateMatch = formattedReceiveAt.toLowerCase().includes(lowerKeyword)
+    const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
 
     return (
       roomMatch ||
