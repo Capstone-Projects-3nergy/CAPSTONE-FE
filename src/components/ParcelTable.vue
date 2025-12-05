@@ -3,7 +3,11 @@ defineProps({
   items: Array,
   pages: Array,
   page: Number,
-  total: Number
+  total: Number,
+  showAction: {
+    type: Boolean,
+    default: true
+  }
 })
 
 function formatDateTime(datetimeStr) {
@@ -47,7 +51,12 @@ function formatDateTime(datetimeStr) {
             </div>
           </th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Action</th>
+          <th
+            v-if="showAction"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Action
+          </th>
         </tr>
       </thead>
 
@@ -116,6 +125,7 @@ function formatDateTime(datetimeStr) {
           </td>
 
           <td
+            v-if="showAction"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
           >
             <span class="md:hidden font-semibold text-blue-700">Action:</span>
