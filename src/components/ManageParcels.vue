@@ -780,8 +780,15 @@ const closePopUp = (operate) => {
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+        <ParcelFilterBar
+          v-model:date="selectedDate"
+          v-model:search="searchKeyword"
+          v-model:sort="selectedSort"
+          :show-add-button="true"
+          @add="showParcelScannerPage"
+        />
 
-        <div
+        <!-- <div
           class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
@@ -850,7 +857,7 @@ const closePopUp = (operate) => {
               </button>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
