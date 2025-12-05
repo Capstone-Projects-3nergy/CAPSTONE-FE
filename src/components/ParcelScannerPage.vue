@@ -104,6 +104,22 @@ const selectedResident = computed(
 const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
 )
+const getResponsiveSize = () => {
+  const width = window.innerWidth
+
+  if (width < 480) {
+    return { width: 130, height: 130 } 
+  } else if (width < 640) {
+    return { width: 140, height: 140 } 
+  } else if (width < 768) {
+    return { width: 160, height: 160 } 
+  } else if (width < 1024) {
+    return { width: 180, height: 180 } 
+  } else {
+    return { width: 200, height: 200 }
+  }
+}
+
 
 const filteredResidents = computed(() => {
   const q = recipientSearch.value.trim().toLowerCase()
@@ -303,16 +319,9 @@ function startScan(mode) {
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: function (viewW, viewH) {
-        const isMobile = window.innerWidth < 600
-
-        if (isMobile) {
-          return { width: 100, height: 100 }
-        } else {
-          return { width: 150, height: 170 }
-        }
+      qrbox: function () {
+        return getResponsiveSize()
       },
-
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
 
@@ -323,7 +332,7 @@ function startScan(mode) {
         form.value.trackingNumber = cleanText
       })
       .catch((err) => {
-        alert('เริ่มสแกน QR ไม่สำเร็จ')
+        alert('Failed to start QR scanning.')
       })
   } else if (mode === 'barcode') {
     startQuagga()

@@ -272,6 +272,21 @@ function stopQuagga() {
     Quagga.offDetected()
   } catch (e) {}
 }
+const getResponsiveSize = () => {
+  const width = window.innerWidth
+
+  if (width < 480) {
+    return { width: 130, height: 130 }
+  } else if (width < 640) {
+    return { width: 140, height: 140 }
+  } else if (width < 768) {
+    return { width: 160, height: 160 }
+  } else if (width < 1024) {
+    return { width: 180, height: 180 }
+  } else {
+    return { width: 200, height: 200 }
+  }
+}
 
 function startScan(mode) {
   scanningMode.value = mode
@@ -281,14 +296,8 @@ function startScan(mode) {
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: function (viewW, viewH) {
-        const isMobile = window.innerWidth < 600
-
-        if (isMobile) {
-          return { width: 120, height: 100 }
-        } else {
-          return { width: 170, height: 250 }
-        }
+      qrbox: function () {
+        return getResponsiveSize()
       },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
@@ -300,7 +309,7 @@ function startScan(mode) {
         form.value.trackingNumber = cleanText
       })
       .catch((err) => {
-        alert('เริ่มสแกน QR ไม่สำเร็จ')
+        alert('Failed to start QR scanning.')
       })
   } else if (mode === 'barcode') {
     startQuagga()
