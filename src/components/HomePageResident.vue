@@ -11,6 +11,7 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileResident from './ProfileResident.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import ParcelTable from './ParcelTable.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import {
   getItems,
@@ -568,8 +569,91 @@ const toggleSortDate = () => {
               <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
             </div>
           </div>
+          <ParcelTable
+            :items="paginatedParcels"
+            :pages="visiblePages"
+            :page="currentPage"
+            :total="totalPages"
+            :show-action="false"
+            @prev="prevPage"
+            @next="nextPage"
+            @go="goToPage"
+            @status-click="openStatusPopup"
+            @view-detail="showParcelDetail"
+          >
+            <template #sort-room>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortRoom"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
 
-          <div
+            <template #sort-status>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortStatus"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+
+            <template #sort-date>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortDate"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+          </ParcelTable>
+          <!-- <div
             class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
           >
             <table class="min-w-full text-left border-collapse">
@@ -769,7 +853,7 @@ const toggleSortDate = () => {
             >
               Next &gt;
             </button>
-          </div>
+          </div> -->
         </div>
       </main>
     </div>
