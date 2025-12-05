@@ -28,7 +28,7 @@ function sortByDateReverse(parcels) {
 
 function sortByTracking(parcels) {
   parcels.sort((a, b) =>
-    (a.tracking || '').localeCompare(b.tracking || '', 'th', {
+    (a.trackingNumber || '').localeCompare(b.trackingNumber || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -36,7 +36,7 @@ function sortByTracking(parcels) {
 
 function sortByTrackingReverse(parcels) {
   parcels.sort((a, b) =>
-    (b.tracking || '').localeCompare(a.tracking || '', 'th', {
+    (b.trackingNumber || '').localeCompare(a.trackingNumber || '', 'th', {
       sensitivity: 'base'
     })
   )
