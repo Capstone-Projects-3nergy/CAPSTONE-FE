@@ -96,7 +96,7 @@ const showSuggestions = computed(
 const mapStatus = (status) => {
   switch (status) {
     case 'WAITING_FOR_STAFF':
-      return 'waiting for staff'
+      return 'Waiting for Staff'
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
