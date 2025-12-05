@@ -56,7 +56,7 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
-
+import ParcelFilterBar from './ParcelFilterBar.vue'
 const authStore = useAuthManager()
 
 const loginManager = useAuthManager()
@@ -500,6 +500,25 @@ const showProfileResidentPage = async function () {
   })
   showProfileResident.value = true
 }
+const filterDate = ref('')
+const filterSearch = ref('')
+const filterSort = ref('')
+
+const handleSearchUpdate = (val) => {
+  filterSearch.value = val
+  searchKeyword.value = val
+}
+
+const handleDateUpdate = (val) => {
+  filterDate.value = val
+  selectedDate.value = val
+}
+
+const handleSortUpdate = (val) => {
+  filterSort.value = val
+  selectedSort.value = val
+  handleSort()
+}
 </script>
 
 <template>
@@ -722,8 +741,19 @@ const showProfileResidentPage = async function () {
 
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
+        <ParcelFilterBar
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          :show-add-button="false"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
+          @add="showAddParcelPage"
+          :hideNameSort="true"
+        />
 
-        <div
+        <!-- <div
           class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
@@ -773,7 +803,7 @@ const showProfileResidentPage = async function () {
               </select>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp

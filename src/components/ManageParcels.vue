@@ -520,6 +520,25 @@ const closePopUp = (operate) => {
       break
   }
 }
+const filterDate = ref('')
+const filterSearch = ref('')
+const filterSort = ref('')
+
+const handleSearchUpdate = (val) => {
+  filterSearch.value = val
+  searchKeyword.value = val
+}
+
+const handleDateUpdate = (val) => {
+  filterDate.value = val
+  selectedDate.value = val
+}
+
+const handleSortUpdate = (val) => {
+  filterSort.value = val
+  selectedSort.value = val
+  handleSort()
+}
 </script>
 
 <template>
@@ -782,10 +801,12 @@ const closePopUp = (operate) => {
           <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Manage Parcels</h2>
         </div>
         <ParcelFilterBar
-          v-model:date="selectedDate"
-          v-model:search="searchKeyword"
-          v-model:sort="selectedSort"
-          :show-add-button="true"
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
           @add="showParcelScannerPage"
         />
 

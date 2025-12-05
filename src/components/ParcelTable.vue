@@ -1,4 +1,6 @@
 <script setup>
+const emit = defineEmits(['prev', 'next', 'go', 'status-click', 'view-detail'])
+
 defineProps({
   items: Array,
   pages: Array,

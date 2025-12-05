@@ -6,6 +6,10 @@ defineProps({
   showAddButton: {
     type: Boolean,
     default: true
+  },
+  hideNameSort: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -16,7 +20,6 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add'])
     class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
   >
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <!-- Date Filter -->
       <div class="flex items-center gap-2 flex-wrap">
         <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
         <input
@@ -27,9 +30,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add'])
         />
       </div>
 
-      <!-- Search + Sort + Add Button -->
       <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-        <!-- Search Box -->
         <div class="relative flex-1 min-w-[120px]">
           <svg
             class="absolute left-2 top-1/2 -translate-y-1/2"
@@ -53,20 +54,19 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add'])
           />
         </div>
 
-        <!-- Sort Dropdown -->
         <select
           class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
           :value="modelSort"
           @change="$emit('update:sort', $event.target.value)"
         >
-          <option disabled>Sort by:</option>
+          <option value="" disabled>Sort by:</option>
           <option>Newest</option>
           <option>Oldest</option>
-          <option>Name (A→Z)</option>
-          <option>Name (Z→A)</option>
+
+          <option v-if="!hideNameSort">Name (A→Z)</option>
+          <option v-if="!hideNameSort">Name (Z→A)</option>
         </select>
 
-        <!-- Add Parcel Button (optional) -->
         <button
           v-if="showAddButton"
           @click="$emit('add')"
