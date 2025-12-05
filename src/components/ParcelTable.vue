@@ -6,9 +6,9 @@ defineProps({
   total: Number
 })
 
-function formatDate(v) {
-  const d = new Date(v)
-  return d.toLocaleString('en-GB')
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
 }
 </script>
 <template>
@@ -112,7 +112,7 @@ function formatDate(v) {
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-blue-700">Update:</span>
-            {{ formatDate(p.updateAt) }}
+            {{ formatDateTime(p.updateAt) }}
           </td>
 
           <td

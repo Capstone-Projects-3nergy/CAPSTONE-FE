@@ -15,6 +15,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import ParcelsDetail from './ParcelsDetail.vue'
 import ChangeParcelStatus from './ChangeParcelStatus.vue'
 import ParcelTrash from './ParcelTrash.vue'
+import ParcelTable from '@/components/ParcelTable.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -893,8 +894,110 @@ const closePopUp = (operate) => {
             @closePopUp="closePopUp"
           />
         </div>
+        <ParcelTable
+          :items="paginatedParcels"
+          :pages="visiblePages"
+          :page="currentPage"
+          :total="totalPages"
+          @prev="prevPage"
+          @next="nextPage"
+          @go="goToPage"
+          @status-click="openStatusPopup"
+          @view-detail="showParcelDetail"
+        >
+          <template #sort-room>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortRoom"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
 
-        <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
+          <template #sort-status>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortStatus"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-date>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortDate"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #icon-view>
+            <svg
+              class="cursor-pointer"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                fill="#107EFF"
+              />
+              <path
+                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                fill="#107EFF"
+              />
+            </svg>
+          </template>
+        </ParcelTable>
+        <!-- <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
             <thead
               class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
@@ -1132,7 +1235,7 @@ const closePopUp = (operate) => {
           >
             Next &gt;
           </button>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>
