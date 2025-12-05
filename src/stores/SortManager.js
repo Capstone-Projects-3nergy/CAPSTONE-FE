@@ -81,8 +81,8 @@ function searchParcels(parcels, keyword) {
 
   return parcels.filter((p) => {
     let formattedReceiveAt = ''
-    if (p.receiveAt) {
-      const date = new Date(p.receiveAt)
+    if (p.updateAt) {
+      const date = new Date(p.updateAt)
       const dd = String(date.getDate()).padStart(2, '0')
       const mm = String(date.getMonth() + 1).padStart(2, '0')
       const yyyy = date.getFullYear()
