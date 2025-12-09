@@ -191,7 +191,7 @@ function updateUser(data) {
           />
         </div>
 
-        <div class="col-span-2 flex gap-4 mt-4">
+        <div class="col-span-2 flex gap-4 mt-4 justify-end sm:justify-start">
           <button
             @click="save"
             class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
