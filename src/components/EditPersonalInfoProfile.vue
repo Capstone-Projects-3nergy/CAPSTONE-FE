@@ -48,9 +48,24 @@ function startEdit() {
   isEdit.value = true
   emit('edit')
 }
+const newAvatar = ref(null)
+const avatarPreview = computed(() => {
+  if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
+  return props.avatar
+})
+
+function onImageChange(e) {
+  const file = e.target.files[0]
+  if (file) newAvatar.value = file
+}
 
 function save() {
   emit('save', { ...form.value })
+
+  if (newAvatar.value) {
+    emit('update-avatar', newAvatar.value)
+  }
+
   isEdit.value = false
 }
 
@@ -83,13 +98,13 @@ function updateUser(data) {
     <div
       class="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-50"
     >
-      <div class="flex flex-col items-center w-full md:w-1/3">
+      <div class="flex flex-col items-center">
         <div
-          class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
+          class="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
         >
           <img
-            v-if="hasAvatar"
-            :src="avatar"
+            v-if="avatarPreview"
+            :src="avatarPreview"
             alt="Profile"
             class="w-full h-full object-cover"
           />
@@ -100,6 +115,18 @@ function updateUser(data) {
           >
             {{ userInitial }}
           </div>
+
+          <label
+            class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs py-1 text-center cursor-pointer"
+          >
+            Change Image
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onImageChange"
+            />
+          </label>
         </div>
 
         <p class="mt-3 text-gray-700 font-medium text-center md:text-left">

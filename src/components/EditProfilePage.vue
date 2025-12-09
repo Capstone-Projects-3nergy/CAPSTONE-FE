@@ -506,7 +506,7 @@ onMounted(async () => {
             class="text-2xl font-bold text-[#185dc0]"
             v-if="loginManager.user.role == 'STAFF'"
           >
-            Edit Profile Resident
+            Edit Profile Staff
           </h2>
         </div>
         <EditPersonalInfoProfile
