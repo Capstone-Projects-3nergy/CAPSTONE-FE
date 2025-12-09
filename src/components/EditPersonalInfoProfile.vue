@@ -78,14 +78,6 @@ function display(value) {
       <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
         {{ title }}
       </h2>
-
-      <button
-        v-if="showEdit && !isEdit"
-        @click="startEdit"
-        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm cursor-pointer"
-      >
-        Edit Profile
-      </button>
     </div>
 
     <div
@@ -115,51 +107,7 @@ function display(value) {
         </p>
       </div>
 
-      <!-- VIEW MODE -->
       <div
-        v-if="!isEdit"
-        class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
-      >
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Firstname</label
-          >
-          <p>{{ firstName }}</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Lastname</label
-          >
-          <p>{{ lastName }}</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Email</label>
-          <p>{{ email }}</p>
-        </div>
-
-        <div v-if="roomNumber !== null">
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Room Number</label
-          >
-          <p>{{ roomNumber }}</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Line ID</label>
-          <p>{{ display(lineId) }}</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Contact</label>
-          <p>{{ display(contact) }}</p>
-        </div>
-      </div>
-
-      <!-- EDIT MODE -->
-      <div
-        v-else
         class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
       >
         <div>

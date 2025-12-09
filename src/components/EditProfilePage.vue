@@ -499,7 +499,18 @@ onMounted(async () => {
             />
           </svg>
 
-          <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
+          <h2
+            class="text-2xl font-bold text-[#185dc0]"
+            v-if="loginManager.user.role == 'RESIDENT'"
+          >
+            Edit Profile Resident
+          </h2>
+          <h2
+            class="text-2xl font-bold text-[#185dc0]"
+            v-if="loginManager.user.role == 'STAFF'"
+          >
+            Edit Profile Resident
+          </h2>
         </div>
         <EditPersonalInfoProfile
           :firstName="firstName"
