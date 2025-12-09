@@ -422,7 +422,7 @@ const toggleSortDate = () => {
               </template>
             </SidebarItem>
             <SidebarItem
-              title="Manage Residents "
+              title="Manage Residents"
               @click="ShowManageResidentPage"
             >
               <template #icon>

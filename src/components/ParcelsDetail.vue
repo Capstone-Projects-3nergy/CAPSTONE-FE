@@ -344,7 +344,10 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents (Next Release)">
+            <SidebarItem
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
               <template #icon>
                 <svg
                   width="25"
