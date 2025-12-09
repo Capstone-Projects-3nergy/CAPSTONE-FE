@@ -82,7 +82,7 @@ function display(value) {
       <button
         v-if="showEdit && !isEdit"
         @click="startEdit"
-        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm"
+        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm cursor-pointer"
       >
         Edit Profile
       </button>
@@ -219,13 +219,13 @@ function display(value) {
         <div class="col-span-2 flex gap-4 mt-4">
           <button
             @click="save"
-            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow"
+            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
           >
             Save
           </button>
           <button
             @click="cancel"
-            class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl shadow"
+            class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
           >
             Cancel
           </button>

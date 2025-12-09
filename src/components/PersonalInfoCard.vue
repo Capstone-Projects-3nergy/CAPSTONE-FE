@@ -39,7 +39,7 @@ defineEmits(['edit'])
       <button
         v-if="showEdit"
         @click="$emit('edit')"
-        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm"
+        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm cursor-pointer"
       >
         Edit Profile
       </button>
