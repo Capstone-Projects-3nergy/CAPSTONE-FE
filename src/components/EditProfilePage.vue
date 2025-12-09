@@ -27,21 +27,6 @@ const resident = ref({
   address: '203/45 Moo 5, Bangkok, Thailand'
 })
 
-const saveProfile = () => {
-  alert('Resident profile updated Successfuly!')
-}
-
-const cancelEdit = () => {
-  resident.value = {
-    name: 'Somchai Suksan',
-    email: 'somchai.suksan@example.com',
-    phone: '081-234-5678',
-    idCard: '1234567890123',
-    room: 'A-203',
-    building: 'Building 2',
-    address: '203/45 Moo 5, Bangkok, Thailand'
-  }
-}
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
@@ -51,6 +36,18 @@ const showResidentParcelPage = async function () {
     name: 'residentparcels'
   })
   showResidentParcels.value = true
+}
+const goBackProfilePage = async function () {
+  if ((loginManager.user.role = 'RESIDENT')) {
+    router.replace({
+      name: 'profileresident'
+    })
+  }
+  if ((loginManager.user.role = 'STAFF')) {
+    router.replace({
+      name: 'profilestaff'
+    })
+  }
 }
 const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
@@ -517,6 +514,7 @@ onMounted(async () => {
           :lastName="lastName"
           :email="loginManager.user.email"
           @save="updateUser"
+          @cancel="goBackProfilePage"
         ></EditPersonalInfoProfile>
       </main>
     </div>

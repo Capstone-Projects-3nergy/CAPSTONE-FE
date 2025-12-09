@@ -66,9 +66,9 @@ const userInitial = computed(() =>
 )
 const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 
-function display(value) {
-  if (!value || value.trim() === '') return '-'
-  return value
+function updateUser(data) {
+  console.log('ข้อมูลใหม่:', data)
+  // API update...
 }
 </script>
 
