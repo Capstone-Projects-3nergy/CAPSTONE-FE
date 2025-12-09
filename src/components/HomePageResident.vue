@@ -79,6 +79,8 @@ const authStore = useAuthManager()
 const currentUser = ref('Pimpajee SetXXXXXX')
 const showProfileResident = ref(false)
 const showLogoutConfirm = ref(false)
+const openStatusPopup = ref(false)
+const showParcelDetail = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }

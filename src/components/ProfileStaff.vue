@@ -84,6 +84,9 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
 })
+function goToEditProfile() {
+  router.replace({ name: 'editprofile' })
+}
 </script>
 
 <template>
@@ -331,14 +334,11 @@ onMounted(async () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
+      <main class="flex-1 p-6 md:p-9">
         <div class="flex items-center space-x-2 mb-6">
           <svg
-            class="w-6 h-6 text-blue-800"
+            class="w-6 h-6 text-[#185dc0]"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -350,18 +350,26 @@ onMounted(async () => {
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Staff</h2>
         </div>
+        <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
+              Personal Information
+            </h2>
 
-        <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
-          <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
-            Personal Information
-          </h2>
+            <button
+              @click="goToEditProfile"
+              class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm"
+            >
+              Edit Profile
+            </button>
+          </div>
 
           <div
-            class="flex flex-col md:flex-row items-center md:items-start gap-10"
+            class="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-50"
           >
             <div class="flex flex-col items-center w-full md:w-1/3">
               <div
-                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-600 mb-4 md:mb-0"
+                class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
               >
                 <img
                   src="https://i.pravatar.cc/150?img=8"
@@ -370,7 +378,9 @@ onMounted(async () => {
                 />
               </div>
 
-              <p class="mt-3 text-gray-600 font-medium">
+              <p
+                class="mt-3 text-gray-700 font-medium text-center md:text-left"
+              >
                 {{ loginManager.user.fullName }}
               </p>
             </div>
@@ -379,66 +389,45 @@ onMounted(async () => {
               class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
             >
               <div>
-                <label class="block font-semibold text-blue-700 mb-1"
+                <label class="block font-semibold text-[#185dc0] mb-1"
                   >Firstname</label
                 >
-
-                {{ firstName }}
+                <p>{{ firstName }}</p>
               </div>
 
               <div>
-                <label class="block font-semibold text-blue-700 mb-1"
+                <label class="block font-semibold text-[#185dc0] mb-1"
                   >Lastname</label
                 >
-                <input
-                  type="text"
-                  value="SetXXXXXX"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                <p>{{ lastName }}</p>
               </div>
 
               <div>
-                <label class="block font-semibold text-blue-700 mb-1"
+                <label class="block font-semibold text-[#185dc0] mb-1"
                   >Email</label
                 >
-                <input
-                  type="email"
-                  value="abcd@gmail.com"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                <p>{{ loginManager.user.email }}</p>
               </div>
 
               <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >LineID</label
-                >
-                <input
-                  type="text"
-                  value="abcdef555"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
-                  >Contact</label
-                >
-                <input
-                  type="text"
-                  value="097-230-XXXX"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-blue-700 mb-1"
+                <label class="block font-semibold text-[#185dc0] mb-1"
                   >Room Number</label
                 >
-                <input
-                  type="text"
-                  value="101"
-                  class="border border-gray-300 rounded-md px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                <p>-</p>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Line ID</label
+                >
+                <p>-</p>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#185dc0] mb-1"
+                  >Contact</label
+                >
+                <p>-</p>
               </div>
             </div>
           </div>

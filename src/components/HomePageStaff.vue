@@ -79,6 +79,8 @@ const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const isCollapsed = ref(false)
+const openStatusPopup = ref(false)
+const showParcelDetail = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
@@ -135,7 +137,6 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
-
   window.addEventListener('resize', checkScreen)
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
