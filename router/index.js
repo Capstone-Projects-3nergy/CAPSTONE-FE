@@ -21,6 +21,7 @@ import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 import ParcelTrash from '@/components/ParcelTrash.vue'
 import ParcelScannerPageSender from '@/components/ParcelScannerPageSender.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
+import EditProfilePage from '@/components/EditProfilePage.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -74,7 +75,7 @@ const routes = [
   {
     path: '/homepage/resident/:id/profile/editprofile',
     name: 'editprofileresident',
-    component: EditPersonalInfoProfile
+    component: EditProfilePage
   },
 
   // Staff
@@ -122,7 +123,7 @@ const routes = [
   {
     path: '/homepage/staff/:id/profile/editprofile',
     name: 'editprofilestaff',
-    component: EditPersonalInfoProfile
+    component: EditProfilePage
   },
   {
     path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',

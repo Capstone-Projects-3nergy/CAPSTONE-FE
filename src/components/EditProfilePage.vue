@@ -501,12 +501,12 @@ onMounted(async () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
-        <EditProfilePage 
-          :firstName="user.firstName"
-          :lastName="user.lastName"
-          :email="user.email"
+        <EditPersonalInfoProfile
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
           @save="updateUser"
-        ></EditProfilePage>
+        ></EditPersonalInfoProfile>
       </main>
     </div>
   </div>
