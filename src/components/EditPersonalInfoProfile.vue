@@ -115,19 +115,20 @@ function updateUser(data) {
           >
             {{ userInitial }}
           </div>
-
-          <label
-            class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs py-1 text-center cursor-pointer"
-          >
-            Change Image
-            <input
-              type="file"
-              accept="image/*"
-              class="hidden"
-              @change="onImageChange"
-            />
-          </label>
         </div>
+        <button
+          class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
+          @click="$refs.imageInput.click()"
+        >
+          Change Image
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          class="hidden"
+          ref="imageInput"
+          @change="onImageChange"
+        />
 
         <p class="mt-3 text-gray-700 font-medium text-center md:text-left">
           {{ props.fullName }}
