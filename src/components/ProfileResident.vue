@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, onMounted } from 'vue'
+import { ref, onUnmounted, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -7,6 +7,7 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
+import PersonalInfoCard from './PersonalInfoCard.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
@@ -50,7 +51,16 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
-
+const firstName = computed(() => {
+  return loginManager.user.fullName.split(' ')[0] || ''
+})
+function goToEditProfile() {
+  router.replace({ name: 'editprofile' })
+}
+const lastName = computed(() => {
+  const parts = loginManager.user.fullName.split(' ')
+  return parts.slice(1).join(' ') || ''
+})
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -281,7 +291,7 @@ onMounted(async () => {
       <main class="flex-1 p-9">
         <div class="flex items-center space-x-2 mb-6">
           <svg
-            class="w-6 h-6 text-blue-800"
+            class="w-6 h-6 text-[#185dc0]"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -298,8 +308,17 @@ onMounted(async () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
-
-        <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
+        <PersonalInfoCard
+          :fullName="loginManager.user.fullName"
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
+          :roomNumber="loginManager.user.roomNumber"
+          :lineId="lineId"
+          :contact="contact"
+          @edit="goToEditProfile"
+        />
+        <!-- <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
           <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
             Personal Information
           </h2>
@@ -391,7 +410,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>

@@ -1,9 +1,11 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { useAuthManager } from '@/stores/AuthManager'
+const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
-  avatar: { type: String, default: 'https://i.pravatar.cc/150?img=8' },
+  avatar: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -12,10 +14,19 @@ defineProps({
   lineId: { type: String, default: null },
   contact: { type: String, default: null }
 })
+
 function display(value) {
   if (!value || value.trim() === '') return '-'
   return value
 }
+const authStore = useAuthManager()
+
+const userName = computed(() => authStore.user?.fullName || 'Courier')
+
+const userInitial = computed(() =>
+  userName.value ? userName.value[0].toUpperCase() : 'C'
+)
+const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 defineEmits(['edit'])
 </script>
 <template>
@@ -41,7 +52,19 @@ defineEmits(['edit'])
         <div
           class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
         >
-          <img :src="avatar" alt="Profile" class="w-full h-full object-cover" />
+          <img
+            v-if="hasAvatar"
+            :src="avatar"
+            alt="Profile"
+            class="w-full h-full object-cover"
+          />
+
+          <div
+            v-else
+            class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
+          >
+            {{ userInitial }}
+          </div>
         </div>
 
         <p class="mt-3 text-gray-700 font-medium text-center md:text-left">

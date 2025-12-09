@@ -12,8 +12,8 @@ import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
-
 const router = useRouter()
+const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
