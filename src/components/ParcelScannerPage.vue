@@ -693,7 +693,7 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile (Next Release)">
+            <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"

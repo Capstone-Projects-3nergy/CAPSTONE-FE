@@ -641,7 +641,7 @@ const handleSortUpdate = (val) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile (Next Release)">
+            <SidebarItem title="Profile" @click="showProfileResidentPage">
               <template #icon>
                 <svg
                   width="24"

@@ -368,7 +368,8 @@ const toggleSortDate = () => {
               </template>
             </SidebarItem>
             <SidebarItem
-              title="Profile (Next Release)"
+              title="Profile"
+              @click="showProfileResidentPage"
               :collapsed="isCollapsed"
             >
               <template #icon>
