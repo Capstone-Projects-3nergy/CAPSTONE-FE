@@ -20,6 +20,7 @@ import ConfirmParcels from '@/components/ConfirmParcels.vue'
 import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 import ParcelTrash from '@/components/ParcelTrash.vue'
 import ParcelScannerPageSender from '@/components/ParcelScannerPageSender.vue'
+import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -70,6 +71,11 @@ const routes = [
     name: 'profileresident',
     component: ProfileResident
   },
+  {
+    path: '/homepage/resident/:id/profile/editprofile',
+    name: 'editprofileresident',
+    component: EditPersonalInfoProfile
+  },
 
   // Staff
   {
@@ -112,6 +118,11 @@ const routes = [
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
+  },
+  {
+    path: '/homepage/staff/:id/profile/editprofile',
+    name: 'editprofilestaff',
+    component: EditPersonalInfoProfile
   },
   {
     path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',

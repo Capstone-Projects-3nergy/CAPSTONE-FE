@@ -166,36 +166,54 @@ function display(value) {
           <label class="block font-semibold text-[#185dc0] mb-1"
             >Firstname</label
           >
-          <input v-model="form.firstName" class="input" />
+          <input
+            v-model="form.firstName"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div>
           <label class="block font-semibold text-[#185dc0] mb-1"
             >Lastname</label
           >
-          <input v-model="form.lastName" class="input" />
+          <input
+            v-model="form.lastName"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div>
           <label class="block font-semibold text-[#185dc0] mb-1">Email</label>
-          <input v-model="form.email" class="input" />
+          <input
+            v-model="form.email"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div v-if="roomNumber !== null">
           <label class="block font-semibold text-[#185dc0] mb-1"
             >Room Number</label
           >
-          <input v-model="form.roomNumber" class="input" />
+          <input
+            v-model="form.roomNumber"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div>
           <label class="block font-semibold text-[#185dc0] mb-1">Line ID</label>
-          <input v-model="form.lineId" class="input" />
+          <input
+            v-model="form.lineId"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div>
           <label class="block font-semibold text-[#185dc0] mb-1">Contact</label>
-          <input v-model="form.contact" class="input" />
+          <input
+            v-model="form.contact"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div class="col-span-2 flex gap-4 mt-4">
@@ -217,8 +235,4 @@ function display(value) {
   </div>
 </template>
 
-<style scoped>
-.input {
-  @apply w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500;
-}
-</style>
+<style scoped></style>
