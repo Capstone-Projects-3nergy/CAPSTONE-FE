@@ -12,7 +12,10 @@ defineProps({
   lineId: { type: String, default: null },
   contact: { type: String, default: null }
 })
-
+function display(value) {
+  if (!value || value.trim() === '') return '-'
+  return value
+}
 defineEmits(['edit'])
 </script>
 <template>
@@ -75,14 +78,14 @@ defineEmits(['edit'])
           <p>{{ roomNumber }}</p>
         </div>
 
-        <div v-if="lineId !== null">
+        <div>
           <label class="block font-semibold text-[#185dc0] mb-1">Line ID</label>
-          <p>{{ lineId }}</p>
+          <p>{{ display(lineId) }}</p>
         </div>
 
-        <div v-if="contact !== null">
+        <div>
           <label class="block font-semibold text-[#185dc0] mb-1">Contact</label>
-          <p>{{ contact }}</p>
+          <p>{{ display(contact) }}</p>
         </div>
       </div>
     </div>

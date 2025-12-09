@@ -8,7 +8,7 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
-
+import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 const loginManager = useAuthManager()
@@ -350,7 +350,17 @@ function goToEditProfile() {
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Staff</h2>
         </div>
-        <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
+        <PersonalInfoCard
+          :fullName="loginManager.user.fullName"
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
+          :roomNumber="null"
+          :lineId="lineId"
+          :contact="contact"
+          @edit="goToEditProfile"
+        />
+        <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
               Personal Information
@@ -431,7 +441,7 @@ function goToEditProfile() {
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>
