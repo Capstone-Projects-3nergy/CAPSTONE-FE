@@ -122,7 +122,12 @@ function updateUser(data) {
           class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
           @click="$refs.imageInput.click()"
         />
-
+        <!-- <button
+          class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
+          @click="$refs.imageInput.click()"
+        >
+          Change Image
+        </button> -->
         <input
           type="file"
           accept="image/*"
@@ -197,15 +202,27 @@ function updateUser(data) {
           <ButtonWeb
             label="Save"
             color="green"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto px-5 py-2 rounded-xl shadow"
             @click="save"
           />
           <ButtonWeb
             label=" Cancel"
             color="gray"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto px-5 py-2 rounded-xl shadow"
             @click="cancel"
           />
+          <!-- <button
+            @click="save"
+            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
+          >
+            Save
+          </button>
+          <button
+            @click="cancel"
+            class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
+          >
+            Cancel
+          </button> -->
         </div>
       </div>
     </div>
