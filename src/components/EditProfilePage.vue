@@ -501,7 +501,7 @@ onMounted(async () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
-        <EditProfilePage
+        <EditProfilePage 
           :firstName="user.firstName"
           :lastName="user.lastName"
           :email="user.email"

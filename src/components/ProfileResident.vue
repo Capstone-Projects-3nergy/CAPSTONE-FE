@@ -55,7 +55,7 @@ const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
 })
 function goToEditProfile() {
-  router.replace({ name: 'editprofile' })
+  router.replace({ name: 'editprofileresident' })
 }
 const lastName = computed(() => {
   const parts = loginManager.user.fullName.split(' ')

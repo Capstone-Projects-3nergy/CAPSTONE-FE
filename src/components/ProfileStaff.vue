@@ -85,7 +85,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
 })
 function goToEditProfile() {
-  router.replace({ name: 'editprofile' })
+  router.replace({ name: 'editprofilestaff' })
 }
 </script>
 
