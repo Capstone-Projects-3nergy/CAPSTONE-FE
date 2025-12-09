@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
+import ButtonWeb from './ButtonWeb.vue'
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -35,14 +36,13 @@ defineEmits(['edit'])
       <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
         {{ title }}
       </h2>
-
-      <button
+      <ButtonWeb
         v-if="showEdit"
+        label="Edit Profile"
+        color="blue"
+        class="w-full sm:w-auto"
         @click="$emit('edit')"
-        class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow transition max-sm:px-3 max-sm:py-1.5 max-sm:text-sm cursor-pointer"
-      >
-        Edit Profile
-      </button>
+      />
     </div>
 
     <div

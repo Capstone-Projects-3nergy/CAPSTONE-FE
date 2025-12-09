@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
-
+import ButtonWeb from './ButtonWeb.vue'
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -98,7 +98,7 @@ function updateUser(data) {
     <div
       class="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-50"
     >
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center w-full md:w-1/3">
         <div
           class="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
         >
@@ -116,12 +116,13 @@ function updateUser(data) {
             {{ userInitial }}
           </div>
         </div>
-        <button
+        <ButtonWeb
+          label=" Change Image"
+          color="blue"
           class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
           @click="$refs.imageInput.click()"
-        >
-          Change Image
-        </button>
+        />
+
         <input
           type="file"
           accept="image/*"
@@ -192,19 +193,19 @@ function updateUser(data) {
           />
         </div>
 
-        <div class="col-span-2 flex gap-4 mt-4 justify-end sm:justify-start">
-          <button
+        <div class="col-span-2 flex gap-4 mt-4 justify-end">
+          <ButtonWeb
+            label="Save"
+            color="green"
+            class="w-full sm:w-auto"
             @click="save"
-            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
-          >
-            Save
-          </button>
-          <button
+          />
+          <ButtonWeb
+            label=" Cancel"
+            color="gray"
+            class="w-full sm:w-auto"
             @click="cancel"
-            class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
-          >
-            Cancel
-          </button>
+          />
         </div>
       </div>
     </div>
