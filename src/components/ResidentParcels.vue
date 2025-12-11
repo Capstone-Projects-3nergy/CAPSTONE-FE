@@ -746,11 +746,12 @@ const handleSortUpdate = (val) => {
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
+          :hideNameSort="true"
+          :hideTrash="false"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
-          :hideNameSort="true"
         />
 
         <!-- <div

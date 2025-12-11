@@ -10,10 +10,14 @@ defineProps({
   hideNameSort: {
     type: Boolean,
     default: false
+  },
+  hideTrash: {
+    type: Boolean,
+    default: true
   }
 })
 
-defineEmits(['update:date', 'update:search', 'update:sort', 'add'])
+defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
 </script>
 <template>
   <div
@@ -79,6 +83,29 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add'])
             />
           </svg>
           <span>Add parcel</span>
+        </button>
+        <button
+          v-if="hideTrash"
+          @click="$emit('trash')"
+          class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 18 21"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+              fill="white"
+            />
+          </svg>
+          <span>Trash</span>
         </button>
       </div>
     </div>

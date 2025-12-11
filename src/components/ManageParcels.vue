@@ -932,6 +932,7 @@ const handleSortUpdate = (val) => {
           :page="currentPage"
           :total="totalPages"
           :showDelete="true"
+          :hideTrash="true"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
