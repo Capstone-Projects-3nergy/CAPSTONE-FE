@@ -16,6 +16,10 @@ defineProps({
   showAction: {
     type: Boolean,
     default: true
+  },
+  showDelete: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -146,6 +150,7 @@ function formatDateTime(datetimeStr) {
               <slot name="icon-view"></slot>
             </button>
             <button
+              v-if="showDelete"
               @click="$emit('delete', p.id)"
               class="hover:opacity-80 cursor-pointer"
             >

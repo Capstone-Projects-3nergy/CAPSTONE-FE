@@ -931,6 +931,7 @@ const handleSortUpdate = (val) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
+          :showDelete="true"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1045,8 +1046,9 @@ const handleSortUpdate = (val) => {
         21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
         V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                 fill="red"
-              /></svg
-          ></template>
+              />
+            </svg>
+          </template>
         </ParcelTable>
         <!-- <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
