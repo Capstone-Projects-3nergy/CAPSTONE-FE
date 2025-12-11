@@ -811,6 +811,7 @@ const handleSortUpdate = (val) => {
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
           @add="showParcelScannerPage"
+          @trash="showParcelTrashPage"
         />
 
         <!-- <div

@@ -146,7 +146,7 @@ const routes = [
     component: DeleteParcels
   },
   {
-    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/trashparcel',
+    path: '/homepage/staff/:id/manageparcel/trashparcel',
     name: 'trashparcels',
     component: ParcelTrash
   }
