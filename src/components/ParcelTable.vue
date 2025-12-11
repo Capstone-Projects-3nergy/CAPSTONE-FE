@@ -1,5 +1,12 @@
 <script setup>
-const emit = defineEmits(['prev', 'next', 'go', 'status-click', 'view-detail'])
+const emit = defineEmits([
+  'prev',
+  'next',
+  'go',
+  'status-click',
+  'view-detail',
+  'delete'
+])
 
 defineProps({
   items: Array,
@@ -137,6 +144,12 @@ function formatDateTime(datetimeStr) {
               class="text-blue-600 hover:text-blue-800 cursor-pointer"
             >
               <slot name="icon-view"></slot>
+            </button>
+            <button
+              @click="$emit('delete', p.id)"
+              class="hover:opacity-80 cursor-pointer"
+            >
+              <slot name="icon-delete"> </slot>
             </button>
           </td>
         </tr>
