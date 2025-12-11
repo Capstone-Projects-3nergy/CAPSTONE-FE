@@ -841,7 +841,7 @@ const closePopUp = (operate) => {
           </div>
 
           <ButtonWeb
-            label="Cancel"
+            label="Go Back"
             color="gray"
             @click="cancelPage"
             class="w-full md:w-auto"
@@ -1084,12 +1084,6 @@ const closePopUp = (operate) => {
             </svg>
           </template>
         </ParcelTable>
-        <ButtonWeb
-          label="Go Black"
-          color="gray"
-          @click="cancelPage"
-          class="w-full md:w-auto"
-        />
         <!-- <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
             <thead
