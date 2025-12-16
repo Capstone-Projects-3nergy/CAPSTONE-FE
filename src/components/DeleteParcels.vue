@@ -69,11 +69,11 @@ const cancelBalckToTrashPage = () => {
   router.replace({ name: 'trashparcels' })
 }
 const confirmAction = () => {
-  isPermanent ? deleteParcelFn() : removeParcelToTrashFn()
+  props.isPermanent ? deleteParcelFn() : removeParcelToTrashFn()
 }
 
 const cancelAction = () => {
-  isPermanent ? cancelBalckToTrashPage() : cancelBalckToManagePage()
+  props.isPermanent ? cancelBalckToTrashPage() : cancelBalckToManagePage()
 }
 </script>
 
