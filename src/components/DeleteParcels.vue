@@ -6,7 +6,14 @@ import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-const props = defineProps(['parcelData'])
+const props = defineProps({
+  parcelData: Object,
+  isPermanent: {
+    type: Boolean,
+    default: false
+  }
+})
+
 const router = useRouter()
 const parcelManager = useParcelManager()
 const parcelEditDetail = ref(null)
@@ -16,6 +23,24 @@ onMounted(async () => {})
 
 const parcel = computed(() => props.parcelData || {})
 
+const removeParcelToTrashFn = async () => {
+  if (!parcel.value.id) return
+
+  deletedParcel.value = await deleteItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    parcel.value.id
+  )
+
+  if (deletedParcel.value === '404') {
+    emit('redAlert')
+    emit('cancelDetail', true)
+    return
+  }
+
+  parcelManager.deleteParcels(parcel.value.id)
+
+  emit('confirmDetail', true)
+}
 const deleteParcelFn = async () => {
   if (!parcel.value.id) return
 
@@ -35,9 +60,20 @@ const deleteParcelFn = async () => {
   emit('confirmDetail', true)
 }
 
-const cancelFn = () => {
+const cancelBalckToManagePage = () => {
   emit('cancelDetail', true)
   router.replace({ name: 'staffparcels' })
+}
+const cancelBalckToTrashPage = () => {
+  emit('cancelDetail', true)
+  router.replace({ name: 'trashparcels' })
+}
+const confirmAction = () => {
+  isPermanent ? deleteParcelFn() : removeParcelToTrashFn()
+}
+
+const cancelAction = () => {
+  isPermanent ? cancelBalckToTrashPage() : cancelBalckToManagePage()
 }
 </script>
 
@@ -55,11 +91,17 @@ const cancelFn = () => {
       </div>
 
       <div class="p-4 text-center sm:text-left">
-        <p class="mb-4">
+        <template v-if="isPermanent">
+          Do you want to permanently delete this parcel number?
+          <b>{{ parcel.parcelNumber || '' }}</b
+          >?
+        </template>
+
+        <template v-else>
           Do you want to move this tracking number
           <b>{{ parcel.parcelNumber || '' }}</b>
           to trash?
-        </p>
+        </template>
       </div>
 
       <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
@@ -67,13 +109,14 @@ const cancelFn = () => {
           label="Confirm"
           color="green"
           class="w-full sm:w-auto"
-          @click="deleteParcelFn"
+          @click="confirmAction"
         />
+
         <ButtonWeb
           label="Cancel"
           color="red"
           class="w-full sm:w-auto"
-          @click="cancelFn"
+          @click="cancelAction"
         />
       </div>
     </div>

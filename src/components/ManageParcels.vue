@@ -1301,6 +1301,7 @@ const handleSortUpdate = (val) => {
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
       :parcelData="parcelDetail"
+      :isPermanent="false"
     />
   </teleport>
   <Teleport to="body" v-if="showLogoutConfirm"

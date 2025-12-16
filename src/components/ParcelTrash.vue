@@ -1395,4 +1395,13 @@ const closePopUp = (operate) => {
       class="w-full md:w-auto"
     />
   </div> -->
+  <teleport to="body" v-if="showDeleteParcel">
+    <DeleteParcels
+      @cancelDetail="clearDeletePopUp"
+      @confirmDetail="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelData="parcelDetail"
+      :isPermanent="true"
+    />
+  </teleport>
 </template>
