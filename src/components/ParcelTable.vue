@@ -158,7 +158,7 @@ function formatDateTime(datetimeStr) {
             </button>
             <button
               v-if="showDelete"
-              @click="$emit('delete', p.id)"
+              @click="$emit('delete', p)"
               class="hover:opacity-80 cursor-pointer"
             >
               <slot name="icon-delete"> </slot>

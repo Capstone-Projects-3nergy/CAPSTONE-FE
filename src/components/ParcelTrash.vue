@@ -449,7 +449,7 @@ const deleteParcelPopUp = (parcel) => {
   showDeleteParcel.value = true
   parcelDetail.value = {
     id: parcel.id,
-    parcelNumber: parcel.parcelNumber
+    parcelNumber: parcel.trackingNumber
   }
 }
 

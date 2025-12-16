@@ -92,9 +92,8 @@ const cancelAction = () => {
 
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
-          Do you want to permanently delete this parcel number?
-          <b>{{ parcel.parcelNumber || '' }}</b
-          >?
+          Do you want to permanently delete this
+          <b>{{ parcel.parcelNumber || '' }}</b> parcel number? ?
         </template>
 
         <template v-else>
