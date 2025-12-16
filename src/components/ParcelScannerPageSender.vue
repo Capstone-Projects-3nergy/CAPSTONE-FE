@@ -385,6 +385,8 @@ const saveParcel = async () => {
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
+    selectedResidentId.value = null
+    recipientSearch.value = ''
     form.value = {
       trackingNumber: '',
       recipientName: '',
@@ -404,6 +406,13 @@ const saveParcel = async () => {
 }
 
 onMounted(async () => {
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {}
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
@@ -626,8 +635,38 @@ const closePopUp = (operate) => {
                     class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                   />
                 </div>
-
                 <div>
+                  <label class="block font-semibold mb-1">
+                    Recipient <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="recipientSearch"
+                    type="text"
+                    placeholder="Enter Recipient Name"
+                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                  />
+
+                  <ul
+                    v-if="showSuggestions"
+                    class="absolute z-10 mt-1 w-[235px] lg:w-[505px] sm:w-[560px] md:w-[380px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                  >
+                    <li
+                      v-for="r in filteredResidents"
+                      :key="r.userId"
+                      @click="selectResident(r)"
+                      class="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                    >
+                      {{ r.fullName }}
+                    </li>
+                    <li
+                      v-if="filteredResidents.length === 0"
+                      class="px-3 py-1 text-gray-400"
+                    >
+                      No residents found matching your search terms.
+                    </li>
+                  </ul>
+                </div>
+                <!-- <div>
                   <label class="block font-semibold mb-1">
                     Recipient <span class="text-red-500">*</span>
                   </label>
@@ -637,7 +676,7 @@ const closePopUp = (operate) => {
                     placeholder="Enter Recipient Name"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
-                </div>
+                </div> -->
                 <div>
                   <label class="block font-semibold mb-1">
                     Parcel Type <span class="text-red-500">*</span>
@@ -730,7 +769,11 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Recipient:</span>
-                  <span>{{ form.recipientName }}</span>
+                  <span>{{
+                    selectedResident
+                      ? selectedResident.fullName
+                      : form.recipientName
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Type:</span>
