@@ -26,7 +26,7 @@ const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
-
+const auth = useAuthManager()
 const companyList = ref([])
 const router = useRouter()
 const error = ref(false)
@@ -362,6 +362,7 @@ const saveParcel = async () => {
 
   try {
     const requestBody = {
+      userId: selectedResidentId.value,
       trackingNumber: form.value.trackingNumber,
       recipientName: form.value.recipientName,
       parcelType: form.value.parcelType,
