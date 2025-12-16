@@ -966,6 +966,7 @@ const closePopUp = (operate) => {
           :total="totalPages"
           :showDelete="true"
           :hideTrash="true"
+          :clickableStatus="false"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1044,7 +1045,7 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
-
+          <!-- 
           <template #icon-view>
             <svg
               class="cursor-pointer"
@@ -1063,7 +1064,7 @@ const closePopUp = (operate) => {
                 fill="#107EFF"
               />
             </svg>
-          </template>
+          </template> -->
 
           <template #icon-delete>
             <svg

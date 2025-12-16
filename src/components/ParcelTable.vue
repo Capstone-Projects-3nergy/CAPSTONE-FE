@@ -20,6 +20,10 @@ defineProps({
   showDelete: {
     type: Boolean,
     default: true
+  },
+  clickableStatus: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -118,13 +122,16 @@ function formatDateTime(datetimeStr) {
             <span class="md:hidden font-semibold text-blue-700">Status:</span>
 
             <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white cursor-pointer"
-              :class="{
-                'bg-yellow-400': p.status === 'Waiting for Staff',
-                'bg-green-400': p.status === 'Picked Up',
-                'bg-blue-400': p.status === 'Received'
-              }"
-              @click="$emit('status-click', p)"
+              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              :class="[
+                {
+                  'bg-yellow-400': p.status === 'Waiting for Staff',
+                  'bg-green-400': p.status === 'Picked Up',
+                  'bg-blue-400': p.status === 'Received'
+                },
+                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
+              ]"
+              @click="clickableStatus && $emit('status-click', p)"
             >
               {{ p.status }}
             </span>
