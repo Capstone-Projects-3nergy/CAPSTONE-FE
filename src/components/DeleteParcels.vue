@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
+
 const props = defineProps({
   parcelData: Object,
   isPermanent: {
@@ -16,10 +17,8 @@ const props = defineProps({
 
 const router = useRouter()
 const parcelManager = useParcelManager()
-const parcelEditDetail = ref(null)
-const parcelIdDetail = ref(null)
+
 const deletedParcel = ref(null)
-onMounted(async () => {})
 
 const parcel = computed(() => props.parcelData || {})
 
@@ -37,15 +36,16 @@ const removeParcelToTrashFn = async () => {
     return
   }
 
-  parcelManager.deleteParcels(parcel.value.id)
+  parcelManager.moveToTrash(parcel.value.id)
 
   emit('confirmDetail', true)
 }
+
 const deleteParcelFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels/permanent`,
     parcel.value.id
   )
 
@@ -55,25 +55,20 @@ const deleteParcelFn = async () => {
     return
   }
 
-  parcelManager.deleteParcels(parcel.value.id)
+  parcelManager.deletePermanent(parcel.value.id)
 
   emit('confirmDetail', true)
 }
 
-const cancelBalckToManagePage = () => {
-  emit('cancelDetail', true)
-  router.replace({ name: 'staffparcels' })
-}
-const cancelBalckToTrashPage = () => {
-  emit('cancelDetail', true)
-  router.replace({ name: 'trashparcels' })
-}
 const confirmAction = () => {
   props.isPermanent ? deleteParcelFn() : removeParcelToTrashFn()
 }
 
 const cancelAction = () => {
-  props.isPermanent ? cancelBalckToTrashPage() : cancelBalckToManagePage()
+  emit('cancelDetail', true)
+  router.replace({
+    name: props.isPermanent ? 'trashparcels' : 'staffparcels'
+  })
 }
 </script>
 
