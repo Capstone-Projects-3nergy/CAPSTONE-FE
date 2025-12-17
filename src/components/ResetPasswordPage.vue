@@ -28,30 +28,40 @@ const checkInputLength = () => {
 }
 
 const sendResetEmail = async () => {
-  loading.value = true
-  if (!email.value.trim()) {
-    emailRequire.value = true
-    setTimeout(() => (emailRequire.value = false), 10000)
+  emailRequire.value = false
+  incorrectemailform.value = false
+  success.value = false
+  error.value = false
 
+  loading.value = true
+
+  if (!trimmedEmail.value) {
+    emailRequire.value = true
     loading.value = false
+    setTimeout(() => (emailRequire.value = false), 10000)
     return
   }
+
   if (!/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
     incorrectemailform.value = true
-    setTimeout(() => (incorrectemailform.value = false), 10000)
     loading.value = false
+    setTimeout(() => (incorrectemailform.value = false), 10000)
     return
   }
 
   try {
     await resetStore.sendResetEmail(trimmedEmail.value)
-    setTimeout(() => (success.value = false), 10000)
+
     success.value = true
+    setTimeout(() => (success.value = false), 10000)
   } catch (e) {
-    setTimeout(() => (error.value = false), 10000)
     error.value = true
+    setTimeout(() => (error.value = false), 10000)
+  } finally {
+    loading.value = false
   }
 }
+
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'success') success.value = false
@@ -162,7 +172,7 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="error"
-          :titles="'Unable to send reset password email.'"
+          :titles="'Failed to send reset password email.'"
           message="Please try again later."
           styleType="red"
           operate="problem"
@@ -171,7 +181,7 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="success"
-          :titles="'Password reset email sent successfully.'"
+          :titles="' Reset password link has been sent to your email.'"
           message="Please check your email to continue."
           styleType="green"
           operate="success"
@@ -203,8 +213,6 @@ const returnLoginPage = () => {
               type="email"
               placeholder="Email"
               class="w-full pl-4 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              @input="checkInputLength"
-              :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
             />
           </div>
 
@@ -212,32 +220,28 @@ const returnLoginPage = () => {
             Please enter a valid email address.
           </p>
 
-          <p v-if="isEmailOverLimit" class="text-sm text-red-600">
-            Limit email to 30 characters or less.
-          </p>
-
           <button
             type="submit"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 cursor-pointer"
-            :disabled="trimmedEmail.length === 0 || isEmailOverLimit"
+            :disabled="isEmailOverLimit"
           >
             Reset Password
           </button>
-
+          <!-- 
           <p v-if="success" class="text-green-600 text-sm">
             Reset password link has been sent to your email.
           </p>
 
           <p v-if="error" class="text-red-600 text-sm">
             Failed to send reset password email.
-          </p>
+          </p> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-6">
           Remember your password?
           <a
             href="#"
-            class="text-blue-600 font-medium hover:underline cursor-pointer"
+            class="text-[#107EFF] font-medium hover:underline cursor-pointer"
             @click="returnLoginPage"
           >
             Sign In
