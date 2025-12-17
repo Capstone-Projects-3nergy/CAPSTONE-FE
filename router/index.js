@@ -21,6 +21,7 @@ import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 import ParcelTrash from '@/components/ParcelTrash.vue'
 import ParcelScannerPageSender from '@/components/ParcelScannerPageSender.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
+import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
 import EditProfilePage from '@/components/EditProfilePage.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
@@ -45,6 +46,13 @@ const routes = [
     name: 'home',
     component: HomePageResident
   },
+  ,
+  {
+    path: '/resetpasswordpage',
+    name: 'resetpassword',
+    component: ResetPasswordPage
+  },
+
   {
     path: '/homepage/resident/:id/parcelspage',
     name: 'residentparcels',

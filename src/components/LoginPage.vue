@@ -436,7 +436,13 @@ const showResetPasswordPageWeb = async function () {
             </button>
           </div>
 
-          <div class="flex justify-end"></div>
+          <div class="flex justify-end">
+            <a
+              @click="showResetPasswordPageWeb"
+              class="text-sm text-black hover:text-gray-600 cursor-pointer"
+              >Reset password?</a
+            >
+          </div>
           <ButtonWeb
             label="Sign In"
             type="submit"
