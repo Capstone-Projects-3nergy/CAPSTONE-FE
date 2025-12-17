@@ -108,7 +108,7 @@ const cancelAction = () => {
 
         <ButtonWeb
           label="Cancel"
-          color="red"
+          color="gray"
           class="w-full sm:w-auto"
           @click="cancelAction"
         />
