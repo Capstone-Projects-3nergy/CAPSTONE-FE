@@ -65,7 +65,8 @@ const parcelManager = useParcelManager()
 const emit = defineEmits(['add-success'])
 const showLogoutConfirm = ref(null)
 const parcelStore = useParcelManager()
-const trashList = ref([])
+// const trashList = ref([])
+const trashList = computed(() => parcelManager.getTrash?.() || [])
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -200,31 +201,33 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-const sortStatusAsc = () => sortByStatus(parcels.value)
-const sortStatusDesc = () => sortByStatusReverse(parcels.value)
-const sortDateAsc = () => sortByDate(parcels.value)
-const sortDateDesc = () => sortByDateReverse(parcels.value)
-const sortByNameAsc = () => sortByName(parcels.value)
-const sortByNameDesc = () => sortByNameReverse(parcels.value)
+const sortRoomAsc = () => sortByRoomNumber(trashList.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(trashList.value)
+const sortStatusAsc = () => sortByStatus(trashList.value)
+const sortStatusDesc = () => sortByStatusReverse(trashList.value)
+const sortDateAsc = () => sortByDate(trashList.value)
+const sortDateDesc = () => sortByDateReverse(trashList.value)
+const sortByNameAsc = () => sortByName(trashList.value)
+const sortByNameDesc = () => sortByNameReverse(trashList.value)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
-    ? sortByRoomNumber(parcels.value)
-    : sortByRoomNumberReverse(parcels.value)
+    ? sortByRoomNumber(trashList.value)
+    : sortByRoomNumberReverse(trashList.value)
   isRoomAsc.value = !isRoomAsc.value
 }
 
 const toggleSortStatus = () => {
   isStatusAsc.value
-    ? sortByStatus(parcels.value)
-    : sortByStatusReverse(parcels.value)
+    ? sortByStatus(trashList.value)
+    : sortByStatusReverse(trashList.value)
   isStatusAsc.value = !isStatusAsc.value
 }
 
 const toggleSortDate = () => {
-  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value
+    ? sortByDate(trashList.value)
+    : sortByDateReverse(trashList.value)
   isDateAsc.value = !isDateAsc.value
 }
 const selectedSort = ref('Sort by:')
@@ -300,7 +303,7 @@ function parseDate(dateStr) {
 const selectedDate = ref('')
 
 const filteredParcels = computed(() => {
-  let result = parcels.value.map((p) => ({
+  let result = trashList.value.map((p) => ({
     ...p,
     parsedDate: parseDate(p.updateAt)
   }))
@@ -389,7 +392,7 @@ const toggleSidebar = () => {
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
-  Math.ceil(parcels.value.length / perPage.value)
+  Math.ceil(trashList.value.length / perPage.value)
 )
 
 const paginatedParcels = computed(() => {
@@ -542,25 +545,61 @@ const handleSortUpdate = (val) => {
   handleSort()
 }
 const fetchTrash = async () => {
-  const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
-  trashList.value = await res.json()
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/trash`
+    )
+
+    if (!res.ok) return
+
+    const data = await res.json()
+
+    // ป้องกัน null / undefined
+    const list = Array.isArray(data) ? data : []
+
+    // map ให้โครงสร้างตรงกับ parcel
+    const mapped = list.map((p) => ({
+      id: p.parcelId,
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName,
+      roomNumber: p.roomNumber,
+      email: p.contactEmail,
+      status: 'TRASH',
+      trashedAt: p.trashedAt || null
+    }))
+
+    // ใส่เข้า Pinia
+    parcelManager.trash.length = 0
+    mapped.forEach((p) => parcelManager.trash.push(p))
+  } catch (e) {
+    // ❗ไม่ throw error
+    console.warn('Fetch trash failed', e)
+  }
 }
 
+// const fetchTrash = async () => {
+//   const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
+//   trashList.value = await res.json()
+// }
+
 const deleteForever = async (id) => {
-  if (!confirm('Delete permanently? This action cannot be undone.')) {
+  if (!confirm('Delete permanently? This action cannot be undone.')) return
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/force`,
+      { method: 'DELETE' }
+    )
+
+    if (!res.ok) throw new Error('delete failed')
+
+    parcelManager.deletePermanent(id)
+
+    deleteSuccess.value = true
+    setTimeout(() => (deleteSuccess.value = false), 10000)
+  } catch (e) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
-    return
-  }
-  const res = await fetch(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/force`,
-    { method: 'DELETE' }
-  )
-
-  if (res.ok) {
-    await fetchTrash()
-    setTimeout(() => (deleteSuccess.value = false), 10000)
-    deleteSuccess.value = true
   }
 }
 
