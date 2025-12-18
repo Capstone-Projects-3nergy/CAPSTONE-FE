@@ -124,30 +124,58 @@ const videoRef = ref(null)
 const isCameraReady = ref(false)
 
 async function extractParcelInfo(imageDataUrl) {
+  // 🛑 กัน image ว่าง / format ผิด
+  if (
+    !imageDataUrl ||
+    typeof imageDataUrl !== 'string' ||
+    !imageDataUrl.startsWith('data:image')
+  ) {
+    console.error('Invalid image data for OCR:', imageDataUrl)
+    return null
+  }
+
   try {
-    const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result.data.text
+    const result = await Tesseract.recognize(imageDataUrl, 'tha+eng', {
+      logger: (m) => console.log(m)
+    })
 
-    const info = { name: '', tracking: '', courier: '', type: '' }
+    const text = result?.data?.text
+    if (!text) {
+      console.warn('OCR completed but no text detected')
+      return null
+    }
 
+    const info = {
+      recipientName: '',
+      trackingNumber: '',
+      companyId: '',
+      parcelType: ''
+    }
+
+    // 👤 ชื่อผู้รับ
     const nameMatch = text.match(
-      /(ชื่อเจ้าของพัสดุ|ชื่อผู้รับ)[:\s]*([\u0E00-\u0E7Fa-zA-Z ]+)/
+      /(ชื่อผู้รับ|Recipient|To)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]+)/i
     )
-    if (nameMatch) info.name = nameMatch[2].trim()
+    if (nameMatch) info.recipientName = nameMatch[2].trim()
 
-    const trackingMatch = text.match(/(TH\d{10,}[A-Z]?)/)
-    if (trackingMatch) info.tracking = trackingMatch[1]
+    // 📦 Tracking number
+    const trackingMatch = text.match(/TH\d{10,}[A-Z]?/i)
+    if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
-    if (/Shopee Express/i.test(text)) info.courier = 'Shopee Express'
-    else if (/Kerry/i.test(text)) info.courier = 'Kerry Express'
-    else if (/J&T/i.test(text)) info.courier = 'J&T Express'
+    // 🚚 บริษัทขนส่ง
+    if (/Kerry/i.test(text)) info.companyId = 1
+    else if (/J&T/i.test(text)) info.companyId = 2
+    else if (/Shopee/i.test(text)) info.companyId = 3
 
-    if (/กล่องเล็ก/.test(text)) info.type = 'กล่องเล็ก'
-    else if (/กล่องใหญ่/.test(text)) info.type = 'กล่องใหญ่'
-    else if (/ซอง/.test(text)) info.type = 'ซอง'
+    // 📦 ประเภทพัสดุ
+    if (/DOCUMENT|เอกสาร/i.test(text)) info.parcelType = 'DOCUMENT'
+    else if (/BOX|กล่อง/i.test(text)) info.parcelType = 'BOX'
+    else if (/ซอง|Envelope/i.test(text)) info.parcelType = 'DOCUMENT'
+    else info.parcelType = 'ELECTRONIC'
 
     return info
   } catch (err) {
+    console.error('OCR Error:', err)
     return null
   }
 }
@@ -187,23 +215,36 @@ function stopCameraOnly() {
 
 async function capturePhoto() {
   if (!videoRef.value || !isCameraReady.value) {
-    alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
+    alert('Camera not ready')
     return
   }
-  const video = videoRef.value
-  const canvas = document.createElement('canvas')
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-  previewUrl.value = canvas.toDataURL('image/png')
 
-  const parcelInfo = await extractParcelInfo(previewUrl.value)
-  if (parcelInfo) {
-    form.value.recipientName = parcelInfo.name || ''
-    form.value.trackingNumber = parcelInfo.tracking || ''
-    form.value.companyId = parcelInfo.courier || ''
-    form.value.parcelType = parcelInfo.type || ''
+  // 🛑 ป้องกัน canvas ว่าง
+  if (videoRef.value.videoWidth === 0) {
+    alert('Camera still loading, please wait')
+    return
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = videoRef.value.videoWidth
+  canvas.height = videoRef.value.videoHeight
+
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(videoRef.value, 0, 0)
+
+  // ✅ ใช้ JPEG จะเสถียรกว่า PNG
+  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+  previewUrl.value = imageDataUrl
+
+  const info = await extractParcelInfo(imageDataUrl)
+
+  if (info) {
+    form.value.recipientName = info.recipientName || ''
+    form.value.trackingNumber = info.trackingNumber || ''
+    form.value.companyId = info.companyId || ''
+    form.value.parcelType = info.parcelType || ''
+  } else {
+    alert('ไม่สามารถอ่านข้อมูลจากภาพได้ กรุณาถ่ายใหม่')
   }
 }
 
@@ -622,6 +663,19 @@ const closePopUp = (operate) => {
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="Open Camera"
+                  color="blue"
+                  @click="startCamera"
+                  :disabled="scanningMode || videoStream"
+                />
+
+                <ButtonWeb
+                  label="Take Photo"
+                  color="green"
+                  @click="capturePhoto"
+                  :disabled="!isCameraReady"
                 />
               </div>
 
