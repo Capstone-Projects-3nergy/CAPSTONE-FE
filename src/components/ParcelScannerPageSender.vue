@@ -78,11 +78,11 @@ function cancelParcel() {
     (key) => (form.value[key] = key === 'status' ? 'Waiting for staff' : '')
   )
 }
+
 const selectedResident = computed(
   () =>
     residents.value.find((r) => r.userId === selectedResidentId.value) || null
 )
-
 const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
 )
