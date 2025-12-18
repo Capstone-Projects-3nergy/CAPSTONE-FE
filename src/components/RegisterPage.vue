@@ -44,6 +44,7 @@ const returnLogin = ref(false)
 const router = useRouter()
 const isPasswordVisible = ref(false)
 const isComfirmPasswordVisible = ref(false)
+const isEmailExist = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
@@ -173,6 +174,9 @@ const submitForm = async (roleType) => {
         if (key === 'dormId') form[key] = null
         else form[key] = ''
       })
+    } else if (res.status === 404) {
+      isEmailExist.value = true
+      setTimeout(() => (isEmailExist.value = false), 10000)
     } else if (res.status === 409) {
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 10000)
@@ -283,6 +287,7 @@ const closePopUp = (operate) => {
   if (operate === 'notnumber') roomidnotnumber.value = false
   if (operate === 'erroeposition ') isPositionWrong.value = false
   if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'EmailNotExist') isEmailExist.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -496,6 +501,14 @@ const toggleComfirmPasswordVisibility = () => {
           message="Error!!"
           styleType="red"
           operate="notpositionrequired"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="isEmailExist"
+          :titles="'This Email does not exist.'"
+          message="Error!!"
+          styleType="red"
+          operate="EmailNotExist"
           @closePopUp="closePopUp"
         />
 
