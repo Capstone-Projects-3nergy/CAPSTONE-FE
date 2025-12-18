@@ -108,18 +108,17 @@ const getResponsiveSize = () => {
   const width = window.innerWidth
 
   if (width < 480) {
-    return { width: 130, height: 130 } 
+    return { width: 130, height: 130 }
   } else if (width < 640) {
-    return { width: 140, height: 140 } 
+    return { width: 140, height: 140 }
   } else if (width < 768) {
-    return { width: 160, height: 160 } 
+    return { width: 160, height: 160 }
   } else if (width < 1024) {
-    return { width: 180, height: 180 } 
+    return { width: 180, height: 180 }
   } else {
     return { width: 200, height: 200 }
   }
 }
-
 
 const filteredResidents = computed(() => {
   const q = recipientSearch.value.trim().toLowerCase()
@@ -749,8 +748,10 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents"
-              @click="ShowManageResidentPage">
+            <SidebarItem
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
               <template #icon>
                 <svg
                   width="25"
@@ -970,6 +971,19 @@ onMounted(async () => {
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="Open Camera"
+                  color="blue"
+                  @click="startCamera"
+                  :disabled="scanningMode || videoStream"
+                />
+
+                <ButtonWeb
+                  label="Take Photo"
+                  color="green"
+                  @click="capturePhoto"
+                  :disabled="!isCameraReady"
                 />
               </div>
 
