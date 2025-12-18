@@ -51,7 +51,7 @@ const sendResetEmail = async () => {
 
   try {
     await resetStore.sendResetEmail(trimmedEmail.value)
-
+    form.value.email = ''
     success.value = true
     setTimeout(() => (success.value = false), 10000)
   } catch (e) {
