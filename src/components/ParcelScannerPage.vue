@@ -163,60 +163,35 @@ const showAddParcelPage = async () => {
 }
 
 async function extractParcelInfo(imageDataUrl) {
-  // 🛑 กันกรณี image ว่างหรือผิด format
   if (
     !imageDataUrl ||
     typeof imageDataUrl !== 'string' ||
     !imageDataUrl.startsWith('data:image')
-  ) {
-    console.error('Invalid image data for OCR')
+  )
     return null
-  }
 
   try {
-    const result = await Tesseract.recognize(imageDataUrl, 'tha+eng', {
-      logger: (m) => console.log(m)
-    })
-
-    const text = result?.data?.text
-    console.log('OCR TEXT >>>', text)
-
-    if (!text || text.trim().length === 0) {
-      console.warn('No text detected by OCR')
-      return null
-    }
+    const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
+    const text = result?.data?.text?.trim()
+    if (!text) return null
 
     const info = {
-      name: '',
-      tracking: '',
-      courier: '',
-      type: ''
+      recipientName: '',
+      trackingNumber: ''
     }
 
-    // 👤 ชื่อผู้รับ (regex กว้างขึ้น)
+    // 👤 Recipient
     const nameMatch = text.match(
-      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[^\u0E00-\u0E7Fa-zA-Z]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
+      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
     )
-    if (nameMatch) info.name = nameMatch[2].trim()
+    if (nameMatch) info.recipientName = nameMatch[2].trim()
 
-    // 📦 Tracking number
-    const trackingMatch = text.match(/TH\d{8,15}[A-Z]?/i)
-    if (trackingMatch) info.tracking = trackingMatch[0]
-
-    // 🚚 บริษัทขนส่ง
-    if (/Shopee/i.test(text)) info.courier = 'Shopee Express'
-    else if (/Kerry/i.test(text)) info.courier = 'Kerry Express'
-    else if (/J&T|J&T Express/i.test(text)) info.courier = 'J&T Express'
-
-    // 📦 ประเภทพัสดุ
-    if (/กล่องเล็ก|Small Box/i.test(text)) info.type = 'BOX_SMALL'
-    else if (/กล่องใหญ่|Large Box/i.test(text)) info.type = 'BOX_LARGE'
-    else if (/ซอง|Envelope/i.test(text)) info.type = 'DOCUMENT'
-    else info.type = 'OTHER'
+    // 📦 Tracking (ไม่บังคับ TH)
+    const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
+    if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
     return info
-  } catch (err) {
-    console.error('OCR Error:', err)
+  } catch {
     return null
   }
 }
@@ -270,12 +245,6 @@ async function capturePhoto() {
     return
   }
 
-  // 🛑 ป้องกัน canvas ว่าง
-  if (videoRef.value.videoWidth === 0) {
-    alert('Camera still loading, please wait')
-    return
-  }
-
   const canvas = document.createElement('canvas')
   canvas.width = videoRef.value.videoWidth
   canvas.height = videoRef.value.videoHeight
@@ -283,20 +252,15 @@ async function capturePhoto() {
   const ctx = canvas.getContext('2d')
   ctx.drawImage(videoRef.value, 0, 0)
 
-  // ✅ ใช้ JPEG จะเสถียรกว่า PNG
   const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
   previewUrl.value = imageDataUrl
 
   const info = await extractParcelInfo(imageDataUrl)
+  if (!info) return
 
-  if (info) {
-    form.value.recipientName = info.recipientName || ''
-    form.value.trackingNumber = info.trackingNumber || ''
-    form.value.companyId = info.companyId || ''
-    form.value.parcelType = info.parcelType || ''
-  } else {
-    alert('ไม่สามารถอ่านข้อมูลจากภาพได้ กรุณาถ่ายใหม่')
-  }
+  // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
+  form.value.recipientName = info.recipientName || form.value.recipientName
+  form.value.trackingNumber = info.trackingNumber || ''
 }
 
 function startQuagga() {
