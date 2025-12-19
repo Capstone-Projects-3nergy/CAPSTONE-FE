@@ -33,9 +33,8 @@ export const useParcelManager = defineStore('parcelManager', () => {
   //     parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
   //   }
   // }
-
-  const updateParcelStatus = (parcelId, newStatus) => {
-    const index = findIndexByParcelId(parcel, parcelId)
+  const updateParcelStatus = (id, newStatus) => {
+    const index = findIndexById(parcel, id)
     if (index !== -1) {
       parcel.splice(index, 1, {
         ...parcel[index],
@@ -48,6 +47,21 @@ export const useParcelManager = defineStore('parcelManager', () => {
       })
     }
   }
+
+  // const updateParcelStatus = (parcelId, newStatus) => {
+  //   const index = findIndexByParcelId(parcel, parcelId)
+  //   if (index !== -1) {
+  //     parcel.splice(index, 1, {
+  //       ...parcel[index],
+  //       status: newStatus,
+  //       updatedAt: new Date().toISOString(),
+  //       receivedAt:
+  //         newStatus.toUpperCase() === 'RECEIVED'
+  //           ? new Date().toISOString()
+  //           : parcel[index].receivedAt
+  //     })
+  //   }
+  // }
 
   // const moveToTrash = (parcelId) => {
   //   const index = findIndexByParcelId(parcel, parcelId)
@@ -78,9 +92,8 @@ export const useParcelManager = defineStore('parcelManager', () => {
       })
     }
   }
-
-  const restoreFromTrash = (parcelId) => {
-    const index = findIndexByParcelId(trash, parcelId)
+  const restoreFromTrash = (id) => {
+    const index = findIndexById(trash, id)
     if (index !== -1) {
       const restored = trash.splice(index, 1)[0]
       parcel.push({
@@ -91,12 +104,30 @@ export const useParcelManager = defineStore('parcelManager', () => {
     }
   }
 
-  const deletePermanent = (parcelId) => {
-    const index = findIndexByParcelId(trash, parcelId)
+  // const restoreFromTrash = (parcelId) => {
+  //   const index = findIndexByParcelId(trash, parcelId)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored,
+  //       status: 'ACTIVE',
+  //       restoredAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  const deletePermanent = (id) => {
+    const index = findIndexById(trash, id)
     if (index !== -1) {
       trash.splice(index, 1)
     }
   }
+
+  // const deletePermanent = (parcelId) => {
+  //   const index = findIndexByParcelId(trash, parcelId)
+  //   if (index !== -1) {
+  //     trash.splice(index, 1)
+  //   }
+  // }
 
   const findByStatus = (status) => parcel.filter((el) => el.status === status)
 
