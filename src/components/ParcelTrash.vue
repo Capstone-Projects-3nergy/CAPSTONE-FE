@@ -146,7 +146,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels/trash'`,
     router
   )
 
@@ -164,8 +164,7 @@ onMounted(async () => {
     }))
 
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
-
-    parcelManager.setParcels(mapped)
+    parcelManager.setTrash(mapped)
   }
 
   try {
