@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -9,10 +9,49 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
 import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear
+} from '@/stores/SortManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -38,6 +77,7 @@ const showDeleteParcel = ref(false)
 const showStatusParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
+const parcelManager = useParcelManager()
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -65,6 +105,19 @@ const showHomePageStaffWeb = async () => {
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
@@ -72,6 +125,37 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
+
+  if (data) {
+    const mapped = data.map((p) => ({
+      id: p.parcelId,
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName,
+      roomNumber: p.roomNumber,
+      email: p.contactEmail,
+      status: mapStatus(p.status),
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+
+    parcelManager.setParcels(mapped)
+  }
+
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {}
 })
 const openStatusPopup = (parcel) => {
   parcelStatusDetail.value = {
@@ -205,6 +289,38 @@ const toggleSortDate = () => {
   isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
   isDateAsc.value = !isDateAsc.value
 }
+function parseDate(dateStr) {
+  if (!dateStr) return null
+
+  let d = new Date(dateStr)
+  if (!isNaN(d)) return d
+
+  const parts = dateStr.split(' ')
+  if (parts.length === 3) {
+    const [day, mon, year] = parts
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+    const monthIndex = months.indexOf(mon)
+    if (monthIndex !== -1) {
+      return new Date(year, monthIndex, day)
+    }
+  }
+
+  return null
+}
+
 const selectedSort = ref('Sort by:')
 const selectedDate = ref('')
 
@@ -257,6 +373,9 @@ const handleSort = () => {
       break
   }
 }
+const filterDate = ref('')
+const filterSearch = ref('')
+const filterSort = ref('')
 const handleSearchUpdate = (val) => {
   filterSearch.value = val
   searchKeyword.value = val
@@ -668,7 +787,7 @@ const handleSortUpdate = (val) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
-          :showDelete="true"
+          :showDelete="false"
           :hideTrash="true"
           @prev="prevPage"
           @next="nextPage"
