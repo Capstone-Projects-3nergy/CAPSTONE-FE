@@ -14,7 +14,6 @@ import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
 import ParcelsDetail from './ParcelsDetail.vue'
 import ChangeParcelStatus from './ChangeParcelStatus.vue'
-import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import {
