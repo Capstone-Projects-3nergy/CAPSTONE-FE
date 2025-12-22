@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -10,6 +10,9 @@ import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
+import ParcelTable from '@/components/ParcelTable.vue'
+import ParcelFilterBar from './ParcelFilterBar.vue'
+import AlertPopUp from './AlertPopUp.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -21,101 +24,23 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const tabs = ['Day', 'Month', 'Year']
-const activeTab = ref('Day')
-const showLogoutConfirm = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
+const parcelsResidentDetail = ref(null)
+const showLogoutConfirm = ref(null)
+const deletedParcel = ref(null)
+const showAddParcels = ref(false)
+const showParcelDetailModal = ref(false)
+const error = ref(false)
+const addSuccess = ref(false)
+const editSuccess = ref(false)
+const deleteSuccess = ref(false)
+const statusSuccess = ref(false)
+const showDeleteParcel = ref(false)
+const showStatusParcel = ref(false)
+const parcelDetail = ref(null)
+const parcelStatusDetail = ref(null)
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels' })
+}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -138,24 +63,41 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 const checkScreen = () => {
-
   isCollapsed.value = window.innerWidth < 768
 }
 onUnmounted(() => {
-
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-
   checkScreen()
-
 
   window.addEventListener('resize', checkScreen)
 })
+const openStatusPopup = (parcel) => {
+  parcelStatusDetail.value = {
+    id: parcel.id,
+    parcelStatus: parcel.parcelStatus
+  }
+}
 
+const showParcelDetail = async function (id) {
+  router.push({
+    name: 'detailparcels',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+}
+const deleteParcelPopUp = (parcel) => {
+  showDeleteParcel.value = true
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.trackingNumber
+  }
+}
 const returnLoginPage = async () => {
   try {
-
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
@@ -174,6 +116,162 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const currentPage = ref(1)
+const perPage = ref(10)
+const totalPages = computed(() =>
+  Math.ceil(parcels.value.length / perPage.value)
+)
+
+const paginatedParcels = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredParcels.value.slice(start, end)
+})
+const goToPage = (page) => {
+  if (page < 1) page = 1
+  if (page > totalPages.value) page = totalPages.value
+  currentPage.value = page
+}
+const nextPage = () => goToPage(currentPage.value + 1)
+const prevPage = () => goToPage(currentPage.value - 1)
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    if (current <= 3) {
+      pages.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      pages.push(1, '...', total - 2, total - 1, total)
+    } else {
+      pages.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
+  }
+
+  return pages
+})
+const parcels = computed(() => parcelManager.getParcels())
+function autoClose(refVar, timeout = 10000) {
+  watch(refVar, (val) => {
+    if (val) {
+      setTimeout(() => {
+        refVar.value = false
+      }, timeout)
+    }
+  })
+}
+
+autoClose(addSuccess)
+autoClose(editSuccess)
+autoClose(deleteSuccess)
+autoClose(error)
+
+const searchKeyword = ref('')
+const activeTab = ref('Day')
+const tabs = ['Day', 'Month', 'Year']
+
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortDateAsc = () => sortByDate(parcels.value)
+const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
+
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
+const selectedSort = ref('Sort by:')
+const selectedDate = ref('')
+
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+
+const handleSort = () => {
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
+      break
+  }
+}
+const handleSearchUpdate = (val) => {
+  filterSearch.value = val
+  searchKeyword.value = val
+}
+
+const handleDateUpdate = (val) => {
+  filterDate.value = val
+  selectedDate.value = val
+}
+
+const handleSortUpdate = (val) => {
+  filterSort.value = val
+  selectedSort.value = val
+  handleSort()
+}
 </script>
 
 <template>
@@ -181,12 +279,10 @@ const toggleSidebar = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
- 
     <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
-     
         <svg
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
@@ -203,7 +299,6 @@ const toggleSidebar = () => {
         </svg>
 
         <div class="flex-1 flex justify-end items-center gap-5">
-
           <svg
             width="14"
             height="14"
@@ -239,19 +334,15 @@ const toggleSidebar = () => {
       </div>
     </header>
 
- 
     <div class="flex flex-1">
-
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
-       
           ]"
           class="overflow-hidden"
         >
- 
           <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
@@ -412,9 +503,8 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-          
           </nav>
-     
+
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -464,12 +554,21 @@ const toggleSidebar = () => {
             Manage Resident
           </h2>
         </div>
-
+        <ParcelFilterBar
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
+          @add="showParcelScannerPage"
+          @trash="showParcelTrashPage"
+        />
+        <!-- 
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
           <div class="flex items-center justify-between mb-4">
-       
             <div class="flex items-center space-x-4">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
               <div class="flex bg-gray-100 rounded-lg overflow-hidden">
@@ -489,9 +588,7 @@ const toggleSidebar = () => {
               </div>
             </div>
 
-        
             <div class="flex items-center space-x-3">
-           
               <div class="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -514,7 +611,6 @@ const toggleSidebar = () => {
                 />
               </div>
 
-      
               <select
                 class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
@@ -522,13 +618,177 @@ const toggleSidebar = () => {
                 <option>Newest</option>
                 <option>Oldest</option>
               </select>
-
-    
             </div>
           </div>
+        </div> -->
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="deleteSuccess"
+            :titles="'Delete Parcel to Trash is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="statusSuccess"
+            :titles="'Change Status is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="addSuccess"
+            :titles="'Add New Parcel is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="addSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="editSuccess"
+            :titles="'Edit Parcel  is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
         </div>
+        <ParcelTable
+          :items="paginatedParcels"
+          :pages="visiblePages"
+          :page="currentPage"
+          :total="totalPages"
+          :showDelete="true"
+          :hideTrash="true"
+          @prev="prevPage"
+          @next="nextPage"
+          @go="goToPage"
+          @status-click="openStatusPopup"
+          @view-detail="showParcelDetail"
+          @delete="deleteParcelPopUp"
+        >
+          <template #sort-room>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortRoom"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
 
-   
+          <template #sort-status>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortStatus"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-date>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortDate"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #icon-view>
+            <svg
+              class="cursor-pointer"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                fill="#107EFF"
+              />
+              <path
+                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                fill="#107EFF"
+              />
+            </svg>
+          </template>
+
+          <template #icon-delete>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 18 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                fill="red"
+              />
+            </svg>
+          </template>
+        </ParcelTable>
+        <!-- 
         <div class="overflow-x-auto bg-white rounded-lg shadow">
           <table class="min-w-full text-left border-collapse">
             <thead class="bg-gray-100">
@@ -616,7 +876,6 @@ const toggleSidebar = () => {
           </table>
         </div>
 
-  
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
           <button class="px-3 py-1 rounded hover:bg-gray-200">
             &lt; Previous
@@ -626,7 +885,7 @@ const toggleSidebar = () => {
           <span class="px-2 py-1">...</span>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
           <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>
