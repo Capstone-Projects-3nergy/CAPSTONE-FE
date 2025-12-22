@@ -24,6 +24,14 @@ defineProps({
   clickableStatus: {
     type: Boolean,
     default: true
+  },
+  showTracking: {
+    type: Boolean,
+    default: true
+  },
+  showStatus: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -39,7 +47,10 @@ function formatDateTime(datetimeStr) {
         class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
       >
         <tr>
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+          <th
+            v-if="showTracking"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
             Tracking
           </th>
 
@@ -54,7 +65,10 @@ function formatDateTime(datetimeStr) {
 
           <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Email</th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+          <th
+            v-if="showStatus"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
             <div class="flex items-center gap-2">
               Status
               <slot name="sort-status"></slot>
@@ -89,6 +103,7 @@ function formatDateTime(datetimeStr) {
           class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
         >
           <td
+            v-if="showTracking"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-blue-700"
@@ -118,7 +133,10 @@ function formatDateTime(datetimeStr) {
             {{ p.email }}
           </td>
 
-          <td class="px-4 py-2 md:py-3 border-b md:border-none">
+          <td
+            v-if="showStatus"
+            class="px-4 py-2 md:py-3 border-b md:border-none"
+          >
             <span class="md:hidden font-semibold text-blue-700">Status:</span>
 
             <span

@@ -122,6 +122,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
+  console.log(loginManager.user.value)
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
@@ -677,11 +678,13 @@ const handleSortUpdate = (val) => {
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
+          :show-add-button="false"
+          :hideNameSort="true"
+          :hideTrash="false"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
-          @add="showParcelScannerPage"
-          @trash="showParcelTrashPage"
+          @add="showAddParcelPage"
         />
         <!-- 
         <div
@@ -787,6 +790,8 @@ const handleSortUpdate = (val) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
+          :showTracking="false"
+          :showStatus="false"
           :showDelete="false"
           :hideTrash="true"
           @prev="prevPage"

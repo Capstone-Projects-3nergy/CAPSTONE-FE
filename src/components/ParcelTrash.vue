@@ -873,7 +873,9 @@ const closePopUp = (operate) => {
               />
             </svg>
 
-            <h2 class="text-2xl font-bold text-[#185dc0]">
+            <h2
+              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
+            >
               Manage Parcels > 🗑 Trash
             </h2>
           </div>
@@ -882,7 +884,7 @@ const closePopUp = (operate) => {
             label="Go Back"
             color="gray"
             @click="cancelPage"
-            class="w-full md:w-auto"
+            class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 w-auto"
           />
         </div>
         <ParcelFilterBar
