@@ -41,6 +41,11 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
+}
+
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -209,8 +214,11 @@ function goToEditProfile() {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="Profile"
+              @click="showProfileStaffPage"
+              class="bg-[#81AFEA] cursor-default"
+            >
               <template #icon>
                 <svg
                   width="24"
@@ -228,8 +236,7 @@ function goToEditProfile() {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -245,7 +252,6 @@ function goToEditProfile() {
                 </svg>
               </template>
             </SidebarItem>
-
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -262,7 +268,6 @@ function goToEditProfile() {
                 </svg>
               </template>
             </SidebarItem>
-
             <SidebarItem
               title="Manage Residents"
               @click="ShowManageResidentPage"
@@ -283,10 +288,7 @@ function goToEditProfile() {
               </template>
             </SidebarItem>
 
-            <SidebarItem
-              title="Manage Announcements"
-              @click="ShowManageAnnouncementPage"
-            >
+            <SidebarItem title="Manage Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"

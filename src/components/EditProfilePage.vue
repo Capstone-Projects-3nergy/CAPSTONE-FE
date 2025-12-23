@@ -12,20 +12,13 @@ import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
-const tab = ref('event')
-const currentSlide = ref(1)
-const showResidentParcels = ref(false)
-const returnLogin = ref(false)
 const showLogoutConfirm = ref(false)
-const resident = ref({
-  name: 'Somchai Suksan',
-  email: 'somchai.suksan@example.com',
-  phone: '081-234-5678',
-  idCard: '1234567890123',
-  room: 'A-203',
-  building: 'Building 2',
-  address: '203/45 Moo 5, Bangkok, Thailand'
-})
+const showHomePageStaff = ref(false)
+const showStaffParcels = ref(false)
+const returnLogin = ref(false)
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
 
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
@@ -63,6 +56,29 @@ const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
+}
+
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({
+    name: 'manageannouncement'
+  })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false
@@ -243,7 +259,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements">
+            <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -353,8 +369,11 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="Profile"
+              @click="showProfileStaffPage"
+              class="bg-[#81AFEA] cursor-default"
+            >
               <template #icon>
                 <svg
                   width="24"
@@ -372,8 +391,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -389,7 +407,6 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -406,7 +423,6 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-
             <SidebarItem
               title="Manage Residents"
               @click="ShowManageResidentPage"
@@ -427,10 +443,7 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem
-              title="Manage Announcements"
-              @click="ShowManageAnnouncementPage"
-            >
+            <SidebarItem title="Manage Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"

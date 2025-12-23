@@ -552,7 +552,7 @@ const handleSortUpdate = (val) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -604,10 +604,7 @@ const handleSortUpdate = (val) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem
-              title="Manage Announcements"
-              @click="ShowManageAnnouncementPage"
-            >
+            <SidebarItem title="Manage Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"

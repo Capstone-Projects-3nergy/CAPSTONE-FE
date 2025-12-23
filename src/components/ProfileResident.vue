@@ -241,7 +241,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements">
+            <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
