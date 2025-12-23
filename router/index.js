@@ -24,6 +24,7 @@ import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
 import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
 import EditProfilePage from '@/components/EditProfilePage.vue'
 import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.vue'
+import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   {
@@ -106,7 +107,7 @@ const routes = [
   {
     path: '/homepage/staff/:id/manageresident/:tid/detailregistration/editdetailregistration',
     name: 'editdetailregistration',
-    component: ResidentRegistrationDetail
+    component: EditRegistrationDetail
   },
   {
     path: '/homepage/staff/:id/manageparcel',
