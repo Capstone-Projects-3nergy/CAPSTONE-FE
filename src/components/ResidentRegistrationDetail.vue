@@ -111,7 +111,7 @@ watch(
   }
 )
 
-const backToManageParcels = () => router.replace({ name: 'staffparcels' })
+const backToManageResident = () => router.replace({ name: 'manageresident' })
 const showParcelScannerPage = async () => {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -152,9 +152,9 @@ const showProfileStaffPage = async () => {
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
-const showEditParacelDetail = async function (parcelId) {
+const showEditRegistrationDetail = async function (parcelId) {
   router.push({
-    name: 'editparcels',
+    name: 'editdetailregistration',
     params: {
       id: route.params.id,
       tid: parcelId
@@ -415,7 +415,7 @@ function formatDateTime(datetimeStr) {
       <main class="flex-1 p-9 bg-gray-100">
         <div class="flex items-center space-x-2 mb-6">
           <h2 class="text-2xl font-bold text-[#185dc0]">
-            Manage Parcel &gt; Details
+            Manage Resident &gt; Details
           </h2>
         </div>
 
@@ -423,6 +423,46 @@ function formatDateTime(datetimeStr) {
 
         <form class="bg-white p-6 rounded-lg shadow space-y-8">
           <section>
+            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Name</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.residentName || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Room Number</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.roomNumber || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Email</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.email || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Password</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  ********
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Dormitory</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.dormitoryName || '-' }}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- <section>
             <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -540,18 +580,18 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
             </div>
-          </section>
+          </section> -->
           <div class="flex items-center gap-3 ml-auto justify-end">
             <ButtonWeb
               label="Edit"
               color="blue"
-              @click="showEditParacelDetail(parcel.parcelId)"
+              @click="showEditRegistrationDetail(parcel.parcelId)"
               class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
             />
             <ButtonWeb
               label="Go Back"
               color="gray"
-              @click="backToManageParcels"
+              @click="backToManageResident"
               class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
             />
           </div>

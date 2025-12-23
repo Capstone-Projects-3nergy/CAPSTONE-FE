@@ -338,7 +338,7 @@ const removeImage = () => {
 }
 
 const cancelEdit = () => {
-  router.replace({ name: 'detailparcels' })
+  router.replace({ name: 'detailregistration' })
 }
 
 const showParcelScannerPage = async function () {
@@ -530,8 +530,8 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- Profile -->
-            <SidebarItem title="Profile (Next Release)">
+
+            <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -587,7 +587,10 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents (Next Release)">
+            <SidebarItem
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
               <template #icon>
                 <svg
                   width="25"
@@ -740,6 +743,96 @@ function formatDateTime(datetimeStr) {
           @submit.prevent="saveEditParcel"
         >
           <section>
+            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+
+            <div class="mb-4">
+              <label class="block font-semibold mb-1">Search Name</label>
+              <input
+                type="text"
+                v-model="recipientSearch"
+                placeholder="Type name, room or email..."
+                class="md:w-[325px] w-full border rounded-md p-2"
+                :disabled="form.status === 'PICKED_UP'"
+              />
+
+              <ul
+                v-if="recipientSearch"
+                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+              >
+                <li
+                  v-for="r in filteredResidents"
+                  :key="r.userId"
+                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
+                  v-if="filteredResidents.length > 0"
+                  @click="selectResident(r)"
+                >
+                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
+                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                </li>
+
+                <li
+                  v-if="filteredResidents.length === 0"
+                  class="px-3 py-1 text-gray-400"
+                >
+                  No residents found.
+                </li>
+              </ul>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block font-semibold mb-1">Name</label>
+                <input
+                  type="text"
+                  :value="form.residentName"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Room Number</label>
+                <input
+                  type="text"
+                  :value="form.roomNumber"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Email</label>
+                <input
+                  type="text"
+                  :value="form.email"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Password</label>
+                <input
+                  type="text"
+                  value="********"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Dormitory</label>
+                <input
+                  type="text"
+                  :value="form.dormitoryName"
+                  readonly
+                  class="w-full border rounded-md p-2 bg-gray-100"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- <section>
             <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -926,7 +1019,7 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
             </div>
-          </section>
+          </section> -->
 
           <div class="flex justify-end space-x-2 mt-6">
             <ButtonWeb

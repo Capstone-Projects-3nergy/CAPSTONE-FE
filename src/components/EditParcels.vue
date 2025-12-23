@@ -530,8 +530,8 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- Profile -->
-            <SidebarItem title="Profile (Next Release)">
+
+            <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -587,7 +587,10 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents (Next Release)">
+            <SidebarItem
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
               <template #icon>
                 <svg
                   width="25"

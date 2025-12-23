@@ -54,6 +54,7 @@ import {
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
+const route = useRoute()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -165,9 +166,9 @@ const openStatusPopup = (parcel) => {
   }
 }
 
-const showParcelDetail = async function (id) {
+const showRegistrationDetail = async function (id) {
   router.push({
-    name: 'detailparcels',
+    name: 'detailregistration',
     params: {
       id: route.params.id,
       tid: id
@@ -795,7 +796,7 @@ const handleSortUpdate = (val) => {
           @next="nextPage"
           @go="goToPage"
           @status-click="openStatusPopup"
-          @view-detail="showParcelDetail"
+          @view-detail="showRegistrationDetail"
           @delete="deleteParcelPopUp"
         >
           <template #sort-room>
