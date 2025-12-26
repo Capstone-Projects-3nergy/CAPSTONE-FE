@@ -31,7 +31,9 @@ import {
   deleteFile,
   updateParcelStatus
 } from '@/utils/fetchUtils'
+import { useRegistrationResidentManager } from '@/stores/RegistrationResidentManager'
 
+const registrationResidentManager = useRegistrationResidentManager()
 const router = useRouter()
 const route = useRoute()
 const tid = route.params.tid
@@ -59,24 +61,31 @@ const showLogoutConfirm = ref(false)
 const parcelStore = useParcelManager()
 const companyList = ref([])
 
+// const form = ref({
+//   userId: null,
+//   parcelId: '',
+//   trackingNumber: '',
+//   recipientName: '',
+//   senderName: '',
+//   parcelType: '',
+//   companyId: '',
+//   imageUrl: '',
+//   status: '',
+
+//   receivedAt: '',
+//   pickedUpAt: '',
+//   updatedAt: '',
+
+//   residentName: '',
+//   roomNumber: '',
+//   email: ''
+// })
 const form = ref({
   userId: null,
-  parcelId: '',
-  trackingNumber: '',
-  recipientName: '',
-  senderName: '',
-  parcelType: '',
-  companyId: '',
-  imageUrl: '',
-  status: '',
-
-  receivedAt: '',
-  pickedUpAt: '',
-  updatedAt: '',
-
   residentName: '',
   roomNumber: '',
-  email: ''
+  email: '',
+  dormitoryName: ''
 })
 
 const statusOptions = computed(() => {
@@ -248,68 +257,105 @@ const filteredResidents = computed(() => {
 })
 
 const emit = defineEmits(['edit-success', 'edit-error'])
-const saveEditParcel = async () => {
+
+// const saveEditRegistrationDetail = async () => {
+//   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
+//     selectName.value = true
+//     setTimeout(() => (selectName.value = false), 10000)
+//     return
+//   }
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+//     SenderNameError.value = true
+//     setTimeout(() => (SenderNameError.value = false), 10000)
+//     return
+//   }
+//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
+//     recipientNameError.value = true
+//     setTimeout(() => (recipientNameError.value = false), 10000)
+//     return
+//   }
+
+//   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+//     trackingNumberError.value = true
+//     setTimeout(() => (trackingNumberError.value = false), 10000)
+//     return
+//   }
+//   try {
+//     const body = {
+//       trackingNumber: form.value.trackingNumber,
+//       recipientName: form.value.recipientName,
+//       parcelType: form.value.parcelType,
+//       senderName: form.value.senderName,
+//       status: form.value.status,
+//       companyId: form.value.companyId ? Number(form.value.companyId) : null,
+//       imageUrl: form.value.imageUrl,
+//       userId: form.value.userId || null
+//     }
+
+//     const updatedParcel = await editItem(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//       form.value.parcelId,
+//       body,
+//       router
+//     )
+
+//     if (!updatedParcel) {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 10000)
+//       return
+//     }
+
+//     parcelStore.editParcel(form.value.parcelId, updatedParcel)
+
+//     form.value = {
+//       ...form.value,
+//       ...updatedParcel
+//     }
+//     originalForm.value = { ...form.value }
+
+//     editSuccess.value = true
+//     setTimeout(() => (editSuccess.value = false), 10000)
+//   } catch (err) {
+//     error.value = true
+//     setTimeout(() => (error.value = false), 10000)
+//   }
+// }
+const saveEditRegistrationDetail = async () => {
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
-    selectName.value = true
-    setTimeout(() => (selectName.value = false), 10000)
-    return
-  }
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
-    SenderNameError.value = true
-    setTimeout(() => (SenderNameError.value = false), 10000)
-    return
-  }
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
-    recipientNameError.value = true
-    setTimeout(() => (recipientNameError.value = false), 10000)
+    error.value = true
+    setTimeout(() => (error.value = false), 5000)
     return
   }
 
-  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
-    trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 10000)
-    return
-  }
   try {
     const body = {
-      trackingNumber: form.value.trackingNumber,
-      recipientName: form.value.recipientName,
-      parcelType: form.value.parcelType,
-      senderName: form.value.senderName,
-      status: form.value.status,
-      companyId: form.value.companyId ? Number(form.value.companyId) : null,
-      imageUrl: form.value.imageUrl,
-      userId: form.value.userId || null
+      userId: form.value.userId,
+      residentName: form.value.residentName,
+      roomNumber: form.value.roomNumber,
+      email: form.value.email,
+      dormitoryName: form.value.dormitoryName
     }
 
-    const updatedParcel = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      form.value.parcelId,
+    const updatedResident = await editItem(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      form.value.userId,
       body,
       router
     )
 
-    if (!updatedParcel) {
-      error.value = true
-      setTimeout(() => (error.value = false), 10000)
-      return
-    }
+    if (!updatedResident) throw new Error('Update failed')
 
-    parcelStore.editParcel(form.value.parcelId, updatedParcel)
-
-    form.value = {
-      ...form.value,
-      ...updatedParcel
-    }
-    originalForm.value = { ...form.value }
+    registrationResidentManager.updateResident(updatedResident)
+    form.value = { ...form.value, ...updatedResident }
 
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 10000)
+    setTimeout(() => (editSuccess.value = false), 5000)
   } catch (err) {
     error.value = true
-    setTimeout(() => (error.value = false), 10000)
+    setTimeout(() => (error.value = false), 5000)
   }
 }
+
 const previewUrl = ref(null)
 
 const handleImageUpload = (event) => {
@@ -1025,7 +1071,7 @@ function formatDateTime(datetimeStr) {
             <ButtonWeb
               label="Save"
               color="green"
-              @click="saveEditParcel"
+              @click="saveEditRegistrationDetail"
               :disabled="isUnchanged"
             />
 
