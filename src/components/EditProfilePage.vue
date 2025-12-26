@@ -10,9 +10,11 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-
+import AlertPopUp from './AlertPopUp.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
+const editSuccess = ref(false)
+const error = ref(false)
 const showHomePageResident = ref(false)
 const showLogoutConfirm = ref(false)
 const showHomePageStaff = ref(false)
@@ -39,15 +41,21 @@ const updateProfile = async (payload) => {
 
     // ✅ แจ้งว่าบันทึกสำเร็จ
     profileManager.showEditSuccess()
-
+    editSuccess.value = true
+    setTimeout(() => (editSuccess.value = false), 5000)
     // 4. redirect
-    if (loginManager.user.role === 'STAFF') {
-      router.replace({ name: 'profilestaff' })
-    } else {
-      router.replace({ name: 'profileresident' })
-    }
+    // if (loginManager.user.role === 'STAFF') {
+    //   // router.replace({ name: 'profilestaff' })
+    //   editSuccess.value = true
+    // } else {
+    //   // router.replace({ name: 'profileresident' })
+    //   editSuccess.value = true
+    //    setTimeout(() => ( editSuccess.value= false), 5000)
+    // }
   } catch (e) {
-    profileManager.showError()
+    error.value = true
+    setTimeout(() => (error.value = false), 5000)
+    // profileManager.showError()
   }
 }
 
@@ -552,6 +560,25 @@ onMounted(async () => {
           >
             Edit Profile Staff
           </h2>
+        </div>
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="editSuccess"
+            titles="Edit Profile Successful."
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="error"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           :firstName="firstName"
