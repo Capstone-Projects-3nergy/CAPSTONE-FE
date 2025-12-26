@@ -2,6 +2,9 @@
 import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
+import { useProfileManager } from '@/stores/ProfileManager'
+const profileManager = useProfileManager()
+
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -60,12 +63,17 @@ function onImageChange(e) {
 }
 
 function save() {
-  emit('save', { ...form.value })
-
-  if (newAvatar.value) {
-    emit('update-avatar', newAvatar.value)
+  const payload = {
+    firstName: form.value.firstName,
+    lastName: form.value.lastName,
+    email: form.value.email,
+    roomNumber: form.value.roomNumber,
+    lineId: form.value.lineId,
+    contact: form.value.contact,
+    avatar: newAvatar.value || null
   }
 
+  emit('save', payload)
   isEdit.value = false
 }
 

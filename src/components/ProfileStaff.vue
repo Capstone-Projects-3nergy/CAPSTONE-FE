@@ -11,8 +11,14 @@ import UserInfo from '@/components/UserInfo.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
+import AlertPopUp from './AlertPopUp.vue'
+import { useProfileManager } from '@/stores/ProfileManager'
+
+const profileManager = useProfileManager()
 const loginManager = useAuthManager()
 const router = useRouter()
+const EditSuccess = ref(false)
+const error = ref(false)
 const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -92,6 +98,20 @@ onMounted(async () => {
 function goToEditProfile() {
   router.replace({ name: 'editprofilestaff' })
 }
+
+const closePopUp = () => {
+  profileManager.clearAlert()
+}
+// const closePopUp = (operate) => {
+//   switch (operate) {
+//     case 'problem':
+//       error.value = false
+//       break
+//     case ' editSuccessMessage':
+//       editSuccess.value = false
+//       break
+//   }
+// }
 </script>
 
 <template>
@@ -352,6 +372,26 @@ function goToEditProfile() {
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Staff</h2>
         </div>
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="profileManager.editSuccess"
+            titles="Edit Profile Successful."
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="profileManager.error"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+        </div>
+
         <PersonalInfoCard
           :fullName="loginManager.user.fullName"
           :firstName="firstName"

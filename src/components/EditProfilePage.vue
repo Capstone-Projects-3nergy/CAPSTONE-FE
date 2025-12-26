@@ -9,6 +9,8 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
+import { useProfileManager } from '@/stores/ProfileManager'
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
@@ -19,6 +21,35 @@ const returnLogin = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
+const profileManager = useProfileManager()
+
+const updateProfile = async (payload) => {
+  try {
+    // 1. update store
+    profileManager.updateProfile(payload)
+
+    // 2. sync auth
+    loginManager.user.fullName = payload.firstName + ' ' + payload.lastName
+    loginManager.user.email = payload.email
+
+    // 3. avatar
+    if (payload.avatar) {
+      profileManager.updateProfile({ avatar: payload.avatar })
+    }
+
+    // ✅ แจ้งว่าบันทึกสำเร็จ
+    profileManager.showEditSuccess()
+
+    // 4. redirect
+    if (loginManager.user.role === 'STAFF') {
+      router.replace({ name: 'profilestaff' })
+    } else {
+      router.replace({ name: 'profileresident' })
+    }
+  } catch (e) {
+    profileManager.showError()
+  }
+}
 
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
@@ -31,12 +62,12 @@ const showResidentParcelPage = async function () {
   showResidentParcels.value = true
 }
 const goBackProfilePage = async function () {
-  if ((loginManager.user.role = 'RESIDENT')) {
+  if (loginManager.user.role === 'RESIDENT') {
     router.replace({
       name: 'profileresident'
     })
   }
-  if ((loginManager.user.role = 'STAFF')) {
+  if (loginManager.user.role === 'STAFF') {
     router.replace({
       name: 'profilestaff'
     })
@@ -164,7 +195,7 @@ onMounted(async () => {
       <button
         @click="toggleSidebar"
         class="text-white focus:outline-none"
-        v-if="loginManager.user.role == 'RESIDENT'"
+        v-if="loginManager.user.role === 'RESIDENT'"
       >
         <aside
           :class="[
@@ -309,7 +340,7 @@ onMounted(async () => {
       <button
         @click="toggleSidebar"
         class="text-white focus:outline-none"
-        v-if="loginManager.user.role == 'STAFF'"
+        v-if="loginManager.user.role === 'STAFF'"
       >
         <aside
           :class="[
@@ -511,13 +542,13 @@ onMounted(async () => {
 
           <h2
             class="text-2xl font-bold text-[#185dc0]"
-            v-if="loginManager.user.role == 'RESIDENT'"
+            v-if="loginManager.user.role === 'RESIDENT'"
           >
             Edit Profile Resident
           </h2>
           <h2
             class="text-2xl font-bold text-[#185dc0]"
-            v-if="loginManager.user.role == 'STAFF'"
+            v-if="loginManager.user.role === 'STAFF'"
           >
             Edit Profile Staff
           </h2>
@@ -526,7 +557,7 @@ onMounted(async () => {
           :firstName="firstName"
           :lastName="lastName"
           :email="loginManager.user.email"
-          @save="updateUser"
+          @save="updateProfile"
           @cancel="goBackProfilePage"
         ></EditPersonalInfoProfile>
       </main>
