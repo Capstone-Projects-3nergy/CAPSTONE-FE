@@ -14,7 +14,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   getItems,
   getItemById,

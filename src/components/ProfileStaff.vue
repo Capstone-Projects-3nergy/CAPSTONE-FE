@@ -13,7 +13,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
 const router = useRouter()

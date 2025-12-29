@@ -11,7 +11,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()

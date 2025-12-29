@@ -17,7 +17,7 @@ import ChangeParcelStatus from './ChangeParcelStatus.vue'
 import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,

@@ -14,7 +14,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,

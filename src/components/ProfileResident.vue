@@ -10,7 +10,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 const profileManager = useProfileManager()
 
 const editSuccess = ref(false)

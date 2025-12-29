@@ -16,7 +16,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   getItems,
   getItemById,

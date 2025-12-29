@@ -13,7 +13,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   getItemById,
   deleteItemById,

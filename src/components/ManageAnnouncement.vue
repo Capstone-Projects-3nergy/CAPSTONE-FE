@@ -10,7 +10,7 @@ import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)

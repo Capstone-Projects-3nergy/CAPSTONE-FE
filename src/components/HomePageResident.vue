@@ -13,7 +13,7 @@ import ProfileResident from './ProfileResident.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ParcelTable from './ParcelTable.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import {
   getItems,
   getItemById,

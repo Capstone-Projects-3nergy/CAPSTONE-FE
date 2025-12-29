@@ -10,7 +10,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 const loginManager = useAuthManager()
 const router = useRouter()

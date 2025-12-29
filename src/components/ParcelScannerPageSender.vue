@@ -17,7 +17,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { getItems, addItem } from '@/utils/fetchUtils'
-import AppHeader from './AppHeader.vue'
+import AppHeader from './WebHeader.vue'
 const addSuccess = ref(false)
 const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
