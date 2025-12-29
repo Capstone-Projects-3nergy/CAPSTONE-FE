@@ -11,7 +11,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
-import AppHeader from './WebHeader.vue'
+import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -143,7 +143,7 @@ const toggleSidebar = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader @toggle-sidebar="toggleSidebar" />
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"

@@ -10,7 +10,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import AppHeader from './WebHeader.vue'
+import WebHeader from './WebHeader.vue'
 const profileManager = useProfileManager()
 
 const editSuccess = ref(false)
@@ -112,7 +112,7 @@ const closePopUp = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader @toggle-sidebar="toggleSidebar" />
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
