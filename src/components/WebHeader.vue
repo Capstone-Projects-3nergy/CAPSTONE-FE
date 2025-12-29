@@ -1,10 +1,27 @@
 <script setup>
 import UserInfo from '@/components/UserInfo.vue'
+import { computed } from 'vue'
+import { useAuthManager } from '@/stores/AuthManager'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthManager()
+const router = useRouter()
 
 const emit = defineEmits(['toggle-sidebar'])
 
+const role = computed(() => authStore.user?.role)
+
 const toggleSidebar = () => {
   emit('toggle-sidebar')
+}
+
+const openNotification = () => {
+  if (!role.value) return
+  if (role.value === 'STAFF') {
+    router.replace({ name: 'staffnotification' })
+  } else if (role.value === 'RESIDENT') {
+    router.replace({ name: 'residentnotification' })
+  }
 }
 </script>
 
