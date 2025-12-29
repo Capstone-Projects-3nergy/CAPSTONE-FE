@@ -31,7 +31,7 @@ import {
   deleteFile,
   updateParcelStatus
 } from '@/utils/fetchUtils'
-import { useRegistrationResidentManager } from '@/stores/RegistrationResidentManager'
+import { useRegistrationResidentManager } from '@/stores/RegistationResidentManager'
 
 const registrationResidentManager = useRegistrationResidentManager()
 const router = useRouter()
