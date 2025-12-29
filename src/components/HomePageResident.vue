@@ -13,6 +13,7 @@ import ProfileResident from './ProfileResident.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ParcelTable from './ParcelTable.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import AppHeader from './AppHeader.vue'
 import {
   getItems,
   getItemById,
@@ -254,7 +255,8 @@ const toggleSortDate = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -299,7 +301,6 @@ const toggleSortDate = () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -307,7 +308,7 @@ const toggleSortDate = () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">

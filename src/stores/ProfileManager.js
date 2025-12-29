@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useProfileManager = defineStore('profileManager', () => {

@@ -17,6 +17,7 @@ import ChangeParcelStatus from './ChangeParcelStatus.vue'
 import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
+import AppHeader from './AppHeader.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -546,7 +547,8 @@ const handleSortUpdate = (val) => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -591,7 +593,6 @@ const handleSortUpdate = (val) => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -599,7 +600,7 @@ const handleSortUpdate = (val) => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">

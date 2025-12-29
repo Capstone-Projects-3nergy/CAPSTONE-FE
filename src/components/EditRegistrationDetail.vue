@@ -14,6 +14,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
+import AppHeader from './AppHeader.vue'
 import {
   getItems,
   getItemById,
@@ -461,7 +462,8 @@ function formatDateTime(datetimeStr) {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -506,7 +508,6 @@ function formatDateTime(datetimeStr) {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -514,7 +515,7 @@ function formatDateTime(datetimeStr) {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">

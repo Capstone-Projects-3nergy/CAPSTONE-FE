@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Chart from 'chart.js/auto' 
+import Chart from 'chart.js/auto'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
@@ -11,6 +11,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+import AppHeader from './AppHeader.vue'
 const loginManager = useAuthManager()
 const loginStore = useLoginManager()
 const router = useRouter()
@@ -43,16 +44,13 @@ const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
 ]
 const checkScreen = () => {
-
   isCollapsed.value = window.innerWidth < 768
 }
 onUnmounted(() => {
-  
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
   checkScreen()
-
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
@@ -67,8 +65,8 @@ onMounted(async () => {
           backgroundColor: (context) => {
             const index = context.dataIndex
             return index === 3
-              ? 'rgba(37, 99, 235, 0.9)' 
-              : 'rgba(59, 130, 246, 0.3)' 
+              ? 'rgba(37, 99, 235, 0.9)'
+              : 'rgba(59, 130, 246, 0.3)'
           },
           borderRadius: 8,
           barThickness: 30
@@ -104,11 +102,8 @@ const showHomePageStaffWeb = async function () {
 
 const returnLoginPage = async () => {
   try {
-  
     await loginManager.logoutAccount(router)
-    
-  } catch (err) {
-  }
+  } catch (err) {}
 }
 const returnHomepage = () => {
   showLogoutConfirm.value = false
@@ -121,7 +116,6 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-
 
 const ShowManageAnnouncementPage = async function () {
   router.replace({
@@ -149,12 +143,11 @@ const toggleSidebar = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-   
-    <header class="flex items-center w-full h-16 bg-white">
+    <AppHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
-     
         <svg
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
@@ -171,7 +164,6 @@ const toggleSidebar = () => {
         </svg>
 
         <div class="flex-1 flex justify-end items-center gap-5">
-         
           <svg
             width="14"
             height="14"
@@ -197,8 +189,6 @@ const toggleSidebar = () => {
               </clipPath>
             </defs>
           </svg>
-
-          
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -206,20 +196,17 @@ const toggleSidebar = () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
-     
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
-           
           ]"
           class="overflow-hidden"
         >
-      
           <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
@@ -271,7 +258,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-         
+
             <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
@@ -290,7 +277,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-            
+
             <SidebarItem
               title="Dashboard"
               @click="showDashBoardPage"
@@ -311,7 +298,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-          
+
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -328,7 +315,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-         
+
             <SidebarItem
               title="Manage Residents"
               @click="ShowManageResidentPage"
@@ -348,7 +335,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-         
+
             <SidebarItem
               title="Manage Announcements"
               @click="ShowManageAnnouncementPage"
@@ -369,7 +356,7 @@ const toggleSidebar = () => {
               </template>
             </SidebarItem>
           </nav>
-         
+
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -400,9 +387,7 @@ const toggleSidebar = () => {
         </aside>
       </button>
 
-    
       <main class="flex-1 p-9 bg-gray-50 min-h-screen">
-       
         <div class="flex items-center space-x-2 mb-6">
           <svg
             width="25"
@@ -419,7 +404,6 @@ const toggleSidebar = () => {
           <h2 class="text-2xl font-bold text-[#185dc0]">Dashboard</h2>
         </div>
 
-       
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div
             class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
@@ -571,5 +555,4 @@ const toggleSidebar = () => {
   ></Teleport>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
