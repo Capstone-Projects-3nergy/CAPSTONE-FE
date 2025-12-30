@@ -23,6 +23,9 @@ const openNotification = () => {
     router.replace({ name: 'residentnotification' })
   }
 }
+const showNotification = computed(
+  () => role.value === 'STAFF' || role.value === 'RESIDENT'
+)
 </script>
 
 <template>
@@ -31,6 +34,7 @@ const openNotification = () => {
       class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
     >
       <svg
+        v-if="showNotification"
         @click="toggleSidebar"
         class="md:hidden mr-4 cursor-pointer"
         width="24"
@@ -48,6 +52,7 @@ const openNotification = () => {
 
       <div class="flex-1 flex justify-end items-center gap-5">
         <svg
+          v-if="showNotification"
           @click="openNotification"
           class="cursor-pointer"
           width="14"
