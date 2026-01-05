@@ -1014,7 +1014,7 @@ onMounted(async () => {
                   <input
                     v-model="recipientSearch"
                     type="text"
-                    placeholder="Enter name/ email / room number"
+                    placeholder="Enter Resident Name/ Email / Room Number"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
 

@@ -704,7 +704,7 @@ const closePopUp = (operate) => {
                   <input
                     v-model="recipientSearch"
                     type="text"
-                    placeholder="Enter Recipient Name"
+                    placeholder="Enter Recipient Name / Room Number"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
 
@@ -718,7 +718,7 @@ const closePopUp = (operate) => {
                       @click="selectResident(r)"
                       class="px-3 py-1 cursor-pointer hover:bg-blue-100"
                     >
-                      {{ r.fullName }}
+                      {{ r.fullName }} (Room {{ r.roomNumber }})
                     </li>
                     <li
                       v-if="filteredResidents.length === 0"
@@ -835,6 +835,12 @@ const closePopUp = (operate) => {
                     selectedResident
                       ? selectedResident.fullName
                       : form.recipientName
+                  }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Room:</span>
+                  <span>{{
+                    selectedResident ? selectedResident.roomNumber : ''
                   }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
