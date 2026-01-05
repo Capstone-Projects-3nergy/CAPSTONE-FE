@@ -112,23 +112,23 @@ const submitForm = async (roleType) => {
     /* =======================
        CHECK EMAIL EXIST (REAL)
        ======================= */
-    // const baseURL = import.meta.env.VITE_BASE_URL
+    const baseURL = import.meta.env.VITE_BASE_URL
 
-    // try {
-    //   await axios.post(`${baseURL}/api/public/email`, {
-    //     email: form.email.trim()
-    //   })
-    //   // ถ้าเข้า try แปลว่า email มีจริง → ผ่าน
-    // } catch (error) {
-    //   if (error.response?.status === 404) {
-    //     // ❌ email ไม่มีอยู่จริง
-    //     isEmailExist.value = true
-    //     setTimeout(() => (isEmailExist.value = false), 10000)
-    //     return
-    //   } else {
-    //     throw error
-    //   }
-    // }
+    try {
+      await axios.post(`${baseURL}/api/public/email/check`, {
+        email: form.email.trim()
+      })
+      // ถ้าเข้า try แปลว่า email มีจริง → ผ่าน
+    } catch (error) {
+      if (error.response?.status === 404) {
+        // ❌ email ไม่มีอยู่จริง
+        isEmailExist.value = true
+        setTimeout(() => (isEmailExist.value = false), 10000)
+        return
+      } else {
+        throw error
+      }
+    }
 
     /* =======================
        PREPARE PAYLOAD
