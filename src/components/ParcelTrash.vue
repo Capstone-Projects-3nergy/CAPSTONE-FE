@@ -401,15 +401,15 @@ const paginatedParcels = computed(() => {
   return filteredParcels.value.slice(start, end)
 })
 
-const showParcelDetail = async function (id) {
-  router.push({
-    name: 'detailparcels',
-    params: {
-      id: route.params.id,
-      tid: id
-    }
-  })
-}
+// const showParcelDetail = async function (id) {
+//   router.push({
+//     name: 'detailparcels',
+//     params: {
+//       id: route.params.id,
+//       tid: id
+//     }
+//   })
+// }
 
 const goToPage = (page) => {
   if (page < 1) page = 1
@@ -456,22 +456,22 @@ const deleteParcelPopUp = (parcel) => {
   }
 }
 
-const openStatusPopup = (parcel) => {
-  parcelStatusDetail.value = {
-    id: parcel.id,
-    parcelStatus: parcel.parcelStatus
-  }
+// const openStatusPopup = (parcel) => {
+//   parcelStatusDetail.value = {
+//     id: parcel.id,
+//     parcelStatus: parcel.parcelStatus
+//   }
 
-  router.push({
-    name: 'editparcelstatus',
-    params: {
-      id: route.params.id,
-      tid: parcel.id
-    }
-  })
+//   router.push({
+//     name: 'editparcelstatus',
+//     params: {
+//       id: route.params.id,
+//       tid: parcel.id
+//     }
+//   })
 
-  showStatusParcel.value = true
-}
+//   showStatusParcel.value = true
+// }
 
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
@@ -582,26 +582,26 @@ const fetchTrash = async () => {
 //   trashList.value = await res.json()
 // }
 
-const deleteForever = async (id) => {
-  if (!confirm('Delete permanently? This action cannot be undone.')) return
+// const deleteForever = async (id) => {
+//   if (!confirm('Delete permanently? This action cannot be undone.')) return
 
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/force`,
-      { method: 'DELETE' }
-    )
+//   try {
+//     const res = await fetch(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/force`,
+//       { method: 'DELETE' }
+//     )
 
-    if (!res.ok) throw new Error('delete failed')
+//     if (!res.ok) throw new Error('delete failed')
 
-    parcelManager.deletePermanent(id)
+//     parcelManager.deletePermanent(id)
 
-    deleteSuccess.value = true
-    setTimeout(() => (deleteSuccess.value = false), 10000)
-  } catch (e) {
-    error.value = true
-    setTimeout(() => (error.value = false), 10000)
-  }
-}
+//     deleteSuccess.value = true
+//     setTimeout(() => (deleteSuccess.value = false), 10000)
+//   } catch (e) {
+//     error.value = true
+//     setTimeout(() => (error.value = false), 10000)
+//   }
+// }
 
 onMounted(fetchTrash)
 const cancelPage = () => {
@@ -1011,8 +1011,6 @@ const closePopUp = (operate) => {
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
-          @status-click="openStatusPopup"
-          @view-detail="showParcelDetail"
           @delete="deleteParcelPopUp"
         >
           <template #sort-room>

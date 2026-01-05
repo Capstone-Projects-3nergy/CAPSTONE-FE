@@ -145,7 +145,8 @@ function formatDateTime(datetimeStr) {
                 {
                   'bg-yellow-400': p.status === 'Waiting for Staff',
                   'bg-green-400': p.status === 'Picked Up',
-                  'bg-blue-400': p.status === 'Received'
+                  'bg-blue-400': p.status === 'Received',
+                  'bg-red-400': p.status === 'TRASH'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
