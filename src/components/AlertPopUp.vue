@@ -18,9 +18,9 @@ const emit = defineEmits(['closePopUp'])
 </script>
 
 <template>
-  <div class="w-full flex relative">
+  <div class="w-full flex relative mb-6">
     <div
-      class="fixed px-6 py-4 rounded-lg shadow-lg"
+      class="relative itbkk-message px-6 py-4 rounded-lg shadow-lg"
       :class="
         styleType === 'green'
           ? 'bg-green-100 border border-green-400 text-green-700'

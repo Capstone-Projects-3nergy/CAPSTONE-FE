@@ -520,123 +520,123 @@ const toggleComfirmPasswordVisibility = () => {
         <p class="text-[#8C8F91] text-sm mb-4">
           Welcome to Tractify — Create your account below
         </p>
+        <div class="fixed top-30">
+          <AlertPopUp
+            v-if="isPasswordNotMatch"
+            :titles="'Password is not Match'"
+            message="Error!!"
+            styleType="red"
+            operate="errorpassword"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPositionWrong"
+            :titles="'Position can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="errorposition"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="roomidnotnumber"
+            :titles="'Room Number can only type as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="notnumber"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isPasswordNotMatch"
-          :titles="'Password is not Match'"
-          message="Error!!"
-          styleType="red"
-          operate="errorpassword"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isPositionWrong"
-          :titles="'Position can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="errorposition"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="roomidnotnumber"
-          :titles="'Room Number can only type as number.'"
-          message="Error!!"
-          styleType="red"
-          operate="notnumber"
-          @closePopUp="closePopUp"
-        />
+          <AlertPopUp
+            v-if="isEmailDuplicate"
+            :titles="`This email is already registered`"
+            message="Error!!"
+            styleType="red"
+            operate="email"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="incorrectemailform"
+            :titles="'Email Form Is Incorrect'"
+            message="Error!!"
+            styleType="red"
+            operate="emailform"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isEmailDuplicate"
-          :titles="`This email is already registered`"
-          message="Error!!"
-          styleType="red"
-          operate="email"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="incorrectemailform"
-          :titles="'Email Form Is Incorrect'"
-          message="Error!!"
-          styleType="red"
-          operate="emailform"
-          @closePopUp="closePopUp"
-        />
+          <AlertPopUp
+            v-if="isPasswordMax"
+            titles="Limit password to 20 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="password"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="success"
+            :titles="'Register New Account is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="success"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isPasswordMax"
-          titles="Limit password to 20 characters or less."
-          message="Error!!"
-          styleType="red"
-          operate="password"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="success"
-          :titles="'Register New Account is Successful.'"
-          message="Success!!"
-          styleType="green"
-          operate="success"
-          @closePopUp="closePopUp"
-        />
-
-        <AlertPopUp
-          v-if="isNoDorm"
-          :titles="'Please select a dormitory.'"
-          message="Error!!"
-          styleType="red"
-          operate="dorm"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isNotMatch"
-          :titles="'Passwords do not match'"
-          message="Error!!"
-          styleType="red"
-          operate="notmatch"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isRoomRequired"
-          :titles="'Room number is required.'"
-          message="Error!!"
-          styleType="red"
-          operate="notroomrequired"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isFullNameWrong"
-          :titles="'Full Name can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="nametypewrong"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isPositionRequired"
-          :titles="'Position is required for staff.'"
-          message="Error!!"
-          styleType="red"
-          operate="notpositionrequired"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isEmailExist"
-          :titles="'This Email does not exist.'"
-          message="Error!!"
-          styleType="red"
-          operate="EmailNotExist"
-          @closePopUp="closePopUp"
-        />
-
+          <AlertPopUp
+            v-if="isNoDorm"
+            :titles="'Please select a dormitory.'"
+            message="Error!!"
+            styleType="red"
+            operate="dorm"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNotMatch"
+            :titles="'Passwords do not match'"
+            message="Error!!"
+            styleType="red"
+            operate="notmatch"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isRoomRequired"
+            :titles="'Room number is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="notroomrequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isFullNameWrong"
+            :titles="'Full Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="nametypewrong"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPositionRequired"
+            :titles="'Position is required for staff.'"
+            message="Error!!"
+            styleType="red"
+            operate="notpositionrequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailExist"
+            :titles="'This Email does not exist.'"
+            message="Error!!"
+            styleType="red"
+            operate="EmailNotExist"
+            @closePopUp="closePopUp"
+          />
+        </div>
         <div class="flex bg-[#EAF0F5] rounded-lg mb-4 p-1">
           <button
             @click="role = 'resident'"
