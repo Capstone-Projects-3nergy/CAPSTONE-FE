@@ -796,9 +796,7 @@ const handleSortUpdate = (val) => {
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
-          @status-click="openStatusPopup"
           @view-detail="showRegistrationDetail"
-          @delete="deleteParcelPopUp"
         >
           <template #sort-room>
             <svg
