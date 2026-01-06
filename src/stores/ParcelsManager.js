@@ -86,19 +86,45 @@ export const useParcelManager = defineStore('parcelManager', () => {
       const removed = parcel.splice(index, 1)[0]
       trash.push({
         ...removed,
+        original: { ...removed }, // เก็บสภาพก่อนลบ
+        trashedAt: new Date().toISOString()
+      })
+    }
+  }
+
+  const restoreFromTrash = (id) => {
+    const index = findIndexById(trash, id)
+    if (index !== -1) {
+      const removed = trash.splice(index, 1)[0]
+
+      const originals = removed.original || removed
+
+      parcel.push({
+        ...originals,
         updatedAt: new Date().toISOString()
       })
     }
   }
-  const restoreFromTrash = (id) => {
-    const index = findIndexById(trash, id)
-    if (index !== -1) {
-      const restored = trash.splice(index, 1)[0]
-      parcel.push({
-        ...restored
-      })
-    }
-  }
+
+  // const moveToTrash = (id) => {
+  //   const index = findIndexById(parcel, id)
+  //   if (index !== -1) {
+  //     const removed = parcel.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       updatedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored
+  //     })
+  //   }
+  // }
 
   // const moveToTrash = (id) => {
   //   const index = findIndexById(parcel, id)

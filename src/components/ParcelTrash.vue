@@ -18,6 +18,7 @@ import ChangeParcelStatus from './ChangeParcelStatus.vue'
 import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
+import RestoreParcels from './RestoreParcels.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -633,7 +634,8 @@ const cancelPage = () => {
 }
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'errorSuccessMessage ') addSuccess.value = false
+  if (operate === 'deleteSuccessMessage ') deleteSuccess.value = false
+  if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
 }
 </script>
 
@@ -1012,7 +1014,15 @@ const closePopUp = (operate) => {
             :titles="'Delete Parcel is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="errorSuccessMessage"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="restoreSuccess"
+            :titles="'Restore Parcel is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="restoreSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -1036,6 +1046,7 @@ const closePopUp = (operate) => {
           @next="nextPage"
           @go="goToPage"
           @delete="deleteParcelPopUp"
+          @restore="restoreParcelPopUp"
         >
           <template #sort-room>
             <svg
@@ -1495,12 +1506,11 @@ const closePopUp = (operate) => {
     />
   </teleport>
   <teleport to="body" v-if="showRestoreParcel">
-    <DeleteParcels
+    <RestoreParcels
       @cancelDetail="clearRestorePopUp"
       @confirmDetail="showRestoreComplete"
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
-      :isPermanent="true"
     />
   </teleport>
 </template>

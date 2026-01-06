@@ -41,7 +41,7 @@ const removeParcelToTrashFn = async () => {
   emit('confirmDetail', true)
 }
 
-const deleteParcelFn = async () => {
+const restoreParcelFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
@@ -60,13 +60,8 @@ const deleteParcelFn = async () => {
   emit('confirmDetail', true)
 }
 
-const confirmAction = () => {
-  deleteParcelFn()
-}
-
 const cancelAction = () => {
   emit('cancelDetail', true)
-  router.replace('trashparcels')
 }
 </script>
 
@@ -79,15 +74,13 @@ const cancelAction = () => {
     >
       <div class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
-          Delete Parcel
+          Restore Parcel
         </h1>
       </div>
 
       <div class="p-4 text-center sm:text-left">
-        <template>
-          Do you want to restore the parcel with tracking number
-          <b>"{{ parcel.parcelNumber || '' }}"</b>?
-        </template>
+        Do you want to restore the parcel with tracking number
+        <b>"{{ parcel.parcelNumber || '' }}"</b>?
       </div>
 
       <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
@@ -95,7 +88,7 @@ const cancelAction = () => {
           label="Confirm"
           color="green"
           class="w-full sm:w-auto"
-          @click="confirmAction"
+          @click="restoreParcelFn"
         />
 
         <ButtonWeb
