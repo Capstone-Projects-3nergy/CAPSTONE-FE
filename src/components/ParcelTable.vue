@@ -5,7 +5,8 @@ const emit = defineEmits([
   'go',
   'status-click',
   'view-detail',
-  'delete'
+  'delete',
+  'restore'
 ])
 
 defineProps({
@@ -18,6 +19,10 @@ defineProps({
     default: true
   },
   showDelete: {
+    type: Boolean,
+    default: true
+  },
+  showRestore: {
     type: Boolean,
     default: true
   },
@@ -181,6 +186,13 @@ function formatDateTime(datetimeStr) {
               class="hover:opacity-80 cursor-pointer"
             >
               <slot name="icon-delete"> </slot>
+            </button>
+            <button
+              v-if="showRestore"
+              @click="$emit('restore', p)"
+              class="hover:opacity-80 cursor-pointer"
+            >
+              <slot name="restore-trash"> </slot>
             </button>
           </td>
         </tr>

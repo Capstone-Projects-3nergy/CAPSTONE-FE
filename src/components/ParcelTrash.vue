@@ -85,8 +85,10 @@ const error = ref(false)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
+const restoreSuccess = ref(false)
 const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
+const showRestoreParcel = ref(false)
 const showStatusParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
@@ -455,7 +457,13 @@ const deleteParcelPopUp = (parcel) => {
     parcelNumber: parcel.trackingNumber
   }
 }
-
+const restoreParcelPopUp = (parcel) => {
+  showRestoreParcel.value = true
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.trackingNumber
+  }
+}
 // const openStatusPopup = (parcel) => {
 //   parcelStatusDetail.value = {
 //     id: parcel.id,
@@ -477,8 +485,18 @@ const clearDeletePopUp = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
 }
+const clearRestorePopUp = () => {
+  showRestoreParcel.value = false
+  parcelDetail.value = null
+}
 const clearStatusPopUp = () => {
   showStatusParcel.value = false
+  parcelDetail.value = null
+}
+const showRestoreComplete = () => {
+  restoreSuccess.value = true
+  setTimeout(() => (restoreSuccess.value = false), 10000)
+  showRestoreParcel.value = false
   parcelDetail.value = null
 }
 const showDelComplete = () => {
@@ -500,6 +518,12 @@ const openRedPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)
   showDeleteParcel.value = false
+  parcelDetail.value = null
+}
+const openRedRestorePopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showRestoreParcel.value = false
   parcelDetail.value = null
 }
 const openRedStatusPopup = () => {
@@ -1123,6 +1147,33 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
+          <template #restore-trash>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+            >
+              <g
+                class="text-yellow-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="1.5"
+              >
+                <path
+                  d="m19.5 5.5l-.5 6m-14.5-6l.605 10.037c.154 2.57.232 3.855.874 4.78a4 4 0 0 0 1.2 1.132c.582.356 1.284.496 2.321.551"
+                />
+                <path
+                  stroke-linejoin="round"
+                  d="m11 15.5l1.136 1.466a4 4 0 0 1 7.364-.901M21 20.5l-1.136-1.464a4 4 0 0 1-7.328.965"
+                />
+                <path
+                  d="M3 5.5h18m-4.944 0l-.683-1.408c-.453-.936-.68-1.403-1.071-1.695a2 2 0 0 0-.275-.172C13.594 2 13.074 2 12.035 2c-1.066 0-1.599 0-2.04.234a2 2 0 0 0-.278.18c-.395.303-.616.788-1.058 1.757L8.053 5.5"
+                />
+              </g>
+            </svg>
+          </template>
         </ParcelTable>
         <!-- <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
           <table class="min-w-full text-left border-collapse">
@@ -1439,6 +1490,15 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeletePopUp"
       @confirmDetail="showDelComplete"
       @redAlert="openRedPopup"
+      :parcelData="parcelDetail"
+      :isPermanent="true"
+    />
+  </teleport>
+  <teleport to="body" v-if="showRestoreParcel">
+    <DeleteParcels
+      @cancelDetail="clearRestorePopUp"
+      @confirmDetail="showRestoreComplete"
+      @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
       :isPermanent="true"
     />
