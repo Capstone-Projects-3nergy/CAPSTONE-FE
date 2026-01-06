@@ -332,6 +332,35 @@ async function confirmParcelReceived(url, id, router) {
     return null
   }
 }
+async function restoreParcel(url, id, router) {
+  const options = { method: 'PUT', headers: {} }
+  const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
+
+  if (!res) return { ok: false, status: 0 }
+
+  return {
+    ok: res.ok,
+    status: res.status
+  }
+}
+
+// async function restoreParcel(url, id, router) {
+//   try {
+//     const options = {
+//       method: 'PUT',
+//       headers: {}
+//     }
+
+//     const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
+
+//     if (res?.ok) {
+//       return true
+//     }
+//     return false
+//   } catch (error) {
+//     return false
+//   }
+// }
 
 export {
   getItemById,
@@ -349,5 +378,6 @@ export {
   deleteFile,
   updateParcelStatus,
   confirmParcelPickup,
-  confirmParcelReceived
+  confirmParcelReceived,
+  restoreParcel
 }

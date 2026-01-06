@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import { deleteItemById } from '@/utils/fetchUtils'
+import { restoreParcel } from '@/utils/fetchUtils'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 
@@ -18,47 +18,45 @@ const props = defineProps({
 const router = useRouter()
 const parcelManager = useParcelManager()
 
-const deletedParcel = ref(null)
+const restoreParcels = ref(null)
 
 const parcel = computed(() => props.parcelData || {})
+const restoreParcelFn = async () => {
+  if (!parcel.value?.id) return
 
-const removeParcelToTrashFn = async () => {
-  if (!parcel.value.id) return
-
-  deletedParcel.value = await deleteItemById(
+  const result = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     parcel.value.id
   )
 
-  if (deletedParcel.value === '404') {
-    emit('redAlert')
+  if (!result.ok) {
+    if (result.status === 404) emit('redAlert')
     emit('cancelDetail', true)
     return
   }
 
-  parcelManager.moveToTrash(parcel.value.id)
-
+  parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }
 
-const restoreParcelFn = async () => {
-  if (!parcel.value.id) return
+// const restoreParcelFn = async () => {
+//   if (!parcel.value?.id) return
 
-  deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/permanent`,
-    parcel.value.id
-  )
+//   const success = await restoreParcel(
+//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//     parcel.value.id
+//   )
 
-  if (deletedParcel.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
-    return
-  }
+//   if (!success) {
+//     emit('redAlert')
+//     emit('cancelDetail', true)
+//     return
+//   }
 
-  parcelManager.deletePermanent(parcel.value.id)
+//   parcelManager.restoreFromTrash(parcel.value.id)
 
-  emit('confirmDetail', true)
-}
+//   emit('confirmDetail', true)
+// }
 
 const cancelAction = () => {
   emit('cancelDetail', true)

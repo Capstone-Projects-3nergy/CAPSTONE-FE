@@ -45,7 +45,7 @@ const deleteParcelFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/permanent`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     parcel.value.id
   )
 
