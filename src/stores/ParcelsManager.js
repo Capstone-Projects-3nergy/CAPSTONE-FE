@@ -80,15 +80,13 @@ export const useParcelManager = defineStore('parcelManager', () => {
       parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
     }
   }
-
   const moveToTrash = (id) => {
     const index = findIndexById(parcel, id)
     if (index !== -1) {
       const removed = parcel.splice(index, 1)[0]
       trash.push({
         ...removed,
-        status: 'TRASH',
-        trashedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       })
     }
   }
@@ -97,12 +95,33 @@ export const useParcelManager = defineStore('parcelManager', () => {
     if (index !== -1) {
       const restored = trash.splice(index, 1)[0]
       parcel.push({
-        ...restored,
-        status: 'ACTIVE',
-        restoredAt: new Date().toISOString()
+        ...restored
       })
     }
   }
+
+  // const moveToTrash = (id) => {
+  //   const index = findIndexById(parcel, id)
+  //   if (index !== -1) {
+  //     const removed = parcel.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       status: 'TRASH',
+  //       trashedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored,
+  //       status: 'ACTIVE',
+  //       restoredAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
 
   // const restoreFromTrash = (parcelId) => {
   //   const index = findIndexByParcelId(trash, parcelId)
