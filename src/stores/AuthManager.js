@@ -5,7 +5,8 @@ import { auth } from '@/firebase/firebaseConfig'
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 
@@ -128,7 +129,17 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const baseURL = import.meta.env.VITE_BASE_URL
       const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
+      // 🔽 ADD ตรงนี้ // login Firebase เพื่อให้ได้ currentUser
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        payload.email,
+        payload.password
+      )
+      // ส่ง verify email
+      await sendEmailVerification(cred.user)
 
+      successMessage.value =
+        'Account registered successfully. Please check your email to verify your account.'
       status.value = res.status
       successMessage.value = 'Account registered successfully! Please login.'
 
@@ -173,6 +184,14 @@ export const useAuthManager = defineStore('authManager', () => {
       let cred
       try {
         cred = await signInWithEmailAndPassword(auth, email, password)
+        if (!cred.user.emailVerified) {
+          throw {
+            response: {
+              status: 401,
+              data: { message: 'Please verify your email before login.' }
+            }
+          }
+        }
       } catch (firebaseErr) {
         const firebaseCodes = [
           'auth/invalid-credential',
