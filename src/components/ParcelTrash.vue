@@ -887,7 +887,7 @@ const closePopUp = (operate) => {
       <main class="flex-1 p-9 w-full">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-1">
-            <svg
+            <!-- <svg
               width="25"
               height="25"
               viewBox="0 0 25 25"
@@ -898,21 +898,22 @@ const closePopUp = (operate) => {
                 d="M13.9674 2.61776C13.0261 2.23614 11.9732 2.23614 11.032 2.61776L8.75072 3.54276L18.7424 7.42818L22.257 6.07089C22.1124 5.95203 21.9509 5.85547 21.7778 5.78443L13.9674 2.61776ZM22.9163 7.49068L13.2809 11.2136V22.5917C13.5143 22.5445 13.7431 22.4754 13.9674 22.3844L21.7778 19.2178C22.1142 19.0815 22.4023 18.8479 22.6051 18.5469C22.808 18.2459 22.9163 17.8912 22.9163 17.5282V7.49068ZM11.7184 22.5917V11.2136L2.08301 7.49068V17.5292C2.08321 17.892 2.19167 18.2465 2.39449 18.5473C2.59732 18.8481 2.88529 19.0816 3.22155 19.2178L11.032 22.3844C11.2563 22.4747 11.4851 22.5431 11.7184 22.5917ZM2.74238 6.07089L12.4997 9.84068L16.5799 8.2636L6.63926 4.39901L3.22155 5.78443C3.04377 5.85665 2.88405 5.95214 2.74238 6.07089Z"
                 fill="#185DC0"
               />
-            </svg>
+            </svg> -->
 
             <h2
-              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
+              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap cursor-pointer"
+              @click="cancelPage"
             >
-              Manage Parcels > 🗑 Trash
+              🗑 Trash
             </h2>
           </div>
 
-          <ButtonWeb
+          <!-- <ButtonWeb
             label="Go Back"
             color="gray"
             @click="cancelPage"
             class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 w-auto"
-          />
+          /> -->
         </div>
         <ParcelFilterBar
           :modelDate="filterDate"
