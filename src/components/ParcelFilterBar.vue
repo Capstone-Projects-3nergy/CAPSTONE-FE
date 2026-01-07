@@ -84,7 +84,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
           </svg>
           <span>Add parcel</span>
         </button>
-        <button
+        <!-- <button
           v-if="hideTrash"
           @click="$emit('trash')"
           class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
@@ -106,7 +106,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
             />
           </svg>
           <span>Trash</span>
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
