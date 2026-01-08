@@ -95,7 +95,6 @@ const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelsResidentDetail = ref(null)
 const route = useRoute()
-
 const residents = ref([])
 
 const recipientSearch = ref('')
@@ -197,8 +196,8 @@ autoClose(deleteSuccess)
 autoClose(error)
 
 const searchKeyword = ref('')
-const activeTab = ref('Day')
-const tabs = ['Day', 'Month', 'Year']
+const activeTab = ref('Parcels')
+const tabs = ['Parcels', 'Staffs']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -934,6 +933,27 @@ const closePopUp = (operate) => {
             @click="cancelPage"
             class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 w-auto"
           /> -->
+        </div>
+        <div class="flex items-center justify-between mb-4">
+          <!-- Left:  Tabs -->
+          <div class="flex items-center space-x-4">
+            <!-- <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3> -->
+            <div class="flex bg-gray-300 rounded-lg overflow-hidden">
+              <button
+                v-for="tab in tabs"
+                :key="tab"
+                @click="activeTab = tab"
+                :class="[
+                  'px-4 py-1 font-medium transition  cursor-pointer',
+                  activeTab === tab
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-500 hover:bg-gray-200'
+                ]"
+              >
+                {{ tab }}
+              </button>
+            </div>
+          </div>
         </div>
         <ParcelFilterBar
           :modelDate="filterDate"
