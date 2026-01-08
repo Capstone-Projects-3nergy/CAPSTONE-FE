@@ -96,7 +96,134 @@ function updateUser(data) {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row gap-10">
+      <!-- LEFT : Profile Image Card -->
+      <div
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
+      >
+        <div
+          class="relative w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-sm"
+        >
+          <img
+            v-if="avatarPreview"
+            :src="avatarPreview"
+            alt="Profile"
+            class="w-full h-full object-cover"
+          />
+
+          <div
+            v-else
+            class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
+          >
+            {{ userInitial }}
+          </div>
+        </div>
+
+        <ButtonWeb
+          label="Change Image"
+          color="blue"
+          class="mt-4 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-4 py-2 rounded-full shadow-sm"
+          @click="$refs.imageInput.click()"
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          class="hidden"
+          ref="imageInput"
+          @change="onImageChange"
+        />
+
+        <p class="mt-4 text-gray-800 font-semibold text-lg">
+          {{ props.fullName }}
+        </p>
+      </div>
+
+      <!-- RIGHT : Edit Information Card -->
+      <div
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+      >
+        <!-- Header -->
+        <div class="mb-8">
+          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+            {{ title }}
+          </h2>
+        </div>
+
+        <!-- Form Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1"> Firstname </label>
+            <input
+              v-model="form.firstName"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-400 mb-1"> Lastname </label>
+            <input
+              v-model="form.lastName"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-400 mb-1"> Email </label>
+            <input
+              v-model="form.email"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <div v-if="roomNumber !== null">
+            <label class="block text-sm text-gray-400 mb-1">
+              Room Number
+            </label>
+            <input
+              v-model="form.roomNumber"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-400 mb-1"> Line ID </label>
+            <input
+              v-model="form.lineId"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-400 mb-1"> Contact </label>
+            <input
+              v-model="form.contact"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+
+          <!-- Actions -->
+          <div class="col-span-2 flex justify-end gap-4 mt-6">
+            <ButtonWeb
+              label="Save"
+              color="green"
+              class="px-6 py-2 rounded-full shadow"
+              @click="save"
+            />
+            <ButtonWeb
+              label="Cancel"
+              color="gray"
+              class="px-6 py-2 rounded-full shadow"
+              @click="cancel"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
         {{ title }}
@@ -130,12 +257,7 @@ function updateUser(data) {
           class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
           @click="$refs.imageInput.click()"
         />
-        <!-- <button
-          class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
-          @click="$refs.imageInput.click()"
-        >
-          Change Image
-        </button> -->
+       
         <input
           type="file"
           accept="image/*"
@@ -219,22 +341,11 @@ function updateUser(data) {
             class="w-full sm:w-auto px-5 py-2 rounded-xl shadow"
             @click="cancel"
           />
-          <!-- <button
-            @click="save"
-            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
-          >
-            Save
-          </button>
-          <button
-            @click="cancel"
-            class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-xl shadow cursor-pointer"
-          >
-            Cancel
-          </button> -->
+        
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <style scoped></style>
