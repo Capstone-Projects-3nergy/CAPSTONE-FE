@@ -921,7 +921,7 @@ const closePopUp = (operate) => {
             </svg> -->
 
             <h2
-              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap cursor-pointer"
+              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
             >
               🗑 Trash
             </h2>
