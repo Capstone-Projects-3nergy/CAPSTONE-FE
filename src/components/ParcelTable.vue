@@ -37,7 +37,9 @@ defineProps({
   showStatus: {
     type: Boolean,
     default: true
-  }
+  },
+  showUpdateAt: { type: Boolean, default: true },
+  showDeletedAt: { type: Boolean, default: false }
 })
 
 function formatDateTime(datetimeStr) {
@@ -80,9 +82,21 @@ function formatDateTime(datetimeStr) {
             </div>
           </th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+          <th
+            v-if="showUpdateAt"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
             <div class="flex items-center gap-2">
-              Update
+              Updated At
+              <slot name="sort-date"></slot>
+            </div>
+          </th>
+          <th
+            v-if="showDeletedAt"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            <div class="flex items-center gap-2">
+              Deleted At
               <slot name="sort-date"></slot>
             </div>
           </th>
@@ -162,18 +176,20 @@ function formatDateTime(datetimeStr) {
           </td>
 
           <td
+            v-if="showUpdateAt"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-blue-700"
-              >Update At:</span
+              >Updated At:</span
             >
             {{ formatDateTime(p.updateAt) }}
           </td>
           <td
+            v-if="showDeletedAt"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-blue-700"
-              >Delete At:</span
+              >Deleted At:</span
             >
             {{ formatDateTime(p.deletedAt) }}
           </td>

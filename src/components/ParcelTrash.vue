@@ -1084,6 +1084,8 @@ const closePopUp = (operate) => {
           :showDelete="true"
           :hideTrash="true"
           :clickableStatus="false"
+          :showUpdateAt="false"
+          :showDeletedAt="true"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
