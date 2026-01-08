@@ -520,7 +520,7 @@ const toggleComfirmPasswordVisibility = () => {
         <p class="text-[#8C8F91] text-sm mb-4">
           Welcome to Tractify — Create your account below
         </p>
-        <div class="fixed top-30">
+        <div class="fixed top-20">
           <AlertPopUp
             v-if="isPasswordNotMatch"
             :titles="'Password is not Match'"
