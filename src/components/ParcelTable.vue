@@ -164,8 +164,18 @@ function formatDateTime(datetimeStr) {
           <td
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Update:</span>
+            <span class="md:hidden font-semibold text-blue-700"
+              >Update At:</span
+            >
             {{ formatDateTime(p.updateAt) }}
+          </td>
+          <td
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700"
+              >Delete At:</span
+            >
+            {{ formatDateTime(p.deletedAt) }}
           </td>
 
           <td

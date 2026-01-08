@@ -28,12 +28,12 @@ const restoreParcelFn = async () => {
     `${import.meta.env.VITE_BASE_URL}/api/trash`,
     parcel.value.id
   )
-
-  if (!result.ok) {
-    if (result.value === '404') emit('redAlert')
+  if (!result || !result.ok) {
+    emit('redAlert')
     emit('cancelDetail', true)
     return
   }
+
   parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }
