@@ -24,11 +24,11 @@ const parcel = computed(() => props.parcelData || {})
 const restoreParcelFn = async () => {
   if (!parcel.value?.id) return
 
-  const result = await restoreParcel(
+  restoreParcels.value = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/trash`,
     parcel.value.id
   )
-  if (!result || !result.ok) {
+  if (restoreParcels.value === '404') {
     emit('redAlert')
     emit('cancelDetail', true)
     return
