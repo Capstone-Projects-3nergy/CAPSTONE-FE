@@ -90,12 +90,21 @@ const cancelAction = () => {
         <template v-if="isPermanent">
           Do you want to permanently delete the parcel with tracking number
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
+          <br />
+          <span class="text-red-500 text-sm">
+            **Once deleted, this parcel cannot be recovered.**
+          </span>
         </template>
 
         <template v-else>
           Do you want to move the parcel with tracking number
           <b>"{{ parcel.parcelNumber || '' }}"</b>
           to the trash?
+          <br />
+          <span class="text-gray-500 text-sm">
+            **Items in the trash will be kept for 30 days before being
+            permanently deleted.**
+          </span>
         </template>
       </div>
 
