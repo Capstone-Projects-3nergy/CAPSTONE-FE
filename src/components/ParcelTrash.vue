@@ -165,7 +165,7 @@ onMounted(async () => {
       email: p.contactEmail,
       status: mapStatus(p.status),
       receiveAt: p.receivedAt,
-      updateAt: p.updatedAt || null,
+      deletedAt: p.updatedAt || null,
       pickupAt: p.pickedUpAt || null
     }))
 
@@ -310,7 +310,7 @@ const selectedDate = ref('')
 const filteredParcels = computed(() => {
   let result = trashList.value.map((p) => ({
     ...p,
-    parsedDate: parseDate(p.updateAt)
+    parsedDate: parseDate(p.deletedAt)
   }))
 
   if (searchKeyword.value) {
@@ -1399,7 +1399,7 @@ const closePopUp = (operate) => {
                   <span class="md:hidden font-semibold text-blue-700"
                     >Update:
                   </span>
-                  {{ formatDateByTab(p.updateAt) }}
+                  {{ formatDateByTab(p.deletedAt) }}
                 </td>
 
                 <td
