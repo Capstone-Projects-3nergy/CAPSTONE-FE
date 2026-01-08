@@ -30,11 +30,10 @@ const restoreParcelFn = async () => {
   )
 
   if (!result.ok) {
-    if (result.status === 404) emit('redAlert')
+    if (result.value === '404') emit('redAlert')
     emit('cancelDetail', true)
     return
   }
-
   parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }

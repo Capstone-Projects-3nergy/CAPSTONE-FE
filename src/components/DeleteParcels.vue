@@ -26,7 +26,7 @@ const removeParcelToTrashFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     parcel.value.id
   )
 
@@ -45,7 +45,7 @@ const deleteParcelFn = async () => {
   if (!parcel.value.id) return
 
   deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash`,
     parcel.value.id
   )
 

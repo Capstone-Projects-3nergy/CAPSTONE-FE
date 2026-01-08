@@ -333,7 +333,7 @@ async function confirmParcelReceived(url, id, router) {
   }
 }
 async function restoreParcel(url, id, router) {
-  const options = { method: 'PUT', headers: {} }
+  const options = { method: 'POST', headers: {} }
   const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
 
   if (!res) return { ok: false, status: 0 }

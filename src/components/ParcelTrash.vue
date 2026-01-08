@@ -152,7 +152,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/trash'`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash`,
     router
   )
 
@@ -573,9 +573,7 @@ const handleSortUpdate = (val) => {
 }
 const fetchTrash = async () => {
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/trash`
-    )
+    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/trash`)
 
     if (!res.ok) return
 
