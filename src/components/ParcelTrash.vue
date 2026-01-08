@@ -123,7 +123,10 @@ watch(recipientSearch, (val) => {
     parcelData.value.recipientName = ''
   }
 })
-
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
 const mapStatus = (status) => {
   switch (status) {
     case 'WAITING_FOR_STAFF':
@@ -795,7 +798,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title=" Manage Parcel">
+            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
                   width="25"

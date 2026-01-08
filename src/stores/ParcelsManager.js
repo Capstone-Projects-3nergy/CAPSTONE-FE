@@ -87,7 +87,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
       trash.push({
         ...removed,
         original: { ...removed }, // เก็บสภาพก่อนลบ
-        trashedAt: new Date().toISOString()
+        deletedAt: new Date().toISOString()
       })
     }
   }
