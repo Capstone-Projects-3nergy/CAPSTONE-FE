@@ -181,11 +181,11 @@ function formatDateTime(datetimeStr) {
               <slot name="icon-view"></slot>
             </button>
             <button
-              v-if="showDelete"
+              v-if="showDelete && p.status !== 'Picked Up'"
               @click="$emit('delete', p)"
               class="hover:opacity-80 cursor-pointer"
             >
-              <slot name="icon-delete"> </slot>
+              <slot name="icon-delete"></slot>
             </button>
             <button
               v-if="showRestore"

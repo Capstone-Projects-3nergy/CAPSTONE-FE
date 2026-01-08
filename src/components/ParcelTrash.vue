@@ -165,7 +165,7 @@ onMounted(async () => {
       email: p.contactEmail,
       status: mapStatus(p.status),
       receiveAt: p.receivedAt,
-      deletedAt: p.updatedAt || null,
+      deletedAt: p.deletedAt || null,
       pickupAt: p.pickedUpAt || null
     }))
 
