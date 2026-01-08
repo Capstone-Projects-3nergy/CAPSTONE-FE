@@ -152,7 +152,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels/trash'`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash'`,
     router
   )
 

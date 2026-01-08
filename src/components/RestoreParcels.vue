@@ -25,7 +25,7 @@ const restoreParcelFn = async () => {
   if (!parcel.value?.id) return
 
   const result = await restoreParcel(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash`,
     parcel.value.id
   )
 
