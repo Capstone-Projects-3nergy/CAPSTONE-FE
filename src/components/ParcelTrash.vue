@@ -589,8 +589,8 @@ const fetchTrash = async () => {
       recipientName: p.ownerName,
       roomNumber: p.roomNumber,
       email: p.contactEmail,
-      status: 'TRASH',
-      trashedAt: p.trashedAt || null
+      status: p.status,
+      deletedAt: p.deletedAt || null
     }))
 
     // ใส่เข้า Pinia
