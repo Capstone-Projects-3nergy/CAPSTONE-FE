@@ -938,7 +938,7 @@ const closePopUp = (operate) => {
           <!-- Left:  Tabs -->
           <div class="flex items-center space-x-4">
             <!-- <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3> -->
-            <div class="flex bg-gray-300 rounded-lg overflow-hidden">
+            <div class="flex bg-white rounded-lg overflow-hidden">
               <button
                 v-for="tab in tabs"
                 :key="tab"
