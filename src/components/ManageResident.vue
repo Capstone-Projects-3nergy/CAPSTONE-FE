@@ -840,6 +840,7 @@ const handleSortUpdate = (val) => {
           :showMobile="true"
           :showActionStatus="true"
           :showRoom="false"
+          :showUpdateAt="false"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
