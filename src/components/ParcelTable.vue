@@ -14,6 +14,26 @@ defineProps({
   pages: Array,
   page: Number,
   total: Number,
+  showPhoto: {
+    type: Boolean,
+    default: false
+  },
+  showActionStatus: {
+    type: Boolean,
+    default: false
+  },
+  showMemberName: {
+    type: Boolean,
+    default: false
+  },
+  showMobile: {
+    type: Boolean,
+    default: false
+  },
+  showName: {
+    type: Boolean,
+    default: true
+  },
   showAction: {
     type: Boolean,
     default: true
@@ -31,6 +51,10 @@ defineProps({
     default: true
   },
   showTracking: {
+    type: Boolean,
+    default: true
+  },
+  showRoom: {
     type: Boolean,
     default: true
   },
@@ -55,15 +79,40 @@ function formatDateTime(datetimeStr) {
       >
         <tr>
           <th
+            v-if="showPhoto"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Photo
+          </th>
+          <th
             v-if="showTracking"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
             Tracking
           </th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Name</th>
-
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
+          <th
+            v-if="showName"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Name
+          </th>
+          <th
+            v-if="showMemberName"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Member name
+          </th>
+          <th
+            v-if="showMobile"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Mobile
+          </th>
+          <th
+            v-if="showRoom"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
             <div class="flex items-center gap-2">
               Room
               <slot name="sort-room"></slot>
@@ -105,6 +154,12 @@ function formatDateTime(datetimeStr) {
             v-if="showAction"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
+            Operation
+          </th>
+          <th
+            v-if="showActionStatus"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
             Action
           </th>
         </tr>
@@ -122,6 +177,17 @@ function formatDateTime(datetimeStr) {
           class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
         >
           <td
+            v-if="showPhoto"
+            class="px-4 py-2 md:py-3 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700">Photo:</span>
+
+            <img
+              :src="p.photo || '/default-avatar.png'"
+              class="w-10 h-10 rounded-full object-cover"
+            />
+          </td>
+          <td
             v-if="showTracking"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
@@ -132,13 +198,32 @@ function formatDateTime(datetimeStr) {
           </td>
 
           <td
+            v-if="showName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Name: </span>
+            <span class="md:hidden font-semibold text-blue-700">Name:</span>
             {{ p.recipientName }}
           </td>
 
           <td
+            v-if="showMemberName"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700">
+              Member name:
+            </span>
+            {{ p.memberName }}
+          </td>
+          <td
+            v-if="showMobile"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700">Mobile:</span>
+            {{ p.mobile }}
+          </td>
+
+          <td
+            v-if="showRoom"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-blue-700">Room: </span>
@@ -220,6 +305,25 @@ function formatDateTime(datetimeStr) {
             >
               <slot name="restore-trash"> </slot>
             </button>
+          </td>
+          <td
+            v-if="showActionStatus"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700">Action:</span>
+
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              :class="[
+                {
+                  'bg-blue-400': p.action === 'Login',
+                  'bg-red-400': p.action === 'Logout'
+                },
+                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
+              ]"
+            >
+              {{ p.action }}
+            </span>
           </td>
         </tr>
       </tbody>

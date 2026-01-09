@@ -675,25 +675,46 @@ const handleSortUpdate = (val) => {
       </button>
 
       <main class="flex-1 p-9">
-        <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
+        <div class="flex items-center justify-between mb-6 px-2">
+          <!-- LEFT -->
+          <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
 
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
-            Manage Resident
-          </h2>
+          <!-- RIGHT -->
+          <div class="flex items-center space-x-3">
+            <button
+              @click=""
+              class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                  fill="white"
+                />
+              </svg>
+              <span>Add New Member</span>
+            </button>
+
+            <button
+              @click=""
+              class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 1024 1024"
+              >
+                <path
+                  fill="currentColor"
+                  d="M685.248 104.704a64 64 0 0 1 0 90.496L368.448 512l316.8 316.8a64 64 0 0 1-90.496 90.496L232.704 557.248a64 64 0 0 1 0-90.496l362.048-362.048a64 64 0 0 1 90.496 0"
+                />
+              </svg>
+              <span>Filter</span>
+            </button>
+          </div>
         </div>
-        <ParcelFilterBar
+
+        <!-- <ParcelFilterBar
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
@@ -704,7 +725,7 @@ const handleSortUpdate = (val) => {
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
-        />
+        /> -->
         <!-- 
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
@@ -809,10 +830,16 @@ const handleSortUpdate = (val) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
+          :showPhoto="true"
+          :showName="false"
+          :showMemberName="true"
           :showTracking="false"
           :showStatus="false"
           :showDelete="false"
           :hideTrash="true"
+          :showMobile="true"
+          :showActionStatus="true"
+          :showRoom="false"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
