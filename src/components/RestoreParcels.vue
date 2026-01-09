@@ -61,19 +61,20 @@ const restoreResult = ref(null) // null | true | false
 const restoreParcelFn = async () => {
   if (!parcel.value?.id) return
 
-  const success = await restoreParcel(
+  const res = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/trash`,
     parcel.value.id,
     router
   )
 
-  if (!success) {
+  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
+  if (!res || !res.ok) {
     emit('redAlert')
     emit('cancelDetail', true)
     return
   }
 
-  // ✅ update state หลัง backend success เท่านั้น
+  // ✅ backend restore สำเร็จจริง
   parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }
