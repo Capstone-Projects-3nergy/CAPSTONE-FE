@@ -18,44 +18,65 @@ const props = defineProps({
 const router = useRouter()
 const parcelManager = useParcelManager()
 
-const restoreParcels = ref(null)
-
 const parcel = computed(() => props.parcelData || {})
-const restoreParcelFn = async () => {
-  if (!parcel.value?.id) return
-
-  restoreParcels.value = await restoreParcel(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
-    parcel.value.id
-  )
-  if (restoreParcels.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
-    return
-  }
-
-  parcelManager.restoreFromTrash(parcel.value.id)
-  emit('confirmDetail', true)
-}
-
 // const restoreParcelFn = async () => {
 //   if (!parcel.value?.id) return
 
-//   const success = await restoreParcel(
-//     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//   restoreParcels.value = await restoreParcel(
+//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
 //     parcel.value.id
 //   )
-
-//   if (!success) {
+//   if (restoreParcels.value === '404') {
 //     emit('redAlert')
 //     emit('cancelDetail', true)
 //     return
 //   }
 
 //   parcelManager.restoreFromTrash(parcel.value.id)
-
 //   emit('confirmDetail', true)
 // }
+const restoreResult = ref(null) // null | true | false
+
+// const restoreParcelFn = async () => {
+//   if (!parcel.value?.id) return
+
+//   restoreResult.value = null
+
+//   restoreResult.value = await restoreParcel(
+//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
+//     parcel.value.id,
+//     router
+//   )
+
+//   if (restoreResult.value !== true) {
+//     emit('redAlert')
+//     emit('cancelDetail', true)
+//     return
+//   }
+
+//   parcelManager.restoreFromTrash(parcel.value.id)
+//   emit('confirmDetail', true)
+// }
+
+const restoreParcelFn = async () => {
+  if (!parcel.value?.id) return
+
+  const success = await restoreParcel(
+    `${import.meta.env.VITE_BASE_URL}/api/trash`,
+    parcel.value.id,
+    router
+  )
+
+  if (!success) {
+    emit('redAlert')
+    emit('cancelDetail', true)
+    return
+  }
+
+  // ✅ update state หลัง backend success เท่านั้น
+  parcelManager.restoreFromTrash(parcel.value.id)
+  emit('confirmDetail', true)
+}
 
 const cancelAction = () => {
   emit('cancelDetail', true)

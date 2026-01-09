@@ -99,11 +99,27 @@ export const useParcelManager = defineStore('parcelManager', () => {
 
       parcel.push({
         ...originals,
+        isDeleted: false,
+        status: originals.status,
         deletedAt: null,
         updatedAt: new Date().toISOString()
       })
     }
   }
+
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const removed = trash.splice(index, 1)[0]
+  //     const originals = removed.original || removed
+
+  //     parcel.push({
+  //       ...originals,
+  //       deletedAt: null,
+  //       updatedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
 
   // const restoreFromTrash = (id) => {
   //   const index = findIndexById(trash, id)
