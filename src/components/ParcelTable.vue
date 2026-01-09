@@ -211,7 +211,7 @@ function formatDateTime(datetimeStr) {
             <span class="md:hidden font-semibold text-blue-700">
               Member name:
             </span>
-            {{ p.memberName }}
+            {{ p.recipientName }}
           </td>
           <td
             v-if="showMobile"
