@@ -918,7 +918,7 @@ const handleSortUpdate = (val) => {
             </svg>
           </template>
 
-          <template #icon-view>
+          <template #icon-view-member>
             <svg
               class="cursor-pointer"
               width="16"

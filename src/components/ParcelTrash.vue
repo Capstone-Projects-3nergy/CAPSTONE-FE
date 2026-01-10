@@ -1184,7 +1184,7 @@ const closePopUp = (operate) => {
             </svg>
           </template> -->
 
-          <template #icon-delete>
+          <template #icon-delete-permanent>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
