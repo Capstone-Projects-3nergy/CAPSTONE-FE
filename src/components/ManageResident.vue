@@ -675,12 +675,22 @@ const handleSortUpdate = (val) => {
       </button>
 
       <main class="flex-1 p-9">
-        <div class="flex items-center justify-between mb-6 px-2">
-          <!-- LEFT -->
+        <div class="flex items-center gap-2 mb-6 px-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#185DC0"
+              d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+            />
+          </svg>
+
           <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
 
-          <!-- RIGHT -->
-          <div class="flex items-center space-x-3">
+          <div class="ml-auto flex items-center space-x-3">
             <button
               @click=""
               class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
@@ -691,7 +701,7 @@ const handleSortUpdate = (val) => {
                   fill="white"
                 />
               </svg>
-              <span>Add New Member</span>
+              <span class="cursor-pointer">Add New Member</span>
             </button>
 
             <button
@@ -709,7 +719,7 @@ const handleSortUpdate = (val) => {
                   d="M685.248 104.704a64 64 0 0 1 0 90.496L368.448 512l316.8 316.8a64 64 0 0 1-90.496 90.496L232.704 557.248a64 64 0 0 1 0-90.496l362.048-362.048a64 64 0 0 1 90.496 0"
                 />
               </svg>
-              <span>Filter</span>
+              <span class="cursor-pointer">Filter</span>
             </button>
           </div>
         </div>

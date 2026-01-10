@@ -88,7 +88,9 @@ const form = ref({
   email: '',
   dormitoryName: ''
 })
-
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels' })
+}
 const statusOptions = computed(() => {
   if (form.value.status === 'WAITING_FOR_STAFF') {
     return ['WAITING_FOR_STAFF', 'RECEIVED']
@@ -614,10 +616,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem
-              title=" Manage Parcel"
-              class="bg-[#81AFEA] cursor-default"
-            >
+            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
                   width="25"
@@ -636,6 +635,7 @@ function formatDateTime(datetimeStr) {
 
             <SidebarItem
               title="Manage Residents"
+              class="bg-[#81AFEA] cursor-default"
               @click="ShowManageResidentPage"
             >
               <template #icon>
@@ -665,6 +665,26 @@ function formatDateTime(datetimeStr) {
                 >
                   <path
                     d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <SidebarItem title="Trash" @click="showParcelTrashPage">
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
                   />
                 </svg>
@@ -705,18 +725,17 @@ function formatDateTime(datetimeStr) {
       <main class="flex-1 p-9">
         <div class="flex items-center space-x-2 mb-6">
           <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
           >
             <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
               fill="#185DC0"
+              d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Member ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
         </div>
         <div class="fixed top-5 left-5 z-50">

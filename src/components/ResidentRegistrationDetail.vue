@@ -67,7 +67,6 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
-
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
@@ -327,11 +326,7 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem
-              title=" Manage Parcel"
-              class="bg-[#81AFEA] cursor-default"
-            >
+            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
                   width="25"
@@ -350,6 +345,7 @@ function formatDateTime(datetimeStr) {
 
             <SidebarItem
               title="Manage Residents"
+              class="bg-[#81AFEA] cursor-default"
               @click="ShowManageResidentPage"
             >
               <template #icon>
@@ -438,9 +434,18 @@ function formatDateTime(datetimeStr) {
 
       <main class="flex-1 p-9 bg-gray-100">
         <div class="flex items-center space-x-2 mb-6">
-          <h2 class="text-2xl font-bold text-[#185dc0]">
-            Manage Resident &gt; Details
-          </h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#185DC0"
+              d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+            />
+          </svg>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Member &gt; Details</h2>
         </div>
 
         <div class="flex flex-col mb-4 gap-4"></div>
