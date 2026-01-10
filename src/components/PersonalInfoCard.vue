@@ -69,24 +69,40 @@ defineEmits(['edit'])
           <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
             {{ title }}
           </h2>
+          <div class="relative group">
+            <svg
+              class="cursor-pointer text-gray-400 hover:text-gray-600 transition"
+              @click="$emit('edit')"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="m18.988 2.012l3 3L19.701 7.3l-3-3zM8 16h3l7.287-7.287l-3-3L8 13z"
+              />
+              <path
+                fill="currentColor"
+                d="M19 19H8.158c-.026 0-.053.01-.079.01c-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .896-2 2v14c0 1.104.897 2 2 2h14a2 2 0 0 0 2-2v-8.668l-2 2z"
+              />
+            </svg>
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="relative rounded-lg bg-gray-600 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+              >
+                Edit Profile
 
-          <svg
-            class="cursor-pointer text-gray-400 hover:text-gray-600 transition"
-            @click="$emit('edit')"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="m18.988 2.012l3 3L19.701 7.3l-3-3zM8 16h3l7.287-7.287l-3-3L8 13z"
-            />
-            <path
-              fill="currentColor"
-              d="M19 19H8.158c-.026 0-.053.01-.079.01c-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .896-2 2v14c0 1.104.897 2 2 2h14a2 2 0 0 0 2-2v-8.668l-2 2z"
-            />
-          </svg>
+                <div class="absolute left-1/2 top-full -translate-x-1/2">
+                  <div
+                    class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Info Grid -->

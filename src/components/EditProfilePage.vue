@@ -501,11 +501,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem
-              title="Trash"
-              @click="showParcelTrashPage"
-              class="bg-[#81AFEA] cursor-default"
-            >
+            <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
                 <svg
                   width="24"
