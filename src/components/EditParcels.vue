@@ -79,6 +79,7 @@ const form = ref({
   roomNumber: '',
   email: ''
 })
+
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
