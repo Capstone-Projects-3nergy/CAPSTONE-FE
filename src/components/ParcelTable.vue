@@ -300,7 +300,9 @@ function formatDateTime(datetimeStr) {
             v-if="showAction"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
           >
-            <span class="md:hidden font-semibold text-blue-700">Action:</span>
+            <span class="md:hidden font-semibold text-blue-700"
+              >Operation:</span
+            >
 
             <button
               @click="$emit('view-detail', p.id)"
