@@ -847,6 +847,7 @@ const handleSortUpdate = (val) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
+          :clickableStatus="false"
           :showDelete="false"
           @prev="prevPage"
           @next="nextPage"
