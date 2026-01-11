@@ -70,6 +70,12 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
+const showProfileResidentPage = async function () {
+  router.replace({
+    name: 'profileresident'
+  })
+  showProfileResident.value = true
+}
 const goBackProfilePage = async function () {
   if (loginManager.user.role === 'RESIDENT') {
     router.replace({
@@ -266,7 +272,11 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="Profile"
+              class="bg-[#81AFEA] cursor-default"
+              @click="showProfileResidentPage"
+            >
               <template #icon>
                 <svg
                   width="24"

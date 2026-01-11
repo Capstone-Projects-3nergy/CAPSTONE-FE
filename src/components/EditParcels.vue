@@ -573,6 +573,7 @@ function formatDateTime(datetimeStr) {
 
             <SidebarItem
               title=" Manage Parcel"
+              @click="showManageParcelPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>

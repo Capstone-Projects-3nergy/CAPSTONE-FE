@@ -74,7 +74,12 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
-
+const showResidentParcelPage = async function () {
+  router.replace({
+    name: 'residentparcels'
+  })
+  showResidentParcels.value = true
+}
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
@@ -357,7 +362,11 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="My parcel"
+              class="bg-[#81AFEA] cursor-default"
+              @click="showResidentParcelPage"
+            >
               <template #icon>
                 <svg
                   width="25"
