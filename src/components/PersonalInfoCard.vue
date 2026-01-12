@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
+
+const loginManager = useAuthManager()
 const activeTab = ref('profile')
 
 const props = defineProps({
@@ -12,6 +14,7 @@ const props = defineProps({
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
+  position: { type: String, default: '-' },
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
@@ -213,7 +216,14 @@ const menuClass = (tab) => {
               {{ email }}
             </p>
           </div>
-
+          <div v-if="loginManager.user.role === 'STAFF'">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Position
+            </label>
+            <p class="text-gray-400 font-medium break-all">
+              {{ position }}
+            </p>
+          </div>
           <div v-if="roomNumber !== null">
             <label class="block text-sm text-black font-semibold mb-1">
               Room Number

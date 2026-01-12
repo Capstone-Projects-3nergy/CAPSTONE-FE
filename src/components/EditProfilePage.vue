@@ -12,6 +12,7 @@ import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const editSuccess = ref(false)
@@ -616,6 +617,10 @@ onMounted(async () => {
           :firstName="firstName"
           :lastName="lastName"
           :email="loginManager.user.email"
+          :roomNumber="null"
+          :lineId="lineId"
+          :contact="contact"
+          :position="loginManager.user.position"
           @save="updateProfile"
           @cancel="goBackProfilePage"
         ></EditPersonalInfoProfile>

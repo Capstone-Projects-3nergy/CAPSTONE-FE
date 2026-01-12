@@ -3,8 +3,9 @@ import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-const profileManager = useProfileManager()
 
+const profileManager = useProfileManager()
+const loginManager = useAuthManager()
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -14,6 +15,7 @@ const props = defineProps({
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
   email: { type: String, default: '-' },
+  position: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null }
@@ -30,6 +32,7 @@ const form = ref({
   email: '',
   roomNumber: '',
   lineId: '',
+  position: '',
   phoneNumber: ''
 })
 
@@ -40,6 +43,7 @@ watch(
     form.value.firstName = props.firstName
     form.value.lastName = props.lastName
     form.value.email = props.email
+    form.value.position = props.position
     form.value.roomNumber = props.roomNumber
     form.value.lineId = props.lineId
     form.value.phoneNumber = props.phoneNumber
@@ -67,6 +71,7 @@ function save() {
     firstName: form.value.firstName,
     lastName: form.value.lastName,
     email: form.value.email,
+    position: form.value.position,
     roomNumber: form.value.roomNumber,
     lineId: form.value.lineId,
     phoneNumber: form.value.phoneNumber,
@@ -189,6 +194,15 @@ function updateUser(data) {
             </label>
             <input
               v-model="form.roomNumber"
+              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+            />
+          </div>
+          <div v-if="loginManager.user.role === 'STAFF'">
+            <label class="block text-sm text-black font-semibold mb-1">
+              position
+            </label>
+            <input
+              v-model="form.position"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>

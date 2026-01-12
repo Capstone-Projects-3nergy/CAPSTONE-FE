@@ -422,6 +422,7 @@ const closePopUp = () => {
           :roomNumber="null"
           :lineId="lineId"
           :contact="contact"
+          :position="loginManager.user.position"
           @edit="goToEditProfile"
         />
         <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
