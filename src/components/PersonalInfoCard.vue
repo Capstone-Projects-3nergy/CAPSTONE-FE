@@ -55,7 +55,7 @@ defineEmits(['edit'])
           </div>
         </div>
 
-        <p class="mt-4 text-gray-800 font-semibold text-lg">
+        <p class="mt-4 text-black font-semibold text-lg">
           {{ fullName }}
         </p>
       </div>
@@ -71,7 +71,7 @@ defineEmits(['edit'])
           </h2>
           <div class="relative group">
             <svg
-              class="cursor-pointer text-gray-400 hover:text-gray-600 transition"
+              class="cursor-pointer text-black font-semibold hover:text-gray-400 transition"
               @click="$emit('edit')"
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -108,45 +108,55 @@ defineEmits(['edit'])
         <!-- Info Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Firstname </label>
-            <p class="text-gray-800 font-medium">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Firstname
+            </label>
+            <p class="text-gray-400 font-medium">
               {{ firstName }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Lastname </label>
-            <p class="text-gray-800 font-medium">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Lastname
+            </label>
+            <p class="text-gray-400 font-medium">
               {{ lastName }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Email </label>
-            <p class="text-gray-800 font-medium break-all">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Email
+            </label>
+            <p class="text-gray-400 font-medium break-all">
               {{ email }}
             </p>
           </div>
 
           <div v-if="roomNumber !== null">
-            <label class="block text-sm text-gray-400 mb-1">
+            <label class="block text-sm text-black font-semibold mb-1">
               Room Number
             </label>
-            <p class="text-gray-800 font-medium">
+            <p class="text-gray-400 font-medium">
               {{ roomNumber }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Line ID </label>
-            <p class="text-gray-800 font-medium">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Line ID
+            </label>
+            <p class="text-gray-400 font-medium">
               {{ display(lineId) }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Contact </label>
-            <p class="text-gray-800 font-medium">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Contact
+            </label>
+            <p class="text-gray-400 font-medium">
               {{ display(contact) }}
             </p>
           </div>

@@ -154,7 +154,9 @@ function updateUser(data) {
         <!-- Form Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Firstname </label>
+            <label class="block text-sm text-black font-semibold mb-1">
+              Firstname
+            </label>
             <input
               v-model="form.firstName"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
@@ -162,7 +164,9 @@ function updateUser(data) {
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Lastname </label>
+            <label class="block text-sm text-black font-semibold mb-1">
+              Lastname
+            </label>
             <input
               v-model="form.lastName"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
@@ -170,7 +174,9 @@ function updateUser(data) {
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Email </label>
+            <label class="block text-sm text-black font-semibold mb-1">
+              Email
+            </label>
             <input
               v-model="form.email"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
@@ -178,7 +184,7 @@ function updateUser(data) {
           </div>
 
           <div v-if="roomNumber !== null">
-            <label class="block text-sm text-gray-400 mb-1">
+            <label class="block text-sm text-black font-semibold mb-1">
               Room Number
             </label>
             <input
@@ -188,7 +194,9 @@ function updateUser(data) {
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Line ID </label>
+            <label class="block text-sm text-black font-semibold mb-1">
+              Line ID
+            </label>
             <input
               v-model="form.lineId"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
@@ -196,7 +204,9 @@ function updateUser(data) {
           </div>
 
           <div>
-            <label class="block text-sm text-gray-400 mb-1"> Contact </label>
+            <label class="block text-sm text-black font-semibold mb-1">
+              Contact
+            </label>
             <input
               v-model="form.contact"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
