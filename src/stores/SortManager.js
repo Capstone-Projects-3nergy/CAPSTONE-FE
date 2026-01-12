@@ -102,6 +102,10 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+    const phoneNumberMatch = p.phoneNumber
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
     const statusMatch = p.status
       ?.toString()
@@ -115,7 +119,8 @@ function searchParcels(parcels, keyword) {
       nameMatch ||
       emailMatch ||
       statusMatch ||
-      dateMatch
+      dateMatch ||
+      phoneNumberMatch
     )
   })
 }
