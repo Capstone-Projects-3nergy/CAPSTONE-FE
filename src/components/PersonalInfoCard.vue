@@ -1,7 +1,9 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
+const activeTab = ref('profile')
+
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -29,12 +31,66 @@ const userInitial = computed(() =>
 )
 const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 defineEmits(['edit'])
+const menuClass = (tab) => {
+  return [
+    'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
+    activeTab.value === tab
+      ? 'bg-[#FFEEDB] text-[#C47A00]'
+      : 'text-gray-500 hover:bg-gray-100'
+  ]
+}
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
     <div class="flex flex-col md:flex-row gap-10">
       <!-- LEFT : Profile Card -->
       <div
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+      >
+        <!-- Avatar -->
+        <div class="flex flex-col items-center text-center">
+          <div
+            class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
+          >
+            <img
+              v-if="hasAvatar"
+              :src="avatar"
+              class="w-full h-full object-cover"
+            />
+            <div
+              v-else
+              class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
+            >
+              {{ userInitial }}
+            </div>
+          </div>
+
+          <p class="mt-4 text-black font-semibold text-lg">
+            {{ fullName }}
+          </p>
+        </div>
+
+        <!-- Menu -->
+        <div class="mt-8 space-y-2">
+          <button
+            @click="activeTab = 'profile'"
+            :class="menuClass('profile')"
+            class="cursor-pointer"
+          >
+            👤 Personal Information
+          </button>
+
+          <button
+            @click="activeTab = 'password'"
+            :class="menuClass('password')"
+            class="cursor-pointer"
+          >
+            🔒 Reset Password
+          </button>
+        </div>
+      </div>
+
+      <!-- <div
         class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
       >
         <div
@@ -58,10 +114,10 @@ defineEmits(['edit'])
         <p class="mt-4 text-black font-semibold text-lg">
           {{ fullName }}
         </p>
-      </div>
-
+      </div> -->
       <!-- RIGHT : Information Card -->
       <div
+        v-if="activeTab === 'profile'"
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <!-- Header -->
@@ -160,6 +216,52 @@ defineEmits(['edit'])
               {{ display(contact) }}
             </p>
           </div>
+        </div>
+      </div>
+      <div
+        v-if="activeTab === 'password'"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+      >
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+          Reset Password
+        </h2>
+        <div class="space-y-5 max-w-md">
+          <div>
+            <label class="block text-sm font-semibold mb-1">
+              Current Password
+            </label>
+            <input
+              type="password"
+              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-1">
+              New Password
+            </label>
+            <input
+              type="password"
+              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-1">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
+            />
+          </div>
+        </div>
+        <div class="flex justify-end mt-auto pt-6">
+          <ButtonWeb
+            label="Update Password"
+            color="blue"
+            @click="UpdatePassword"
+          />
         </div>
       </div>
     </div>
