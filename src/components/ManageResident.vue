@@ -673,7 +673,7 @@ const handleSortUpdate = (val) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
+      <main class="flex-1 p-9 x-full">
         <div class="flex items-center gap-2 mb-6 px-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -688,8 +688,8 @@ const handleSortUpdate = (val) => {
           </svg>
 
           <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
-          <div class="ml-auto flex items-center space-x-3">
-            <button
+          <!-- <div class="ml-auto flex items-center space-x-3"> -->
+          <!-- <button
               @click=""
               class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
             >
@@ -700,9 +700,9 @@ const handleSortUpdate = (val) => {
                 />
               </svg>
               <span class="cursor-pointer">Add New Member</span>
-            </button>
+            </button> -->
 
-            <button
+          <!-- <button
               @click=""
               class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
             >
@@ -718,22 +718,24 @@ const handleSortUpdate = (val) => {
                 />
               </svg>
               <span class="cursor-pointer">Filter</span>
-            </button>
-          </div>
+            </button> -->
+          <!-- </div> -->
         </div>
 
-        <!-- <ParcelFilterBar
+        <ParcelFilterBar
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
           :hideNameSort="true"
           :hideTrash="false"
+          :showDate="false"
+          :showAddMemberButton="true"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
-        /> -->
+        />
         <!-- 
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
