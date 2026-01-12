@@ -16,7 +16,7 @@ const props = defineProps({
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
-  contact: { type: String, default: null }
+  phoneNumber: { type: String, default: null }
 })
 
 const emit = defineEmits(['edit', 'save', 'cancel'])
@@ -30,7 +30,7 @@ const form = ref({
   email: '',
   roomNumber: '',
   lineId: '',
-  contact: ''
+  phoneNumber: ''
 })
 
 // load props → form
@@ -42,7 +42,7 @@ watch(
     form.value.email = props.email
     form.value.roomNumber = props.roomNumber
     form.value.lineId = props.lineId
-    form.value.contact = props.contact
+    form.value.phoneNumber = props.phoneNumber
   },
   { immediate: true, deep: true }
 )
@@ -69,7 +69,7 @@ function save() {
     email: form.value.email,
     roomNumber: form.value.roomNumber,
     lineId: form.value.lineId,
-    contact: form.value.contact,
+    phoneNumber: form.value.phoneNumber,
     avatar: newAvatar.value || null
   }
 
@@ -205,10 +205,10 @@ function updateUser(data) {
 
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Contact
+              Phone Number
             </label>
             <input
-              v-model="form.contact"
+              v-model="form.phoneNumber"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
@@ -216,13 +216,13 @@ function updateUser(data) {
           <!-- Actions -->
           <div class="col-span-2 flex justify-end gap-4 mt-6">
             <ButtonWeb
-              label="Save"
+              label="Save Changes"
               color="green"
               class="px-6 py-2 rounded-full shadow"
               @click="save"
             />
             <ButtonWeb
-              label="Cancel"
+              label="Cancel Changes"
               color="gray"
               class="px-6 py-2 rounded-full shadow"
               @click="cancel"
@@ -331,9 +331,9 @@ function updateUser(data) {
         </div>
 
         <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Contact</label>
+          <label class="block font-semibold text-[#185dc0] mb-1">phoneNumber</label>
           <input
-            v-model="form.contact"
+            v-model="form.phoneNumber"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
           />
         </div>

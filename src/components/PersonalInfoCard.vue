@@ -15,7 +15,7 @@ const props = defineProps({
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
-  contact: { type: String, default: null }
+  phoneNumber: { type: String, default: null }
 })
 
 function display(value) {
@@ -234,10 +234,10 @@ const menuClass = (tab) => {
 
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Contact
+              Phone Number
             </label>
             <p class="text-gray-400 font-medium">
-              {{ display(contact) }}
+              {{ display(phoneNumber) }}
             </p>
           </div>
         </div>
@@ -283,7 +283,7 @@ const menuClass = (tab) => {
         <div class="flex justify-end mt-auto pt-6">
           <ButtonWeb
             label="Update Password"
-            color="blue"
+            color="green"
             @click="UpdatePassword"
           />
         </div>
@@ -377,8 +377,8 @@ const menuClass = (tab) => {
         </div>
 
         <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Contact</label>
-          <p>{{ display(contact) }}</p>
+          <label class="block font-semibold text-[#185dc0] mb-1">phoneNumber</label>
+          <p>{{ display(phoneNumber) }}</p>
         </div>
       </div>
     </div>
