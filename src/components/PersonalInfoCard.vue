@@ -327,7 +327,7 @@ const sendUpdateEmail = async () => {
               type="email"
               disabled
               class="w-full px-4 py-2 bg-gray-100 text-gray-600 rounded-md outline-none"
-              :value="currentUserEmail"
+              :value="email"
             />
             <p class="text-xs text-gray-400 mt-1">
               This email is used for sign-in and account notifications.
@@ -356,7 +356,7 @@ const sendUpdateEmail = async () => {
           <ButtonWeb
             label="Save Account Changes"
             color="green"
-            @click="sendVerifyEmailHandler"
+            @click="sendUpdateEmail"
           />
         </div>
       </div>
