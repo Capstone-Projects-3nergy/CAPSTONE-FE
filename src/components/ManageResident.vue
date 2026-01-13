@@ -80,6 +80,7 @@ const showStatusParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
+
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -258,8 +259,8 @@ autoClose(deleteSuccess)
 autoClose(error)
 
 const searchKeyword = ref('')
-const activeTab = ref('Day')
-const tabs = ['Day', 'Month', 'Year']
+const activeTab = ref('Members')
+const tabs = ['Members', 'Staff']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -674,52 +675,41 @@ const handleSortUpdate = (val) => {
       </button>
 
       <main class="flex-1 p-9 x-full">
-        <div class="flex items-center gap-2 mb-6 px-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="#185DC0"
-              d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
-            />
-          </svg>
-
-          <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
-          <!-- <div class="ml-auto flex items-center space-x-3"> -->
-          <!-- <button
-              @click=""
-              class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+        <div class="flex flex-col gap-4 mb-6 px-2">
+          <!-- Header -->
+          <div class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-                  fill="white"
-                />
-              </svg>
-              <span class="cursor-pointer">Add New Member</span>
-            </button> -->
+              <path
+                fill="#185DC0"
+                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+              />
+            </svg>
+            <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
+          </div>
 
-          <!-- <button
-              @click=""
-              class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 1024 1024"
+          <!-- Tabs (อยู่ข้างล่าง Members) -->
+          <div class="flex items-center">
+            <div class="flex bg-white rounded-lg overflow-hidden">
+              <button
+                v-for="tab in tabs"
+                :key="tab"
+                @click="activeTab = tab"
+                :class="[
+                  'px-4 py-1 font-medium transition cursor-pointer',
+                  activeTab === tab
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-500 hover:bg-gray-200'
+                ]"
               >
-                <path
-                  fill="currentColor"
-                  d="M685.248 104.704a64 64 0 0 1 0 90.496L368.448 512l316.8 316.8a64 64 0 0 1-90.496 90.496L232.704 557.248a64 64 0 0 1 0-90.496l362.048-362.048a64 64 0 0 1 90.496 0"
-                />
-              </svg>
-              <span class="cursor-pointer">Filter</span>
-            </button> -->
-          <!-- </div> -->
+                {{ tab }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <ParcelFilterBar
