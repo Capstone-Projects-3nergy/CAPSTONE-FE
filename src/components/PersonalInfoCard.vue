@@ -243,7 +243,7 @@ const sendUpdateEmail = async () => {
         </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 truncate">
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
               Firstname
@@ -266,10 +266,37 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Email
             </label>
-            <p class="text-gray-400 font-medium break-all">
-              {{ email }}
-            </p>
+
+            <div class="flex items-center gap-2">
+              <p class="font-medium break-all text-gray-400">
+                {{ email }}
+              </p>
+
+              <div class="flex items-center gap-1 text-green-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  class="shrink-0"
+                >
+                  <g fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path
+                      d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m9.515 12.536l2.035 1.949l2.935-4.97"
+                    />
+                  </g>
+                </svg>
+
+                <span class="text-sm font-medium leading-none"> verified </span>
+              </div>
+            </div>
           </div>
+
           <div v-if="loginManager.user.role === 'STAFF'">
             <label class="block text-sm text-black font-semibold mb-1">
               Position
@@ -323,15 +350,40 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm font-semibold mb-1">
               Account Email
             </label>
-            <input
-              type="email"
-              disabled
-              class="w-full px-4 py-2 bg-gray-100 text-gray-600 rounded-md outline-none"
-              :value="email"
-            />
-            <p class="text-xs text-gray-400 mt-1">
-              This email is used for sign-in and account notifications.
-            </p>
+            <div class="relative">
+              <input
+                type="email"
+                disabled
+                class="w-full px-4 py-2 pr-28 bg-gray-100 text-gray-600 rounded-md outline-none"
+                :value="email"
+              />
+
+              <!-- Verified badge -->
+              <div
+                class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-green-600 pointer-events-none"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  class="shrink-0"
+                >
+                  <g fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path
+                      d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m9.515 12.536l2.035 1.949l2.935-4.97"
+                    />
+                  </g>
+                </svg>
+
+                <span class="text-xs font-medium leading-none"> verified </span>
+              </div>
+            </div>
           </div>
 
           <!-- Contact Email -->
