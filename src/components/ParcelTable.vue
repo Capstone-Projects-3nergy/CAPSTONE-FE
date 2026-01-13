@@ -30,6 +30,7 @@ const props = defineProps({
   showPhoto: { type: Boolean, default: false },
   showActionStatus: { type: Boolean, default: false },
   showMemberName: { type: Boolean, default: false },
+  showStaffName: { type: Boolean, default: false },
   showMobile: { type: Boolean, default: false },
   showName: { type: Boolean, default: true },
   showAction: { type: Boolean, default: true },
@@ -138,6 +139,12 @@ function formatDateTime(datetimeStr) {
             Member name
           </th>
           <th
+            v-if="showStaffName"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Staff name
+          </th>
+          <th
             v-if="showMobile"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
@@ -244,6 +251,15 @@ function formatDateTime(datetimeStr) {
           >
             <span class="md:hidden font-semibold text-blue-700">
               Member name:
+            </span>
+            {{ p.recipientName }}
+          </td>
+          <td
+            v-if="showStaffName"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-blue-700">
+              Staff name:
             </span>
             {{ p.recipientName }}
           </td>
