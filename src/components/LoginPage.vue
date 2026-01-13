@@ -440,7 +440,7 @@ const showResetPasswordPageWeb = async function () {
             <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
-              >Reset password?</a
+              >Forgot your password?</a
             >
           </div>
           <ButtonWeb
