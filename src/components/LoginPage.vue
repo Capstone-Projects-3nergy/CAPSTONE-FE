@@ -281,8 +281,14 @@ const showResetPasswordPageWeb = async function () {
         <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
           Get Started
         </h2>
-        <p class="text-[#8C8F91] mb-6 text-center md:text-left">
+        <p class="font-medium text-[#8C8F91] mb-6 text-center md:text-left">
           Welcome to tractify - Let's get started
+        </p>
+        <p class="text-sm mb-4">
+          <span class="text-[#8C8F91] md:hidden">
+            Easily manage dormitory parcels, track delivery status, and stay
+            updated anytime with Tractify.
+          </span>
         </p>
 
         <div class="space-y-2">

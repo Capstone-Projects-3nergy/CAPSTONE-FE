@@ -166,8 +166,13 @@ const returnLoginPage = () => {
         </div>
 
         <h2 class="text-xl font-bold mb-1">Reset your password</h2>
-        <p class="text-[#8C8F91] text-sm mb-4">
-          Enter your email and new password below to reset your password.
+        <p class="text-sm mb-4">
+          <span class="font-medium text-[#8C8F91] block md:hidden">
+            Forgot your password?
+          </span>
+          <span class="text-[#8C8F91]">
+            Enter your email below to reset your password.
+          </span>
         </p>
 
         <AlertPopUp
@@ -211,7 +216,7 @@ const returnLoginPage = () => {
             <input
               v-model="form.email"
               type="email"
-              placeholder="Email"
+              placeholder="Enter Your Email Account"
               class="w-full pl-4 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
             />
           </div>
