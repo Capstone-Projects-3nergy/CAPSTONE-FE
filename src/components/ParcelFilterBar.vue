@@ -11,6 +11,10 @@ defineProps({
     type: Boolean,
     default: false
   },
+  showAddStaffButton: {
+    type: Boolean,
+    default: false
+  },
   hideNameSort: {
     type: Boolean,
     default: false
@@ -104,6 +108,19 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
             />
           </svg>
           <span>Add New Member</span>
+        </button>
+        <button
+          v-if="showAddStaffButton"
+          @click="$emit('addMember')"
+          class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+              fill="white"
+            />
+          </svg>
+          <span>Add New Staff</span>
         </button>
         <!-- <button
           v-if="hideTrash"

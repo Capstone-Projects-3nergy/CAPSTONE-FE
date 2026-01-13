@@ -713,6 +713,7 @@ const handleSortUpdate = (val) => {
         </div>
 
         <ParcelFilterBar
+          v-if="activeTab === 'Members'"
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
@@ -721,6 +722,21 @@ const handleSortUpdate = (val) => {
           :hideTrash="false"
           :showDate="false"
           :showAddMemberButton="true"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
+          @add="showAddParcelPage"
+        />
+        <ParcelFilterBar
+          v-else-if="activeTab === 'Staff'"
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          :show-add-button="false"
+          :hideNameSort="true"
+          :hideTrash="false"
+          :showDate="false"
+          :showAddStaffButton="true"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
