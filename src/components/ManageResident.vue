@@ -694,9 +694,8 @@ const handleSortUpdate = (val) => {
 
           <div class="flex items-center justify-between">
             <div
-              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8"
             >
-              <!-- Left: Tabs -->
               <div class="flex bg-white rounded-lg overflow-hidden w-fit">
                 <button
                   v-for="tab in tabs"
@@ -713,9 +712,8 @@ const handleSortUpdate = (val) => {
                 </button>
               </div>
 
-              <!-- Right: Stats -->
               <div
-                class="flex flex-wrap sm:flex-nowrap items-center gap-x-6 gap-y-1 text-sm text-gray-500"
+                class="flex flex-wrap sm:flex-nowrap items-center gap-y-3 gap-x-4 sm:gap-y-0 sm:gap-x-6 text-sm text-gray-500 sm:ml-auto"
               >
                 <span>
                   <span class="font-medium text-gray-700">Total users:</span>
