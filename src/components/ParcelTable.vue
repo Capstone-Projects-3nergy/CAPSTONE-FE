@@ -9,62 +9,96 @@ const emit = defineEmits([
   'restore'
 ])
 
-defineProps({
-  items: Array,
-  pages: Array,
-  page: Number,
-  total: Number,
-  showPhoto: {
-    type: Boolean,
-    default: false
+const props = defineProps({
+  items: {
+    type: Array,
+    default: () => []
   },
-  showActionStatus: {
-    type: Boolean,
-    default: false
+  pages: {
+    type: Array,
+    default: () => []
   },
-  showMemberName: {
-    type: Boolean,
-    default: false
+  page: {
+    type: Number,
+    default: 1
   },
-  showMobile: {
-    type: Boolean,
-    default: false
+  total: {
+    type: Number,
+    default: 0
   },
-  showName: {
-    type: Boolean,
-    default: true
-  },
-  showAction: {
-    type: Boolean,
-    default: true
-  },
-  showDelete: {
-    type: Boolean,
-    default: true
-  },
-  showRestore: {
-    type: Boolean,
-    default: true
-  },
-  clickableStatus: {
-    type: Boolean,
-    default: true
-  },
-  showTracking: {
-    type: Boolean,
-    default: true
-  },
-  showRoom: {
-    type: Boolean,
-    default: true
-  },
-  showStatus: {
-    type: Boolean,
-    default: true
-  },
+
+  showPhoto: { type: Boolean, default: false },
+  showActionStatus: { type: Boolean, default: false },
+  showMemberName: { type: Boolean, default: false },
+  showMobile: { type: Boolean, default: false },
+  showName: { type: Boolean, default: true },
+  showAction: { type: Boolean, default: true },
+  showDelete: { type: Boolean, default: true },
+  showRestore: { type: Boolean, default: true },
+  clickableStatus: { type: Boolean, default: true },
+  showTracking: { type: Boolean, default: true },
+  showRoom: { type: Boolean, default: true },
+  showStatus: { type: Boolean, default: true },
   showUpdateAt: { type: Boolean, default: true },
   showDeletedAt: { type: Boolean, default: false }
 })
+
+// defineProps({
+//   items: Array,
+//   pages: Array,
+//   page: Number,
+//   total: Number,
+//   showPhoto: {
+//     type: Boolean,
+//     default: false
+//   },
+//   showActionStatus: {
+//     type: Boolean,
+//     default: false
+//   },
+//   showMemberName: {
+//     type: Boolean,
+//     default: false
+//   },
+//   showMobile: {
+//     type: Boolean,
+//     default: false
+//   },
+//   showName: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showAction: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showDelete: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showRestore: {
+//     type: Boolean,
+//     default: true
+//   },
+//   clickableStatus: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showTracking: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showRoom: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showStatus: {
+//     type: Boolean,
+//     default: true
+//   },
+//   showUpdateAt: { type: Boolean, default: true },
+//   showDeletedAt: { type: Boolean, default: false }
+// })
 
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
