@@ -692,22 +692,40 @@ const handleSortUpdate = (val) => {
             <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
           </div>
 
-          <!-- Tabs (อยู่ข้างล่าง Members) -->
-          <div class="flex items-center">
-            <div class="flex bg-white rounded-lg overflow-hidden">
-              <button
-                v-for="tab in tabs"
-                :key="tab"
-                @click="activeTab = tab"
-                :class="[
-                  'px-4 py-1 font-medium transition cursor-pointer',
-                  activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-500 hover:bg-gray-200'
-                ]"
+          <div class="flex items-center justify-between">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            >
+              <!-- Left: Tabs -->
+              <div class="flex bg-white rounded-lg overflow-hidden w-fit">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'px-4 py-1 font-medium transition cursor-pointer',
+                    activeTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ tab }}
+                </button>
+              </div>
+
+              <!-- Right: Stats -->
+              <div
+                class="flex flex-wrap sm:flex-nowrap items-center gap-x-6 gap-y-1 text-sm text-gray-500"
               >
-                {{ tab }}
-              </button>
+                <span>
+                  <span class="font-medium text-gray-700">Total users:</span>
+                  {{ totalUsers }}
+                </span>
+                <span>
+                  <span class="font-medium text-gray-700">Current used:</span>
+                  {{ currentUsed }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
