@@ -2,6 +2,9 @@
 import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
+import { useChangeEmailManager } from '@/stores/ChangeEmailManager'
+
+const changeEmailStore = useChangeEmailManager()
 
 const loginManager = useAuthManager()
 const activeTab = ref('profile')
@@ -41,6 +44,45 @@ const menuClass = (tab) => {
       ? 'bg-[#e0f2fe] text-[#60a5fa]'
       : 'text-gray-500 hover:bg-gray-100'
   ]
+}
+const sendUpdateEmail = async () => {
+  emailRequire.value = false
+  incorrectemailform.value = false
+  success.value = false
+  error.value = false
+
+  loading.value = true
+
+  // 1️⃣ required check
+  if (!trimmedEmail.value) {
+    emailRequire.value = true
+    loading.value = false
+    setTimeout(() => (emailRequire.value = false), 10000)
+    return
+  }
+
+  // 2️⃣ email format check
+  if (!/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
+    incorrectemailform.value = true
+    loading.value = false
+    setTimeout(() => (incorrectemailform.value = false), 10000)
+    return
+  }
+
+  try {
+    // 3️⃣ call Pinia store (ChangeEmailManager)
+    await changeEmailStore.sendChangeEmailVerification(trimmedEmail.value)
+
+    form.value.email = ''
+    success.value = true
+
+    setTimeout(() => (success.value = false), 10000)
+  } catch (e) {
+    error.value = true
+    setTimeout(() => (error.value = false), 10000)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 <template>
@@ -95,8 +137,8 @@ const menuClass = (tab) => {
           </button>
 
           <button
-            @click="activeTab = 'password'"
-            :class="menuClass('password')"
+            @click="activeTab = 'account'"
+            :class="menuClass('account')"
             class="relative flex items-center gap-3 w-full cursor-pointer"
           >
             <svg
@@ -265,48 +307,56 @@ const menuClass = (tab) => {
         </div>
       </div>
       <div
-        v-if="activeTab === 'password'"
+        v-if="activeTab === 'account'"
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
-        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-          Account Setting
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+          Account Settings
         </h2>
-        <div class="space-y-5 max-w-md">
+        <p class="text-sm text-gray-500 mb-6">
+          Update your account information and manage how we contact you.
+        </p>
+
+        <div class="space-y-6 max-w-md">
+          <!-- Account Email -->
           <div>
             <label class="block text-sm font-semibold mb-1">
-              Current Password
+              Account Email
             </label>
             <input
-              type="password"
-              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
+              type="email"
+              disabled
+              class="w-full px-4 py-2 bg-gray-100 text-gray-600 rounded-md outline-none"
+              :value="currentUserEmail"
             />
+            <p class="text-xs text-gray-400 mt-1">
+              This email is used for sign-in and account notifications.
+            </p>
           </div>
 
+          <!-- Contact Email -->
           <div>
             <label class="block text-sm font-semibold mb-1">
-              New Password
+              Update Email Address
             </label>
             <input
-              type="password"
+              type="email"
+              v-model="newEmail"
+              placeholder="Enter a new email address"
               class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
             />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold mb-1">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
-            />
+            <p class="text-xs text-gray-400 mt-1">
+              We’ll send a confirmation link to verify this email before
+              updating your account.
+            </p>
           </div>
         </div>
-        <div class="flex justify-end mt-auto pt-6">
+
+        <div class="flex justify-end mt-8">
           <ButtonWeb
-            label="Update Password"
+            label="Save Account Changes"
             color="green"
-            @click="UpdatePassword"
+            @click="sendVerifyEmailHandler"
           />
         </div>
       </div>

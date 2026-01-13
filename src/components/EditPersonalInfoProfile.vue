@@ -183,6 +183,7 @@ function updateUser(data) {
               Email
             </label>
             <input
+              disabled
               v-model="form.email"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
