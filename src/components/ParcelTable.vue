@@ -370,7 +370,7 @@ function formatDateTime(datetimeStr) {
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
-                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
                     ></div>
                   </div>
                 </div>
@@ -392,7 +392,7 @@ function formatDateTime(datetimeStr) {
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
-                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
                     ></div>
                   </div>
                 </div>
@@ -414,7 +414,7 @@ function formatDateTime(datetimeStr) {
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
-                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
                     ></div>
                   </div>
                 </div>
@@ -436,7 +436,7 @@ function formatDateTime(datetimeStr) {
                   Delete Parcel
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
-                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
                     ></div>
                   </div>
                 </div>
@@ -458,7 +458,7 @@ function formatDateTime(datetimeStr) {
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
-                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-600"
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
                     ></div>
                   </div>
                 </div>

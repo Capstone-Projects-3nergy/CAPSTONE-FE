@@ -91,7 +91,7 @@ const showNotification = computed(
 
               <div class="absolute left-1/2 bottom-full -translate-x-1/2">
                 <div
-                  class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-b-[7px] border-l-transparent border-r-transparent border-b-gray-600"
+                  class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-b-[7px] border-l-transparent border-r-transparent border-b-gray-400"
                 ></div>
               </div>
             </div>
