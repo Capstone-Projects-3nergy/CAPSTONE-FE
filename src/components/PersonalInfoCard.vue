@@ -41,7 +41,7 @@ const menuClass = (tab) => {
   return [
     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
     activeTab.value === tab
-      ? 'bg-[#e0f2fe] text-[#60a5fa]'
+      ? 'bg-[#D9D9D9] text-[#60a5fa]'
       : 'text-gray-500 hover:bg-gray-100'
   ]
 }
@@ -123,15 +123,28 @@ const sendUpdateEmail = async () => {
             class="relative flex items-center gap-3 w-full cursor-pointer"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
               viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                fill="currentColor"
-                d="M14.91 1H3v22h18V7.09zm.09 9.5a3 3 0 1 1-6 0a3 3 0 0 1 6 0M6 19a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1H6z"
-              />
+              <g clip-path="url(#clip0_995_32)">
+                <path
+                  d="M4 22C4 20.9391 4.42143 19.9217 5.17157 19.1716C5.92172 18.4214 6.93913 18 8 18H16C17.0609 18 18.0783 18.4214 18.8284 19.1716C19.5786 19.9217 20 20.9391 20 22C20 22.5304 19.7893 23.0391 19.4142 23.4142C19.0391 23.7893 18.5304 24 18 24H6C5.46957 24 4.96086 23.7893 4.58579 23.4142C4.21071 23.0391 4 22.5304 4 22Z"
+                  stroke-width="2.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 14C13.6569 14 15 12.6569 15 11C15 9.34315 13.6569 8 12 8C10.3431 8 9 9.34315 9 11C9 12.6569 10.3431 14 12 14Z"
+                  stroke-width="2.5"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_995_32">
+                  <rect width="24" height="24" fill="white" />
+                </clipPath>
+              </defs>
             </svg>
             <span>Personal Information</span>
           </button>
