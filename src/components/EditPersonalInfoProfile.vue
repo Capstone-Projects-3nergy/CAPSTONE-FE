@@ -51,6 +51,7 @@ watch(
   () => {
     form.value.firstName = props.firstName
     form.value.lastName = props.lastName
+    form.value.fullName = props.fullName
     form.value.email = props.email
     form.value.position = props.position
     form.value.roomNumber = props.roomNumber
@@ -187,6 +188,13 @@ const saveEditProfile = async () => {
     emit('error', true)
   }
 }
+const displayFullName = computed(() => {
+  const first = form.value.firstName?.trim()
+  const last = form.value.lastName?.trim()
+
+  if (!first && !last) return '-'
+  return `${first || ''} ${last || ''}`.trim()
+})
 </script>
 
 <template>
@@ -258,7 +266,7 @@ const saveEditProfile = async () => {
         />
 
         <p class="mt-4 text-gray-800 font-semibold text-lg">
-          {{ props.fullName }}
+          {{ displayFullName }}
         </p>
       </div>
 
