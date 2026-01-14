@@ -196,59 +196,59 @@ const saveEditProfile = async () => {
       <div
         class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
       >
-        <div
-          class="relative w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-sm"
-        >
-          <img
-            v-if="avatarPreview"
-            :src="avatarPreview"
-            alt="Profile"
-            class="w-full h-full object-cover"
-          />
-
+        <div class="relative inline-block">
+          <!-- Avatar -->
           <div
-            v-else
-            class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
+            class="w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-sm"
           >
-            {{ userInitial }}
-          </div>
-        </div>
-
-        <!-- Edit Image Icon -->
-        <div class="absolute bottom-1 right-1 relative group">
-          <svg
-            class="cursor-pointer hover:text-[#8C8F91] transition"
-            @click="$refs.imageInput.click()"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-              fill="#8C8F91"
+            <img
+              v-if="avatarPreview"
+              :src="avatarPreview"
+              alt="Profile"
+              class="w-full h-full object-cover"
             />
-          </svg>
 
-          <!-- Tooltip -->
-          <div
-            class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
-          >
             <div
-              class="relative rounded-lg bg-gray-400 min-w-[120px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+              v-else
+              class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
             >
-              Change Image
-              <div class="absolute left-1/2 top-full -translate-x-1/2">
-                <div
-                  class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
-                ></div>
+              {{ userInitial }}
+            </div>
+          </div>
+
+          <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
+          <div
+            class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+            @click="$refs.imageInput.click()"
+          >
+            <svg
+              class="transition hover:text-[#8C8F91]"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+                fill="#8C8F91"
+              />
+            </svg>
+
+            <!-- Tooltip -->
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow"
+              >
+                Change Image
               </div>
             </div>
           </div>
         </div>
 
-        <!-- hidden file input -->
+        <!-- hidden input -->
         <input
           type="file"
           accept="image/*"
