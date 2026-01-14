@@ -221,7 +221,7 @@ const sendUpdateEmail = async () => {
           </h2>
           <div class="relative group">
             <svg
-              class="cursor-pointer text-black font-semibold hover:text-gray-400 transition"
+              class="cursor-pointer text-black font-semibold hover:text-[#8C8F91] transition"
               @click="$emit('edit')"
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -261,7 +261,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Firstname
             </label>
-            <p class="text-gray-400 font-medium">
+            <p class="text-[#8C8F91] font-medium">
               {{ firstName }}
             </p>
           </div>
@@ -270,7 +270,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Lastname
             </label>
-            <p class="text-gray-400 font-medium">
+            <p class="text-[#8C8F91] font-medium">
               {{ lastName }}
             </p>
           </div>
@@ -281,7 +281,7 @@ const sendUpdateEmail = async () => {
             </label>
 
             <div class="flex items-center gap-2">
-              <p class="font-medium break-all text-gray-400">
+              <p class="font-medium break-all text-[#8C8F91]">
                 {{ email }}
               </p>
 
@@ -314,7 +314,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Position
             </label>
-            <p class="text-gray-400 font-medium break-all">
+            <p class="text-[#8C8F91] font-medium break-all">
               {{ position }}
             </p>
           </div>
@@ -322,7 +322,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Room Number
             </label>
-            <p class="text-gray-400 font-medium">
+            <p class="text-[#8C8F91] font-medium">
               {{ roomNumber }}
             </p>
           </div>
@@ -331,7 +331,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Line ID
             </label>
-            <p class="text-gray-400 font-medium">
+            <p class="text-[#8C8F91] font-medium">
               {{ display(lineId) }}
             </p>
           </div>
@@ -340,7 +340,7 @@ const sendUpdateEmail = async () => {
             <label class="block text-sm text-black font-semibold mb-1">
               Phone Number
             </label>
-            <p class="text-gray-400 font-medium">
+            <p class="text-[#8C8F91] font-medium">
               {{ display(phoneNumber) }}
             </p>
           </div>
@@ -410,7 +410,7 @@ const sendUpdateEmail = async () => {
               placeholder="Enter a new email address"
               class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
             />
-            <p class="text-xs text-gray-400 mt-1">
+            <p class="text-xs text-[#8C8F91] mt-1">
               We’ll send a confirmation link to verify this email before
               updating your account.
             </p>
