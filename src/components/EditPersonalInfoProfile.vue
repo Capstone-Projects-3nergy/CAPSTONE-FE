@@ -21,7 +21,16 @@ const props = defineProps({
   phoneNumber: { type: String, default: null }
 })
 
-const emit = defineEmits(['edit', 'save', 'cancel'])
+const emit = defineEmits([
+  'edit',
+  'save',
+  'cancel',
+  'error',
+  'success',
+  'first-name-error',
+  'last-name-error',
+  'phone-error'
+])
 
 const isEdit = ref(false)
 
@@ -97,6 +106,104 @@ const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 function updateUser(data) {
   console.log('ข้อมูลใหม่:', data)
   // API update...
+}
+const saveEditProfile = async () => {
+  const isStaff = loginManager.user?.role === 'STAFF'
+
+  // -----------------------
+  // validate required fields
+  // -----------------------
+  if (!form.value.firstName || !form.value.lastName || !form.value.email) {
+    emit('error', true)
+    return
+  }
+
+  // -----------------------
+  // validate name (ไทย + อังกฤษ)
+  // -----------------------
+  const nameRegex = /^[A-Za-zก-๙\s]+$/
+
+  if (!nameRegex.test(form.value.firstName)) {
+    emit('first-name-error', true)
+    return
+  }
+
+  if (!nameRegex.test(form.value.lastName)) {
+    emit('last-name-error', true)
+    return
+  }
+
+  // -----------------------
+  // validate phone (optional)
+  // -----------------------
+  if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
+    emit('phone-error', true)
+    return
+  }
+
+  // -----------------------
+  // validate position (STAFF only)
+  // -----------------------
+  if (isStaff && !form.value.position) {
+    emit('error', true)
+    return
+  }
+
+  try {
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      email: form.value.email,
+      roomNumber: form.value.roomNumber || null,
+      lineId: form.value.lineId || null,
+      phoneNumber: form.value.phoneNumber || null
+    }
+
+    if (isStaff) {
+      body.position = form.value.position || null
+    }
+
+    if (newAvatar.value) {
+      body.avatar = newAvatar.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const updatedProfile = await profileManager.updateProfile(
+      `${import.meta.env.VITE_BASE_URL}/api/profile`,
+      body,
+      router
+    )
+
+    if (!updatedProfile) {
+      emit('error', true)
+      return
+    }
+
+    // -----------------------
+    // update store
+    // -----------------------
+    profileManager.setProfile(updatedProfile)
+    loginManager.updateUser(updatedProfile)
+
+    // -----------------------
+    // sync form
+    // -----------------------
+    form.value = {
+      ...form.value,
+      ...updatedProfile
+    }
+
+    emit('success', true)
+    isEdit.value = false
+  } catch (err) {
+    console.error(err)
+    emit('error', true)
+  }
 }
 </script>
 
@@ -234,7 +341,7 @@ function updateUser(data) {
               label="Save Changes"
               color="green"
               class="px-6 py-2 rounded-full shadow"
-              @click="save"
+              @click="saveEditProfile"
             />
             <ButtonWeb
               label="Cancel Changes"

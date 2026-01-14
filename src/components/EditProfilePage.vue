@@ -26,7 +26,9 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const profileManager = useProfileManager()
-
+const firstNameError = ref(false)
+const lastNameError = ref(false)
+const phoneError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -147,6 +149,45 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
 })
+const showProfileError = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+}
+const showPhoneError = () => {
+  phoneError.value = true
+  setTimeout(() => (phoneError.value = false), 10000)
+}
+const showProfileSuccess = () => {
+  editSuccess.value = true
+  setTimeout(() => (editSuccess.value = false), 10000)
+}
+const showFirstNameError = () => {
+  firstNameError.value = true
+  setTimeout(() => (firstNameError.value = false), 10000)
+}
+const showLastNameError = () => {
+  lastNameError.value = true
+  setTimeout(() => (lastNameError.value = false), 10000)
+}
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'firstNameMessage':
+      firstNameError.value = false
+      break
+    case 'lastNameMessageMessage':
+      lastNameError.value = false
+      break
+    case 'phoneMessage':
+      phoneError.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
+}
 </script>
 
 <template>
@@ -623,6 +664,11 @@ onMounted(async () => {
           :position="loginManager.user.position"
           @save="updateProfile"
           @cancel="goBackProfilePage"
+          @success="showProfileSuccess"
+          @error="showProfileError"
+          @first-name-error="showFirstNameError"
+          @last-name-error="showLastNameError"
+          @phone-error="showPhoneError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

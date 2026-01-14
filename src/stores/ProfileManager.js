@@ -1,42 +1,64 @@
 import { reactive, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import axios from 'axios'
 
 export const useProfileManager = defineStore('profileManager', () => {
-  // เก็บข้อมูลโปรไฟล์ผู้ใช้ (object เดียว)
+  // ------------------------
+  // state
+  // ------------------------
   const profile = reactive({
     id: null,
     firstName: '',
     lastName: '',
     email: '',
-    role: ''
+    role: '',
+    avatar: '',
+    position: '',
+    roomNumber: '',
+    lineId: '',
+    phoneNumber: ''
   })
 
-  const getProfile = () => profile
-
-  const setProfile = (user) => {
-    if (!user) return
-    profile.id = user.id
-    profile.firstName = user.firstName
-    profile.lastName = user.lastName
-    profile.email = user.email
-    profile.role = user.role
-  }
-
-  const updateProfile = (updatedData) => {
-    if (!updatedData) return
-    Object.assign(profile, {
-      ...profile,
-      ...updatedData,
-      updatedAt: new Date().toISOString()
-    })
-  }
-
-  const clearProfile = () => {
-    Object.keys(profile).forEach((key) => (profile[key] = null))
-  }
+  const loading = ref(false)
   const editSuccess = ref(false)
   const error = ref(false)
 
+  // ------------------------
+  // getters
+  // ------------------------
+  const getProfile = () => profile
+
+  // ------------------------
+  // mutations
+  // ------------------------
+  const setProfile = (user) => {
+    if (!user) return
+    Object.assign(profile, user)
+  }
+
+  const updateProfileState = (updatedData) => {
+    if (!updatedData) return
+    Object.assign(profile, updatedData)
+  }
+
+  const clearProfile = () => {
+    Object.assign(profile, {
+      id: null,
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      avatar: '',
+      position: '',
+      roomNumber: '',
+      lineId: '',
+      phoneNumber: ''
+    })
+  }
+
+  // ------------------------
+  // alerts
+  // ------------------------
   const showEditSuccess = () => {
     editSuccess.value = true
   }
@@ -49,18 +71,74 @@ export const useProfileManager = defineStore('profileManager', () => {
     editSuccess.value = false
     error.value = false
   }
+
+  // ------------------------
+  // API actions ✅ (อันที่ขาด)
+  // ------------------------
+  const updateProfile = async (url, payload, router) => {
+    loading.value = true
+    clearAlert()
+
+    try {
+      let body
+
+      // ✅ รองรับ avatar → FormData
+      if (payload.avatar) {
+        body = new FormData()
+        Object.keys(payload).forEach((key) => {
+          if (payload[key] !== null && payload[key] !== undefined) {
+            body.append(key, payload[key])
+          }
+        })
+      } else {
+        body = payload
+      }
+
+      const res = await axios.put(url, body, {
+        headers:
+          body instanceof FormData
+            ? { 'Content-Type': 'multipart/form-data' }
+            : {}
+      })
+
+      updateProfileState(res.data)
+      showEditSuccess()
+      return res.data
+    } catch (err) {
+      console.error(err)
+      showError()
+
+      if (err.response?.status === 401 && router) {
+        router.push('/login')
+      }
+
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // ------------------------
   return {
+    // state
     profile,
+    loading,
     editSuccess,
     error,
-    updateProfile,
-    showEditSuccess,
-    showError,
-    clearAlert,
+
+    // getters
     getProfile,
+
+    // actions
     setProfile,
     updateProfile,
-    clearProfile
+    updateProfileState,
+    clearProfile,
+
+    // alerts
+    showEditSuccess,
+    showError,
+    clearAlert
   }
 })
 
