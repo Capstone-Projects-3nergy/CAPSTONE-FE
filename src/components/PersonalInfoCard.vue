@@ -84,6 +84,21 @@ const sendUpdateEmail = async () => {
     loading.value = false
   }
 }
+// แสดงค่า (default = ACTIVE)
+const displayStatus = (value) => {
+  if (!value || value.trim() === '') return 'ACTIVE'
+  return value.toUpperCase()
+}
+
+// กำหนดสีตามสถานะ
+const statusClass = (value) => {
+  const status = displayStatus(value)
+
+  return {
+    'bg-green-500': status === 'ACTIVE',
+    'bg-red-500': status === 'INACTIVE'
+  }
+}
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
@@ -358,6 +373,16 @@ const sendUpdateEmail = async () => {
             <p class="text-[#8C8F91] font-medium">
               {{ display(phoneNumber) }}
             </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-black font-semibold"> Status: </label>
+
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
+              :class="statusClass(status)"
+            >
+              {{ displayStatus(status) }}
+            </span>
           </div>
         </div>
       </div>
