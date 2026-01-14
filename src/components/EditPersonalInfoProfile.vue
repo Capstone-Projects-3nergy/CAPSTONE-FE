@@ -109,15 +109,6 @@ function updateUser(data) {
 }
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
-
-  // -----------------------
-  // validate required fields
-  // -----------------------
-  if (!form.value.firstName || !form.value.lastName || !form.value.email) {
-    emit('error', true)
-    return
-  }
-
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -140,15 +131,6 @@ const saveEditProfile = async () => {
     emit('phone-error', true)
     return
   }
-
-  // -----------------------
-  // validate position (STAFF only)
-  // -----------------------
-  if (isStaff && !form.value.position) {
-    emit('error', true)
-    return
-  }
-
   try {
     // -----------------------
     // payload

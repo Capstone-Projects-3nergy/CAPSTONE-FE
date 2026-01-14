@@ -644,6 +644,30 @@ const closePopUp = (operate) => {
             operate="editSuccessMessage"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="firstNameError"
+            titles="First name can only contain Thai or English letters."
+            message="Error!!"
+            styleType="red"
+            operate="firstNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="lastNameError"
+            titles="Last name can only contain Thai or English letters."
+            message="Error!!"
+            styleType="red"
+            operate="lastNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="phoneError"
+            titles="Phone number must contain 9–10 digits only."
+            message="Error!!"
+            styleType="red"
+            operate="phoneMessage"
+            @closePopUp="closePopUp"
+          />
 
           <AlertPopUp
             v-if="error"
@@ -662,7 +686,6 @@ const closePopUp = (operate) => {
           :lineId="lineId"
           :contact="contact"
           :position="loginManager.user.position"
-          @save="updateProfile"
           @cancel="goBackProfilePage"
           @success="showProfileSuccess"
           @error="showProfileError"
