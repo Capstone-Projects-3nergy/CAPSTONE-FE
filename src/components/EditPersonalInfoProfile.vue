@@ -214,13 +214,41 @@ const saveEditProfile = async () => {
           </div>
         </div>
 
-        <ButtonWeb
-          label="Change Image"
-          color="blue"
-          class="mt-4 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-4 py-2 rounded-full shadow-sm"
-          @click="$refs.imageInput.click()"
-        />
+        <!-- Edit Image Icon -->
+        <div class="absolute bottom-1 right-1 relative group">
+          <svg
+            class="cursor-pointer hover:text-[#8C8F91] transition"
+            @click="$refs.imageInput.click()"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+              fill="#8C8F91"
+            />
+          </svg>
 
+          <!-- Tooltip -->
+          <div
+            class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+          >
+            <div
+              class="relative rounded-lg bg-gray-400 min-w-[120px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+            >
+              Change Image
+              <div class="absolute left-1/2 top-full -translate-x-1/2">
+                <div
+                  class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- hidden file input -->
         <input
           type="file"
           accept="image/*"
