@@ -215,6 +215,11 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
+const paginatedStaffs = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredStaffs.value.slice(start, end)
+})
 const goToPage = (page) => {
   if (page < 1) page = 1
   if (page > totalPages.value) page = totalPages.value
@@ -243,6 +248,7 @@ const visiblePages = computed(() => {
   return pages
 })
 const parcels = computed(() => parcelManager.getParcels())
+const staffs = computed(() => parcelManager.getParcels())
 function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
@@ -348,7 +354,26 @@ const filteredParcels = computed(() => {
 
   return result
 })
+const filteredStaffs = computed(() => {
+  let result = staffs.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
 
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
 const handleSort = () => {
   switch (selectedSort.value) {
     case 'Newest':
