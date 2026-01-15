@@ -19,6 +19,7 @@ import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import RestoreParcels from './RestoreParcels.vue'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -64,11 +65,13 @@ import ConfirmLogout from './ConfirmLogout.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const userManager = useUserManager()
 const emit = defineEmits(['add-success'])
 const showLogoutConfirm = ref(null)
 const parcelStore = useParcelManager()
 // const trashList = ref([])
 const trashList = computed(() => parcelManager.getTrash?.() || [])
+const trashMemberList = computed(() => userManager.getTrash?.() || [])
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -139,7 +142,16 @@ const mapStatus = (status) => {
       return status
   }
 }
-
+const mapActiveStatus = (activeStatus) => {
+  switch (activeStatus) {
+    case 'ACTIVE ':
+      return 'Active'
+    case 'INACTIVE':
+      return 'Inactive'
+    default:
+      return activeStatus
+  }
+}
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -172,7 +184,26 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
     parcelManager.setTrash(mapped)
   }
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+    router
+  )
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.parcelId,
+      memberName: p.memberName,
+      mobile: p.mobile,
+      email: p.contactEmail,
+      status: mapActiveStatus(p.activeStatus),
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
 
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+
+    userManager.setTrash(mapped)
+  }
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -200,7 +231,7 @@ autoClose(error)
 
 const searchKeyword = ref('')
 const activeTab = ref('Parcels')
-const tabs = ['Parcels', 'Staffs']
+const tabs = ['Parcels', 'Members']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -327,7 +358,26 @@ const filteredParcels = computed(() => {
 
   return result
 })
+const filteredMembers = computed(() => {
+  let result = trashMemberList.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.deletedAt)
+  }))
 
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
 function formatDateByTab(rawDate) {
   if (!rawDate) return rawDate
 
@@ -405,7 +455,11 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-
+const paginatedMembers = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredMembers.value.slice(start, end)
+})
 // const showParcelDetail = async function (id) {
 //   router.push({
 //     name: 'detailparcels',
@@ -1242,8 +1296,8 @@ const closePopUp = (operate) => {
           </template>
         </ParcelTable>
         <ParcelTable
-          v-if="activeTab === 'Staffs'"
-          :items="paginatedStaffs"
+          v-if="activeTab === 'Members'"
+          :items="paginatedMembers"
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
