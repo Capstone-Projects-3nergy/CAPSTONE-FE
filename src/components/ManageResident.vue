@@ -16,6 +16,7 @@ import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import WebHeader from './WebHeader.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import DeleteMemberStaff from './DeleteMemberStaff.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -67,6 +68,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const parcelsResidentDetail = ref(null)
+const showDeleteMember = ref(null)
 const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const showAddParcels = ref(false)
@@ -163,26 +165,26 @@ onMounted(async () => {
 
     parcelManager.setParcels(mapped)
   }
-  const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/staffs`,
-    router
-  )
-  if (dataUser) {
-    const mapped = dataUser.map((p) => ({
-      id: p.parcelId,
-      staffName: p.staffName,
-      mobile: p.mobile,
-      email: p.contactEmail,
-      status: mapActiveStatus(p.activeStatus),
-      receiveAt: p.receivedAt,
-      updateAt: p.updatedAt || null,
-      pickupAt: p.pickedUpAt || null
-    }))
+  // const dataUser = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/members`,
+  //   router
+  // )
+  // if (dataUser) {
+  //   const mapped = dataUser.map((p) => ({
+  //     id: p.memberId,
+  //     memberName: p.memberName,
+  //     mobile: p.mobile,
+  //     email: p.contactEmail,
+  //     status: mapActiveStatus(p.activeStatus),
+  //     receiveAt: p.receivedAt,
+  //     updateAt: p.updatedAt || null,
+  //     pickupAt: p.pickedUpAt || null
+  //   }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+  //   mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
-    userManager.setStaffs(mapped)
-  }
+  //   userManager.setMembers(mapped)
+  // }
 
   try {
     const res = await getItems(
@@ -289,7 +291,13 @@ function autoClose(refVar, timeout = 10000) {
     }
   })
 }
-
+const deleteMemberPopUp = (member) => {
+  showDeleteMember.value = true
+  // memberDetail.value = {
+  //   id: member.id,
+  //   parcelNumber: member.memberName
+  // }
+}
 autoClose(addSuccess)
 autoClose(editSuccess)
 autoClose(deleteSuccess)
@@ -924,12 +932,13 @@ const handleSortUpdate = (val) => {
           :showMemberName="true"
           :showTracking="false"
           :showStatus="false"
-          :showDelete="false"
+          :showDeleteMember="true"
           :hideTrash="true"
           :showMobile="true"
           :showActionStatus="true"
           :showRoom="false"
           :showUpdateAt="false"
+          @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1301,4 +1310,13 @@ const handleSortUpdate = (val) => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
+  <teleport to="body" v-if="showDeleteMember">
+    <DeleteMemberStaff
+      @cancelDetail="clearDeletePopUp"
+      @confirmDetail="showDelComplete"
+      @redAlert="openRedPopup"
+      :parcelData="MemberDetail"
+      :isPermanent="false"
+    />
+  </teleport>
 </template>

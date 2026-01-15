@@ -6,7 +6,8 @@ const emit = defineEmits([
   'status-click',
   'view-detail',
   'delete',
-  'restore'
+  'restore',
+  'deleteMember'
 ])
 
 const props = defineProps({
@@ -467,7 +468,7 @@ function formatDateTime(datetimeStr) {
             </button>
             <button
               v-if="showDeleteMember && p.role == 'Resident'"
-              @click="$emit('delete', p)"
+              @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >
               <slot name="icon-delete"></slot>
@@ -490,7 +491,7 @@ function formatDateTime(datetimeStr) {
 
             <button
               v-if="showDeleteMember && p.role == 'Resident'"
-              @click="$emit('delete', p)"
+              @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >
               <slot name="icon-delete-permanent"></slot>
@@ -511,7 +512,7 @@ function formatDateTime(datetimeStr) {
             </button>
             <button
               v-if="showRestoreMember"
-              @click="$emit('restore', p)"
+              @click="$emit('restoreMember', p)"
               class="relative group cursor-pointer"
             >
               <slot name="restore-trash"> </slot>

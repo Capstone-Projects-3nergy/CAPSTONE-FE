@@ -190,7 +190,7 @@ onMounted(async () => {
   )
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
-      id: p.parcelId,
+      id: p.memberId,
       memberName: p.memberName,
       mobile: p.mobile,
       email: p.contactEmail,

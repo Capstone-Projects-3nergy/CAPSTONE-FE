@@ -81,7 +81,7 @@ const cancelAction = () => {
     >
       <div class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
-          <template v-if="isPermanent"> Delete Parcel </template>
+          <template v-if="isPermanent"> Delete Member </template>
           <template v-else> Move To Trash </template>
         </h1>
       </div>
