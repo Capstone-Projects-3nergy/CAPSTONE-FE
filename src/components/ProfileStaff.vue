@@ -14,6 +14,13 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
+
+const errorAccount = ref(false)
+const successAccount = ref(false)
+const incorrectemail = ref(false)
+
+const emailRequire = ref(false)
+
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -101,20 +108,43 @@ onMounted(async () => {
 function goToEditProfile() {
   router.replace({ name: 'editprofilestaff' })
 }
+function confirmAccountFn() {
+  successAccount.value = true
+  setTimeout(() => (successAccount.value = false), 10000)
+}
+
+function redAlertErrorFn() {
+  errorAccount.value = true
+  setTimeout(() => (errorAccount.value = false), 10000)
+}
+function incorrectemailformFn() {
+  incorrectemail.value = true
+  setTimeout(() => (incorrectemail.value = false), 10000)
+}
+function emailRequireFn() {
+  emailRequire.value = true
+  setTimeout(() => (emailRequire.value = false), 10000)
+}
 
 const closePopUp = () => {
   profileManager.clearAlert()
 }
-// const closePopUp = (operate) => {
-//   switch (operate) {
-//     case 'problem':
-//       error.value = false
-//       break
-//     case ' editSuccessMessage':
-//       editSuccess.value = false
-//       break
-//   }
-// }
+const closePopUps = (operate) => {
+  switch (operate) {
+    case 'SuccessAccount':
+      successAccount.value = false
+      break
+    case ' problemAccount':
+      errorAccount.value = false
+      break
+    case 'emailForm':
+      incorrectemail.value = false
+      break
+    case ' require':
+      emailRequire.value = false
+      break
+  }
+}
 </script>
 
 <template>
@@ -403,7 +433,6 @@ const closePopUp = () => {
             operate="editSuccessMessage"
             @closePopUp="closePopUp"
           />
-
           <AlertPopUp
             v-if="profileManager.error"
             titles="There is a problem. Please try again later."
@@ -411,6 +440,38 @@ const closePopUp = () => {
             styleType="red"
             operate="problem"
             @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="successAccount"
+            titles="Reset Email Successful."
+            message="Success!!"
+            styleType="green"
+            operate="SuccessAccount"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="errorAccount"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problemAccount"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="incorrectemail"
+            titles="Please enter a valid email address (example: name@email.com)."
+            message="Error!!"
+            styleType="red"
+            operate="emailForm"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="emailRequire"
+            titles="Email is required"
+            message="Error!!"
+            styleType="red"
+            operate="require"
+            @closePopUp="closePopUps"
           />
         </div>
 
@@ -424,6 +485,10 @@ const closePopUp = () => {
           :contact="contact"
           :position="loginManager.user.position"
           @edit="goToEditProfile"
+          @confirmAccount="confirmAccountFn"
+          @redAlertError="redAlertErrorFn"
+          @incorrectemailform="incorrectemailformFn"
+          @emailRequire="emailRequireFn"
         />
         <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
           <div class="flex items-center justify-between mb-8">

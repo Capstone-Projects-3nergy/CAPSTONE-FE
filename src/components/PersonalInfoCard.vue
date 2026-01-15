@@ -5,7 +5,13 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useChangeEmailManager } from '@/stores/ChangeEmailManager'
 
 const changeEmailStore = useChangeEmailManager()
-
+const emit = defineEmits([
+  'confirmAccount',
+  'redAlertError',
+  'incorrectemailform',
+  'edit',
+  'emailRequire'
+])
 const loginManager = useAuthManager()
 const activeTab = ref('profile')
 
@@ -36,7 +42,6 @@ const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
 const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
-defineEmits(['edit'])
 const menuClass = (tab) => {
   return [
     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
@@ -46,26 +51,15 @@ const menuClass = (tab) => {
   ]
 }
 const sendUpdateEmail = async () => {
-  emailRequire.value = false
-  incorrectemailform.value = false
-  success.value = false
-  error.value = false
-
-  loading.value = true
-
   // 1️⃣ required check
   if (!trimmedEmail.value) {
-    emailRequire.value = true
-    loading.value = false
-    setTimeout(() => (emailRequire.value = false), 10000)
+    emit('emailRequire', true)
     return
   }
 
   // 2️⃣ email format check
   if (!/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
-    incorrectemailform.value = true
-    loading.value = false
-    setTimeout(() => (incorrectemailform.value = false), 10000)
+    emit('incorrectemailform', true)
     return
   }
 
@@ -74,14 +68,10 @@ const sendUpdateEmail = async () => {
     await changeEmailStore.sendChangeEmailVerification(trimmedEmail.value)
 
     form.value.email = ''
-    success.value = true
-
-    setTimeout(() => (success.value = false), 10000)
+    emit('confirmAccount', true)
   } catch (e) {
     error.value = true
-    setTimeout(() => (error.value = false), 10000)
-  } finally {
-    loading.value = false
+    emit('redAlertError', true)
   }
 }
 // แสดงค่า (default = ACTIVE)

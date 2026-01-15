@@ -12,7 +12,11 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 const profileManager = useProfileManager()
+const errorAccount = ref(false)
+const successAccount = ref(false)
+const incorrectemail = ref(false)
 
+const emailRequire = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
 const loginManager = useAuthManager()
@@ -105,6 +109,40 @@ const closePopUp = () => {
 //       break
 //   }
 // }
+function confirmAccountFn() {
+  successAccount.value = true
+  setTimeout(() => (successAccount.value = false), 10000)
+}
+
+function redAlertErrorFn() {
+  errorAccount.value = true
+  setTimeout(() => (errorAccount.value = false), 10000)
+}
+function incorrectemailformFn() {
+  incorrectemail.value = true
+  setTimeout(() => (incorrectemail.value = false), 10000)
+}
+function emailRequireFn() {
+  emailRequire.value = true
+  setTimeout(() => (emailRequire.value = false), 10000)
+}
+
+const closePopUps = (operate) => {
+  switch (operate) {
+    case 'SuccessAccount':
+      successAccount.value = false
+      break
+    case ' problemAccount':
+      errorAccount.value = false
+      break
+    case 'emailForm':
+      incorrectemail.value = false
+      break
+    case ' require':
+      emailRequire.value = false
+      break
+  }
+}
 </script>
 
 <template>
@@ -347,6 +385,38 @@ const closePopUp = () => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="successAccount"
+            titles="Reset Email Successful."
+            message="Success!!"
+            styleType="green"
+            operate="SuccessAccount"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="errorAccount"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problemAccount"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="incorrectemail"
+            titles="Please enter a valid email address (example: name@email.com)."
+            message="Error!!"
+            styleType="red"
+            operate="emailForm"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="emailRequire"
+            titles="Email is required"
+            message="Error!!"
+            styleType="red"
+            operate="require"
+            @closePopUp="closePopUps"
+          />
         </div>
 
         <PersonalInfoCard
@@ -358,6 +428,10 @@ const closePopUp = () => {
           :lineId="lineId"
           :contact="contact"
           @edit="goToEditProfile"
+          @confirmAccount="confirmAccountFn"
+          @redAlertError="redAlertErrorFn"
+          @incorrectemailform="incorrectemailformFn"
+          @emailRequire="emailRequireFn"
         />
         <!-- <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
           <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
