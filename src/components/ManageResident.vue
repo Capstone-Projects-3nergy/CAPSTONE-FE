@@ -121,6 +121,16 @@ const mapStatus = (status) => {
       return status
   }
 }
+const mapActiveStatus = (activeStatus) => {
+  switch (activeStatus) {
+    case 'ACTIVE ':
+      return 'Active'
+    case 'INACTIVE':
+      return 'Inactive'
+    default:
+      return activeStatus
+  }
+}
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
@@ -160,11 +170,10 @@ onMounted(async () => {
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.parcelId,
-      trackingNumber: p.trackingNumber,
-      recipientName: p.ownerName,
-      roomNumber: p.roomNumber,
+      staffName: p.staffName,
+      mobile: p.mobile,
       email: p.contactEmail,
-      status: mapStatus(p.status),
+      status: mapActiveStatus(p.activeStatus),
       receiveAt: p.receivedAt,
       updateAt: p.updatedAt || null,
       pickupAt: p.pickedUpAt || null
