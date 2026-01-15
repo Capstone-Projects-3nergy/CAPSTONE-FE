@@ -15,6 +15,7 @@ import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import WebHeader from './WebHeader.vue'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -80,7 +81,7 @@ const showStatusParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
-
+const userManager = useUserManager()
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -151,6 +152,27 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
+  }
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staffs`,
+    router
+  )
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.parcelId,
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName,
+      roomNumber: p.roomNumber,
+      email: p.contactEmail,
+      status: mapStatus(p.status),
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+
+    userManager.setStaffs(mapped)
   }
 
   try {
@@ -248,7 +270,7 @@ const visiblePages = computed(() => {
   return pages
 })
 const parcels = computed(() => parcelManager.getParcels())
-const staffs = computed(() => parcelManager.getParcels())
+const staffs = computed(() => userManager.getStaffs())
 function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
