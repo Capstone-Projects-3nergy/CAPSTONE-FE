@@ -67,7 +67,7 @@ const confirmAction = () => {
 const cancelAction = () => {
   emit('cancelDetail', true)
   router.replace({
-    name: props.isPermanent ? 'trashparcels' : 'staffparcels'
+    name: props.isPermanent ? 'trashparcels' : 'manageresident'
   })
 }
 </script>
@@ -88,16 +88,16 @@ const cancelAction = () => {
 
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
-          Do you want to permanently delete the parcel with tracking number
+          Do you want to permanently delete this Member name
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
           <br />
           <span class="text-red-500 text-sm">
-            **Once deleted, this parcel cannot be recovered.**
+            **Once deleted, this Member name cannot be recovered.**
           </span>
         </template>
 
         <template v-else>
-          Do you want to move this member name
+          Do you want to move this Member name
           <b>"{{ parcel.parcelNumber || '' }}"</b>
           to the trash?
           <br />

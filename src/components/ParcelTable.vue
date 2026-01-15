@@ -35,6 +35,7 @@ const props = defineProps({
   showName: { type: Boolean, default: true },
   showAction: { type: Boolean, default: true },
   showDelete: { type: Boolean, default: true },
+  showDeleteMember: { type: Boolean, default: false },
   showRestore: { type: Boolean, default: true },
   clickableStatus: { type: Boolean, default: true },
   showTracking: { type: Boolean, default: true },
@@ -455,6 +456,72 @@ function formatDateTime(datetimeStr) {
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
                   Restore Parcel
+
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <button
+              v-if="showDeleteMember && p.role == 'Resident'"
+              @click="$emit('delete', p)"
+              class="relative group cursor-pointer"
+            >
+              <slot name="icon-delete"></slot>
+              <div
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+              >
+                <div
+                  class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Move To Trash
+
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              v-if="showDeleteMember && p.role == 'Resident'"
+              @click="$emit('delete', p)"
+              class="relative group cursor-pointer"
+            >
+              <slot name="icon-delete-permanent"></slot>
+              <div
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+              >
+                <div
+                  class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Delete Member
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <button
+              v-if="showRestoreMember"
+              @click="$emit('restore', p)"
+              class="relative group cursor-pointer"
+            >
+              <slot name="restore-trash"> </slot>
+              <div
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+              >
+                <div
+                  class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Restore Members
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
