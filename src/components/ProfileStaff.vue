@@ -442,7 +442,7 @@ const closePopUps = (operate) => {
           />
           <AlertPopUp
             v-if="successAccount"
-            titles="Reset Email Successful."
+            titles="Reset Email Successful, Please check your email to confirm the email change."
             message="Success!!"
             styleType="green"
             operate="SuccessAccount"
