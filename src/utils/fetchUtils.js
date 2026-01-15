@@ -366,6 +366,79 @@ async function restoreParcel(url, id, router) {
 //   }
 // }
 
+//Member and stadd
+async function getMembers(url, router) {
+  return await getItems(url, router)
+}
+
+async function getStaffs(url, router) {
+  return await getItems(url, router)
+}
+
+async function getMemberById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+
+async function getStaffById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+
+// วิธีใช้
+// getMembers('/api/members', router)
+// getStaffs('/api/staffs', router)
+async function addMember(url, member, router) {
+  return await addItem(url, member, router)
+}
+
+async function addStaff(url, staff, router) {
+  return await addItem(url, staff, router)
+}
+
+// addMember('/api/members', newMember, router)
+// addStaff('/api/staffs', newStaff, router)
+async function editMember(url, id, editedMember, router) {
+  return await editItem(url, id, editedMember, router)
+}
+
+async function editStaff(url, id, editedStaff, router) {
+  return await editItem(url, id, editedStaff, router)
+}
+async function deleteMember(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
+
+async function deleteStaff(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
+async function updateUserRole(url, id, role, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role })
+  }
+
+  const res = await fetchWithAuth(`${url}/${id}/role`, options, router)
+  if (res?.ok) return await res.json()
+  return null
+}
+// updateUserRole('/api/staffs', staffId, 'ADMIN', router)
+async function toggleUserActive(url, id, isActive, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isActive })
+  }
+
+  const res = await fetchWithAuth(`${url}/${id}/active`, options, router)
+  if (res?.ok) return await res.json()
+  return null
+}
+// ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
+// const members = await getMembers('/api/members', router)
+// userStore.setMembers(members)
+
+// const staffs = await getStaffs('/api/staffs', router)
+// userStore.setStaffs(staffs)
 export {
   getItemById,
   deleteItemById,
@@ -383,5 +456,17 @@ export {
   updateParcelStatus,
   confirmParcelPickup,
   confirmParcelReceived,
-  restoreParcel
+  restoreParcel,
+  getMembers,
+  getStaffs,
+  getMemberById,
+  getStaffById,
+  addMember,
+  addStaff,
+  editMember,
+  editStaff,
+  deleteMember,
+  deleteStaff,
+  updateUserRole,
+  toggleUserActive
 }
