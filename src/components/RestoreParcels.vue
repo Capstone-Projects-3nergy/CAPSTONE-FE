@@ -12,7 +12,10 @@ const props = defineProps({
   isPermanent: {
     type: Boolean,
     default: false
-  }
+  },
+  showMember: { type: Boolean, default: false },
+  showStaff: { type: Boolean, default: false },
+  showParcel: { type: Boolean, default: true }
 })
 
 const router = useRouter()
@@ -78,9 +81,51 @@ const restoreParcelFn = async () => {
   parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }
+const restoreMemberFn = async () => {
+  if (!parcel.value?.id) return
 
+  const res = await restoreParcel(
+    `${import.meta.env.VITE_BASE_URL}/api/members/trash`,
+    parcel.value.id,
+    router
+  )
+
+  if (!res || !res.ok) throw new Error('restore member failed')
+
+  parcelManager.restoreMember(parcel.value.id)
+}
+
+const restoreStaffFn = async () => {
+  if (!parcel.value?.id) return
+
+  const res = await restoreParcel(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/trash`,
+    parcel.value.id,
+    router
+  )
+
+  if (!res || !res.ok) throw new Error('restore staff failed')
+
+  parcelManager.restoreStaff(parcel.value.id)
+}
 const cancelAction = () => {
   emit('cancelDetail', true)
+}
+const confirmRestore = async () => {
+  try {
+    if (props.showMember) {
+      await restoreMemberFn()
+    } else if (props.showStaff) {
+      await restoreStaffFn()
+    } else {
+      await restoreParcelFn()
+    }
+
+    emit('confirmDetail', true)
+  } catch (err) {
+    emit('redAlert')
+    emit('cancelDetail', true)
+  }
 }
 </script>
 
@@ -96,18 +141,34 @@ const cancelAction = () => {
           Restore Parcel
         </h1>
       </div>
-
       <div class="p-4 text-center sm:text-left">
+        <template v-if="showMember">
+          Do you want to restore this Member name
+          <b>"{{ parcel.parcelNumber || '' }}"</b>?
+        </template>
+
+        <template v-else-if="showStaff">
+          Do you want to restore this Staff name
+          <b>"{{ parcel.parcelNumber || '' }}"</b>?
+        </template>
+
+        <template v-else>
+          Do you want to restore this Parcel
+          <b>"{{ parcel.parcelNumber || '' }}"</b>?
+        </template>
+      </div>
+
+      <!-- <div class="p-4 text-center sm:text-left">
         Do you want to restore the parcel with tracking number
         <b>"{{ parcel.parcelNumber || '' }}"</b>?
-      </div>
+      </div> -->
 
       <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
         <ButtonWeb
           label="Confirm"
           color="green"
           class="w-full sm:w-auto"
-          @click="restoreParcelFn"
+          @click="confirmRestore"
         />
 
         <ButtonWeb

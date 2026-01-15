@@ -1080,6 +1080,7 @@ const handleSortUpdate = (val) => {
           :showActionStatus="true"
           :showRoom="false"
           :showUpdateAt="false"
+          @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
