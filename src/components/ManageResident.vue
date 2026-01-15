@@ -1319,9 +1319,9 @@ const handleSortUpdate = (val) => {
   ></Teleport>
   <teleport to="body" v-if="showDeleteMember">
     <DeleteMemberStaff
-      @cancelDetail="clearDeletePopUp"
-      @confirmDetail="showDelComplete"
-      @redAlert="openRedPopup"
+      @cancelDetail="clearDeleteMemPopUp"
+      @confirmDetail="showDelMemComplete"
+      @redAlert="openRedMemPopup"
       :parcelData="MemberDetail"
       :isPermanent="false"
     />

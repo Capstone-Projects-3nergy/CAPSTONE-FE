@@ -19,6 +19,7 @@ import ParcelTrash from './ParcelTrash.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import RestoreParcels from './RestoreParcels.vue'
+import DeleteMemberStaff from './DeleteMemberStaff.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import {
   sortByRoomNumber,
@@ -83,6 +84,7 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
+const showDeleteMember = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -1791,6 +1793,15 @@ const closePopUp = (operate) => {
       @confirmDetail="showRestoreComplete"
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
+    />
+  </teleport>
+  <teleport to="body" v-if="showDeleteMember">
+    <DeleteMemberStaff
+      @cancelDetail="clearDeleteMemPopUp"
+      @confirmDetail="showDelMemComplete"
+      @redAlert="openRedMemPopup"
+      :parcelData="MemberDetail"
+      :isPermanent="true"
     />
   </teleport>
 </template>
