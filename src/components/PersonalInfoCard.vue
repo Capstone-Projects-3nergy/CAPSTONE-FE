@@ -14,7 +14,8 @@ const emit = defineEmits([
 ])
 const loginManager = useAuthManager()
 const activeTab = ref('profile')
-
+const newEmail = ref('')
+const trimmedEmail = newEmail.value?.trim()
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -29,6 +30,9 @@ const props = defineProps({
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null }
 })
+const resetForm = () => {
+  newEmail.value = ''
+}
 
 function display(value) {
   if (!value || value.trim() === '') return '-'
@@ -51,29 +55,29 @@ const menuClass = (tab) => {
   ]
 }
 const sendUpdateEmail = async () => {
-  // 1️⃣ required check
-  if (!trimmedEmail.value) {
+  const trimmedEmail = newEmail.value?.trim()
+
+  // 1️⃣ required
+  if (!trimmedEmail) {
     emit('emailRequire', true)
     return
   }
 
-  // 2️⃣ email format check
-  if (!/^\S+@\S+\.\S+$/.test(trimmedEmail.value)) {
+  // 2️⃣ format
+  if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
     emit('incorrectemailform', true)
     return
   }
 
   try {
-    // 3️⃣ call Pinia store (ChangeEmailManager)
-    await changeEmailStore.sendChangeEmailVerification(trimmedEmail.value)
-
-    form.value.email = ''
+    await changeEmailStore.sendChangeEmailVerification(trimmedEmail)
+    newEmail.value = ''
     emit('confirmAccount', true)
   } catch (e) {
-    error.value = true
     emit('redAlertError', true)
   }
 }
+
 // แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
   if (!value || value.trim() === '') return 'ACTIVE'
@@ -447,10 +451,17 @@ const statusClass = (value) => {
           </div>
         </div>
 
-        <div class="flex justify-end mt-8">
+        <div class="flex justify-end mt-8 gap-3">
+          <ButtonWeb
+            label="Reset"
+            color="red"
+            class="min-w-[180px]"
+            @click="resetForm"
+          />
           <ButtonWeb
             label="Save Account Changes"
             color="green"
+            class="min-w-[180px]"
             @click="sendUpdateEmail"
           />
         </div>

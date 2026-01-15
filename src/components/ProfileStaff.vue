@@ -18,7 +18,6 @@ import WebHeader from './WebHeader.vue'
 const errorAccount = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
-
 const emailRequire = ref(false)
 
 const profileManager = useProfileManager()
