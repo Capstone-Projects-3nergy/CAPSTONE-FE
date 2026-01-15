@@ -68,7 +68,8 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const parcelsResidentDetail = ref(null)
-const showDeleteMember = ref(null)
+const MemberDetail = ref(null)
+const showDeleteMember = ref(false)
 const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const showAddParcels = ref(false)
@@ -292,12 +293,18 @@ function autoClose(refVar, timeout = 10000) {
   })
 }
 const deleteMemberPopUp = (member) => {
+  MemberDetail.value = {
+    id: member.id,
+    parcelNumber: member.memberName // หรือ field ที่ใช้แสดงชื่อ
+  }
+
   showDeleteMember.value = true
-  // memberDetail.value = {
-  //   id: member.id,
-  //   parcelNumber: member.memberName
-  // }
 }
+const clearDeletePopUp = () => {
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+
 autoClose(addSuccess)
 autoClose(editSuccess)
 autoClose(deleteSuccess)
