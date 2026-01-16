@@ -97,7 +97,7 @@ const statusClass = (value) => {
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row gap-10">
+    <div class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
