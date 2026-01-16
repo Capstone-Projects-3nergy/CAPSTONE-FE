@@ -73,8 +73,7 @@ const sendUpdateEmail = async () => {
   try {
     await changeEmailStore.sendChangeEmailVerification(trimmedEmail)
     newEmail.value = ''
-    router.replace({ name: 'emailAction' })
-    // emit('confirmAccount', true)
+    emit('confirmAccount', true)
   } catch (e) {
     emit('redAlertError', true)
   }
