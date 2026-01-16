@@ -69,6 +69,67 @@ const statusClass = (value) => {
     'bg-red-500': status === 'INACTIVE'
   }
 }
+
+const notifications = [
+  {
+    type: 'new',
+    label: 'Joined New User',
+    title: 'New Registration: Finibus Bonorum et Malorum',
+    user: 'Allen Deo',
+    time: '24 Nov 2018 · 9:30 AM'
+  },
+  {
+    type: 'message',
+    label: 'Message',
+    title: 'Darren Smith sent new message',
+    user: 'Darren',
+    time: '24 Nov 2018 · 9:30 AM'
+  },
+  {
+    type: 'comment',
+    label: 'Comment',
+    title: 'Arin Ganshiram commented on post',
+    user: 'Arin Ganshiram',
+    time: '24 Nov 2018 · 9:30 AM'
+  },
+  {
+    type: 'connect',
+    label: 'Connect',
+    title: 'Juliet Den connect Allen Depk',
+    user: 'Juliet Den',
+    time: '24 Nov 2018 · 9:30 AM'
+  }
+]
+
+const badgeClass = (type) => {
+  switch (type) {
+    case 'new':
+      return 'bg-green-500'
+    case 'message':
+      return 'bg-orange-500'
+    case 'comment':
+      return 'bg-purple-500'
+    case 'connect':
+      return 'bg-sky-500'
+    default:
+      return 'bg-gray-400'
+  }
+}
+
+const badgeText = (type) => {
+  switch (type) {
+    case 'new':
+      return 'NEW'
+    case 'message':
+      return 'MSG'
+    case 'comment':
+      return 'CMT'
+    case 'connect':
+      return 'CON'
+    default:
+      return ''
+  }
+}
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
@@ -135,8 +196,8 @@ const statusClass = (value) => {
           </button>
 
           <button
-            @click="activeTab = 'account'"
-            :class="menuClass('account')"
+            @click="activeTab = 'notify'"
+            :class="menuClass('notify')"
             class="relative flex items-center gap-3 w-full cursor-pointer"
           >
             <svg
@@ -368,89 +429,51 @@ const statusClass = (value) => {
         </div>
       </div>
       <div
-        v-if="activeTab === 'account'"
+        v-if="activeTab === 'notify'"
         class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
-        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
-          Account Settings
+        <!-- Header -->
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+          Notifications
         </h2>
-        <p class="text-sm text-gray-500 mb-6">
-          Update your account information and manage how we contact you.
-        </p>
 
-        <div class="space-y-6 max-w-md">
-          <!-- Account Email -->
-          <div>
-            <label class="block text-sm font-semibold mb-1">
-              Account Email
-            </label>
-            <div class="relative">
-              <input
-                type="email"
-                disabled
-                class="w-full px-4 py-2 pr-28 bg-gray-100 text-gray-600 rounded-md outline-none"
-                :value="email"
-              />
-
-              <!-- Verified badge -->
-              <div
-                class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-green-600 pointer-events-none"
+        <!-- Notification list -->
+        <div class="space-y-4">
+          <div
+            v-for="(item, index) in notifications"
+            :key="index"
+            class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4"
+          >
+            <!-- LEFT ICON -->
+            <div class="mt-1">
+              <span
+                class="inline-flex items-center justify-center w-8 h-8 rounded text-white text-xs font-semibold"
+                :class="badgeClass(item.type)"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  class="shrink-0"
-                >
-                  <g fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path
-                      d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m9.515 12.536l2.035 1.949l2.935-4.97"
-                    />
-                  </g>
-                </svg>
+                {{ badgeText(item.type) }}
+              </span>
+            </div>
 
-                <span class="text-xs font-medium leading-none"> verified </span>
-              </div>
+            <!-- CONTENT -->
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-gray-800">
+                {{ item.label }}
+              </p>
+
+              <p class="text-sm text-gray-500 mt-0.5">
+                {{ item.title }}
+              </p>
+
+              <p class="text-xs text-red-500 mt-1">
+                {{ item.user }}
+              </p>
+            </div>
+
+            <!-- TIME -->
+            <div class="text-xs text-gray-400 whitespace-nowrap">
+              {{ item.time }}
             </div>
           </div>
-
-          <!-- Contact Email -->
-          <div>
-            <label class="block text-sm font-semibold mb-1">
-              Update Email Address
-            </label>
-            <input
-              type="email"
-              v-model="newEmail"
-              placeholder="Enter a new email address"
-              class="w-full px-4 py-2 bg-gray-100 rounded-md focus:ring-2 focus:ring-blue-300 outline-none"
-            />
-            <p class="text-xs text-[#8C8F91] mt-1">
-              We’ll send a confirmation link to verify this email before
-              updating your account.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex justify-end mt-8 gap-3">
-          <ButtonWeb
-            label="Reset"
-            color="red"
-            class="min-w-[180px]"
-            @click="resetForm"
-          />
-          <!-- <ButtonWeb
-            label="Save Account Changes"
-            color="green"
-            class="min-w-[180px]"
-            @click="sendUpdateEmail"
-          /> -->
         </div>
       </div>
     </div>
