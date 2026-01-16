@@ -181,6 +181,12 @@ const routes = [
     path: '/courier/parcelscannerpage',
     name: 'parcelscannershipping',
     component: ParcelScannerPageSender
+  },
+  //route กลาง
+  {
+    path: '/email-action',
+    name: 'emailAction',
+    component: EmailActionHandler
   }
 ]
 

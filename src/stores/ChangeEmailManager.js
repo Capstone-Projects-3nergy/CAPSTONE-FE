@@ -20,7 +20,7 @@ export const useChangeEmailManager = defineStore('ChangeEmailManager', () => {
 
       // 🔑 actionCodeSettings (จำเป็น)
       const actionCodeSettings = {
-        url: `${window.location.origin}/profile`,
+        url: `${window.location.origin}/email-action`,
         handleCodeInApp: false
       }
 
