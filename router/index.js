@@ -25,6 +25,7 @@ import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
 import EditProfilePage from '@/components/EditProfilePage.vue'
 import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.vue'
 import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
+import AddMember from '@/components/AddMember.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -107,7 +108,11 @@ const routes = [
     name: 'manageresident',
     component: ManageResident
   },
-
+  {
+    path: '/homepage/staff/:id/manageresident/addmember',
+    name: 'addmember',
+    component: AddMember
+  },
   {
     path: '/homepage/staff/:id/manageresident/:tid/detailregistration',
     name: 'detailregistration',
