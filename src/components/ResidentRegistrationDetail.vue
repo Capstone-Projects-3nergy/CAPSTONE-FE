@@ -620,7 +620,7 @@ function formatDateTime(datetimeStr) {
               label="Go Back"
               color="gray"
               @click="backToManageResident"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
             />
           </div>
         </form>

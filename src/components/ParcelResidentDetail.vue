@@ -592,6 +592,7 @@ const closePopUp = (operate) => {
               <ButtonWeb
                 label="Back"
                 color="gray"
+                class="text-[#898989]"
                 @click="showManageParcelPage"
               />
             </div>

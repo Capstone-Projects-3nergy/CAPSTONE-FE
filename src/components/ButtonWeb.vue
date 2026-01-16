@@ -23,14 +23,14 @@ const bgClass = computed(() => {
   if (props.color === 'black')
     return 'bg-black hover:bg-gray-700 disabled:bg-gray-400'
   if (props.color === 'gray')
-    return 'bg-[#898989] hover:bg-gray-700 disabled:bg-gray-400'
+    return 'bg-[#DADEE5] hover:bg-gray-700 disabled:bg-gray-400'
 })
 </script>
 
 <template>
   <button
     @click="$emit('click')"
-    :class="`${bgClass} text-white px-5 py-2 rounded cursor-pointer`"
+    :class="`${bgClass} text-[#898989] px-5 py-2 rounded cursor-pointer`"
   >
     {{ label }}
   </button>

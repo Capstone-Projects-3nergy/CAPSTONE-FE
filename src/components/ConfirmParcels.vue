@@ -84,7 +84,7 @@ const cancelFn = () => {
         <ButtonWeb
           label="Cancel"
           color="gray"
-          class="w-full sm:w-auto"
+          class="w-full sm:w-auto text-[#898989]"
           @click="cancelFn"
         />
       </div>

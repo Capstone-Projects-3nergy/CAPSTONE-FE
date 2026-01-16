@@ -398,7 +398,12 @@ const displayFullName = computed(() => {
               color="blue"
               @click="submit"
             />
-            <ButtonWeb label="Cancel Changes" color="gray" @click="cancel" />
+            <ButtonWeb
+              label="Cancel Changes"
+              color="gray"
+              @click="cancel"
+              class="text-[#898989]"
+            />
           </div>
         </div>
       </div>

@@ -1156,7 +1156,7 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="block md:hidden"
+                  class="text-[#898989] block md:hidden"
                 />
               </div>
             </div>
@@ -1227,7 +1227,7 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="w-auto"
+                  class="text-[#898989] w-auto"
                 />
               </div>
 
