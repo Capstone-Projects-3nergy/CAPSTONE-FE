@@ -804,7 +804,7 @@ function formatDateTime(datetimeStr) {
           />
         </div>
         <form
-          class="bg-white p-6 rounded-lg shadow space-y-8"
+          class="bg-white p-6 rounded-[5px] shadow space-y-8"
           @submit.prevent="saveEditParcel"
         >
           <section>

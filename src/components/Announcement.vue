@@ -287,7 +287,7 @@ onMounted(async () => {
           </h2>
 
           <div
-            class="bg-white rounded-xl shadow p-6 mb-6 border-t-4 border-gray-200"
+            class="bg-white rounded-[5px] shadow p-6 mb-6 border-t-4 border-gray-200"
           >
             <div
               class="h-56 bg-gray-200 rounded-lg mb-3 flex items-center justify-center text-gray-400 text-lg font-medium"
@@ -333,7 +333,7 @@ onMounted(async () => {
           </div>
 
           <div
-            class="bg-white rounded-xl shadow p-6 mb-8 border border-gray-200 border-t-4"
+            class="bg-white rounded-[5px] shadow p-6 mb-8 border border-gray-200 border-t-4"
           >
             <div class="flex items-center gap-3 mb-4">
               <label class="font-medium text-gray-800">Event Name</label>

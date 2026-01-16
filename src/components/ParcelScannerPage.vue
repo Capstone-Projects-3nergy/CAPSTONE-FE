@@ -865,7 +865,7 @@ onMounted(async () => {
         </div>
 
         <div
-          class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
+          class="max-w-full mx-auto bg-white rounded-[5px] shadow-lg overflow-hidden"
         >
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
@@ -1162,7 +1162,7 @@ onMounted(async () => {
             </div>
 
             <div
-              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg"
+              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-[5px]"
             >
               <div class="flex items-center justify-end mb-4"></div>
 

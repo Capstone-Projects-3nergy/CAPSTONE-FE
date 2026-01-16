@@ -100,7 +100,7 @@ const statusClass = (value) => {
     <div class="flex flex-col md:flex-row gap-10">
       <!-- LEFT : Profile Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
@@ -206,7 +206,7 @@ const statusClass = (value) => {
       </div>
 
       <!-- <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
       >
         <div
           class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
@@ -233,7 +233,7 @@ const statusClass = (value) => {
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <!-- Header -->
         <div class="flex items-center gap-3 mb-8">
@@ -394,7 +394,7 @@ const statusClass = (value) => {
       </div>
       <div
         v-if="activeTab === 'account'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
           Account Settings

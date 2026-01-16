@@ -444,7 +444,7 @@ function formatDateTime(datetimeStr) {
 
         <div class="flex flex-col mb-4 gap-4"></div>
 
-        <form class="bg-white p-6 rounded-lg shadow space-y-8">
+        <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
           <section>
             <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -458,7 +458,7 @@ const showProfileStaffPage = async function () {
 
         <div class="flex space-x-2 mb-4"></div>
 
-        <div class="overflow-x-auto bg-white rounded-lg shadow"></div>
+        <div class="overflow-x-auto bg-white rounded-[5px] shadow"></div>
 
         <div class="flex justify-end space-x-2 mt-4 text-gray-700"></div>
       </main>

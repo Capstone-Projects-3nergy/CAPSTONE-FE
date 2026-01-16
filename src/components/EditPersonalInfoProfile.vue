@@ -240,7 +240,7 @@ const displayFullName = computed(() => {
     <div class="flex flex-col md:flex-row gap-10">
       <!-- LEFT : Profile Image Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
       >
         <div class="relative inline-block">
           <!-- Avatar -->
@@ -310,7 +310,7 @@ const displayFullName = computed(() => {
 
       <!-- RIGHT : Edit Information Card -->
       <div
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <!-- Header -->
         <div class="mb-8">

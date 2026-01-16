@@ -457,7 +457,7 @@ const addMember = async (payload) => {
           @save="addMember"
           @cancel="ShowManageResidentPage"
         />
-        <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
+        <!-- <div class="bg-white rounded-[5px]shadow p-6 md:p-8 max-w-5xl mx-auto">
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
               Personal Information

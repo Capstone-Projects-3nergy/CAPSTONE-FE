@@ -456,7 +456,9 @@ const closePopUp = (operate) => {
           />
         </div>
 
-        <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
+        <div
+          class="bg-white border border-gray-300 rounded-[5px] shadow-md p-10"
+        >
           <form class="space-y-10">
             <section>
               <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
