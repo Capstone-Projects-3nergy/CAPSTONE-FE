@@ -395,16 +395,10 @@ const displayFullName = computed(() => {
           <div class="col-span-2 flex justify-end gap-4 mt-6">
             <ButtonWeb
               :label="mode === 'add' ? 'Add Member' : 'Save Changes'"
-              color="green"
-              class="px-6 py-2 rounded-full shadow"
+              color="blue"
               @click="submit"
             />
-            <ButtonWeb
-              label="Cancel Changes"
-              color="gray"
-              class="px-6 py-2 rounded-full shadow"
-              @click="cancel"
-            />
+            <ButtonWeb label="Cancel Changes" color="gray" @click="cancel" />
           </div>
         </div>
       </div>
