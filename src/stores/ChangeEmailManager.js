@@ -9,9 +9,6 @@ export const useChangeEmailManager = defineStore('ChangeEmailManager', () => {
   const successMessage = ref('')
   const errorMessage = ref('')
 
-  // ===============================
-  // SEND VERIFY EMAIL (CHANGE EMAIL)
-  // ===============================
   const sendChangeEmailVerification = async (newEmail) => {
     loading.value = true
     successMessage.value = ''
@@ -19,14 +16,21 @@ export const useChangeEmailManager = defineStore('ChangeEmailManager', () => {
 
     try {
       const user = auth.currentUser
-      if (!user) {
-        throw new Error('User is not authenticated')
+      if (!user) throw new Error('User not authenticated')
+
+      // 🔑 actionCodeSettings (จำเป็น)
+      const actionCodeSettings = {
+        url: `${window.location.origin}/profile`,
+        handleCodeInApp: false
       }
 
-      // Firebase sends verification email to NEW email
-      await verifyBeforeUpdateEmail(user, newEmail)
+      // ✅ CHANGE EMAIL (Firebase official way)
+      await verifyBeforeUpdateEmail(user, newEmail, actionCodeSettings)
 
-      // Optional: notify backend (log / audit only)
+      successMessage.value =
+        '📧 Verification email has been sent to your new email address.'
+
+      // optional: backend log
       const baseURL = import.meta.env.VITE_BASE_URL
       if (baseURL) {
         await axios.post(`${baseURL}/public/auth/change-email-request`, {
@@ -35,22 +39,20 @@ export const useChangeEmailManager = defineStore('ChangeEmailManager', () => {
           newEmail
         })
       }
-
-      successMessage.value =
-        '📧 Verification email has been sent. Please check your inbox to confirm the change.'
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage.value = '❌ This email address is already in use.'
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage.value = '❌ Invalid email address.'
-      } else if (error.code === 'auth/requires-recent-login') {
-        errorMessage.value =
-          '⚠️ Please sign in again before updating your account.'
-      } else {
-        errorMessage.value =
-          error.response?.data?.message ||
-          error.message ||
-          'Failed to send verification email. Please try again.'
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage.value = '❌ This email is already in use.'
+          break
+        case 'auth/invalid-email':
+          errorMessage.value = '❌ Invalid email address.'
+          break
+        case 'auth/requires-recent-login':
+          errorMessage.value = '⚠️ Please re-login before changing your email.'
+          break
+        default:
+          errorMessage.value =
+            error.message || 'Failed to send verification email.'
       }
     } finally {
       loading.value = false
