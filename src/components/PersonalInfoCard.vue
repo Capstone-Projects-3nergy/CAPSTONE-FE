@@ -142,35 +142,49 @@ const notifications = [
     time: '15 Jan 2026 · 06:10 PM'
   }
 ]
+const ACCOUNT_TYPES = ['message']
+const PARCEL_TYPES = ['new', 'comment', 'connect']
 
 const badgeClass = (type) => {
-  switch (type) {
-    case 'new':
-      return 'bg-green-500'
-    case 'message':
-      return 'bg-orange-500'
-    case 'comment':
-      return 'bg-purple-500'
-    case 'connect':
-      return 'bg-sky-500'
-    default:
-      return 'bg-gray-400'
-  }
+  if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
+  if (PARCEL_TYPES.includes(type)) return 'bg-blue-500'
+  return 'bg-gray-400'
 }
 
-const badgeText = (type) => {
-  switch (type) {
-    case 'new':
-      return 'NEW'
-    case 'message':
-      return 'MSG'
-    case 'comment':
-      return 'CMT'
-    case 'connect':
-      return 'CON'
-    default:
-      return ''
+const badgeIcon = (type) => {
+  // account / message
+  if (type === 'message') {
+    return `
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+         fill="white"
+        />
+      </svg>
+    `
   }
+
+  // parcel / notification
+  return `
+    <svg
+      width="25"
+      height="25"
+      viewBox="0 0 25 25"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+        fill="white"
+      />
+    </svg>
+  `
 }
 </script>
 <template>
@@ -489,11 +503,10 @@ const badgeText = (type) => {
             <!-- LEFT ICON -->
             <div class="mt-1">
               <span
-                class="inline-flex items-center justify-center w-8 h-8 rounded text-white text-xs font-semibold"
+                class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
                 :class="badgeClass(item.type)"
-              >
-                {{ badgeText(item.type) }}
-              </span>
+                v-html="badgeIcon(item.type)"
+              />
             </div>
 
             <!-- CONTENT -->
