@@ -189,7 +189,7 @@ const statusClass = (value) => {
                 fill="currentColor"
               />
             </svg> -->
-            <span>Account Setting</span>
+            <span>Notifications</span>
           </button>
         </div>
       </div>
