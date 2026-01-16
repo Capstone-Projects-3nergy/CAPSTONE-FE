@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useChangeEmailManager } from '@/stores/ChangeEmailManager'
-
+import { useRouter, useRoute } from 'vue-router'
 const changeEmailStore = useChangeEmailManager()
 const emit = defineEmits([
   'confirmAccount',
@@ -12,6 +12,7 @@ const emit = defineEmits([
   'edit',
   'emailRequire'
 ])
+const router = useRouter()
 const loginManager = useAuthManager()
 const activeTab = ref('profile')
 const newEmail = ref('')
@@ -72,7 +73,8 @@ const sendUpdateEmail = async () => {
   try {
     await changeEmailStore.sendChangeEmailVerification(trimmedEmail)
     newEmail.value = ''
-    emit('confirmAccount', true)
+    router.replace({ name: 'emailAction' })
+    // emit('confirmAccount', true)
   } catch (e) {
     emit('redAlertError', true)
   }

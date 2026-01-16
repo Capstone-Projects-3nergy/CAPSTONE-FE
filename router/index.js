@@ -26,6 +26,7 @@ import EditProfilePage from '@/components/EditProfilePage.vue'
 import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.vue'
 import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 import AddMember from '@/components/AddMember.vue'
+import EmailActionHandler from '@/components/EmailActionHandler.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -184,7 +185,7 @@ const routes = [
   },
   //route กลาง
   {
-    path: '/email-action',
+    path: '/homepage/staff/:id/profile/email-action',
     name: 'emailAction',
     component: EmailActionHandler
   }
