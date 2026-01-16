@@ -107,6 +107,7 @@ const routes = [
     name: 'manageresident',
     component: ManageResident
   },
+
   {
     path: '/homepage/staff/:id/manageresident/:tid/detailregistration',
     name: 'detailregistration',
