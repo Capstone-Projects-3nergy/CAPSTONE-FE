@@ -385,14 +385,14 @@ const closePopUps = (operate) => {
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="successAccount"
             titles="Reset Email Successful, Please check your email to confirm the email change."
             message="Success!!"
             styleType="green"
             operate="SuccessAccount"
             @closePopUp="closePopUps"
-          />
+          /> -->
           <AlertPopUp
             v-if="errorAccount"
             titles="There is a problem. Please try again later."
