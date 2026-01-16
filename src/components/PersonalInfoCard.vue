@@ -2,9 +2,7 @@
 import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
-import { useChangeEmailManager } from '@/stores/ChangeEmailManager'
 import { useRouter, useRoute } from 'vue-router'
-const changeEmailStore = useChangeEmailManager()
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -54,29 +52,6 @@ const menuClass = (tab) => {
       ? 'bg-[#D9D9D9] text-[#60a5fa]'
       : 'text-gray-500 hover:bg-gray-100'
   ]
-}
-const sendUpdateEmail = async () => {
-  const trimmedEmail = newEmail.value?.trim()
-
-  // 1️⃣ required
-  if (!trimmedEmail) {
-    emit('emailRequire', true)
-    return
-  }
-
-  // 2️⃣ format
-  if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
-    emit('incorrectemailform', true)
-    return
-  }
-
-  try {
-    await changeEmailStore.sendChangeEmailVerification(trimmedEmail)
-    newEmail.value = ''
-    emit('confirmAccount', true)
-  } catch (e) {
-    emit('redAlertError', true)
-  }
 }
 
 // แสดงค่า (default = ACTIVE)
@@ -470,12 +445,12 @@ const statusClass = (value) => {
             class="min-w-[180px]"
             @click="resetForm"
           />
-          <ButtonWeb
+          <!-- <ButtonWeb
             label="Save Account Changes"
             color="green"
             class="min-w-[180px]"
             @click="sendUpdateEmail"
-          />
+          /> -->
         </div>
       </div>
     </div>
