@@ -7,6 +7,10 @@ import { useProfileManager } from '@/stores/ProfileManager'
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
 const props = defineProps({
+  mode: {
+    type: String,
+    default: 'edit' // 'edit' | 'add'
+  },
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
@@ -47,16 +51,37 @@ const form = ref({
 
 // load props → form
 watch(
-  () => props,
-  () => {
-    form.value.firstName = props.firstName
-    form.value.lastName = props.lastName
-    form.value.fullName = props.fullName
-    form.value.email = props.email
-    form.value.position = props.position
-    form.value.roomNumber = props.roomNumber
-    form.value.lineId = props.lineId
-    form.value.phoneNumber = props.phoneNumber
+  () => props.mode,
+  (mode) => {
+    if (mode === 'add') {
+      form.value = {
+        firstName: '',
+        lastName: '',
+        email: '',
+        roomNumber: '',
+        lineId: '',
+        position: '',
+        phoneNumber: ''
+      }
+      // newAvatar.value = null
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.mode,
+  (mode) => {
+    if (mode === 'edit') {
+      form.value.firstName = props.firstName
+      form.value.lastName = props.lastName
+      form.value.fullName = props.fullName
+      form.value.email = props.email
+      form.value.position = props.position
+      form.value.roomNumber = props.roomNumber
+      form.value.lineId = props.lineId
+      form.value.phoneNumber = props.phoneNumber
+    }
   },
   { immediate: true, deep: true }
 )
@@ -108,6 +133,17 @@ function updateUser(data) {
   console.log('ข้อมูลใหม่:', data)
   // API update...
 }
+const submit = () => {
+  if (props.mode === 'add') {
+    emit('save', {
+      ...form.value,
+      avatar: newAvatar.value || null
+    })
+  } else {
+    saveEditProfile()
+  }
+}
+
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
   // -----------------------
@@ -189,11 +225,13 @@ const saveEditProfile = async () => {
   }
 }
 const displayFullName = computed(() => {
-  const first = form.value.firstName?.trim()
-  const last = form.value.lastName?.trim()
+  if ((props.mode = 'edit')) {
+    const first = form.value.firstName?.trim()
+    const last = form.value.lastName?.trim()
 
-  if (!first && !last) return '-'
-  return `${first || ''} ${last || ''}`.trim()
+    if (!first && !last) return '-'
+    return `${first || ''} ${last || ''}`.trim()
+  }
 })
 </script>
 
@@ -308,7 +346,7 @@ const displayFullName = computed(() => {
               Email
             </label>
             <input
-              disabled
+              :disabled="mode === 'edit'"
               v-model="form.email"
               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
@@ -356,10 +394,10 @@ const displayFullName = computed(() => {
           <!-- Actions -->
           <div class="col-span-2 flex justify-end gap-4 mt-6">
             <ButtonWeb
-              label="Save Changes"
+              :label="mode === 'add' ? 'Add Member' : 'Save Changes'"
               color="green"
               class="px-6 py-2 rounded-full shadow"
-              @click="saveEditProfile"
+              @click="submit"
             />
             <ButtonWeb
               label="Cancel Changes"

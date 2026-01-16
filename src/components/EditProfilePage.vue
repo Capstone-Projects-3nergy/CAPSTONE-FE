@@ -679,6 +679,7 @@ const closePopUp = (operate) => {
           />
         </div>
         <EditPersonalInfoProfile
+          mode="edit"
           :firstName="firstName"
           :lastName="lastName"
           :email="loginManager.user.email"

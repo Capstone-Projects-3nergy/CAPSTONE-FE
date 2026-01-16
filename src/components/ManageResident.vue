@@ -101,6 +101,9 @@ const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
+const showAddNewMember = async function () {
+  router.replace({ name: 'addmember' })
+}
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
@@ -812,7 +815,7 @@ const handleSortUpdate = (val) => {
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
-          @add="showAddParcelPage"
+          @addMember="showAddNewMember"
         />
         <ParcelFilterBar
           v-else-if="activeTab === 'Staff'"
