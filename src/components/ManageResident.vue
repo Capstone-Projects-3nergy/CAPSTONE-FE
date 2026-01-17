@@ -948,6 +948,7 @@ const handleSortUpdate = (val) => {
           :showActionStatus="true"
           :showRoom="true"
           :showUpdateAt="false"
+          :showDeleteResident="true"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
