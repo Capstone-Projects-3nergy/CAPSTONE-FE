@@ -946,7 +946,7 @@ const handleSortUpdate = (val) => {
           :hideTrash="true"
           :showMobile="true"
           :showActionStatus="true"
-          :showRoom="false"
+          :showRoom="true"
           :showUpdateAt="false"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
