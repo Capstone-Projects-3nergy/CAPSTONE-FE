@@ -34,7 +34,9 @@ const emit = defineEmits([
   'success',
   'first-name-error',
   'last-name-error',
-  'phone-error'
+  'phone-error',
+  'successAddProfile',
+  'errorAddProfile'
 ])
 
 const isEdit = ref(false)
@@ -102,21 +104,21 @@ function onImageChange(e) {
   if (file) newAvatar.value = file
 }
 
-function save() {
-  const payload = {
-    firstName: form.value.firstName,
-    lastName: form.value.lastName,
-    email: form.value.email,
-    position: form.value.position,
-    roomNumber: form.value.roomNumber,
-    lineId: form.value.lineId,
-    phoneNumber: form.value.phoneNumber,
-    avatar: newAvatar.value || null
-  }
+// function save() {
+//   const payload = {
+//     firstName: form.value.firstName,
+//     lastName: form.value.lastName,
+//     email: form.value.email,
+//     position: form.value.position,
+//     roomNumber: form.value.roomNumber,
+//     lineId: form.value.lineId,
+//     phoneNumber: form.value.phoneNumber,
+//     avatar: newAvatar.value || null
+//   }
 
-  emit('save', payload)
-  isEdit.value = false
-}
+//   emit('save', payload)
+//   isEdit.value = false
+// }
 
 function cancel() {
   isEdit.value = false
@@ -130,18 +132,101 @@ const userInitial = computed(() =>
 )
 const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 
-function updateUser(data) {
-  console.log('ข้อมูลใหม่:', data)
-  // API update...
-}
-const submit = () => {
+// function updateUser(data) {
+//   console.log('ข้อมูลใหม่:', data)
+//   // API update...
+// }
+const submit = async () => {
   if (props.mode === 'add') {
-    emit('save', {
-      ...form.value,
-      avatar: newAvatar.value || null
-    })
+    await addProfile()
   } else {
-    saveEditProfile()
+    await saveEditProfile()
+  }
+}
+const addProfile = async () => {
+  // -----------------------
+  // validate name (ไทย + อังกฤษ)
+  // -----------------------
+  const nameRegex = /^[A-Za-zก-๙\s]+$/
+
+  if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
+    emit('first-name-error', true)
+    return
+  }
+
+  if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
+    emit('last-name-error', true)
+    return
+  }
+
+  // -----------------------
+  // validate email
+  // -----------------------
+  if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
+    emit('errorAddProfile')
+    return
+  }
+
+  // -----------------------
+  // validate phone (optional)
+  // -----------------------
+  if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
+    emit('phone-error', true)
+    return
+  }
+
+  try {
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      firstName: form.value.firstName.trim(),
+      lastName: form.value.lastName.trim(),
+      email: form.value.email.trim(),
+      roomNumber: form.value.roomNumber || null,
+      lineId: form.value.lineId || null,
+      phoneNumber: form.value.phoneNumber || null
+    }
+
+    if (newAvatar.value) {
+      body.avatar = newAvatar.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const result = await addMemberWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      body,
+      router
+    )
+
+    if (!result) {
+      emit('errorAddProfile')
+      return
+    }
+
+    // -----------------------
+    // success
+    // -----------------------
+    emit('successAddProfile')
+
+    // reset form (เหมือน saveParcel)
+    form.value = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      roomNumber: '',
+      lineId: '',
+      position: '',
+      phoneNumber: ''
+    }
+
+    newAvatar.value = null
+    isEdit.value = false
+  } catch (err) {
+    console.error(err)
+    emit('errorAddProfile')
   }
 }
 

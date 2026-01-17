@@ -144,14 +144,14 @@ const closePopUps = (operate) => {
       break
   }
 }
-const addMember = async (payload) => {
-  try {
-    await memberManager.createMember(payload)
-    // success popup / redirect
-  } catch (e) {
-    console.error(e)
-  }
-}
+// const addMember = async (payload) => {
+//   try {
+//     await memberManager.createMember(payload)
+//     // success popup / redirect
+//   } catch (e) {
+//     console.error(e)
+//   }
+// }
 </script>
 
 <template>
