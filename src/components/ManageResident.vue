@@ -187,7 +187,7 @@ onMounted(async () => {
 
   //   mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
-  //   userManager.setMembers(mapped)
+  //   userManager.setResidents(mapped)
   // }
 
   try {
@@ -314,8 +314,8 @@ autoClose(deleteSuccess)
 autoClose(error)
 
 const searchKeyword = ref('')
-const activeTab = ref('Members')
-const tabs = ['Members', 'Staff']
+const activeTab = ref('Residents')
+const tabs = ['Residents', 'Staff']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -763,7 +763,7 @@ const handleSortUpdate = (val) => {
                 d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
               />
             </svg>
-            <h2 class="text-2xl font-bold text-[#185dc0]">Members</h2>
+            <h2 class="text-2xl font-bold text-[#185dc0]">Manages Resident</h2>
           </div>
 
           <div class="flex items-center justify-between">
@@ -803,7 +803,7 @@ const handleSortUpdate = (val) => {
         </div>
 
         <ParcelFilterBar
-          v-if="activeTab === 'Members'"
+          v-if="activeTab === 'Residents'"
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
@@ -932,7 +932,7 @@ const handleSortUpdate = (val) => {
           />
         </div>
         <ParcelTable
-          v-if="activeTab === 'Members'"
+          v-if="activeTab === 'Residents'"
           :items="paginatedParcels"
           :pages="visiblePages"
           :page="currentPage"

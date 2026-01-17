@@ -469,7 +469,7 @@ const showLastNameError = () => {
               />
             </svg>
             <h2 class="text-2xl font-bold text-[#185dc0]">
-              Members > Add Member
+              Manage Residents > Add Resident
             </h2>
           </div>
         </div>
@@ -535,7 +535,7 @@ const showLastNameError = () => {
 
         <EditPersonalInfoProfile
           mode="add"
-          title="Add New Member"
+          title="Add New Resident"
           :showEdit="false"
           @successAddProfile="showAddProfileSuccess"
           @errorAddProfile="showAddProfileError"

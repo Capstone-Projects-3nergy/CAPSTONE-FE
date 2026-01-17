@@ -107,7 +107,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
               fill="white"
             />
           </svg>
-          <span>Add New Member</span>
+          <span>Add New</span>
         </button>
         <button
           v-if="showAddStaffButton"

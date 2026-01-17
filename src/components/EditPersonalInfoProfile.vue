@@ -474,7 +474,7 @@ const displayFullName = computed(() => {
           <!-- Actions -->
           <div class="col-span-2 flex justify-end gap-4 mt-6">
             <ButtonWeb
-              :label="mode === 'add' ? 'Add Member' : 'Save Changes'"
+              :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
             />
