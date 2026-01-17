@@ -10,6 +10,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
 
   const findIndexByParcelId = (list, parcelId) =>
     list.findIndex((el) => el.parcelId === parcelId)
+
   const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
   const setParcels = (parcelList = []) => {
     parcel.length = 0
@@ -25,6 +26,14 @@ export const useParcelManager = defineStore('parcelManager', () => {
   const addParcel = (newParcel) => {
     if (!newParcel) return
     parcel.push(newParcel)
+  }
+  const findIndexByParcelIds = (parcelId) =>
+    parcel.findIndex((el) => el.parcelId === parcelId)
+  const editParcel = (parcelId, updatedParcel) => {
+    const index = findIndexByParcelIds(parcelId)
+    if (index !== -1) {
+      parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
+    }
   }
 
   // const updateParcel = (updatedParcel) => {
@@ -214,6 +223,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
     getParcels,
     getTrash,
     setParcels,
+    editParcel,
     addParcel,
     updateParcel,
     updateParcelStatus,
