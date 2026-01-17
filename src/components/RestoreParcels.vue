@@ -143,16 +143,16 @@ const confirmRestore = async () => {
       </div>
       <div class="p-4 text-center sm:text-left">
         <template v-if="showMember">
-          Do you want to restore this Member name
+          Do you want to restore this Resident name
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
         </template>
 
-        <template v-else-if="showStaff">
+        <template v-if="showStaff">
           Do you want to restore this Staff name
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
         </template>
 
-        <template v-else>
+        <template v-if="showParcel">
           Do you want to restore this Parcel
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
         </template>

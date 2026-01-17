@@ -1333,6 +1333,7 @@ const closePopUp = (operate) => {
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
+          :showMember="true"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
