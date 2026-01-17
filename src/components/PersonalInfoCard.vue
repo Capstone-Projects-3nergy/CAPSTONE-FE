@@ -27,7 +27,8 @@ const props = defineProps({
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
-  phoneNumber: { type: String, default: null }
+  phoneNumber: { type: String, default: null },
+  showNotify: { type: Boolean, default: true }
 })
 const resetForm = () => {
   newEmail.value = ''
@@ -286,6 +287,7 @@ const notifyTabClass = (tab) => {
           </button>
 
           <button
+            v-if="showNotify"
             @click="activeTab = 'notify'"
             :class="menuClass('notify')"
             class="relative flex items-center gap-3 w-full cursor-pointer"

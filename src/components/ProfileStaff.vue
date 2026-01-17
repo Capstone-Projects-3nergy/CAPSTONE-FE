@@ -483,6 +483,7 @@ const closePopUps = (operate) => {
           :lineId="lineId"
           :contact="contact"
           :position="loginManager.user.position"
+          :showNotify="false"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"
           @redAlertError="redAlertErrorFn"
