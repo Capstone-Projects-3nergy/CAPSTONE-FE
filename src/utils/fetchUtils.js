@@ -433,6 +433,32 @@ async function toggleUserActive(url, id, isActive, router) {
   if (res?.ok) return await res.json()
   return null
 }
+async function updateProfileWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  Object.keys(payload).forEach((key) => {
+    if (payload[key] !== null && payload[key] !== undefined) {
+      formData.append(key, payload[key])
+    }
+  })
+
+  try {
+    const options = {
+      method: 'PUT',
+      body: formData
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (!res) return null
+    if (!res.ok) return null
+
+    return await res.json()
+  } catch (err) {
+    console.error('updateProfileWithFile error:', err)
+    return null
+  }
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -468,5 +494,6 @@ export {
   deleteMember,
   deleteStaff,
   updateUserRole,
-  toggleUserActive
+  toggleUserActive,
+  updateProfileWithFile
 }

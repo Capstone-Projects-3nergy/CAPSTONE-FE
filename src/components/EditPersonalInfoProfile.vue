@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
+import { updateProfileWithFile } from '@/utils/fetchUtils'
 
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
@@ -192,7 +193,7 @@ const saveEditProfile = async () => {
     // -----------------------
     // API call
     // -----------------------
-    const updatedProfile = await profileManager.updateProfile(
+    const updatedProfile = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
       body,
       router
@@ -203,15 +204,11 @@ const saveEditProfile = async () => {
       return
     }
 
-    // -----------------------
     // update store
-    // -----------------------
     profileManager.setProfile(updatedProfile)
     loginManager.updateUser(updatedProfile)
 
-    // -----------------------
     // sync form
-    // -----------------------
     form.value = {
       ...form.value,
       ...updatedProfile
@@ -407,130 +404,6 @@ const displayFullName = computed(() => {
       </div>
     </div>
   </div>
-
-  <!-- <div class="bg-white rounded-2xl shadow p-6 md:p-8 max-w-5xl mx-auto">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl max-sm:text-xl font-bold text-[#185dc0]">
-        {{ title }}
-      </h2>
-    </div>
-
-    <div
-      class="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-50"
-    >
-      <div class="flex flex-col items-center w-full md:w-1/3">
-        <div
-          class="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
-        >
-          <img
-            v-if="avatarPreview"
-            :src="avatarPreview"
-            alt="Profile"
-            class="w-full h-full object-cover"
-          />
-
-          <div
-            v-else
-            class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
-          >
-            {{ userInitial }}
-          </div>
-        </div>
-        <ButtonWeb
-          label=" Change Image"
-          color="blue"
-          class="mt-3 bg-[#185DC0] hover:bg-[#144a99] text-white text-xs px-3 py-1.5 rounded cursor-pointer"
-          @click="$refs.imageInput.click()"
-        />
-       
-        <input
-          type="file"
-          accept="image/*"
-          class="hidden"
-          ref="imageInput"
-          @change="onImageChange"
-        />
-
-        <p class="mt-3 text-gray-700 font-medium text-center md:text-left">
-          {{ props.fullName }}
-        </p>
-      </div>
-
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 w-full md:w-2/3 text-gray-700"
-      >
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Firstname</label
-          >
-          <input
-            v-model="form.firstName"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Lastname</label
-          >
-          <input
-            v-model="form.lastName"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Email</label>
-          <input
-            v-model="form.email"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div v-if="roomNumber !== null">
-          <label class="block font-semibold text-[#185dc0] mb-1"
-            >Room Number</label
-          >
-          <input
-            v-model="form.roomNumber"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">Line ID</label>
-          <input
-            v-model="form.lineId"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block font-semibold text-[#185dc0] mb-1">phoneNumber</label>
-          <input
-            v-model="form.phoneNumber"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div class="col-span-2 flex gap-4 mt-4 justify-end">
-          <ButtonWeb
-            label="Save"
-            color="green"
-            class="w-full sm:w-auto px-5 py-2 rounded-xl shadow"
-            @click="save"
-          />
-          <ButtonWeb
-            label=" Cancel"
-            color="gray"
-            class="w-full sm:w-auto px-5 py-2 rounded-xl shadow"
-            @click="cancel"
-          />
-        
-        </div>
-      </div>
-    </div>
-  </div> -->
 </template>
 
 <style scoped></style>
