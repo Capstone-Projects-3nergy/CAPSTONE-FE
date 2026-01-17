@@ -17,10 +17,14 @@ const toggleSidebar = () => {
 
 const openNotification = () => {
   if (!role.value) return
+
   if (role.value === 'STAFF') {
     router.replace({ name: 'profilestaff' })
   } else if (role.value === 'RESIDENT') {
-    router.replace({ name: 'profileresident' })
+    router.replace({
+      name: 'profileresident',
+      query: { tab: 'notify' }
+    })
   }
 }
 const showNotification = computed(
@@ -51,7 +55,7 @@ const showNotification = computed(
       </svg>
 
       <div class="flex-1 flex justify-end items-center gap-5">
-        <div class="relative group">
+        <div v-if="role === 'RESIDENT'" class="relative group">
           <svg
             v-if="showNotification"
             @click="openNotification"

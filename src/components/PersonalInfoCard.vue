@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -10,6 +10,8 @@ const emit = defineEmits([
   'edit',
   'emailRequire'
 ])
+
+const route = useRoute()
 const router = useRouter()
 const loginManager = useAuthManager()
 const activeTab = ref('profile')
@@ -38,6 +40,16 @@ function display(value) {
   if (!value || value.trim() === '') return '-'
   return value
 }
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (tab === 'notify') {
+      activeTab.value = 'notify'
+    }
+  },
+  { immediate: true }
+)
+
 const authStore = useAuthManager()
 
 const userName = computed(() => authStore.user?.fullName || 'Courier')
