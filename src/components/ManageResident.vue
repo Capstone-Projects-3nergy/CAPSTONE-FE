@@ -315,7 +315,7 @@ autoClose(error)
 
 const searchKeyword = ref('')
 const activeTab = ref('Residents')
-const tabs = ['Residents', 'Staff']
+const tabs = ['Residents', 'Staffs']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -818,7 +818,7 @@ const handleSortUpdate = (val) => {
           @addMember="showAddNewMember"
         />
         <ParcelFilterBar
-          v-else-if="activeTab === 'Staff'"
+          v-else-if="activeTab === 'Staffs'"
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
@@ -1066,7 +1066,7 @@ const handleSortUpdate = (val) => {
           </template>
         </ParcelTable>
         <ParcelTable
-          v-else-if="activeTab === 'Staff'"
+          v-else-if="activeTab === 'Staffs'"
           :items="paginatedStaffs"
           :pages="visiblePages"
           :page="currentPage"
