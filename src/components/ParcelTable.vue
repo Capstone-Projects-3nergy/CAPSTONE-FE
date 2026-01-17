@@ -1,4 +1,6 @@
 <script setup>
+import { useAuthManager } from '@/stores/AuthManager'
+import { computed, ref } from 'vue'
 const emit = defineEmits([
   'prev',
   'next',
@@ -107,6 +109,20 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+const authStore = useAuthManager()
+
+const userName = computed(() => authStore.user?.fullName || 'Courier')
+
+const userInitial = computed(() =>
+  userName.value ? userName.value[0].toUpperCase() : 'C'
+)
+
+// กรณีใช้ p.photo
+// const hasAvatar = computed(() => !!p.photo)
+// const avatar = computed(() => p.photo)
+
+const avatar = computed(() => authStore.user?.photo || null)
+const hasAvatar = computed(() => !!avatar.value)
 </script>
 <template>
   <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
@@ -224,10 +240,22 @@ function formatDateTime(datetimeStr) {
           >
             <span class="md:hidden font-semibold text-blue-700">Photo:</span>
 
-            <img
-              :src="p.photo || '/default-avatar.png'"
-              class="w-10 h-10 rounded-full object-cover"
-            />
+            <div
+              class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center"
+            >
+              <img
+                v-if="hasAvatar"
+                :src="avatar"
+                class="w-full h-full object-cover"
+              />
+
+              <div
+                v-else
+                class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
+              >
+                {{ userInitial }}
+              </div>
+            </div>
           </td>
           <td
             v-if="showTracking"

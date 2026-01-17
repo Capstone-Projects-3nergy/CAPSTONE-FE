@@ -826,7 +826,7 @@ const handleSortUpdate = (val) => {
           :hideNameSort="true"
           :hideTrash="false"
           :showDate="false"
-          :showAddStaffButton="true"
+          :showAddStaffButton="false"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
