@@ -244,9 +244,7 @@ const displayFullName = computed(() => {
       >
         <div class="relative inline-block">
           <!-- Avatar -->
-          <div
-            class="w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-sm"
-          >
+          <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
             <img
               v-if="avatarPreview"
               :src="avatarPreview"
@@ -327,7 +325,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.firstName"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
@@ -337,7 +335,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.lastName"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
@@ -348,7 +346,7 @@ const displayFullName = computed(() => {
             <input
               :disabled="mode === 'edit'"
               v-model="form.email"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-gray-100 border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
@@ -358,7 +356,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.roomNumber"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
           <div v-if="loginManager.user.role === 'STAFF' && mode !== 'add'">
@@ -367,7 +365,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.position"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
@@ -377,7 +375,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.lineId"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
@@ -387,7 +385,7 @@ const displayFullName = computed(() => {
             </label>
             <input
               v-model="form.phoneNumber"
-              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
 
