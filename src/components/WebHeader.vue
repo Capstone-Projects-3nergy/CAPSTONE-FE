@@ -18,9 +18,9 @@ const toggleSidebar = () => {
 const openNotification = () => {
   if (!role.value) return
   if (role.value === 'STAFF') {
-    router.replace({ name: 'staffnotification' })
+    router.replace({ name: 'profilestaff' })
   } else if (role.value === 'RESIDENT') {
-    router.replace({ name: 'residentnotification' })
+    router.replace({ name: 'profileresident' })
   }
 }
 const showNotification = computed(
