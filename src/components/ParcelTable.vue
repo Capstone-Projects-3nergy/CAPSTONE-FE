@@ -109,20 +109,25 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
-const authStore = useAuthManager()
+const getInitial = (name) => {
+  if (!name) return 'C'
+  return name.trim()[0].toUpperCase()
+}
 
-const userName = computed(() => authStore.user?.fullName || 'Courier')
+// const authStore = useAuthManager()
 
-const userInitial = computed(() =>
-  userName.value ? userName.value[0].toUpperCase() : 'C'
-)
+// const userName = computed(() => authStore.user?.fullName || 'Courier')
 
-// กรณีใช้ p.photo
-// const hasAvatar = computed(() => !!p.photo)
-// const avatar = computed(() => p.photo)
+// const userInitial = computed(() =>
+//   userName.value ? userName.value[0].toUpperCase() : 'C'
+// )
 
-const avatar = computed(() => authStore.user?.photo || null)
-const hasAvatar = computed(() => !!avatar.value)
+// // กรณีใช้ p.photo
+// // const hasAvatar = computed(() => !!p.photo)
+// // const avatar = computed(() => p.photo)
+
+// const avatar = computed(() => authStore.user?.photo || null)
+// const hasAvatar = computed(() => !!avatar.value)
 </script>
 <template>
   <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
@@ -244,8 +249,8 @@ const hasAvatar = computed(() => !!avatar.value)
               class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center"
             >
               <img
-                v-if="hasAvatar"
-                :src="avatar"
+                v-if="p.photo"
+                :src="p.photo"
                 class="w-full h-full object-cover"
               />
 
@@ -253,7 +258,7 @@ const hasAvatar = computed(() => !!avatar.value)
                 v-else
                 class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
               >
-                {{ userInitial }}
+                {{ getInitial(p.recipientName) }}
               </div>
             </div>
           </td>
