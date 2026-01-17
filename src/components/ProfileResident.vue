@@ -370,7 +370,7 @@ const closePopUps = (operate) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="profileManager.editSuccess"
-            titles="Edit Profile Successful."
+            titles="Profile updated successfully."
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
