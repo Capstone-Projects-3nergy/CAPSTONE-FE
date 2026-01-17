@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import { updateProfileWithFile } from '@/utils/fetchUtils'
+import { updateProfileWithFile, addProfile } from '@/utils/fetchUtils'
 
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
