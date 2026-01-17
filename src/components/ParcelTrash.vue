@@ -963,6 +963,26 @@ const closePopUp = (operate) => {
       <main class="flex-1 p-9 w-full">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g fill="#185DC0">
+                <path
+                  fill="#185DC0"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
+                />
+                <path
+                  stroke="#185DC0"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                />
+              </g>
+            </svg>
             <!-- <svg
               width="25"
               height="25"
@@ -979,7 +999,7 @@ const closePopUp = (operate) => {
             <h2
               class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
             >
-              🗑 Trash
+              Trash
             </h2>
           </div>
 
