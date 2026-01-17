@@ -35,7 +35,10 @@ const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showLogoutConfirm = ref(false)
-
+const addSuccess = ref(false)
+const firstNameError = ref(false)
+const lastNameError = ref(false)
+const phoneError = ref(false)
 const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
 })
@@ -124,10 +127,28 @@ function emailRequireFn() {
   emailRequire.value = true
   setTimeout(() => (emailRequire.value = false), 10000)
 }
-
-const closePopUp = () => {
-  profileManager.clearAlert()
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'firstNameMessage':
+      firstNameError.value = false
+      break
+    case 'lastNameMessageMessage':
+      lastNameError.value = false
+      break
+    case 'phoneMessage':
+      phoneError.value = false
+      break
+    case 'editSuccessMessage':
+      addSuccess.value = false
+      break
+  }
 }
+// const closePopUp = () => {
+//   profileManager.clearAlert()
+// }
 const closePopUps = (operate) => {
   switch (operate) {
     case 'SuccessAccount':
@@ -152,6 +173,27 @@ const closePopUps = (operate) => {
 //     console.error(e)
 //   }
 // }
+const showAddProfileError = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+}
+const showPhoneError = () => {
+  phoneError.value = true
+  setTimeout(() => (phoneError.value = false), 10000)
+}
+const showAddProfileSuccess = () => {
+  addSuccess.value = true
+  setTimeout(() => (addSuccess.value = false), 10000)
+}
+const showFirstNameError = () => {
+  firstNameError.value = true
+  setTimeout(() => (firstNameError.value = false), 10000)
+}
+const showLastNameError = () => {
+  lastNameError.value = true
+  setTimeout(() => (lastNameError.value = false), 10000)
+}
+
 </script>
 
 <template>
@@ -432,7 +474,49 @@ const closePopUps = (operate) => {
           </div>
         </div>
         <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp
+            v-if="addSuccess"
+            titles="Add Member is Successful."
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
+            v-if="firstNameError"
+            titles="First name can only contain Thai or English letters."
+            message="Error!!"
+            styleType="red"
+            operate="firstNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="lastNameError"
+            titles="Last name can only contain Thai or English letters."
+            message="Error!!"
+            styleType="red"
+            operate="lastNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="phoneError"
+            titles="Phone number must contain 9–10 digits only."
+            message="Error!!"
+            styleType="red"
+            operate="phoneMessage"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="error"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+        </div>
+          <!-- <AlertPopUp
             v-if="successAccount"
             titles="Add Member is Successful."
             message="Success!!"
@@ -447,14 +531,18 @@ const closePopUps = (operate) => {
             styleType="red"
             operate="problemAccount"
             @closePopUp="closePopUps"
-          />
+          /> -->
         </div>
 
         <EditPersonalInfoProfile
           mode="add"
           title="Add New Member"
           :showEdit="false"
-          @save="addMember"
+          @successAddProfile="showAddProfileSuccess"
+          @errorAddProfile="showAddProfileError"
+          @first-name-error="showFirstNameError"
+          @last-name-error="showLastNameError"
+          @phone-error="showPhoneError"
           @cancel="ShowManageResidentPage"
         />
         <!-- <div class="bg-white rounded-[5px]shadow p-6 md:p-8 max-w-5xl mx-auto">
