@@ -428,17 +428,24 @@ const displayFullName = computed(() => {
             <input
               :disabled="mode === 'edit'"
               v-model="form.email"
-              class="w-full bg-gray-100 border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :class="[
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+              ]"
             />
           </div>
 
-          <div v-if="roomNumber !== null">
+          <div v-if="roomNumber !== null || mode == 'add'">
             <label class="block text-sm text-black font-semibold mb-1">
               Room Number
             </label>
             <input
+              :disabled="mode === 'edit'"
               v-model="form.roomNumber"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :class="[
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+              ]"
             />
           </div>
           <div v-if="loginManager.user.role === 'STAFF' && mode !== 'add'">

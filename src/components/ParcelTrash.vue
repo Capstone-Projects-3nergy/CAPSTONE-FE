@@ -233,7 +233,7 @@ autoClose(error)
 
 const searchKeyword = ref('')
 const activeTab = ref('Parcels')
-const tabs = ['Parcels', 'Members']
+const tabs = ['Parcels', 'Residents']
 
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -1318,7 +1318,7 @@ const closePopUp = (operate) => {
           </template>
         </ParcelTable>
         <ParcelTable
-          v-if="activeTab === 'Members'"
+          v-if="activeTab === 'Residents'"
           :items="paginatedMembers"
           :pages="visiblePages"
           :page="currentPage"
