@@ -1,89 +1,194 @@
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
-export const useProfileManager = defineStore('profileManager', () => {
-  // ------------------------
-  // state
-  // ------------------------
-  const profiles = reactive([]) // profile list
-  const trash = reactive([]) // deleted profiles
+export const useParcelManager = defineStore('parcelManager', () => {
+  const parcel = reactive([])
+  const trash = reactive([])
 
-  const loading = ref(false)
-  const error = ref(false)
-
-  // ------------------------
-  // helpers
-  // ------------------------
-  const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
-
-  // ------------------------
-  // getters
-  // ------------------------
-  const getProfiles = () => profiles
-  const getProfileById = (id) => profiles.find((p) => p.id === id) || null
+  const getParcels = () => parcel
   const getTrash = () => trash
 
-  // ------------------------
-  // setters
-  // ------------------------
-  const setProfiles = (profileList = []) => {
-    profiles.length = 0
-    const list = Array.isArray(profileList) ? profileList : [profileList]
-    list.forEach((p) => profiles.push(p))
+  const findIndexByParcelId = (list, parcelId) =>
+    list.findIndex((el) => el.parcelId === parcelId)
+  const findIndexById = (list, id) => list.findIndex((el) => el.id === id)
+  const setParcels = (parcelList = []) => {
+    parcel.length = 0
+    const list = Array.isArray(parcelList) ? parcelList : [parcelList]
+    list.forEach((p) => parcel.push(p))
   }
-
   const setTrash = (trashList = []) => {
     trash.length = 0
     const list = Array.isArray(trashList) ? trashList : [trashList]
     list.forEach((t) => trash.push(t))
   }
 
-  // ------------------------
-  // CRUD (เหมือน parcel)
-  // ------------------------
-  const addProfile = (newProfile) => {
-    if (!newProfile) return
-    profiles.push(newProfile)
+  const addParcel = (newParcel) => {
+    if (!newParcel) return
+    parcel.push(newParcel)
   }
 
-  const updateProfile = (updatedProfile) => {
-    if (!updatedProfile) return
-    const index = findIndexById(profiles, updatedProfile.id)
+  // const updateParcel = (updatedParcel) => {
+  //   const index = findIndexByParcelId(parcel, updatedParcel.parcelId)
+  //   if (index !== -1) {
+  //     parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
+  //   }
+  // }
+  const updateParcelStatus = (id, newStatus) => {
+    const index = findIndexById(parcel, id)
     if (index !== -1) {
-      profiles.splice(index, 1, {
-        ...profiles[index],
-        ...updatedProfile,
-        updatedAt: new Date().toISOString()
+      parcel.splice(index, 1, {
+        ...parcel[index],
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+        receivedAt:
+          newStatus.toUpperCase() === 'RECEIVED'
+            ? new Date().toISOString()
+            : parcel[index].receivedAt
       })
     }
   }
 
-  const moveToTrash = (id) => {
-    const index = findIndexById(profiles, id)
+  // const updateParcelStatus = (parcelId, newStatus) => {
+  //   const index = findIndexByParcelId(parcel, parcelId)
+  //   if (index !== -1) {
+  //     parcel.splice(index, 1, {
+  //       ...parcel[index],
+  //       status: newStatus,
+  //       updatedAt: new Date().toISOString(),
+  //       receivedAt:
+  //         newStatus.toUpperCase() === 'RECEIVED'
+  //           ? new Date().toISOString()
+  //           : parcel[index].receivedAt
+  //     })
+  //   }
+  // }
+
+  // const moveToTrash = (parcelId) => {
+  //   const index = findIndexByParcelId(parcel, parcelId)
+  //   if (index !== -1) {
+  //     const removed = parcel.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       status: 'TRASH',
+  //       trashedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  const updateParcel = (updatedParcel) => {
+    const index = findIndexById(parcel, updatedParcel.id)
     if (index !== -1) {
-      const removed = profiles.splice(index, 1)[0]
+      parcel.splice(index, 1, { ...parcel[index], ...updatedParcel })
+    }
+  }
+  const moveToTrash = (id) => {
+    const index = findIndexById(parcel, id)
+    if (index !== -1) {
+      const removed = parcel.splice(index, 1)[0]
       trash.push({
         ...removed,
-        original: { ...removed },
+        original: { ...removed }, // เก็บสภาพก่อนลบ
         deletedAt: new Date().toISOString()
       })
     }
   }
-
   const restoreFromTrash = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
       const removed = trash.splice(index, 1)[0]
-      const original = removed.original || removed
+      const originals = removed.original || removed
 
-      profiles.push({
-        ...original,
+      parcel.push({
+        ...originals,
+        isDeleted: false,
+        status: originals.status,
         deletedAt: null,
         updatedAt: new Date().toISOString()
       })
     }
   }
 
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const removed = trash.splice(index, 1)[0]
+  //     const originals = removed.original || removed
+
+  //     parcel.push({
+  //       ...originals,
+  //       deletedAt: null,
+  //       updatedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const removed = trash.splice(index, 1)[0]
+
+  //     const originals = removed.original || removed
+
+  //     parcel.push({
+  //       ...originals,
+  //       updatedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+
+  // const moveToTrash = (id) => {
+  //   const index = findIndexById(parcel, id)
+  //   if (index !== -1) {
+  //     const removed = parcel.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       updatedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored
+  //     })
+  //   }
+  // }
+
+  // const moveToTrash = (id) => {
+  //   const index = findIndexById(parcel, id)
+  //   if (index !== -1) {
+  //     const removed = parcel.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       status: 'TRASH',
+  //       trashedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+  // const restoreFromTrash = (id) => {
+  //   const index = findIndexById(trash, id)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored,
+  //       status: 'ACTIVE',
+  //       restoredAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
+
+  // const restoreFromTrash = (parcelId) => {
+  //   const index = findIndexByParcelId(trash, parcelId)
+  //   if (index !== -1) {
+  //     const restored = trash.splice(index, 1)[0]
+  //     parcel.push({
+  //       ...restored,
+  //       status: 'ACTIVE',
+  //       restoredAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
   const deletePermanent = (id) => {
     const index = findIndexById(trash, id)
     if (index !== -1) {
@@ -91,39 +196,39 @@ export const useProfileManager = defineStore('profileManager', () => {
     }
   }
 
-  const clearProfiles = () => {
-    profiles.length = 0
-    trash.length = 0
-  }
+  // const deletePermanent = (parcelId) => {
+  //   const index = findIndexByParcelId(trash, parcelId)
+  //   if (index !== -1) {
+  //     trash.splice(index, 1)
+  //   }
+  // }
+
+  const findByStatus = (status) => parcel.filter((el) => el.status === status)
+
+  const findByTracking = (trackingNumber) =>
+    parcel.find((el) => el.trackingNumber === trackingNumber)
 
   return {
-    // state
-    profiles,
+    parcel,
     trash,
-    loading,
-    error,
-
-    // getters
-    getProfiles,
-    getProfileById,
+    getParcels,
     getTrash,
-
-    // actions
-    setProfiles,
-    setTrash,
-    addProfile,
-    updateProfile,
+    setParcels,
+    addParcel,
+    updateParcel,
+    updateParcelStatus,
     moveToTrash,
     restoreFromTrash,
     deletePermanent,
-    clearProfiles
+    findByStatus,
+    findByTracking,
+    setTrash
   }
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useProfileManager, import.meta.hot))
-}
-// import { reactive } from 'vue'
+  import.meta.hot.accept(acceptHMRUpdate(useParcelManager, import.meta.hot))
+} // import { reactive } from 'vue'
 // import { defineStore, acceptHMRUpdate } from 'pinia'
 
 // export const useParcelManager = defineStore('parcelManager', () => {

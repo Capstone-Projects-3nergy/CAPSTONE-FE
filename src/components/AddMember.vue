@@ -149,22 +149,23 @@ const closePopUp = (operate) => {
 // const closePopUp = () => {
 //   profileManager.clearAlert()
 // }
-const closePopUps = (operate) => {
-  switch (operate) {
-    case 'SuccessAccount':
-      successAccount.value = false
-      break
-    case ' problemAccount':
-      errorAccount.value = false
-      break
-    case 'emailForm':
-      incorrectemail.value = false
-      break
-    case ' require':
-      emailRequire.value = false
-      break
-  }
-}
+
+// const closePopUps = (operate) => {
+//   switch (operate) {
+//     case 'SuccessAccount':
+//       successAccount.value = false
+//       break
+//     case ' problemAccount':
+//       errorAccount.value = false
+//       break
+//     case 'emailForm':
+//       incorrectemail.value = false
+//       break
+//     case ' require':
+//       emailRequire.value = false
+//       break
+//   }
+// }
 // const addMember = async (payload) => {
 //   try {
 //     await memberManager.createMember(payload)
@@ -193,7 +194,6 @@ const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
 }
-
 </script>
 
 <template>
@@ -474,7 +474,7 @@ const showLastNameError = () => {
           </div>
         </div>
         <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
+          <AlertPopUp
             v-if="addSuccess"
             titles="Add Member is Successful."
             message="Success!!"
@@ -516,7 +516,7 @@ const showLastNameError = () => {
             @closePopUp="closePopUp"
           />
         </div>
-          <!-- <AlertPopUp
+        <!-- <AlertPopUp
             v-if="successAccount"
             titles="Add Member is Successful."
             message="Success!!"
@@ -532,7 +532,6 @@ const showLastNameError = () => {
             operate="problemAccount"
             @closePopUp="closePopUps"
           /> -->
-        </div>
 
         <EditPersonalInfoProfile
           mode="add"

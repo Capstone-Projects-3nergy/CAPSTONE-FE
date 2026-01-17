@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import { updateProfileWithFile, addProfile } from '@/utils/fetchUtils'
+import { updateProfileWithFile } from '@/utils/fetchUtils'
 
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
@@ -138,12 +138,12 @@ const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
 // }
 const submit = async () => {
   if (props.mode === 'add') {
-    await addProfile()
+    await addProfiles()
   } else {
     await saveEditProfile()
   }
 }
-const addProfile = async () => {
+const addProfiles = async () => {
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
