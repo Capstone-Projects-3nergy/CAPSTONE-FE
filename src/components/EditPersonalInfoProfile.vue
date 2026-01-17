@@ -205,7 +205,7 @@ const saveEditProfile = async () => {
     }
 
     // update store
-    profileManager.setProfile(updatedProfile)
+    profileManager.updateProfile(updatedProfile)
     loginManager.updateUser(updatedProfile)
 
     // sync form
