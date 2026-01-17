@@ -142,8 +142,24 @@ const notifications = [
     time: '15 Jan 2026 · 06:10 PM'
   }
 ]
+const activeNotifyTab = ref('all')
 const ACCOUNT_TYPES = ['message']
 const PARCEL_TYPES = ['new', 'comment', 'connect']
+const filteredNotifications = computed(() => {
+  if (activeNotifyTab.value === 'all') {
+    return notifications
+  }
+
+  if (activeNotifyTab.value === 'parcel') {
+    return notifications.filter((n) => PARCEL_TYPES.includes(n.type))
+  }
+
+  if (activeNotifyTab.value === 'announcement') {
+    return notifications.filter((n) => ACCOUNT_TYPES.includes(n.type))
+  }
+
+  return notifications
+})
 
 const badgeClass = (type) => {
   if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
@@ -185,6 +201,24 @@ const badgeIcon = (type) => {
       />
     </svg>
   `
+}
+const notifyTabClass = (tab) => {
+  const isActive = activeNotifyTab.value === tab
+
+  if (!isActive) {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-500 hover:bg-gray-200 transition'
+  }
+
+  if (tab === 'all') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-yellow-500 text-white transition'
+  }
+
+  if (tab === 'parcel') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-blue-500 text-white transition'
+  }
+  if (tab === 'announcement') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-green-500 text-white transition'
+  }
 }
 </script>
 <template>
@@ -492,11 +526,37 @@ const badgeIcon = (type) => {
         <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
           Notifications
         </h2>
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6">
+          <button
+            @click="activeNotifyTab = 'all'"
+            :class="notifyTabClass('all')"
+            class="cursor-pointer"
+          >
+            All Notify
+          </button>
+
+          <button
+            @click="activeNotifyTab = 'parcel'"
+            :class="notifyTabClass('parcel')"
+            class="cursor-pointer"
+          >
+            Parcel Notify
+          </button>
+
+          <button
+            @click="activeNotifyTab = 'announcement'"
+            :class="notifyTabClass('announcement')"
+            class="cursor-pointer"
+          >
+            Announcement Notify
+          </button>
+        </div>
 
         <!-- Notification list -->
         <div class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
           <div
-            v-for="(item, index) in notifications"
+            v-for="(item, index) in filteredNotifications"
             :key="index"
             class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
           >
