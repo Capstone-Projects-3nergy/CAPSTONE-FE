@@ -319,7 +319,7 @@ const displayFullName = computed(() => {
 
 <template>
   <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row gap-10">
+    <div class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
@@ -443,7 +443,7 @@ const displayFullName = computed(() => {
           </div>
           <div v-if="loginManager.user.role === 'STAFF' && mode !== 'add'">
             <label class="block text-sm text-black font-semibold mb-1">
-              position
+              Position
             </label>
             <input
               v-model="form.position"

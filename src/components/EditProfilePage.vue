@@ -683,7 +683,7 @@ const closePopUp = (operate) => {
           :firstName="firstName"
           :lastName="lastName"
           :email="loginManager.user.email"
-          :roomNumber="null"
+          :roomNumber="loginManager.user.roomNumber"
           :lineId="lineId"
           :contact="contact"
           :position="loginManager.user.position"
