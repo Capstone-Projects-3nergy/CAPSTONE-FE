@@ -81,23 +81,23 @@ const cancelAction = () => {
     >
       <div class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
-          <template v-if="isPermanent"> Delete Member </template>
+          <template v-if="isPermanent"> Delete Resident </template>
           <template v-else> Move To Trash </template>
         </h1>
       </div>
 
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
-          Do you want to permanently delete this Member name
+          Do you want to permanently delete this Resident name
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
           <br />
           <span class="text-red-500 text-sm">
-            **Once deleted, this Member name cannot be recovered.**
+            **Once deleted, this Resident name cannot be recovered.**
           </span>
         </template>
 
         <template v-else>
-          Do you want to move this Member name
+          Do you want to move this Resident name
           <b>"{{ parcel.parcelNumber || '' }}"</b>
           to the trash?
           <br />
