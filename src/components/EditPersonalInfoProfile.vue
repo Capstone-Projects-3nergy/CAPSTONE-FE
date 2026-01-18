@@ -89,10 +89,10 @@ watch(
   { immediate: true, deep: true }
 )
 
-function startEdit() {
-  isEdit.value = true
-  emit('edit')
-}
+// function startEdit() {
+//   isEdit.value = true
+//   emit('edit')
+// }
 const newAvatar = ref(null)
 const avatarPreview = computed(() => {
   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
@@ -195,23 +195,26 @@ const addProfiles = async () => {
     // -----------------------
     // API call
     // -----------------------
-    const result = await addMemberWithFile(
+    const savedProfile = await addMemberWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/members`,
       body,
       router
     )
 
-    if (!result) {
+    if (!savedProfile) {
       emit('errorAddProfile')
       return
     }
+
+    // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
+    profileManager.addProfile(savedProfile)
 
     // -----------------------
     // success
     // -----------------------
     emit('successAddProfile')
 
-    // reset form (เหมือน saveParcel)
+    // reset form
     form.value = {
       firstName: '',
       lastName: '',
@@ -229,6 +232,93 @@ const addProfiles = async () => {
     emit('errorAddProfile')
   }
 }
+
+// const addProfiles = async () => {
+//   // -----------------------
+//   // validate name (ไทย + อังกฤษ)
+//   // -----------------------
+//   const nameRegex = /^[A-Za-zก-๙\s]+$/
+
+//   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
+//     emit('first-name-error', true)
+//     return
+//   }
+
+//   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
+//     emit('last-name-error', true)
+//     return
+//   }
+
+//   // -----------------------
+//   // validate email
+//   // -----------------------
+//   if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
+//     emit('errorAddProfile')
+//     return
+//   }
+
+//   // -----------------------
+//   // validate phone (optional)
+//   // -----------------------
+//   if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
+//     emit('phone-error', true)
+//     return
+//   }
+
+//   try {
+//     // -----------------------
+//     // payload
+//     // -----------------------
+//     const body = {
+//       firstName: form.value.firstName.trim(),
+//       lastName: form.value.lastName.trim(),
+//       email: form.value.email.trim(),
+//       roomNumber: form.value.roomNumber || null,
+//       lineId: form.value.lineId || null,
+//       phoneNumber: form.value.phoneNumber || null
+//     }
+
+//     if (newAvatar.value) {
+//       body.avatar = newAvatar.value
+//     }
+
+//     // -----------------------
+//     // API call
+//     // -----------------------
+//     const result = await addMemberWithFile(
+//       `${import.meta.env.VITE_BASE_URL}/api/members`,
+//       body,
+//       router
+//     )
+
+//     if (!result) {
+//       emit('errorAddProfile')
+//       return
+//     }
+
+//     // -----------------------
+//     // success
+//     // -----------------------
+//     emit('successAddProfile')
+
+//     // reset form (เหมือน saveParcel)
+//     form.value = {
+//       firstName: '',
+//       lastName: '',
+//       email: '',
+//       roomNumber: '',
+//       lineId: '',
+//       position: '',
+//       phoneNumber: ''
+//     }
+
+//     newAvatar.value = null
+//     isEdit.value = false
+//   } catch (err) {
+//     console.error(err)
+//     emit('errorAddProfile')
+//   }
+// }
 
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
