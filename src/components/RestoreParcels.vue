@@ -4,7 +4,7 @@ import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { restoreParcel } from '@/utils/fetchUtils'
-
+import { useProfileManager } from '@/stores/ProfileManager'
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 
 const props = defineProps({
@@ -22,6 +22,10 @@ const router = useRouter()
 const parcelManager = useParcelManager()
 
 const parcel = computed(() => props.parcelData || {})
+const profileManager = useProfileManager()
+
+const profile = computed(() => props.profileData || {})
+
 // const restoreParcelFn = async () => {
 //   if (!parcel.value?.id) return
 
@@ -82,32 +86,36 @@ const restoreParcelFn = async () => {
   emit('confirmDetail', true)
 }
 const restoreMemberFn = async () => {
-  if (!parcel.value?.id) return
+  if (!profile.value?.id) return
 
   const res = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/members/trash`,
-    parcel.value.id,
+    profile.value.id,
     router
   )
 
   if (!res || !res.ok) throw new Error('restore member failed')
 
-  parcelManager.restoreMember(parcel.value.id)
+  profileManager.restoreFromTrash(profile.value.id)
 }
 
+// ==============================
+// restore staff
+// ==============================
 const restoreStaffFn = async () => {
-  if (!parcel.value?.id) return
+  if (!profile.value?.id) return
 
   const res = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/staff/trash`,
-    parcel.value.id,
+    profile.value.id,
     router
   )
 
   if (!res || !res.ok) throw new Error('restore staff failed')
 
-  parcelManager.restoreStaff(parcel.value.id)
+  profileManager.restoreFromTrash(profile.value.id)
 }
+
 const cancelAction = () => {
   emit('cancelDetail', true)
 }
@@ -144,12 +152,12 @@ const confirmRestore = async () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="showMember">
           Do you want to restore this Resident name
-          <b>"{{ parcel.parcelNumber || '' }}"</b>?
+          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
         </template>
 
         <template v-if="showStaff">
           Do you want to restore this Staff name
-          <b>"{{ parcel.parcelNumber || '' }}"</b>?
+          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
         </template>
 
         <template v-if="showParcel">
