@@ -15,7 +15,7 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
-  avatar: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -94,9 +94,9 @@ watch(
 //   emit('edit')
 // }
 const newAvatar = ref(null)
-const avatarPreview = computed(() => {
+const profileImagePreview = computed(() => {
   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-  return props.avatar
+  return props.profileImage
 })
 
 function onImageChange(e) {
@@ -113,7 +113,7 @@ function onImageChange(e) {
 //     roomNumber: form.value.roomNumber,
 //     lineId: form.value.lineId,
 //     phoneNumber: form.value.phoneNumber,
-//     avatar: newAvatar.value || null
+//     profileImage: newAvatar.value || null
 //   }
 
 //   emit('save', payload)
@@ -130,7 +130,9 @@ const userName = computed(() => authStore.user?.fullName || 'Courier')
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
-const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
+const hasAvatar = computed(
+  () => props.profileImage && props.profileImage.trim() !== ''
+)
 
 // function updateUser(data) {
 //   console.log('ข้อมูลใหม่:', data)
@@ -189,7 +191,7 @@ const addProfiles = async () => {
     }
 
     if (newAvatar.value) {
-      body.avatar = newAvatar.value
+      body.profileImage = newAvatar.value
     }
 
     // -----------------------
@@ -279,7 +281,7 @@ const addProfiles = async () => {
 //     }
 
 //     if (newAvatar.value) {
-//       body.avatar = newAvatar.value
+//       body.profileImage = newAvatar.value
 //     }
 
 //     // -----------------------
@@ -362,7 +364,7 @@ const saveEditProfile = async () => {
     }
 
     if (newAvatar.value) {
-      body.avatar = newAvatar.value
+      body.profileImage = newAvatar.value
     }
 
     // -----------------------
@@ -397,7 +399,7 @@ const saveEditProfile = async () => {
   }
 }
 const displayFullName = computed(() => {
-  if ((props.mode = 'edit')) {
+  if (props.mode === 'edit') {
     const first = form.value.firstName?.trim()
     const last = form.value.lastName?.trim()
 
@@ -418,8 +420,8 @@ const displayFullName = computed(() => {
           <!-- Avatar -->
           <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
             <img
-              v-if="avatarPreview"
-              :src="avatarPreview"
+              v-if="profileImagePreview"
+              :src="profileImagePreview"
               alt="Profile"
               class="w-full h-full object-cover"
             />

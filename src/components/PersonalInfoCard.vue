@@ -21,7 +21,7 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
-  avatar: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -57,7 +57,9 @@ const userName = computed(() => authStore.user?.fullName || 'Courier')
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
-const hasAvatar = computed(() => props.avatar && props.avatar.trim() !== '')
+const hasProfileImage = computed(
+  () => props.profileImage && props.profileImage.trim() !== ''
+)
 const menuClass = (tab) => {
   return [
     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
@@ -247,8 +249,8 @@ const notifyTabClass = (tab) => {
             class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
           >
             <img
-              v-if="hasAvatar"
-              :src="avatar"
+              v-if="hasProfileImage"
+              :src="profileImage"
               class="w-full h-full object-cover"
             />
             <div
@@ -352,8 +354,8 @@ const notifyTabClass = (tab) => {
           class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
         >
           <img
-            v-if="hasAvatar"
-            :src="avatar"
+            v-if="hasProfileImage"
+            :src="profileImage"
             alt="Profile"
             class="w-full h-full object-cover"
           />
@@ -640,8 +642,8 @@ const notifyTabClass = (tab) => {
           class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
         >
           <img
-            v-if="hasAvatar"
-            :src="avatar"
+            v-if="hasProfileImage"
+            :src="profileImage"
             alt="Profile"
             class="w-full h-full object-cover"
           />

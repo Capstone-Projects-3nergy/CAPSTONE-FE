@@ -38,9 +38,9 @@ const updateProfile = async (payload) => {
     loginManager.user.fullName = payload.firstName + ' ' + payload.lastName
     loginManager.user.email = payload.email
 
-    // 3. avatar
-    if (payload.avatar) {
-      profileManager.updateProfile({ avatar: payload.avatar })
+    // 3. profileImage
+    if (payload.profileImage) {
+      profileManager.updateProfile({ profileImage: payload.profileImage })
     }
 
     // ✅ แจ้งว่าบันทึกสำเร็จ
