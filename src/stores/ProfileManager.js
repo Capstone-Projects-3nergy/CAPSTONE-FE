@@ -137,7 +137,7 @@ if (import.meta.hot) {
 //     lastName: '',
 //     email: '',
 //     role: '',
-//     profileImage: '',
+//     profileImageUrl: '',
 //     position: '',
 //     roomNumber: '',
 //     lineId: '',
@@ -173,7 +173,7 @@ if (import.meta.hot) {
 //       lastName: '',
 //       email: '',
 //       role: '',
-//       profileImage: '',
+//       profileImageUrl: '',
 //       position: '',
 //       roomNumber: '',
 //       lineId: '',
@@ -207,8 +207,8 @@ if (import.meta.hot) {
 //     try {
 //       let body
 
-//       // ✅ รองรับ profileImage → FormData
-//       if (payload.profileImage) {
+//       // ✅ รองรับ profileImageUrl → FormData
+//       if (payload.profileImageUrl) {
 //         body = new FormData()
 //         Object.keys(payload).forEach((key) => {
 //           if (payload[key] !== null && payload[key] !== undefined) {

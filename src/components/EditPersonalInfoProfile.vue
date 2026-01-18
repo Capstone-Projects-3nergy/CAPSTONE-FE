@@ -15,7 +15,7 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
-  profileImage: { type: String, default: '' },
+  profileImageUrl: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -94,9 +94,9 @@ watch(
 //   emit('edit')
 // }
 const newAvatar = ref(null)
-const profileImagePreview = computed(() => {
+const profileImageUrlPreview = computed(() => {
   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-  return props.profileImage
+  return props.profileImageUrl
 })
 
 function onImageChange(e) {
@@ -113,7 +113,7 @@ function onImageChange(e) {
 //     roomNumber: form.value.roomNumber,
 //     lineId: form.value.lineId,
 //     phoneNumber: form.value.phoneNumber,
-//     profileImage: newAvatar.value || null
+//     profileImageUrl: newAvatar.value || null
 //   }
 
 //   emit('save', payload)
@@ -131,7 +131,7 @@ const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
 const hasAvatar = computed(
-  () => props.profileImage && props.profileImage.trim() !== ''
+  () => props.profileImageUrl && props.profileImageUrl.trim() !== ''
 )
 
 // function updateUser(data) {
@@ -191,7 +191,7 @@ const addProfiles = async () => {
     }
 
     if (newAvatar.value) {
-      body.profileImage = newAvatar.value
+      body.profileImageUrl = newAvatar.value
     }
 
     // -----------------------
@@ -281,7 +281,7 @@ const addProfiles = async () => {
 //     }
 
 //     if (newAvatar.value) {
-//       body.profileImage = newAvatar.value
+//       body.profileImageUrl = newAvatar.value
 //     }
 
 //     // -----------------------
@@ -364,7 +364,7 @@ const saveEditProfile = async () => {
     }
 
     if (newAvatar.value) {
-      body.profileImage = newAvatar.value
+      body.profileImageUrl = newAvatar.value
     }
 
     // -----------------------
@@ -420,8 +420,8 @@ const displayFullName = computed(() => {
           <!-- Avatar -->
           <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
             <img
-              v-if="profileImagePreview"
-              :src="profileImagePreview"
+              v-if="profileImageUrlPreview"
+              :src="profileImageUrlPreview"
               alt="Profile"
               class="w-full h-full object-cover"
             />

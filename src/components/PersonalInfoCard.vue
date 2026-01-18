@@ -21,7 +21,7 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
 
-  profileImage: { type: String, default: '' },
+  profileImageUrl: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -57,8 +57,8 @@ const userName = computed(() => authStore.user?.fullName || 'Courier')
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
-const hasProfileImage = computed(
-  () => props.profileImage && props.profileImage.trim() !== ''
+const hasProfileImageUrl = computed(
+  () => props.profileImageUrl && props.profileImageUrl.trim() !== ''
 )
 const menuClass = (tab) => {
   return [
@@ -249,8 +249,8 @@ const notifyTabClass = (tab) => {
             class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
           >
             <img
-              v-if="hasProfileImage"
-              :src="profileImage"
+              v-if="hasProfileImageUrl"
+              :src="profileImageUrl"
               class="w-full h-full object-cover"
             />
             <div
@@ -354,8 +354,8 @@ const notifyTabClass = (tab) => {
           class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
         >
           <img
-            v-if="hasProfileImage"
-            :src="profileImage"
+            v-if="hasProfileImageUrl"
+            :src="profileImageUrl"
             alt="Profile"
             class="w-full h-full object-cover"
           />
@@ -642,8 +642,8 @@ const notifyTabClass = (tab) => {
           class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-600 shadow"
         >
           <img
-            v-if="hasProfileImage"
-            :src="profileImage"
+            v-if="hasProfileImageUrl"
+            :src="profileImageUrl"
             alt="Profile"
             class="w-full h-full object-cover"
           />
