@@ -55,7 +55,7 @@ const showNotification = computed(
       </svg>
 
       <div class="flex-1 flex justify-end items-center gap-5">
-        <div v-if="role === 'RESIDENT'" class="relative group">
+        <div class="relative group">
           <svg
             v-if="showNotification"
             @click="openNotification"
