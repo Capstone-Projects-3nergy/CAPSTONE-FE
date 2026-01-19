@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -15,7 +15,7 @@ const props = defineProps({
   },
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
-
+  showDomain: { type: Boolean, default: true },
   profileImageUrl: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
@@ -41,7 +41,7 @@ const emit = defineEmits([
 ])
 
 const isEdit = ref(false)
-
+const dormList = ref([])
 // form data
 const form = ref({
   firstName: '',
@@ -50,7 +50,38 @@ const form = ref({
   roomNumber: '',
   lineId: '',
   position: '',
-  phoneNumber: ''
+  phoneNumber: '',
+  dormId: ''
+})
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
 })
 
 // load props → form
@@ -536,6 +567,7 @@ const isUnchanged = computed(
           <div v-if="roomNumber !== null || mode == 'add'">
             <label class="block text-sm text-black font-semibold mb-1">
               Room Number
+              <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               :disabled="mode === 'edit'"
@@ -545,6 +577,26 @@ const isUnchanged = computed(
                 mode === 'edit' ? 'bg-gray-100' : 'bg-white'
               ]"
             />
+          </div>
+          <div v-if="mode == 'add'">
+            <label class="block text-sm text-black font-semibold mb-1">
+              Dormitory
+              <span class="text-red-500">*</span>
+            </label>
+            <select
+              v-if="mode === 'add'"
+              v-model="form.dormId"
+              class="custom-select"
+            >
+              <option disabled value="null">Select Dormitory</option>
+              <option
+                v-for="dorm in dormList"
+                :key="dorm.dormId"
+                :value="dorm.dormId"
+              >
+                {{ dorm.dormName }}
+              </option>
+            </select>
           </div>
           <div v-if="loginManager.user.role === 'STAFF' && mode !== 'add'">
             <label class="block text-sm text-black font-semibold mb-1">

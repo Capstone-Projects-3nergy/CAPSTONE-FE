@@ -323,6 +323,37 @@ const emit = defineEmits(['edit-success', 'edit-error'])
 //     setTimeout(() => (error.value = false), 10000)
 //   }
 // }
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
+})
+
 const saveEditRegistrationDetail = async () => {
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
     error.value = true
