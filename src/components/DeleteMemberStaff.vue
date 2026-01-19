@@ -4,6 +4,7 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 
@@ -17,7 +18,7 @@ const props = defineProps({
 
 const router = useRouter()
 const profileManager = useProfileManager()
-
+const userManager = useUserManager()
 const deletedProfile = ref(null)
 
 const profile = computed(() => props.profileData || {})
@@ -52,7 +53,7 @@ const deleteProfileFn = async () => {
     return
   }
 
-  profileManager.deletePermanent(profile.value.id)
+  userManager.deletePermanent(profile.value.id)
   emit('confirmDetail', true)
 }
 

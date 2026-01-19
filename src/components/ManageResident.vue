@@ -169,26 +169,27 @@ onMounted(async () => {
 
     parcelManager.setParcels(mapped)
   }
-  // const dataUser = await getItems(
-  //   `${import.meta.env.VITE_BASE_URL}/api/members`,
-  //   router
-  // )
-  // if (dataUser) {
-  //   const mapped = dataUser.map((p) => ({
-  //     id: p.memberId,
-  //     memberName: p.memberName,
-  //     mobile: p.mobile,
-  //     email: p.contactEmail,
-  //     status: mapActiveStatus(p.activeStatus),
-  //     receiveAt: p.receivedAt,
-  //     updateAt: p.updatedAt || null,
-  //     pickupAt: p.pickedUpAt || null
-  //   }))
+  //profile resident&staff
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/members`,
+    router
+  )
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.memberId,
+      memberName: p.memberName,
+      mobile: p.mobile,
+      email: p.contactEmail,
+      status: mapActiveStatus(p.activeStatus),
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
 
-  //   mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
-  //   userManager.setResidents(mapped)
-  // }
+    userManager.setResidents(mapped)
+  }
 
   try {
     const res = await getItems(
@@ -286,6 +287,7 @@ const visiblePages = computed(() => {
 })
 const parcels = computed(() => parcelManager.getParcels())
 const staffs = computed(() => userManager.getStaffs())
+const members = computed(() => userManager.getMembers())
 function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {

@@ -4,8 +4,9 @@ import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { updateProfileWithFile } from '@/utils/fetchUtils'
-
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 const profileManager = useProfileManager()
+const userManager = useUserManager()
 const loginManager = useAuthManager()
 const props = defineProps({
   mode: {
@@ -197,19 +198,19 @@ const addProfiles = async () => {
     // -----------------------
     // API call
     // -----------------------
-    const savedProfile = await addMemberWithFile(
+    const savedMember = await addMemberWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/members`,
       body,
       router
     )
 
-    if (!savedProfile) {
+    if (!savedMember) {
       emit('errorAddProfile')
       return
     }
 
     // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
-    profileManager.addProfile(savedProfile)
+    userManager.addMember(savedMember)
 
     // -----------------------
     // success
