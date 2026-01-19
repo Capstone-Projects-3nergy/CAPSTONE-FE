@@ -501,6 +501,7 @@ const isUnchanged = computed(
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
               Firstname
+              <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               v-model="form.firstName"
@@ -510,7 +511,7 @@ const isUnchanged = computed(
 
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Lastname
+              Lastname <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               v-model="form.lastName"
@@ -520,7 +521,7 @@ const isUnchanged = computed(
 
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Email
+              Email <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               :disabled="mode === 'edit'"
