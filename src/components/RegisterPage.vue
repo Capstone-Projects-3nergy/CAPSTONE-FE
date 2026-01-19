@@ -658,7 +658,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isEmailStaff"
-            :titles="'Staff Email Cannot Use @gmail.com or @email.com'"
+            :titles="'Staff Email Cannot Use @gmail.com'"
             message="Error!!"
             styleType="red"
             operate="EmailStaff"
@@ -1038,7 +1038,7 @@ const toggleComfirmPasswordVisibility = () => {
                     <input
                       v-model="form.email"
                       type="email"
-                      placeholder="Email"
+                      placeholder="Staff Email"
                       class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                       @input="checkInputLength('email')"
                     />
