@@ -40,7 +40,12 @@ const emit = defineEmits([
   'last-name-error',
   'phone-error',
   'successAddProfile',
-  'errorAddProfile'
+  'errorAddProfile',
+  'first-name-required',
+  'last-name-required',
+  'email-required',
+  'dorm-ID-required',
+  'room-number-required'
 ])
 
 const isEdit = ref(false)
@@ -187,6 +192,32 @@ const submit = async () => {
   }
 }
 const addProfiles = async () => {
+  // -----------------------
+  // REQUIRED FIELD CHECK
+  // -----------------------
+  if (!form.value.firstName?.trim()) {
+    emit('first-name-required', true)
+    return
+  }
+
+  if (!form.value.lastName?.trim()) {
+    emit('last-name-required', true)
+    return
+  }
+
+  if (!form.value.email?.trim()) {
+    emit('email-required', true)
+    return
+  }
+
+  if (!form.value.roomNumber?.trim()) {
+    emit('room-number-required', true)
+    return
+  }
+  if (!form.value.dormId?.trim()) {
+    emit('dorm-ID-required', true)
+    return
+  }
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -608,7 +639,7 @@ const isUnchanged = computed(
               ]"
             />
           </div>
-          <div v-if="mode == 'add' && loginManager.user.role === 'RESIDENT'">
+          <div v-if="mode == 'add' && loginManager.user.role === 'STAFF'">
             <label class="block text-sm text-black font-semibold mb-1">
               Dormitory
               <span class="text-red-500">*</span>

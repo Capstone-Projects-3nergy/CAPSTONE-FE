@@ -28,6 +28,12 @@ const showManageResident = ref(false)
 const profileManager = useProfileManager()
 const firstNameError = ref(false)
 const lastNameError = ref(false)
+const firstNameRequired = ref(false)
+const lastNameRequired = ref(false)
+const emailRequired = ref(false)
+const dormRequired = ref(false)
+const roomNumberRequired = ref(false)
+
 const phoneError = ref(false)
 const updateProfile = async (payload) => {
   try {
@@ -106,6 +112,31 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
+const showFirstNameRequired = () => {
+  firstNameRequired.value = true
+  setTimeout(() => (firstNameRequired.value = false), 10000)
+}
+
+const showLastNameRequired = () => {
+  lastNameRequired.value = true
+  setTimeout(() => (lastNameRequired.value = false), 10000)
+}
+
+const showEmailRequired = () => {
+  emailRequired.value = true
+  setTimeout(() => (emailRequired.value = false), 10000)
+}
+
+const showDormRequired = () => {
+  dormRequired.value = true
+  setTimeout(() => (dormRequired.value = false), 10000)
+}
+
+const showRoomNumberRequired = () => {
+  roomNumberRequired.value = true
+  setTimeout(() => (roomNumberRequired.value = false), 10000)
+}
+
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
@@ -171,23 +202,79 @@ const showLastNameError = () => {
 }
 const closePopUp = (operate) => {
   switch (operate) {
+    // -----------------
+    // general
+    // -----------------
     case 'problem':
       error.value = false
       break
-    case 'firstNameMessage':
-      firstNameError.value = false
-      break
-    case 'lastNameMessageMessage':
-      lastNameError.value = false
-      break
-    case 'phoneMessage':
-      phoneError.value = false
-      break
+
     case 'editSuccessMessage':
       editSuccess.value = false
       break
+
+    // -----------------
+    // format error
+    // -----------------
+    case 'firstNameErrorMessage':
+      firstNameError.value = false
+      break
+
+    case 'lastNameErrorMessage':
+      lastNameError.value = false
+      break
+
+    case 'phoneMessage':
+      phoneError.value = false
+      break
+
+    // -----------------
+    // required field
+    // -----------------
+    case 'firstNameRequired':
+      firstNameRequired.value = false
+      break
+
+    case 'lastNameRequired':
+      lastNameRequired.value = false
+      break
+
+    case 'emailRequired':
+      emailRequired.value = false
+      break
+
+    case 'dormRequired':
+      dormRequired.value = false
+      break
+
+    case 'roomNumberRequired':
+      roomNumberRequired.value = false
+      break
+
+    default:
+      break
   }
 }
+
+// const closePopUp = (operate) => {
+//   switch (operate) {
+//     case 'problem':
+//       error.value = false
+//       break
+//     case 'firstNameMessage':
+//       firstNameError.value = false
+//       break
+//     case 'lastNameMessageMessage':
+//       lastNameError.value = false
+//       break
+//     case 'phoneMessage':
+//       phoneError.value = false
+//       break
+//     case 'editSuccessMessage':
+//       editSuccess.value = false
+//       break
+//   }
+// }
 </script>
 
 <template>
@@ -677,6 +764,50 @@ const closePopUp = (operate) => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="firstNameRequired"
+            titles="First name is required."
+            message="Error!!"
+            styleType="red"
+            operate="firstNameRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="lastNameRequired"
+            titles="Last name is required."
+            message="Error!!"
+            styleType="red"
+            operate="lastNameRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="emailRequired"
+            titles="Email is required."
+            message="Error!!"
+            styleType="red"
+            operate="emailRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="dormRequired"
+            titles="Dormitory is required."
+            message="Error!!"
+            styleType="red"
+            operate="dormRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="roomNumberRequired"
+            titles="Room number is required."
+            message="Error!!"
+            styleType="red"
+            operate="roomNumberRequired"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -694,6 +825,11 @@ const closePopUp = (operate) => {
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
+          @first-name-required="showFirstNameRequired"
+          @last-name-required="showLastNameRequired"
+          @email-required="showEmailRequired"
+          @dorm-ID-required="showDormRequired"
+          @room-number-required="showRoomNumberRequired"
         ></EditPersonalInfoProfile>
       </main>
     </div>
