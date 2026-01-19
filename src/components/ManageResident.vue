@@ -1361,7 +1361,7 @@ const handleSortUpdate = (val) => {
       @cancelDetail="clearDeleteMemPopUp"
       @confirmDetail="showDelMemComplete"
       @redAlert="openRedMemPopup"
-      :parcelData="MemberDetail"
+      :residentData:="MemberDetail"
       :isPermanent="false"
     />
   </teleport>

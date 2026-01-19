@@ -9,7 +9,7 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 
 const props = defineProps({
-  profileData: Object,
+  residentData: Object,
   isPermanent: {
     type: Boolean,
     default: false
@@ -21,13 +21,13 @@ const profileManager = useProfileManager()
 const userManager = useUserManager()
 const deletedProfile = ref(null)
 
-const profile = computed(() => props.profileData || {})
-const removeProfileToTrashFn = async () => {
-  if (!profile.value.id) return
+const resident = computed(() => props.residentData || {})
+const removedResidentToTrashFn = async () => {
+  if (!resident.value.id) return
 
   deletedProfile.value = await deleteItemById(
     `${import.meta.env.VITE_BASE_URL}/api/members`,
-    profile.value.id
+    resident.value.id
   )
 
   if (deletedProfile.value === '404') {
@@ -36,15 +36,15 @@ const removeProfileToTrashFn = async () => {
     return
   }
 
-  profileManager.moveToTrash(profile.value.id)
+  userManager.moveToTrash(resident.value.id)
   emit('confirmDetail', true)
 }
-const deleteProfileFn = async () => {
-  if (!profile.value.id) return
+const deleteResidentFn = async () => {
+  if (!resident.value.id) return
 
   deletedProfile.value = await deleteItemById(
     `${import.meta.env.VITE_BASE_URL}/api/members/trash`,
-    profile.value.id
+    resident.value.id
   )
 
   if (deletedProfile.value === '404') {
@@ -53,73 +53,12 @@ const deleteProfileFn = async () => {
     return
   }
 
-  userManager.deletePermanent(profile.value.id)
-  emit('confirmDetail', true)
-}
-
-// import { ref, computed } from 'vue'
-// import { useParcelManager } from '@/stores/ParcelsManager'
-// import { useRouter } from 'vue-router'
-// import ButtonWeb from './ButtonWeb.vue'
-// import { deleteItemById } from '@/utils/fetchUtils'
-
-// const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
-
-// const props = defineProps({
-//   parcelData: Object,
-//   isPermanent: {
-//     type: Boolean,
-//     default: false
-//   }
-// })
-
-// const router = useRouter()
-// const parcelManager = useParcelManager()
-
-// const deletedParcel = ref(null)
-
-// const parcel = computed(() => props.parcelData || {})
-
-const removeParcelToTrashFn = async () => {
-  if (!parcel.value.id) return
-
-  deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    parcel.value.id
-  )
-
-  if (deletedParcel.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
-    return
-  }
-
-  parcelManager.moveToTrash(parcel.value.id)
-
-  emit('confirmDetail', true)
-}
-
-const deleteParcelFn = async () => {
-  if (!parcel.value.id) return
-
-  deletedParcel.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
-    parcel.value.id
-  )
-
-  if (deletedParcel.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
-    return
-  }
-
-  parcelManager.deletePermanent(parcel.value.id)
-
+  userManager.deletePermanent(resident.value.id)
   emit('confirmDetail', true)
 }
 
 const confirmAction = () => {
-  props.isPermanent ? deleteParcelFn() : removeParcelToTrashFn()
+  props.isPermanent ? deleteResidentFn() : removedResidentToTrashFn()
 }
 
 const cancelAction = () => {
@@ -147,7 +86,7 @@ const cancelAction = () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
           Do you want to permanently delete this Resident name
-          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
+          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
           ?
           <br />
           <span class="text-red-500 text-sm">
@@ -157,7 +96,7 @@ const cancelAction = () => {
 
         <template v-else>
           Do you want to move this Resident name
-          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
+          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
 
           to the trash?
           <br />
