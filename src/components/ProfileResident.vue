@@ -427,6 +427,7 @@ const closePopUps = (operate) => {
           :roomNumber="loginManager.user.roomNumber"
           :lineId="lineId"
           :contact="contact"
+          :dormName="loginManager.user.dormId"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"
           @redAlertError="redAlertErrorFn"

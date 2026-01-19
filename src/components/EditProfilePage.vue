@@ -685,6 +685,7 @@ const closePopUp = (operate) => {
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
           :lineId="lineId"
+          :dormName="loginManager.user.dormId"
           :contact="contact"
           :position="loginManager.user.position"
           @cancel="goBackProfilePage"

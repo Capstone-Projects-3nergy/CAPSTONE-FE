@@ -20,11 +20,11 @@ const trimmedEmail = newEmail.value?.trim()
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
-
   profileImageUrl: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
+  dormName: { type: String, default: '-' },
   position: { type: String, default: '-' },
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
@@ -502,6 +502,16 @@ const notifyTabClass = (tab) => {
             </label>
             <p class="text-[#8C8F91] font-medium">
               {{ roomNumber }}
+            </p>
+          </div>
+          <div
+            v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
+          >
+            <label class="block text-sm text-black font-semibold mb-1">
+              Dormitory
+            </label>
+            <p class="text-[#8C8F91] font-medium">
+              {{ dormName }}
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -8,6 +8,8 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
+const selectedResidentId = ref(null)
+const auth = useAuthManager()
 const props = defineProps({
   mode: {
     type: String,
@@ -20,6 +22,7 @@ const props = defineProps({
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
+  dormName: { type: String, default: '-' },
   email: { type: String, default: '-' },
   position: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
@@ -42,16 +45,20 @@ const emit = defineEmits([
 
 const isEdit = ref(false)
 const dormList = ref([])
+const forms = reactive({
+  dormId: null
+})
 // form data
 const form = ref({
+  userId: auth.user.id,
   firstName: '',
   lastName: '',
   email: '',
   roomNumber: '',
+  dormName: '',
   lineId: '',
   position: '',
-  phoneNumber: '',
-  dormId: ''
+  phoneNumber: ''
 })
 onMounted(async () => {
   try {
@@ -96,7 +103,8 @@ watch(
         roomNumber: '',
         lineId: '',
         position: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        dormId: ''
       }
       // newAvatar.value = null
     }
@@ -116,6 +124,7 @@ watch(
       form.value.roomNumber = props.roomNumber
       form.value.lineId = props.lineId
       form.value.phoneNumber = props.phoneNumber
+      form.value.dormName = props.dormName
     }
   },
   { immediate: true, deep: true }
@@ -214,12 +223,14 @@ const addProfiles = async () => {
     // payload
     // -----------------------
     const body = {
-      firstName: form.value.firstName.trim(),
-      lastName: form.value.lastName.trim(),
-      email: form.value.email.trim(),
-      roomNumber: form.value.roomNumber || null,
-      lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null
+      userId: selectedResidentId.value,
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      email: form.value.email,
+      roomNumber: form.value.roomNumber,
+      lineId: form.value.lineId,
+      phoneNumber: form.value.phoneNumber,
+      dormId: Number(form.value.dormId)
     }
 
     if (newAvatar.value) {
@@ -254,8 +265,8 @@ const addProfiles = async () => {
       lastName: '',
       email: '',
       roomNumber: '',
+      dormId: '',
       lineId: '',
-      position: '',
       phoneNumber: ''
     }
 
@@ -578,15 +589,33 @@ const isUnchanged = computed(
               ]"
             />
           </div>
-          <div v-if="mode == 'add'">
+          <div
+            v-if="
+              dormId !== null &&
+              mode !== 'add' &&
+              loginManager.user.role === 'RESIDENT'
+            "
+          >
+            <label class="block text-sm text-black font-semibold mb-1">
+              Dormitory
+            </label>
+            <input
+              :disabled="mode === 'edit'"
+              v-model="form.dormName"
+              :class="[
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+              ]"
+            />
+          </div>
+          <div v-if="mode == 'add' && loginManager.user.role === 'RESIDENT'">
             <label class="block text-sm text-black font-semibold mb-1">
               Dormitory
               <span class="text-red-500">*</span>
             </label>
             <select
-              v-if="mode === 'add'"
-              v-model="form.dormId"
-              class="custom-select"
+              v-model="forms.dormId"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             >
               <option disabled value="null">Select Dormitory</option>
               <option
