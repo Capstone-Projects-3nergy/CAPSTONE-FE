@@ -408,6 +408,10 @@ const displayFullName = computed(() => {
     return `${first || ''} ${last || ''}`.trim()
   }
 })
+const originalForm = ref({ ...form.value })
+const isUnchanged = computed(
+  () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
+)
 </script>
 
 <template>
@@ -577,6 +581,7 @@ const displayFullName = computed(() => {
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
+              :disabled="isUnchanged"
             />
             <ButtonWeb
               label="Cancel Changes"
