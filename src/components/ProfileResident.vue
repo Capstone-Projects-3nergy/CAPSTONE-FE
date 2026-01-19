@@ -15,7 +15,7 @@ const profileManager = useProfileManager()
 const errorAccount = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
-
+const dormList = ref([])
 const emailRequire = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
@@ -40,6 +40,36 @@ const resident = ref({
 const saveProfile = () => {
   alert('Resident profile updated Successfuly!')
 }
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
+})
 
 const cancelEdit = () => {
   resident.value = {
@@ -143,6 +173,15 @@ const closePopUps = (operate) => {
       break
   }
 }
+const dormName = computed(() => {
+  if (!loginManager.user?.dormId || dormList.value.length === 0) {
+    return '-'
+  }
+
+  const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
+
+  return dorm ? dorm.dormName : '-'
+})
 </script>
 
 <template>
