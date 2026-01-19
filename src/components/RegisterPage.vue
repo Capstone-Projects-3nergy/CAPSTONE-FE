@@ -38,6 +38,7 @@ const success = ref(false)
 const isRoomRequired = ref(false)
 const isPositionRequired = ref(false)
 const incorrectemailform = ref(false)
+const isEmailStaff = ref(false)
 const isPositionWrong = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
@@ -232,10 +233,28 @@ const submitForm = async (roleType) => {
     //   setTimeout(() => (isPasswordMax.value = false), 10000)
     //   return
     // }
-    if (!form.email || !form.email.endsWith('@gmail.com')) {
-      incorrectemailform.value = true
-      setTimeout(() => (incorrectemailform.value = false), 10000)
-      return
+
+    // if (!form.email || !form.email.endsWith('@gmail.com')) {
+    //   incorrectemailform.value = true
+    //   setTimeout(() => (incorrectemailform.value = false), 10000)
+    //   return
+    // }
+    if (roleType === 'STAFF') {
+      if (
+        form.email.endsWith('@gmail.com') ||
+        form.email.endsWith('@email.com')
+      ) {
+        isEmailStaff.value = true
+        setTimeout(() => (isEmailStaff.value = false), 10000)
+        return
+      }
+    }
+    if (roleType === 'RESIDENT') {
+      if (!form.email || !form.email.endsWith('@gmail.com')) {
+        incorrectemailform.value = true
+        setTimeout(() => (incorrectemailform.value = false), 10000)
+        return
+      }
     }
 
     const [firstName = '', lastName = ''] = (form.fullName || '')
@@ -413,6 +432,7 @@ const closePopUp = (operate) => {
   if (operate === 'erroeposition ') isPositionWrong.value = false
   if (operate === 'nametypewrong ') isFullNameWrong.value = false
   if (operate === 'EmailNotExist') isEmailExist.value = false
+  if (operate === 'EmailStaff') isEmailStaff.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -564,7 +584,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="incorrectemailform"
-            :titles="'Email Form Is Incorrect'"
+            :titles="'Resident Email Must Be @gmail.com Only'"
             message="Error!!"
             styleType="red"
             operate="emailform"
@@ -634,6 +654,14 @@ const toggleComfirmPasswordVisibility = () => {
             message="Error!!"
             styleType="red"
             operate="EmailNotExist"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailStaff"
+            :titles="'Staff Email Cannot Use @gmail.com or @email.com'"
+            message="Error!!"
+            styleType="red"
+            operate="EmailStaff"
             @closePopUp="closePopUp"
           />
         </div>
@@ -1278,7 +1306,9 @@ const toggleComfirmPasswordVisibility = () => {
     no-repeat right 0.9rem center;
   background-size: 15px 15px;
 
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
 }
 
 .custom-select:focus {
