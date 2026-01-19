@@ -186,9 +186,16 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    // เรียงตาม update ล่าสุด
+    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
 
-    userManager.setResidents(mapped)
+    // 🔹 แยก role
+    const residents = mapped.filter((u) => u.role === 'RESIDENT')
+    const staffs = mapped.filter((u) => u.role === 'STAFF')
+
+    // 🔹 set เข้า Pinia store
+    userManager.setMembers(residents)
+    userManager.setStaffs(staffs)
   }
 
   try {
@@ -253,6 +260,11 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
+const paginatedResidents = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredResidents.value.slice(start, end)
+})
 const paginatedStaffs = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
@@ -287,7 +299,7 @@ const visiblePages = computed(() => {
 })
 const parcels = computed(() => parcelManager.getParcels())
 const staffs = computed(() => userManager.getStaffs())
-const members = computed(() => userManager.getMembers())
+const residents = computed(() => userManager.getMembers())
 function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
@@ -387,6 +399,26 @@ const selectedDate = ref('')
 
 const filteredParcels = computed(() => {
   let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+const filteredResidents = computed(() => {
+  let result = residents.value.map((p) => ({
     ...p,
     parsedDate: parseDate(p.updateAt)
   }))
