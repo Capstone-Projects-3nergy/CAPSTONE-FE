@@ -720,7 +720,7 @@ const isSaveDisabled = computed(() => {
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
-              :disabled="isUnchanged"
+              :disabled="isSaveDisabled"
             />
             <ButtonWeb
               class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
