@@ -489,6 +489,17 @@ const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
+const isFormUnchanged = computed(() => {
+  return JSON.stringify(form.value) === JSON.stringify(originalForm.value)
+})
+
+const isAvatarChanged = computed(() => {
+  return !!newAvatar.value
+})
+
+const isSaveDisabled = computed(() => {
+  return isFormUnchanged.value && !isAvatarChanged.value
+})
 </script>
 
 <template>
