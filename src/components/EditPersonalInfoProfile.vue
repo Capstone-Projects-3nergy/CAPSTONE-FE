@@ -477,13 +477,11 @@ const saveEditProfile = async () => {
   }
 }
 const displayFullName = computed(() => {
-  if (props.mode === 'edit') {
-    const first = form.value.firstName?.trim()
-    const last = form.value.lastName?.trim()
+  const first = form.value.firstName?.trim()
+  const last = form.value.lastName?.trim()
 
-    if (!first && !last) return '-'
-    return `${first || ''} ${last || ''}`.trim()
-  }
+  if (!first && !last) return '-'
+  return `${first || ''} ${last || ''}`.trim()
 })
 const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
