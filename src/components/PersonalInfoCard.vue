@@ -235,6 +235,11 @@ const notifyTabClass = (tab) => {
     return 'px-4 py-2 rounded-full text-sm font-medium bg-green-500 text-white transition'
   }
 }
+const newAvatar = ref(null)
+const profileImageUrlPreview = computed(() => {
+  if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
+  return props.profileImageUrl
+})
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
@@ -249,8 +254,8 @@ const notifyTabClass = (tab) => {
             class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
           >
             <img
-              v-if="hasProfileImageUrl"
-              :src="profileImageUrl"
+              v-if="profileImageUrlPreview"
+              :src="profileImageUrlPreview"
               class="w-full h-full object-cover"
             />
             <div
