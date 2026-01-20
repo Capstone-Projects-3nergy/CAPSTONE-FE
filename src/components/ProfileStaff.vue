@@ -101,6 +101,7 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
+  console.log(loginManager.user)
 
   window.addEventListener('resize', checkScreen)
 })
@@ -476,13 +477,16 @@ const closePopUps = (operate) => {
 
         <PersonalInfoCard
           :fullName="loginManager.user.fullName"
-          :firstName="firstName"
-          :lastName="lastName"
+          :firstName="loginManager.user.firstName"
+          :lastName="loginManager.user.lastName"
           :email="loginManager.user.email"
-          :roomNumber="null"
-          :lineId="lineId"
-          :contact="contact"
+          :roomNumber="loginManager.user.roomNumber"
+          :lineId="loginManager.user.lineId"
+          :phoneNumber="loginManager.user.phoneNumber"
           :position="loginManager.user.position"
+          :dormName="loginManager.user.dormName"
+          :status="loginManager.user.status"
+          :profileImageUrl="loginManager.user.profileImageUrl"
           :showNotify="false"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"

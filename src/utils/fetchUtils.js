@@ -436,11 +436,21 @@ async function toggleUserActive(url, id, isActive, router) {
 async function updateProfileWithFile(url, payload, router) {
   const formData = new FormData()
 
-  Object.keys(payload).forEach((key) => {
-    if (payload[key] !== null && payload[key] !== undefined) {
-      formData.append(key, payload[key])
-    }
-  })
+  // ✅ แยก profileImage ออก
+  const { profileImageUrl, ...profileData } = payload
+
+  // ✅ ส่ง JSON เป็น data
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(profileData)], {
+      type: 'application/json'
+    })
+  )
+
+  // ✅ ส่งไฟล์ด้วยชื่อที่ backend ต้องการ
+  if (profileImageUrl instanceof File) {
+    formData.append('profileImage', profileImageUrl)
+  }
 
   try {
     const options = {
@@ -449,8 +459,7 @@ async function updateProfileWithFile(url, payload, router) {
     }
 
     const res = await fetchWithAuth(url, options, router)
-    if (!res) return null
-    if (!res.ok) return null
+    if (!res || !res.ok) return null
 
     return await res.json()
   } catch (err) {
