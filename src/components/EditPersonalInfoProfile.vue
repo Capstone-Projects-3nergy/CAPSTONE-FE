@@ -6,6 +6,7 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import { updateProfileWithFile } from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
