@@ -12,6 +12,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import { getProfile } from '@/utils/fetchUtils'
+import axios from 'axios'
 const profileManager = useProfileManager()
 const errorAccount = ref(false)
 const successAccount = ref(false)
@@ -37,7 +38,14 @@ const resident = ref({
   building: 'Building 2',
   address: '203/45 Moo 5, Bangkok, Thailand'
 })
+const userDormName = computed(() => {
+  const userDormId = loginManager.user?.dormId
+  if (!userDormId || dormList.value.length === 0) return ''
 
+  const dorm = dormList.value.find((d) => d.dormId === userDormId)
+
+  return dorm ? dorm.dormName : ''
+})
 const saveProfile = () => {
   alert('Resident profile updated Successfuly!')
 }
@@ -496,7 +504,7 @@ const closePopUps = (operate) => {
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
           :position="loginManager.user.position"
-          :dormName="loginManager.user.dormId"
+          :dormName="userDormName"
           :status="loginManager.user.status"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
