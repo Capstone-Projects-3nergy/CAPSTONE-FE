@@ -20,7 +20,7 @@ const trimmedEmail = newEmail.value?.trim()
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
-  profileImageUrl: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -58,7 +58,7 @@ const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
 const hasProfileImageUrl = computed(
-  () => props.profileImageUrl && props.profileImageUrl.trim() !== ''
+  () => props.profileImage && props.profileImage.trim() !== ''
 )
 const menuClass = (tab) => {
   return [
@@ -238,7 +238,7 @@ const notifyTabClass = (tab) => {
 const newAvatar = ref(null)
 const profileImageUrlPreview = computed(() => {
   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-  return props.profileImageUrl
+  return props.profileImage
 })
 </script>
 <template>
