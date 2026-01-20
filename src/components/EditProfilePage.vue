@@ -219,6 +219,7 @@ onMounted(async () => {
   console.log(loginManager.user)
 
   window.addEventListener('resize', checkScreen)
+
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,
     router
@@ -869,7 +870,7 @@ const closePopUp = (operate) => {
           :dormName="userDormName"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
-          :profileImageUrl="profileManager.currentProfile?.profileImageUrl"
+          :profileImage="profileManager.currentProfile?.profileImage"
           :position="loginManager.user.position"
           :status="loginManager.user.status"
           @cancel="goBackProfilePage"

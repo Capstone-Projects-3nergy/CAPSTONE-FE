@@ -3,10 +3,11 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import { updateProfileWithFile } from '@/utils/fetchUtils'
+import { updateProfileWithFile, getProfile } from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
@@ -21,7 +22,7 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
   showDomain: { type: Boolean, default: true },
-  profileImageUrl: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
   fullName: { type: String, required: true },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
@@ -145,10 +146,17 @@ watch(
 // }
 const newAvatar = ref(null)
 const profileImageUrlPreview = computed(() => {
-  if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-  return props.profileImageUrl
-})
+  if (newAvatar.value) {
+    return URL.createObjectURL(newAvatar.value)
+  }
 
+  const url = profileManager.currentProfile?.profileImage
+  if (url && url.startsWith('http')) {
+    return url
+  }
+
+  return ''
+})
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) newAvatar.value = file
@@ -163,7 +171,7 @@ function onImageChange(e) {
 //     roomNumber: form.value.roomNumber,
 //     lineId: form.value.lineId,
 //     phoneNumber: form.value.phoneNumber,
-//     profileImageUrl: newAvatar.value || null
+//     profileImage: newAvatar.value || null
 //   }
 
 //   emit('save', payload)
@@ -179,9 +187,6 @@ const authStore = useAuthManager()
 const userName = computed(() => authStore.user?.fullName || 'Courier')
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
-)
-const hasAvatar = computed(
-  () => props.profileImageUrl && props.profileImageUrl.trim() !== ''
 )
 
 // function updateUser(data) {
@@ -269,7 +274,7 @@ const addProfiles = async () => {
     }
 
     if (newAvatar.value) {
-      body.profileImageUrl = newAvatar.value
+      body.profileImage = newAvatar.value
     }
 
     // -----------------------
@@ -359,7 +364,7 @@ const addProfiles = async () => {
 //     }
 
 //     if (newAvatar.value) {
-//       body.profileImageUrl = newAvatar.value
+//       body.profileImage = newAvatar.value
 //     }
 
 //     // -----------------------
@@ -433,7 +438,6 @@ const saveEditProfile = async () => {
     const body = {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
-      email: form.value.email,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
       phoneNumber: form.value.phoneNumber || null
@@ -444,36 +448,31 @@ const saveEditProfile = async () => {
     }
 
     if (newAvatar.value) {
-      body.profileImageUrl = newAvatar.value
+      body.profileImage = newAvatar.value
     }
 
     // -----------------------
     // API call
     // -----------------------
-    const updatedProfile = await updateProfileWithFile(
+    const updated = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
       body,
       router
     )
 
-    if (!updatedProfile) {
+    if (!updated) {
       emit('error', true)
       return
     }
-
-    // update store
-
-    profileManager.setCurrentProfile(updatedProfile)
-    loginManager.updateUser(updatedProfile)
-    // profileManager.updateProfile(updatedProfile)
-    // loginManager.updateUser(updatedProfile)
-
-    // sync form
-    form.value = {
-      ...form.value,
-      ...updatedProfile
-    }
+    await getProfile()
+    // profileManager.setCurrentProfile(profile)
+    // 🔥 sync ทุก store
+    profileManager.setCurrentProfile(updated)
+    loginManager.updateUser(updated)
+    // reset local state
+    newAvatar.value = null
     originalForm.value = { ...form.value }
+
     emit('success', true)
     isEdit.value = false
   } catch (err) {

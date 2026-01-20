@@ -508,7 +508,7 @@ const closePopUps = (operate) => {
           :status="loginManager.user.status"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
-          :profileImageUrl="profileManager.currentProfile?.profileImageUrl"
+          :profileImage="profileManager.currentProfile?.profileImage"
           :showNotify="true"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"
