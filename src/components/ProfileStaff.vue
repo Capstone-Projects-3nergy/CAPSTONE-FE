@@ -99,18 +99,23 @@ const checkScreen = () => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
+onMounted(async () => {
+  checkScreen()
+  console.log(loginManager.user)
 
-const profile = await getProfile(
-  `${import.meta.env.VITE_BASE_URL}/api/profile`,
-  router
-)
+  window.addEventListener('resize', checkScreen)
+  const profile = await getProfile(
+    `${import.meta.env.VITE_BASE_URL}/api/profile`,
+    router
+  )
 
-if (profile) {
-  profileManager.setCurrentProfile(profile)
+  if (profile) {
+    profileManager.setCurrentProfile(profile)
 
-  // sync form    form.value = { ...profile }
-  originalForm.value = { ...profile }
-}
+    // sync form    form.value = { ...profile }
+    originalForm.value = { ...profile }
+  }
+})
 
 console.log(profileManager.currentProfile)
 
