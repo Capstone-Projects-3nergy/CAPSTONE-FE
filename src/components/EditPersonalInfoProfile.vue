@@ -5,10 +5,12 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { updateProfileWithFile } from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import { useRoute, useRouter } from 'vue-router'
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
 const selectedResidentId = ref(null)
+const router = useRouter()
 const auth = useAuthManager()
 const props = defineProps({
   mode: {
@@ -416,10 +418,12 @@ const saveEditProfile = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
-  if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
+  // validate phone (optional) : ตัวเลข + -
+  if (form.value.phoneNumber && !/^[0-9-]+$/.test(form.value.phoneNumber)) {
     emit('phone-error', true)
     return
   }
+
   try {
     // -----------------------
     // payload
@@ -570,8 +574,8 @@ const isUnchanged = computed(
         </div>
 
         <!-- Form Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
-          <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+          <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
               Firstname
               <span v-if="mode === 'add'" class="text-red-500">*</span>
@@ -582,7 +586,7 @@ const isUnchanged = computed(
             />
           </div>
 
-          <div>
+          <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
               Lastname <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -592,7 +596,7 @@ const isUnchanged = computed(
             />
           </div>
 
-          <div>
+          <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
               Email <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -606,7 +610,10 @@ const isUnchanged = computed(
             />
           </div>
 
-          <div v-if="roomNumber !== null || mode == 'add'">
+          <div
+            class="flex flex-col"
+            v-if="roomNumber !== null || mode == 'add'"
+          >
             <label class="block text-sm text-black font-semibold mb-1">
               Room Number
               <span v-if="mode === 'add'" class="text-red-500">*</span>
@@ -621,6 +628,7 @@ const isUnchanged = computed(
             />
           </div>
           <div
+            class="flex flex-col"
             v-if="
               dormId !== null &&
               mode !== 'add' &&
@@ -639,7 +647,10 @@ const isUnchanged = computed(
               ]"
             />
           </div>
-          <div v-if="mode == 'add' && loginManager.user.role === 'STAFF'">
+          <div
+            class="flex flex-col"
+            v-if="mode == 'add' && loginManager.user.role === 'STAFF'"
+          >
             <label class="block text-sm text-black font-semibold mb-1">
               Dormitory
               <span class="text-red-500">*</span>
@@ -658,7 +669,10 @@ const isUnchanged = computed(
               </option>
             </select>
           </div>
-          <div v-if="loginManager.user.role === 'STAFF' && mode !== 'add'">
+          <div
+            class="flex flex-col"
+            v-if="loginManager.user.role === 'STAFF' && mode !== 'add'"
+          >
             <label class="block text-sm text-black font-semibold mb-1">
               Position
             </label>
@@ -668,7 +682,7 @@ const isUnchanged = computed(
             />
           </div>
 
-          <div>
+          <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
               Line ID
             </label>
@@ -678,7 +692,7 @@ const isUnchanged = computed(
             />
           </div>
 
-          <div>
+          <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
               Phone Number
             </label>
@@ -689,18 +703,18 @@ const isUnchanged = computed(
           </div>
 
           <!-- Actions -->
-          <div class="col-span-2 flex justify-end gap-4 mt-6">
+          <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end">
             <ButtonWeb
+              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
               :disabled="isUnchanged"
             />
             <ButtonWeb
+              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
               label="Cancel Changes"
               color="gray"
-              @click="cancel"
-              class="text-[#898989]"
             />
           </div>
         </div>
