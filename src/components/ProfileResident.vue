@@ -460,8 +460,8 @@ const dormName = computed(() => {
 
         <PersonalInfoCard
           :fullName="loginManager.user.fullName"
-          :firstName="loginManager.user.firstName"
-          :lastName="loginManager.user.lastName"
+          :firstName="firstName"
+          :lastName="lastName"
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
           :lineId="loginManager.user.lineId"
