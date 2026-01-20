@@ -55,6 +55,7 @@ const dormList = ref([])
 const forms = reactive({
   dormId: null
 })
+
 // form data
 const form = ref({
   userId: auth.user.id,
@@ -468,7 +469,7 @@ const saveEditProfile = async () => {
       ...form.value,
       ...updatedProfile
     }
-
+    originalForm.value = { ...form.value }
     emit('success', true)
     isEdit.value = false
   } catch (err) {
