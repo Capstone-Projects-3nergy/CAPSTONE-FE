@@ -41,6 +41,13 @@ const resident = ref({
 const saveProfile = () => {
   alert('Resident profile updated Successfuly!')
 }
+const dormName = computed(() => {
+  if (!loginManager.user?.dormId) return ''
+
+  const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
+
+  return dorm ? dorm.dormName : ''
+})
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -94,7 +101,7 @@ onMounted(async () => {
   //   profileManager.updateProfile(profile)
   // }
 })
-
+const originalForm = ref(null)
 const cancelEdit = () => {
   resident.value = {
     name: 'Somchai Suksan',
@@ -197,15 +204,15 @@ const closePopUps = (operate) => {
       break
   }
 }
-const dormName = computed(() => {
-  if (!loginManager.user?.dormId || dormList.value.length === 0) {
-    return '-'
-  }
+// const dormName = computed(() => {
+//   if (!loginManager.user?.dormId || dormList.value.length === 0) {
+//     return '-'
+//   }
 
-  const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
+//   const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
 
-  return dorm ? dorm.dormName : '-'
-})
+//   return dorm ? dorm.dormName : '-'
+// })
 </script>
 
 <template>

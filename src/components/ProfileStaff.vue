@@ -99,6 +99,7 @@ const checkScreen = () => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
+const originalForm = ref(null)
 onMounted(async () => {
   checkScreen()
   console.log(loginManager.user)

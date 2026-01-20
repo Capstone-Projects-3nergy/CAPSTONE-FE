@@ -10,9 +10,9 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
+import { getProfile } from '@/utils/fetchUtils'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
-
 const loginManager = useAuthManager()
 const router = useRouter()
 const editSuccess = ref(false)
@@ -121,7 +121,7 @@ const showLastNameRequired = () => {
   lastNameRequired.value = true
   setTimeout(() => (lastNameRequired.value = false), 10000)
 }
-
+const originalForm = ref(null)
 const showEmailRequired = () => {
   emailRequired.value = true
   setTimeout(() => (emailRequired.value = false), 10000)
@@ -177,21 +177,21 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
+  console.log(loginManager.user)
 
   window.addEventListener('resize', checkScreen)
-  onMounted(async () => {
-    const profile = await getProfile(
-      `${import.meta.env.VITE_BASE_URL}/api/profile`,
-      router
-    )
+  const profile = await getProfile(
+    `${import.meta.env.VITE_BASE_URL}/api/profile`,
+    router
+  )
 
-    if (profile) {
-      profileManager.setCurrentProfile(profile)
-      loginManager.updateUser(profile)
-      profileManager.updateProfile(profile)
-    }
-  })
+  if (profile) {
+    profileManager.setCurrentProfile(profile)
+    // sync form    form.value = { ...profile }
+    originalForm.value = { ...profile }
+  }
 })
+
 const showProfileError = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)

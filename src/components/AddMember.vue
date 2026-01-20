@@ -16,10 +16,11 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 const errorAccount = ref(false)
+import axios from 'axios'
 const successAccount = ref(false)
 const incorrectemail = ref(false)
 const emailRequire = ref(false)
-
+const dormList = ref([])
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -106,6 +107,35 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+    console.log(res)
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
+  console.log(dormList)
 })
 function goToEditProfile() {
   router.replace({ name: 'editprofilestaff' })
