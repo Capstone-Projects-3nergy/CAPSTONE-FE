@@ -715,6 +715,7 @@ const isUnchanged = computed(
               class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
               label="Cancel Changes"
               color="gray"
+              @click="cancel"
             />
           </div>
         </div>
