@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onUnmounted, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
@@ -15,6 +16,7 @@ import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
+const dormList = ref([])
 const editSuccess = ref(false)
 const error = ref(false)
 const showHomePageResident = ref(false)
@@ -97,6 +99,14 @@ const goBackProfilePage = async function () {
     })
   }
 }
+const userDormName = computed(() => {
+  const userDormId = loginManager.user?.dormId
+  if (!userDormId || dormList.value.length === 0) return ''
+
+  const dorm = dormList.value.find((d) => d.dormId === userDormId)
+
+  return dorm ? dorm.dormName : ''
+})
 const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
 })
@@ -176,6 +186,35 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
+
   checkScreen()
   console.log(loginManager.user)
 
@@ -827,7 +866,7 @@ const closePopUp = (operate) => {
           :lastName="lastName"
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
-          :dormName="loginManager.user.dormId"
+          :dormName="userDormName"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
           :profileImageUrl="profileManager.currentProfile?.profileImageUrl"
