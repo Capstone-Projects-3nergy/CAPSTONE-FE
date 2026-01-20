@@ -72,33 +72,55 @@ const form = ref({
 })
 onMounted(async () => {
   try {
+    // -------------------------
+    // 1. โหลด dorm list
+    // -------------------------
     const baseURL = import.meta.env.VITE_BASE_URL
-    const res = await axios.get(`${baseURL}/api/dorms/list`, {
-      headers: { Accept: 'application/json' }
+    const res = await axios.get(`${baseURL}/api/dorms/list`)
+    dormList.value = Array.isArray(res.data) ? res.data : []
+
+    // -------------------------
+    // 2. โหลด profile
+    // -------------------------
+    const profile = await getProfile(`${baseURL}/api/profile`, router)
+
+    if (!profile) return
+
+    profileManager.setCurrentProfile(profile)
+
+    // -------------------------
+    // 3. หา dormName จาก dormId
+    // -------------------------
+    // const dorm = dormList.value.find((d) => d.dormId === profile.dormId)
+    const dormName = computed(() => {
+      if (!loginManager.user?.dormId) return ''
+
+      const dorm = dormList.value.find(
+        (d) => d.dormId === loginManager.user.dormId
+      )
+
+      return dorm ? dorm.dormName : ''
     })
-
-    const rawData = res.data
-
-    let parsedDorms = []
-
-    if (typeof rawData === 'string') {
-      const dormMatches =
-        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
-
-      parsedDorms = dormMatches.map((str) => {
-        const idMatch = str.match(/"dormId":(\d+)/)
-        const nameMatch = str.match(/"dormName":"(.*?)"/)
-        return {
-          dormId: idMatch ? Number(idMatch[1]) : null,
-          dormName: nameMatch ? nameMatch[1] : ''
-        }
-      })
-    } else if (Array.isArray(rawData)) {
-      parsedDorms = rawData
+    // -------------------------
+    // 4. set ค่าเริ่มต้นให้ form
+    // -------------------------
+    form.value = {
+      userId: profile.userId,
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      email: profile.email || '',
+      roomNumber: profile.roomNumber || '',
+      dormName: dormName || '',
+      lineId: profile.lineId || '',
+      position: profile.position || '',
+      phoneNumber: profile.phoneNumber || ''
     }
 
-    dormList.value = parsedDorms
-  } catch (err) {}
+    // ใช้สำหรับ compare ตอน edit
+    originalForm.value = { ...form.value }
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 // load props → form
