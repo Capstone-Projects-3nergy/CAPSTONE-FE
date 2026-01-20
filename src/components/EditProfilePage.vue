@@ -179,6 +179,18 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+  onMounted(async () => {
+    const profile = await getProfile(
+      `${import.meta.env.VITE_BASE_URL}/api/profile`,
+      router
+    )
+
+    if (profile) {
+      profileManager.setCurrentProfile(profile)
+      loginManager.updateUser(profile)
+      profileManager.updateProfile(profile)
+    }
+  })
 })
 const showProfileError = () => {
   error.value = true
@@ -816,9 +828,12 @@ const closePopUp = (operate) => {
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
           :dormName="loginManager.user.dormId"
-          :lineId="loginManager.user.lineId"
-          :phoneNumber="loginManager.user.phoneNumber"
+         :lineId="profileManager.currentProfile?.lineId"
+:phoneNumber="profileManager.currentProfile?.phoneNumber"
+:profileImageUrl="profileManager.currentProfile?.profileImageUrl"
           :position="loginManager.user.position"
+          :status="loginManager.user.status"
+
           @cancel="goBackProfilePage"
           @success="showProfileSuccess"
           @error="showProfileError"

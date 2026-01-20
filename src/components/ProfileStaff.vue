@@ -14,7 +14,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
-
+import { getProfile } from '@/utils/fetchUtils'
 const errorAccount = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
@@ -99,12 +99,21 @@ const checkScreen = () => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
-onMounted(async () => {
-  checkScreen()
-  console.log(loginManager.user)
 
-  window.addEventListener('resize', checkScreen)
-})
+const profile = await getProfile(
+  `${import.meta.env.VITE_BASE_URL}/api/profile`,
+  router
+)
+
+if (profile) {
+  profileManager.setCurrentProfile(profile)
+
+  // sync form    form.value = { ...profile }
+  originalForm.value = { ...profile }
+}
+
+console.log(profileManager.currentProfile)
+
 function goToEditProfile() {
   router.replace({ name: 'editprofilestaff' })
 }
@@ -481,12 +490,12 @@ const closePopUps = (operate) => {
           :lastName="lastName"
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
-          :lineId="loginManager.user.lineId"
-          :phoneNumber="loginManager.user.phoneNumber"
           :position="loginManager.user.position"
           :dormName="loginManager.user.dormName"
           :status="loginManager.user.status"
-          :profileImageUrl="loginManager.user.profileImageUrl"
+          :lineId="profileManager.currentProfile?.lineId"
+          :phoneNumber="profileManager.currentProfile?.phoneNumber"
+          :profileImageUrl="profileManager.currentProfile?.profileImageUrl"
           :showNotify="false"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"

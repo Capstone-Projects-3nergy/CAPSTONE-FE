@@ -11,6 +11,7 @@ import PersonalInfoCard from './PersonalInfoCard.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
+import { getProfile } from '@/utils/fetchUtils'
 const profileManager = useProfileManager()
 const errorAccount = ref(false)
 const successAccount = ref(false)
@@ -69,6 +70,29 @@ onMounted(async () => {
 
     dormList.value = parsedDorms
   } catch (err) {}
+
+  const profile = await getProfile(
+    `${import.meta.env.VITE_BASE_URL}/api/profile`,
+    router
+  )
+
+  if (profile) {
+    profileManager.setCurrentProfile(profile)
+
+    // sync form    form.value = { ...profile }
+    originalForm.value = { ...profile }
+  }
+
+  // const profile = await getProfile(
+  //   `${import.meta.env.VITE_BASE_URL}/api/profile`,
+  //   router
+  // )
+
+  // if (profile) {
+  //   profileManager.setCurrentProfile(profile)
+  //   loginManager.updateUser(profile)
+  //   profileManager.updateProfile(profile)
+  // }
 })
 
 const cancelEdit = () => {
@@ -464,12 +488,12 @@ const dormName = computed(() => {
           :lastName="lastName"
           :email="loginManager.user.email"
           :roomNumber="loginManager.user.roomNumber"
-          :lineId="loginManager.user.lineId"
-          :phoneNumber="loginManager.user.phoneNumber"
           :position="loginManager.user.position"
           :dormName="loginManager.user.dormId"
           :status="loginManager.user.status"
-          :profileImageUrl="loginManager.user.profileImageUrl"
+          :lineId="profileManager.currentProfile?.lineId"
+          :phoneNumber="profileManager.currentProfile?.phoneNumber"
+          :profileImageUrl="profileManager.currentProfile?.profileImageUrl"
           :showNotify="true"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"

@@ -95,6 +95,19 @@ export const useProfileManager = defineStore('profileManager', () => {
     profiles.length = 0
     trash.length = 0
   }
+  const currentProfile = ref(null)
+
+  const setCurrentProfile = (profile) => {
+    currentProfile.value = profile
+  }
+
+  const updateCurrentProfile = (updated) => {
+    if (!currentProfile.value) return
+    currentProfile.value = {
+      ...currentProfile.value,
+      ...updated
+    }
+  }
 
   return {
     // state
@@ -116,7 +129,10 @@ export const useProfileManager = defineStore('profileManager', () => {
     moveToTrash,
     restoreFromTrash,
     deletePermanent,
-    clearProfiles
+    clearProfiles,
+    currentProfile,
+    setCurrentProfile,
+    updateCurrentProfile
   }
 })
 

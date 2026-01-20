@@ -347,6 +347,16 @@ async function restoreParcel(url, id, router) {
     }
   }
 }
+export async function getProfile(url, router) {
+  try {
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('getProfile error:', err)
+    return null
+  }
+}
 
 // async function restoreParcel(url, id, router) {
 //   try {
