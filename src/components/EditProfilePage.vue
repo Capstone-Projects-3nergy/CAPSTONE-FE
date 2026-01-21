@@ -777,7 +777,7 @@ const closePopUp = (operate) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="editSuccess"
-            titles="Edit Profile Successful."
+            :titles="'Edit Profile Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
@@ -785,7 +785,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="firstNameError"
-            titles="First name can only contain Thai or English letters."
+            :titles="'First name can only contain Thai or English letters.'"
             message="Error!!"
             styleType="red"
             operate="firstNameErrorMessage"
@@ -793,7 +793,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="lastNameError"
-            titles="Last name can only contain Thai or English letters."
+            :titles="'Last name can only contain Thai or English letters.'"
             message="Error!!"
             styleType="red"
             operate="lastNameErrorMessage"
@@ -810,7 +810,7 @@ const closePopUp = (operate) => {
 
           <AlertPopUp
             v-if="error"
-            titles="There is a problem. Please try again later."
+            :titles="'There is a problem. Please try again later.'"
             message="Error!!"
             styleType="red"
             operate="problem"
@@ -818,7 +818,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="firstNameRequired"
-            titles="First name is required."
+            :titles="'First name is required.'"
             message="Error!!"
             styleType="red"
             operate="firstNameRequired"
@@ -827,7 +827,7 @@ const closePopUp = (operate) => {
 
           <AlertPopUp
             v-if="lastNameRequired"
-            titles="Last name is required."
+            :titles="'Last name is required.'"
             message="Error!!"
             styleType="red"
             operate="lastNameRequired"
@@ -836,7 +836,7 @@ const closePopUp = (operate) => {
 
           <AlertPopUp
             v-if="emailRequired"
-            titles="Email is required."
+            :titles="'Email is required.'"
             message="Error!!"
             styleType="red"
             operate="emailRequired"
@@ -845,7 +845,7 @@ const closePopUp = (operate) => {
 
           <AlertPopUp
             v-if="dormRequired"
-            titles="Dormitory is required."
+            :titles="'Dormitory is required.'"
             message="Error!!"
             styleType="red"
             operate="dormRequired"
@@ -854,7 +854,7 @@ const closePopUp = (operate) => {
 
           <AlertPopUp
             v-if="roomNumberRequired"
-            titles="Room number is required."
+            :titles="'Room number is required.'"
             message="Error!!"
             styleType="red"
             operate="roomNumberRequired"
