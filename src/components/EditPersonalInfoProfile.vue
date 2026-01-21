@@ -174,7 +174,7 @@ const profileImageUrlPreview = computed(() => {
     return URL.createObjectURL(newAvatar.value)
   }
 
-  const url = profileManager.currentProfile?.profileImage
+  const url = profileManager.currentProfile?.profileImageUrl
   if (url && url.startsWith('http')) {
     return url
   }

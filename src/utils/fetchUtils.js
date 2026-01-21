@@ -1,36 +1,69 @@
 import { useAuthManager } from '@/stores/AuthManager.js'
-
-async function fetchWithAuth(url, options, router) {
+async function fetchWithAuth(url, optionsOrFactory, router) {
   const authManager = useAuthManager()
-  const token = authManager.user?.accessToken
 
-  if (token) {
+  const buildOptions = (token) => {
+    const options =
+      typeof optionsOrFactory === 'function'
+        ? optionsOrFactory()
+        : { ...optionsOrFactory }
+
+    // 🔥 บังคับมี headers เสมอ
     options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${token}`
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
+
+    return options
   }
 
-  const res = await fetch(url, options)
+  let res = await fetch(url, buildOptions(authManager.user?.accessToken))
 
   if (res.status === 401) {
     const newToken = await authManager.refreshToken()
 
-    if (newToken) {
-      options.headers.Authorization = `Bearer ${newToken}`
-      const retryRes = await fetch(url, options)
-
-      if (retryRes.ok) return retryRes
-
-      return retryRes
+    if (!newToken) {
+      authManager.logoutAccount(router)
+      return null
     }
 
-    authManager.logoutAccount(router)
-    return null
+    res = await fetch(url, buildOptions(newToken))
   }
 
   return res
 }
+
+// async function fetchWithAuth(url, options, router) {
+//   const authManager = useAuthManager()
+//   const token = authManager.user?.accessToken
+
+//   if (token) {
+//     options.headers = {
+//       ...options.headers,
+//       Authorization: `Bearer ${token}`
+//     }
+//   }
+
+//   const res = await fetch(url, options)
+
+//   if (res.status === 401) {
+//     const newToken = await authManager.refreshToken()
+
+//     if (newToken) {
+//       options.headers.Authorization = `Bearer ${newToken}`
+//       const retryRes = await fetch(url, options)
+
+//       if (retryRes.ok) return retryRes
+
+//       return retryRes
+//     }
+
+//     authManager.logoutAccount(router)
+//     return null
+//   }
+
+//   return res
+// }
 
 export async function getItems(url, router) {
   try {
@@ -446,10 +479,8 @@ async function toggleUserActive(url, id, isActive, router) {
 async function updateProfileWithFile(url, payload, router) {
   const formData = new FormData()
 
-  // ✅ แยก profileImage ออก
   const { profileImage, ...profileData } = payload
 
-  // ✅ ส่ง JSON เป็น data
   formData.append(
     'data',
     new Blob([JSON.stringify(profileData)], {
@@ -457,20 +488,22 @@ async function updateProfileWithFile(url, payload, router) {
     })
   )
 
-  // ✅ ส่งไฟล์ด้วยชื่อที่ backend ต้องการ
   if (profileImage instanceof File) {
     formData.append('profileImage', profileImage)
   }
 
   try {
-    const options = {
-      method: 'PUT',
-      body: formData
-    }
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'PUT',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
 
-    const res = await fetchWithAuth(url, options, router)
     if (!res || !res.ok) return null
-
     return await res.json()
   } catch (err) {
     console.error('updateProfileWithFile error:', err)

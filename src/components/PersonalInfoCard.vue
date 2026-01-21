@@ -3,6 +3,7 @@ import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useProfileManager } from '@/stores/ProfileManager'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -10,7 +11,7 @@ const emit = defineEmits([
   'edit',
   'emailRequire'
 ])
-
+const profileManager = useProfileManager()
 const route = useRoute()
 const router = useRouter()
 const loginManager = useAuthManager()
@@ -236,9 +237,21 @@ const notifyTabClass = (tab) => {
   }
 }
 const newAvatar = ref(null)
+// const profileImageUrlPreview = computed(() => {
+//   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
+//   return props.profileImage
+// })
 const profileImageUrlPreview = computed(() => {
-  if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-  return props.profileImage
+  if (newAvatar.value) {
+    return URL.createObjectURL(newAvatar.value)
+  }
+
+  const url = profileManager.currentProfile?.profileImageUrl
+  if (url && url.startsWith('http')) {
+    return url
+  }
+
+  return ''
 })
 </script>
 <template>

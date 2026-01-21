@@ -140,6 +140,8 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
+  console.log(loginStore.user)
+  console.log()
   checkScreen()
   window.addEventListener('resize', checkScreen)
   const data = await getItems(
@@ -514,7 +516,7 @@ const toggleSortDate = () => {
       </button>
 
       <main class="flex-1 p-9 w-full">
-        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]" >
+        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
               <svg
