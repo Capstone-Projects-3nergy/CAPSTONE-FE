@@ -219,12 +219,12 @@ const userInitial = computed(() =>
 // }
 const submit = async () => {
   if (props.mode === 'add') {
-    await addProfiles()
+    await addResidents()
   } else {
     await saveEditProfile()
   }
 }
-const addProfiles = async () => {
+const addResidents = async () => {
   // -----------------------
   // REQUIRED FIELD CHECK
   // -----------------------
@@ -352,7 +352,7 @@ const addProfiles = async () => {
   }
 }
 
-// const addProfiles = async () => {
+// const addResidents = async () => {
 //   // -----------------------
 //   // validate name (ไทย + อังกฤษ)
 //   // -----------------------
