@@ -1,13 +1,33 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
-
+import { useProfileManager } from '@/stores/ProfileManager'
+import axios from 'axios'
 const authStore = useAuthManager()
+const profileManager = useProfileManager()
 
+// --------------------
+// name + initial
+// --------------------
 const userName = computed(() => authStore.user?.fullName || 'Courier')
+
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
+
+// --------------------
+// profile image
+// --------------------
+const profileImage = computed(() => {
+  return profileManager.currentProfile?.profileImage || null
+})
+// const profileImage = computed(() => {
+//   const img = profileManager.currentProfile?.profileImage
+//   if (!img) return null
+//   return img.startsWith('http')
+//     ? img
+//     : `${import.meta.env.VITE_BASE_URL}${img}`
+// })
 
 const userRole = computed(() => {
   const role = authStore.user?.role
@@ -21,14 +41,34 @@ const userRole = computed(() => {
       return 'User'
   }
 })
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const profile = await getProfile(`${baseURL}/api/profile`, router)
+    if (!profile) return
+    profileManager.setCurrentProfile(profile)
+  } catch (err) {
+    console.error(err)
+  }
+})
 </script>
 
 <template>
   <div class="flex items-center gap-3">
+    <!-- profile image -->
     <div
-      class="w-10 h-10 bg-[#185DC0] rounded-full flex items-center justify-center text-white font-semibold text-lg"
+      class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-[#185DC0]"
     >
-      {{ userInitial }}
+      <img
+        v-if="profileImage"
+        :src="profileImage"
+        alt="profile"
+        class="w-full h-full object-cover"
+      />
+
+      <span v-else class="text-white font-semibold text-lg">
+        {{ userInitial }}
+      </span>
     </div>
 
     <div class="flex flex-col leading-tight">
