@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useProfileManager } from '@/stores/ProfileManager'
 import axios from 'axios'
@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const authStore = useAuthManager()
 const profileManager = useProfileManager()
-
+const newAvatar = ref(null)
 // --------------------
 // name + initial
 // --------------------
@@ -22,8 +22,20 @@ const userInitial = computed(() =>
 // --------------------
 // profile image
 // --------------------
-const profileImage = computed(() => {
-  return profileManager.currentProfile?.profileImage || null
+// const profileImage = computed(() => {
+//   return profileManager.currentProfile?.profileImage || null
+// })
+const profileImageUrlPreview = computed(() => {
+  if (newAvatar.value) {
+    return URL.createObjectURL(newAvatar.value)
+  }
+
+  const url = profileManager.currentProfile?.profileImageUrl
+  if (url && url.startsWith('http')) {
+    return url
+  }
+
+  return ''
 })
 // const profileImage = computed(() => {
 //   const img = profileManager.currentProfile?.profileImage
@@ -64,8 +76,8 @@ onMounted(async () => {
       class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-[#185DC0]"
     >
       <img
-        v-if="profileImage"
-        :src="profileImage"
+        v-if="profileImageUrlPreview"
+        :src="profileImageUrlPreview"
         alt="profile"
         class="w-full h-full object-cover"
       />
