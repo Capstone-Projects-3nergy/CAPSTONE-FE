@@ -62,6 +62,9 @@ const trackingNumberError = ref(false)
 const showLogoutConfirm = ref(false)
 const parcelStore = useParcelManager()
 const companyList = ref([])
+const phoneError = ref(false)
+const firstNameError = ref(false)
+const lastNameError = ref(false)
 
 // const form = ref({
 //   userId: null,
@@ -515,15 +518,50 @@ const isAllEmpty = computed(() => {
   )
 })
 const closePopUp = (operate) => {
+  // -----------------
+  // general
+  // -----------------
   if (operate === 'problem') error.value = false
-  if (operate === 'editSuccessMessage ') editSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
+  if (operate === 'editSuccessMessage') editSuccess.value = false
+
+  // -----------------
+  // format error
+  // -----------------
+  if (operate === 'firstNameErrorMessage') firstNameError.value = false
+  if (operate === 'lastNameErrorMessage') lastNameError.value = false
+  if (operate === 'positionMessage') positionError.value = false
+  if (operate === 'phoneMessage') phoneError.value = false
+
+  // -----------------
+  // required field
+  // -----------------
+  if (operate === 'firstNameRequired') firstNameRequired.value = false
+  if (operate === 'lastNameRequired') lastNameRequired.value = false
+  if (operate === 'emailRequired') emailRequired.value = false
+  if (operate === 'dormRequired') dormRequired.value = false
+  if (operate === 'roomNumberRequired') roomNumberRequired.value = false
+
+  // -----------------
+  // parcel / registration (จากของเดิม)
+  // -----------------
+  if (operate === 'roomNumber') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
-  if (operate === 'RecipientName') recipientNameError.value = false
+  if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'select') selectName.value = false
 }
+
+// const closePopUp = (operate) => {
+//   if (operate === 'problem') error.value = false
+//   if (operate === 'editSuccessMessage ') editSuccess.value = false
+//   if (operate === 'roomNumber ') roomNumberError.value = false
+//   if (operate === 'senderName') SenderNameError.value = false
+//   if (operate === 'parcelType') parcelTypeError.value = false
+//   if (operate === 'trackingNumber') trackingNumberError.value = false
+//   if (operate === 'RecipientName') recipientNameError.value = false
+//   if (operate === 'select') selectName.value = false
+// }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
@@ -811,6 +849,99 @@ function formatDateTime(datetimeStr) {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="editSuccess"
+            :titles="'Edit Profile Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="firstNameError"
+            :titles="'First name can only contain Thai or English letters.'"
+            message="Error!!"
+            styleType="red"
+            operate="firstNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="lastNameError"
+            :titles="'Last name can only contain Thai or English letters.'"
+            message="Error!!"
+            styleType="red"
+            operate="lastNameErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="phoneError"
+            :titles="'Phone number must have 9–10 digits (hyphens allowed but text not allowed).'"
+            message="Error!!"
+            styleType="red"
+            operate="phoneMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="positionError"
+            title="Position can only type as text."
+            message="Error!!"
+            styleType="red"
+            operate="positionMessage"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="firstNameRequired"
+            :titles="'First name is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="firstNameRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="lastNameRequired"
+            :titles="'Last name is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="lastNameRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="emailRequired"
+            :titles="'Email is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="emailRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="dormRequired"
+            :titles="'Dormitory is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="dormRequired"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="roomNumberRequired"
+            :titles="'Room number is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumberRequired"
+            @closePopUp="closePopUp"
+          />
+          <!-- <AlertPopUp
+            v-if="editSuccess"
             :titles="'Edit Parcel is Successful.'"
             message="Success!!"
             styleType="green"
@@ -872,7 +1003,7 @@ function formatDateTime(datetimeStr) {
             styleType="red"
             operate="selectName"
             @closePopUp="closePopUp"
-          />
+          /> -->
         </div>
         <form
           class="bg-white p-6 rounded-[5px] shadow space-y-8"
