@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
@@ -67,6 +67,17 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
+const parcelManager = useParcelManager()
+const parcels = computed(() => parcelManager.getParcels())
+const firstName = computed(() => {
+  if (!parcel.value?.recipientName) return '-'
+  return parcel.value.recipientName.split(' ')[0]
+})
+
+const lastName = computed(() => {
+  if (!parcel.value?.recipientName) return '-'
+  return parcel.value.recipientName.split(' ').slice(1).join(' ')
+})
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
@@ -100,7 +111,7 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
-
+  console.log(parcels.value)
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
@@ -451,40 +462,62 @@ function formatDateTime(datetimeStr) {
 
         <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <h3 class="font-semibold text-lg mb-4">Resident Info:</h3>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- First Name -->
               <div>
-                <label class="block font-semibold mb-1">Name</label>
+                <label class="block font-semibold mb-1">First Name </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.residentName || '-' }}
+                  {{ firstName || '-' }}
                 </p>
               </div>
 
+              <!-- Last Name -->
               <div>
-                <label class="block font-semibold mb-1">Room Number</label>
+                <label class="block font-semibold mb-1">Last Name </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.roomNumber || '-' }}
+                  {{ lastName || '-' }}
                 </p>
               </div>
 
+              <!-- Email -->
               <div>
-                <label class="block font-semibold mb-1">Email</label>
+                <label class="block font-semibold mb-1">Email </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
                   {{ parcel?.email || '-' }}
                 </p>
               </div>
 
+              <!-- Room Number -->
               <div>
-                <label class="block font-semibold mb-1">Password</label>
+                <label class="block font-semibold mb-1">Room Number </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  ********
+                  {{ parcel?.roomNumber || '-' }}
                 </p>
               </div>
 
+              <!-- Dormitory -->
               <div>
-                <label class="block font-semibold mb-1">Dormitory</label>
+                <label class="block font-semibold mb-1">Dormitory </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
                   {{ parcel?.dormitoryName || '-' }}
+                </p>
+              </div>
+
+              <!-- Line ID -->
+              <div>
+                <label class="block font-semibold mb-1">Line ID</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.lineId || '-' }}
+                </p>
+              </div>
+
+              <!-- Phone Number -->
+              <div>
+                <label class="block font-semibold mb-1">Phone Number</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.phoneNumber || '-' }}
                 </p>
               </div>
             </div>

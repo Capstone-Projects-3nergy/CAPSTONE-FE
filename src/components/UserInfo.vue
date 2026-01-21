@@ -4,6 +4,9 @@ import { useAuthManager } from '@/stores/AuthManager'
 import { useProfileManager } from '@/stores/ProfileManager'
 import axios from 'axios'
 import { getProfile } from '@/utils/fetchUtils'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const authStore = useAuthManager()
 const profileManager = useProfileManager()
 

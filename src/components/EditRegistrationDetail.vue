@@ -15,6 +15,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import WebHeader from './WebHeader.vue'
+
 import {
   getItems,
   getItemById,
@@ -33,7 +34,7 @@ import {
   updateParcelStatus
 } from '@/utils/fetchUtils'
 import { useRegistrationResidentManager } from '@/stores/RegistationResidentManager'
-
+const dormList = ref([])
 const registrationResidentManager = useRegistrationResidentManager()
 const router = useRouter()
 const route = useRoute()
@@ -90,6 +91,28 @@ const form = ref({
   lineId: '',
   phoneNumber: ''
 })
+const loading = ref(false)
+
+// const loadParcel = async () => {
+//   loading.value = true
+//   try {
+//     const res = await getItemById(parcelId)
+
+//     // แยกชื่อจาก recipientName
+//     const [first, ...rest] = (res.recipientName || '').split(' ')
+
+//     form.value.firstName = first || ''
+//     form.value.lastName = rest.join(' ') || ''
+//     form.value.email = res.email || ''
+//     form.value.roomNumber = res.roomNumber || ''
+//     form.value.dormitoryId = res.dormitoryId || ''
+//     form.value.lineId = res.lineId || ''
+//     form.value.phoneNumber = res.phoneNumber || ''
+//   } finally {
+//     loading.value = false
+//   }
+// }
+
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -110,42 +133,35 @@ const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
-const loadCompanies = async () => {
+const loadDom = async () => {
   const auth = useAuthManager()
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-
-    const res = await axios.get(`${baseURL}/api/companies`, {
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${auth.user.accessToken}`
-      }
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
     })
 
     const rawData = res.data
 
-    let parsedCompanies = []
+    let parsedDorms = []
 
     if (typeof rawData === 'string') {
-      const matches =
-        rawData.match(/"companyId":(\d+).*?"companyName":"(.*?)"/g) || []
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
 
-      parsedCompanies = matches.map((str) => {
-        const id = str.match(/"companyId":(\d+)/)
-        const name = str.match(/"companyName":"(.*?)"/)
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
         return {
-          companyId: id ? Number(id[1]) : null,
-          companyName: name ? name[1] : ''
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
         }
       })
     } else if (Array.isArray(rawData)) {
-      parsedCompanies = rawData.map((c) => ({
-        companyId: c.companyId,
-        companyName: c.companyName
-      }))
+      parsedDorms = rawData
     }
 
-    companyList.value = parsedCompanies
+    dormList.value = parsedDorms
   } catch (err) {}
 }
 
@@ -222,9 +238,32 @@ const getParcelDetail = async (tid) => {
     parcelStore.addParcel(form.value)
     originalForm.value = { ...form.value }
   } catch (err) {}
-  await loadCompanies()
+  await loadDom()
   await loadResidents()
 }
+
+const firstName = computed({
+  get() {
+    if (!form.value.recidentName && !form.value.recipientName) return ''
+    const name = form.value.recipientName || ''
+    return name.split(' ')[0] || ''
+  },
+  set(val) {
+    const last = lastName.value
+    form.value.recipientName = [val, last].filter(Boolean).join(' ')
+  }
+})
+
+const lastName = computed({
+  get() {
+    if (!form.value.recipientName) return ''
+    return form.value.recipientName.split(' ').slice(1).join(' ') || ''
+  },
+  set(val) {
+    const first = firstName.value
+    form.value.recipientName = [first, val].filter(Boolean).join(' ')
+  }
+})
 
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
@@ -234,9 +273,8 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
-
   window.addEventListener('resize', checkScreen)
-  loadCompanies()
+  loadDom()
   loadResidents()
   const tid = route.params.tid
   getParcelDetail(tid)
@@ -879,14 +917,21 @@ function formatDateTime(datetimeStr) {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Name</label>
+                <label class="block font-semibold mb-1">First Name</label>
                 <input
                   type="text"
-                  :value="form.residentName"
+                  :value="form.firstName"
                   class="w-full border rounded-md p-2 bg-white"
                 />
               </div>
-
+              <div>
+                <label class="block font-semibold mb-1">Last Name</label>
+                <input
+                  type="text"
+                  :value="form.lastName"
+                  class="w-full border rounded-md p-2 bg-white"
+                />
+              </div>
               <div>
                 <label class="block font-semibold mb-1">Room Number</label>
                 <input
@@ -906,7 +951,7 @@ function formatDateTime(datetimeStr) {
               </div>
               <!-- Dormitory -->
               <div>
-                <label class="block font-semibold mb-1">Dormitory *</label>
+                <label class="block font-semibold mb-1">Dormitory </label>
                 <select
                   v-model="form.dormitoryId"
                   class="w-full border rounded-md p-2"
