@@ -496,7 +496,7 @@ const closePopUps = (operate) => {
           :roomNumber="loginManager.user.roomNumber"
           :position="loginManager.user.position"
           :dormName="loginManager.user.dormName"
-          :status="loginManager.user.status"
+          :status="profileManager.currentProfile?.status"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
           :profileImage="profileManager.currentProfile?.profileImage"

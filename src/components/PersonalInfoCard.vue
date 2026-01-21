@@ -29,6 +29,7 @@ const props = defineProps({
   position: { type: String, default: '-' },
   email: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
+  status: { type: String, default: null },
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null },
   showNotify: { type: Boolean, default: true }
@@ -72,7 +73,7 @@ const menuClass = (tab) => {
 
 // แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
-  if (!value || value.trim() === '') return 'ACTIVE'
+  if (!value || value.trim() === '') return 'ERROR'
   return value.toUpperCase()
 }
 
@@ -82,7 +83,8 @@ const statusClass = (value) => {
 
   return {
     'bg-green-500': status === 'ACTIVE',
-    'bg-red-500': status === 'INACTIVE'
+    'bg-red-500': status === 'INACTIVE',
+    'bg-yellow-500': status === 'ERROR'
   }
 }
 
