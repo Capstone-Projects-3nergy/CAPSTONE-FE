@@ -35,7 +35,7 @@ const userRole = computed(() => {
   if (!role) return ''
   switch (role.toUpperCase()) {
     case 'STAFF':
-      return 'Dormitory Staff'
+      return authStore.user.position
     case 'RESIDENT':
       return 'Resident'
     default:
