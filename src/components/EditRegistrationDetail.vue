@@ -841,7 +841,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
 
-            <div class="mb-4">
+            <!-- <div class="mb-4">
               <label class="block font-semibold mb-1">Search Name</label>
               <input
                 type="text"
@@ -873,7 +873,7 @@ function formatDateTime(datetimeStr) {
                   No residents found.
                 </li>
               </ul>
-            </div>
+            </div> -->
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
