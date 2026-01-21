@@ -82,11 +82,13 @@ const companyList = ref([])
 //   email: ''
 // })
 const form = ref({
-  userId: null,
-  residentName: '',
-  roomNumber: '',
+  firstName: '',
+  lastName: '',
   email: '',
-  dormitoryName: ''
+  roomNumber: '',
+  dormitoryId: '',
+  lineId: '',
+  phoneNumber: ''
 })
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
@@ -881,8 +883,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.residentName"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border rounded-md p-2 bg-white"
                 />
               </div>
 
@@ -891,8 +892,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.roomNumber"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border rounded-md p-2 bg-white"
                 />
               </div>
 
@@ -901,28 +901,44 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.email"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border rounded-md p-2 bg-white"
+                />
+              </div>
+              <!-- Dormitory -->
+              <div>
+                <label class="block font-semibold mb-1">Dormitory *</label>
+                <select
+                  v-model="form.dormitoryId"
+                  class="w-full border rounded-md p-2"
+                >
+                  <option disabled value="">Select Dormitory</option>
+                  <option
+                    v-for="d in dormList"
+                    :key="d.dormId"
+                    :value="d.dormId"
+                  >
+                    {{ d.dormName }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Line ID -->
+              <div>
+                <label class="block font-semibold mb-1">Line ID</label>
+                <input
+                  type="text"
+                  v-model="form.lineId"
+                  class="w-full border rounded-md p-2"
                 />
               </div>
 
+              <!-- Phone Number -->
               <div>
-                <label class="block font-semibold mb-1">Password</label>
+                <label class="block font-semibold mb-1">Phone Number</label>
                 <input
                   type="text"
-                  value="********"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Dormitory</label>
-                <input
-                  type="text"
-                  :value="form.dormitoryName"
-                  readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  v-model="form.phoneNumber"
+                  class="w-full border rounded-md p-2"
                 />
               </div>
             </div>
@@ -1032,7 +1048,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.residentName"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
@@ -1042,7 +1058,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.roomNumber"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
@@ -1051,7 +1067,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.email"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
@@ -1066,7 +1082,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.receivedAt"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
@@ -1076,7 +1092,7 @@ function formatDateTime(datetimeStr) {
                 <input
                   type="text"
                   :value="form.updatedAt"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
@@ -1087,7 +1103,7 @@ function formatDateTime(datetimeStr) {
                   placeholder="-"
                   type="text"
                   :value="form.pickedUpAt"
-                  readonly
+                  
                   class="w-full border rounded-md p-2 bg-gray-100"
                 />
               </div>
