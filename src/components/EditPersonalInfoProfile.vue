@@ -69,7 +69,7 @@ const form = ref({
   lineId: '',
   position: '',
   phoneNumber: '',
-  profileImage: ''
+  profileImage: null
 })
 onMounted(async () => {
   try {
@@ -463,8 +463,7 @@ const saveEditProfile = async () => {
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null,
-      profileImage: form.value.profileImage || null
+      phoneNumber: form.value.phoneNumber || null
     }
 
     if (isStaff) {
