@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useProfileManager } from '@/stores/ProfileManager'
 import axios from 'axios'
+import { getProfile } from '@/utils/fetchUtils'
 const authStore = useAuthManager()
 const profileManager = useProfileManager()
 

@@ -447,7 +447,7 @@ async function updateProfileWithFile(url, payload, router) {
   const formData = new FormData()
 
   // ✅ แยก profileImage ออก
-  const { profileImageUrl, ...profileData } = payload
+  const { profileImage, ...profileData } = payload
 
   // ✅ ส่ง JSON เป็น data
   formData.append(
@@ -458,8 +458,8 @@ async function updateProfileWithFile(url, payload, router) {
   )
 
   // ✅ ส่งไฟล์ด้วยชื่อที่ backend ต้องการ
-  if (profileImageUrl instanceof File) {
-    formData.append('profileImage', profileImageUrl)
+  if (profileImage instanceof File) {
+    formData.append('profileImage', profileImage)
   }
 
   try {
