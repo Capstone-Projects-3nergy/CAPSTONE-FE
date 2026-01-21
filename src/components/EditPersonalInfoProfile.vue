@@ -43,6 +43,7 @@ const emit = defineEmits([
   'first-name-error',
   'last-name-error',
   'phone-error',
+  'position-error',
   'successAddProfile',
   'errorAddProfile',
   'first-name-required',
@@ -276,9 +277,19 @@ const addProfiles = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
-  if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
-    emit('phone-error', true)
-    return
+  if (form.value.phoneNumber) {
+    // รูปแบบตัวเลข + -
+    if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      emit('phone-error', true)
+      return
+    }
+
+    // เช็คจำนวนตัวเลข 9–10
+    const digits = form.value.phoneNumber.replace(/-/g, '')
+    if (digits.length < 9 || digits.length > 10) {
+      emit('phone-error', true)
+      return
+    }
   }
 
   try {
@@ -448,12 +459,30 @@ const saveEditProfile = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
-  // validate phone (optional) : ตัวเลข + -
-  if (form.value.phoneNumber && !/^[0-9-]+$/.test(form.value.phoneNumber)) {
-    emit('phone-error', true)
-    return
+  if (form.value.phoneNumber) {
+    // รูปแบบตัวเลข + -
+    if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      emit('phone-error', true)
+      return
+    }
+
+    // เช็คจำนวนตัวเลข 9–10
+    const digits = form.value.phoneNumber.replace(/-/g, '')
+    if (digits.length < 9 || digits.length > 10) {
+      emit('phone-error', true)
+      return
+    }
   }
 
+  // -----------------------
+  // validate position (staff only)
+  // -----------------------
+  if (isStaff && form.value.position) {
+    if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+      emit('position-error', true)
+      return
+    }
+  }
   try {
     // -----------------------
     // payload

@@ -35,7 +35,7 @@ const lastNameRequired = ref(false)
 const emailRequired = ref(false)
 const dormRequired = ref(false)
 const roomNumberRequired = ref(false)
-
+const positionError = ref(false)
 const phoneError = ref(false)
 const updateProfile = async (payload) => {
   try {
@@ -71,6 +71,10 @@ const updateProfile = async (payload) => {
   }
 }
 
+const showPositionError = () => {
+  positionError.value = true
+  setTimeout(() => (positionError.value = false), 10000)
+}
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
@@ -275,7 +279,9 @@ const closePopUp = (operate) => {
     case 'lastNameErrorMessage':
       lastNameError.value = false
       break
-
+    case 'positionMessage':
+      positionError.value = false
+      break
     case 'phoneMessage':
       phoneError.value = false
       break
@@ -807,6 +813,14 @@ const closePopUp = (operate) => {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="positionError"
+            title="Position can only type as text."
+            message="Error!!"
+            styleType="red"
+            operate="positionMessage"
+            @closePopUp="closePopUp"
+          />
 
           <AlertPopUp
             v-if="error"
@@ -878,6 +892,7 @@ const closePopUp = (operate) => {
           @error="showProfileError"
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
+          @position-error="showPositionError"
           @phone-error="showPhoneError"
           @first-name-required="showFirstNameRequired"
           @last-name-required="showLastNameRequired"
