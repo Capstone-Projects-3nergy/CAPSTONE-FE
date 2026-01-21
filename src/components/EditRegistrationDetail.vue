@@ -74,7 +74,7 @@ const lastNameError = ref(false)
 //   senderName: '',
 //   parcelType: '',
 //   companyId: '',
-//   imageUrl: '',
+//   profileImage: '',
 //   status: '',
 
 //   receivedAt: '',
@@ -226,7 +226,7 @@ const getParcelDetail = async (tid) => {
       senderName: data.senderName || '',
       parcelType: data.parcelType || '',
       companyId: Number(data.companyId) ?? '',
-      imageUrl: data.imageUrl ?? '',
+      profileImage: data.profileImage ?? '',
       status: data.status,
 
       receivedAt: formatDateTime(data.receivedAt),
@@ -334,7 +334,7 @@ const emit = defineEmits(['edit-success', 'edit-error'])
 //       senderName: form.value.senderName,
 //       status: form.value.status,
 //       companyId: form.value.companyId ? Number(form.value.companyId) : null,
-//       imageUrl: form.value.imageUrl,
+//       profileImage: form.value.profileImage,
 //       userId: form.value.userId || null
 //     }
 
@@ -451,12 +451,12 @@ const handleImageUpload = (event) => {
     return
   }
 
-  form.value.imageUrl = file
+  form.value.profileImage = file
 
   previewUrl.value = URL.createObjectURL(file)
 }
 const removeImage = () => {
-  form.value.imageUrl = null
+  form.value.profileImage = null
   previewUrl.value = null
 }
 
@@ -879,14 +879,14 @@ function formatDateTime(datetimeStr) {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="positionError"
             title="Position can only type as text."
             message="Error!!"
             styleType="red"
             operate="positionMessage"
             @closePopUp="closePopUp"
-          />
+          /> -->
 
           <AlertPopUp
             v-if="error"
@@ -896,7 +896,7 @@ function formatDateTime(datetimeStr) {
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="firstNameRequired"
             :titles="'First name is required.'"
             message="Error!!"
@@ -939,7 +939,7 @@ function formatDateTime(datetimeStr) {
             styleType="red"
             operate="roomNumberRequired"
             @closePopUp="closePopUp"
-          />
+          /> -->
           <!-- <AlertPopUp
             v-if="editSuccess"
             :titles="'Edit Parcel is Successful.'"
