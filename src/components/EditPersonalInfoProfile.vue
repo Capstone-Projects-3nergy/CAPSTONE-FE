@@ -106,18 +106,19 @@ onMounted(async () => {
     // -------------------------
     // 4. set ค่าเริ่มต้นให้ form
     // -------------------------
-    form.value = {
-      userId: profile.userId,
-      firstName: profile.firstName || '',
-      lastName: profile.lastName || '',
-      email: profile.email || '',
-      roomNumber: profile.roomNumber || '',
-      dormName: dormName || '',
-      lineId: profile.lineId || '',
-      position: profile.position || '',
-      phoneNumber: profile.phoneNumber || ''
+    if (mode === 'edit') {
+      form.value = {
+        userId: profile.userId,
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        email: profile.email || '',
+        roomNumber: profile.roomNumber || '',
+        dormName: dormName || '',
+        lineId: profile.lineId || '',
+        position: profile.position || '',
+        phoneNumber: profile.phoneNumber || ''
+      }
     }
-
     // ใช้สำหรับ compare ตอน edit
     originalForm.value = { ...form.value }
   } catch (err) {
@@ -170,16 +171,18 @@ watch(
 // }
 const newAvatar = ref(null)
 const profileImageUrlPreview = computed(() => {
-  if (newAvatar.value) {
-    return URL.createObjectURL(newAvatar.value)
-  }
+  if (props.mode === 'edit') {
+    if (newAvatar.value) {
+      return URL.createObjectURL(newAvatar.value)
+    }
 
-  const url = profileManager.currentProfile?.profileImageUrl
-  if (url && url.startsWith('http')) {
-    return url
-  }
+    const url = profileManager.currentProfile?.profileImageUrl
+    if (url && url.startsWith('http')) {
+      return url
+    }
 
-  return ''
+    return ''
+  }
 })
 function onImageChange(e) {
   const file = e.target.files[0]
@@ -572,12 +575,15 @@ const isSaveDisabled = computed(() => {
               alt="Profile"
               class="w-full h-full object-cover"
             />
-
             <div
               v-else
-              class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white font-semibold text-4xl"
+              class="w-full h-full flex items-center justify-center font-semibold"
+              :class="{
+                'bg-[#185DC0] text-white text-4xl': props.mode !== 'add',
+                'bg-white text-black text-xl': props.mode === 'add'
+              }"
             >
-              {{ userInitial }}
+              {{ props.mode === 'add' ? 'Add Profile' : userInitial }}
             </div>
           </div>
 
