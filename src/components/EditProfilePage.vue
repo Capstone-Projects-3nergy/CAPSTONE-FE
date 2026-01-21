@@ -807,7 +807,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="phoneError"
-            title="Phone number must have 9–10 digits (hyphens allowed)."
+            :titles="'Phone number must have 9–10 digits (hyphens allowed).'"
             message="Error!!"
             styleType="red"
             operate="phoneMessage"
