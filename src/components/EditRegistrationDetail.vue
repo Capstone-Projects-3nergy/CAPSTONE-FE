@@ -849,7 +849,7 @@ function formatDateTime(datetimeStr) {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Profile Successful.'"
+            :titles="'Edit Member detail is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
