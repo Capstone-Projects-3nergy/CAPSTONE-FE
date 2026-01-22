@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useProfileManager } from '@/stores/ProfileManager'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { deleteItemById } from '@/utils/fetchUtils'
@@ -17,12 +16,13 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const profileManager = useProfileManager()
 const userManager = useUserManager()
 const deletedProfile = ref(null)
 
 const resident = computed(() => props.residentData || {})
-const removedResidentToTrashFn = async () => {
+
+/* ---------- move to trash ---------- */
+const moveToTrash = async () => {
   if (!resident.value.id) return
 
   deletedProfile.value = await deleteItemById(
@@ -36,10 +36,12 @@ const removedResidentToTrashFn = async () => {
     return
   }
 
-  userManager.moveToTrash(resident.value.id)
+  userManager.moveMemberToTrash(resident.value.id)
   emit('confirmDetail', true)
 }
-const deleteResidentFn = async () => {
+
+/* ---------- delete permanent ---------- */
+const deletePermanent = async () => {
   if (!resident.value.id) return
 
   deletedProfile.value = await deleteItemById(
@@ -58,7 +60,7 @@ const deleteResidentFn = async () => {
 }
 
 const confirmAction = () => {
-  props.isPermanent ? deleteResidentFn() : removedResidentToTrashFn()
+  props.isPermanent ? deletePermanent() : moveToTrash()
 }
 
 const cancelAction = () => {
