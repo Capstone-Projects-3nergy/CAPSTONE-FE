@@ -177,13 +177,15 @@ onMounted(async () => {
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.memberId,
-      memberName: p.memberName,
-      mobile: p.mobile,
+      residentName: p.residentName,
+      phoneNumber: p.phoneNumber,
+      lineId: p.lineId,
       email: p.contactEmail,
+      dormId: p.dormId,
+      profileImage: p.profileImage,
+      position: p.position,
       status: mapActiveStatus(p.activeStatus),
-      receiveAt: p.receivedAt,
-      updateAt: p.updatedAt || null,
-      pickupAt: p.pickedUpAt || null
+      updateAt: p.updatedAt || null
     }))
 
     // เรียงตาม update ล่าสุด
@@ -312,7 +314,7 @@ function autoClose(refVar, timeout = 10000) {
 const deleteMemberPopUp = (member) => {
   MemberDetail.value = {
     id: member.id,
-    parcelNumber: member.memberName // หรือ field ที่ใช้แสดงชื่อ
+    parcelNumber: member.residentName // หรือ field ที่ใช้แสดงชื่อ
   }
 
   showDeleteMember.value = true
