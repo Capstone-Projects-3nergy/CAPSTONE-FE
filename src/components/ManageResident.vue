@@ -314,7 +314,7 @@ function autoClose(refVar, timeout = 10000) {
 const deleteMemberPopUp = (member) => {
   MemberDetail.value = {
     id: member.id,
-    parcelNumber: member.residentName // หรือ field ที่ใช้แสดงชื่อ
+    residentName: member.residentName // หรือ field ที่ใช้แสดงชื่อ
   }
 
   showDeleteMember.value = true
