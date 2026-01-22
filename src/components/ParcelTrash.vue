@@ -1814,6 +1814,7 @@ const closePopUp = (operate) => {
       @confirmDetail="showRestoreComplete"
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
+      :residentData="residentDetail"
     />
   </teleport>
   <teleport to="body" v-if="showDeleteMember">
@@ -1821,7 +1822,7 @@ const closePopUp = (operate) => {
       @cancelDetail="clearDeleteMemPopUp"
       @confirmDetail="showDelMemComplete"
       @redAlert="openRedMemPopup"
-      :parcelData="MemberDetail"
+      :residentData="residentDetail"
       :isPermanent="true"
     />
   </teleport>

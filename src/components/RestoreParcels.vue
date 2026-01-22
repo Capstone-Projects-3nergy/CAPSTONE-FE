@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { restoreParcel } from '@/utils/fetchUtils'
 import { useProfileManager } from '@/stores/ProfileManager'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
 
 const props = defineProps({
@@ -13,6 +14,8 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  residentData: Object,
+  staffData: Object,
   showMember: { type: Boolean, default: false },
   showStaff: { type: Boolean, default: false },
   showParcel: { type: Boolean, default: true }
@@ -23,9 +26,9 @@ const parcelManager = useParcelManager()
 
 const parcel = computed(() => props.parcelData || {})
 const profileManager = useProfileManager()
-
-const profile = computed(() => props.profileData || {})
-
+const userManager = useUserManager()
+const resident = computed(() => props.residentData || {})
+const staff = computed(() => props.staffData || {})
 // const restoreParcelFn = async () => {
 //   if (!parcel.value?.id) return
 
@@ -86,34 +89,34 @@ const restoreParcelFn = async () => {
   emit('confirmDetail', true)
 }
 const restoreMemberFn = async () => {
-  if (!profile.value?.id) return
+  if (!resident.value?.id) return
 
   const res = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/members/trash`,
-    profile.value.id,
+    resident.value.id,
     router
   )
 
   if (!res || !res.ok) throw new Error('restore member failed')
 
-  profileManager.restoreFromTrash(profile.value.id)
+  userManager.restoreFromTrash(resident.value.id)
 }
 
 // ==============================
 // restore staff
 // ==============================
 const restoreStaffFn = async () => {
-  if (!profile.value?.id) return
+  if (!resident.value?.id) return
 
   const res = await restoreParcel(
     `${import.meta.env.VITE_BASE_URL}/api/staff/trash`,
-    profile.value.id,
+    staff.value.id,
     router
   )
 
   if (!res || !res.ok) throw new Error('restore staff failed')
 
-  profileManager.restoreFromTrash(profile.value.id)
+  userManager.restoreFromTrash(staff.value.id)
 }
 
 const cancelAction = () => {
@@ -144,20 +147,30 @@ const confirmRestore = async () => {
     <div
       class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
-      <div class="flex flex-col justify-between p-4 border-b">
+      <div v-if="showParcel" class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
           Restore Parcel
+        </h1>
+      </div>
+      <div v-if="showMember" class="flex flex-col justify-between p-4 border-b">
+        <h1 class="text-xl font-bold text-center sm:text-left">
+          Restore Resident Member
+        </h1>
+      </div>
+      <div v-if="showStaff" class="flex flex-col justify-between p-4 border-b">
+        <h1 class="text-xl font-bold text-center sm:text-left">
+          Restore Staff Member
         </h1>
       </div>
       <div class="p-4 text-center sm:text-left">
         <template v-if="showMember">
           Do you want to restore this Resident name
-          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
+          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
         </template>
 
         <template v-if="showStaff">
           Do you want to restore this Staff name
-          <b>"{{ profile.firstName }} {{ profile.lastName }}"</b>
+          <b>"{{ staff.firstName }} {{ staff.lastName }}"</b>
         </template>
 
         <template v-if="showParcel">
