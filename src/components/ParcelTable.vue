@@ -218,13 +218,13 @@ const getInitial = (name) => {
             v-if="showActionStatus"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
-            Action
+            Status
           </th>
           <th
             v-if="showAction"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
-            Operation
+            Action
           </th>
         </tr>
       </thead>
@@ -367,7 +367,7 @@ const getInitial = (name) => {
             v-if="showActionStatus"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Action:</span>
+            <span class="md:hidden font-semibold text-blue-700">Status:</span>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -386,9 +386,7 @@ const getInitial = (name) => {
             v-if="showAction"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
           >
-            <span class="md:hidden font-semibold text-blue-700"
-              >Operation:</span
-            >
+            <span class="md:hidden font-semibold text-blue-700">Action:</span>
 
             <button
               @click="$emit('view-detail', p.id)"
