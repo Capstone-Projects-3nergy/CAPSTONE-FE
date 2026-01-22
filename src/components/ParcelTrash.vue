@@ -85,6 +85,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showDeleteMember = ref(false)
+const showRestoreMember = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -92,6 +93,7 @@ const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
 const restoreSuccess = ref(false)
+const restoreResidentSuccess = ref(false)
 const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const showRestoreParcel = ref(false)
@@ -101,7 +103,7 @@ const parcelStatusDetail = ref(null)
 const parcelsResidentDetail = ref(null)
 const route = useRoute()
 const residents = ref([])
-
+const deleteMemberSuccess = ref(false)
 const recipientSearch = ref('')
 
 const selectedResidentId = ref(null)
@@ -523,6 +525,21 @@ const restoreParcelPopUp = (parcel) => {
     parcelNumber: parcel.trackingNumber
   }
 }
+const deleteMemberPopUp = (resident) => {
+  showDeleteMember.value = true
+  residentDetail.value = {
+    id: resident.id,
+    residentName: resident.residentName
+  }
+}
+const restoreMemberPopUp = (resident) => {
+  showRestoreMember.value = true
+  residentDetail.value = {
+    id: resident.id,
+    residentName: resident.residentName
+  }
+}
+
 // const openStatusPopup = (parcel) => {
 //   parcelStatusDetail.value = {
 //     id: parcel.id,
@@ -547,6 +564,11 @@ const clearDeletePopUp = () => {
 const clearRestorePopUp = () => {
   showRestoreParcel.value = false
   parcelDetail.value = null
+  residentDetail.value = null
+}
+const clearDeleteMemPopUp = () => {
+  showDeleteMember.value = false
+  residentDetail.value = null
 }
 const clearStatusPopUp = () => {
   showStatusParcel.value = false
@@ -557,7 +579,15 @@ const showRestoreComplete = () => {
   setTimeout(() => (restoreSuccess.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
+  residentDetail.value = null
 }
+const showDelMemComplete = () => {
+  showDeleteMember.value = false
+  deleteMemberSuccess.value = true
+  setTimeout(() => (deleteMemberSuccess.value = false), 10000)
+  residentDetail.value = null
+}
+
 const showDelComplete = () => {
   deleteSuccess.value = true
   setTimeout(() => (deleteSuccess.value = false), 10000)
@@ -584,6 +614,13 @@ const openRedRestorePopup = () => {
   setTimeout(() => (error.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
+  residentDetail.value = null
+}
+const openRedMemPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showDeleteMember.value = false
+  residentDetail.value = null
 }
 const openRedStatusPopup = () => {
   error.value = true
@@ -1353,8 +1390,8 @@ const closePopUp = (operate) => {
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
-          @delete="deleteParcelPopUp"
-          @restore="restoreParcelPopUp"
+          @delete="deleteMemberPopUp"
+          @restore="restoreMemberPopUp"
         >
           <template #sort-room>
             <svg
