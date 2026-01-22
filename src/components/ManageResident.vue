@@ -972,7 +972,7 @@ const closePopUp = (operate) => {
           /> -->
           <AlertPopUp
             v-if="showDeleteMemberSuccess"
-            :titles="'Delete Member to Trash is Successful.'"
+            :titles="'Delete Resident to Trash is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -988,7 +988,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="addSuccess"
-            :titles="'Add New Member is Successful.'"
+            :titles="'Add New Resident is Successful.'"
             message="Success!!"
             styleType="green"
             operate="addSuccessMessage"
@@ -996,7 +996,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Member is Successful.'"
+            :titles="'Edit Resident is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"

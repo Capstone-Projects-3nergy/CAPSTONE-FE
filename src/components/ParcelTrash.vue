@@ -1135,8 +1135,24 @@ const closePopUp = (operate) => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="deleteMemberSuccess"
+            :titles="'Delete Resident is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="restoreSuccess"
             :titles="'Restore Parcel is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="restoreSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="restoreMemberSuccess"
+            :titles="'Restore Resident is Successful.'"
             message="Success!!"
             styleType="green"
             operate="restoreSuccessMessage"
