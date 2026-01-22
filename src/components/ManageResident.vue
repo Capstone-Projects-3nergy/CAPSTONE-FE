@@ -322,19 +322,19 @@ const deleteMemberPopUp = (member) => {
 
   showDeleteMember.value = true
 }
-const clearDeleteMemPopUp = (member) => {
+const clearDeleteMemPopUp = () => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-const showDelMemComplete = (member) => {
+const showDelMemComplete = () => {
   showDeleteMemberSuccess.value = true
   setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-const openRedMemPopup = (member) => {
-  showDeleteMemberError.value = true
-  setTimeout(() => (showDeleteMemberError.value = false), 10000)
+const openRedMemPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
   showDeleteMember.value = false
   MemberDetail.value = null
 }
@@ -524,6 +524,22 @@ const handleSortUpdate = (val) => {
   filterSort.value = val
   selectedSort.value = val
   handleSort()
+}
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      showDeleteMemberSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
 }
 </script>
 
@@ -946,9 +962,17 @@ const handleSortUpdate = (val) => {
           </div>
         </div> -->
         <div class="fixed top-5 left-5 z-50">
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="deleteSuccess"
             :titles="'Delete Parcel to Trash is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          /> -->
+          <AlertPopUp
+            v-if="showDeleteMemberSuccess"
+            :titles="'Delete Member to Trash is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
@@ -964,7 +988,7 @@ const handleSortUpdate = (val) => {
           />
           <AlertPopUp
             v-if="addSuccess"
-            :titles="'Add New Parcel is Successful.'"
+            :titles="'Add New Member is Successful.'"
             message="Success!!"
             styleType="green"
             operate="addSuccessMessage"
@@ -972,7 +996,7 @@ const handleSortUpdate = (val) => {
           />
           <AlertPopUp
             v-if="editSuccess"
-            :titles="'Edit Parcel  is Successful.'"
+            :titles="'Edit Member is Successful.'"
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
