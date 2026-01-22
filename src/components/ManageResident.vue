@@ -81,6 +81,9 @@ const deleteSuccess = ref(false)
 const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const showStatusParcel = ref(false)
+const showDeleteMemberSuccess = ref(false)
+const showDeleteMemberError = ref(false)
+
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
@@ -319,10 +322,27 @@ const deleteMemberPopUp = (member) => {
 
   showDeleteMember.value = true
 }
-const clearDeletePopUp = () => {
+const clearDeleteMemPopUp = (member) => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
+const showDelMemComplete = (member) => {
+  showDeleteMemberSuccess.value = true
+  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+const openRedMemPopup = (member) => {
+  showDeleteMemberError.value = true
+  setTimeout(() => (showDeleteMemberError.value = false), 10000)
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+
+// const clearDeletePopUp = () => {
+//   showDeleteMember.value = false
+//   MemberDetail.value = null
+// }
 
 autoClose(addSuccess)
 autoClose(editSuccess)
