@@ -15,7 +15,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import WebHeader from './WebHeader.vue'
-
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 import {
   getItems,
   getItemById,
@@ -33,15 +33,14 @@ import {
   deleteFile,
   updateParcelStatus
 } from '@/utils/fetchUtils'
-import { useRegistrationResidentManager } from '@/stores/RegistationResidentManager'
 const dormList = ref([])
-const registrationResidentManager = useRegistrationResidentManager()
+
 const router = useRouter()
 const route = useRoute()
 const tid = route.params.tid
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
-
+const userStore = useUserManager()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -244,6 +243,51 @@ const getParcelDetail = async (tid) => {
   await loadDom()
   await loadResidents()
 }
+const getResidentDetail = async (tid) => {
+  if (!tid) return
+  const tidNum = Number(tid)
+
+  const localResident = userStore
+    .getMembers()
+    .find((p) => p.residentId === tidNum)
+
+  if (localResident) {
+    form.value = {
+      ...form.value,
+      ...localResident
+    }
+    originalForm.value = { ...form.value }
+    return
+  }
+
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      tidNum,
+      router
+    )
+
+    if (!data) return
+
+    form.value = {
+      profileImage: data.profileImage ?? '',
+      status: data.status,
+      updatedAt: formatDateTime(data.updatedAt),
+      userId: data.residentId || null,
+      roomNumber: data.roomNumber,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      lineId: data.lineId,
+      phoneNumber: data.phoneNumber
+    }
+
+    userStore.addMember(form.value)
+    originalForm.value = { ...form.value }
+  } catch (err) {}
+  await loadDom()
+  await loadResidents()
+}
 
 const firstName = computed({
   get() {
@@ -351,7 +395,7 @@ const emit = defineEmits(['edit-success', 'edit-error'])
 //       return
 //     }
 
-//     parcelStore.editParcel(form.value.parcelId, updatedParcel)
+//     userStore.editParcel(form.value.parcelId, updatedParcel)
 
 //     form.value = {
 //       ...form.value,
@@ -407,14 +451,17 @@ const saveEditRegistrationDetail = async () => {
   try {
     const body = {
       userId: form.value.userId,
-      residentName: form.value.residentName,
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
       roomNumber: form.value.roomNumber,
+      lineId: form.value.lineId,
+      phoneNumber: form.value.phoneNumber,
       email: form.value.email,
       dormitoryName: form.value.dormitoryName
     }
 
     const updatedResident = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
       form.value.userId,
       body,
       router
@@ -422,7 +469,7 @@ const saveEditRegistrationDetail = async () => {
 
     if (!updatedResident) throw new Error('Update failed')
 
-    registrationResidentManager.updateResident(updatedResident)
+    userStore.updateMember(updatedResident)
     form.value = { ...form.value, ...updatedResident }
 
     editSuccess.value = true
