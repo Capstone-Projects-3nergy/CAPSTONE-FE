@@ -105,7 +105,7 @@ const route = useRoute()
 const residents = ref([])
 const deleteMemberSuccess = ref(false)
 const recipientSearch = ref('')
-
+const restoreMemberSuccess = ref(false)
 const selectedResidentId = ref(null)
 
 const selectedResident = computed(
@@ -579,6 +579,12 @@ const showRestoreComplete = () => {
   setTimeout(() => (restoreSuccess.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
+  residentDetail.value = null
+}
+const showRestoreMemberComplete = () => {
+  restoreMemberSuccess.value = true
+  setTimeout(() => (restoreMemberSuccess = false), 10000)
+  showRestoreParcel.value = false
   residentDetail.value = null
 }
 const showDelMemComplete = () => {
@@ -1865,6 +1871,7 @@ const closePopUp = (operate) => {
     <RestoreParcels
       @cancelDetail="clearRestorePopUp"
       @confirmDetail="showRestoreComplete"
+      @confirmMemberDetail="showRestoreMemberComplete"
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
       :residentData="residentDetail"

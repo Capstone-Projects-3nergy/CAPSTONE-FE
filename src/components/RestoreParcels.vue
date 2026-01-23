@@ -6,7 +6,13 @@ import ButtonWeb from './ButtonWeb.vue'
 import { restoreParcel } from '@/utils/fetchUtils'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-const emit = defineEmits(['confirmDetail', 'cancelDetail', 'redAlert'])
+const emit = defineEmits([
+  'confirmDetail',
+  'cancelDetail',
+  'redAlert',
+  'confirmMemberDetail',
+  'confirmStaffDetail'
+])
 
 const props = defineProps({
   parcelData: Object,
@@ -97,9 +103,15 @@ const restoreMemberFn = async () => {
     router
   )
 
-  if (!res || !res.ok) throw new Error('restore member failed')
+  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
+  if (!res || !res.ok) {
+    emit('redAlert')
+    emit('cancelDetail', true)
+    return
+  }
 
   userManager.restoreFromTrash(resident.value.id)
+  emit('confirmMemberDetail', true)
 }
 
 // ==============================
@@ -114,9 +126,15 @@ const restoreStaffFn = async () => {
     router
   )
 
-  if (!res || !res.ok) throw new Error('restore staff failed')
+  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
+  if (!res || !res.ok) {
+    emit('redAlert')
+    emit('cancelDetail', true)
+    return
+  }
 
   userManager.restoreFromTrash(staff.value.id)
+  emit('confirmStaffDetail', true)
 }
 
 const cancelAction = () => {
