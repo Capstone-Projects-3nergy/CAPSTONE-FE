@@ -9,6 +9,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import PersonalInfoCard from './PersonalInfoCard.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
@@ -459,13 +460,31 @@ function formatDateTime(datetimeStr) {
         </div>
 
         <div class="flex flex-col mb-4 gap-4"></div>
-
-        <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
+        <PersonalInfoCard
+          :fullName="loginManager.user.fullName"
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
+          :roomNumber="loginManager.user.roomNumber"
+          :position="loginManager.user.position"
+          :dormName="userDormName"
+          :status="loginManager.user.status"
+          :lineId="loginManager.user.lineId"
+          :phoneNumber="loginManager.user.phoneNumber"
+          :profileImage="loginManager.user.profileImage"
+          :showNotify="true"
+          @edit="goToEditProfile"
+          @confirmAccount="confirmAccountFn"
+          @redAlertError="redAlertErrorFn"
+          @incorrectemailform="incorrectemailformFn"
+          @emailRequire="emailRequireFn"
+        />
+        <!-- <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
           <section>
             <h3 class="font-semibold text-lg mb-4">Resident Info:</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <!-- First Name -->
+              
               <div>
                 <label class="block font-semibold mb-1">First Name </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -473,7 +492,6 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Last Name -->
               <div>
                 <label class="block font-semibold mb-1">Last Name </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -481,7 +499,7 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Email -->
+            
               <div>
                 <label class="block font-semibold mb-1">Email </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -489,7 +507,7 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Room Number -->
+          
               <div>
                 <label class="block font-semibold mb-1">Room Number </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -497,7 +515,7 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Dormitory -->
+           
               <div>
                 <label class="block font-semibold mb-1">Dormitory </label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -505,7 +523,7 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Line ID -->
+          
               <div>
                 <label class="block font-semibold mb-1">Line ID</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -513,7 +531,6 @@ function formatDateTime(datetimeStr) {
                 </p>
               </div>
 
-              <!-- Phone Number -->
               <div>
                 <label class="block font-semibold mb-1">Phone Number</label>
                 <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
@@ -523,125 +540,7 @@ function formatDateTime(datetimeStr) {
             </div>
           </section>
 
-          <!-- <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.trackingNumber || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.recipientName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.senderName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.parcelType || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Company</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.companyName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Parcel Image</label>
-                <div v-if="parcel?.imageUrl">
-                  <img
-                    :src="parcel.imageUrl"
-                    alt="Parcel Image"
-                    class="w-48 h-48 object-cover border rounded-md"
-                  />
-                </div>
-                <div v-else class="text-gray-400">No image available</div>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.residentName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Room Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.roomNumber || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ parcel?.email || '-' }}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Received At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ formatDateTime(parcel?.receivedAt || '-') }}
-                </p>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Updated At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ formatDateTime(parcel?.updatedAt || '-') }}
-                </p>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
-                  {{ formatDateTime(parcel?.pickedUpAt || '-') }}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <p
-                  class="w-full p-2 text-gray-700 rounded-md"
-                  :class="{
-                    'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                    'bg-blue-400': parcel?.status === 'RECEIVED',
-                    'bg-green-400': parcel?.status === 'PICKED_UP'
-                  }"
-                >
-                  {{ parcel?.status || '-' }}
-                </p>
-              </div>
-            </div>
-          </section> -->
+         
           <div class="flex items-center gap-3 ml-auto justify-end">
             <ButtonWeb
               label="Edit"
@@ -656,7 +555,7 @@ function formatDateTime(datetimeStr) {
               class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
             />
           </div>
-        </form>
+        </form> -->
       </main>
     </div>
   </div>

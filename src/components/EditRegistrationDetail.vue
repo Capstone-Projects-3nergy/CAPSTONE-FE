@@ -7,6 +7,7 @@ import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
+import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
@@ -1052,47 +1053,34 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           /> -->
         </div>
-        <form
+        <EditPersonalInfoProfile
+          mode="edit"
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
+          :roomNumber="loginManager.user.roomNumber"
+          :dormName="userDormName"
+          :position="loginManager.user.position"
+          :status="loginManager.user.status"
+          @cancel="goBackProfilePage"
+          @success="showProfileSuccess"
+          @error="showProfileError"
+          @first-name-error="showFirstNameError"
+          @last-name-error="showLastNameError"
+          @position-error="showPositionError"
+          @phone-error="showPhoneError"
+          @first-name-required="showFirstNameRequired"
+          @last-name-required="showLastNameRequired"
+          @email-required="showEmailRequired"
+          @dorm-ID-required="showDormRequired"
+          @room-number-required="showRoomNumberRequired"
+        ></EditPersonalInfoProfile>
+        <!-- <form
           class="bg-white p-6 rounded-[5px] shadow space-y-8"
           @submit.prevent="saveEditParcel"
         >
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-
-            <!-- <div class="mb-4">
-              <label class="block font-semibold mb-1">Search Name</label>
-              <input
-                type="text"
-                v-model="recipientSearch"
-                placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border rounded-md p-2"
-                :disabled="form.status === 'PICKED_UP'"
-              />
-
-              <ul
-                v-if="recipientSearch"
-                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
-              >
-                <li
-                  v-for="r in filteredResidents"
-                  :key="r.userId"
-                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
-                  v-if="filteredResidents.length > 0"
-                  @click="selectResident(r)"
-                >
-                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
-                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
-                </li>
-
-                <li
-                  v-if="filteredResidents.length === 0"
-                  class="px-3 py-1 text-gray-400"
-                >
-                  No residents found.
-                </li>
-              </ul>
-            </div> -->
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block font-semibold mb-1">First Name</label>
@@ -1127,7 +1115,7 @@ function formatDateTime(datetimeStr) {
                   class="w-full border rounded-md p-2 bg-white"
                 />
               </div>
-              <!-- Dormitory -->
+
               <div>
                 <label class="block font-semibold mb-1">Dormitory </label>
                 <select
@@ -1145,7 +1133,6 @@ function formatDateTime(datetimeStr) {
                 </select>
               </div>
 
-              <!-- Line ID -->
               <div>
                 <label class="block font-semibold mb-1">Line ID</label>
                 <input
@@ -1155,7 +1142,6 @@ function formatDateTime(datetimeStr) {
                 />
               </div>
 
-              <!-- Phone Number -->
               <div>
                 <label class="block font-semibold mb-1">Phone Number</label>
                 <input
@@ -1166,195 +1152,6 @@ function formatDateTime(datetimeStr) {
               </div>
             </div>
           </section>
-
-          <!-- <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
-                <input
-                  type="text"
-                  v-model="form.trackingNumber"
-                  class="w-full border rounded-md p-2"
-                />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
-                <input
-                  type="text"
-                  v-model="form.recipientName"
-                  class="w-full border rounded-md p-2"
-                />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
-                <input
-                  type="text"
-                  v-model="form.senderName"
-                  class="w-full border rounded-md p-2"
-                />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
-
-                <select
-                  v-model="form.parcelType"
-                  class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-                >
-                  <option disabled value="">Select Parcel Type</option>
-                  <option value="DOCUMENT">Document</option>
-                  <option value="BOX">Box</option>
-                  <option value="ELECTRONIC">Electronic</option>
-                </select>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Company</label>
-
-                <select
-                  v-model="form.companyId"
-                  class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  <option disabled value="">Select Company</option>
-
-                  <option
-                    v-for="company in companyList"
-                    :key="company.companyId"
-                    :value="company.companyId"
-                  >
-                    {{ company.companyName }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="mb-4">
-              <label class="block font-semibold mb-1"
-                >Search Resident Name</label
-              >
-              <input
-                type="text"
-                v-model="recipientSearch"
-                placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border rounded-md p-2"
-                :disabled="form.status === 'PICKED_UP'"
-              />
-
-              <ul
-                v-if="recipientSearch"
-                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
-              >
-                <li
-                  v-for="r in filteredResidents"
-                  :key="r.userId"
-                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
-                  v-if="filteredResidents.length > 0"
-                  @click="selectResident(r)"
-                >
-                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
-                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
-                </li>
-
-                <li
-                  v-if="filteredResidents.length === 0"
-                  class="px-3 py-1 text-gray-400"
-                >
-                  No residents found matching your search terms.
-                </li>
-              </ul>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
-                <input
-                  type="text"
-                  :value="form.residentName"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Room Number</label>
-                <input
-                  type="text"
-                  :value="form.roomNumber"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <input
-                  type="text"
-                  :value="form.email"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="flex-1">
-                <label class="block font-semibold mb-1">Received At</label>
-                <input
-                  type="text"
-                  :value="form.receivedAt"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold mb-1">Updated At</label>
-                <input
-                  type="text"
-                  :value="form.updatedAt"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-
-              <div class="flex-1">
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <input
-                  placeholder="-"
-                  type="text"
-                  :value="form.pickedUpAt"
-                  
-                  class="w-full border rounded-md p-2 bg-gray-100"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
-
-            <div class="flex gap-6 items-start">
-              <div class="flex-1">
-                <select
-                  v-model="form.status"
-                  class="border rounded-md p-2 w-auto"
-                  :disabled="form.status === 'PICKED_UP'"
-                >
-                  <option v-for="s in statusOptions" :key="s" :value="s">
-                    {{ s }}
-                  </option>
-                </select>
-
-                <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: Waiting for Staff →
-                  Received → Picked Up
-                </p>
-              </div>
-            </div>
-          </section> -->
 
           <div class="flex justify-end space-x-2 mt-6">
             <ButtonWeb
@@ -1371,7 +1168,7 @@ function formatDateTime(datetimeStr) {
               class="text-[#898989]"
             />
           </div>
-        </form>
+        </form> -->
       </main>
     </div>
   </div>
