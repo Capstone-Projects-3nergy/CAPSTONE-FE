@@ -13,6 +13,7 @@ import PersonalInfoCard from './PersonalInfoCard.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import {
@@ -32,6 +33,7 @@ import {
   updateParcelStatus
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
+const userManager = useUserManager()
 const router = useRouter()
 const route = useRoute()
 const tid = Number(route.params.tid)
@@ -68,6 +70,51 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
+const mapMemberData = (data) => ({
+  id: data.id,
+  firstName: data.firstName || '',
+  lastName: data.lastName || '',
+  email: data.email || '',
+  roomNumber: data.roomNumber || '',
+  dormName: data.dormName || '',
+  phoneNumber: data.phoneNumber || '',
+  lineId: data.lineId || '',
+  status: data.status || 'INACTIVE',
+  profileImageUrl: data.profileImageUrl || '',
+  updatedAt: data.updatedAt || null,
+  createdAt: data.createdAt || null
+})
+const residentDetail = ref(null)
+const members = computed(() => userManager.getMembers())
+const getMemberDetail = async (memberId) => {
+  if (!memberId) return
+
+  // 🔹 1. หาใน store (ผ่าน computed)
+  const localMember = members.value.find((m) => m.id === memberId)
+
+  if (localMember) {
+    residentDetail.value = localMember
+    return
+  }
+
+  // 🔹 2. ดึงจาก API
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      memberId,
+      router
+    )
+
+    if (data) {
+      const mapped = mapMemberData(data)
+      residentDetail.value = mapped
+      userManager.addMember(mapped)
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const parcelManager = useParcelManager()
 const parcels = computed(() => parcelManager.getParcels())
 const firstName = computed(() => {
@@ -79,6 +126,7 @@ const lastName = computed(() => {
   if (!parcel.value?.recipientName) return '-'
   return parcel.value.recipientName.split(' ').slice(1).join(' ')
 })
+
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
@@ -116,6 +164,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
+  getMemberDetail(tidNum)
 })
 
 watch(

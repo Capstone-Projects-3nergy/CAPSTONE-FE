@@ -193,6 +193,7 @@ const loadResidents = async () => {
     residents.value = []
   }
 }
+const userManager = useUserManager()
 const getParcelDetail = async (tid) => {
   if (!tid) return
   const tidNum = Number(tid)
@@ -244,6 +245,55 @@ const getParcelDetail = async (tid) => {
   await loadDom()
   await loadResidents()
 }
+const getMemberDetail = async (memberId) => {
+  if (!memberId) return
+  const memberIdNum = Number(memberId)
+
+  // 🔹 1. หาใน store ก่อน
+  const localMember = userManager.getMembers().find((m) => m.id === memberIdNum)
+
+  if (localMember) {
+    form.value = {
+      ...form.value,
+      ...localMember
+    }
+    originalForm.value = { ...form.value }
+    return
+  }
+
+  // 🔹 2. ดึงจาก API
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      memberIdNum,
+      router
+    )
+
+    if (!data) return
+
+    form.value = {
+      id: data.id,
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      email: data.email || '',
+      roomNumber: data.roomNumber || '',
+      dormitoryId: data.dormitoryId || '',
+      lineId: data.lineId || '',
+      phoneNumber: data.phoneNumber || '',
+      status: data.status || 'ACTIVE',
+      profileImage: data.profileImage || '',
+      updatedAt: formatDateTime(data.updatedAt)
+    }
+
+    userManager.addMember(form.value)
+    originalForm.value = { ...form.value }
+  } catch (err) {
+    console.error(err)
+  }
+
+  await loadDormitories?.()
+}
+
 const getResidentDetail = async (tid) => {
   if (!tid) return
   const tidNum = Number(tid)
