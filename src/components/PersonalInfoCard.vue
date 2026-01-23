@@ -583,9 +583,9 @@ const profileImageUrlPreview = computed(() => {
           <div
             class="md:w-1/3 flex flex-col items-center text-center justify-center"
           >
-            <p class="mb-4 text-black font-semibold text-lg">
+            <!-- <p class="mb-4 text-black font-semibold text-lg">
               {{ fullName }}
-            </p>
+            </p> -->
 
             <div
               class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
@@ -608,7 +608,7 @@ const profileImageUrlPreview = computed(() => {
           <div class="md:w-2/3">
             <div class="flex items-center gap-3 mb-8">
               <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                {{ title }}
+                {{ fullName }}
               </h2>
             </div>
 

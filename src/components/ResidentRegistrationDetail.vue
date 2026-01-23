@@ -480,10 +480,7 @@ function goToEditResident() {
             :profile="false"
             :residentDetail="true"
             @edit="goToEditResident"
-            @confirmAccount="confirmAccountFn"
-            @redAlertError="redAlertErrorFn"
-            @incorrectemailform="incorrectemailformFn"
-            @emailRequire="emailRequireFn"
+            @cancel="backToManageResident"
           />
         </div>
         <!-- <form class="bg-white p-6 rounded-[5px] shadow space-y-8">

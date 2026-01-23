@@ -31,7 +31,9 @@ const props = defineProps({
   position: { type: String, default: '-' },
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
-  phoneNumber: { type: String, default: null }
+  phoneNumber: { type: String, default: null },
+  editProfile: { type: String, default: true },
+  editResidentDetail: { type: String, required: false }
 })
 
 const emit = defineEmits([
@@ -561,7 +563,7 @@ const isSaveDisabled = computed(() => {
 
 <template>
   <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row gap-2">
+    <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
@@ -788,6 +790,223 @@ const isSaveDisabled = computed(() => {
               color="gray"
               @click="cancel"
             />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
+      <!-- 🔹 CARD เดียว -->
+      <div
+        class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+      >
+        <!-- 🔹 WRAPPER -->
+        <div class="flex flex-col md:flex-row gap-10">
+          <!-- ================= LEFT : Profile Image ================= -->
+          <div
+            class="md:w-1/3 flex flex-col items-center justify-center text-center"
+          >
+            <div class="relative inline-block">
+              <!-- Avatar -->
+
+              <div
+                class="w-32 h-32 rounded-full overflow-hidden border shadow-sm"
+              >
+                <img
+                  v-if="profileImageUrlPreview"
+                  :src="profileImageUrlPreview"
+                  alt="Profile"
+                  class="w-full h-full object-cover"
+                />
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center font-semibold"
+                  :class="{
+                    'bg-[#185DC0] text-white text-4xl': props.mode !== 'add',
+                    'bg-white text-black text-xl': props.mode === 'add'
+                  }"
+                >
+                  {{ userInitial }}
+                </div>
+              </div>
+
+              <!-- ✏️ Edit icon -->
+              <div
+                class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+                @click="$refs.imageInput.click()"
+              >
+                <svg
+                  class="transition hover:text-[#8C8F91]"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+                    fill="#8C8F91"
+                  />
+                </svg>
+
+                <!-- Tooltip -->
+                <div
+                  class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+                >
+                  <div
+                    class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow"
+                  >
+                    Change Image
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- hidden input -->
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              ref="imageInput"
+              @change="onImageChange"
+            />
+          </div>
+
+          <!-- ================= RIGHT : Edit Information ================= -->
+          <div class="md:w-2/3">
+            <!-- Header -->
+            <div class="mb-8">
+              <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+                {{ displayFullName }}
+              </h2>
+            </div>
+
+            <!-- Form Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Firstname
+                  <span v-if="mode === 'add'" class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.firstName"
+                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Lastname
+                  <span v-if="mode === 'add'" class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.lastName"
+                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Email
+                  <span v-if="mode === 'add'" class="text-red-500">*</span>
+                </label>
+                <input
+                  :disabled="mode === 'edit'"
+                  v-model="form.email"
+                  :class="[
+                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                  ]"
+                />
+              </div>
+
+              <div
+                class="flex flex-col"
+                v-if="roomNumber !== null || mode == 'add'"
+              >
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Room Number
+                  <span v-if="mode === 'add'" class="text-red-500">*</span>
+                </label>
+                <input
+                  :disabled="mode === 'edit'"
+                  v-model="form.roomNumber"
+                  :class="[
+                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                  ]"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Dormitory
+                </label>
+                <input
+                  v-model="form.dormName"
+                  :class="[
+                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                  ]"
+                />
+              </div>
+
+              <div
+                class="flex flex-col"
+                v-if="mode == 'add' && loginManager.user.role === 'STAFF'"
+              >
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Dormitory <span class="text-red-500">*</span>
+                </label>
+                <select
+                  v-model="forms.dormId"
+                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                >
+                  <option disabled value="null">Select Dormitory</option>
+                  <option
+                    v-for="dorm in dormList"
+                    :key="dorm.dormId"
+                    :value="dorm.dormId"
+                  >
+                    {{ dorm.dormName }}
+                  </option>
+                </select>
+              </div>
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Line ID
+                </label>
+                <input
+                  v-model="form.lineId"
+                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label class="block text-sm text-black font-semibold mb-1">
+                  Phone Number
+                </label>
+                <input
+                  v-model="form.phoneNumber"
+                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                />
+              </div>
+
+              <!-- Actions -->
+              <div class="md:col-span-2 flex gap-3 mt-6 justify-end">
+                <ButtonWeb
+                  class="text-sm py-2 md:text-base md:py-2.5"
+                  :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
+                  color="blue"
+                  @click="submit"
+                  :disabled="isSaveDisabled"
+                />
+                <ButtonWeb
+                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
+                  label="Cancel Changes"
+                  color="gray"
+                  @click="cancel"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
