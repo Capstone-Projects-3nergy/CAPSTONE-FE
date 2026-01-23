@@ -33,7 +33,9 @@ const props = defineProps({
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null },
   showNotify: { type: Boolean, default: true },
-  showMenu: { type: Boolean, default: true }
+  showMenu: { type: Boolean, default: true },
+  profile: { type: Boolean, default: true },
+  residentDetail :{ type: Boolean, default: false }
 })
 const resetForm = () => {
   newEmail.value = ''
@@ -259,7 +261,7 @@ const profileImageUrlPreview = computed(() => {
 </script>
 <template>
   <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row gap-2">
+    <div v-if="profile"class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
@@ -570,5 +572,113 @@ const profileImageUrlPreview = computed(() => {
         </div>
       </div>
     </div>
+    <div v-if="residentDetail" class="max-w-4xl mx-auto">
+  <div
+    class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+  >
+    <!-- Profile Header -->
+    <div class="flex flex-col items-center text-center mb-10">
+      <div
+        class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
+      >
+        <img
+          v-if="profileImageUrlPreview"
+          :src="profileImageUrlPreview"
+          class="w-full h-full object-cover"
+        />
+        <div
+          v-else
+          class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
+        >
+          {{ userInitial }}
+        </div>
+      </div>
+
+      <p class="mt-4 text-black font-semibold text-lg">
+        {{ fullName }}
+      </p>
+    </div>
+
+    <!-- Personal Information -->
+    <div>
+      <div class="flex items-center gap-3 mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+          {{ title }}
+        </h2>
+
+        <svg
+          class="cursor-pointer hover:text-[#8C8F91]"
+          @click="$emit('edit')"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.84 1.83l3.75 3.75zM3 17.25V21h3.75l11.06-11.06l-3.75-3.75z"
+          />
+        </svg>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
+        <div>
+          <label class="block text-sm font-semibold mb-1">Firstname</label>
+          <p class="text-[#8C8F91] font-medium">{{ firstName }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Lastname</label>
+          <p class="text-[#8C8F91] font-medium">{{ lastName }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Email</label>
+          <p class="text-[#8C8F91] font-medium break-all">{{ email }}</p>
+        </div>
+
+        <div v-if="loginManager.user.role === 'STAFF'">
+          <label class="block text-sm font-semibold mb-1">Position</label>
+          <p class="text-[#8C8F91] font-medium">{{ position }}</p>
+        </div>
+
+        <div v-if="roomNumber !== null">
+          <label class="block text-sm font-semibold mb-1">Room Number</label>
+          <p class="text-[#8C8F91] font-medium">{{ roomNumber }}</p>
+        </div>
+
+        <div
+          v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
+        >
+          <label class="block text-sm font-semibold mb-1">Dormitory</label>
+          <p class="text-[#8C8F91] font-medium">{{ dormName }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Line ID</label>
+          <p class="text-[#8C8F91] font-medium">{{ display(lineId) }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Phone Number</label>
+          <p class="text-[#8C8F91] font-medium">
+            {{ display(phoneNumber) }}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-semibold">Status:</label>
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+            :class="statusClass(status)"
+          >
+            {{ displayStatus(status) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
   </div>
 </template>
