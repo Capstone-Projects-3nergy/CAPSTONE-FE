@@ -422,7 +422,7 @@ const getInitial = (name) => {
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[150px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
-                  View Member Detail
+                  View Resident Detail
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
