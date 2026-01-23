@@ -460,7 +460,7 @@ function goToEditResident() {
             />
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">
-            Resident &gt; Details
+            Manages Resident &gt; Details
           </h2>
         </div>
 
