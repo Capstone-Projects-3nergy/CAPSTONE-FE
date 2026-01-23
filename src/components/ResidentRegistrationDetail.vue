@@ -180,6 +180,9 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+function goToEditResident() {
+  router.replace({ name: 'editdetailregistration' })
+}
 </script>
 
 <template>
@@ -456,29 +459,31 @@ function formatDateTime(datetimeStr) {
               d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Member &gt; Details</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">
+            Resident &gt; Details
+          </h2>
         </div>
 
-        <div class="flex flex-col mb-4 gap-4"></div>
-        <PersonalInfoCard
-          :fullName="loginManager.user.fullName"
-          :firstName="firstName"
-          :lastName="lastName"
-          :email="loginManager.user.email"
-          :roomNumber="loginManager.user.roomNumber"
-          :position="loginManager.user.position"
-          :dormName="userDormName"
-          :status="loginManager.user.status"
-          :lineId="loginManager.user.lineId"
-          :phoneNumber="loginManager.user.phoneNumber"
-          :profileImage="loginManager.user.profileImage"
-          :showNotify="true"
-          @edit="goToEditProfile"
-          @confirmAccount="confirmAccountFn"
-          @redAlertError="redAlertErrorFn"
-          @incorrectemailform="incorrectemailformFn"
-          @emailRequire="emailRequireFn"
-        />
+        <div class="flex flex-col mb-4 gap-4">
+          <PersonalInfoCard
+            :fullName="loginManager.user.fullName"
+            :firstName="firstName"
+            :lastName="lastName"
+            :email="loginManager.user.email"
+            :roomNumber="loginManager.user.roomNumber"
+            :dormName="userDormName"
+            :status="loginManager.user.status"
+            :lineId="loginManager.user.lineId"
+            :phoneNumber="loginManager.user.phoneNumber"
+            :profileImage="loginManager.user.profileImage"
+            :showNotify="true"
+            @edit="goToEditResident"
+            @confirmAccount="confirmAccountFn"
+            @redAlertError="redAlertErrorFn"
+            @incorrectemailform="incorrectemailformFn"
+            @emailRequire="emailRequireFn"
+          />
+        </div>
         <!-- <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
           <section>
             <h3 class="font-semibold text-lg mb-4">Resident Info:</h3>
