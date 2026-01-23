@@ -614,6 +614,26 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+const showProfileError = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+}
+const showPhoneError = () => {
+  phoneError.value = true
+  setTimeout(() => (phoneError.value = false), 10000)
+}
+const showProfileSuccess = () => {
+  editSuccess.value = true
+  setTimeout(() => (editSuccess.value = false), 10000)
+}
+const showFirstNameError = () => {
+  firstNameError.value = true
+  setTimeout(() => (firstNameError.value = false), 10000)
+}
+const showLastNameError = () => {
+  lastNameError.value = true
+  setTimeout(() => (lastNameError.value = false), 10000)
+}
 </script>
 
 <template>
@@ -927,15 +947,6 @@ function formatDateTime(datetimeStr) {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
-          <!-- <AlertPopUp
-            v-if="positionError"
-            title="Position can only type as text."
-            message="Error!!"
-            styleType="red"
-            operate="positionMessage"
-            @closePopUp="closePopUp"
-          /> -->
-
           <AlertPopUp
             v-if="error"
             :titles="'There is a problem. Please try again later.'"
@@ -944,114 +955,6 @@ function formatDateTime(datetimeStr) {
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <!-- <AlertPopUp
-            v-if="firstNameRequired"
-            :titles="'First name is required.'"
-            message="Error!!"
-            styleType="red"
-            operate="firstNameRequired"
-            @closePopUp="closePopUp"
-          />
-
-          <AlertPopUp
-            v-if="lastNameRequired"
-            :titles="'Last name is required.'"
-            message="Error!!"
-            styleType="red"
-            operate="lastNameRequired"
-            @closePopUp="closePopUp"
-          />
-
-          <AlertPopUp
-            v-if="emailRequired"
-            :titles="'Email is required.'"
-            message="Error!!"
-            styleType="red"
-            operate="emailRequired"
-            @closePopUp="closePopUp"
-          />
-
-          <AlertPopUp
-            v-if="dormRequired"
-            :titles="'Dormitory is required.'"
-            message="Error!!"
-            styleType="red"
-            operate="dormRequired"
-            @closePopUp="closePopUp"
-          />
-
-          <AlertPopUp
-            v-if="roomNumberRequired"
-            :titles="'Room number is required.'"
-            message="Error!!"
-            styleType="red"
-            operate="roomNumberRequired"
-            @closePopUp="closePopUp"
-          /> -->
-          <!-- <AlertPopUp
-            v-if="editSuccess"
-            :titles="'Edit Parcel is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="editSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="roomNumberError"
-            :titles="'Room Number can only be typed as number.'"
-            message="Error!!"
-            styleType="red"
-            operate="roomNumber"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="trackingNumberError"
-            :titles="'Thai characters are not allowed in the Tracking Number.'"
-            message="Error!!"
-            styleType="red"
-            operate="trackingNumber"
-            @closePopUp="closePopUp('trackingNumber')"
-          />
-          <AlertPopUp
-            v-if="SenderNameError"
-            :titles="'Sender Name can only be typed as text.'"
-            message="Error!!"
-            styleType="red"
-            operate="SenderName"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="recipientNameError"
-            :titles="'Recipient Name can only be typed as text.'"
-            message="Error!!"
-            styleType="red"
-            operate="RecipientName"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="parcelTypeError"
-            :titles="'Parcel Type can only be typed as text.'"
-            message="Error!!"
-            styleType="red"
-            operate="parcelType "
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="selectName"
-            :titles="'Please Select Resident Name'"
-            message="Error!!"
-            styleType="red"
-            operate="selectName"
-            @closePopUp="closePopUp"
-          /> -->
         </div>
         <EditPersonalInfoProfile
           mode="edit"

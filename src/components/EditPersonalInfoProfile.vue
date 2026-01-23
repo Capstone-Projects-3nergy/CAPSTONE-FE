@@ -537,6 +537,88 @@ const saveEditProfile = async () => {
     emit('error', true)
   }
 }
+const saveEditDetail = async () => {
+  // -----------------------
+  // validate name (ไทย + อังกฤษ)
+  // -----------------------
+  const nameRegex = /^[A-Za-zก-๙\s]+$/
+
+  if (!nameRegex.test(form.value.firstName)) {
+    emit('first-name-error', true)
+    return
+  }
+
+  if (!nameRegex.test(form.value.lastName)) {
+    emit('last-name-error', true)
+    return
+  }
+
+  // -----------------------
+  // validate phone (optional)
+  // -----------------------
+  if (form.value.phoneNumber) {
+    if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      emit('phone-error', true)
+      return
+    }
+
+    const digits = form.value.phoneNumber.replace(/-/g, '')
+    if (digits.length < 9 || digits.length > 10) {
+      emit('phone-error', true)
+      return
+    }
+  }
+
+  try {
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      roomNumber: form.value.roomNumber || null,
+      lineId: form.value.lineId || null,
+      phoneNumber: form.value.phoneNumber || null
+    }
+
+    if (isStaff) {
+      body.position = form.value.position || null
+    }
+
+    if (newAvatar.value) {
+      body.profileImage = newAvatar.value
+    }
+
+    // -----------------------
+    // API call (คงไว้ตามที่ขอ)
+    // -----------------------
+    const updated = await updateProfileWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/details`,
+      body,
+      router
+    )
+
+    if (!updated) {
+      emit('error', true)
+      return
+    }
+
+    userManager.editMember(updated.id, updated)
+
+    // -----------------------
+    // reset local state
+    // -----------------------
+    newAvatar.value = null
+    originalForm.value = { ...form.value }
+
+    emit('success', true)
+    isEdit.value = false
+  } catch (err) {
+    console.error(err)
+    emit('error', true)
+  }
+}
+
 const displayFullName = computed(() => {
   const first = form.value.firstName?.trim()
   const last = form.value.lastName?.trim()
@@ -996,7 +1078,7 @@ const isSaveDisabled = computed(() => {
                   class="text-sm py-2 md:text-base md:py-2.5"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
-                  @click="submit"
+                  @click="saveEditDetail"
                   :disabled="isSaveDisabled"
                 />
                 <ButtonWeb

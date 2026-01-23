@@ -63,6 +63,26 @@ export const useUserManager = defineStore('userManager', () => {
       })
     }
   }
+  const editMember = (memberId, updatedMember) => {
+    const index = findIndexById(members, memberId)
+    if (index !== -1) {
+      members.splice(index, 1, {
+        ...members[index],
+        ...updatedMember,
+        updatedAt: new Date().toISOString()
+      })
+    }
+  }
+  const editStaff = (staffId, updatedStaff) => {
+    const index = findIndexById(staffs, staffId)
+    if (index !== -1) {
+      staffs.splice(index, 1, {
+        ...staffs[index],
+        ...updatedStaff,
+        updatedAt: new Date().toISOString()
+      })
+    }
+  }
 
   /* ---------- move to trash ---------- */
   const moveMemberToTrash = (id) => {
@@ -145,6 +165,9 @@ export const useUserManager = defineStore('userManager', () => {
 
     updateMember,
     updateStaff,
+
+    editMember,
+    editStaff,
 
     moveMemberToTrash,
     moveStaffToTrash,
