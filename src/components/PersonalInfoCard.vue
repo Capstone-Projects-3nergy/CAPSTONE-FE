@@ -631,23 +631,16 @@ const profileImageUrlPreview = computed(() => {
                 <p class="text-[#8C8F91] font-medium break-all">{{ email }}</p>
               </div>
 
-              <div v-if="loginManager.user.role === 'STAFF'">
-                <label class="block text-sm font-semibold mb-1">Position</label>
-                <p class="text-[#8C8F91] font-medium">{{ position }}</p>
-              </div>
-
-              <div v-if="roomNumber !== null">
+              <div>
                 <label class="block text-sm font-semibold mb-1"
                   >Room Number</label
                 >
-                <p class="text-[#8C8F91] font-medium">{{ roomNumber }}</p>
+                <p class="text-[#8C8F91] font-medium">
+                  {{ display(roomNumber) }}
+                </p>
               </div>
 
-              <div
-                v-if="
-                  dormName !== null && loginManager.user.role === 'RESIDENT'
-                "
-              >
+              <div>
                 <label class="block text-sm font-semibold mb-1"
                   >Dormitory</label
                 >

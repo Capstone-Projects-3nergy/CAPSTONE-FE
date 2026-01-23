@@ -69,6 +69,7 @@ const form = ref({
   email: '',
   roomNumber: '',
   dormName: '',
+  dormId: '',
   lineId: '',
   position: '',
   phoneNumber: '',
@@ -493,6 +494,7 @@ const saveEditProfile = async () => {
     // payload
     // -----------------------
     const body = {
+      userId: auth.user.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
@@ -574,11 +576,13 @@ const saveEditDetail = async () => {
     // payload
     // -----------------------
     const body = {
+      userId: auth.user.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null
+      phoneNumber: form.value.phoneNumber || null,
+      dormId: form.value.dormId.dormId
     }
 
     if (isStaff) {
@@ -1000,43 +1004,20 @@ const isSaveDisabled = computed(() => {
                 />
               </div>
 
-              <div
-                class="flex flex-col"
-                v-if="roomNumber !== null || mode == 'add'"
-              >
+              <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
                   Room Number
-                  <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
-                  :disabled="mode === 'edit'"
                   v-model="form.roomNumber"
                   :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
                   ]"
                 />
               </div>
-
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
-                </label>
-                <input
-                  v-model="form.dormName"
-                  :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
-                  ]"
-                />
-              </div>
-
-              <div
-                class="flex flex-col"
-                v-if="mode == 'add' && loginManager.user.role === 'STAFF'"
-              >
-                <label class="block text-sm text-black font-semibold mb-1">
-                  Dormitory <span class="text-red-500">*</span>
                 </label>
                 <select
                   v-model="forms.dormId"
