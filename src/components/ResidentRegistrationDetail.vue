@@ -466,6 +466,7 @@ function goToEditResident() {
 
         <div class="flex flex-col mb-4 gap-4">
           <PersonalInfoCard
+            :title="'Resident Information'"
             :fullName="loginManager.user.fullName"
             :firstName="firstName"
             :lastName="lastName"
@@ -477,6 +478,7 @@ function goToEditResident() {
             :phoneNumber="loginManager.user.phoneNumber"
             :profileImage="loginManager.user.profileImage"
             :showNotify="true"
+            :showMenu="false"
             @edit="goToEditResident"
             @confirmAccount="confirmAccountFn"
             @redAlertError="redAlertErrorFn"
