@@ -577,6 +577,11 @@ const profileImageUrlPreview = computed(() => {
       <div
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
+        <div class="mb-6 text-center md:hidden">
+          <h2 class="text-xl font-semibold text-gray-800">
+            {{ fullName }}
+          </h2>
+        </div>
         <!-- 🔹 WRAPPER ซ้าย-ขวา -->
         <div class="flex flex-col md:flex-row gap-10">
           <!-- ================= LEFT : Profile Header ================= -->
@@ -607,7 +612,9 @@ const profileImageUrlPreview = computed(() => {
           <!-- ================= RIGHT : Personal Information ================= -->
           <div class="md:w-2/3">
             <div class="flex items-center gap-3 mb-8">
-              <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+              <h2
+                class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800"
+              >
                 {{ fullName }}
               </h2>
             </div>
