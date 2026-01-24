@@ -1161,6 +1161,7 @@ const closePopUp = (operate) => {
           :showDelete="false"
           :hideTrash="true"
           :showMobile="true"
+          :showAction="false"
           :showActionStatus="true"
           :showRoom="false"
           :showUpdateAt="false"
