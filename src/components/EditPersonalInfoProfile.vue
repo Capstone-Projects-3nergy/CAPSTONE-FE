@@ -648,7 +648,7 @@ const isSaveDisabled = computed(() => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto">
+  <div class="w-full mx-auto px-4">
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
@@ -894,7 +894,7 @@ const isSaveDisabled = computed(() => {
         <div class="flex flex-col md:flex-row gap-10">
           <!-- ================= LEFT : Profile Image ================= -->
           <div
-            class="md:w-1/3 flex flex-col items-center justify-center text-center"
+            class="md:w-1/3 flex flex-col items-center text-center pt-1 md:pt-0"
           >
             <div class="relative inline-block">
               <!-- Avatar -->
@@ -959,14 +959,17 @@ const isSaveDisabled = computed(() => {
               ref="imageInput"
               @change="onImageChange"
             />
+            <h2 class="hidden text-xl sm:text-2xl font-semibold text-gray-800">
+              {{ displayFullName }}
+            </h2>
           </div>
 
           <!-- ================= RIGHT : Edit Information ================= -->
           <div class="md:w-2/3">
             <!-- Header -->
-            <div class="hidden md:block mb-8">
+            <div class="md:block mb-8">
               <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                {{ displayFullName }}
+                Details:
               </h2>
             </div>
 

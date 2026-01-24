@@ -261,7 +261,7 @@ const profileImageUrlPreview = computed(() => {
 })
 </script>
 <template>
-  <div class="max-w-6xl mx-auto">
+  <div class="w-full mx-auto px-4">
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
@@ -573,7 +573,8 @@ const profileImageUrlPreview = computed(() => {
         </div>
       </div>
     </div>
-    <div v-if="residentDetail" class="max-w-4xl mx-auto">
+    <div v-if="residentDetail" class="max-w-5xl mx-auto">
+      <!-- 🔹 CARD เดียว -->
       <div
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
@@ -586,12 +587,8 @@ const profileImageUrlPreview = computed(() => {
         <div class="flex flex-col md:flex-row gap-10">
           <!-- ================= LEFT : Profile Header ================= -->
           <div
-            class="md:w-1/3 flex flex-col items-center text-center justify-center"
+            class="md:w-1/3 flex flex-col items-center text-center pt-1 md:pt-0"
           >
-            <!-- <p class="mb-4 text-black font-semibold text-lg">
-              {{ fullName }}
-            </p> -->
-
             <div
               class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
             >
@@ -607,15 +604,18 @@ const profileImageUrlPreview = computed(() => {
                 {{ userInitial }}
               </div>
             </div>
+            <p class="hidden mb-4 text-black font-semibold text-lg">
+              {{ fullName }}
+            </p>
           </div>
 
           <!-- ================= RIGHT : Personal Information ================= -->
           <div class="md:w-2/3">
             <div class="flex items-center gap-3 mb-8">
               <h2
-                class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800"
+                class="md:block text-xl sm:text-2xl font-semibold text-gray-800"
               >
-                {{ fullName }}
+                Details:
               </h2>
             </div>
 
