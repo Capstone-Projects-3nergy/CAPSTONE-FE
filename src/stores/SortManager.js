@@ -73,7 +73,6 @@ function sortByContactReverse(parcels) {
     })
   )
 }
-
 function searchParcels(parcels, keyword) {
   if (!keyword) return parcels
 
@@ -98,25 +97,49 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
+    // ชื่อผู้รับเดิม
     const nameMatch = p.recipientName
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
+    // ✅ เพิ่มจาก UpdateProfile
+    const firstNameMatch = p.firstName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
+    const lastNameMatch = p.lastName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
+    const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
+      .toLowerCase()
+      .includes(lowerKeyword)
+
     const phoneNumberMatch = p.phoneNumber
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+
     const statusMatch = p.status
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
     const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
 
     return (
       roomMatch ||
       trackingMatch ||
       nameMatch ||
+      firstNameMatch ||
+      lastNameMatch ||
+      fullNameMatch ||
       emailMatch ||
       statusMatch ||
       dateMatch ||
@@ -124,6 +147,57 @@ function searchParcels(parcels, keyword) {
     )
   })
 }
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     let formattedupdateAt = ''
+//     if (p.updateAt) {
+//       const date = new Date(p.updateAt)
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+//       formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+//     }
+
+//     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+//     const trackingMatch = p.trackingNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const nameMatch = p.recipientName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const phoneNumberMatch = p.phoneNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+//     const statusMatch = p.status
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
+
+//     return (
+//       roomMatch ||
+//       trackingMatch ||
+//       nameMatch ||
+//       emailMatch ||
+//       statusMatch ||
+//       dateMatch ||
+//       phoneNumberMatch
+//     )
+//   })
+// }
 
 function parseDate(dateStr) {
   return new Date(dateStr)
@@ -225,6 +299,36 @@ function sortByPhoneNumberReverse(parcels) {
     })
   )
 }
+function sortByPosition(parcels) {
+  parcels.sort((a, b) => {
+    const aPos = (a.position || '').toLowerCase()
+    const bPos = (b.position || '').toLowerCase()
+    return aPos.localeCompare(bPos, 'th', { sensitivity: 'base' })
+  })
+}
+
+function sortByPositionReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aPos = (a.position || '').toLowerCase()
+    const bPos = (b.position || '').toLowerCase()
+    return bPos.localeCompare(aPos, 'th', { sensitivity: 'base' })
+  })
+}
+function sortByDormName(parcels) {
+  parcels.sort((a, b) => {
+    const aDorm = (a.dormId?.dormName || '').toLowerCase()
+    const bDorm = (b.dormId?.dormName || '').toLowerCase()
+    return aDorm.localeCompare(bDorm, 'th', { sensitivity: 'base' })
+  })
+}
+
+function sortByDormNameReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aDorm = (a.dormId?.dormName || '').toLowerCase()
+    const bDorm = (b.dormId?.dormName || '').toLowerCase()
+    return bDorm.localeCompare(aDorm, 'th', { sensitivity: 'base' })
+  })
+}
 
 export {
   sortByRoomNumber,
@@ -250,5 +354,9 @@ export {
   sortByLineId,
   sortByLineIdReverse,
   sortByPhoneNumber,
-  sortByPhoneNumberReverse
+  sortByPhoneNumberReverse,
+  sortByPosition,
+  sortByPositionReverse,
+  sortByDormName,
+  sortByDormNameReverse
 }
