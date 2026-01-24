@@ -244,22 +244,24 @@ const getInitial = (name) => {
             v-if="showPhoto"
             class="px-4 py-2 md:py-3 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Photo:</span>
-
-            <div
-              class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center"
-            >
-              <img
-                v-if="p.photo"
-                :src="p.photo"
-                class="w-full h-full object-cover"
-              />
+            <div class="flex items-center gap-2">
+              <span class="md:hidden font-semibold text-[#185DC0]">Photo:</span>
 
               <div
-                v-else
-                class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
+                class="w-10 h-10 inline-flex flex-shrink-0 rounded-full overflow-hidden border border-gray-200 shadow-sm items-center justify-center"
               >
-                {{ getInitial(p.recipientName) }}
+                <img
+                  v-if="p.photo"
+                  :src="p.photo"
+                  class="w-full h-full object-cover"
+                />
+
+                <div
+                  v-else
+                  class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
+                >
+                  {{ getInitial(p.recipientName) }}
+                </div>
               </div>
             </div>
           </td>
@@ -267,7 +269,7 @@ const getInitial = (name) => {
             v-if="showTracking"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700"
+            <span class="md:hidden font-semibold text-[#185DC0]"
               >Tracking:
             </span>
             {{ p.trackingNumber }}
@@ -277,7 +279,7 @@ const getInitial = (name) => {
             v-if="showName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Name:</span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Name:</span>
             {{ p.recipientName }}
           </td>
 
@@ -285,7 +287,7 @@ const getInitial = (name) => {
             v-if="showMemberName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">
+            <span class="md:hidden font-semibold text-[#185DC0]">
               Resident name:
             </span>
             {{ p.recipientName }}
@@ -294,7 +296,7 @@ const getInitial = (name) => {
             v-if="showStaffName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">
+            <span class="md:hidden font-semibold text-[#185DC0]">
               Staff name:
             </span>
             {{ p.recipientName }}
@@ -303,7 +305,7 @@ const getInitial = (name) => {
             v-if="showMobile"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Mobile:</span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Mobile:</span>
             {{ p.mobile }}
           </td>
 
@@ -311,14 +313,14 @@ const getInitial = (name) => {
             v-if="showRoom"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Room: </span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Room: </span>
             {{ p.roomNumber }}
           </td>
 
           <td
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Email: </span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Email: </span>
             {{ p.email }}
           </td>
 
@@ -326,7 +328,7 @@ const getInitial = (name) => {
             v-if="showStatus"
             class="px-4 py-2 md:py-3 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Status:</span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -349,7 +351,7 @@ const getInitial = (name) => {
             v-if="showUpdateAt"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700"
+            <span class="md:hidden font-semibold text-[#185DC0]"
               >Updated At:</span
             >
             {{ formatDateTime(p.updateAt) }}
@@ -358,7 +360,7 @@ const getInitial = (name) => {
             v-if="showDeletedAt"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700"
+            <span class="md:hidden font-semibold text-[#185DC0]"
               >Deleted At:</span
             >
             {{ formatDateTime(p.deletedAt) }}
@@ -367,7 +369,7 @@ const getInitial = (name) => {
             v-if="showActionStatus"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-blue-700">Status:</span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -386,7 +388,7 @@ const getInitial = (name) => {
             v-if="showAction"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
           >
-            <span class="md:hidden font-semibold text-blue-700">Action:</span>
+            <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
 
             <button
               @click="$emit('view-detail', p.id)"
