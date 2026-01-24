@@ -86,11 +86,11 @@ const mapMemberData = (data) => ({
 })
 const residentDetail = ref(null)
 const members = computed(() => userManager.getMembers())
-const getMemberDetail = async (memberId) => {
-  if (!memberId) return
+const getMemberDetail = async (residentId) => {
+  if (!residentId) return
 
   // 🔹 1. หาใน store (ผ่าน computed)
-  const localMember = members.value.find((m) => m.id === memberId)
+  const localMember = members.value.find((m) => m.id === residentId)
 
   if (localMember) {
     residentDetail.value = localMember
@@ -101,7 +101,7 @@ const getMemberDetail = async (memberId) => {
   try {
     const data = await getItemById(
       `${import.meta.env.VITE_BASE_URL}/api/members`,
-      memberId,
+      residentId,
       router
     )
 

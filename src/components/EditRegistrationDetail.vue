@@ -175,7 +175,7 @@ const selectResident = (resident) => {
     `${resident.firstName || ''} ${resident.lastName || ''}`.trim()
 
   form.value.userId = resident.userId
-  form.value.residentName = name
+  form.value.residentName = resident.resident
   form.value.roomNumber = resident.roomNumber
   form.value.email = resident.email
 
@@ -245,12 +245,14 @@ const getParcelDetail = async (tid) => {
   await loadDom()
   await loadResidents()
 }
-const getMemberDetail = async (memberId) => {
-  if (!memberId) return
-  const memberIdNum = Number(memberId)
+const getMemberDetail = async (residentId) => {
+  if (!residentId) return
+  const residentIdNum = Number(residentId)
 
   // 🔹 1. หาใน store ก่อน
-  const localMember = userManager.getMembers().find((m) => m.id === memberIdNum)
+  const localMember = userManager
+    .getMembers()
+    .find((m) => m.id === residentIdNum)
 
   if (localMember) {
     form.value = {
@@ -265,7 +267,7 @@ const getMemberDetail = async (memberId) => {
   try {
     const data = await getItemById(
       `${import.meta.env.VITE_BASE_URL}/api/members`,
-      memberIdNum,
+      residentIdNum,
       router
     )
 

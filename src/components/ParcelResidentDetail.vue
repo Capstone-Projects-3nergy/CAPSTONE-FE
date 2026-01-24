@@ -71,7 +71,8 @@ const mapParcelData = (data) => ({
   companyId: data.companyId || null,
   companyName: data.companyName || '',
   residentId: data.residentId || null,
-  residentName: data.residentName || '',
+  firstName: data.firstName || '',
+  lastName: data.lastName || '',
   imageUrl: data.imageUrl || ''
 })
 const showResidentParcelPage = async function () {

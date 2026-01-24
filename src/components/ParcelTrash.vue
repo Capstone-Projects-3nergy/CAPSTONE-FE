@@ -194,14 +194,14 @@ onMounted(async () => {
   )
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
-      id: p.memberId,
-      memberName: p.memberName,
+      id: p.residentId,
+      firstName: p.firstName,
+      lastName: p.lastName,
       mobile: p.mobile,
+      lineId: p.lineId,
       email: p.contactEmail,
       status: mapActiveStatus(p.activeStatus),
-      receiveAt: p.receivedAt,
-      updateAt: p.updatedAt || null,
-      pickupAt: p.pickedUpAt || null
+      updateAt: p.updatedAt || null
     }))
 
     mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
@@ -726,7 +726,45 @@ const fetchTrash = async () => {
 //     setTimeout(() => (error.value = false), 10000)
 //   }
 // }
+import { onMounted } from 'vue'
+import { getItems } from '@/utils/fetchUtils'
+import { useRouter } from 'vue-router'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
 
+const router = useRouter()
+const userManager = useUserManager()
+
+const fetchTrashMembers = async () => {
+  try {
+    const dataUser = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+      router
+    )
+
+    // ป้องกัน null / undefined
+    const list = Array.isArray(dataUser) ? dataUser : []
+
+    // map ให้โครงสร้างที่ frontend ใช้
+    const mapped = list.map((u) => ({
+      id: u.userId,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      roomNumber: u.roomNumber,
+      role: u.role,
+      status: u.status,
+      deletedAt: u.deletedAt || null
+    }))
+
+    // ใส่เข้า Pinia (clear ก่อน)
+    userManager.trash.length = 0
+    mapped.forEach((u) => userManager.trash.push(u))
+  } catch (e) {
+    console.warn('Fetch trash members failed', e)
+  }
+}
+
+onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
 const cancelPage = () => {
   router.replace({ name: 'staffparcels' })
