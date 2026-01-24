@@ -726,13 +726,6 @@ const fetchTrash = async () => {
 //     setTimeout(() => (error.value = false), 10000)
 //   }
 // }
-import { onMounted } from 'vue'
-import { getItems } from '@/utils/fetchUtils'
-import { useRouter } from 'vue-router'
-import { useUserManager } from '@/stores/MemberAndStaffManager'
-
-const router = useRouter()
-const userManager = useUserManager()
 
 const fetchTrashMembers = async () => {
   try {
