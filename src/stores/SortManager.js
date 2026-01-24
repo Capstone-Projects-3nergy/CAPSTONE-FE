@@ -194,6 +194,37 @@ function sortByLastNameReverse(parcels) {
     return bLast.localeCompare(aLast)
   })
 }
+function sortByLineId(parcels) {
+  parcels.sort((a, b) =>
+    (a.lineId || '').localeCompare(b.lineId || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByLineIdReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.lineId || '').localeCompare(a.lineId || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByPhoneNumber(parcels) {
+  parcels.sort((a, b) =>
+    (a.phoneNumber || '').localeCompare(b.phoneNumber || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByPhoneNumberReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.phoneNumber || '').localeCompare(a.phoneNumber || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
 
 export {
   sortByRoomNumber,
@@ -215,5 +246,9 @@ export {
   searchParcels,
   filterByDay,
   filterByMonth,
-  filterByYear
+  filterByYear,
+  sortByLineId,
+  sortByLineIdReverse,
+  sortByPhoneNumber,
+  sortByPhoneNumberReverse
 }
