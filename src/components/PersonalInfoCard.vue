@@ -587,7 +587,7 @@ const profileImageUrlPreview = computed(() => {
         <div class="flex flex-col md:flex-row gap-10">
           <!-- ================= LEFT : Profile Header ================= -->
           <div
-            class="md:w-1/3 flex flex-col items-center text-center pt-1 md:pt-0"
+            class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
             <div
               class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
@@ -604,7 +604,9 @@ const profileImageUrlPreview = computed(() => {
                 {{ userInitial }}
               </div>
             </div>
-            <p class="hidden mb-4 text-black font-semibold text-lg">
+            <p
+              class="hidden md:block mb-4 text-black font-semibold text-lg pt-5"
+            >
               {{ fullName }}
             </p>
           </div>

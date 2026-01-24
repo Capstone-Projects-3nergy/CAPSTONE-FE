@@ -894,7 +894,7 @@ const isSaveDisabled = computed(() => {
         <div class="flex flex-col md:flex-row gap-10">
           <!-- ================= LEFT : Profile Image ================= -->
           <div
-            class="md:w-1/3 flex flex-col items-center text-center pt-1 md:pt-0"
+            class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
             <div class="relative inline-block">
               <!-- Avatar -->
@@ -959,7 +959,9 @@ const isSaveDisabled = computed(() => {
               ref="imageInput"
               @change="onImageChange"
             />
-            <h2 class="hidden text-xl sm:text-2xl font-semibold text-gray-800">
+            <h2
+              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5"
+            >
               {{ displayFullName }}
             </h2>
           </div>
