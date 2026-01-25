@@ -79,16 +79,24 @@ function searchParcels(parcels, keyword) {
   const lowerKeyword = keyword.toLowerCase().trim()
 
   return parcels.filter((p) => {
-    let formattedupdateAt = ''
+    let displayDate = ''
+    let isoDate = ''
+
     if (p.updateAt) {
       const date = new Date(p.updateAt)
+
       const dd = String(date.getDate()).padStart(2, '0')
       const mm = String(date.getMonth() + 1).padStart(2, '0')
       const yyyy = date.getFullYear()
       const hh = String(date.getHours()).padStart(2, '0')
       const min = String(date.getMinutes()).padStart(2, '0')
       const ss = String(date.getSeconds()).padStart(2, '0')
-      formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+      // แสดงผลเดิม
+      displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+      // 🔥 สำหรับ search แบบ backend
+      isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
     }
 
     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
@@ -98,13 +106,11 @@ function searchParcels(parcels, keyword) {
       .toLowerCase()
       .includes(lowerKeyword)
 
-    // ชื่อผู้รับเดิม
     const nameMatch = p.recipientName
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
 
-    // ✅ เพิ่มจาก UpdateProfile
     const firstNameMatch = p.firstName
       ?.toString()
       .toLowerCase()
@@ -114,10 +120,6 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
-
-    // const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
-    //   .toLowerCase()
-    //   .includes(lowerKeyword)
 
     const fullNameMatch = p.fullName
       ?.toString()
@@ -136,7 +138,10 @@ function searchParcels(parcels, keyword) {
       .toLowerCase()
       .includes(lowerKeyword)
 
-    const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
+    // ✅ รองรับทั้ง 2 format
+    const dateMatch =
+      displayDate.toLowerCase().includes(lowerKeyword) ||
+      isoDate.toLowerCase().includes(lowerKeyword)
 
     return (
       roomMatch ||
@@ -152,6 +157,86 @@ function searchParcels(parcels, keyword) {
     )
   })
 }
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     let formattedupdateAt = ''
+//     if (p.updateAt) {
+//       const date = new Date(p.updateAt)
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+//       formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+//     }
+
+//     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+//     const trackingMatch = p.trackingNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // ชื่อผู้รับเดิม
+//     const nameMatch = p.recipientName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // ✅ เพิ่มจาก UpdateProfile
+//     const firstNameMatch = p.firstName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const lastNameMatch = p.lastName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
+//     //   .toLowerCase()
+//     //   .includes(lowerKeyword)
+
+//     const fullNameMatch = p.fullName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const phoneNumberMatch = p.phoneNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+
+//     const statusMatch = p.status
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
+
+//     return (
+//       roomMatch ||
+//       trackingMatch ||
+//       nameMatch ||
+//       firstNameMatch ||
+//       lastNameMatch ||
+//       fullNameMatch ||
+//       emailMatch ||
+//       statusMatch ||
+//       dateMatch ||
+//       phoneNumberMatch
+//     )
+//   })
+// }
 
 // function searchParcels(parcels, keyword) {
 //   if (!keyword) return parcels
