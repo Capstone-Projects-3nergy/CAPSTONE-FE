@@ -57,7 +57,7 @@ const showNotification = computed(
       <div class="flex-1 flex justify-end items-center gap-5">
         <div class="relative group">
           <svg
-            v-if="showNotification"
+            v-if="showNotification && authStore.user.role === 'RESIDENT'"
             @click="openNotification"
             class="cursor-pointer"
             width="14"
