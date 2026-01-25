@@ -494,7 +494,6 @@ const saveEditProfile = async () => {
     // payload
     // -----------------------
     const body = {
-      userId: auth.user.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
