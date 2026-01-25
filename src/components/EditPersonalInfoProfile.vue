@@ -109,7 +109,7 @@ onMounted(async () => {
     // -------------------------
     // 4. set ค่าเริ่มต้นให้ form
     // -------------------------
-    if (mode === 'edit') {
+    if (props.mode === 'edit') {
       form.value = {
         userId: profile.userId,
         firstName: profile.firstName || '',
@@ -321,7 +321,7 @@ const addResidents = async () => {
     // API call
     // -----------------------
     const savedMember = await addMemberWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
       body,
       router
     )
@@ -1069,7 +1069,7 @@ const isSaveDisabled = computed(() => {
                   class="text-sm py-2 md:text-base md:py-2.5"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
-                  @click="saveEditDetail"
+                  @click="submit"
                   :disabled="isSaveDisabled"
                 />
                 <ButtonWeb
