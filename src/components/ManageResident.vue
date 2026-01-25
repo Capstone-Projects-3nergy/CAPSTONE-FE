@@ -37,7 +37,13 @@ import {
   searchParcels,
   filterByDay,
   filterByMonth,
-  filterByYear
+  filterByYear,
+  sortByFullName,
+  sortByFullNameReverse,
+  sortByRoomNumberUser,
+  sortByRoomNumberUserReverse,
+  sortByUserDate,
+  sortByUserDateReverse
 } from '@/stores/SortManager'
 import {
   getItems,
@@ -345,6 +351,15 @@ const visiblePages = computed(() => {
 
   return pages
 })
+const sortNameAsc = () => sortByFullName(usersByTab.value)
+const sortNameDesc = () => sortByFullNameReverse(usersByTab.value)
+
+const sortRoomAsc = () => sortByRoomNumberUser(usersByTab.value)
+const sortRoomDesc = () => sortByRoomNumberUserReverse(usersByTab.value)
+
+const sortNewest = () => sortByUserDateReverse(usersByTab.value)
+const sortOldest = () => sortByUserDate(usersByTab.value)
+
 const parcels = computed(() => parcelManager.getParcels())
 const staffs = computed(() => userManager.getStaffs())
 const residents = computed(() => userManager.getMembers())
@@ -411,8 +426,8 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
 const sortStatusAsc = () => sortByStatus(parcels.value)
 const sortStatusDesc = () => sortByStatusReverse(parcels.value)
 const sortDateAsc = () => sortByDate(parcels.value)
@@ -944,7 +959,6 @@ const showResidentDetail = async function (id) {
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
-          :hideNameSort="true"
           :hideTrash="false"
           :showDate="false"
           :showAddMemberButton="true"
@@ -961,7 +975,6 @@ const showResidentDetail = async function (id) {
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
-          :hideNameSort="true"
           :hideTrash="false"
           :showDate="false"
           :showAddStaffButton="false"

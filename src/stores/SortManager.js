@@ -419,6 +419,81 @@ function sortByDormNameReverse(parcels) {
     return bDorm.localeCompare(aDorm, 'th', { sensitivity: 'base' })
   })
 }
+function sortByDormNameUser(users) {
+  users.sort((a, b) =>
+    (a.dormName || '').localeCompare(b.dormName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByDormNameUserReverse(users) {
+  users.sort((a, b) =>
+    (b.dormName || '').localeCompare(a.dormName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByFullName(users) {
+  users.sort((a, b) =>
+    (a.fullName || '').localeCompare(b.fullName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByFullNameReverse(users) {
+  users.sort((a, b) =>
+    (b.fullName || '').localeCompare(a.fullName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByEmail(users) {
+  users.sort((a, b) =>
+    (a.email || '').localeCompare(b.email || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByEmailReverse(users) {
+  users.sort((a, b) =>
+    (b.email || '').localeCompare(a.email || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByUserStatus(users) {
+  users.sort((a, b) =>
+    (a.status || '').localeCompare(b.status || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByUserStatusReverse(users) {
+  users.sort((a, b) =>
+    (b.status || '').localeCompare(a.status || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByUserDate(users) {
+  users.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+}
+
+function sortByUserDateReverse(users) {
+  users.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+}
+function sortByRoomNumberUser(users) {
+  users.sort((a, b) => (a.roomNumber || 0) - (b.roomNumber || 0))
+}
+
+function sortByRoomNumberUserReverse(users) {
+  users.sort((a, b) => (b.roomNumber || 0) - (a.roomNumber || 0))
+}
 
 export {
   sortByRoomNumber,
@@ -448,5 +523,17 @@ export {
   sortByPosition,
   sortByPositionReverse,
   sortByDormName,
-  sortByDormNameReverse
+  sortByDormNameReverse,
+  sortByFullName,
+  sortByFullNameReverse,
+  sortByEmail,
+  sortByEmailReverse,
+  sortByDormNameUser,
+  sortByDormNameUserReverse,
+  sortByRoomNumberUser,
+  sortByRoomNumberUserReverse,
+  sortByUserStatus,
+  sortByUserStatusReverse,
+  sortByUserDate,
+  sortByUserDateReverse
 }
