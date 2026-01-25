@@ -91,9 +91,9 @@ const statusClass = (value) => {
   const status = displayStatus(value)
 
   return {
-    'bg-green-500': status === 'ACTIVE',
-    'bg-red-500': status === 'INACTIVE',
-    'bg-yellow-500': status === 'ERROR'
+    'bg-green-400': status === 'ACTIVE',
+    'bg-gray-400': status === 'INACTIVE',
+    'bg-yellow-400': status === 'ERROR'
   }
 }
 
