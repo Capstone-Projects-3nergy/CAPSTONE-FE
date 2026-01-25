@@ -290,7 +290,7 @@ const getInitial = (name) => {
             <span class="md:hidden font-semibold text-[#185DC0]">
               Resident name:
             </span>
-            {{ p.recipientName }}
+            {{ p.fullName }}
           </td>
           <td
             v-if="showStaffName"
@@ -299,7 +299,7 @@ const getInitial = (name) => {
             <span class="md:hidden font-semibold text-[#185DC0]">
               Staff name:
             </span>
-            {{ p.recipientName }}
+            {{ p.fullName }}
           </td>
           <td
             v-if="showMobile"

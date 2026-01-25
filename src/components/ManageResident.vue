@@ -174,12 +174,13 @@ onMounted(async () => {
   }
   //profile resident&staff
   const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/members`,
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
-      id: p.memberId,
+      id: p.userId,
+      fullName: p.fullname,
       firstName: p.firstName,
       lastName: p.lastName,
       phoneNumber: p.phoneNumber,
@@ -203,50 +204,51 @@ onMounted(async () => {
     userManager.setMembers(residents)
     userManager.setStaffs(staffs)
   }
-  const dataUserResident = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/members`,
-    router
-  )
-  if (dataUserResident) {
-    const mapped = dataUserResident.map((p) => ({
-      id: p.residentId,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      phoneNumber: p.phoneNumber,
-      lineId: p.lineId,
-      email: p.contactEmail,
-      profileImage: p.profileImage,
-      dormName: p.dormName,
-      status: mapActiveStatus(p.activeStatus),
-      updateAt: p.updatedAt || null
-    }))
+  console.log(dataUser)
+  // const dataUserResident = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/members`,
+  //   router
+  // )
+  // if (dataUserResident) {
+  //   const mapped = dataUserResident.map((p) => ({
+  //     id: p.residentId,
+  //     firstName: p.firstName,
+  //     lastName: p.lastName,
+  //     phoneNumber: p.phoneNumber,
+  //     lineId: p.lineId,
+  //     email: p.contactEmail,
+  //     profileImage: p.profileImage,
+  //     dormName: p.dormName,
+  //     status: mapActiveStatus(p.activeStatus),
+  //     updateAt: p.updatedAt || null
+  //   }))
 
-    // เรียงตาม update ล่าสุด
-    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
-    userManager.setMembers(residents)
-  }
-  const dataUserStaff = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/staffs`,
-    router
-  )
-  if (dataUserStaff) {
-    const mapped = dataUserStaff.map((p) => ({
-      id: p.staffId,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      phoneNumber: p.phoneNumber,
-      lineId: p.lineId,
-      email: p.contactEmail,
-      profileImage: p.profileImage,
-      position: p.position,
-      status: mapActiveStatus(p.activeStatus),
-      updateAt: p.updatedAt || null
-    }))
+  //   // เรียงตาม update ล่าสุด
+  //   mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+  //   userManager.setMembers(residents)
+  // }
+  // const dataUserStaff = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/staffs`,
+  //   router
+  // )
+  // if (dataUserStaff) {
+  //   const mapped = dataUserStaff.map((p) => ({
+  //     id: p.staffId,
+  //     firstName: p.firstName,
+  //     lastName: p.lastName,
+  //     phoneNumber: p.phoneNumber,
+  //     lineId: p.lineId,
+  //     email: p.contactEmail,
+  //     profileImage: p.profileImage,
+  //     position: p.position,
+  //     status: mapActiveStatus(p.activeStatus),
+  //     updateAt: p.updatedAt || null
+  //   }))
 
-    // เรียงตาม update ล่าสุด
-    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
-    userManager.setStaffs(staffs)
-  }
+  //   // เรียงตาม update ล่าสุด
+  //   mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+  //   userManager.setStaffs(staffs)
+  // }
 
   try {
     const res = await getItems(
@@ -1059,7 +1061,7 @@ const closePopUp = (operate) => {
         </div>
         <ParcelTable
           v-if="activeTab === 'Residents'"
-          :items="paginatedParcels"
+          :items="paginatedResidents"
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
