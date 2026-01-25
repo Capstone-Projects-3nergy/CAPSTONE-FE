@@ -96,34 +96,70 @@ const residentLastName = computed(() => {
 
 const residentDetail = ref(null)
 const members = computed(() => userManager.getMembers())
-const getMemberDetail = async (residentId) => {
-  if (!residentId) return
+const getMemberDetail = async (userId) => {
+  if (!userId) return
 
-  // 🔹 1. หาใน store (ผ่าน computed)
-  const localMember = members.value.find((m) => m.id === residentId)
-
+  // 1️⃣ หาใน store ก่อน
+  const localMember = members.value.find((m) => m.id === userId)
   if (localMember) {
-    residentDetail.value = localMember
+    residentDetail.value = { ...localMember }
+
     return
   }
 
-  // 🔹 2. ดึงจาก API
-  try {
-    const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-      residentId,
-      router
-    )
+  // 2️⃣ ถ้าไม่มี ค่อยยิง API
+  const data = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    userId,
+    router
+  )
 
-    if (data) {
-      const mapped = mapMemberData(data)
-      residentDetail.value = mapped
-      userManager.addMember(mapped)
+  if (data) {
+    const mapped = {
+      id: data.userId,
+      fullName: data.fullName,
+      email: data.email,
+      dormName: data.dormName,
+      roomNumber: data.roomNumber,
+      status: data.status,
+      photo: data.profileImageUrl,
+      phoneNumber: data.phoneNumber || '',
+      lineId: data.lineId || ''
     }
-  } catch (err) {
-    console.error(err)
+
+    residentDetail.value = mapped
+    userManager.addMember(mapped)
   }
 }
+
+// const getMemberDetail = async (residentId) => {
+//   if (!residentId) return
+
+//   // 🔹 1. หาใน store (ผ่าน computed)
+//   const localMember = members.value.find((m) => m.id === residentId)
+
+//   if (localMember) {
+//     residentDetail.value = localMember
+//     return
+//   }
+
+//   // 🔹 2. ดึงจาก API
+//   try {
+//     const data = await getItemById(
+//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+//       residentId,
+//       router
+//     )
+
+//     if (data) {
+//       const mapped = mapMemberData(data)
+//       residentDetail.value = mapped
+//       userManager.addMember(mapped)
+//     }
+//   } catch (err) {
+//     console.error(err)
+//   }
+// }
 
 const parcelManager = useParcelManager()
 const parcels = computed(() => parcelManager.getParcels())
@@ -207,8 +243,8 @@ onMounted(async () => {
   console.log(parcels.value)
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
-  getParcelDetail(tidNum)
-  getMemberDetail(tidNum)
+  // getParcelDetail(tidNum)
+  getMemberDetail(tid)
 })
 
 watch(
@@ -276,6 +312,14 @@ function formatDateTime(datetimeStr) {
 function goToEditResident() {
   router.replace({ name: 'editdetailregistration' })
 }
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    residentDetail.value = null // ⭐ RESET ก่อน
+    getMemberDetail(Number(newTid))
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -561,6 +605,7 @@ function goToEditResident() {
           <PersonalInfoCard
             v-if="residentDetail"
             title="Resident Information"
+            :key="residentDetail.id"
             :firstName="residentFirstName"
             :lastName="residentLastName"
             :email="residentDetail.email"
@@ -569,7 +614,7 @@ function goToEditResident() {
             :status="residentDetail.status"
             :lineId="residentDetail.lineId"
             :phoneNumber="residentDetail.phoneNumber"
-            :profileImage="residentDetail.profileImageUrl"
+            :profileImage="residentDetail.photo"
             :profile="false"
             :residentDetail="true"
             @edit="goToEditResident"

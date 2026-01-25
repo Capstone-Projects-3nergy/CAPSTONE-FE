@@ -267,15 +267,16 @@ const openStatusPopup = (parcel) => {
   }
 }
 
-const showRegistrationDetail = async function (id) {
+const showRegistrationDetail = (id) => {
+  // id = user.id (จาก mapped)
   router.push({
     name: 'detailregistration',
     params: {
-      id: route.params.id,
       tid: id
     }
   })
 }
+
 const deleteParcelPopUp = (parcel) => {
   showDeleteParcel.value = true
   parcelDetail.value = {
@@ -383,10 +384,10 @@ function autoClose(refVar, timeout = 10000) {
     }
   })
 }
-const deleteMemberPopUp = (member) => {
+const deleteMemberPopUp = (id) => {
   MemberDetail.value = {
-    id: member.id,
-    fullName: member.fullName
+    id: id.id,
+    fullName: id.fullName
   }
 
   showDeleteMember.value = true
