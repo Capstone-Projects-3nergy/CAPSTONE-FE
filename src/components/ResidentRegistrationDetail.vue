@@ -247,13 +247,13 @@ onMounted(async () => {
   getMemberDetail(tid)
 })
 
-watch(
-  () => route.params.tid,
-  (newTid) => {
-    const tidNum = Number(newTid)
-    getParcelDetail(tidNum)
-  }
-)
+// watch(
+//   () => route.params.tid,
+//   (newTid) => {
+//     const tidNum = Number(newTid)
+//     getParcelDetail(tidNum)
+//   }
+// )
 
 const backToManageResident = () => router.replace({ name: 'manageresident' })
 const showParcelScannerPage = async () => {
@@ -310,8 +310,16 @@ function formatDateTime(datetimeStr) {
   return datetimeStr.replace('T', ' ')
 }
 function goToEditResident() {
-  router.replace({ name: 'editdetailregistration' })
+  if (!residentDetail.value?.id) return
+
+  router.replace({
+    name: 'editdetailregistration',
+    params: {
+      id: residentDetail.value.id
+    }
+  })
 }
+
 watch(
   () => route.params.tid,
   (newTid) => {

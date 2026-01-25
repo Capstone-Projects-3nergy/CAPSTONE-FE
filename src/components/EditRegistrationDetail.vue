@@ -66,34 +66,20 @@ const phoneError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 
-// const form = ref({
-//   userId: null,
-//   parcelId: '',
-//   trackingNumber: '',
-//   recipientName: '',
-//   senderName: '',
-//   parcelType: '',
-//   companyId: '',
-//   profileImage: '',
-//   status: '',
-
-//   receivedAt: '',
-//   pickedUpAt: '',
-//   updatedAt: '',
-
-//   residentName: '',
-//   roomNumber: '',
-//   email: ''
-// })
+const userId = Number(route.params.id)
 const form = ref({
+  id: null,
   firstName: '',
   lastName: '',
   email: '',
   roomNumber: '',
-  dormitoryId: '',
+  dormName: '',
+  status: '',
   lineId: '',
-  phoneNumber: ''
+  phoneNumber: '',
+  photo: ''
 })
+
 const loading = ref(false)
 
 // const loadParcel = async () => {
@@ -245,56 +231,38 @@ const getParcelDetail = async (tid) => {
   await loadDom()
   await loadResidents()
 }
-const getMemberDetail = async (residentId) => {
-  if (!residentId) return
-  const residentIdNum = Number(residentId)
 
-  // 🔹 1. หาใน store ก่อน
-  const localMember = userManager
-    .getMembers()
-    .find((m) => m.id === residentIdNum)
+const getMemberDetail = async (id) => {
+  if (!id) return
 
-  if (localMember) {
+  const res = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/resident/${id}`,
+    router
+  )
+
+  if (res) {
     form.value = {
-      ...form.value,
-      ...localMember
+      id: res.userId,
+      firstName: res.firstName,
+      lastName: res.lastName,
+      email: res.email,
+      roomNumber: res.roomNumber,
+      dormName: res.dormName,
+      status: res.status,
+      lineId: res.lineId,
+      phoneNumber: res.phoneNumber,
+      photo: res.profileImageUrl
     }
-    originalForm.value = { ...form.value }
-    return
   }
-
-  // 🔹 2. ดึงจาก API
-  try {
-    const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/members`,
-      residentIdNum,
-      router
-    )
-
-    if (!data) return
-
-    form.value = {
-      id: data.id,
-      firstName: data.firstName || '',
-      lastName: data.lastName || '',
-      email: data.email || '',
-      roomNumber: data.roomNumber || '',
-      dormitoryId: data.dormitoryId || '',
-      lineId: data.lineId || '',
-      phoneNumber: data.phoneNumber || '',
-      status: data.status || 'ACTIVE',
-      profileImage: data.profileImage || '',
-      updatedAt: formatDateTime(data.updatedAt)
-    }
-
-    userManager.addMember(form.value)
-    originalForm.value = { ...form.value }
-  } catch (err) {
-    console.error(err)
-  }
-
-  await loadDormitories?.()
 }
+
+watch(
+  () => route.params.id,
+  (id) => {
+    if (id) getMemberDetail(id)
+  },
+  { immediate: true }
+)
 
 const getResidentDetail = async (tid) => {
   if (!tid) return
@@ -1011,16 +979,17 @@ const showLastNameError = () => {
         </div>
         <EditPersonalInfoProfile
           mode="edit"
-          :firstName="firstName"
-          :lastName="lastName"
-          :email="loginManager.user.email"
-          :roomNumber="loginManager.user.roomNumber"
-          :dormName="userDormName"
-          :position="loginManager.user.position"
-          :status="loginManager.user.status"
-          :lineId="loginManager.user.lineId"
-          :phoneNumber="loginManager.user.phoneNumber"
-          :profileImage="loginManager.user.profileImage"
+          :key="form.id"
+          :profileImage="form.photo"
+          :useCurrentProfile="false"
+          :firstName="form.firstName"
+          :lastName="form.lastName"
+          :email="form.email"
+          :roomNumber="form.roomNumber"
+          :dormName="form.dormName"
+          :status="form.status"
+          :lineId="form.lineId"
+          :phoneNumber="form.phoneNumber"
           :editResidentDetail="true"
           :editProfile="false"
           @cancel="cancelEdit"
@@ -1028,14 +997,9 @@ const showLastNameError = () => {
           @error="showProfileError"
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
-          @position-error="showPositionError"
           @phone-error="showPhoneError"
-          @first-name-required="showFirstNameRequired"
-          @last-name-required="showLastNameRequired"
-          @email-required="showEmailRequired"
-          @dorm-ID-required="showDormRequired"
-          @room-number-required="showRoomNumberRequired"
-        ></EditPersonalInfoProfile>
+        />
+
         <!-- <form
           class="bg-white p-6 rounded-[5px] shadow space-y-8"
           @submit.prevent="saveEditParcel"

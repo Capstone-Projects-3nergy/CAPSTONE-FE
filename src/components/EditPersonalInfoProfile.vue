@@ -109,21 +109,61 @@ onMounted(async () => {
     // -------------------------
     // 4. set ค่าเริ่มต้นให้ form
     // -------------------------
-    if (props.mode === 'edit') {
+    if (props.editResidentDetail) {
+      form.value = {
+        firstName: props.firstName,
+        lastName: props.lastName,
+        email: props.email,
+        roomNumber: props.roomNumber,
+        dormName: props.dormName,
+        lineId: props.lineId,
+        phoneNumber: props.phoneNumber
+      }
+      originalForm.value = { ...form.value }
+      return
+    }
+
+    // ✅ แก้ profile login เท่านั้น
+    if (props.editProfile) {
+      const profile = await getProfile(
+        `${import.meta.env.VITE_BASE_URL}/api/profile`,
+        router
+      )
+
+      if (!profile) return
+
+      profileManager.setCurrentProfile(profile)
+
       form.value = {
         userId: profile.userId,
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         email: profile.email || '',
         roomNumber: profile.roomNumber || '',
-        dormName: dormName || '',
+        dormName: '',
         lineId: profile.lineId || '',
         position: profile.position || '',
         phoneNumber: profile.phoneNumber || ''
       }
+
+      originalForm.value = { ...form.value }
     }
-    // ใช้สำหรับ compare ตอน edit
-    originalForm.value = { ...form.value }
+
+    // if (props.mode === 'edit') {
+    //   form.value = {
+    //     userId: profile.userId,
+    //     firstName: profile.firstName || '',
+    //     lastName: profile.lastName || '',
+    //     email: profile.email || '',
+    //     roomNumber: profile.roomNumber || '',
+    //     dormName: dormName || '',
+    //     lineId: profile.lineId || '',
+    //     position: profile.position || '',
+    //     phoneNumber: profile.phoneNumber || ''
+    //   }
+    // }
+    // // ใช้สำหรับ compare ตอน edit
+    // originalForm.value = { ...form.value }
   } catch (err) {
     console.error(err)
   }
@@ -174,19 +214,25 @@ watch(
 // }
 const newAvatar = ref(null)
 const profileImageUrlPreview = computed(() => {
-  if (props.mode === 'edit') {
-    if (newAvatar.value) {
-      return URL.createObjectURL(newAvatar.value)
-    }
-
-    const url = profileManager.currentProfile?.profileImageUrl
-    if (url && url.startsWith('http')) {
-      return url
-    }
-
-    return ''
+  // 1️⃣ รูปใหม่
+  if (newAvatar.value) {
+    return URL.createObjectURL(newAvatar.value)
   }
+
+  // 2️⃣ แก้ resident → ใช้รูปจาก props
+  if (props.editResidentDetail && props.profileImage) {
+    return props.profileImage
+  }
+
+  // 3️⃣ แก้ profile login
+  if (props.editProfile) {
+    const url = profileManager.currentProfile?.profileImageUrl
+    if (url && url.startsWith('http')) return url
+  }
+
+  return ''
 })
+
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) newAvatar.value = file
