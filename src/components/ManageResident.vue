@@ -360,8 +360,7 @@ function autoClose(refVar, timeout = 10000) {
 const deleteMemberPopUp = (member) => {
   MemberDetail.value = {
     id: member.id,
-    firstName: member.firstName,
-    lastName: member.lastName // หรือ field ที่ใช้แสดงชื่อ
+    fullName: member.fullName
   }
 
   showDeleteMember.value = true
@@ -595,6 +594,15 @@ const closePopUp = (operate) => {
       editSuccess.value = false
       break
   }
+}
+const showResidentDetail = async function (id) {
+  router.push({
+    name: 'detailregistration',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
 }
 </script>
 
@@ -940,6 +948,7 @@ const closePopUp = (operate) => {
           :hideTrash="false"
           :showDate="false"
           :showAddMemberButton="true"
+          @view-detail="showResidentDetail"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
@@ -1083,9 +1092,9 @@ const closePopUp = (operate) => {
           :hideTrash="true"
           :showMobile="false"
           :showActionStatus="true"
+          :showDelete="false"
           :showRoom="true"
           :showUpdateAt="true"
-          :showDeleteResident="true"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"

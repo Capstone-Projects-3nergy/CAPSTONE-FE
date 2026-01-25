@@ -88,7 +88,7 @@ const cancelAction = () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
           Do you want to permanently delete this Resident name
-          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
+          <b>"{{ resident.fullName }}"</b>
           ?
           <br />
           <span class="text-red-500 text-sm">
@@ -98,7 +98,7 @@ const cancelAction = () => {
 
         <template v-else>
           Do you want to move this Resident name
-          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
+          <b>"{{ resident.fullName }}"</b>
 
           to the trash?
           <br />
