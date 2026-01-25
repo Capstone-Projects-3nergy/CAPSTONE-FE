@@ -184,7 +184,7 @@ const cancel = () => {
           <ButtonWeb
             label="Cancel"
             color="gray"
-            class="w-full sm:w-auto px-3 sm:px-6 py-2 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base"
+            class="w-full sm:w-auto px-3 sm:px-6 py-2 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base text-[#898989]"
             @click="cancel"
           />
         </div>

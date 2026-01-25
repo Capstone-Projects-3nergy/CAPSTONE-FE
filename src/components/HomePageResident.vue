@@ -11,7 +11,9 @@ import DashBoard from './DashBoard.vue'
 import SidebarItem from './SidebarItem.vue'
 import ProfileResident from './ProfileResident.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import ParcelTable from './ParcelTable.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import WebHeader from './WebHeader.vue'
 import {
   getItems,
   getItemById,
@@ -78,6 +80,8 @@ const authStore = useAuthManager()
 const currentUser = ref('Pimpajee SetXXXXXX')
 const showProfileResident = ref(false)
 const showLogoutConfirm = ref(false)
+const openStatusPopup = ref(false)
+const showParcelDetail = ref(false)
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
 }
@@ -251,7 +255,8 @@ const toggleSortDate = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -296,7 +301,6 @@ const toggleSortDate = () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -304,7 +308,7 @@ const toggleSortDate = () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -367,7 +371,8 @@ const toggleSortDate = () => {
               </template>
             </SidebarItem>
             <SidebarItem
-              title="Profile (Next Release)"
+              title="Profile"
+              @click="showProfileResidentPage"
               :collapsed="isCollapsed"
             >
               <template #icon>
@@ -461,7 +466,7 @@ const toggleSortDate = () => {
       </button>
 
       <main class="flex-1 p-9 w-full">
-        <div class="sm:bg-white p-6 sm:shadow">
+        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
           <section class="p-4">
             <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
               <svg
@@ -480,7 +485,7 @@ const toggleSortDate = () => {
             </h1>
 
             <div
-              class="relative bg-white max-w-4xl mx-auto h-56 rounded-xl shadow border border-gray-300 overflow-hidden flex items-center"
+              class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
             >
               <button
                 @click="prevSlide"
@@ -568,8 +573,91 @@ const toggleSortDate = () => {
               <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
             </div>
           </div>
+          <ParcelTable
+            :items="paginatedParcels"
+            :pages="visiblePages"
+            :page="currentPage"
+            :total="totalPages"
+            :show-action="false"
+            @prev="prevPage"
+            @next="nextPage"
+            @go="goToPage"
+            @status-click="openStatusPopup"
+            @view-detail="showParcelDetail"
+          >
+            <template #sort-room>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortRoom"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
 
-          <div
+            <template #sort-status>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortStatus"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+
+            <template #sort-date>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortDate"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#185DC0"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#5C9BEB"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+          </ParcelTable>
+          <!-- <div
             class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
           >
             <table class="min-w-full text-left border-collapse">
@@ -769,7 +857,7 @@ const toggleSortDate = () => {
             >
               Next &gt;
             </button>
-          </div>
+          </div> -->
         </div>
       </main>
     </div>

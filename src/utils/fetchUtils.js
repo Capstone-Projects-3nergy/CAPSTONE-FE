@@ -1,36 +1,69 @@
 import { useAuthManager } from '@/stores/AuthManager.js'
-
-async function fetchWithAuth(url, options, router) {
+async function fetchWithAuth(url, optionsOrFactory, router) {
   const authManager = useAuthManager()
-  const token = authManager.user?.accessToken
 
-  if (token) {
+  const buildOptions = (token) => {
+    const options =
+      typeof optionsOrFactory === 'function'
+        ? optionsOrFactory()
+        : { ...optionsOrFactory }
+
+    // 🔥 บังคับมี headers เสมอ
     options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${token}`
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
+
+    return options
   }
 
-  const res = await fetch(url, options)
+  let res = await fetch(url, buildOptions(authManager.user?.accessToken))
 
   if (res.status === 401) {
     const newToken = await authManager.refreshToken()
 
-    if (newToken) {
-      options.headers.Authorization = `Bearer ${newToken}`
-      const retryRes = await fetch(url, options)
-
-      if (retryRes.ok) return retryRes
-
-      return retryRes
+    if (!newToken) {
+      authManager.logoutAccount(router)
+      return null
     }
 
-    authManager.logoutAccount(router)
-    return null
+    res = await fetch(url, buildOptions(newToken))
   }
 
   return res
 }
+
+// async function fetchWithAuth(url, options, router) {
+//   const authManager = useAuthManager()
+//   const token = authManager.user?.accessToken
+
+//   if (token) {
+//     options.headers = {
+//       ...options.headers,
+//       Authorization: `Bearer ${token}`
+//     }
+//   }
+
+//   const res = await fetch(url, options)
+
+//   if (res.status === 401) {
+//     const newToken = await authManager.refreshToken()
+
+//     if (newToken) {
+//       options.headers.Authorization = `Bearer ${newToken}`
+//       const retryRes = await fetch(url, options)
+
+//       if (retryRes.ok) return retryRes
+
+//       return retryRes
+//     }
+
+//     authManager.logoutAccount(router)
+//     return null
+//   }
+
+//   return res
+// }
 
 export async function getItems(url, router) {
   try {
@@ -332,7 +365,158 @@ async function confirmParcelReceived(url, id, router) {
     return null
   }
 }
+async function restoreParcel(url, id, router) {
+  try {
+    const options = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    }
 
+    const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
+    return res
+  } catch (error) {
+    {
+      return null
+    }
+  }
+}
+export async function getProfile(url, router) {
+  try {
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('getProfile error:', err)
+    return null
+  }
+}
+
+// async function restoreParcel(url, id, router) {
+//   try {
+//     const options = {
+//       method: 'PUT',
+//       headers: {}
+//     }
+
+//     const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
+
+//     if (res?.ok) {
+//       return true
+//     }
+//     return false
+//   } catch (error) {
+//     return false
+//   }
+// }
+
+//Member and stadd
+async function getMembers(url, router) {
+  return await getItems(url, router)
+}
+
+async function getStaffs(url, router) {
+  return await getItems(url, router)
+}
+
+async function getMemberById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+
+async function getStaffById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+
+// วิธีใช้
+// getMembers('/api/members', router)
+// getStaffs('/api/staffs', router)
+async function addMember(url, member, router) {
+  return await addItem(url, member, router)
+}
+
+async function addStaff(url, staff, router) {
+  return await addItem(url, staff, router)
+}
+
+// addMember('/api/members', newMember, router)
+// addStaff('/api/staffs', newStaff, router)
+async function editMember(url, id, editedMember, router) {
+  return await editItem(url, id, editedMember, router)
+}
+
+async function editStaff(url, id, editedStaff, router) {
+  return await editItem(url, id, editedStaff, router)
+}
+async function deleteMember(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
+
+async function deleteStaff(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
+async function updateUserRole(url, id, role, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role })
+  }
+
+  const res = await fetchWithAuth(`${url}/${id}/role`, options, router)
+  if (res?.ok) return await res.json()
+  return null
+}
+// updateUserRole('/api/staffs', staffId, 'ADMIN', router)
+async function toggleUserActive(url, id, isActive, router) {
+  const options = {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isActive })
+  }
+
+  const res = await fetchWithAuth(`${url}/${id}/active`, options, router)
+  if (res?.ok) return await res.json()
+  return null
+}
+async function updateProfileWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  const { profileImage, ...profileData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(profileData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (profileImage instanceof File) {
+    formData.append('profileImage', profileImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'PUT',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('updateProfileWithFile error:', err)
+    return null
+  }
+}
+
+// ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
+// const members = await getMembers('/api/members', router)
+// userStore.setMembers(members)
+
+// const staffs = await getStaffs('/api/staffs', router)
+// userStore.setStaffs(staffs)
 export {
   getItemById,
   deleteItemById,
@@ -349,5 +533,19 @@ export {
   deleteFile,
   updateParcelStatus,
   confirmParcelPickup,
-  confirmParcelReceived
+  confirmParcelReceived,
+  restoreParcel,
+  getMembers,
+  getStaffs,
+  getMemberById,
+  getStaffById,
+  addMember,
+  addStaff,
+  editMember,
+  editStaff,
+  deleteMember,
+  deleteStaff,
+  updateUserRole,
+  toggleUserActive,
+  updateProfileWithFile
 }

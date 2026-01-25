@@ -15,6 +15,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+import WebHeader from './WebHeader.vue'
 import {
   getItemById,
   deleteItemById,
@@ -70,10 +71,16 @@ const mapParcelData = (data) => ({
   companyId: data.companyId || null,
   companyName: data.companyName || '',
   residentId: data.residentId || null,
-  residentName: data.residentName || '',
+  firstName: data.firstName || '',
+  lastName: data.lastName || '',
   imageUrl: data.imageUrl || ''
 })
-
+const showResidentParcelPage = async function () {
+  router.replace({
+    name: 'residentparcels'
+  })
+  showResidentParcels.value = true
+}
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
@@ -221,7 +228,8 @@ const closePopUp = (operate) => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -266,7 +274,6 @@ const closePopUp = (operate) => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -274,7 +281,7 @@ const closePopUp = (operate) => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -337,7 +344,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile (Next Release)">
+            <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -356,7 +363,11 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="My parcel"
+              class="bg-[#81AFEA] cursor-default"
+              @click="showResidentParcelPage"
+            >
               <template #icon>
                 <svg
                   width="25"
@@ -446,7 +457,9 @@ const closePopUp = (operate) => {
           />
         </div>
 
-        <div class="bg-white border border-gray-300 rounded-xl shadow-md p-10">
+        <div
+          class="bg-white border border-gray-300 rounded-[5px] shadow-md p-10"
+        >
           <form class="space-y-10">
             <section>
               <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
@@ -580,6 +593,7 @@ const closePopUp = (operate) => {
               <ButtonWeb
                 label="Back"
                 color="gray"
+                class="text-[#898989]"
                 @click="showManageParcelPage"
               />
             </div>

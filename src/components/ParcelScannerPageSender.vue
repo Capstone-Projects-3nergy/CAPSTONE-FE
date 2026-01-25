@@ -17,7 +17,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { getItems, addItem } from '@/utils/fetchUtils'
-
+import WebHeader from './WebHeader.vue'
 const addSuccess = ref(false)
 const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
@@ -26,7 +26,7 @@ const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
-
+const auth = useAuthManager()
 const companyList = ref([])
 const router = useRouter()
 const error = ref(false)
@@ -78,11 +78,11 @@ function cancelParcel() {
     (key) => (form.value[key] = key === 'status' ? 'Waiting for staff' : '')
   )
 }
+
 const selectedResident = computed(
   () =>
     residents.value.find((r) => r.userId === selectedResidentId.value) || null
 )
-
 const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
 )
@@ -124,30 +124,35 @@ const videoRef = ref(null)
 const isCameraReady = ref(false)
 
 async function extractParcelInfo(imageDataUrl) {
+  if (
+    !imageDataUrl ||
+    typeof imageDataUrl !== 'string' ||
+    !imageDataUrl.startsWith('data:image')
+  )
+    return null
+
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result.data.text
+    const text = result?.data?.text?.trim()
+    if (!text) return null
 
-    const info = { name: '', tracking: '', courier: '', type: '' }
+    const info = {
+      recipientName: '',
+      trackingNumber: ''
+    }
 
+    // 👤 Recipient
     const nameMatch = text.match(
-      /(ชื่อเจ้าของพัสดุ|ชื่อผู้รับ)[:\s]*([\u0E00-\u0E7Fa-zA-Z ]+)/
+      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
     )
-    if (nameMatch) info.name = nameMatch[2].trim()
+    if (nameMatch) info.recipientName = nameMatch[2].trim()
 
-    const trackingMatch = text.match(/(TH\d{10,}[A-Z]?)/)
-    if (trackingMatch) info.tracking = trackingMatch[1]
-
-    if (/Shopee Express/i.test(text)) info.courier = 'Shopee Express'
-    else if (/Kerry/i.test(text)) info.courier = 'Kerry Express'
-    else if (/J&T/i.test(text)) info.courier = 'J&T Express'
-
-    if (/กล่องเล็ก/.test(text)) info.type = 'กล่องเล็ก'
-    else if (/กล่องใหญ่/.test(text)) info.type = 'กล่องใหญ่'
-    else if (/ซอง/.test(text)) info.type = 'ซอง'
+    // 📦 Tracking (ไม่บังคับ TH)
+    const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
+    if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
     return info
-  } catch (err) {
+  } catch {
     return null
   }
 }
@@ -187,24 +192,26 @@ function stopCameraOnly() {
 
 async function capturePhoto() {
   if (!videoRef.value || !isCameraReady.value) {
-    alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
+    alert('Camera not ready')
     return
   }
-  const video = videoRef.value
-  const canvas = document.createElement('canvas')
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-  previewUrl.value = canvas.toDataURL('image/png')
 
-  const parcelInfo = await extractParcelInfo(previewUrl.value)
-  if (parcelInfo) {
-    form.value.recipientName = parcelInfo.name || ''
-    form.value.trackingNumber = parcelInfo.tracking || ''
-    form.value.companyId = parcelInfo.courier || ''
-    form.value.parcelType = parcelInfo.type || ''
-  }
+  const canvas = document.createElement('canvas')
+  canvas.width = videoRef.value.videoWidth
+  canvas.height = videoRef.value.videoHeight
+
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(videoRef.value, 0, 0)
+
+  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+  previewUrl.value = imageDataUrl
+
+  const info = await extractParcelInfo(imageDataUrl)
+  if (!info) return
+
+  // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
+  form.value.recipientName = info.recipientName || form.value.recipientName
+  form.value.trackingNumber = info.trackingNumber || ''
 }
 
 function startQuagga() {
@@ -272,6 +279,21 @@ function stopQuagga() {
     Quagga.offDetected()
   } catch (e) {}
 }
+const getResponsiveSize = () => {
+  const width = window.innerWidth
+
+  if (width < 480) {
+    return { width: 130, height: 130 }
+  } else if (width < 640) {
+    return { width: 140, height: 140 }
+  } else if (width < 768) {
+    return { width: 160, height: 160 }
+  } else if (width < 1024) {
+    return { width: 180, height: 180 }
+  } else {
+    return { width: 200, height: 200 }
+  }
+}
 
 function startScan(mode) {
   scanningMode.value = mode
@@ -281,14 +303,8 @@ function startScan(mode) {
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: function (viewW, viewH) {
-        const isMobile = window.innerWidth < 600
-
-        if (isMobile) {
-          return { width: 120, height: 100 }
-        } else {
-          return { width: 170, height: 250 }
-        }
+      qrbox: function () {
+        return getResponsiveSize()
       },
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
@@ -300,7 +316,7 @@ function startScan(mode) {
         form.value.trackingNumber = cleanText
       })
       .catch((err) => {
-        alert('เริ่มสแกน QR ไม่สำเร็จ')
+        alert('Failed to start QR scanning.')
       })
   } else if (mode === 'barcode') {
     startQuagga()
@@ -353,6 +369,7 @@ const saveParcel = async () => {
 
   try {
     const requestBody = {
+      userId: selectedResidentId.value,
       trackingNumber: form.value.trackingNumber,
       recipientName: form.value.recipientName,
       parcelType: form.value.parcelType,
@@ -376,6 +393,8 @@ const saveParcel = async () => {
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
+    selectedResidentId.value = null
+    recipientSearch.value = ''
     form.value = {
       trackingNumber: '',
       recipientName: '',
@@ -395,6 +414,13 @@ const saveParcel = async () => {
 }
 
 onMounted(async () => {
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {}
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
@@ -442,11 +468,52 @@ const closePopUp = (operate) => {
 
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
+        <svg
+          @click="toggleSidebar"
+          class="md:hidden mr-4 cursor-pointer"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3 7H21C21.2652 7 21.5196 6.89464 21.7071 6.70711C21.8946 6.51957 22 6.26522 22 6C22 5.73478 21.8946 5.48043 21.7071 5.29289C21.5196 5.10536 21.2652 5 21 5H3C2.73478 5 2.48043 5.10536 2.29289 5.29289C2.10536 5.48043 2 5.73478 2 6C2 6.26522 2.10536 6.51957 2.29289 6.70711C2.48043 6.89464 2.73478 7 3 7ZM21 17H3C2.73478 17 2.48043 17.1054 2.29289 17.2929C2.10536 17.4804 2 17.7348 2 18C2 18.2652 2.10536 18.5196 2.29289 18.7071C2.48043 18.8946 2.73478 19 3 19H21C21.2652 19 21.5196 18.8946 21.7071 18.7071C21.8946 18.5196 22 18.2652 22 18C22 17.7348 21.8946 17.4804 21.7071 17.2929C21.5196 17.1054 21.2652 17 21 17ZM21 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14C2 14.2652 2.10536 14.5196 2.29289 14.7071C2.48043 14.8946 2.73478 15 3 15H21C21.2652 15 21.5196 14.8946 21.7071 14.7071C21.8946 14.5196 22 14.2652 22 14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13ZM21 9H3C2.73478 9 2.48043 9.10536 2.29289 9.29289C2.10536 9.48043 2 9.73478 2 10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10C22 9.73478 21.8946 9.48043 21.7071 9.29289C21.5196 9.10536 21.2652 9 21 9Z"
+            fill="black"
+          />
+        </svg>
+
         <div class="flex-1 flex justify-end items-center gap-5">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_84_935)">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M6.12715 0.5C6.58315 0.5 7.03215 0.568 7.46115 0.697C7.14875 1.2667 6.98973 1.90779 6.99968 2.55745C7.00962 3.2071 7.18819 3.84302 7.51788 4.40289C7.84757 4.96276 8.31707 5.42737 8.88037 5.75117C9.44366 6.07497 10.0814 6.24687 10.7311 6.25V8.477C10.7311 8.56835 10.7492 8.65881 10.7841 8.7432C10.8191 8.82758 10.8704 8.90424 10.9351 8.96879C10.9997 9.03334 11.0764 9.08452 11.1609 9.11938C11.2453 9.15425 11.3358 9.17213 11.4271 9.172C11.6261 9.172 11.8168 9.25102 11.9575 9.39167C12.0981 9.53232 12.1771 9.72309 12.1771 9.922C12.1771 10.1209 12.0981 10.3117 11.9575 10.4523C11.8168 10.593 11.6261 10.672 11.4271 10.672H0.827148C0.628236 10.672 0.437471 10.593 0.296818 10.4523C0.156166 10.3117 0.0771484 10.1209 0.0771484 9.922C0.0771484 9.72309 0.156166 9.53232 0.296818 9.39167C0.437471 9.25102 0.628236 9.172 0.827148 9.172C0.918501 9.17213 1.00898 9.15425 1.09342 9.11938C1.17786 9.08452 1.25459 9.03334 1.31923 8.96879C1.38388 8.90424 1.43516 8.82758 1.47015 8.7432C1.50514 8.65881 1.52315 8.56835 1.52315 8.477V5.104C1.52315 3.88294 2.00821 2.7119 2.87163 1.84848C3.73505 0.985063 4.90609 0.5 6.12715 0.5ZM5.12715 12C4.92824 12 4.73747 12.079 4.59682 12.2197C4.45617 12.3603 4.37715 12.5511 4.37715 12.75C4.37715 12.9489 4.45617 13.1397 4.59682 13.2803C4.73747 13.421 4.92824 13.5 5.12715 13.5H7.12715C7.32606 13.5 7.51683 13.421 7.65748 13.2803C7.79813 13.1397 7.87715 12.9489 7.87715 12.75C7.87715 12.5511 7.79813 12.3603 7.65748 12.2197C7.51683 12.079 7.32606 12 7.12715 12H5.12715Z"
+                fill="black"
+              />
+              <path
+                d="M10.75 5C11.413 5 12.0489 4.73661 12.5178 4.26777C12.9866 3.79893 13.25 3.16304 13.25 2.5C13.25 1.83696 12.9866 1.20107 12.5178 0.732233C12.0489 0.263392 11.413 0 10.75 0C10.087 0 9.45107 0.263392 8.98223 0.732233C8.51339 1.20107 8.25 1.83696 8.25 2.5C8.25 3.16304 8.51339 3.79893 8.98223 4.26777C9.45107 4.73661 10.087 5 10.75 5Z"
+                fill="#FFCC00"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_84_935">
+                <rect width="14" height="14" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -454,7 +521,7 @@ const closePopUp = (operate) => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <main class="flex-1 p-9">
@@ -597,12 +664,25 @@ const closePopUp = (operate) => {
                 />
               </div>
 
-              <div class="flex flex-wrap gap-3 px-7">
+              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="Open Camera"
+                  color="blue"
+                  @click="startCamera"
+                  :disabled="scanningMode || videoStream"
+                />
+
+                <ButtonWeb
+                  label="Take Photo"
+                  color="green"
+                  @click="capturePhoto"
+                  :disabled="!isCameraReady"
                 />
               </div>
 
@@ -617,8 +697,38 @@ const closePopUp = (operate) => {
                     class="w-full border rounded px-3 py-2 focus:outline-blue-500"
                   />
                 </div>
-
                 <div>
+                  <label class="block font-semibold mb-1">
+                    Recipient <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="recipientSearch"
+                    type="text"
+                    placeholder="Enter Recipient Name / Room Number"
+                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                  />
+
+                  <ul
+                    v-if="showSuggestions"
+                    class="absolute z-10 mt-1 w-[235px] lg:w-[505px] sm:w-[560px] md:w-[380px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                  >
+                    <li
+                      v-for="r in filteredResidents"
+                      :key="r.userId"
+                      @click="selectResident(r)"
+                      class="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                    >
+                      {{ r.fullName }} (Room {{ r.roomNumber }})
+                    </li>
+                    <li
+                      v-if="filteredResidents.length === 0"
+                      class="px-3 py-1 text-gray-400"
+                    >
+                      No residents found matching your search terms.
+                    </li>
+                  </ul>
+                </div>
+                <!-- <div>
                   <label class="block font-semibold mb-1">
                     Recipient <span class="text-red-500">*</span>
                   </label>
@@ -628,7 +738,7 @@ const closePopUp = (operate) => {
                     placeholder="Enter Recipient Name"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
-                </div>
+                </div> -->
                 <div>
                   <label class="block font-semibold mb-1">
                     Parcel Type <span class="text-red-500">*</span>
@@ -721,7 +831,17 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Recipient:</span>
-                  <span>{{ form.recipientName }}</span>
+                  <span>{{
+                    selectedResident
+                      ? selectedResident.fullName
+                      : form.recipientName
+                  }}</span>
+                </div>
+                <div class="flex justify-between border-b py-2">
+                  <span>Room:</span>
+                  <span>{{
+                    selectedResident ? selectedResident.roomNumber : ''
+                  }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Type:</span>

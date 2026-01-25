@@ -20,13 +20,21 @@ import ConfirmParcels from '@/components/ConfirmParcels.vue'
 import ChangeParcelStatus from '@/components/ChangeParcelStatus.vue'
 import ParcelTrash from '@/components/ParcelTrash.vue'
 import ParcelScannerPageSender from '@/components/ParcelScannerPageSender.vue'
+import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
+import ResetPasswordPage from '@/components/ResetPasswordPage.vue'
+import EditProfilePage from '@/components/EditProfilePage.vue'
+import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.vue'
+import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
+import AddMember from '@/components/AddMember.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
+  /* =======================
+   * Public
+   * ======================= */
   {
     path: '/',
     redirect: '/loginpage'
   },
-
   {
     path: '/loginpage',
     name: 'login',
@@ -37,7 +45,15 @@ const routes = [
     name: 'register',
     component: RegisterPage
   },
-  ,
+  {
+    path: '/resetpasswordpage',
+    name: 'resetpassword',
+    component: ResetPasswordPage
+  },
+
+  /* =======================
+   * Resident
+   * ======================= */
   {
     path: '/homepage/resident/:id',
     name: 'home',
@@ -48,7 +64,6 @@ const routes = [
     name: 'residentparcels',
     component: ResidentParcelsPage
   },
-  ,
   {
     path: '/homepage/resident/:id/parcelspage/:tid/detailparcel',
     name: 'residentparcelsDetail',
@@ -64,18 +79,29 @@ const routes = [
     name: 'announcement',
     component: Announcement
   },
-  ,
   {
     path: '/homepage/resident/:id/profile',
     name: 'profileresident',
     component: ProfileResident
   },
+  {
+    path: '/homepage/resident/:id/profile/editprofile',
+    name: 'editprofileresident',
+    component: EditProfilePage
+  },
 
-  // Staff
+  /* =======================
+   * Staff
+   * ======================= */
   {
     path: '/homepage/staff/:id',
     name: 'homestaff',
     component: HomePageStaff
+  },
+  {
+    path: '/homepage/staff/:id/dashboardpage',
+    name: 'dashboard',
+    component: DashBoard
   },
   {
     path: '/homepage/staff/:id/manageresident',
@@ -83,9 +109,49 @@ const routes = [
     component: ManageResident
   },
   {
+    path: '/homepage/staff/:id/manageresident/addmember',
+    name: 'addmember',
+    component: AddMember
+  },
+  {
+    path: '/homepage/staff/:id/manageresident/:tid/detailregistration',
+    name: 'detailregistration',
+    component: ResidentRegistrationDetail
+  },
+  {
+    path: '/homepage/staff/:id/manageresident/:tid/detailregistration/editdetailregistration',
+    name: 'editdetailregistration',
+    component: EditRegistrationDetail
+  },
+  {
     path: '/homepage/staff/:id/manageparcel',
     name: 'staffparcels',
     component: StaffParcelsPage
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/trashparcel',
+    name: 'trashparcels',
+    component: ParcelTrash
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel',
+    name: 'detailparcels',
+    component: ParcelsDetail
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/editparcel',
+    name: 'editparcels',
+    component: EditParcels
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',
+    name: 'editparcelstatus',
+    component: ChangeParcelStatus
+  },
+  {
+    path: '/homepage/staff/:id/manageparcel/:tid/deleteparcel',
+    name: 'deleteparcels',
+    component: DeleteParcels
   },
   {
     path: '/homepage/staff/:id/manageannouncement',
@@ -97,48 +163,172 @@ const routes = [
     name: 'parcelscanner',
     component: ParcelScannerPage
   },
-  ,
-  {
-    path: '/courier/parcelscannerpage',
-    name: 'parcelscannershipping',
-    component: ParcelScannerPageSender
-  },
-  {
-    path: '/homepage/staff/:id/dashboardpage',
-    name: 'dashboard',
-    component: DashBoard
-  },
   {
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
   },
   {
-    path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',
-    name: 'editparcelstatus',
-    component: ChangeParcelStatus
+    path: '/homepage/staff/:id/profile/editprofile',
+    name: 'editprofilestaff',
+    component: EditProfilePage
   },
+
+  /* =======================
+   * Courier
+   * ======================= */
   {
-    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/editparcel',
-    name: 'editparcels',
-    component: EditParcels
-  },
-  {
-    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel',
-    name: 'detailparcels',
-    component: ParcelsDetail
-  },
-  {
-    path: '/homepage/staff/:id/manageparcel/:tid/deleteparcel',
-    name: 'deleteparcels',
-    component: DeleteParcels
-  },
-  {
-    path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/trashparcel',
-    name: 'trashparcels',
-    component: ParcelTrash
+    path: '/courier/parcelscannerpage',
+    name: 'parcelscannershipping',
+    component: ParcelScannerPageSender
   }
 ]
+
+// const routes = [
+//   {
+//     path: '/',
+//     redirect: '/loginpage'
+//   },
+
+//   {
+//     path: '/loginpage',
+//     name: 'login',
+//     component: LoginPage
+//   },
+//   {
+//     path: '/registerpage',
+//     name: 'register',
+//     component: RegisterPage
+//   },
+//   ,
+//   {
+//     path: '/homepage/resident/:id',
+//     name: 'home',
+//     component: HomePageResident
+//   },
+//   ,
+//   {
+//     path: '/resetpasswordpage',
+//     name: 'resetpassword',
+//     component: ResetPasswordPage
+//   },
+
+//   {
+//     path: '/homepage/resident/:id/parcelspage',
+//     name: 'residentparcels',
+//     component: ResidentParcelsPage
+//   },
+//   ,
+//   {
+//     path: '/homepage/resident/:id/parcelspage/:tid/detailparcel',
+//     name: 'residentparcelsDetail',
+//     component: ParcelResidentDetail
+//   },
+//   {
+//     path: '/homepage/resident/:id/parcelspage/:tid/detailparcel/confirmparcel',
+//     name: 'residentparcelsConfirm',
+//     component: ConfirmParcels
+//   },
+//   {
+//     path: '/homepage/resident/:id/announcement',
+//     name: 'announcement',
+//     component: Announcement
+//   },
+//   ,
+//   {
+//     path: '/homepage/resident/:id/profile',
+//     name: 'profileresident',
+//     component: ProfileResident
+//   },
+//   {
+//     path: '/homepage/resident/:id/profile/editprofile',
+//     name: 'editprofileresident',
+//     component: EditProfilePage
+//   },
+
+//   // Staff
+//   {
+//     path: '/homepage/staff/:id',
+//     name: 'homestaff',
+//     component: HomePageStaff
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageresident',
+//     name: 'manageresident',
+//     component: ManageResident
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageresident/:tid/detailregistration',
+//     name: 'detailregistration',
+//     component: ResidentRegistrationDetail
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageresident/:tid/detailregistration/editdetailregistration',
+//     name: 'editdetailregistration',
+//     component: EditRegistrationDetail
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel',
+//     name: 'staffparcels',
+//     component: StaffParcelsPage
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageannouncement',
+//     name: 'manageannouncement',
+//     component: ManageAnnouncement
+//   },
+//   {
+//     path: '/homepage/staff/:id/parcelscannerpage',
+//     name: 'parcelscanner',
+//     component: ParcelScannerPage
+//   },
+//   ,
+//   {
+//     path: '/courier/parcelscannerpage',
+//     name: 'parcelscannershipping',
+//     component: ParcelScannerPageSender
+//   },
+//   {
+//     path: '/homepage/staff/:id/dashboardpage',
+//     name: 'dashboard',
+//     component: DashBoard
+//   },
+//   {
+//     path: '/homepage/staff/:id/profile',
+//     name: 'profilestaff',
+//     component: ProfileStaff
+//   },
+//   {
+//     path: '/homepage/staff/:id/profile/editprofile',
+//     name: 'editprofilestaff',
+//     component: EditProfilePage
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel/:tid/changeparcel',
+//     name: 'editparcelstatus',
+//     component: ChangeParcelStatus
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel/:tid/detailparcel/editparcel',
+//     name: 'editparcels',
+//     component: EditParcels
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel/:tid/detailparcel',
+//     name: 'detailparcels',
+//     component: ParcelsDetail
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel/:tid/deleteparcel',
+//     name: 'deleteparcels',
+//     component: DeleteParcels
+//   },
+//   {
+//     path: '/homepage/staff/:id/manageparcel/trashparcel',
+//     name: 'trashparcels',
+//     component: ParcelTrash
+//   }
+// ]
 
 const router = createRouter({
   history,

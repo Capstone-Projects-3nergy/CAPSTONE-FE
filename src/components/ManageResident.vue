@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -9,9 +9,61 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
 import ConfirmLogout from './ConfirmLogout.vue'
+import ParcelTable from '@/components/ParcelTable.vue'
+import ParcelFilterBar from './ParcelFilterBar.vue'
+import AlertPopUp from './AlertPopUp.vue'
+import WebHeader from './WebHeader.vue'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
+import DeleteMemberStaff from './DeleteMemberStaff.vue'
+import {
+  sortByRoomNumber,
+  sortByRoomNumberReverse,
+  sortByStatus,
+  sortByStatusReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByTracking,
+  sortByTrackingReverse,
+  sortByName,
+  sortByNameReverse,
+  sortByContact,
+  sortByContactReverse,
+  sortByFirstName,
+  sortByLastName,
+  sortByFirstNameReverse,
+  sortByLastNameReverse,
+  searchParcels,
+  filterByDay,
+  filterByMonth,
+  filterByYear,
+  sortByFullName,
+  sortByFullNameReverse,
+  sortByRoomNumberUser,
+  sortByRoomNumberUserReverse,
+  sortByUserDate,
+  sortByUserDateReverse
+} from '@/stores/SortManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
+const route = useRoute()
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -21,101 +73,30 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const tabs = ['Day', 'Month', 'Year']
-const activeTab = ref('Day')
-const showLogoutConfirm = ref(false)
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
+const parcelsResidentDetail = ref(null)
+const MemberDetail = ref(null)
+const showDeleteMember = ref(false)
+const showLogoutConfirm = ref(null)
+const deletedParcel = ref(null)
+const showAddParcels = ref(false)
+const showParcelDetailModal = ref(false)
+const error = ref(false)
+const addSuccess = ref(false)
+const editSuccess = ref(false)
+const deleteSuccess = ref(false)
+const statusSuccess = ref(false)
+const showDeleteParcel = ref(false)
+const showStatusParcel = ref(false)
+const showDeleteMemberSuccess = ref(false)
+const showDeleteMemberError = ref(false)
+
+const parcelDetail = ref(null)
+const parcelStatusDetail = ref(null)
+const parcelManager = useParcelManager()
+const userManager = useUserManager()
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels' })
+}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner' })
   showParcelScanner.value = true
@@ -129,6 +110,9 @@ const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
+const showAddNewMember = async function () {
+  router.replace({ name: 'addmember' })
+}
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
@@ -138,24 +122,170 @@ const showHomePageStaffWeb = async () => {
   showHomePageStaff.value = true
 }
 const checkScreen = () => {
-
   isCollapsed.value = window.innerWidth < 768
 }
-onUnmounted(() => {
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
+const mapActiveStatus = (activeStatus) => {
+  switch (activeStatus) {
+    case 'ACTIVE ':
+      return 'Active'
+    case 'INACTIVE':
+      return 'Inactive'
+    default:
+      return activeStatus
+  }
+}
 
+onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-
+  console.log(loginManager.user.value)
   checkScreen()
 
-
   window.addEventListener('resize', checkScreen)
-})
 
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
+
+  if (data) {
+    const mapped = data.map((p) => ({
+      id: p.parcelId,
+      trackingNumber: p.trackingNumber,
+      recipientName: p.ownerName,
+      roomNumber: p.roomNumber,
+      email: p.contactEmail,
+      status: mapStatus(p.status),
+      receiveAt: p.receivedAt,
+      updateAt: p.updatedAt || null,
+      pickupAt: p.pickedUpAt || null
+    }))
+
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+
+    parcelManager.setParcels(mapped)
+  }
+  //profile resident&staff
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    router
+  )
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.userId,
+      fullName: p.fullName,
+      email: p.email,
+      dormName: p.dormName,
+      roomNumber: p.roomNumber,
+      role: p.role, // "RESIDENT" | "STAFF"
+      status: p.status,
+      updateAt: p.updatedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
+      photo: p.profileImageUrl // 🔥 table ใช้ photo
+    }))
+
+    // เรียงตาม update ล่าสุด
+    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+
+    // 🔹 แยก role
+    const residentList = mapped.filter((u) => u.role === 'RESIDENT')
+    const staffList = mapped.filter((u) => u.role === 'STAFF')
+
+    userManager.setMembers(residentList)
+    userManager.setStaffs(staffList)
+  }
+  console.log(dataUser)
+  // const dataUserResident = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/members`,
+  //   router
+  // )
+  // if (dataUserResident) {
+  //   const mapped = dataUserResident.map((p) => ({
+  //     id: p.residentId,
+  //     firstName: p.firstName,
+  //     lastName: p.lastName,
+  //     phoneNumber: p.phoneNumber,
+  //     lineId: p.lineId,
+  //     email: p.contactEmail,
+  //     profileImage: p.profileImage,
+  //     dormName: p.dormName,
+  //     status: mapActiveStatus(p.activeStatus),
+  //     updateAt: p.updatedAt || null
+  //   }))
+
+  //   // เรียงตาม update ล่าสุด
+  //   mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+  //   userManager.setMembers(residents)
+  // }
+  // const dataUserStaff = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/staffs`,
+  //   router
+  // )
+  // if (dataUserStaff) {
+  //   const mapped = dataUserStaff.map((p) => ({
+  //     id: p.staffId,
+  //     firstName: p.firstName,
+  //     lastName: p.lastName,
+  //     phoneNumber: p.phoneNumber,
+  //     lineId: p.lineId,
+  //     email: p.contactEmail,
+  //     profileImage: p.profileImage,
+  //     position: p.position,
+  //     status: mapActiveStatus(p.activeStatus),
+  //     updateAt: p.updatedAt || null
+  //   }))
+
+  //   // เรียงตาม update ล่าสุด
+  //   mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+  //   userManager.setStaffs(staffs)
+  // }
+
+  try {
+    const res = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      router
+    )
+    residents.value = res || []
+  } catch (e) {}
+})
+const openStatusPopup = (parcel) => {
+  parcelStatusDetail.value = {
+    id: parcel.id,
+    parcelStatus: parcel.parcelStatus
+  }
+}
+
+const showRegistrationDetail = (id) => {
+  // id = user.id (จาก mapped)
+  router.push({
+    name: 'detailregistration',
+    params: {
+      tid: id
+    }
+  })
+}
+
+const deleteParcelPopUp = (parcel) => {
+  showDeleteParcel.value = true
+  parcelDetail.value = {
+    id: parcel.id,
+    parcelNumber: parcel.trackingNumber
+  }
+}
 const returnLoginPage = async () => {
   try {
-
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
@@ -174,6 +304,322 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const currentPage = ref(1)
+const perPage = ref(10)
+const totalPages = computed(() =>
+  Math.ceil(parcels.value.length / perPage.value)
+)
+
+const paginatedParcels = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredParcels.value.slice(start, end)
+})
+const paginatedResidents = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredResidents.value.slice(start, end)
+})
+const paginatedStaffs = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredStaffs.value.slice(start, end)
+})
+const goToPage = (page) => {
+  if (page < 1) page = 1
+  if (page > totalPages.value) page = totalPages.value
+  currentPage.value = page
+}
+const nextPage = () => goToPage(currentPage.value + 1)
+const prevPage = () => goToPage(currentPage.value - 1)
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    if (current <= 3) {
+      pages.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      pages.push(1, '...', total - 2, total - 1, total)
+    } else {
+      pages.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
+  }
+
+  return pages
+})
+const sortNameAsc = () => sortByFullName(usersByTab.value)
+const sortNameDesc = () => sortByFullNameReverse(usersByTab.value)
+
+const sortRoomAsc = () => sortByRoomNumberUser(usersByTab.value)
+const sortRoomDesc = () => sortByRoomNumberUserReverse(usersByTab.value)
+
+const sortNewest = () => sortByUserDateReverse(usersByTab.value)
+const sortOldest = () => sortByUserDate(usersByTab.value)
+
+const parcels = computed(() => parcelManager.getParcels())
+const staffs = computed(() => userManager.getStaffs())
+const residents = computed(() => userManager.getMembers())
+const usersByTab = computed(() => {
+  if (activeTab.value === 'Residents') return residents.value
+  if (activeTab.value === 'Staffs') return staffs.value
+  return [...residents.value, ...staffs.value]
+})
+const totalUsers = computed(() => usersByTab.value.length)
+
+const currentUsed = computed(
+  () => usersByTab.value.filter((u) => u.status === 'ACTIVE').length
+)
+
+function autoClose(refVar, timeout = 10000) {
+  watch(refVar, (val) => {
+    if (val) {
+      setTimeout(() => {
+        refVar.value = false
+      }, timeout)
+    }
+  })
+}
+const deleteMemberPopUp = (id) => {
+  MemberDetail.value = {
+    id: id.id,
+    fullName: id.fullName
+  }
+
+  showDeleteMember.value = true
+}
+const clearDeleteMemPopUp = () => {
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+const showDelMemComplete = () => {
+  showDeleteMemberSuccess.value = true
+  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+const openRedMemPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showDeleteMember.value = false
+  MemberDetail.value = null
+}
+
+// const clearDeletePopUp = () => {
+//   showDeleteMember.value = false
+//   MemberDetail.value = null
+// }
+
+autoClose(addSuccess)
+autoClose(editSuccess)
+autoClose(deleteSuccess)
+autoClose(error)
+
+const searchKeyword = ref('')
+const activeTab = ref('Residents')
+const tabs = ['Residents', 'Staffs']
+
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
+// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortDateAsc = () => sortByDate(parcels.value)
+const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
+
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
+function parseDate(dateStr) {
+  if (!dateStr) return null
+
+  let d = new Date(dateStr)
+  if (!isNaN(d)) return d
+
+  const parts = dateStr.split(' ')
+  if (parts.length === 3) {
+    const [day, mon, year] = parts
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+    const monthIndex = months.indexOf(mon)
+    if (monthIndex !== -1) {
+      return new Date(year, monthIndex, day)
+    }
+  }
+
+  return null
+}
+
+const selectedSort = ref('Sort by:')
+const selectedDate = ref('')
+
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+const filteredResidents = computed(() => {
+  let result = residents.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+const filteredStaffs = computed(() => {
+  let result = staffs.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+const handleSort = () => {
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
+      break
+  }
+}
+const filterDate = ref('')
+const filterSearch = ref('')
+const filterSort = ref('')
+const handleSearchUpdate = (val) => {
+  filterSearch.value = val
+  searchKeyword.value = val
+}
+
+const handleDateUpdate = (val) => {
+  filterDate.value = val
+  selectedDate.value = val
+}
+
+const handleSortUpdate = (val) => {
+  filterSort.value = val
+  selectedSort.value = val
+  handleSort()
+}
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      showDeleteMemberSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
+}
+const showResidentDetail = async function (id) {
+  router.push({
+    name: 'detailregistration',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+}
 </script>
 
 <template>
@@ -181,12 +627,11 @@ const toggleSidebar = () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
- 
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
-     
         <svg
           @click="toggleSidebar"
           class="md:hidden mr-4 cursor-pointer"
@@ -203,7 +648,6 @@ const toggleSidebar = () => {
         </svg>
 
         <div class="flex-1 flex justify-end items-center gap-5">
-
           <svg
             width="14"
             height="14"
@@ -229,7 +673,6 @@ const toggleSidebar = () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -237,21 +680,17 @@ const toggleSidebar = () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
- 
     <div class="flex flex-1">
-
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
-       
           ]"
           class="overflow-hidden"
         >
- 
           <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
@@ -341,7 +780,7 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
+            <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -379,24 +818,20 @@ const toggleSidebar = () => {
             >
               <template #icon>
                 <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
                     fill="white"
+                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
                   />
                 </svg>
               </template>
             </SidebarItem>
 
-            <SidebarItem
-              title="Manage Announcements"
-              @click="ShowManageAnnouncementPage"
-            >
+            <SidebarItem title="Manage Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -412,9 +847,28 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-          
+            <SidebarItem title="Trash" @click="showParcelTrashPage">
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
           </nav>
-     
+
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -445,31 +899,96 @@ const toggleSidebar = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
-        <div class="flex space-x-1">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
+      <main class="flex-1 p-9 x-full">
+        <div class="flex flex-col gap-4 mb-6 px-2">
+          <!-- Header -->
+          <div class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#185DC0"
+                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+              />
+            </svg>
+            <h2 class="text-2xl font-bold text-[#185dc0]">Manages Resident</h2>
+          </div>
 
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">
-            Manage Resident
-          </h2>
+          <div class="flex items-center justify-between">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8"
+            >
+              <div class="flex bg-white rounded-lg overflow-hidden w-fit">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab"
+                  @click="activeTab = tab"
+                  :class="[
+                    'px-4 py-1 font-medium transition cursor-pointer',
+                    activeTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ tab }}
+                </button>
+              </div>
+
+              <div
+                class="flex flex-wrap sm:flex-nowrap items-center gap-y-3 gap-x-4 sm:gap-y-0 sm:gap-x-6 text-sm text-gray-500 sm:ml-auto"
+              >
+                <span>
+                  <span class="font-medium text-gray-700">Total users:</span>
+                  {{ totalUsers }}
+                </span>
+                <span>
+                  <span class="font-medium text-gray-700">Current used:</span>
+                  {{ currentUsed }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <ParcelFilterBar
+          v-if="activeTab === 'Residents'"
+          :items="paginatedResidents"
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          :show-add-button="false"
+          :hideTrash="false"
+          :showDate="false"
+          :showAddMemberButton="true"
+          @view-detail="showResidentDetail"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
+          @addMember="showAddNewMember"
+        />
+        <ParcelFilterBar
+          v-else-if="activeTab === 'Staffs'"
+          :items="paginatedStaffs"
+          :modelDate="filterDate"
+          :modelSearch="filterSearch"
+          :modelSort="filterSort"
+          :show-add-button="false"
+          :hideTrash="false"
+          :showDate="false"
+          :showAddStaffButton="false"
+          @update:date="handleDateUpdate"
+          @update:search="handleSearchUpdate"
+          @update:sort="handleSortUpdate"
+          @add="showAddParcelPage"
+        />
+        <!-- 
         <div
           class="bg-white h-18 mb-3 shadow-md rounded-xl p-4 border border-gray-200"
         >
           <div class="flex items-center justify-between mb-4">
-       
             <div class="flex items-center space-x-4">
               <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3>
               <div class="flex bg-gray-100 rounded-lg overflow-hidden">
@@ -489,9 +1008,7 @@ const toggleSidebar = () => {
               </div>
             </div>
 
-        
             <div class="flex items-center space-x-3">
-           
               <div class="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -514,7 +1031,6 @@ const toggleSidebar = () => {
                 />
               </div>
 
-      
               <select
                 class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
@@ -522,13 +1038,333 @@ const toggleSidebar = () => {
                 <option>Newest</option>
                 <option>Oldest</option>
               </select>
-
-    
             </div>
           </div>
+        </div> -->
+        <div class="fixed top-5 left-5 z-50">
+          <!-- <AlertPopUp
+            v-if="deleteSuccess"
+            :titles="'Delete Parcel to Trash is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          /> -->
+          <AlertPopUp
+            v-if="showDeleteMemberSuccess"
+            :titles="'Delete Resident to Trash is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="statusSuccess"
+            :titles="'Change Status is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="deleteSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="addSuccess"
+            :titles="'Add New Resident is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="addSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="editSuccess"
+            :titles="'Edit Resident is Successful.'"
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
         </div>
+        <ParcelTable
+          v-if="activeTab === 'Residents'"
+          :items="paginatedResidents"
+          :pages="visiblePages"
+          :page="currentPage"
+          :total="totalPages"
+          :showPhoto="true"
+          :showName="false"
+          :showMemberName="true"
+          :showTracking="false"
+          :showStatus="false"
+          :clickableStatus="false"
+          :showDeleteMember="true"
+          :hideTrash="true"
+          :showMobile="false"
+          :showActionStatus="true"
+          :showDelete="false"
+          :showRoom="true"
+          :showUpdateAt="true"
+          @deleteMember="deleteMemberPopUp"
+          @prev="prevPage"
+          @next="nextPage"
+          @go="goToPage"
+          @view-detail="showRegistrationDetail"
+        >
+          <template #sort-room>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortRoom"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
 
-   
+          <template #sort-status>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortStatus"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-date>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortDate"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #icon-view-member>
+            <svg
+              class="cursor-pointer"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                fill="#107EFF"
+              />
+              <path
+                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                fill="#107EFF"
+              />
+            </svg>
+          </template>
+
+          <template #icon-delete>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 18 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                fill="red"
+              />
+            </svg>
+          </template>
+        </ParcelTable>
+        <ParcelTable
+          v-else-if="activeTab === 'Staffs'"
+          :items="paginatedStaffs"
+          :pages="visiblePages"
+          :page="currentPage"
+          :total="totalPages"
+          :showPhoto="true"
+          :showName="false"
+          :clickableStatus="false"
+          :showMobile="false"
+          :showMemberName="false"
+          :showStaffName="true"
+          :showTracking="false"
+          :showStatus="false"
+          :showDelete="false"
+          :hideTrash="true"
+          :showAction="false"
+          :showActionStatus="true"
+          :showRoom="false"
+          :showUpdateAt="true"
+          @deleteMember="deleteMemberPopUp"
+          @prev="prevPage"
+          @next="nextPage"
+          @go="goToPage"
+          @view-detail="showRegistrationDetail"
+        >
+          <template #sort-room>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortRoom"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-status>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortStatus"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-date>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortDate"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#185DC0"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#5C9BEB"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #icon-view-member>
+            <svg
+              class="cursor-pointer"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                fill="#107EFF"
+              />
+              <path
+                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                fill="#107EFF"
+              />
+            </svg>
+          </template>
+
+          <template #icon-delete>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 18 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                fill="red"
+              />
+            </svg>
+          </template>
+        </ParcelTable>
+        <!-- 
         <div class="overflow-x-auto bg-white rounded-lg shadow">
           <table class="min-w-full text-left border-collapse">
             <thead class="bg-gray-100">
@@ -616,7 +1452,6 @@ const toggleSidebar = () => {
           </table>
         </div>
 
-  
         <div class="flex justify-end space-x-2 mt-4 text-gray-700">
           <button class="px-3 py-1 rounded hover:bg-gray-200">
             &lt; Previous
@@ -626,7 +1461,7 @@ const toggleSidebar = () => {
           <span class="px-2 py-1">...</span>
           <button class="px-3 py-1 hover:bg-gray-200 rounded">11</button>
           <button class="px-3 py-1 rounded hover:bg-gray-200">Next &gt;</button>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>
@@ -650,4 +1485,13 @@ const toggleSidebar = () => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
+  <teleport to="body" v-if="showDeleteMember">
+    <DeleteMemberStaff
+      @cancelDetail="clearDeleteMemPopUp"
+      @confirmDetail="showDelMemComplete"
+      @redAlert="openRedMemPopup"
+      :residentData:="MemberDetail"
+      :isPermanent="false"
+    />
+  </teleport>
 </template>

@@ -19,16 +19,16 @@ function sortByStatusReverse(parcels) {
 }
 
 function sortByDate(parcels) {
-  parcels.sort((a, b) => new Date(a.receiveAt) - new Date(b.receiveAt))
+  parcels.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
 }
 
 function sortByDateReverse(parcels) {
-  parcels.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
+  parcels.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 }
 
 function sortByTracking(parcels) {
   parcels.sort((a, b) =>
-    (a.tracking || '').localeCompare(b.tracking || '', 'th', {
+    (a.trackingNumber || '').localeCompare(b.trackingNumber || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -36,7 +36,7 @@ function sortByTracking(parcels) {
 
 function sortByTrackingReverse(parcels) {
   parcels.sort((a, b) =>
-    (b.tracking || '').localeCompare(a.tracking || '', 'th', {
+    (b.trackingNumber || '').localeCompare(a.trackingNumber || '', 'th', {
       sensitivity: 'base'
     })
   )
@@ -73,23 +73,30 @@ function sortByContactReverse(parcels) {
     })
   )
 }
-
 function searchParcels(parcels, keyword) {
   if (!keyword) return parcels
 
   const lowerKeyword = keyword.toLowerCase().trim()
 
   return parcels.filter((p) => {
-    let formattedReceiveAt = ''
+    let displayDate = ''
+    let isoDate = ''
+
     if (p.updateAt) {
       const date = new Date(p.updateAt)
+
       const dd = String(date.getDate()).padStart(2, '0')
       const mm = String(date.getMonth() + 1).padStart(2, '0')
       const yyyy = date.getFullYear()
       const hh = String(date.getHours()).padStart(2, '0')
       const min = String(date.getMinutes()).padStart(2, '0')
       const ss = String(date.getSeconds()).padStart(2, '0')
-      formattedReceiveAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+      // แสดงผลเดิม
+      displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+      // 🔥 สำหรับ search แบบ backend
+      isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
     }
 
     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
@@ -98,27 +105,189 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
     const nameMatch = p.recipientName
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+
+    const firstNameMatch = p.firstName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
+    const lastNameMatch = p.lastName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
+    const fullNameMatch = p.fullName
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
+    const phoneNumberMatch = p.phoneNumber
+      ?.toString()
+      .toLowerCase()
+      .includes(lowerKeyword)
+
     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+
     const statusMatch = p.status
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
-    const dateMatch = formattedReceiveAt.toLowerCase().includes(lowerKeyword)
+
+    // ✅ รองรับทั้ง 2 format
+    const dateMatch =
+      displayDate.toLowerCase().includes(lowerKeyword) ||
+      isoDate.toLowerCase().includes(lowerKeyword)
 
     return (
       roomMatch ||
       trackingMatch ||
       nameMatch ||
+      firstNameMatch ||
+      lastNameMatch ||
+      fullNameMatch ||
       emailMatch ||
       statusMatch ||
-      dateMatch
+      dateMatch ||
+      phoneNumberMatch
     )
   })
 }
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     let formattedupdateAt = ''
+//     if (p.updateAt) {
+//       const date = new Date(p.updateAt)
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+//       formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+//     }
+
+//     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+//     const trackingMatch = p.trackingNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // ชื่อผู้รับเดิม
+//     const nameMatch = p.recipientName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // ✅ เพิ่มจาก UpdateProfile
+//     const firstNameMatch = p.firstName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const lastNameMatch = p.lastName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
+//     //   .toLowerCase()
+//     //   .includes(lowerKeyword)
+
+//     const fullNameMatch = p.fullName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const phoneNumberMatch = p.phoneNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+
+//     const statusMatch = p.status
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
+
+//     return (
+//       roomMatch ||
+//       trackingMatch ||
+//       nameMatch ||
+//       firstNameMatch ||
+//       lastNameMatch ||
+//       fullNameMatch ||
+//       emailMatch ||
+//       statusMatch ||
+//       dateMatch ||
+//       phoneNumberMatch
+//     )
+//   })
+// }
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     let formattedupdateAt = ''
+//     if (p.updateAt) {
+//       const date = new Date(p.updateAt)
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+//       formattedupdateAt = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+//     }
+
+//     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+//     const trackingMatch = p.trackingNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const nameMatch = p.recipientName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const phoneNumberMatch = p.phoneNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+//     const statusMatch = p.status
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const dateMatch = formattedupdateAt.toLowerCase().includes(lowerKeyword)
+
+//     return (
+//       roomMatch ||
+//       trackingMatch ||
+//       nameMatch ||
+//       emailMatch ||
+//       statusMatch ||
+//       dateMatch ||
+//       phoneNumberMatch
+//     )
+//   })
+// }
 
 function parseDate(dateStr) {
   return new Date(dateStr)
@@ -189,6 +358,142 @@ function sortByLastNameReverse(parcels) {
     return bLast.localeCompare(aLast)
   })
 }
+function sortByLineId(parcels) {
+  parcels.sort((a, b) =>
+    (a.lineId || '').localeCompare(b.lineId || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByLineIdReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.lineId || '').localeCompare(a.lineId || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByPhoneNumber(parcels) {
+  parcels.sort((a, b) =>
+    (a.phoneNumber || '').localeCompare(b.phoneNumber || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByPhoneNumberReverse(parcels) {
+  parcels.sort((a, b) =>
+    (b.phoneNumber || '').localeCompare(a.phoneNumber || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByPosition(parcels) {
+  parcels.sort((a, b) => {
+    const aPos = (a.position || '').toLowerCase()
+    const bPos = (b.position || '').toLowerCase()
+    return aPos.localeCompare(bPos, 'th', { sensitivity: 'base' })
+  })
+}
+
+function sortByPositionReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aPos = (a.position || '').toLowerCase()
+    const bPos = (b.position || '').toLowerCase()
+    return bPos.localeCompare(aPos, 'th', { sensitivity: 'base' })
+  })
+}
+function sortByDormName(parcels) {
+  parcels.sort((a, b) => {
+    const aDorm = (a.dormId?.dormName || '').toLowerCase()
+    const bDorm = (b.dormId?.dormName || '').toLowerCase()
+    return aDorm.localeCompare(bDorm, 'th', { sensitivity: 'base' })
+  })
+}
+
+function sortByDormNameReverse(parcels) {
+  parcels.sort((a, b) => {
+    const aDorm = (a.dormId?.dormName || '').toLowerCase()
+    const bDorm = (b.dormId?.dormName || '').toLowerCase()
+    return bDorm.localeCompare(aDorm, 'th', { sensitivity: 'base' })
+  })
+}
+function sortByDormNameUser(users) {
+  users.sort((a, b) =>
+    (a.dormName || '').localeCompare(b.dormName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByDormNameUserReverse(users) {
+  users.sort((a, b) =>
+    (b.dormName || '').localeCompare(a.dormName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByFullName(users) {
+  users.sort((a, b) =>
+    (a.fullName || '').localeCompare(b.fullName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByFullNameReverse(users) {
+  users.sort((a, b) =>
+    (b.fullName || '').localeCompare(a.fullName || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByEmail(users) {
+  users.sort((a, b) =>
+    (a.email || '').localeCompare(b.email || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByEmailReverse(users) {
+  users.sort((a, b) =>
+    (b.email || '').localeCompare(a.email || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByUserStatus(users) {
+  users.sort((a, b) =>
+    (a.status || '').localeCompare(b.status || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByUserStatusReverse(users) {
+  users.sort((a, b) =>
+    (b.status || '').localeCompare(a.status || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+function sortByUserDate(users) {
+  users.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+}
+
+function sortByUserDateReverse(users) {
+  users.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+}
+function sortByRoomNumberUser(users) {
+  users.sort((a, b) => (a.roomNumber || 0) - (b.roomNumber || 0))
+}
+
+function sortByRoomNumberUserReverse(users) {
+  users.sort((a, b) => (b.roomNumber || 0) - (a.roomNumber || 0))
+}
 
 export {
   sortByRoomNumber,
@@ -210,5 +515,25 @@ export {
   searchParcels,
   filterByDay,
   filterByMonth,
-  filterByYear
+  filterByYear,
+  sortByLineId,
+  sortByLineIdReverse,
+  sortByPhoneNumber,
+  sortByPhoneNumberReverse,
+  sortByPosition,
+  sortByPositionReverse,
+  sortByDormName,
+  sortByDormNameReverse,
+  sortByFullName,
+  sortByFullNameReverse,
+  sortByEmail,
+  sortByEmailReverse,
+  sortByDormNameUser,
+  sortByDormNameUserReverse,
+  sortByRoomNumberUser,
+  sortByRoomNumberUserReverse,
+  sortByUserStatus,
+  sortByUserStatusReverse,
+  sortByUserDate,
+  sortByUserDateReverse
 }

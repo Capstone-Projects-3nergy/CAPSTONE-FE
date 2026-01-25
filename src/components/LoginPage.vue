@@ -281,8 +281,14 @@ const showResetPasswordPageWeb = async function () {
         <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
           Get Started
         </h2>
-        <p class="text-[#8C8F91] mb-6 text-center md:text-left">
+        <p class="font-medium text-[#8C8F91] mb-6 text-center md:text-left">
           Welcome to tractify - Let's get started
+        </p>
+        <p class="text-sm mb-4">
+          <span class="text-[#8C8F91] md:hidden">
+            Easily manage dormitory parcels, track delivery status, and stay
+            updated anytime with Tractify.
+          </span>
         </p>
 
         <div class="space-y-2">
@@ -358,7 +364,7 @@ const showResetPasswordPageWeb = async function () {
                 type="email"
                 required
                 placeholder="Email"
-                class="w-full pl-10 pr-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 @input="checkEmailLength"
                 :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
               />
@@ -436,7 +442,13 @@ const showResetPasswordPageWeb = async function () {
             </button>
           </div>
 
-          <div class="flex justify-end"></div>
+          <div class="flex justify-end">
+            <a
+              @click="showResetPasswordPageWeb"
+              class="text-sm text-black hover:text-gray-600 cursor-pointer"
+              >Forgot your password?</a
+            >
+          </div>
           <ButtonWeb
             label="Sign In"
             type="submit"

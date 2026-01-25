@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, onMounted } from 'vue'
+import { ref, onUnmounted, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -7,6 +7,20 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
+import PersonalInfoCard from './PersonalInfoCard.vue'
+import AlertPopUp from './AlertPopUp.vue'
+import { useProfileManager } from '@/stores/ProfileManager'
+import WebHeader from './WebHeader.vue'
+import { getProfile } from '@/utils/fetchUtils'
+import axios from 'axios'
+const profileManager = useProfileManager()
+const errorAccount = ref(false)
+const successAccount = ref(false)
+const incorrectemail = ref(false)
+const dormList = ref([])
+const emailRequire = ref(false)
+const editSuccess = ref(false)
+const error = ref(false)
 const loginManager = useAuthManager()
 const router = useRouter()
 const showHomePageResident = ref(false)
@@ -24,11 +38,78 @@ const resident = ref({
   building: 'Building 2',
   address: '203/45 Moo 5, Bangkok, Thailand'
 })
+const userDormName = computed(() => {
+  const userDormId = loginManager.user?.dormId
+  if (!userDormId || dormList.value.length === 0) return ''
 
+  const dorm = dormList.value.find((d) => d.dormId === userDormId)
+
+  return dorm ? dorm.dormName : ''
+})
 const saveProfile = () => {
   alert('Resident profile updated Successfuly!')
 }
+const dormName = computed(() => {
+  if (!loginManager.user?.dormId) return ''
 
+  const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
+
+  return dorm ? dorm.dormName : ''
+})
+onMounted(async () => {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
+  } catch (err) {}
+
+  const profile = await getProfile(
+    `${import.meta.env.VITE_BASE_URL}/api/profile`,
+    router
+  )
+
+  if (profile) {
+    profileManager.setCurrentProfile(profile)
+
+    // sync form    form.value = { ...profile }
+    originalForm.value = { ...profile }
+  }
+
+  // const profile = await getProfile(
+  //   `${import.meta.env.VITE_BASE_URL}/api/profile`,
+  //   router
+  // )
+
+  // if (profile) {
+  //   profileManager.setCurrentProfile(profile)
+  //   loginManager.updateUser(profile)
+  //   profileManager.updateProfile(profile)
+  // }
+})
+const originalForm = ref(null)
 const cancelEdit = () => {
   resident.value = {
     name: 'Somchai Suksan',
@@ -50,7 +131,16 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
-
+const firstName = computed(() => {
+  return loginManager.user.fullName.split(' ')[0] || ''
+})
+function goToEditProfile() {
+  router.replace({ name: 'editprofileresident' })
+}
+const lastName = computed(() => {
+  const parts = loginManager.user.fullName.split(' ')
+  return parts.slice(1).join(' ') || ''
+})
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -74,6 +164,63 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
 })
+
+const closePopUp = () => {
+  profileManager.clearAlert()
+}
+// const closePopUp = (operate) => {
+//   switch (operate) {
+//     case 'problem':
+//       error.value = false
+//       break
+//     case ' editSuccessMessage':
+//       editSuccess.value = false
+//       break
+//   }
+// }
+function confirmAccountFn() {
+  successAccount.value = true
+  setTimeout(() => (successAccount.value = false), 10000)
+}
+
+function redAlertErrorFn() {
+  errorAccount.value = true
+  setTimeout(() => (errorAccount.value = false), 10000)
+}
+function incorrectemailformFn() {
+  incorrectemail.value = true
+  setTimeout(() => (incorrectemail.value = false), 10000)
+}
+function emailRequireFn() {
+  emailRequire.value = true
+  setTimeout(() => (emailRequire.value = false), 10000)
+}
+
+const closePopUps = (operate) => {
+  switch (operate) {
+    case 'SuccessAccount':
+      successAccount.value = false
+      break
+    case ' problemAccount':
+      errorAccount.value = false
+      break
+    case 'emailForm':
+      incorrectemail.value = false
+      break
+    case ' require':
+      emailRequire.value = false
+      break
+  }
+}
+// const dormName = computed(() => {
+//   if (!loginManager.user?.dormId || dormList.value.length === 0) {
+//     return '-'
+//   }
+
+//   const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
+
+//   return dorm ? dorm.dormName : '-'
+// })
 </script>
 
 <template>
@@ -81,7 +228,8 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -126,7 +274,6 @@ onMounted(async () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -134,7 +281,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -231,7 +378,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements">
+            <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -281,7 +428,7 @@ onMounted(async () => {
       <main class="flex-1 p-9">
         <div class="flex items-center space-x-2 mb-6">
           <svg
-            class="w-6 h-6 text-blue-800"
+            class="w-6 h-6 text-[#185dc0]"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -298,8 +445,78 @@ onMounted(async () => {
 
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Resident</h2>
         </div>
+        <div class="fixed top-5 left-5 z-50">
+          <AlertPopUp
+            v-if="profileManager.editSuccess"
+            titles="Profile updated successfully."
+            message="Success!!"
+            styleType="green"
+            operate="editSuccessMessage"
+            @closePopUp="closePopUp"
+          />
 
-        <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
+          <AlertPopUp
+            v-if="profileManager.error"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <!-- <AlertPopUp
+            v-if="successAccount"
+            titles="Reset Email Successful, Please check your email to confirm the email change."
+            message="Success!!"
+            styleType="green"
+            operate="SuccessAccount"
+            @closePopUp="closePopUps"
+          /> -->
+          <AlertPopUp
+            v-if="errorAccount"
+            titles="There is a problem. Please try again later."
+            message="Error!!"
+            styleType="red"
+            operate="problemAccount"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="incorrectemail"
+            titles="Please enter a valid email address (example: name@email.com)."
+            message="Error!!"
+            styleType="red"
+            operate="emailForm"
+            @closePopUp="closePopUps"
+          />
+          <AlertPopUp
+            v-if="emailRequire"
+            titles="Email is required"
+            message="Error!!"
+            styleType="red"
+            operate="require"
+            @closePopUp="closePopUps"
+          />
+        </div>
+
+        <PersonalInfoCard
+          :useCurrentProfile="true"
+          :fullName="loginManager.user.fullName"
+          :firstName="firstName"
+          :lastName="lastName"
+          :email="loginManager.user.email"
+          :roomNumber="loginManager.user.roomNumber"
+          :position="loginManager.user.position"
+          :dormName="userDormName"
+          :status="profileManager.currentProfile?.status"
+          :lineId="profileManager.currentProfile?.lineId"
+          :phoneNumber="profileManager.currentProfile?.phoneNumber"
+          :showNotify="true"
+          @edit="goToEditProfile"
+          @confirmAccount="confirmAccountFn"
+          @redAlertError="redAlertErrorFn"
+          @incorrectemailform="incorrectemailformFn"
+          @emailRequire="emailRequireFn"
+        />
+        <!-- <div class="bg-white rounded-2xl shadow p-8 max-w-5xl mx-auto">
           <h2 class="text-2xl font-bold text-blue-700 text-center mb-8">
             Personal Information
           </h2>
@@ -391,7 +608,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>

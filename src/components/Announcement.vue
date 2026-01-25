@@ -7,6 +7,7 @@ import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
+import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const showLogoutConfirm = ref(false)
 const router = useRouter()
@@ -63,7 +64,8 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -108,7 +110,6 @@ onMounted(async () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -116,7 +117,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -286,7 +287,7 @@ onMounted(async () => {
           </h2>
 
           <div
-            class="bg-white rounded-xl shadow p-6 mb-6 border-t-4 border-gray-200"
+            class="bg-white rounded-[5px] shadow p-6 mb-6 border-t-4 border-gray-200"
           >
             <div
               class="h-56 bg-gray-200 rounded-lg mb-3 flex items-center justify-center text-gray-400 text-lg font-medium"
@@ -332,7 +333,7 @@ onMounted(async () => {
           </div>
 
           <div
-            class="bg-white rounded-xl shadow p-6 mb-8 border border-gray-200 border-t-4"
+            class="bg-white rounded-[5px] shadow p-6 mb-8 border border-gray-200 border-t-4"
           >
             <div class="flex items-center gap-3 mb-4">
               <label class="font-medium text-gray-800">Event Name</label>

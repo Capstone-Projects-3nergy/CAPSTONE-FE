@@ -1,43 +1,22 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ParcelScanner from '@/components/ParcelScannerPage.vue'
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import AlertPopUp from './../components/AlertPopUp.vue'
+import axios from 'axios'
+import HomePageStaff from '@/components/HomePageResident.vue'
+import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import SidebarItem from './SidebarItem.vue'
-import ProfileStaff from './ProfileStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import PersonalInfoCard from './PersonalInfoCard.vue'
+import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import { useParcelManager } from '@/stores/ParcelsManager'
-import ParcelTable from './ParcelTable.vue'
+import { useParcelManager } from '@/stores/ParcelsManager.js'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
+import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import {
-  sortByRoomNumber,
-  sortByRoomNumberReverse,
-  sortByStatus,
-  sortByStatusReverse,
-  sortByDate,
-  sortByDateReverse,
-  sortByTracking,
-  sortByTrackingReverse,
-  sortByName,
-  sortByNameReverse,
-  sortByContact,
-  sortByContactReverse,
-  sortByFirstName,
-  sortByLastName,
-  sortByFirstNameReverse,
-  sortByLastNameReverse,
-  searchParcels,
-  filterByDay,
-  filterByMonth,
-  filterByYear
-} from '@/stores/SortManager'
-import {
-  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -50,79 +29,254 @@ import {
   editInviteReadWrite,
   declineInvite,
   editItemWithFile,
-  deleteFile
+  deleteFile,
+  updateParcelStatus
 } from '@/utils/fetchUtils'
-import package1 from '@/assets/images/Package1.png'
-import package2 from '@/assets/images/Package2.png'
-import package3 from '@/assets/images/Package3.png'
-import parcels1 from '@/assets/images/parcels.jpg'
-import parcels2 from '@/assets/images/parcels2.jpg'
-import parcels3 from '@/assets/images/parcels3.jpg'
-import parcels4 from '@/assets/images/parcels4.jpg'
-import newsImg from '@/assets/images/New.png'
-import eventImg from '@/assets/images/Event.png'
-import communityImg from '@/assets/images/COMMUNITY.png'
-import ConfirmLogout from './ConfirmLogout.vue'
-const registerStore = useAuthManager()
-const loginStore = useAuthManager()
 const loginManager = useAuthManager()
-const userName = computed(() => loginStore.user?.name || 'Guest')
+const userManager = useUserManager()
 const router = useRouter()
 const route = useRoute()
-const slides = [parcels1, parcels2, parcels3, parcels4]
-const currentIndex = ref(0)
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
+const showHomePage = ref(false)
+const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
-const showResidentParcels = ref(false)
 const showStaffParcels = ref(false)
+const returnLogin = ref(false)
+const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
-const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const isCollapsed = ref(false)
-const openStatusPopup = ref(false)
-const showParcelDetail = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-function prevSlide() {
-  currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
+const showLogoutConfirm = ref(false)
+const parcel = ref(null)
+
+const mapParcelData = (data) => ({
+  parcelId: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.recipientName,
+  roomNumber: data.roomNumber,
+  email: data.email,
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || null,
+  companyName: data.companyName || '',
+  residentId: data.residentId || null,
+  residentName: data.residentName || '',
+  imageUrl: data.imageUrl || ''
+})
+const mapMemberData = (data) => ({
+  id: data.id,
+  firstName: data.firstName || '',
+  lastName: data.lastName || '',
+  email: data.email || '',
+  roomNumber: data.roomNumber || '',
+  dormName: data.dormName || '',
+  phoneNumber: data.phoneNumber || '',
+  lineId: data.lineId || '',
+  status: data.status || 'INACTIVE',
+  profileImageUrl: data.profileImageUrl || '',
+  updatedAt: data.updatedAt || null,
+  createdAt: data.createdAt || null
+})
+const residentFirstName = computed(() => {
+  if (!residentDetail.value?.fullName) return ''
+  return residentDetail.value.fullName.split(' ')[0]
+})
+
+const residentLastName = computed(() => {
+  if (!residentDetail.value?.fullName) return ''
+  return residentDetail.value.fullName.split(' ').slice(1).join(' ')
+})
+
+const residentDetail = ref(null)
+const members = computed(() => userManager.getMembers())
+const getMemberDetail = async (userId) => {
+  if (!userId) return
+
+  // 1️⃣ หาใน store ก่อน
+  const localMember = members.value.find((m) => m.id === userId)
+  if (localMember) {
+    residentDetail.value = { ...localMember }
+
+    return
+  }
+
+  // 2️⃣ ถ้าไม่มี ค่อยยิง API
+  const data = await getItemById(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    userId,
+    router
+  )
+
+  if (data) {
+    const mapped = {
+      id: data.userId,
+      fullName: data.fullName,
+      email: data.email,
+      dormName: data.dormName,
+      roomNumber: data.roomNumber,
+      status: data.status,
+      photo: data.profileImageUrl,
+      phoneNumber: data.phoneNumber || '',
+      lineId: data.lineId || ''
+    }
+
+    residentDetail.value = mapped
+    userManager.addMember(mapped)
+  }
 }
 
-function nextSlide() {
-  currentIndex.value = (currentIndex.value + 1) % slides.length
+// const getMemberDetail = async (residentId) => {
+//   if (!residentId) return
+
+//   // 🔹 1. หาใน store (ผ่าน computed)
+//   const localMember = members.value.find((m) => m.id === residentId)
+
+//   if (localMember) {
+//     residentDetail.value = localMember
+//     return
+//   }
+
+//   // 🔹 2. ดึงจาก API
+//   try {
+//     const data = await getItemById(
+//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+//       residentId,
+//       router
+//     )
+
+//     if (data) {
+//       const mapped = mapMemberData(data)
+//       residentDetail.value = mapped
+//       userManager.addMember(mapped)
+//     }
+//   } catch (err) {
+//     console.error(err)
+//   }
+// }
+
+const parcelManager = useParcelManager()
+const parcels = computed(() => parcelManager.getParcels())
+const firstName = computed(() => {
+  if (!parcel.value?.recipientName) return '-'
+  return parcel.value.recipientName.split(' ')[0]
+})
+
+const lastName = computed(() => {
+  if (!parcel.value?.recipientName) return '-'
+  return parcel.value.recipientName.split(' ').slice(1).join(' ')
+})
+const getParcelDetail = async (tid) => {
+  if (!tid) return
+
+  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+
+  if (localParcel) {
+    parcel.value = localParcel
+
+    if (localParcel.residentId) {
+      getMemberDetail(localParcel.residentId)
+    }
+    return
+  }
+
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tid,
+      router
+    )
+
+    if (data) {
+      const mapped = mapParcelData(data)
+      parcel.value = mapped
+      parcelStore.addParcel(mapped)
+
+      if (mapped.residentId) {
+        getMemberDetail(mapped.residentId)
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
-  showParcelScanner.value = true
-}
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
-}
-const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
-  showManageAnnouncement.value = true
-}
-const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' })
-  showManageResident.value = true
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
-const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
-  showProfileStaff.value = true
+
+// const getParcelDetail = async (tid) => {
+//   if (!tid) return
+//   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+//   if (localParcel) {
+//     parcel.value = localParcel
+
+//     return
+//   }
+
+//   try {
+//     const data = await getItemById(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//       tid,
+//       router
+//     )
+//     if (data) {
+//       const mapped = mapParcelData(data)
+//       parcel.value = mapped
+//       parcelStore.addParcel(mapped)
+//     }
+//   } catch (err) {}
+// }
+const checkScreen = () => {
+  isCollapsed.value = window.innerWidth < 768
 }
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen)
+})
+onMounted(async () => {
+  checkScreen()
+  console.log(parcels.value)
+  window.addEventListener('resize', checkScreen)
+  const tidNum = Number(route.params.tid)
+  // getParcelDetail(tidNum)
+  getMemberDetail(tid)
+})
 
-const showLogoutConfirm = ref(false)
+// watch(
+//   () => route.params.tid,
+//   (newTid) => {
+//     const tidNum = Number(newTid)
+//     getParcelDetail(tidNum)
+//   }
+// )
+
+const backToManageResident = () => router.replace({ name: 'manageresident' })
+const showParcelScannerPage = async () => {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+const showManageParcelPage = async () => {
+  router.replace({ name: 'staffparcels' })
+  showStaffParcels.value = true
+}
+const ShowManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async () => {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -131,128 +285,49 @@ const returnLoginPage = async () => {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
-
-const parcelManager = useParcelManager()
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
+const showDashBoardPage = async () => {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
 }
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  console.log(loginStore.user)
-  console.log()
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-  const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    router
-  )
-
-  if (data) {
-    const mapped = data.map((p) => ({
-      id: p.parcelId,
-      trackingNumber: p.trackingNumber,
-      recipientName: p.ownerName,
-      roomNumber: p.roomNumber,
-      email: p.contactEmail,
-      status: mapStatus(p.status),
-      receiveAt: p.receivedAt,
-      updateAt: p.updatedAt || null,
-      pickupAt: p.pickedUpAt || null
-    }))
-
-    mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-
-    parcelManager.setParcels(mapped)
-  }
-})
-const mapStatus = (status) => {
-  switch (status) {
-    case 'WAITING_FOR_STAFF':
-      return 'Waiting for Staff'
-    case 'PICKED_UP':
-      return 'Picked Up'
-    case 'RECEIVED':
-      return 'Received'
-    default:
-      return status
-  }
+const showProfileStaffPage = async () => {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
-const parcels = computed(() => parcelManager.getParcels())
-const currentPage = ref(1)
-const perPage = ref(10)
-const totalPages = computed(() =>
-  Math.ceil(parcels.value.length / perPage.value)
-)
-const filteredParcels = computed(() => {
-  let result = parcels.value.map((p) => ({
-    ...p
-  }))
-
-  return result
-})
-
-const paginatedParcels = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  const end = start + perPage.value
-  return filteredParcels.value.slice(start, end)
-})
-
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+const showEditRegistrationDetail = async function (parcelId) {
+  router.push({
+    name: 'editdetailregistration',
+    params: {
+      id: route.params.id,
+      tid: parcelId
+    }
+  })
+}
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+function goToEditResident() {
+  if (!residentDetail.value?.id) return
 
-const goToPage = (page) => {
-  if (page < 1) page = 1
-  if (page > totalPages.value) page = totalPages.value
-  currentPage.value = page
-}
-const nextPage = () => goToPage(currentPage.value + 1)
-const prevPage = () => goToPage(currentPage.value - 1)
-
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
+  router.replace({
+    name: 'editdetailregistration',
+    params: {
+      id: residentDetail.value.id
     }
-  }
-
-  return pages
-})
-
-const isRoomAsc = ref(true)
-const isStatusAsc = ref(true)
-const isDateAsc = ref(true)
-const toggleSortRoom = () => {
-  isRoomAsc.value
-    ? sortByRoomNumber(parcels.value)
-    : sortByRoomNumberReverse(parcels.value)
-  isRoomAsc.value = !isRoomAsc.value
+  })
 }
 
-const toggleSortStatus = () => {
-  isStatusAsc.value
-    ? sortByStatus(parcels.value)
-    : sortByStatusReverse(parcels.value)
-  isStatusAsc.value = !isStatusAsc.value
-}
-
-const toggleSortDate = () => {
-  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
-  isDateAsc.value = !isDateAsc.value
-}
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    residentDetail.value = null // ⭐ RESET ก่อน
+    getMemberDetail(Number(newTid))
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -325,11 +400,7 @@ const toggleSortDate = () => {
           class="overflow-hidden"
         >
           <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
-            <SidebarItem
-              title="Tractify"
-              @click="toggleSidebar"
-              class="cursor-pointer"
-            >
+            <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
                   width="45"
@@ -363,7 +434,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -379,6 +450,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
@@ -397,6 +469,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
@@ -429,8 +502,10 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem
               title="Manage Residents"
+              class="bg-[#81AFEA] cursor-default"
               @click="ShowManageResidentPage"
             >
               <template #icon>
@@ -447,6 +522,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem title="Manage Announcements (Next Release)">
               <template #icon>
                 <svg
@@ -515,408 +591,147 @@ const toggleSortDate = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 w-full">
-        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
-          <section class="p-4">
-            <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 44 44"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
-                  fill="#185DC0"
-                />
-              </svg>
-              Home Page
-            </h1>
-
-            <div
-              class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
-            >
-              <button
-                @click="prevSlide"
-                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
-              >
-                ‹
-              </button>
-
-              <div class="relative w-full h-full">
-                <img
-                  :src="slides[currentIndex]"
-                  class="w-full h-full object-cover"
-                />
-
-                <div
-                  class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"
-                ></div>
-
-                <div
-                  class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20"
-                >
-                  <h1 class="text-2xl font-bold drop-shadow-lg">
-                    Welcome to Tractify
-                  </h1>
-                  <p class="text-sm opacity-90">
-                    Track and manage your parcels easily
-                  </p>
-                </div>
-              </div>
-
-              <button
-                @click="nextSlide"
-                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
-              >
-                ›
-              </button>
-            </div>
-          </section>
-
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="newsImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="eventImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">
-                💬 COMMUNITY
-              </h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="communityImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-          </section>
-
-          <div class="p-4">
-            <div class="flex space-x-1">
-              <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
-                <path
-                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                  fill="#185DC0"
-                />
-              </svg>
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                Resident Parcel
-              </h2>
-            </div>
-          </div>
-          <ParcelTable
-            :items="paginatedParcels"
-            :pages="visiblePages"
-            :page="currentPage"
-            :total="totalPages"
-            :show-action="false"
-            @prev="prevPage"
-            @next="nextPage"
-            @go="goToPage"
-            @status-click="openStatusPopup"
-            @view-detail="showParcelDetail"
+      <main class="flex-1 p-9 bg-gray-100">
+        <div class="flex items-center space-x-2 mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
           >
-            <template #sort-room>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortRoom"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-status>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortStatus"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-date>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortDate"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-          </ParcelTable>
-          <!-- 
-          <div
-            class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
-          >
-            <table class="min-w-full text-left border-collapse">
-              <thead
-                class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
-              >
-                <tr>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Tracking
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Name
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Room
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortRoom"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Email
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Status
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortStatus"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Update At
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortDate"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y">
-                <tr
-                  v-for="p in paginatedParcels"
-                  :key="p.id"
-                  class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
-                >
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Tracking:
-                    </span>
-                    {{ p.trackingNumber }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Name:
-                    </span>
-                    {{ p.recipientName }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Room:
-                    </span>
-                    {{ p.roomNumber }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Email:
-                    </span>
-                    {{ p.email }}
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 border-b md:border-none">
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Status:
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                      :class="{
-                        'bg-yellow-400': p.status === 'Waiting for Staff',
-                        'bg-green-400': p.status === 'Picked Up',
-                        'bg-blue-400': p.status === 'Received'
-                      }"
-                    >
-                      {{ p.status }}
-                    </span>
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
-                    <span class="md:hidden font-semibold text-blue-700">
-                      Update:
-                    </span>
-                    {{ formatDateTime(p.updateAt) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              &lt; Previous
-            </button>
-
-            <button
-              class="cursor-pointer"
-              v-for="page in visiblePages"
-              :key="page + Math.random()"
-              @click="goToPage(page)"
-              :class="[
-                'px-3 py-1 rounded',
-                currentPage === page
-                  ? 'bg-blue-700 text-white'
-                  : 'hover:bg-gray-200',
-                page === '...' ? 'cursor-default' : ''
-              ]"
-              :disabled="page === '...'"
-            >
-              {{ page }}
-            </button>
-
-            <button
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              Next &gt;
-            </button>
-          </div> -->
+            <path
+              fill="#185DC0"
+              d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+            />
+          </svg>
+          <h2 class="text-xl sm:text-xl md:text-2xl font-bold text-[#185dc0]">
+            Manages Resident &gt; Details
+          </h2>
         </div>
+
+        <div class="flex flex-col mb-4 gap-4">
+          <PersonalInfoCard
+            v-if="residentDetail"
+            title="Resident Information"
+            :profileImage="residentDetail.photo"
+            :useCurrentProfile="false"
+            :key="residentDetail.id"
+            :firstName="residentFirstName"
+            :lastName="residentLastName"
+            :email="residentDetail.email"
+            :roomNumber="residentDetail.roomNumber"
+            :dormName="residentDetail.dormName"
+            :status="residentDetail.status"
+            :lineId="residentDetail.lineId"
+            :phoneNumber="residentDetail.phoneNumber"
+            :profile="false"
+            :residentDetail="true"
+            @edit="goToEditResident"
+            @cancel="backToManageResident"
+          />
+
+          <!-- <PersonalInfoCard
+            :title="'Resident Information'"
+            :fullName="loginManager.user.fullName"
+            :firstName="firstName"
+            :lastName="lastName"
+            :email="loginManager.user.email"
+            :roomNumber="loginManager.user.roomNumber"
+            :dormName="userDormName"
+            :status="loginManager.user.status"
+            :lineId="loginManager.user.lineId"
+            :phoneNumber="loginManager.user.phoneNumber"
+            :profileImage="loginManager.user.profileImage"
+            :profile="false"
+            :residentDetail="true"
+            @edit="goToEditResident"
+            @cancel="backToManageResident"
+          /> -->
+        </div>
+        <!-- <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
+          <section>
+            <h3 class="font-semibold text-lg mb-4">Resident Info:</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <div>
+                <label class="block font-semibold mb-1">First Name </label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ firstName || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Last Name </label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ lastName || '-' }}
+                </p>
+              </div>
+
+            
+              <div>
+                <label class="block font-semibold mb-1">Email </label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.email || '-' }}
+                </p>
+              </div>
+
+          
+              <div>
+                <label class="block font-semibold mb-1">Room Number </label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.roomNumber || '-' }}
+                </p>
+              </div>
+
+           
+              <div>
+                <label class="block font-semibold mb-1">Dormitory </label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.dormitoryName || '-' }}
+                </p>
+              </div>
+
+          
+              <div>
+                <label class="block font-semibold mb-1">Line ID</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.lineId || '-' }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Phone Number</label>
+                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                  {{ parcel?.phoneNumber || '-' }}
+                </p>
+              </div>
+            </div>
+          </section>
+
+         
+          <div class="flex items-center gap-3 ml-auto justify-end">
+            <ButtonWeb
+              label="Edit"
+              color="blue"
+              @click="showEditRegistrationDetail(parcel.parcelId)"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+            />
+            <ButtonWeb
+              label="Go Back"
+              color="gray"
+              @click="backToManageResident"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
+            />
+          </div>
+        </form> -->
       </main>
     </div>
   </div>
+
+  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>
@@ -930,12 +745,7 @@ const toggleSortDate = () => {
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
   </Teleport>
-  <Teleport to="body" v-if="showProfileStaff">
-    <ProfileStaff> </ProfileStaff>
-  </Teleport>
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
 </template>
-
-<style scoped></style>

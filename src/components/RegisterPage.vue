@@ -38,12 +38,14 @@ const success = ref(false)
 const isRoomRequired = ref(false)
 const isPositionRequired = ref(false)
 const incorrectemailform = ref(false)
+const isEmailStaff = ref(false)
 const isPositionWrong = ref(false)
 const role = ref('resident')
 const returnLogin = ref(false)
 const router = useRouter()
 const isPasswordVisible = ref(false)
 const isComfirmPasswordVisible = ref(false)
+const isEmailExist = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
@@ -88,6 +90,131 @@ onMounted(async () => {
   } catch (err) {}
 })
 
+// const submitForm = async (roleType) => {
+//   try {
+//     if (form.password !== form.confirmPassword) {
+//       isNotMatch.value = true
+//       setTimeout(() => (isNotMatch.value = false), 10000)
+//       return
+//     }
+
+//     if (/\d/.test(form.fullName)) {
+//       isFullNameWrong.value = true
+//       setTimeout(() => (isFullNameWrong.value = false), 10000)
+//       return
+//     }
+
+//     if (!form.email || !form.email.endsWith('@gmail.com')) {
+//       incorrectemailform.value = true
+//       setTimeout(() => (incorrectemailform.value = false), 10000)
+//       return
+//     }
+
+//     /* =======================
+//        CHECK EMAIL EXIST (REAL)
+//        ======================= */
+//     const baseURL = import.meta.env.VITE_BASE_URL
+
+//     try {
+//       await axios.post(`${baseURL}/api/public/email/check`, {
+//         email: form.email.trim()
+//       })
+//       // ถ้าเข้า try แปลว่า email มีจริง → ผ่าน
+//     } catch (error) {
+//       if (error.response?.status === 404) {
+//         // ❌ email ไม่มีอยู่จริง
+//         isEmailExist.value = true
+//         setTimeout(() => (isEmailExist.value = false), 10000)
+//         return
+//       } else {
+//         throw error
+//       }
+//     }
+
+//     /* =======================
+//        PREPARE PAYLOAD
+//        ======================= */
+//     const [firstName = '', lastName = ''] = (form.fullName || '')
+//       .trim()
+//       .split(/\s+/, 2)
+
+//     const roleUpper = String(roleType).toUpperCase()
+
+//     const payload =
+//       roleUpper === 'RESIDENT'
+//         ? {
+//             email: form.email.trim(),
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             dormId: form.dormId || '',
+//             roomNumber: (form.roomNumber || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName.trim()
+//           }
+//         : {
+//             email: form.email.trim(),
+//             firstName,
+//             lastName,
+//             role: roleUpper,
+//             position: (form.position || '').trim(),
+//             password: form.password,
+//             fullName: form.fullName.trim()
+//           }
+
+//     /* =======================
+//        ROLE VALIDATION
+//        ======================= */
+//     if (roleUpper === 'RESIDENT') {
+//       if (!payload.dormId) {
+//         isNoDorm.value = true
+//         setTimeout(() => (isNoDorm.value = false), 10000)
+//         return
+//       }
+//       if (!payload.roomNumber) {
+//         isRoomRequired.value = true
+//         setTimeout(() => (isRoomRequired.value = false), 10000)
+//         return
+//       }
+//     } else if (roleUpper === 'STAFF') {
+//       if (!payload.position) {
+//         isPositionRequired.value = true
+//         setTimeout(() => (isPositionRequired.value = false), 10000)
+//         return
+//       }
+//       if (/\d/.test(payload.position)) {
+//         isPositionWrong.value = true
+//         setTimeout(() => (isPositionWrong.value = false), 10000)
+//         return
+//       }
+//     }
+
+//     /* =======================
+//        REGISTER
+//        ======================= */
+//     const res = await authManager.registerAccount(payload)
+
+//     if (res.status === 201 || res.status === 200) {
+//       success.value = true
+//       setTimeout(() => (success.value = false), 10000)
+
+//       Object.keys(form).forEach((key) => {
+//         if (key === 'dormId') form[key] = null
+//         else form[key] = ''
+//       })
+//     } else if (res.status === 409) {
+//       isEmailDuplicate.value = true
+//       setTimeout(() => (isEmailDuplicate.value = false), 10000)
+//     } else if (res.status === 500) {
+//       error.value = true
+//       setTimeout(() => (error.value = false), 10000)
+//     }
+//   } catch (err) {
+//     error.value = true
+//     setTimeout(() => (error.value = false), 10000)
+//   }
+// }
+
 const submitForm = async (roleType) => {
   try {
     if (form.password !== form.confirmPassword) {
@@ -106,10 +233,28 @@ const submitForm = async (roleType) => {
     //   setTimeout(() => (isPasswordMax.value = false), 10000)
     //   return
     // }
-    if (!form.email || !form.email.endsWith('@gmail.com')) {
-      incorrectemailform.value = true
-      setTimeout(() => (incorrectemailform.value = false), 10000)
-      return
+
+    // if (!form.email || !form.email.endsWith('@gmail.com')) {
+    //   incorrectemailform.value = true
+    //   setTimeout(() => (incorrectemailform.value = false), 10000)
+    //   return
+    // }
+    if (roleType === 'STAFF') {
+      if (
+        form.email.endsWith('@gmail.com') ||
+        form.email.endsWith('@email.com')
+      ) {
+        isEmailStaff.value = true
+        setTimeout(() => (isEmailStaff.value = false), 10000)
+        return
+      }
+    }
+    if (roleType === 'RESIDENT') {
+      if (!form.email || !form.email.endsWith('@gmail.com')) {
+        incorrectemailform.value = true
+        setTimeout(() => (incorrectemailform.value = false), 10000)
+        return
+      }
     }
 
     const [firstName = '', lastName = ''] = (form.fullName || '')
@@ -173,6 +318,9 @@ const submitForm = async (roleType) => {
         if (key === 'dormId') form[key] = null
         else form[key] = ''
       })
+    } else if (res.status === 404) {
+      isEmailExist.value = true
+      setTimeout(() => (isEmailExist.value = false), 10000)
     } else if (res.status === 409) {
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 10000)
@@ -283,6 +431,8 @@ const closePopUp = (operate) => {
   if (operate === 'notnumber') roomidnotnumber.value = false
   if (operate === 'erroeposition ') isPositionWrong.value = false
   if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'EmailNotExist') isEmailExist.value = false
+  if (operate === 'EmailStaff') isEmailStaff.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -390,115 +540,131 @@ const toggleComfirmPasswordVisibility = () => {
         <p class="text-[#8C8F91] text-sm mb-4">
           Welcome to Tractify — Create your account below
         </p>
+        <div class="fixed top-20">
+          <AlertPopUp
+            v-if="isPasswordNotMatch"
+            :titles="'Password is not Match'"
+            message="Error!!"
+            styleType="red"
+            operate="errorpassword"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPositionWrong"
+            :titles="'Position can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="errorposition"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="error"
+            :titles="'There is a problem. Please try again later.'"
+            message="Error!!"
+            styleType="red"
+            operate="problem"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="roomidnotnumber"
+            :titles="'Room Number can only type as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="notnumber"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isPasswordNotMatch"
-          :titles="'Password is not Match'"
-          message="Error!!"
-          styleType="red"
-          operate="errorpassword"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isPositionWrong"
-          :titles="'Position can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="errorposition"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="roomidnotnumber"
-          :titles="'Room Number can only type as number.'"
-          message="Error!!"
-          styleType="red"
-          operate="notnumber"
-          @closePopUp="closePopUp"
-        />
+          <AlertPopUp
+            v-if="isEmailDuplicate"
+            :titles="`This email is already registered`"
+            message="Error!!"
+            styleType="red"
+            operate="email"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="incorrectemailform"
+            :titles="'Resident Email Must Be @gmail.com Only'"
+            message="Error!!"
+            styleType="red"
+            operate="emailform"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isEmailDuplicate"
-          :titles="`This email is already registered`"
-          message="Error!!"
-          styleType="red"
-          operate="email"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="incorrectemailform"
-          :titles="'Email Form Is Incorrect'"
-          message="Error!!"
-          styleType="red"
-          operate="emailform"
-          @closePopUp="closePopUp"
-        />
+          <AlertPopUp
+            v-if="isPasswordMax"
+            titles="Limit password to 20 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="password"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="success"
+            :titles="'Register New Account is Successful. Please verify your email before logging in.'"
+            message="Success!!"
+            styleType="green"
+            operate="success"
+            @closePopUp="closePopUp"
+          />
 
-        <AlertPopUp
-          v-if="isPasswordMax"
-          titles="Limit password to 20 characters or less."
-          message="Error!!"
-          styleType="red"
-          operate="password"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="success"
-          :titles="'Register New Account is Successful.'"
-          message="Success!!"
-          styleType="green"
-          operate="success"
-          @closePopUp="closePopUp"
-        />
-
-        <AlertPopUp
-          v-if="isNoDorm"
-          :titles="'Please select a dormitory.'"
-          message="Error!!"
-          styleType="red"
-          operate="dorm"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isNotMatch"
-          :titles="'Passwords do not match'"
-          message="Error!!"
-          styleType="red"
-          operate="notmatch"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isRoomRequired"
-          :titles="'Room number is required.'"
-          message="Error!!"
-          styleType="red"
-          operate="notroomrequired"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isFullNameWrong"
-          :titles="'Full Name can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="nametypewrong"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="isPositionRequired"
-          :titles="'Position is required for staff.'"
-          message="Error!!"
-          styleType="red"
-          operate="notpositionrequired"
-          @closePopUp="closePopUp"
-        />
-
+          <AlertPopUp
+            v-if="isNoDorm"
+            :titles="'Please select a dormitory.'"
+            message="Error!!"
+            styleType="red"
+            operate="dorm"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNotMatch"
+            :titles="'Passwords do not match'"
+            message="Error!!"
+            styleType="red"
+            operate="notmatch"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isRoomRequired"
+            :titles="'Room number is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="notroomrequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isFullNameWrong"
+            :titles="'Full Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="nametypewrong"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPositionRequired"
+            :titles="'Position is required for staff.'"
+            message="Error!!"
+            styleType="red"
+            operate="notpositionrequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailExist"
+            :titles="'This Email does not exist.'"
+            message="Error!!"
+            styleType="red"
+            operate="EmailNotExist"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailStaff"
+            :titles="'Staff Email Cannot Use @gmail.com'"
+            message="Error!!"
+            styleType="red"
+            operate="EmailStaff"
+            @closePopUp="closePopUp"
+          />
+        </div>
         <div class="flex bg-[#EAF0F5] rounded-lg mb-4 p-1">
           <button
             @click="role = 'resident'"
@@ -872,7 +1038,7 @@ const toggleComfirmPasswordVisibility = () => {
                     <input
                       v-model="form.email"
                       type="email"
-                      placeholder="Email"
+                      placeholder="Staff Email"
                       class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                       @input="checkInputLength('email')"
                     />
@@ -1140,7 +1306,9 @@ const toggleComfirmPasswordVisibility = () => {
     no-repeat right 0.9rem center;
   background-size: 15px 15px;
 
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
 }
 
 .custom-select:focus {

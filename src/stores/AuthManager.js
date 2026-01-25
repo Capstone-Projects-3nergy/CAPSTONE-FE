@@ -5,7 +5,8 @@ import { auth } from '@/firebase/firebaseConfig'
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 
@@ -128,7 +129,17 @@ export const useAuthManager = defineStore('authManager', () => {
 
       const baseURL = import.meta.env.VITE_BASE_URL
       const res = await axios.post(`${baseURL}/api/auth/signup`, payload)
+      // 🔽 ADD ตรงนี้ // login Firebase เพื่อให้ได้ currentUser
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        payload.email,
+        payload.password
+      )
+      // ส่ง verify email
+      await sendEmailVerification(cred.user)
 
+      successMessage.value =
+        'Account registered successfully. Please check your email to verify your account.'
       status.value = res.status
       successMessage.value = 'Account registered successfully! Please login.'
 
@@ -173,6 +184,14 @@ export const useAuthManager = defineStore('authManager', () => {
       let cred
       try {
         cred = await signInWithEmailAndPassword(auth, email, password)
+        if (!cred.user.emailVerified) {
+          throw {
+            response: {
+              status: 401,
+              data: { message: 'Please verify your email before login.' }
+            }
+          }
+        }
       } catch (firebaseErr) {
         const firebaseCodes = [
           'auth/invalid-credential',
@@ -294,16 +313,40 @@ export const useAuthManager = defineStore('authManager', () => {
       isLoading.value = false
     }
   }
-
   const logoutAccount = async (router) => {
     try {
+      if (user.value?.accessToken) {
+        const baseURL = import.meta.env.VITE_BASE_URL
+
+        await axios.post(
+          `${baseURL}/api/auth/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${user.value.accessToken}`
+            }
+          }
+        )
+      }
+
       await signOut(auth)
     } catch (err) {
+      console.error('Logout error:', err)
     } finally {
       user.value = null
       await router?.replace({ name: 'login' })
     }
   }
+
+  // const logoutAccount = async (router) => {
+  //   try {
+  //     await signOut(auth)
+  //   } catch (err) {
+  //   } finally {
+  //     user.value = null
+  //     await router?.replace({ name: 'login' })
+  //   }
+  // }
 
   const refreshToken = async () => {
     try {
@@ -369,12 +412,46 @@ export const useAuthManager = defineStore('authManager', () => {
       next()
     })
   }
+  const updateUser = (updatedProfile) => {
+    if (!user.value || !updatedProfile) return
+
+    // update name
+    if (updatedProfile.firstName || updatedProfile.lastName) {
+      user.value.fullName =
+        `${updatedProfile.firstName ?? ''} ${updatedProfile.lastName ?? ''}`.trim()
+    }
+
+    // update email
+    if (updatedProfile.email) {
+      user.value.email = updatedProfile.email
+    }
+
+    // role specific
+    if (user.value.role === 'STAFF') {
+      if ('position' in updatedProfile) {
+        user.value.position = updatedProfile.position
+      }
+    }
+
+    if (user.value.role === 'RESIDENT') {
+      if ('roomNumber' in updatedProfile) {
+        user.value.roomNumber = updatedProfile.roomNumber
+      }
+    }
+
+    // avatar (ถ้ามี)
+    if (updatedProfile.avatar) {
+      user.value.avatar = updatedProfile.avatar
+    }
+  }
+
   return {
     user,
     isLoading,
     errorMessage,
     successMessage,
     status,
+    updateUser,
     registerAccount,
     loginAccount,
     logoutAccount,

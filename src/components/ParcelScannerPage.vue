@@ -16,6 +16,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import WebHeader from './WebHeader.vue'
 import {
   getItems,
   getItemById,
@@ -100,10 +101,27 @@ const selectedResident = computed(
   () =>
     residents.value.find((r) => r.userId === selectedResidentId.value) || null
 )
-
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels' })
+}
 const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
 )
+const getResponsiveSize = () => {
+  const width = window.innerWidth
+
+  if (width < 480) {
+    return { width: 130, height: 130 }
+  } else if (width < 640) {
+    return { width: 140, height: 140 }
+  } else if (width < 768) {
+    return { width: 160, height: 160 }
+  } else if (width < 1024) {
+    return { width: 180, height: 180 }
+  } else {
+    return { width: 200, height: 200 }
+  }
+}
 
 const filteredResidents = computed(() => {
   const q = recipientSearch.value.trim().toLowerCase()
@@ -148,30 +166,35 @@ const showAddParcelPage = async () => {
 }
 
 async function extractParcelInfo(imageDataUrl) {
+  if (
+    !imageDataUrl ||
+    typeof imageDataUrl !== 'string' ||
+    !imageDataUrl.startsWith('data:image')
+  )
+    return null
+
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result.data.text
+    const text = result?.data?.text?.trim()
+    if (!text) return null
 
-    const info = { name: '', tracking: '', courier: '', type: '' }
+    const info = {
+      recipientName: '',
+      trackingNumber: ''
+    }
 
+    // 👤 Recipient
     const nameMatch = text.match(
-      /(ชื่อเจ้าของพัสดุ|ชื่อผู้รับ)[:\s]*([\u0E00-\u0E7Fa-zA-Z ]+)/
+      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
     )
-    if (nameMatch) info.name = nameMatch[2].trim()
+    if (nameMatch) info.recipientName = nameMatch[2].trim()
 
-    const trackingMatch = text.match(/(TH\d{10,}[A-Z]?)/)
-    if (trackingMatch) info.tracking = trackingMatch[1]
-
-    if (/Shopee Express/i.test(text)) info.courier = 'Shopee Express'
-    else if (/Kerry/i.test(text)) info.courier = 'Kerry Express'
-    else if (/J&T/i.test(text)) info.courier = 'J&T Express'
-
-    if (/กล่องเล็ก/.test(text)) info.type = 'กล่องเล็ก'
-    else if (/กล่องใหญ่/.test(text)) info.type = 'กล่องใหญ่'
-    else if (/ซอง/.test(text)) info.type = 'ซอง'
+    // 📦 Tracking (ไม่บังคับ TH)
+    const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
+    if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
     return info
-  } catch (err) {
+  } catch {
     return null
   }
 }
@@ -221,24 +244,26 @@ function stopCameraOnly() {
 
 async function capturePhoto() {
   if (!videoRef.value || !isCameraReady.value) {
-    alert('กรุณาเปิดกล้องก่อนถ่ายรูป')
+    alert('Camera not ready')
     return
   }
-  const video = videoRef.value
-  const canvas = document.createElement('canvas')
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-  previewUrl.value = canvas.toDataURL('image/png')
 
-  const parcelInfo = await extractParcelInfo(previewUrl.value)
-  if (parcelInfo) {
-    form.value.recipientName = parcelInfo.name || ''
-    form.value.trackingNumber = parcelInfo.tracking || ''
-    form.value.companyId = parcelInfo.courier || ''
-    form.value.parcelType = parcelInfo.type || ''
-  }
+  const canvas = document.createElement('canvas')
+  canvas.width = videoRef.value.videoWidth
+  canvas.height = videoRef.value.videoHeight
+
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(videoRef.value, 0, 0)
+
+  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+  previewUrl.value = imageDataUrl
+
+  const info = await extractParcelInfo(imageDataUrl)
+  if (!info) return
+
+  // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
+  form.value.recipientName = info.recipientName || form.value.recipientName
+  form.value.trackingNumber = info.trackingNumber || ''
 }
 
 function startQuagga() {
@@ -303,16 +328,9 @@ function startScan(mode) {
     html5QrCode = new Html5Qrcode('reader')
     const config = {
       fps: 10,
-      qrbox: function (viewW, viewH) {
-        const isMobile = window.innerWidth < 600
-
-        if (isMobile) {
-          return { width: 100, height: 100 }
-        } else {
-          return { width: 150, height: 170 }
-        }
+      qrbox: function () {
+        return getResponsiveSize()
       },
-
       formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
     }
 
@@ -323,7 +341,7 @@ function startScan(mode) {
         form.value.trackingNumber = cleanText
       })
       .catch((err) => {
-        alert('เริ่มสแกน QR ไม่สำเร็จ')
+        alert('Failed to start QR scanning.')
       })
   } else if (mode === 'barcode') {
     startQuagga()
@@ -568,7 +586,8 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <header class="flex items-center w-full h-16 bg-white">
+    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
       >
@@ -613,7 +632,6 @@ onMounted(async () => {
               </clipPath>
             </defs>
           </svg>
-
           <div class="flex items-center gap-3">
             <div class="flex flex-col leading-tight">
               <UserInfo />
@@ -621,7 +639,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-    </header>
+    </header> -->
 
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -684,7 +702,7 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile (Next Release)">
+            <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -722,6 +740,7 @@ onMounted(async () => {
 
             <SidebarItem
               title=" Manage Parcel"
+              @click="showManageParcelPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>
@@ -740,18 +759,20 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Residents (Next Release)">
+            <SidebarItem
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
               <template #icon>
                 <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
                     fill="white"
+                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
                   />
                 </svg>
               </template>
@@ -768,6 +789,26 @@ onMounted(async () => {
                 >
                   <path
                     d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <SidebarItem title="Trash" @click="showParcelTrashPage">
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
                   />
                 </svg>
@@ -824,7 +865,7 @@ onMounted(async () => {
         </div>
 
         <div
-          class="max-w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden"
+          class="max-w-full mx-auto bg-white rounded-[5px] shadow-lg overflow-hidden"
         >
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
@@ -954,12 +995,25 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="flex flex-wrap gap-3">
+              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="Open Camera"
+                  color="blue"
+                  @click="startCamera"
+                  :disabled="scanningMode || videoStream"
+                />
+
+                <ButtonWeb
+                  label="Take Photo"
+                  color="green"
+                  @click="capturePhoto"
+                  :disabled="!isCameraReady"
                 />
               </div>
 
@@ -982,7 +1036,7 @@ onMounted(async () => {
                   <input
                     v-model="recipientSearch"
                     type="text"
-                    placeholder="Enter name/ email / room number"
+                    placeholder="Enter Resident Name/ Email / Room Number"
                     class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
                   />
 
@@ -1102,13 +1156,13 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="block md:hidden"
+                  class="text-[#898989] block md:hidden"
                 />
               </div>
             </div>
 
             <div
-              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg"
+              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-[5px]"
             >
               <div class="flex items-center justify-end mb-4"></div>
 
@@ -1173,7 +1227,7 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="w-auto"
+                  class="text-[#898989] w-auto"
                 />
               </div>
 
