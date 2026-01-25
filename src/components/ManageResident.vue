@@ -185,8 +185,9 @@ onMounted(async () => {
       lastName: p.lastName,
       phoneNumber: p.phoneNumber,
       lineId: p.lineId,
+      role: p.role,
       email: p.contactEmail,
-      dormId: p.dormId,
+      dormName: p.dormName,
       profileImage: p.profileImage,
       position: p.position,
       status: mapActiveStatus(p.activeStatus),
@@ -197,14 +198,13 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
 
     // 🔹 แยก role
-    const residents = mapped.filter((u) => u.role === 'RESIDENT')
-    const staffs = mapped.filter((u) => u.role === 'STAFF')
+    const residentList = mapped.filter((u) => u.role === 'RESIDENT')
+    const staffList = mapped.filter((u) => u.role === 'STAFF')
 
-    // 🔹 set เข้า Pinia store
-    userManager.setMembers(residents)
-    userManager.setStaffs(staffs)
+    userManager.setMembers(residentList)
+    userManager.setStaffs(staffList)
   }
-  console.log(dataUser)
+  console.log(residents.value)
   // const dataUserResident = await getItems(
   //   `${import.meta.env.VITE_BASE_URL}/api/members`,
   //   router
