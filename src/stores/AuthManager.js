@@ -313,16 +313,40 @@ export const useAuthManager = defineStore('authManager', () => {
       isLoading.value = false
     }
   }
-
   const logoutAccount = async (router) => {
     try {
+      if (user.value?.accessToken) {
+        const baseURL = import.meta.env.VITE_BASE_URL
+
+        await axios.post(
+          `${baseURL}/api/auth/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${user.value.accessToken}`
+            }
+          }
+        )
+      }
+
       await signOut(auth)
     } catch (err) {
+      console.error('Logout error:', err)
     } finally {
       user.value = null
       await router?.replace({ name: 'login' })
     }
   }
+
+  // const logoutAccount = async (router) => {
+  //   try {
+  //     await signOut(auth)
+  //   } catch (err) {
+  //   } finally {
+  //     user.value = null
+  //     await router?.replace({ name: 'login' })
+  //   }
+  // }
 
   const refreshToken = async () => {
     try {
