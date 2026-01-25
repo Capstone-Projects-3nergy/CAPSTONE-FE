@@ -498,6 +498,7 @@ const closePopUps = (operate) => {
         </div>
 
         <PersonalInfoCard
+          :useCurrentProfile="true"
           :fullName="loginManager.user.fullName"
           :firstName="firstName"
           :lastName="lastName"
@@ -508,7 +509,6 @@ const closePopUps = (operate) => {
           :status="profileManager.currentProfile?.status"
           :lineId="profileManager.currentProfile?.lineId"
           :phoneNumber="profileManager.currentProfile?.phoneNumber"
-          :profileImage="profileManager.currentProfile?.profileImage"
           :showNotify="true"
           @edit="goToEditProfile"
           @confirmAccount="confirmAccountFn"

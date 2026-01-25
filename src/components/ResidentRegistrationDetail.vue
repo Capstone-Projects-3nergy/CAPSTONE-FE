@@ -605,6 +605,8 @@ watch(
           <PersonalInfoCard
             v-if="residentDetail"
             title="Resident Information"
+            :profileImage="residentDetail.photo"
+            :useCurrentProfile="false"
             :key="residentDetail.id"
             :firstName="residentFirstName"
             :lastName="residentLastName"
@@ -614,7 +616,6 @@ watch(
             :status="residentDetail.status"
             :lineId="residentDetail.lineId"
             :phoneNumber="residentDetail.phoneNumber"
-            :profileImage="residentDetail.photo"
             :profile="false"
             :residentDetail="true"
             @edit="goToEditResident"

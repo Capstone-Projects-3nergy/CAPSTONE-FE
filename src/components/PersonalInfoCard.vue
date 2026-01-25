@@ -36,7 +36,12 @@ const props = defineProps({
   showNotify: { type: Boolean, default: true },
   showMenu: { type: Boolean, default: true },
   profile: { type: Boolean, default: true },
-  residentDetail: { type: Boolean, default: false }
+  residentDetail: { type: Boolean, default: false },
+  profileImage: String,
+  useCurrentProfile: {
+    type: Boolean,
+    default: false
+  }
 })
 const resetForm = () => {
   newEmail.value = ''
@@ -248,16 +253,21 @@ const newAvatar = ref(null)
 //   return props.profileImage
 // })
 const profileImageUrlPreview = computed(() => {
+  // 1️⃣ รูปใหม่ (ตอน edit)
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
   }
 
-  const url = profileManager.currentProfile?.profileImageUrl
-  if (url && url.startsWith('http')) {
-    return url
+  // 2️⃣ หน้า profile (user login)
+  if (props.useCurrentProfile) {
+    const url = profileManager.currentProfile?.profileImageUrl
+    return url && url.startsWith('http') ? url : ''
   }
 
-  return ''
+  // 3️⃣ หน้า resident / staff detail
+  return props.profileImage && props.profileImage.startsWith('http')
+    ? props.profileImage
+    : ''
 })
 </script>
 <template>
