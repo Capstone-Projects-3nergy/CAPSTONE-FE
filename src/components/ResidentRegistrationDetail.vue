@@ -84,6 +84,16 @@ const mapMemberData = (data) => ({
   updatedAt: data.updatedAt || null,
   createdAt: data.createdAt || null
 })
+const residentFirstName = computed(() => {
+  if (!residentDetail.value?.fullName) return ''
+  return residentDetail.value.fullName.split(' ')[0]
+})
+
+const residentLastName = computed(() => {
+  if (!residentDetail.value?.fullName) return ''
+  return residentDetail.value.fullName.split(' ').slice(1).join(' ')
+})
+
 const residentDetail = ref(null)
 const members = computed(() => userManager.getMembers())
 const getMemberDetail = async (residentId) => {
@@ -100,7 +110,7 @@ const getMemberDetail = async (residentId) => {
   // 🔹 2. ดึงจาก API
   try {
     const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       residentId,
       router
     )
@@ -126,13 +136,17 @@ const lastName = computed(() => {
   if (!parcel.value?.recipientName) return '-'
   return parcel.value.recipientName.split(' ').slice(1).join(' ')
 })
-
 const getParcelDetail = async (tid) => {
   if (!tid) return
+
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+
   if (localParcel) {
     parcel.value = localParcel
 
+    if (localParcel.residentId) {
+      getMemberDetail(localParcel.residentId)
+    }
     return
   }
 
@@ -142,13 +156,43 @@ const getParcelDetail = async (tid) => {
       tid,
       router
     )
+
     if (data) {
       const mapped = mapParcelData(data)
       parcel.value = mapped
       parcelStore.addParcel(mapped)
+
+      if (mapped.residentId) {
+        getMemberDetail(mapped.residentId)
+      }
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error(err)
+  }
 }
+
+// const getParcelDetail = async (tid) => {
+//   if (!tid) return
+//   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+//   if (localParcel) {
+//     parcel.value = localParcel
+
+//     return
+//   }
+
+//   try {
+//     const data = await getItemById(
+//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+//       tid,
+//       router
+//     )
+//     if (data) {
+//       const mapped = mapParcelData(data)
+//       parcel.value = mapped
+//       parcelStore.addParcel(mapped)
+//     }
+//   } catch (err) {}
+// }
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -515,6 +559,24 @@ function goToEditResident() {
 
         <div class="flex flex-col mb-4 gap-4">
           <PersonalInfoCard
+            v-if="residentDetail"
+            title="Resident Information"
+            :firstName="residentFirstName"
+            :lastName="residentLastName"
+            :email="residentDetail.email"
+            :roomNumber="residentDetail.roomNumber"
+            :dormName="residentDetail.dormName"
+            :status="residentDetail.status"
+            :lineId="residentDetail.lineId"
+            :phoneNumber="residentDetail.phoneNumber"
+            :profileImage="residentDetail.profileImageUrl"
+            :profile="false"
+            :residentDetail="true"
+            @edit="goToEditResident"
+            @cancel="backToManageResident"
+          />
+
+          <!-- <PersonalInfoCard
             :title="'Resident Information'"
             :fullName="loginManager.user.fullName"
             :firstName="firstName"
@@ -530,7 +592,7 @@ function goToEditResident() {
             :residentDetail="true"
             @edit="goToEditResident"
             @cancel="backToManageResident"
-          />
+          /> -->
         </div>
         <!-- <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
           <section>
