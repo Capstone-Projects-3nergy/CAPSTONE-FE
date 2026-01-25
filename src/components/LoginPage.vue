@@ -364,7 +364,7 @@ const showResetPasswordPageWeb = async function () {
                 type="email"
                 required
                 placeholder="Email"
-                class="w-full pl-10 pr-4 py-2 text-[#8C8F91] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 @input="checkEmailLength"
                 :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
               />
