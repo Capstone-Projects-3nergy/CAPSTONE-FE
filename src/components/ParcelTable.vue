@@ -544,7 +544,7 @@ const getInitial = (name) => {
               </div>
             </button>
             <button
-              v-if="showDeleteMember && p.role == 'Resident'"
+              v-if="showDeleteMember && p.role === 'RESIDENT'"
               @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >
@@ -567,7 +567,7 @@ const getInitial = (name) => {
             </button>
 
             <button
-              v-if="showDeleteMember && p.role == 'Resident'"
+              v-if="showDeleteMember && p.role === 'RESIDENT'"
               @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >

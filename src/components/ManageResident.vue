@@ -180,18 +180,14 @@ onMounted(async () => {
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.userId,
-      fullName: p.fullname,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      phoneNumber: p.phoneNumber,
-      lineId: p.lineId,
-      role: p.role,
-      email: p.contactEmail,
+      fullName: p.fullName,
+      email: p.email,
       dormName: p.dormName,
-      profileImage: p.profileImage,
-      position: p.position,
-      status: mapActiveStatus(p.activeStatus),
-      updateAt: p.updatedAt || null
+      roomNumber: p.roomNumber,
+      role: p.role, // "RESIDENT" | "STAFF"
+      status: p.status,
+      updateAt: p.updatedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
+      photo: p.profileImageUrl // 🔥 table ใช้ photo
     }))
 
     // เรียงตาม update ล่าสุด
@@ -204,7 +200,7 @@ onMounted(async () => {
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
   }
-  console.log(residents.value)
+  console.log(dataUser)
   // const dataUserResident = await getItems(
   //   `${import.meta.env.VITE_BASE_URL}/api/members`,
   //   router
@@ -924,6 +920,7 @@ const closePopUp = (operate) => {
 
         <ParcelFilterBar
           v-if="activeTab === 'Residents'"
+          :items="paginatedResidents"
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
@@ -939,6 +936,7 @@ const closePopUp = (operate) => {
         />
         <ParcelFilterBar
           v-else-if="activeTab === 'Staffs'"
+          :items="paginatedStaffs"
           :modelDate="filterDate"
           :modelSearch="filterSearch"
           :modelSort="filterSort"
