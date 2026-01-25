@@ -115,7 +115,12 @@ function searchParcels(parcels, keyword) {
       .toLowerCase()
       .includes(lowerKeyword)
 
-    const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
+    // const fullNameMatch = `${p.firstName || ''} ${p.lastName || ''}`
+    //   .toLowerCase()
+    //   .includes(lowerKeyword)
+
+    const fullNameMatch = p.fullName
+      ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
 

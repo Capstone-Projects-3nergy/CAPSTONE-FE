@@ -260,7 +260,7 @@ const getInitial = (name) => {
                   v-else
                   class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
                 >
-                  {{ getInitial(p.recipientName) }}
+                  {{ getInitial(p.fullName) }}
                 </div>
               </div>
             </div>
@@ -375,13 +375,13 @@ const getInitial = (name) => {
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
               :class="[
                 {
-                  'bg-blue-400': p.action === 'Login',
-                  'bg-red-400': p.action === 'Logout'
+                  'bg-blue-400': p.status === 'ACTIVE',
+                  'bg-red-400': p.status === 'INACTIVE'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
             >
-              {{ p.action }}
+              {{ p.status }}
             </span>
           </td>
           <td
