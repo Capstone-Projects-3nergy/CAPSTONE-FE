@@ -375,8 +375,8 @@ const getInitial = (name) => {
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
               :class="[
                 {
-                  'bg-blue-400': p.status === 'ACTIVE',
-                  'bg-red-400': p.status === 'INACTIVE'
+                  'bg-green-400': p.status === 'ACTIVE',
+                  'bg-gray-400': p.status === 'INACTIVE'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"

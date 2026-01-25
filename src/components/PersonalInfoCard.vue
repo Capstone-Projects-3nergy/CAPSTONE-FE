@@ -617,7 +617,7 @@ const profileImageUrlPreview = computed(() => {
               <h2
                 class="md:block text-xl sm:text-2xl font-semibold text-gray-800"
               >
-                Details:
+                Details
               </h2>
             </div>
 

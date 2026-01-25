@@ -970,7 +970,7 @@ const isSaveDisabled = computed(() => {
             <!-- Header -->
             <div class="md:block mb-8">
               <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-                Details:
+                Details
               </h2>
             </div>
 
