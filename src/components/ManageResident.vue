@@ -348,6 +348,17 @@ const visiblePages = computed(() => {
 const parcels = computed(() => parcelManager.getParcels())
 const staffs = computed(() => userManager.getStaffs())
 const residents = computed(() => userManager.getMembers())
+const usersByTab = computed(() => {
+  if (activeTab.value === 'Residents') return residents.value
+  if (activeTab.value === 'Staffs') return staffs.value
+  return [...residents.value, ...staffs.value]
+})
+const totalUsers = computed(() => usersByTab.value.length)
+
+const currentUsed = computed(
+  () => usersByTab.value.filter((u) => u.status === 'ACTIVE').length
+)
+
 function autoClose(refVar, timeout = 10000) {
   watch(refVar, (val) => {
     if (val) {
@@ -408,17 +419,6 @@ const sortDateAsc = () => sortByDate(parcels.value)
 const sortDateDesc = () => sortByDateReverse(parcels.value)
 const sortByNameAsc = () => sortByName(parcels.value)
 const sortByNameDesc = () => sortByNameReverse(parcels.value)
-const usersByTab = computed(() => {
-  if (activeTab.value === 'Resident') return residents.value
-  if (activeTab.value === 'Staff') return staffs.value
-
-  // All
-  return [...residents.value, ...staffs.value]
-})
-const totalUsers = computed(() => usersByTab.value.length)
-const currentUsed = computed(
-  () => usersByTab.value.filter((u) => u.status === 'ACTIVE').length
-)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
