@@ -202,7 +202,7 @@ const handleProfile = async () => {
             />
           </svg>
 
-          <span class="text-gray-700">Profile</span>
+          <span class="text-[#0E4B90]">Profile</span>
         </button>
 
         <!-- logout -->
