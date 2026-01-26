@@ -429,29 +429,31 @@ const isDateAsc = ref(true)
 
 // const sortRoomAsc = () => sortByRoomNumber(parcels.value)
 // const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-const sortStatusAsc = () => sortByStatus(parcels.value)
-const sortStatusDesc = () => sortByStatusReverse(parcels.value)
-const sortDateAsc = () => sortByDate(parcels.value)
-const sortDateDesc = () => sortByDateReverse(parcels.value)
-const sortByNameAsc = () => sortByName(parcels.value)
-const sortByNameDesc = () => sortByNameReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(residents.value)
+const sortStatusDesc = () => sortByStatusReverse(residents.value)
+const sortDateAsc = () => sortByDate(residents.value)
+const sortDateDesc = () => sortByDateReverse(residents.value)
+const sortByNameAsc = () => sortByName(residents.value)
+const sortByNameDesc = () => sortByNameReverse(residents.value)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
-    ? sortByRoomNumber(parcels.value)
-    : sortByRoomNumberReverse(parcels.value)
+    ? sortByRoomNumber(residents.value)
+    : sortByRoomNumberReverse(residents.value)
   isRoomAsc.value = !isRoomAsc.value
 }
 
 const toggleSortStatus = () => {
   isStatusAsc.value
-    ? sortByStatus(parcels.value)
-    : sortByStatusReverse(parcels.value)
+    ? sortByStatus(residents.value)
+    : sortByStatusReverse(residents.value)
   isStatusAsc.value = !isStatusAsc.value
 }
 
 const toggleSortDate = () => {
-  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value
+    ? sortByDate(residents.value)
+    : sortByDateReverse(residents.value)
   isDateAsc.value = !isDateAsc.value
 }
 function parseDate(dateStr) {
