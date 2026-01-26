@@ -482,7 +482,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem> -->
 
-            <SidebarItem title="My parcel" @click="showResidentParcelPage">
+            <!-- <SidebarItem title="My parcel" @click="showResidentParcelPage">
               <template #icon>
                 <svg
                   width="25"
@@ -497,7 +497,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg

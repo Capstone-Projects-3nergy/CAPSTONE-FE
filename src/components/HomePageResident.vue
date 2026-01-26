@@ -58,9 +58,6 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
-
-///
-
 import package1 from '@/assets/images/Package1.png'
 import package2 from '@/assets/images/Package2.png'
 import package3 from '@/assets/images/Package3.png'
@@ -71,53 +68,55 @@ import parcels4 from '@/assets/images/parcels4.jpg'
 import newsImg from '@/assets/images/New.png'
 import eventImg from '@/assets/images/Event.png'
 import communityImg from '@/assets/images/COMMUNITY.png'
-const userName = computed(() => loginStore.user?.name || 'Guest')
-const router = useRouter()
-const route = useRoute()
-const slides = [parcels1, parcels2, parcels3, parcels4]
-const currentIndex = ref(0)
-const showParcelScanner = ref(false)
-const showResidentParcels = ref(false)
-const showStaffParcels = ref(false)
-const showAnnouncement = ref(false)
-const showDashBoard = ref(false)
-const returnLogin = ref(false)
-const loginManager = useAuthManager()
-const registerStore = useAuthManager()
+
 const authStore = useAuthManager()
-const currentUser = ref('Pimpajee SetXXXXXX')
-const showProfileResident = ref(false)
-const showLogoutConfirm = ref(false)
-const openStatusPopup = ref(false)
-const showParcelDetail = ref(false)
-function prevSlide() {
-  currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
-}
 
-function nextSlide() {
-  currentIndex.value = (currentIndex.value + 1) % slides.length
-}
-
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
-
-const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
-  showAnnouncement.value = true
-}
-
-const showProfileResidentPage = async function () {
-  router.replace({
-    name: 'profileresident'
-  })
-  showProfileResident.value = true
-}
-
+const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const emit = defineEmits(['add-success'])
+
+const deletedParcel = ref(null)
+const router = useRouter()
+const showHomePageStaff = ref(false)
+const showParcelScanner = ref(false)
+const showStaffParcels = ref(false)
+const showAddParcels = ref(false)
+const returnLogin = ref(false)
+const showResidentParcels = ref(false)
+const showManageAnnouncement = ref(false)
+const showManageResident = ref(false)
+const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
+const showParcelDetailModal = ref(false)
+const error = ref(false)
+const addSuccess = ref(false)
+const editSuccess = ref(false)
+const deleteSuccess = ref(false)
+const confirmSuccess = ref(false)
+const showDeleteParcel = ref(false)
+const parcelDetail = ref(null)
+const parcelsResidentDetail = ref(null)
+const route = useRoute()
+const showLogoutConfirm = ref(false)
+const recipientSearch = ref('')
+const selectedResidentId = ref(null)
+
+const showSuggestions = computed(
+  () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
+)
+
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
 
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
@@ -129,7 +128,6 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
-
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -148,39 +146,234 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
     parcelManager.setParcels(mapped)
   }
 })
 
-const mapStatus = (status) => {
-  switch (status) {
-    case 'WAITING_FOR_STAFF':
-      return 'Waiting for Staff'
-    case 'PICKED_UP':
-      return 'Picked Up'
-    case 'RECEIVED':
-      return 'Received'
-    default:
-      return status
+const parcels = computed(() => parcelManager.getParcels())
+const selectResident = (resident) => {
+  selectedResidentId.value = resident.userId
+  const name = resident.fullName || `${resident.firstName} ${resident.lastName}`
+  parcels.value.recipientName = name
+  recipientSearch.value = name
+}
+
+watch(recipientSearch, (val) => {
+  if (!val) {
+    selectedResidentId.value = null
+    parcels.value.recipientName = ''
+  }
+})
+function autoClose(refVar, timeout = 10000) {
+  watch(refVar, (val) => {
+    if (val) {
+      setTimeout(() => {
+        refVar.value = false
+      }, timeout)
+    }
+  })
+}
+
+autoClose(addSuccess)
+autoClose(editSuccess)
+autoClose(deleteSuccess)
+autoClose(error)
+
+const searchKeyword = ref('')
+const activeTab = ref('Day')
+const tabs = ['Day', 'Month', 'Year']
+
+const isRoomAsc = ref(true)
+const isStatusAsc = ref(true)
+const isDateAsc = ref(true)
+
+const sortRoomAsc = () => sortByRoomNumber(parcels.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(parcels.value)
+const sortStatusDesc = () => sortByStatusReverse(parcels.value)
+const sortDateAsc = () => sortByDate(parcels.value)
+const sortDateDesc = () => sortByDateReverse(parcels.value)
+const sortByNameAsc = () => sortByName(parcels.value)
+const sortByNameDesc = () => sortByNameReverse(parcels.value)
+
+const toggleSortRoom = () => {
+  isRoomAsc.value
+    ? sortByRoomNumber(parcels.value)
+    : sortByRoomNumberReverse(parcels.value)
+  isRoomAsc.value = !isRoomAsc.value
+}
+
+const toggleSortStatus = () => {
+  isStatusAsc.value
+    ? sortByStatus(parcels.value)
+    : sortByStatusReverse(parcels.value)
+  isStatusAsc.value = !isStatusAsc.value
+}
+
+const toggleSortDate = () => {
+  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value = !isDateAsc.value
+}
+const selectedSort = ref('Sort by:')
+
+const handleSort = () => {
+  switch (selectedSort.value) {
+    case 'Newest':
+      sortDateDesc()
+      break
+    case 'Oldest':
+      sortDateAsc()
+      break
+    case 'Room (A→Z)':
+      sortRoomAsc()
+      break
+    case 'Room (Z→A)':
+      sortRoomDesc()
+      break
+    case 'Status (A→Z)':
+      sortStatusAsc()
+      break
+    case 'Status (Z→A)':
+      sortStatusDesc()
+      break
+    case 'Name (A→Z)':
+      sortByNameAsc()
+      break
+    case 'Name (Z→A)':
+      sortByNameDesc()
+      break
   }
 }
 
-const parcels = computed(() => parcelManager.getParcels())
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+function parseDate(dateStr) {
+  if (!dateStr) return null
+
+  let d = new Date(dateStr)
+  if (!isNaN(d)) return d
+
+  const parts = dateStr.split(' ')
+  if (parts.length === 3) {
+    const [day, mon, year] = parts
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+    const monthIndex = months.indexOf(mon)
+    if (monthIndex !== -1) {
+      return new Date(year, monthIndex, day)
+    }
+  }
+
+  return null
+}
+
+const selectedDate = ref('')
+
+const filteredParcels = computed(() => {
+  let result = parcels.value.map((p) => ({
+    ...p,
+    parsedDate: parseDate(p.updateAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = searchParcels(result, searchKeyword.value)
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((p) => {
+      if (!p.parsedDate) return false
+      const parcelDate = p.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
+function formatDateByTab(rawDate) {
+  if (!rawDate) return rawDate
+  const dateObj = new Date(rawDate.replace(' ', 'T'))
+  if (isNaN(dateObj.getTime())) return rawDate
+
+  const yyyy = dateObj.getFullYear()
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const dd = String(dateObj.getDate()).padStart(2, '0')
+  const hh = String(dateObj.getHours()).padStart(2, '0')
+  const mi = String(dateObj.getMinutes()).padStart(2, '0')
+  const ss = String(dateObj.getSeconds()).padStart(2, '0')
+
+  if (activeTab.value === 'Day') {
+    return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Month') {
+    return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
+  }
+
+  if (activeTab.value === 'Year') {
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
+  }
+
+  return rawDate
+}
+
+const showAddParcelPage = async function () {
+  router.replace({ name: 'addparcels' })
+  showAddParcels.value = true
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff' })
+  showHomePageStaff.value = true
+}
+const returnLoginPage = async () => {
+  try {
+    await loginManager.logoutAccount(router)
+  } catch (err) {}
+}
+const returnHomepage = () => {
+  showLogoutConfirm.value = false
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard' })
+  showDashBoard.value = true
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
+}
+const isCollapsed = ref(false)
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
   Math.ceil(parcels.value.length / perPage.value)
 )
-const filteredParcels = computed(() => {
-  let result = parcels.value.map((p) => ({
-    ...p
-  }))
-
-  return result
-})
 
 const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
@@ -188,22 +381,37 @@ const paginatedParcels = computed(() => {
   return filteredParcels.value.slice(start, end)
 })
 
-const returnLoginPage = async () => {
+const showParcelDetail = async function (id) {
+  router.push({
+    name: 'residentparcelsDetail',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
+}
+const showEditParacelDetail = async function (id) {
+  router.push({ name: 'editparcels', params: { tid: id } })
   try {
-    await loginManager.logoutAccount(router)
-  } catch (err) {}
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/${route.params.id}/parcels`,
+      id
+    )
 
-function formatDateTime(datetimeStr) {
-  if (!datetimeStr) return ''
-  return datetimeStr.replace('T', ' ')
-}
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
+    if (data) {
+      parcelsResidentDetail.value = {
+        id: data.parcelId,
+        trackingNumber: data.trackingNumber,
+        recipientName: data.ownerName,
+        roomNumber: data.roomNumber,
+        email: data.contactEmail,
+        status: mapStatus(data.status),
+        receiveAt: data.receivedAt,
+        updateAt: data.updatedAt || null,
+        pickupAt: data.pickedUpAt || null
+      }
+    }
+  } catch (err) {}
 }
 
 const goToPage = (page) => {
@@ -211,6 +419,7 @@ const goToPage = (page) => {
   if (page > totalPages.value) page = totalPages.value
   currentPage.value = page
 }
+
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
@@ -234,27 +443,150 @@ const visiblePages = computed(() => {
   return pages
 })
 
-const isRoomAsc = ref(true)
-const isStatusAsc = ref(true)
-const isDateAsc = ref(true)
+const pageNumbers = computed(() => {
+  const pages = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    pages.push(i)
+  }
+  return pages
+})
 
-const toggleSortRoom = () => {
-  isRoomAsc.value
-    ? sortByRoomNumber(parcels.value)
-    : sortByRoomNumberReverse(parcels.value)
-  isRoomAsc.value = !isRoomAsc.value
+const clearConfirmPopUp = () => {
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 
-const toggleSortStatus = () => {
-  isStatusAsc.value
-    ? sortByStatus(parcels.value)
-    : sortByStatusReverse(parcels.value)
-  isStatusAsc.value = !isStatusAsc.value
+const showConfirmComplete = () => {
+  confirmSuccess.value = true
+  setTimeout(() => (deleteSuccess.value = false), 10000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
 }
 
-const toggleSortDate = () => {
-  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
-  isDateAsc.value = !isDateAsc.value
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const closePopUp = (operate) => {
+  switch (operate) {
+    case 'problem':
+      error.value = false
+      break
+    case 'deleteSuccessMessage':
+      deleteSuccess.value = false
+      break
+    case 'addSuccessMessage':
+      addSuccess.value = false
+      break
+    case 'editSuccessMessage':
+      editSuccess.value = false
+      break
+  }
+}
+
+const showAnnouncement = ref(false)
+
+const showHomePageResident = ref(false)
+const showConfirmParcel = ref(false)
+const showProfileResident = ref(false)
+const currentUser = ref('Pimpajee SetXXXXXX')
+const myParcels = computed(() =>
+  parcels.value.filter((p) => p.recipient === currentUser.value)
+)
+
+const showHomePageResidentWeb = async function () {
+  router.replace({ name: 'home' })
+  showHomePageResident.value = true
+}
+const showAnnouncementPage = async function () {
+  router.replace({ name: 'announcement' })
+  showAnnouncement.value = true
+}
+
+const showProfileResidentPage = async function () {
+  router.replace({
+    name: 'profileresident'
+  })
+  showProfileResident.value = true
+}
+const filterDate = ref('')
+const filterSearch = ref('')
+const filterSort = ref('')
+
+const handleSearchUpdate = (val) => {
+  filterSearch.value = val
+  searchKeyword.value = val
+}
+
+const handleDateUpdate = (val) => {
+  filterDate.value = val
+  selectedDate.value = val
+}
+
+const handleSortUpdate = (val) => {
+  filterSort.value = val
+  selectedSort.value = val
+  handleSort()
+}
+//
+const userName = computed(() => loginStore.user?.name || 'Guest')
+
+const slides = [parcels1, parcels2, parcels3, parcels4]
+const currentIndex = ref(0)
+const registerStore = useAuthManager()
+function prevSlide() {
+  currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
+}
+
+function nextSlide() {
+  currentIndex.value = (currentIndex.value + 1) % slides.length
+}
+
+const showResidentParcelPage = async function () {
+  router.replace({
+    name: 'residentparcels'
+  })
+  showResidentParcels.value = true
+}
+
+// onUnmounted(() => {
+//   window.removeEventListener('resize', checkScreen)
+// })
+// onMounted(async () => {
+//   checkScreen()
+
+//   window.addEventListener('resize', checkScreen)
+
+//   const data = await getItems(
+//     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
+//     router
+//   )
+
+//   if (data) {
+//     const mapped = data.map((p) => ({
+//       id: p.parcelId,
+//       trackingNumber: p.trackingNumber,
+//       recipientName: p.ownerName,
+//       roomNumber: p.roomNumber,
+//       email: p.contactEmail,
+//       status: mapStatus(p.status),
+//       receiveAt: p.receivedAt,
+//       updateAt: p.updatedAt || null,
+//       pickupAt: p.pickedUpAt || null
+//     }))
+
+//     mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+
+//     parcelManager.setParcels(mapped)
+//   }
+// })
+
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
 }
 </script>
 
@@ -400,7 +732,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem> -->
-            <SidebarItem
+            <!-- <SidebarItem
               title="My parcel"
               :collapsed="isCollapsed"
               @click="showResidentParcelPage"
@@ -419,7 +751,7 @@ const toggleSortDate = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem
               title="Announcements (Next Release)"

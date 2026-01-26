@@ -363,7 +363,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem> -->
 
-            <SidebarItem
+            <!-- <SidebarItem
               title="My parcel"
               class="bg-[#81AFEA] cursor-default"
               @click="showResidentParcelPage"
@@ -382,7 +382,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>
@@ -594,7 +594,7 @@ const closePopUp = (operate) => {
                 label="Back"
                 color="gray"
                 class="text-[#898989]"
-                @click="showManageParcelPage"
+                @click="showHomePageResidentWeb"
               />
             </div>
           </form>

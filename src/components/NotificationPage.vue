@@ -330,7 +330,7 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem> -->
-
+            <!-- 
             <SidebarItem title="My parcel" @click="showResidentParcelPage">
               <template #icon>
                 <svg
@@ -346,7 +346,7 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
