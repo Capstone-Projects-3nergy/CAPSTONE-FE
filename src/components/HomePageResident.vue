@@ -1,46 +1,21 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ParcelScanner from '@/components/ParcelScannerPage.vue'
-import { useRoute, useRouter } from 'vue-router'
-import AlertPopUp from './../components/AlertPopUp.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import HomePageResident from '@/components/HomePageResident.vue'
+import SidebarItem from './SidebarItem.vue'
+import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import ButtonWeb from './ButtonWeb.vue'
+import HomePageStaff from '@/components/HomePageResident.vue'
+import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import SidebarItem from './SidebarItem.vue'
-import ProfileResident from './ProfileResident.vue'
-import UserInfo from '@/components/UserInfo.vue'
-import ParcelTable from './ParcelTable.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import WebHeader from './WebHeader.vue'
-import {
-  getItems,
-  getItemById,
-  deleteItemById,
-  addItem,
-  editItem,
-  deleteAndTransferItem,
-  toggleVisibility,
-  editReadWrite,
-  acceptInvite,
-  cancelInvite,
-  editInviteReadWrite,
-  declineInvite,
-  editItemWithFile,
-  deleteFile
-} from '@/utils/fetchUtils'
-import package1 from '@/assets/images/Package1.png'
-import package2 from '@/assets/images/Package2.png'
-import package3 from '@/assets/images/Package3.png'
-import parcels1 from '@/assets/images/parcels.jpg'
-import parcels2 from '@/assets/images/parcels2.jpg'
-import parcels3 from '@/assets/images/parcels3.jpg'
-import parcels4 from '@/assets/images/parcels4.jpg'
-import newsImg from '@/assets/images/New.png'
-import eventImg from '@/assets/images/Event.png'
-import communityImg from '@/assets/images/COMMUNITY.png'
+import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+import ParcelTable from './ParcelTable.vue'
+import WebHeader from './WebHeader.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -63,6 +38,39 @@ import {
   filterByMonth,
   filterByYear
 } from '@/stores/SortManager'
+import {
+  getItems,
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile
+} from '@/utils/fetchUtils'
+import ParcelScannerPage from './ParcelScannerPage.vue'
+import DeleteParcels from './DeleteParcels.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
+import ParcelFilterBar from './ParcelFilterBar.vue'
+
+///
+
+import package1 from '@/assets/images/Package1.png'
+import package2 from '@/assets/images/Package2.png'
+import package3 from '@/assets/images/Package3.png'
+import parcels1 from '@/assets/images/parcels.jpg'
+import parcels2 from '@/assets/images/parcels2.jpg'
+import parcels3 from '@/assets/images/parcels3.jpg'
+import parcels4 from '@/assets/images/parcels4.jpg'
+import newsImg from '@/assets/images/New.png'
+import eventImg from '@/assets/images/Event.png'
+import communityImg from '@/assets/images/COMMUNITY.png'
 const userName = computed(() => loginStore.user?.name || 'Guest')
 const router = useRouter()
 const route = useRoute()
