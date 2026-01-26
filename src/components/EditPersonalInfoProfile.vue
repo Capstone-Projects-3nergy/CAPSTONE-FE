@@ -174,25 +174,17 @@ watch(
   () => props.mode,
   (mode) => {
     if (mode === 'add') {
-      form.value = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        roomNumber: '',
-        lineId: '',
-        position: '',
-        phoneNumber: '',
-        dormId: ''
-      }
-      // newAvatar.value = null
+      form.value.firstName = ''
+      form.value.lastName = ''
+      form.value.email = ''
+      form.value.roomNumber = ''
+      form.value.lineId = ''
+      form.value.position = ''
+      form.value.phoneNumber = ''
+      form.value.dormId = ''
+      form.value.dormName = props.dormName || ''
     }
-  },
-  { immediate: true }
-)
 
-watch(
-  () => props.mode,
-  (mode) => {
     if (mode === 'edit') {
       form.value.firstName = props.firstName
       form.value.lastName = props.lastName
@@ -205,8 +197,53 @@ watch(
       form.value.dormName = props.dormName
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 )
+
+// watch(
+//   () => props.mode,
+//   (mode) => {
+//     if (mode === 'add') {
+//       form.value = {
+//         firstName: '',
+//         lastName: '',
+//         email: '',
+//         roomNumber: '',
+//         lineId: '',
+//         position: '',
+//         phoneNumber: '',
+//         dormId: ''
+//       }
+//       // newAvatar.value = null
+//     }
+//   },
+//   { immediate: true }
+// )
+// watch(
+//   () => props.dormName,
+//   (val) => {
+//     form.value.dormName = val
+//   },
+//   { immediate: true }
+// )
+
+// watch(
+//   () => props.mode,
+//   (mode) => {
+//     if (mode === 'edit') {
+//       form.value.firstName = props.firstName
+//       form.value.lastName = props.lastName
+//       form.value.fullName = props.fullName
+//       form.value.email = props.email
+//       form.value.position = props.position
+//       form.value.roomNumber = props.roomNumber
+//       form.value.lineId = props.lineId
+//       form.value.phoneNumber = props.phoneNumber
+//       form.value.dormName = props.dormName
+//     }
+//   },
+//   { immediate: true, deep: true }
+// )
 
 // function startEdit() {
 //   isEdit.value = true
@@ -844,7 +881,7 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               :disabled="mode === 'edit'"
-              v-model="form.dormName"
+              :value="dormName"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                 mode === 'edit' ? 'bg-gray-100' : 'bg-white'
