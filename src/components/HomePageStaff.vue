@@ -518,7 +518,7 @@ const toggleSortDate = () => {
       <main class="flex-1 p-9 w-full">
         <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
           <section class="p-4">
-            <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
+            <!-- <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
               <svg
                 width="44"
                 height="44"
@@ -532,7 +532,7 @@ const toggleSortDate = () => {
                 />
               </svg>
               Home Page
-            </h1>
+            </h1> -->
 
             <div
               class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
@@ -612,7 +612,7 @@ const toggleSortDate = () => {
             </div>
           </section>
 
-          <div class="p-4">
+          <!-- <div class="p-4">
             <div class="flex space-x-1">
               <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
@@ -624,8 +624,8 @@ const toggleSortDate = () => {
                 Resident Parcel
               </h2>
             </div>
-          </div>
-          <ParcelTable
+          </div> -->
+          <!-- <ParcelTable
             :items="paginatedParcels"
             :pages="visiblePages"
             :page="currentPage"
@@ -708,7 +708,7 @@ const toggleSortDate = () => {
                 />
               </svg>
             </template>
-          </ParcelTable>
+          </ParcelTable> -->
           <!-- 
           <div
             class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"

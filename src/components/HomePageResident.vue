@@ -468,7 +468,7 @@ const toggleSortDate = () => {
       <main class="flex-1 p-9 w-full">
         <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
           <section class="p-4">
-            <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
+            <!-- <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
               <svg
                 width="44"
                 height="44"
@@ -482,7 +482,7 @@ const toggleSortDate = () => {
                 />
               </svg>
               Home Page
-            </h1>
+            </h1> -->
 
             <div
               class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
@@ -562,7 +562,7 @@ const toggleSortDate = () => {
             </div>
           </section>
 
-          <div class="p-4">
+          <!-- <div class="p-4">
             <div class="flex space-x-1">
               <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
                 <path
@@ -572,292 +572,242 @@ const toggleSortDate = () => {
               </svg>
               <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
             </div>
-          </div>
-          <ParcelTable
-            :items="paginatedParcels"
-            :pages="visiblePages"
-            :page="currentPage"
-            :total="totalPages"
-            :show-action="false"
-            @prev="prevPage"
-            @next="nextPage"
-            @go="goToPage"
-            @status-click="openStatusPopup"
-            @view-detail="showParcelDetail"
-          >
-            <template #sort-room>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortRoom"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-status>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortStatus"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-date>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortDate"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-          </ParcelTable>
-          <!-- <div
-            class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
-          >
-            <table class="min-w-full text-left border-collapse">
-              <thead
-                class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
-              >
-                <tr>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Tracking
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Name
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Room
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortRoom"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Email
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Status
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortStatus"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Update At
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortDate"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y">
-                <tr
-                  v-for="p in paginatedParcels"
-                  :key="p.id"
-                  class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
-                >
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Tracking:
-                    </span>
-                    {{ p.trackingNumber }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Name:
-                    </span>
-                    {{ p.recipientName }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Room:
-                    </span>
-                    {{ p.roomNumber }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Email:
-                    </span>
-                    {{ p.email }}
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 border-b md:border-none">
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Status:
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                      :class="{
-                        'bg-yellow-400': p.status === 'Waiting for Staff',
-                        'bg-green-400': p.status === 'Picked Up',
-                        'bg-blue-400': p.status === 'Received'
-                      }"
-                    >
-                      {{ p.status }}
-                    </span>
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
-                    <span class="md:hidden font-semibold text-blue-700">
-                      Update:
-                    </span>
-                    {{ formatDateTime(p.updateAt) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              &lt; Previous
-            </button>
-
-            <button
-              class="cursor-pointer"
-              v-for="page in visiblePages"
-              :key="page + Math.random()"
-              @click="goToPage(page)"
-              :class="[
-                'px-3 py-1 rounded',
-                currentPage === page
-                  ? 'bg-blue-700 text-white'
-                  : 'hover:bg-gray-200',
-                page === '...' ? 'cursor-default' : ''
-              ]"
-              :disabled="page === '...'"
-            >
-              {{ page }}
-            </button>
-
-            <button
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              Next &gt;
-            </button>
           </div> -->
+        </div>
+        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
+          <div class="p-4">
+            <div class="flex space-x-1">
+              <!-- <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
+                <path
+                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
+                  fill="#185DC0"
+                />
+              </svg> -->
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
+            </div>
+            <ParcelFilterBar
+              :modelDate="filterDate"
+              :modelSearch="filterSearch"
+              :modelSort="filterSort"
+              :show-add-button="false"
+              :hideNameSort="true"
+              :hideTrash="false"
+              @update:date="handleDateUpdate"
+              @update:search="handleSearchUpdate"
+              @update:sort="handleSortUpdate"
+              @add="showAddParcelPage"
+            />
+
+            <!-- <div
+          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
+                <input
+                  type="date"
+                  v-model="selectedDate"
+                  class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <div class="relative flex-1 min-w-[120px]">
+                <svg
+                  class="absolute left-2 top-1/2 -translate-y-1/2"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
+                    fill="#9A9FA7"
+                  />
+                </svg>
+
+                <input
+                  type="text"
+                  v-model="searchKeyword"
+                  placeholder="Search ..."
+                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              <select
+                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
+                v-model="selectedSort"
+                @change="handleSort"
+              >
+                <option disabled>Sort by:</option>
+                <option>Newest</option>
+                <option>Oldest</option>
+              </select>
+            </div>
+          </div>
+        </div> -->
+
+            <div class="fixed top-5 left-5 z-50">
+              <AlertPopUp
+                v-if="deleteSuccess"
+                :titles="'Delete Parcel is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="deleteSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="addSuccess"
+                :titles="'Add New Parcel is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="addSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="editSuccess"
+                :titles="'Edit Parcel  is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="editSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="error"
+                :titles="'There is a problem. Please try again later.'"
+                message="Error!!"
+                styleType="red"
+                operate="problem"
+                @closePopUp="closePopUp"
+              />
+            </div>
+            <ParcelTable
+              :items="paginatedParcels"
+              :pages="visiblePages"
+              :page="currentPage"
+              :total="totalPages"
+              :clickableStatus="false"
+              :showDelete="false"
+              @prev="prevPage"
+              @next="nextPage"
+              @go="goToPage"
+              @status-click="openStatusPopup"
+              @view-detail="showParcelDetail"
+            >
+              <template #sort-room>
+                <svg
+                  class="cursor-pointer"
+                  @click="toggleSortRoom"
+                  width="17"
+                  height="12"
+                  viewBox="0 0 17 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                    fill="#185DC0"
+                  />
+                  <path
+                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                    stroke="#5C9BEB"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </template>
+
+              <template #sort-status>
+                <svg
+                  class="cursor-pointer"
+                  @click="toggleSortStatus"
+                  width="17"
+                  height="12"
+                  viewBox="0 0 17 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                    fill="#185DC0"
+                  />
+                  <path
+                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                    stroke="#5C9BEB"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </template>
+
+              <template #sort-date>
+                <svg
+                  class="cursor-pointer"
+                  @click="toggleSortDate"
+                  width="17"
+                  height="12"
+                  viewBox="0 0 17 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                    fill="#185DC0"
+                  />
+                  <path
+                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                    stroke="#5C9BEB"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </template>
+
+              <template #icon-view>
+                <svg
+                  class="cursor-pointer"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                    fill="#107EFF"
+                  />
+                  <path
+                    d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                    fill="#107EFF"
+                  />
+                </svg>
+              </template>
+              <template #icon-delete>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 18 21"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                    fill="red"
+                  />
+                </svg>
+              </template>
+            </ParcelTable>
+          </div>
         </div>
       </main>
     </div>
