@@ -218,7 +218,10 @@ const getInitial = (name) => {
             v-if="showActionStatus"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
-            Status
+            <div class="flex items-center gap-2">
+              Status
+              <slot name="sort-status"></slot>
+            </div>
           </th>
           <th
             v-if="showAction"
