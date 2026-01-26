@@ -343,7 +343,7 @@ const closePopUps = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+            <!-- <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
               <template #icon>
                 <svg
                   width="24"
@@ -360,7 +360,7 @@ const closePopUps = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="My parcel" @click="showResidentParcelPage">
               <template #icon>

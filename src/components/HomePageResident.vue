@@ -370,7 +370,7 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem
+            <!-- <SidebarItem
               title="Profile"
               @click="showProfileResidentPage"
               :collapsed="isCollapsed"
@@ -391,7 +391,7 @@ const toggleSortDate = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem
               title="My parcel"
               :collapsed="isCollapsed"
