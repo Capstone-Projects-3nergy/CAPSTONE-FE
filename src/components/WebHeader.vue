@@ -56,7 +56,7 @@ const showNotification = computed(
 
       <div class="flex-1 flex justify-end items-center gap-5">
         <div class="relative group">
-          <!-- <svg
+          <svg
             v-if="showNotification && authStore.user.role === 'RESIDENT'"
             @click="openNotification"
             class="cursor-pointer"
@@ -83,7 +83,7 @@ const showNotification = computed(
                 <rect width="14" height="14" fill="white" />
               </clipPath>
             </defs>
-          </svg> -->
+          </svg>
 
           <!-- <div
             class="pointer-events-none absolute top-full left-1/2 z-20 mt-3 -translate-x-1/2 opacity-0 -translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
