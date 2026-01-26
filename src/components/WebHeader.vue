@@ -15,17 +15,20 @@ const toggleSidebar = () => {
   emit('toggle-sidebar')
 }
 
-const openNotification = () => {
-  if (!role.value) return
+// const openNotification = () => {
+//   if (!role.value) return
 
-  if (role.value === 'STAFF') {
-    router.replace({ name: 'profilestaff' })
-  } else if (role.value === 'RESIDENT') {
-    router.replace({
-      name: 'profileresident',
-      query: { tab: 'notify' }
-    })
-  }
+//   if (role.value === 'STAFF') {
+//     router.replace({ name: 'profilestaff' })
+//   } else if (role.value === 'RESIDENT') {
+//     router.replace({
+//       name: 'profileresident',
+//       query: { tab: 'notify' }
+//     })
+//   }
+// }
+const openNotification = () => {
+  router.replace({ name: 'notification' })
 }
 const showNotification = computed(
   () => role.value === 'STAFF' || role.value === 'RESIDENT'
@@ -85,7 +88,7 @@ const showNotification = computed(
             </defs>
           </svg>
 
-          <!-- <div
+          <div
             class="pointer-events-none absolute top-full left-1/2 z-20 mt-3 -translate-x-1/2 opacity-0 -translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
           >
             <div
@@ -99,7 +102,7 @@ const showNotification = computed(
                 ></div>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
         <UserInfo />
       </div>

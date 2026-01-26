@@ -26,6 +26,7 @@ import EditProfilePage from '@/components/EditProfilePage.vue'
 import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.vue'
 import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 import AddMember from '@/components/AddMember.vue'
+import NotificationPage from '@/components/NotificationPage.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -58,6 +59,11 @@ const routes = [
     path: '/homepage/resident/:id',
     name: 'home',
     component: HomePageResident
+  },
+  {
+    path: '/homepage/resident/:id/notificationpage',
+    name: 'notification',
+    component: NotificationPage
   },
   {
     path: '/homepage/resident/:id/parcelspage',
