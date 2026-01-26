@@ -616,6 +616,7 @@ watch(
             :profileImage="residentDetail.photo"
             :useCurrentProfile="false"
             :key="residentDetail.id"
+            :fullName="residentDetail.fullName"
             :firstName="residentFirstName"
             :lastName="residentLastName"
             :email="residentDetail.email"

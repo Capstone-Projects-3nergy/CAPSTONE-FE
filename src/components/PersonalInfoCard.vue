@@ -23,7 +23,10 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
   profileImage: { type: String, default: '' },
-  fullName: { type: String, required: true },
+  fullName: {
+    type: String,
+    default: ''
+  },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
   dormName: { type: String, default: '-' },
@@ -65,9 +68,12 @@ const authStore = useAuthManager()
 
 const userName = computed(() => authStore.user?.fullName || 'Courier')
 
-const userInitial = computed(() =>
-  userName.value ? userName.value[0].toUpperCase() : 'C'
-)
+const userInitial = computed(() => {
+  const name = props.fullName?.trim()
+  if (!name) return '?'
+  return name.split('')[0] // ไทยไม่ต้อง toUpperCase
+})
+
 const hasProfileImageUrl = computed(
   () => props.profileImage && props.profileImage.trim() !== ''
 )
@@ -633,7 +639,7 @@ const profileImageUrlPreview = computed(() => {
                 class="w-full h-full object-cover"
               />
               <div
-                v-else
+                v-else-if="fullName"
                 class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
               >
                 {{ userInitial }}
