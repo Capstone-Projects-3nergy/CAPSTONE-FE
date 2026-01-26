@@ -663,7 +663,7 @@ const handleSortUpdate = (val) => {
               </template>
             </SidebarItem>
             <!-- Profile -->
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -680,7 +680,7 @@ const handleSortUpdate = (val) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
