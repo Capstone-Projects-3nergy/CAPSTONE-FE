@@ -422,7 +422,7 @@ const closePopUps = (operate) => {
       </button>
 
       <main class="flex-1 p-6 md:p-9">
-        <div class="flex items-center space-x-2 mb-6">
+        <!-- <div class="flex items-center space-x-2 mb-6">
           <svg
             class="w-6 h-6 text-[#185dc0]"
             aria-hidden="true"
@@ -436,7 +436,7 @@ const closePopUps = (operate) => {
             />
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Profile Staff</h2>
-        </div>
+        </div> -->
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="profileManager.editSuccess"

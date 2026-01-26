@@ -19,7 +19,7 @@ const props = defineProps({
     type: String,
     default: 'edit' // 'edit' | 'add'
   },
-  title: { type: String, default: 'Personal Information' },
+  title: { type: String, default: 'Edit Personal Information' },
   showEdit: { type: Boolean, default: true },
   showDomain: { type: Boolean, default: true },
   profileImage: { type: String, default: '' },

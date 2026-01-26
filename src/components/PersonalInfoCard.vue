@@ -334,7 +334,7 @@ const profileImageUrlPreview = computed(() => {
             <span>Personal Information</span>
           </button>
 
-          <button
+          <!-- <button
             v-if="showNotify"
             @click="activeTab = 'notify'"
             :class="menuClass('notify')"
@@ -352,7 +352,7 @@ const profileImageUrlPreview = computed(() => {
               />
             </svg>
             <span>Notifications</span>
-          </button>
+          </button> -->
         </div>
       </div>
       <!-- RIGHT : Information Card -->
