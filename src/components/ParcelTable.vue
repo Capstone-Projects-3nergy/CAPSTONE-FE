@@ -48,7 +48,8 @@ const props = defineProps({
   showStatus: { type: Boolean, default: true },
   showUpdateAt: { type: Boolean, default: true },
   showDeletedAt: { type: Boolean, default: false },
-  showDeleteResident: { type: Boolean, default: false }
+  showDeleteResident: { type: Boolean, default: false },
+  showMemberTrashName: { type: Boolean, default: false }
 })
 
 // defineProps({
@@ -160,6 +161,12 @@ const getInitial = (name) => {
           </th>
           <th
             v-if="showMemberName"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Resident name
+          </th>
+          <th
+            v-if="showMemberTrashName"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
             Resident name
@@ -288,6 +295,15 @@ const getInitial = (name) => {
             {{ p.recipientName }}
           </td>
 
+          <td
+            v-if="showMemberTrashName"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]">
+              Resident name:
+            </span>
+            {{ p.firstName }} {{ p.lastName }}
+          </td>
           <td
             v-if="showMemberName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
