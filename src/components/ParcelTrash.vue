@@ -91,6 +91,7 @@ const showRestoreMember = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
+const residentDetail = ref(null)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
@@ -532,18 +533,18 @@ const restoreParcelPopUp = (parcel) => {
     parcelNumber: parcel.trackingNumber
   }
 }
-const deleteMemberPopUp = (resident) => {
+const deleteMemberPopUp = (id) => {
   showDeleteMember.value = true
   residentDetail.value = {
-    id: resident.id,
-    fullName: resident.fullName
+    id: id.id,
+    fullName: id.fullName
   }
 }
-const restoreMemberPopUp = (resident) => {
-  showRestoreMember.value = true
+const restoreMemberPopUp = (id) => {
+  showRestoreParcel.value = true
   residentDetail.value = {
-    id: resident.id,
-    residentName: resident.fullName
+    id: id.id,
+    fullName: id.fullName
   }
 }
 
@@ -744,7 +745,7 @@ const fetchTrashMembers = async () => {
 
     const mapped = list.map((u) => ({
       id: u.userId,
-      fullName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(), // ✅ รวมชื่อ
+      firstName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(), // ✅ รวมชื่อ
       phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,
@@ -1453,15 +1454,20 @@ const closePopUp = (operate) => {
           :showPhoto="true"
           :showActionStatus="true"
           :showStatus="false"
+          :showMember="true"
+          :showParcel="false"
+          :showRestore="false"
+          :showRestoreMember="true"
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
-          :showMember="true"
+          :showMemberName="true"
+          :showName="false"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
           @delete="deleteMemberPopUp"
-          @restore="restoreMemberPopUp"
+          @restoreMember="restoreMemberPopUp"
         >
           <template #sort-room>
             <svg

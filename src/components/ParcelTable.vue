@@ -40,6 +40,7 @@ const props = defineProps({
   showDelete: { type: Boolean, default: false },
   showDeleteMember: { type: Boolean, default: false },
   showRestore: { type: Boolean, default: true },
+  showRestoreMember: { type: Boolean, default: false },
   clickableStatus: { type: Boolean, default: true },
   showTracking: { type: Boolean, default: true },
   showRoom: { type: Boolean, default: true },
