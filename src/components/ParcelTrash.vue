@@ -1146,7 +1146,7 @@ const closePopUp = (operate) => {
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
-          :hideNameSort="true"
+          :hideNameSort="false"
           :hideTrash="false"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
