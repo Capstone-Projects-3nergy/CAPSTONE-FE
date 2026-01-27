@@ -191,7 +191,7 @@ onMounted(async () => {
     parcelManager.setTrash(mapped)
   }
   const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash/resident`,
     router
   )
   if (dataUser) {
@@ -543,7 +543,7 @@ const restoreMemberPopUp = (resident) => {
   showRestoreMember.value = true
   residentDetail.value = {
     id: resident.id,
-    residentName: resident.residentName
+    residentName: resident.fullName
   }
 }
 
