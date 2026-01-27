@@ -66,7 +66,7 @@ const phoneError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 
-const userId = Number(route.params.id)
+const userId = computed(() => Number(route.params.id))
 const form = ref({
   id: null,
   firstName: '',
@@ -122,6 +122,37 @@ const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
+const loadMemberForEdit = async () => {
+  if (!userId.value) return
+
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      userId.value,
+      router
+    )
+
+    if (!data) return
+
+    form.value = {
+      id: data.userId,
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      email: data.email || '',
+      roomNumber: data.roomNumber || '',
+      dormName: data.dormName || '',
+      status: data.status || '',
+      lineId: data.lineId || '',
+      phoneNumber: data.phoneNumber || '',
+      photo: data.profileImageUrl || ''
+    }
+
+    originalForm.value = { ...form.value }
+  } catch (err) {
+    error.value = true
+  }
+}
+
 const loadDom = async () => {
   const auth = useAuthManager()
   try {
@@ -343,6 +374,7 @@ onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
   loadDom()
+  loadMemberForEdit()
   loadResidents()
   const tid = route.params.tid
   getParcelDetail(tid)
@@ -999,6 +1031,29 @@ const showLastNameError = () => {
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
         />
+
+        <!-- <EditPersonalInfoProfile
+          mode="edit"
+          :key="form.id"
+          :profileImage="form.photo"
+          :useCurrentProfile="false"
+          :firstName="form.firstName"
+          :lastName="form.lastName"
+          :email="form.email"
+          :roomNumber="form.roomNumber"
+          :dormName="form.dormName"
+          :status="form.status"
+          :lineId="form.lineId"
+          :phoneNumber="form.phoneNumber"
+          :editResidentDetail="true"
+          :editProfile="false"
+          @cancel="cancelEdit"
+          @success="showProfileSuccess"
+          @error="showProfileError"
+          @first-name-error="showFirstNameError"
+          @last-name-error="showLastNameError"
+          @phone-error="showPhoneError"
+        /> -->
 
         <!-- <form
           class="bg-white p-6 rounded-[5px] shadow space-y-8"
