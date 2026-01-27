@@ -23,40 +23,61 @@ const resident = computed(() => props.residentData || {})
 
 /* ---------- move to trash ---------- */
 const moveToTrash = async () => {
-  if (!resident.value.id) return
-
-  deletedProfile.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-    resident.value.id
-  )
-
-  if (deletedProfile.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
+  if (!resident.value.id) {
+    console.error('No resident ID found')
     return
   }
 
-  userManager.moveMemberToTrash(resident.value.id)
-  emit('confirmDetail', true)
+  console.log('Deleting resident with ID:', resident.value.id)
+
+  try {
+    deletedProfile.value = await deleteItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      resident.value.id
+    )
+
+    if (deletedProfile.value === '404') {
+      emit('redAlert')
+      emit('cancelDetail', true)
+      return
+    }
+
+    // Update store
+    userManager.moveMemberToTrash(resident.value.id)
+    emit('confirmDetail', true)
+  } catch (error) {
+    console.error('Error moving to trash:', error)
+    emit('redAlert')
+    emit('cancelDetail', true)
+  }
 }
 
 /* ---------- delete permanent ---------- */
 const deletePermanent = async () => {
-  if (!resident.value.id) return
-
-  deletedProfile.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
-    resident.value.id
-  )
-
-  if (deletedProfile.value === '404') {
-    emit('redAlert')
-    emit('cancelDetail', true)
+  if (!resident.value.id) {
+    console.error('No resident ID found')
     return
   }
 
-  userManager.deletePermanent(resident.value.id)
-  emit('confirmDetail', true)
+  try {
+    deletedProfile.value = await deleteItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
+      resident.value.id
+    )
+
+    if (deletedProfile.value === '404') {
+      emit('redAlert')
+      emit('cancelDetail', true)
+      return
+    }
+
+    userManager.deletePermanent(resident.value.id)
+    emit('confirmDetail', true)
+  } catch (error) {
+    console.error('Error deleting permanently:', error)
+    emit('redAlert')
+    emit('cancelDetail', true)
+  }
 }
 
 const confirmAction = () => {

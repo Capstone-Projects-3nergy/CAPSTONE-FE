@@ -17,6 +17,13 @@ function sortByStatusReverse(parcels) {
     b.status.localeCompare(a.status, 'th', { sensitivity: 'base' })
   )
 }
+function sortByDeleteDate(parcels) {
+  parcels.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
+}
+
+function sortByDeleteDateReverse(parcels) {
+  parcels.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt))
+}
 
 function sortByDate(parcels) {
   parcels.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
@@ -533,6 +540,8 @@ export {
   sortByRoomNumberUser,
   sortByRoomNumberUserReverse,
   sortByUserStatus,
+  sortByDeleteDate,
+  sortByDeleteDateReverse,
   sortByUserStatusReverse,
   sortByUserDate,
   sortByUserDateReverse

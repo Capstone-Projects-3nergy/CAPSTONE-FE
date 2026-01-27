@@ -39,6 +39,8 @@ import {
   sortByFirstNameReverse,
   sortByLastNameReverse,
   searchParcels,
+  sortByDeleteDateReverse,
+  sortByDeleteDate,
   filterByDay,
   filterByMonth,
   filterByYear
@@ -185,7 +187,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
     parcelManager.setTrash(mapped)
   }
   const dataUser = await getItems(
@@ -194,17 +196,18 @@ onMounted(async () => {
   )
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
-      id: p.residentId,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      mobile: p.mobile,
-      lineId: p.lineId,
-      email: p.contactEmail,
-      status: mapActiveStatus(p.activeStatus),
-      updateAt: p.updatedAt || null
+      id: p.userId,
+      fullName: p.fullName,
+      email: p.email,
+      dormName: p.dormName,
+      roomNumber: p.roomNumber,
+      role: p.role, // "RESIDENT" | "STAFF"
+      status: p.status,
+      deletedAt: p.deletedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
+      photo: p.profileImageUrl // 🔥 table ใช้ photo
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
 
     userManager.setTrash(mapped)
   }
@@ -236,38 +239,42 @@ autoClose(error)
 const searchKeyword = ref('')
 const activeTab = ref('Parcels')
 const tabs = ['Parcels', 'Residents']
-
+const usersByTab = computed(() => {
+  if (activeTab.value === 'Parcels') return trashList.value
+  if (activeTab.value === 'Residents') return trashMemberList.value
+  return [...trashList.value, ...trashMemberList.value]
+})
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-const sortRoomAsc = () => sortByRoomNumber(trashList.value)
-const sortRoomDesc = () => sortByRoomNumberReverse(trashList.value)
-const sortStatusAsc = () => sortByStatus(trashList.value)
-const sortStatusDesc = () => sortByStatusReverse(trashList.value)
-const sortDateAsc = () => sortByDate(trashList.value)
-const sortDateDesc = () => sortByDateReverse(trashList.value)
-const sortByNameAsc = () => sortByName(trashList.value)
-const sortByNameDesc = () => sortByNameReverse(trashList.value)
+const sortRoomAsc = () => sortByRoomNumber(usersByTab.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(usersByTab.value)
+const sortStatusAsc = () => sortByStatus(usersByTab.value)
+const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
+const sortDateAsc = () => sortByDeleteDate(usersByTab.value)
+const sortDateDesc = () => sortByDeleteDateReverse(usersByTab.value)
+const sortByNameAsc = () => sortByName(usersByTab.value)
+const sortByNameDesc = () => sortByNameReverse(usersByTab.value)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
-    ? sortByRoomNumber(trashList.value)
-    : sortByRoomNumberReverse(trashList.value)
+    ? sortByRoomNumber(usersByTab.value)
+    : sortByRoomNumberReverse(usersByTab.value)
   isRoomAsc.value = !isRoomAsc.value
 }
 
 const toggleSortStatus = () => {
   isStatusAsc.value
-    ? sortByStatus(trashList.value)
-    : sortByStatusReverse(trashList.value)
+    ? sortByStatus(usersByTab.value)
+    : sortByStatusReverse(usersByTab.value)
   isStatusAsc.value = !isStatusAsc.value
 }
 
 const toggleSortDate = () => {
   isDateAsc.value
-    ? sortByDate(trashList.value)
-    : sortByDateReverse(trashList.value)
+    ? sortByDate(usersByTab.value)
+    : sortByDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
 }
 const selectedSort = ref('Sort by:')
@@ -395,15 +402,15 @@ function formatDateByTab(rawDate) {
   const mi = String(dateObj.getMinutes()).padStart(2, '0')
   const ss = String(dateObj.getSeconds()).padStart(2, '0')
 
-  if (activeTab.value === 'Day') {
+  if (usersByTab.value === 'Day') {
     return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
   }
 
-  if (activeTab.value === 'Month') {
+  if (usersByTab.value === 'Month') {
     return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
   }
 
-  if (activeTab.value === 'Year') {
+  if (usersByTab.value === 'Year') {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
   }
 
@@ -451,7 +458,7 @@ const toggleSidebar = () => {
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
-  Math.ceil(trashList.value.length / perPage.value)
+  Math.ceil(usersByTab.value.length / perPage.value)
 )
 
 const paginatedParcels = computed(() => {
@@ -703,7 +710,7 @@ const fetchTrash = async () => {
 
 // const fetchTrash = async () => {
 //   const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
-//   trashList.value = await res.json()
+//   activeTab.value = await res.json()
 // }
 
 // const deleteForever = async (id) => {
