@@ -26,7 +26,7 @@ const moveToTrash = async () => {
   if (!resident.value.id) return
 
   deletedProfile.value = await deleteItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     resident.value.id
   )
 

@@ -421,7 +421,7 @@ const addResidents = async () => {
     // API call
     // -----------------------
     const savedMember = await addMemberWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels/add`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       body,
       router
     )
@@ -706,7 +706,7 @@ const saveEditDetail = async () => {
     // API call
     // -----------------------
     const updated = await updateProfileWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/profile`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       body,
       router
     )
