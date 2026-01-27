@@ -142,6 +142,11 @@ function searchParcels(parcels, keyword) {
       ?.toString()
       .toLowerCase()
       .includes(lowerKeyword)
+    const fullNameForSearch = `${p.firstName ?? ''} ${p.lastName ?? ''}`
+      .toLowerCase()
+      .trim()
+
+    const fullNameSpliceMatch = fullNameForSearch.includes(lowerKeyword)
 
     const fullNameMatch = p.fullName
       ?.toString()
@@ -175,7 +180,8 @@ function searchParcels(parcels, keyword) {
       emailMatch ||
       statusMatch ||
       dateMatch ||
-      phoneNumberMatch
+      phoneNumberMatch ||
+      fullNameSpliceMatch
     )
   })
 }
