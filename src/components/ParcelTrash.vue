@@ -1945,6 +1945,8 @@ const closePopUp = (operate) => {
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
       :residentData="residentDetail"
+      :showMember="true"
+      :showParcel="false"
     />
   </teleport>
   <teleport to="body" v-if="showDeleteMember">

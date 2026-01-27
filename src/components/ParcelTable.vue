@@ -9,7 +9,8 @@ const emit = defineEmits([
   'view-detail',
   'delete',
   'restore',
-  'deleteMember'
+  'deleteMember',
+  'restoreMember'
 ])
 
 const props = defineProps({
