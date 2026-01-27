@@ -98,7 +98,7 @@ const restoreMemberFn = async () => {
   if (!resident.value?.id) return
 
   const res = await restoreParcel(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
     resident.value.id,
     router
   )
@@ -121,7 +121,7 @@ const restoreStaffFn = async () => {
   if (!resident.value?.id) return
 
   const res = await restoreParcel(
-    `${import.meta.env.VITE_BASE_URL}api/trash`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash`,
     staff.value.id,
     router
   )

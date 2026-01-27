@@ -729,7 +729,7 @@ const fetchTrash = async () => {
 const fetchTrashMembers = async () => {
   try {
     const dataUser = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/trash`,
+      `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
       router
     )
 
