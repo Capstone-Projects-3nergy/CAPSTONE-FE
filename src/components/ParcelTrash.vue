@@ -273,8 +273,8 @@ const toggleSortStatus = () => {
 
 const toggleSortDate = () => {
   isDateAsc.value
-    ? sortByDate(usersByTab.value)
-    : sortByDateReverse(usersByTab.value)
+    ? sortByDeleteDate(usersByTab.value)
+    : sortByDeleteDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
 }
 const selectedSort = ref('Sort by:')
