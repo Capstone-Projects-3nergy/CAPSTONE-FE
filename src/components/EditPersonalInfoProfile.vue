@@ -309,10 +309,27 @@ const userInitial = computed(() =>
 const submit = async () => {
   if (props.mode === 'add') {
     await addResidents()
-  } else {
+    return
+  }
+
+  if (props.editResidentDetail) {
+    await saveEditDetail()
+    return
+  }
+
+  if (props.editProfile) {
     await saveEditProfile()
+    return
   }
 }
+
+// const submit = async () => {
+//   if (props.mode === 'add') {
+//     await addResidents()
+//   } else {
+//     await saveEditProfile()
+//   }
+// }
 const addResidents = async () => {
   // -----------------------
   // REQUIRED FIELD CHECK
@@ -622,6 +639,8 @@ const saveEditProfile = async () => {
   }
 }
 const saveEditDetail = async () => {
+  const isStaff = loginManager.user?.role === 'STAFF'
+
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -653,18 +672,26 @@ const saveEditDetail = async () => {
     }
   }
 
+  // -----------------------
+  // validate position (staff only)
+  // -----------------------
+  if (isStaff && form.value.position) {
+    if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+      emit('position-error', true)
+      return
+    }
+  }
+
   try {
     // -----------------------
     // payload
     // -----------------------
     const body = {
-      userId: auth.user.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null,
-      dormId: form.value.dormId.dormId
+      phoneNumber: form.value.phoneNumber || null
     }
 
     if (isStaff) {
@@ -676,10 +703,10 @@ const saveEditDetail = async () => {
     }
 
     // -----------------------
-    // API call (คงไว้ตามที่ขอ)
+    // API call
     // -----------------------
     const updated = await updateProfileWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/details`,
+      `${import.meta.env.VITE_BASE_URL}/api/profile`,
       body,
       router
     )
@@ -689,10 +716,40 @@ const saveEditDetail = async () => {
       return
     }
 
-    userManager.editMember(updated.id, updated)
+    // -----------------------
+    // 🔥 sync ทุก store
+    // -----------------------
+    profileManager.setCurrentProfile(updated)
+    loginManager.updateUser(updated)
+
+    // ⭐ sync userManager
+    if (isStaff) {
+      userManager.updateStaff({
+        id: updated.id,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        email: updated.email,
+        phoneNumber: updated.phoneNumber,
+        lineId: updated.lineId,
+        position: updated.position,
+        profileImageUrl: updated.profileImageUrl
+      })
+    } else {
+      userManager.updateMember({
+        id: updated.id,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        email: updated.email,
+        roomNumber: updated.roomNumber,
+        dormName: updated.dormName,
+        phoneNumber: updated.phoneNumber,
+        lineId: updated.lineId,
+        profileImageUrl: updated.profileImageUrl
+      })
+    }
 
     // -----------------------
-    // reset local state
+    // reset state
     // -----------------------
     newAvatar.value = null
     originalForm.value = { ...form.value }
@@ -704,6 +761,90 @@ const saveEditDetail = async () => {
     emit('error', true)
   }
 }
+
+// const saveEditDetail = async () => {
+//   // -----------------------
+//   // validate name (ไทย + อังกฤษ)
+//   // -----------------------
+//   const nameRegex = /^[A-Za-zก-๙\s]+$/
+
+//   if (!nameRegex.test(form.value.firstName)) {
+//     emit('first-name-error', true)
+//     return
+//   }
+
+//   if (!nameRegex.test(form.value.lastName)) {
+//     emit('last-name-error', true)
+//     return
+//   }
+
+//   // -----------------------
+//   // validate phone (optional)
+//   // -----------------------
+//   if (form.value.phoneNumber) {
+//     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+//       emit('phone-error', true)
+//       return
+//     }
+
+//     const digits = form.value.phoneNumber.replace(/-/g, '')
+//     if (digits.length < 9 || digits.length > 10) {
+//       emit('phone-error', true)
+//       return
+//     }
+//   }
+
+//   try {
+//     // -----------------------
+//     // payload
+//     // -----------------------
+//     const body = {
+//       userId: auth.user.id,
+//       firstName: form.value.firstName,
+//       lastName: form.value.lastName,
+//       roomNumber: form.value.roomNumber || null,
+//       lineId: form.value.lineId || null,
+//       phoneNumber: form.value.phoneNumber || null,
+//       dormId: form.value.dormId.dormId
+//     }
+
+//     if (isStaff) {
+//       body.position = form.value.position || null
+//     }
+
+//     if (newAvatar.value) {
+//       body.profileImage = newAvatar.value
+//     }
+
+//     // -----------------------
+//     // API call (คงไว้ตามที่ขอ)
+//     // -----------------------
+//     const updated = await updateProfileWithFile(
+//       `${import.meta.env.VITE_BASE_URL}/api/details`,
+//       body,
+//       router
+//     )
+
+//     if (!updated) {
+//       emit('error', true)
+//       return
+//     }
+
+//     userManager.editMember(updated.id, updated)
+
+//     // -----------------------
+//     // reset local state
+//     // -----------------------
+//     newAvatar.value = null
+//     originalForm.value = { ...form.value }
+
+//     emit('success', true)
+//     isEdit.value = false
+//   } catch (err) {
+//     console.error(err)
+//     emit('error', true)
+//   }
+// }
 
 const displayFullName = computed(() => {
   const first = form.value.firstName?.trim()
