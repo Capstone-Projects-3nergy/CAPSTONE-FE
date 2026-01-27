@@ -190,27 +190,27 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
     parcelManager.setTrash(mapped)
   }
-  const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/trash/resident`,
-    router
-  )
-  if (dataUser) {
-    const mapped = dataUser.map((p) => ({
-      id: p.userId,
-      fullName: p.fullName,
-      email: p.email,
-      dormName: p.dormName,
-      roomNumber: p.roomNumber,
-      role: p.role, // "RESIDENT" | "STAFF"
-      status: p.status,
-      deletedAt: p.deletedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
-      photo: p.profileImageUrl // 🔥 table ใช้ photo
-    }))
+  // const dataUser = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/trash/resident`,
+  //   router
+  // )
+  // if (dataUser) {
+  //   const mapped = dataUser.map((p) => ({
+  //     id: p.userId,
+  //     fullName: p.fullName,
+  //     email: p.email,
+  //     dormName: p.dormName,
+  //     roomNumber: p.roomNumber,
+  //     role: p.role, // "RESIDENT" | "STAFF"
+  //     status: p.status,
+  //     deletedAt: p.deletedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
+  //     photo: p.profileImageUrl // 🔥 table ใช้ photo
+  //   }))
 
-    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
+  //   mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
 
-    userManager.setTrash(mapped)
-  }
+  //   userManager.setTrash(mapped)
+  // }
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -744,13 +744,14 @@ const fetchTrashMembers = async () => {
 
     const mapped = list.map((u) => ({
       id: u.userId,
-      fullName: u.fullName, // ✅ สำคัญ
-      mobile: u.mobile || '-', // ✅ สำคัญ
+      fullName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(), // ✅ รวมชื่อ
+      phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,
       role: u.role || 'RESIDENT',
       status: u.status,
-      deletedAt: u.deletedAt || u.updatedAt || null // ✅ ใช้โชว์วันลบ
+      deletedAt: u.deletedAt || u.updatedAt || null,
+      photo: u.profileImageUrl // 🔥 แก้ typo (p → u)
     }))
 
     userManager.setTrash(mapped)
@@ -1445,10 +1446,11 @@ const closePopUp = (operate) => {
           :page="currentPage"
           :total="totalPages"
           :showTracking="false"
-          :showRoom="false"
-          :showMobile="true"
+          :showRoom="true"
+          :showMobile="false"
           :showDelete="true"
           :hideTrash="true"
+          :showPhoto="true"
           :showActionStatus="true"
           :showStatus="false"
           :clickableStatus="false"

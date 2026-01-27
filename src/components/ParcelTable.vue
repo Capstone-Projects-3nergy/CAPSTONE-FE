@@ -379,7 +379,8 @@ const getInitial = (name) => {
               :class="[
                 {
                   'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE'
+                  'bg-gray-400': p.status === 'INACTIVE',
+                  'bg-red-400': p.status === 'DELETED'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
