@@ -1492,7 +1492,7 @@ const showResidentDetail = async function (id) {
       @cancelDetail="clearDeleteMemPopUp"
       @confirmDetail="showDelMemComplete"
       @redAlert="openRedMemPopup"
-      :residentData:="MemberDetail"
+      :residentData="MemberDetail"
       :isPermanent="false"
     />
   </teleport>
