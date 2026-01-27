@@ -396,12 +396,61 @@ const clearDeleteMemPopUp = () => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-const showDelMemComplete = () => {
-  showDeleteMemberSuccess.value = true
-  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+// เพิ่ม function สำหรับ refresh ข้อมูล
+const refreshUserData = async () => {
+  try {
+    const dataUser = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      router
+    )
+
+    if (dataUser) {
+      const mapped = dataUser.map((p) => ({
+        id: p.userId,
+        fullName: p.fullName,
+        email: p.email,
+        dormName: p.dormName,
+        roomNumber: p.roomNumber,
+        role: p.role,
+        status: p.status,
+        updateAt: p.updatedAt,
+        photo: p.profileImageUrl
+      }))
+
+      mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+
+      const residentList = mapped.filter((u) => u.role === 'RESIDENT')
+      const staffList = mapped.filter((u) => u.role === 'STAFF')
+
+      userManager.setMembers(residentList)
+      userManager.setStaffs(staffList)
+    }
+  } catch (error) {
+    console.error('Error refreshing user data:', error)
+  }
+}
+
+// แก้ไข showDelMemComplete
+const isLoading = ref(false)
+
+const showDelMemComplete = async () => {
+  isLoading.value = true
   showDeleteMember.value = false
   MemberDetail.value = null
+
+  // ✅ fetch ข้อมูลใหม่
+  await refreshUserData()
+
+  isLoading.value = false
+  showDeleteMemberSuccess.value = true
+  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
 }
+// const showDelMemComplete = () => {
+//   showDeleteMemberSuccess.value = true
+//   setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+//   showDeleteMember.value = false
+//   MemberDetail.value = null
+// }
 const openRedMemPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)

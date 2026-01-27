@@ -121,7 +121,7 @@ const restoreStaffFn = async () => {
   if (!resident.value?.id) return
 
   const res = await restoreParcel(
-    `${import.meta.env.VITE_BASE_URL}/api/trash`,
+    `${import.meta.env.VITE_BASE_URL}/api/trash/staffs`,
     staff.value.id,
     router
   )
@@ -183,12 +183,12 @@ const confirmRestore = async () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="showMember">
           Do you want to restore this Resident name
-          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
+          <b>"{{ resident.fullName || '' }}"</b>
         </template>
 
         <template v-if="showStaff">
           Do you want to restore this Staff name
-          <b>"{{ staff.firstName }} {{ staff.lastName }}"</b>
+          <b>"{{ staff.fullName || '' }}"</b>
         </template>
 
         <template v-if="showParcel">

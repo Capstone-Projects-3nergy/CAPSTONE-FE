@@ -28,29 +28,64 @@ const moveToTrash = async () => {
     return
   }
 
-  console.log('Deleting resident with ID:', resident.value.id)
+  console.log('🗑️ Deleting resident with ID:', resident.value.id)
 
   try {
-    deletedProfile.value = await deleteItemById(
+    const response = await deleteItemById(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-      resident.value.id
+      resident.value.id,
+      router
     )
 
-    if (deletedProfile.value === '404') {
+    console.log('📡 Delete response:', response) // ✅ เพิ่ม debug
+
+    // ตรวจสอบ response
+    if (!response || response === '404') {
+      console.error('❌ Delete failed')
       emit('redAlert')
       emit('cancelDetail', true)
       return
     }
 
-    // Update store
+    // ✅ สำเร็จ
+    console.log('✅ Delete successful')
     userManager.moveMemberToTrash(resident.value.id)
     emit('confirmDetail', true)
   } catch (error) {
-    console.error('Error moving to trash:', error)
+    console.error('❌ Error moving to trash:', error)
     emit('redAlert')
     emit('cancelDetail', true)
   }
 }
+// const moveToTrash = async () => {
+//   if (!resident.value.id) {
+//     console.error('No resident ID found')
+//     return
+//   }
+
+//   console.log('Deleting resident with ID:', resident.value.id)
+
+//   try {
+//     deletedProfile.value = await deleteItemById(
+//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+//       resident.value.id
+//     )
+
+//     if (deletedProfile.value === '404') {
+//       emit('redAlert')
+//       emit('cancelDetail', true)
+//       return
+//     }
+
+//     // Update store
+//     userManager.moveMemberToTrash(resident.value.id)
+//     emit('confirmDetail', true)
+//   } catch (error) {
+//     console.error('Error moving to trash:', error)
+//     emit('redAlert')
+//     emit('cancelDetail', true)
+//   }
+// }
 
 /* ---------- delete permanent ---------- */
 const deletePermanent = async () => {
