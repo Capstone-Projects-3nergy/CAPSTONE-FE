@@ -529,7 +529,7 @@ const deleteMemberPopUp = (resident) => {
   showDeleteMember.value = true
   residentDetail.value = {
     id: resident.id,
-    residentName: resident.residentName
+    fullName: resident.fullName
   }
 }
 const restoreMemberPopUp = (resident) => {
@@ -726,36 +726,60 @@ const fetchTrash = async () => {
 //     setTimeout(() => (error.value = false), 10000)
 //   }
 // }
-
 const fetchTrashMembers = async () => {
   try {
     const dataUser = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+      `${import.meta.env.VITE_BASE_URL}/api/trash`,
       router
     )
 
-    // ป้องกัน null / undefined
     const list = Array.isArray(dataUser) ? dataUser : []
 
-    // map ให้โครงสร้างที่ frontend ใช้
     const mapped = list.map((u) => ({
       id: u.userId,
-      firstName: u.firstName,
-      lastName: u.lastName,
+      fullName: u.fullName, // ✅ สำคัญ
+      mobile: u.mobile || '-', // ✅ สำคัญ
       email: u.email,
       roomNumber: u.roomNumber,
-      role: u.role,
+      role: u.role || 'RESIDENT',
       status: u.status,
-      deletedAt: u.deletedAt || null
+      deletedAt: u.deletedAt || u.updatedAt || null // ✅ ใช้โชว์วันลบ
     }))
 
-    // ใส่เข้า Pinia (clear ก่อน)
-    userManager.trash.length = 0
-    mapped.forEach((u) => userManager.trash.push(u))
+    userManager.setTrash(mapped)
   } catch (e) {
     console.warn('Fetch trash members failed', e)
   }
 }
+
+// const fetchTrashMembers = async () => {
+//   try {
+//     const dataUser = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+//       router
+//     )
+
+//     // ป้องกัน null / undefined
+//     const list = Array.isArray(dataUser) ? dataUser : []
+
+//     // map ให้โครงสร้างที่ frontend ใช้
+//     const mapped = list.map((u) => ({
+//       id: u.userId,
+//       firstName: u.firstName,
+//       lastName: u.lastName,
+//       email: u.email,
+//       roomNumber: u.roomNumber,
+//       role: u.role,
+//       status: u.status,
+//       deletedAt: u.deletedAt || null
+//     }))
+
+//     // ใส่เข้า Pinia (clear ก่อน)
+//     userManager.trash.length = 0
+//     mapped.forEach((u) => userManager.trash.push(u))
+//   } catch (e) {
+//     console.warn('Fetch trash members failed', e)
+//   }
 
 onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
