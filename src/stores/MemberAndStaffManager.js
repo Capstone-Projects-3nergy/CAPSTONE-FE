@@ -91,7 +91,7 @@ export const useUserManager = defineStore('userManager', () => {
       const removed = members.splice(index, 1)[0]
       trash.push({
         ...removed,
-        role: 'MEMBER',
+        role: 'RESIDENT',
         original: { ...removed },
         deletedAt: new Date().toISOString()
       })
