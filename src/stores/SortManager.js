@@ -105,7 +105,22 @@ function searchParcels(parcels, keyword) {
       // 🔥 สำหรับ search แบบ backend
       isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
     }
+    if (p.deletedAt) {
+      const date = new Date(p.deletedAt)
 
+      const dd = String(date.getDate()).padStart(2, '0')
+      const mm = String(date.getMonth() + 1).padStart(2, '0')
+      const yyyy = date.getFullYear()
+      const hh = String(date.getHours()).padStart(2, '0')
+      const min = String(date.getMinutes()).padStart(2, '0')
+      const ss = String(date.getSeconds()).padStart(2, '0')
+
+      // แสดงผลเดิม
+      displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+      // 🔥 สำหรับ search แบบ backend
+      isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+    }
     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
 
     const trackingMatch = p.trackingNumber
