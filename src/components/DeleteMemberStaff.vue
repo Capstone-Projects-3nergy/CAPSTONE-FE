@@ -144,7 +144,7 @@ const cancelAction = () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="isPermanent">
           Do you want to permanently delete this Resident name
-          <b>"{{ resident.fullName }}"</b>
+          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
           ?
           <br />
           <span class="text-red-500 text-sm">

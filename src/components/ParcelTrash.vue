@@ -537,14 +537,16 @@ const deleteMemberPopUp = (id) => {
   showDeleteMember.value = true
   residentDetail.value = {
     id: id.id,
-    fullName: id.fullName
+    firstName: id.firstName,
+    lastName: id.lastName
   }
 }
 const restoreMemberPopUp = (id) => {
   showRestoreParcel.value = true
   residentDetail.value = {
     id: id.id,
-    fullName: id.fullName
+    firstName: id.firstName,
+    lastName: id.lastName
   }
 }
 
@@ -745,7 +747,8 @@ const fetchTrashMembers = async () => {
 
     const mapped = list.map((u) => ({
       id: u.userId,
-      firstName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(), // ✅ รวมชื่อ
+      firstName: u.firstName,
+      lastName: u.lastName,
       phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,

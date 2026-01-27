@@ -183,7 +183,7 @@ const confirmRestore = async () => {
       <div class="p-4 text-center sm:text-left">
         <template v-if="showMember">
           Do you want to restore this Resident name
-          <b>"{{ resident.fullName || '' }}"</b>
+          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
         </template>
 
         <template v-if="showStaff">
