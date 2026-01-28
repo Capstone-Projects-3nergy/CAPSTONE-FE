@@ -270,7 +270,7 @@ onMounted(async () => {
       router,
       userId
     )
-
+    console.log(dataUser)
     if (dataUser) {
       const mapped = dataUser.map((p) => ({
         id: p.userId,
