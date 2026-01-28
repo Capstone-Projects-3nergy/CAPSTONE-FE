@@ -398,7 +398,8 @@ const getInitial = (name) => {
                 {
                   'bg-green-400': p.status === 'ACTIVE',
                   'bg-gray-400': p.status === 'INACTIVE',
-                  'bg-red-400': p.status === 'DELETED'
+                  'bg-red-400': p.status === 'DELETED',
+                  'bg-yellow-400': p.status === 'PENDING'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
