@@ -772,7 +772,8 @@ const saveEditDetail = async () => {
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null
+      phoneNumber: form.value.phoneNumber || null,
+      dormId: form.value.dormId || null
     }
 
     if (isStaff) {
@@ -822,6 +823,7 @@ const saveEditDetail = async () => {
         lastName: updated.lastName,
         email: updated.email,
         roomNumber: updated.roomNumber,
+        dormId: updated.dormId,
         dormName: updated.dormName,
         phoneNumber: updated.phoneNumber,
         lineId: updated.lineId,
