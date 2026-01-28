@@ -267,7 +267,8 @@ const getMemberDetail = async (id) => {
   if (!id) return
 
   const res = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/resident/${id}`,
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    id,
     router
   )
 
@@ -686,14 +687,6 @@ const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
 }
-watch(
-  () => route.params.id,
-  async (id) => {
-    if (!id) return // 🔥 ตัวนี้แหละที่คุณขาด
-    await getMemberDetail(Number(id))
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
