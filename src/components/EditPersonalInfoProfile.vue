@@ -82,6 +82,7 @@ const form = ref({
 })
 const originalForm = ref({ ...form.value })
 const resetFormForAdd = () => {
+  newAvatar.value = null
   form.value = {
     userId: null,
     firstName: '',
@@ -285,6 +286,13 @@ watch(
 // }
 
 const profileImageUrlPreview = computed(() => {
+  // ⭐ ADD MODE : ไม่ดึงรูปเก่าเด็ดขาด
+  if (props.mode === 'add') {
+    if (newAvatar.value) {
+      return URL.createObjectURL(newAvatar.value)
+    }
+    return ''
+  }
   // 1️⃣ รูปใหม่
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
@@ -304,9 +312,16 @@ const profileImageUrlPreview = computed(() => {
   return ''
 })
 
+// function onImageChange(e) {
+//   const file = e.target.files[0]
+//   if (file) newAvatar.value = file
+// }
 function onImageChange(e) {
   const file = e.target.files[0]
-  if (file) newAvatar.value = file
+  if (file) {
+    newAvatar.value = file
+    e.target.value = null // ⭐ reset input
+  }
 }
 
 // function save() {
@@ -945,23 +960,23 @@ const isSaveDisabled = computed(() => {
         <div class="relative inline-block">
           <!-- Avatar -->
           <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
-            <!-- ADD MODE : แสดง Add Profile ตลอด -->
-            <div
-              v-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center font-semibold bg-white text-black text-xl"
-            >
-              Add Profile
-            </div>
-
-            <!-- EDIT MODE : มีรูป -->
+            <!-- มีรูป (add หรือ edit ก็แสดง) -->
             <img
-              v-else-if="profileImageUrlPreview"
+              v-if="profileImageUrlPreview"
               :src="profileImageUrlPreview"
               alt="Profile"
               class="w-full h-full object-cover"
             />
 
-            <!-- EDIT MODE : ไม่มีรูป -->
+            <!-- ADD MODE + ยังไม่เลือกรูป -->
+            <div
+              v-else-if="props.mode === 'add'"
+              class="w-full h-full flex items-center justify-center font-semibold bg-white text-black text-xl"
+            >
+              Add Profile
+            </div>
+
+            <!-- EDIT MODE + ไม่มีรูป -->
             <div
               v-else
               class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-4xl"
