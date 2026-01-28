@@ -264,29 +264,29 @@ onMounted(async () => {
   const userId = Number(route.params.id)
 
   // ✅ ถ้า store ว่าง → โหลดใหม่
-  if (!userManager.getMembers().length) {
-    const dataUser = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-      router,
-      userId
-    )
-    console.log(dataUser)
-    if (dataUser) {
-      const mapped = dataUser.map((p) => ({
-        id: p.userId,
-        fullName: p.fullName,
-        email: p.email,
-        dormName: p.dormName,
-        roomNumber: p.roomNumber,
-        status: p.status,
-        photo: p.profileImageUrl,
-        phoneNumber: p.phoneNumber || '',
-        lineId: p.lineId || ''
-      }))
+  // if (!userManager.getMembers().length) {
+  //   const dataUser = await getItems(
+  //     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+  //     router,
+  //     userId
+  //   )
+  //   console.log(dataUser)
+  //   if (dataUser) {
+  //     const mapped = dataUser.map((p) => ({
+  //       id: p.userId,
+  //       fullName: p.fullName,
+  //       email: p.email,
+  //       dormName: p.dormName,
+  //       roomNumber: p.roomNumber,
+  //       status: p.status,
+  //       photo: p.profileImageUrl,
+  //       phoneNumber: p.phoneNumber || '',
+  //       lineId: p.lineId || ''
+  //     }))
 
-      userManager.setMembers(mapped)
-    }
-  }
+  //     userManager.setMembers(mapped)
+  //   }
+  // }
 
   // ✅ ดึง detail ตาม id
   // getMemberDetail(userId)
