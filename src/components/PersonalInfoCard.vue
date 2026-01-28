@@ -4,6 +4,8 @@ import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
+import { getItems } from '@/utils/fetchUtils'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -12,6 +14,7 @@ const emit = defineEmits([
   'emailRequire',
   'cancel'
 ])
+const userManager = useUserManager()
 const profileManager = useProfileManager()
 const route = useRoute()
 const router = useRouter()
@@ -49,6 +52,23 @@ const props = defineProps({
 const resetForm = () => {
   newEmail.value = ''
 }
+const routeUser = computed(() => {
+  const userId = route.params.id
+  if (!userId) return null
+
+  return (
+    userManager.members.find((u) => u.id == userId) ||
+    userManager.staffs.find((u) => u.id == userId) ||
+    null
+  )
+})
+const safeFullName = computed(() => {
+  return props.fullName || routeUser.value?.fullName || ''
+})
+
+const safeStatus = computed(() => {
+  return props.status || routeUser.value?.status || null
+})
 
 function display(value) {
   if (!value || value.trim() === '') return '-'
@@ -67,12 +87,17 @@ watch(
 const authStore = useAuthManager()
 
 const userName = computed(() => authStore.user?.fullName || 'Courier')
-
 const userInitial = computed(() => {
-  const name = props.fullName?.trim()
+  const name = safeFullName.value?.trim()
   if (!name) return '?'
-  return name.split('')[0] // ไทยไม่ต้อง toUpperCase
+  return name.charAt(0)
 })
+
+// const userInitial = computed(() => {
+//   const name = props.fullName?.trim()
+//   if (!name) return '?'
+//   return name.split('')[0] // ไทยไม่ต้อง toUpperCase
+// })
 
 const hasProfileImageUrl = computed(
   () => props.profileImage && props.profileImage.trim() !== ''
@@ -102,6 +127,35 @@ const statusClass = (value) => {
     'bg-yellow-400': status === 'ERROR'
   }
 }
+onMounted(async () => {
+  // กันกรณี refresh แล้ว store ว่าง
+  if (userManager.members.length || userManager.staffs.length) return
+
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    router
+  )
+
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.userId,
+      fullName: p.fullName,
+      email: p.email,
+      dormName: p.dormName,
+      roomNumber: p.roomNumber,
+      role: p.role,
+      status: p.status,
+      updateAt: p.updatedAt,
+      photo: p.profileImageUrl
+    }))
+
+    // เรียงล่าสุด
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+
+    userManager.setMembers(mapped.filter((u) => u.role === 'RESIDENT'))
+    userManager.setStaffs(mapped.filter((u) => u.role === 'STAFF'))
+  }
+})
 
 const notifications = [
   {
@@ -533,9 +587,9 @@ const profileImageUrlPreview = computed(() => {
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
-              :class="statusClass(status)"
+              :class="statusClass(safeStatus)"
             >
-              {{ displayStatus(status) }}
+              {{ displayStatus(safeStatus) }}
             </span>
           </div>
         </div>

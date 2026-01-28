@@ -238,6 +238,7 @@ const showParcelTrashPage = async function () {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
+
 onMounted(async () => {
   checkScreen()
   console.log(parcels.value)
@@ -321,12 +322,10 @@ function goToEditResident() {
 }
 
 watch(
-  () => route.params.tid,
-  (newTid) => {
-    residentDetail.value = null // ⭐ RESET ก่อน
-    getMemberDetail(Number(newTid))
-  },
-  { immediate: true }
+  () => parcel.value?.residentId,
+  (rid) => {
+    if (rid) getMemberDetail(rid)
+  }
 )
 </script>
 
