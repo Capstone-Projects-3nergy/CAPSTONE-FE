@@ -12,6 +12,7 @@ const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
 const selectedResidentId = ref(null)
+
 const router = useRouter()
 const auth = useAuthManager()
 const props = defineProps({
@@ -35,7 +36,7 @@ const props = defineProps({
   editProfile: { type: String, default: true },
   editResidentDetail: { type: String, required: false }
 })
-
+const newAvatar = ref(null)
 const emit = defineEmits([
   'edit',
   'save',
@@ -75,6 +76,27 @@ const form = ref({
   phoneNumber: '',
   profileImage: null
 })
+const originalForm = ref({ ...form.value })
+const resetFormForAdd = () => {
+  form.value = {
+    userId: null,
+    firstName: '',
+    lastName: '',
+    email: '',
+    roomNumber: '',
+    dormName: '',
+    dormId: '',
+    lineId: '',
+    position: '',
+    phoneNumber: '',
+    profileImage: null
+  }
+
+  forms.dormId = null
+  newAvatar.value = null
+  originalForm.value = { ...form.value }
+}
+
 onMounted(async () => {
   try {
     // -------------------------
@@ -84,6 +106,10 @@ onMounted(async () => {
     const res = await axios.get(`${baseURL}/api/dorms/list`)
     dormList.value = Array.isArray(res.data) ? res.data : []
 
+    if (props.mode === 'add') {
+      resetFormForAdd()
+      return
+    }
     // -------------------------
     // 2. โหลด profile
     // -------------------------
@@ -174,15 +200,16 @@ watch(
   () => props.mode,
   (mode) => {
     if (mode === 'add') {
-      form.value.firstName = ''
-      form.value.lastName = ''
-      form.value.email = ''
-      form.value.roomNumber = ''
-      form.value.lineId = ''
-      form.value.position = ''
-      form.value.phoneNumber = ''
-      form.value.dormId = ''
-      form.value.dormName = props.dormName || ''
+      resetFormForAdd()
+      // form.value.firstName = ''
+      // form.value.lastName = ''
+      // form.value.email = ''
+      // form.value.roomNumber = ''
+      // form.value.lineId = ''
+      // form.value.position = ''
+      // form.value.phoneNumber = ''
+      // form.value.dormId = ''
+      // form.value.dormName = props.dormName || ''
     }
 
     if (mode === 'edit') {
@@ -249,7 +276,7 @@ watch(
 //   isEdit.value = true
 //   emit('edit')
 // }
-const newAvatar = ref(null)
+
 const profileImageUrlPreview = computed(() => {
   // 1️⃣ รูปใหม่
   if (newAvatar.value) {
@@ -853,7 +880,7 @@ const displayFullName = computed(() => {
   if (!first && !last) return '-'
   return `${first || ''} ${last || ''}`.trim()
 })
-const originalForm = ref({ ...form.value })
+
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
