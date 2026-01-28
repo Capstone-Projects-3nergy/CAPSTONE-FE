@@ -133,6 +133,7 @@ onMounted(async () => {
 
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    id,
     router
   )
 
@@ -142,6 +143,8 @@ onMounted(async () => {
       fullName: p.fullName,
       email: p.email,
       dormName: p.dormName,
+      phoneNumber: p.phoneNumber || '',
+      lineId: p.lineId || '',
       roomNumber: p.roomNumber,
       role: p.role,
       status: p.status,

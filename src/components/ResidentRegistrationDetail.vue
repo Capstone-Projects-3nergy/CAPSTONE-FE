@@ -71,20 +71,32 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
-const mapMemberData = (data) => ({
-  id: data.id,
-  firstName: data.firstName || '',
-  lastName: data.lastName || '',
-  email: data.email || '',
-  roomNumber: data.roomNumber || '',
-  dormName: data.dormName || '',
-  phoneNumber: data.phoneNumber || '',
-  lineId: data.lineId || '',
-  status: data.status || 'INACTIVE',
-  profileImageUrl: data.profileImageUrl || '',
-  updatedAt: data.updatedAt || null,
-  createdAt: data.createdAt || null
+const mapUser = (u) => ({
+  id: u.userId || u.id,
+  fullName: u.fullName,
+  email: u.email,
+  dormName: u.dormName,
+  roomNumber: u.roomNumber,
+  status: u.status,
+  photo: u.profileImageUrl || u.photo,
+  phoneNumber: u.phoneNumber || '',
+  lineId: u.lineId || ''
 })
+
+// const mapMemberData = (data) => ({
+//   id: data.id,
+//   firstName: data.firstName || '',
+//   lastName: data.lastName || '',
+//   email: data.email || '',
+//   roomNumber: data.roomNumber || '',
+//   dormName: data.dormName || '',
+//   phoneNumber: data.phoneNumber || '',
+//   lineId: data.lineId || '',
+//   status: data.status || 'INACTIVE',
+//   profileImageUrl: data.profileImageUrl || '',
+//   updatedAt: data.updatedAt || null,
+//   createdAt: data.createdAt || null
+// })
 const residentFirstName = computed(() => {
   if (!residentDetail.value?.fullName) return ''
   return residentDetail.value.fullName.split(' ')[0]
@@ -97,6 +109,7 @@ const residentLastName = computed(() => {
 
 const residentDetail = ref(null)
 const members = computed(() => userManager.getMembers())
+
 const getMemberDetail = async (userId) => {
   if (!userId) return
 
@@ -116,20 +129,23 @@ const getMemberDetail = async (userId) => {
   )
 
   if (data) {
-    const mapped = {
-      id: data.userId,
-      fullName: data.fullName,
-      email: data.email,
-      dormName: data.dormName,
-      roomNumber: data.roomNumber,
-      status: data.status,
-      photo: data.profileImageUrl,
-      phoneNumber: data.phoneNumber || '',
-      lineId: data.lineId || ''
-    }
-
+    const mapped = mapUser(data)
     residentDetail.value = mapped
     userManager.addMember(mapped)
+    // const mapped = {
+    //   id: data.userId,
+    //   fullName: data.fullName,
+    //   email: data.email,
+    //   dormName: data.dormName,
+    //   roomNumber: data.roomNumber,
+    //   status: data.status,
+    //   photo: data.profileImageUrl,
+    //   phoneNumber: data.phoneNumber || '',
+    //   lineId: data.lineId || ''
+    // }
+
+    // residentDetail.value = mapped
+    // userManager.addMember(mapped)
   }
 }
 
@@ -242,7 +258,6 @@ onUnmounted(() => {
 
 onMounted(async () => {
   checkScreen()
-  console.log(parcels.value)
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   // getParcelDetail(tidNum)
@@ -252,7 +267,8 @@ onMounted(async () => {
   if (!userManager.getMembers().length) {
     const dataUser = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-      router
+      router,
+      userId
     )
 
     if (dataUser) {
@@ -273,7 +289,7 @@ onMounted(async () => {
   }
 
   // ✅ ดึง detail ตาม id
-  getMemberDetail(userId)
+  // getMemberDetail(userId)
   getMemberDetail(tid)
 })
 

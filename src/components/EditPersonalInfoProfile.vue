@@ -755,12 +755,12 @@ const saveEditDetail = async () => {
   // -----------------------
   // validate position (staff only)
   // -----------------------
-  if (isStaff && form.value.position) {
-    if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
-      emit('position-error', true)
-      return
-    }
-  }
+  // if (isStaff && form.value.position) {
+  //   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+  //     emit('position-error', true)
+  //     return
+  //   }
+  // }
 
   try {
     // -----------------------

@@ -375,10 +375,10 @@ onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
   loadDom()
-  loadMemberForEdit()
-  loadResidents()
+  // loadMemberForEdit()
+  // loadResidents()
   const tid = route.params.tid
-  getParcelDetail(tid)
+  getMemberDetail(tid)
 })
 const residents = ref([])
 const recipientSearch = ref('')

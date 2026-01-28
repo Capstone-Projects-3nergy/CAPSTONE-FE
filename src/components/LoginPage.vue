@@ -111,6 +111,12 @@ const loginHomePageWeb = async () => {
 
         await authManager.logoutAccount(router)
       }
+      if (res.status === 200 || res.status === 201) {
+        const token = res.data?.accessToken || authManager.user?.accessToken
+        await fetchWithAuth('/api/auth/activate', { method: 'POST' }, router)
+
+        // แล้วค่อยไปหน้า home  router.push('/home')
+      }
     } else if ([401, 403].includes(res.status)) {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 10000)
