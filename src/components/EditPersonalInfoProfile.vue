@@ -488,7 +488,7 @@ const addResidents = async () => {
       roomNumber: form.value.roomNumber,
       lineId: form.value.lineId,
       phoneNumber: form.value.phoneNumber,
-      dormId: Number(form.value.dormId)
+      dormId: form.value.dormId
     }
 
     if (newAvatar.value) {
@@ -1006,10 +1006,8 @@ const isSaveDisabled = computed(() => {
             <!-- ADD MODE + ยังไม่เลือกรูป -->
             <div
               v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center font-semibold bg-white text-black text-xl"
-            >
-              Add Profile
-            </div>
+              class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-xl"
+            ></div>
 
             <!-- EDIT MODE + ไม่มีรูป -->
             <div
