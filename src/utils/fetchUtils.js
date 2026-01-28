@@ -1,21 +1,39 @@
 import { useAuthManager } from '@/stores/AuthManager.js'
 async function fetchWithAuth(url, optionsOrFactory, router) {
   const authManager = useAuthManager()
-
   const buildOptions = (token) => {
     const options =
       typeof optionsOrFactory === 'function'
         ? optionsOrFactory()
         : { ...optionsOrFactory }
 
-    // 🔥 บังคับมี headers เสมอ
-    options.headers = {
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    // ✅ ถ้า body เป็น FormData ห้าม merge headers เดิม
+    if (options.body instanceof FormData) {
+      options.headers = token ? { Authorization: `Bearer ${token}` } : {}
+    } else {
+      options.headers = {
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
     }
 
     return options
   }
+
+  // const buildOptions = (token) => {
+  //   const options =
+  //     typeof optionsOrFactory === 'function'
+  //       ? optionsOrFactory()
+  //       : { ...optionsOrFactory }
+
+  //   // 🔥 บังคับมี headers เสมอ
+  //   options.headers = {
+  //     ...(options.headers || {}),
+  //     ...(token ? { Authorization: `Bearer ${token}` } : {})
+  //   }
+
+  //   return options
+  // }
 
   let res = await fetch(url, buildOptions(authManager.user?.accessToken))
 

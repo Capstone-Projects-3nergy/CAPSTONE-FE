@@ -39,9 +39,10 @@ const closePopUp = (operate) => {
 }
 
 onMounted(async () => {
-  await authManager.loadUserFromBackend()
+  if (authManager.user?.accessToken) {
+    await authManager.loadUserFromBackend()
+  }
 })
-
 const loginHomePageWeb = async () => {
   loading.value = true
   if (!email.value.trim() && !password.value.trim()) {
@@ -110,12 +111,6 @@ const loginHomePageWeb = async () => {
         error.value = true
 
         await authManager.logoutAccount(router)
-      }
-      if (res.status === 200 || res.status === 201) {
-        const token = res.data?.accessToken || authManager.user?.accessToken
-        await fetchWithAuth('/api/auth/activate', { method: 'POST' }, router)
-
-        // แล้วค่อยไปหน้า home  router.push('/home')
       }
     } else if ([401, 403].includes(res.status)) {
       incorrect.value = true
