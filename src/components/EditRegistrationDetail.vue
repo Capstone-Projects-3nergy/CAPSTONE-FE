@@ -686,6 +686,14 @@ const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
 }
+watch(
+  () => route.params.id,
+  async (id) => {
+    if (!id) return // 🔥 ตัวนี้แหละที่คุณขาด
+    await getMemberDetail(Number(id))
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
