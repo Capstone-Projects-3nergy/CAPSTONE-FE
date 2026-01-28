@@ -17,6 +17,7 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import {
+  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -245,6 +246,34 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   // getParcelDetail(tidNum)
+  const userId = Number(route.params.id)
+
+  // ✅ ถ้า store ว่าง → โหลดใหม่
+  if (!userManager.getMembers().length) {
+    const dataUser = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      router
+    )
+
+    if (dataUser) {
+      const mapped = dataUser.map((p) => ({
+        id: p.userId,
+        fullName: p.fullName,
+        email: p.email,
+        dormName: p.dormName,
+        roomNumber: p.roomNumber,
+        status: p.status,
+        photo: p.profileImageUrl,
+        phoneNumber: p.phoneNumber || '',
+        lineId: p.lineId || ''
+      }))
+
+      userManager.setMembers(mapped)
+    }
+  }
+
+  // ✅ ดึง detail ตาม id
+  getMemberDetail(userId)
   getMemberDetail(tid)
 })
 
