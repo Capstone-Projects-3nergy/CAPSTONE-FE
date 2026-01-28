@@ -58,9 +58,9 @@ const emit = defineEmits([
 
 const isEdit = ref(false)
 const dormList = ref([])
-const forms = reactive({
-  dormId: null
-})
+// const forms = reactive({
+//   dormId: null
+// })
 
 // form data
 const form = ref({
@@ -70,7 +70,7 @@ const form = ref({
   email: '',
   roomNumber: '',
   dormName: '',
-  dormId: '',
+  dormId: null,
   lineId: '',
   position: '',
   phoneNumber: '',
@@ -85,14 +85,13 @@ const resetFormForAdd = () => {
     email: '',
     roomNumber: '',
     dormName: '',
-    dormId: '',
+    dormId: null,
     lineId: '',
     position: '',
     phoneNumber: '',
     profileImage: null
   }
 
-  forms.dormId = null
   newAvatar.value = null
   originalForm.value = { ...form.value }
 }
@@ -132,6 +131,10 @@ onMounted(async () => {
 
       return dorm ? dorm.dormName : ''
     })
+    if (props.mode === 'add') {
+      resetFormForAdd()
+      return // ⛔ ห้ามโหลด profile ต่อ
+    }
     // -------------------------
     // 4. set ค่าเริ่มต้นให้ form
     // -------------------------
@@ -892,7 +895,38 @@ const isAvatarChanged = computed(() => {
   return !!newAvatar.value
 })
 
+// const isSaveDisabled = computed(() => {
+//   return isFormUnchanged.value && !isAvatarChanged.value
+// })
+const isAddFormValid = computed(() => {
+  if (!form.value.firstName?.trim()) return false
+  if (!form.value.lastName?.trim()) return false
+  if (!form.value.email?.trim()) return false
+  if (!form.value.roomNumber?.trim()) return false
+
+  // dormId บังคับเฉพาะ STAFF ตอน add
+  if (
+    props.mode === 'add' &&
+    loginManager.user.role === 'STAFF' &&
+    (form.value.dormId === null || form.value.dormId === '')
+  ) {
+    return false
+  }
+
+  return true
+})
+
 const isSaveDisabled = computed(() => {
+  // -------------------------
+  // ADD MODE
+  // -------------------------
+  if (props.mode === 'add') {
+    return !isAddFormValid.value
+  }
+
+  // -------------------------
+  // EDIT MODE
+  // -------------------------
   return isFormUnchanged.value && !isAvatarChanged.value
 })
 </script>
@@ -1065,10 +1099,10 @@ const isSaveDisabled = computed(() => {
               <span class="text-red-500">*</span>
             </label>
             <select
-              v-model="forms.dormId"
+              v-model="form.dormId"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             >
-              <option disabled value="null">Select Dormitory</option>
+              <option disabled :value="null">Select Dormitory</option>
               <option
                 v-for="dorm in dormList"
                 :key="dorm.dormId"
