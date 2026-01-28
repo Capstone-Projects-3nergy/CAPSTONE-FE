@@ -941,21 +941,28 @@ const isSaveDisabled = computed(() => {
         <div class="relative inline-block">
           <!-- Avatar -->
           <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
+            <!-- ADD MODE : แสดง Add Profile ตลอด -->
+            <div
+              v-if="props.mode === 'add'"
+              class="w-full h-full flex items-center justify-center font-semibold bg-white text-black text-xl"
+            >
+              Add Profile
+            </div>
+
+            <!-- EDIT MODE : มีรูป -->
             <img
-              v-if="profileImageUrlPreview"
+              v-else-if="profileImageUrlPreview"
               :src="profileImageUrlPreview"
               alt="Profile"
               class="w-full h-full object-cover"
             />
+
+            <!-- EDIT MODE : ไม่มีรูป -->
             <div
               v-else
-              class="w-full h-full flex items-center justify-center font-semibold"
-              :class="{
-                'bg-[#185DC0] text-white text-4xl': props.mode !== 'add',
-                'bg-white text-black text-xl': props.mode === 'add'
-              }"
+              class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-4xl"
             >
-              {{ props.mode === 'add' ? 'Add Profile' : userInitial }}
+              {{ userInitial }}
             </div>
           </div>
 
