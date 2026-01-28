@@ -3,7 +3,11 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
-import { updateProfileWithFile, getProfile } from '@/utils/fetchUtils'
+import {
+  updateProfileWithFile,
+  getProfile,
+  addMemberWithFile
+} from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -383,7 +387,7 @@ const addResidents = async () => {
     emit('room-number-required', true)
     return
   }
-  if (!form.value.dormId?.trim()) {
+  if (form.value.dormId === null || form.value.dormId === '') {
     emit('dorm-ID-required', true)
     return
   }

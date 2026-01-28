@@ -510,7 +510,40 @@ async function updateProfileWithFile(url, payload, router) {
     return null
   }
 }
+async function addMemberWithFile(url, payload, router) {
+  const formData = new FormData()
 
+  const { profileImage, ...profileData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(profileData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (profileImage instanceof File) {
+    formData.append('profileImage', profileImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'POST',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('updateProfileWithFile error:', err)
+    return null
+  }
+}
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -547,5 +580,6 @@ export {
   deleteStaff,
   updateUserRole,
   toggleUserActive,
-  updateProfileWithFile
+  updateProfileWithFile,
+  addMemberWithFile
 }
