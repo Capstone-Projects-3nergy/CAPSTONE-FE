@@ -68,22 +68,22 @@ const dormList = ref([])
 
 // form data
 const form = ref({
-  userId: auth.user.id,
+  userId: null,
   firstName: '',
   lastName: '',
   email: '',
   roomNumber: '',
-  dormName: '',
   dormId: null,
   lineId: '',
   position: '',
   phoneNumber: '',
   profileImage: null
 })
+
 const originalForm = ref({ ...form.value })
 const resetFormForAdd = () => {
   newAvatar.value = null
-  form.value = {
+  Object.assign(form.value, {
     userId: null,
     firstName: '',
     lastName: '',
@@ -95,23 +95,40 @@ const resetFormForAdd = () => {
     position: '',
     phoneNumber: '',
     profileImage: null
-  }
-
-  newAvatar.value = null
+  })
   originalForm.value = { ...form.value }
 }
 
 onMounted(async () => {
   try {
-    // -------------------------
-    // 1. โหลด dorm list
-    // -------------------------
     const baseURL = import.meta.env.VITE_BASE_URL
-    const res = await axios.get(`${baseURL}/api/dorms/list`)
-    dormList.value = Array.isArray(res.data) ? res.data : []
+    const res = await axios.get(`${baseURL}/api/dorms/list`, {
+      headers: { Accept: 'application/json' }
+    })
+
+    const rawData = res.data
+
+    let parsedDorms = []
+
+    if (typeof rawData === 'string') {
+      const dormMatches =
+        rawData.match(/"dormId":(\d+).*?"dormName":"(.*?)"/g) || []
+
+      parsedDorms = dormMatches.map((str) => {
+        const idMatch = str.match(/"dormId":(\d+)/)
+        const nameMatch = str.match(/"dormName":"(.*?)"/)
+        return {
+          dormId: idMatch ? Number(idMatch[1]) : null,
+          dormName: nameMatch ? nameMatch[1] : ''
+        }
+      })
+    } else if (Array.isArray(rawData)) {
+      parsedDorms = rawData
+    }
+
+    dormList.value = parsedDorms
 
     if (props.mode === 'add') {
-      resetFormForAdd()
       return
     }
     // -------------------------
@@ -137,14 +154,13 @@ onMounted(async () => {
       return dorm ? dorm.dormName : ''
     })
     if (props.mode === 'add') {
-      resetFormForAdd()
       return // ⛔ ห้ามโหลด profile ต่อ
     }
     // -------------------------
     // 4. set ค่าเริ่มต้นให้ form
     // -------------------------
     if (props.editResidentDetail) {
-      form.value = {
+      Object.assign(form.value, {
         firstName: props.firstName,
         lastName: props.lastName,
         email: props.email,
@@ -152,7 +168,7 @@ onMounted(async () => {
         dormName: props.dormName,
         lineId: props.lineId,
         phoneNumber: props.phoneNumber
-      }
+      })
       originalForm.value = { ...form.value }
       return
     }
@@ -168,7 +184,7 @@ onMounted(async () => {
 
       profileManager.setCurrentProfile(profile)
 
-      form.value = {
+      Object.assign(form.value, {
         userId: profile.userId,
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
@@ -178,7 +194,7 @@ onMounted(async () => {
         lineId: profile.lineId || '',
         position: profile.position || '',
         phoneNumber: profile.phoneNumber || ''
-      }
+      })
 
       originalForm.value = { ...form.value }
     }
@@ -202,6 +218,18 @@ onMounted(async () => {
     console.error(err)
   }
 })
+watch(
+  () => [props.mode, props.dormName, dormList.value],
+  ([mode, dormName]) => {
+    if (mode !== 'edit') return
+    if (form.value.dormId) return // ⭐ สำคัญ
+    if (!dormName || !dormList.value.length) return
+
+    const dorm = dormList.value.find((d) => d.dormName === dormName)
+    if (dorm) form.value.dormId = dorm.dormId
+  },
+  { immediate: true }
+)
 
 // load props → form
 watch(
@@ -229,7 +257,7 @@ watch(
       form.value.roomNumber = props.roomNumber
       form.value.lineId = props.lineId
       form.value.phoneNumber = props.phoneNumber
-      form.value.dormName = props.dormName
+      // form.value.dormName = props.dormName
     }
   },
   { immediate: true }
@@ -489,15 +517,18 @@ const addResidents = async () => {
     emit('successAddProfile')
 
     // reset form
-    form.value = {
+    Object.assign(form.value, {
       firstName: '',
       lastName: '',
       email: '',
       roomNumber: '',
-      dormId: '',
+      dormId: null,
       lineId: '',
       phoneNumber: ''
-    }
+    })
+
+    newAvatar.value = null
+    isEdit.value = false
 
     newAvatar.value = null
     isEdit.value = false
@@ -736,6 +767,7 @@ const saveEditDetail = async () => {
     // payload
     // -----------------------
     const body = {
+      userId: props.editResidentDetail?.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
@@ -1336,24 +1368,25 @@ const isSaveDisabled = computed(() => {
                 />
               </div>
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <!-- <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
-                </label>
-                <input
+                </label> -->
+                <!-- <input
                   :disabled="mode === 'edit'"
                   :value="dormName"
                   :class="[
                     'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
                   ]"
-                />
-                <!-- <label class="block text-sm text-black font-semibold mb-1">
+                /> -->
+                <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>
                 <select
-                  v-model="form.dormName"
+                  v-model="form.dormId"
                   class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 >
+                  <option disabled value="">Select Dormitory</option>
                   <option
                     v-for="dorm in dormList"
                     :key="dorm.dormId"
@@ -1361,7 +1394,7 @@ const isSaveDisabled = computed(() => {
                   >
                     {{ dorm.dormName }}
                   </option>
-                </select> -->
+                </select>
               </div>
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
