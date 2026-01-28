@@ -6,7 +6,8 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import {
   updateProfileWithFile,
   getProfile,
-  addMemberWithFile
+  addMemberWithFile,
+  updateDetailWithFile
 } from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { useRoute, useRouter } from 'vue-router'
@@ -787,7 +788,7 @@ const saveEditDetail = async () => {
     // -----------------------
     // API call
     // -----------------------
-    const updated = await updateProfileWithFile(
+    const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       body,
       router

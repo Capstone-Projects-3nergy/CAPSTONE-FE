@@ -510,6 +510,40 @@ async function updateProfileWithFile(url, payload, router) {
     return null
   }
 }
+async function updateDetailWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  const { profileImage, ...profileData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(profileData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (profileImage instanceof File) {
+    formData.append('profileImage', profileImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'PUT',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('updateProfileWithFile error:', err)
+    return null
+  }
+}
 async function addMemberWithFile(url, payload, router) {
   const formData = new FormData()
 
@@ -581,5 +615,6 @@ export {
   updateUserRole,
   toggleUserActive,
   updateProfileWithFile,
-  addMemberWithFile
+  addMemberWithFile,
+  updateDetailWithFile
 }
