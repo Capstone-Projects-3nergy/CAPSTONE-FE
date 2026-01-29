@@ -9,9 +9,15 @@ async function fetchWithAuth(url, optionsOrFactory, router) {
 
     // 🔥 บังคับมี headers เสมอ
     options.headers = {
+      Accept: 'application/json',
       ...(options.headers || {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
+
+    // options.headers = {
+    //   ...(options.headers || {}),
+    //   ...(token ? { Authorization: `Bearer ${token}` } : {})
+    // }
 
     return options
   }
