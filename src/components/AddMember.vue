@@ -506,7 +506,7 @@ const showLastNameError = () => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="addSuccess"
-            titles="Add Member is Successful."
+            titles="Add New Resident is Successful."
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
