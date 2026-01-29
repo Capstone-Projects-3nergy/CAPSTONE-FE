@@ -512,11 +512,11 @@ async function updateProfileWithFile(url, payload, router) {
 async function updateDetailWithFile(url, payload, router) {
   const formData = new FormData()
 
-  const { profileImage, ...profileData } = payload
+  const { profileImage, ...residentData } = payload
 
   formData.append(
     'data',
-    new Blob([JSON.stringify(profileData)], {
+    new Blob([JSON.stringify(residentData)], {
       type: 'application/json'
     })
   )
@@ -539,7 +539,7 @@ async function updateDetailWithFile(url, payload, router) {
     if (!res || !res.ok) return null
     return await res.json()
   } catch (err) {
-    console.error('updateProfileWithFile error:', err)
+    console.error('updateDetailWithFile error:', err)
     return null
   }
 }
