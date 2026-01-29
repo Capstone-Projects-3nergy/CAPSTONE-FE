@@ -15,8 +15,9 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
-const errorAccount = ref(false)
 import axios from 'axios'
+const errorAccount = ref(false)
+const emailError = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
 const emailRequire = ref(false)
@@ -174,6 +175,9 @@ const closePopUp = (operate) => {
     case 'editSuccessMessage':
       addSuccess.value = false
       break
+    case 'emailErrorMessage':
+      emailError.value = false
+      break
   }
 }
 // const closePopUp = () => {
@@ -223,6 +227,10 @@ const showFirstNameError = () => {
 const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
+}
+const showEmailError = () => {
+  emailError.value = true
+  setTimeout(() => (emailError.value = false), 10000)
 }
 </script>
 
@@ -536,10 +544,17 @@ const showLastNameError = () => {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
-
+          <AlertPopUp
+            v-if="emailError"
+            titles="An account with this email already exists. Please try another email."
+            message="Error!!"
+            styleType="red"
+            operate="emailErrorMessage"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
             v-if="error"
-            titles="There is a problem. Please try again later."
+            titles="There is a problem. Please try again later, or the email you entered may already be in use. Please check and try again."
             message="Error!!"
             styleType="red"
             operate="problem"
@@ -569,6 +584,7 @@ const showLastNameError = () => {
           :showEdit="false"
           @successAddProfile="showAddProfileSuccess"
           @errorAddProfile="showAddProfileError"
+          @email-duplicate="showEmailError"
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"

@@ -62,7 +62,8 @@ const emit = defineEmits([
   'last-name-required',
   'email-required',
   'dorm-ID-required',
-  'room-number-required'
+  'room-number-required',
+  'email-duplicate'
 ])
 
 const isEdit = ref(false)
@@ -538,7 +539,10 @@ const addResidents = async () => {
       emit('errorAddProfile')
       return
     }
-
+    if (savedMember.status === 400) {
+      emit('email-duplicate', true)
+      return
+    }
     // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
 
@@ -1192,7 +1196,7 @@ const isSaveDisabled = computed(() => {
                     'bg-white text-black text-xl': props.mode === 'add'
                   }"
                 >
-                  {{ getInitial(fullName) || getInitial(firstName) }}
+                  {{ userInitial }}
                 </div>
               </div>
 
