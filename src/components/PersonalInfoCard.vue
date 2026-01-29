@@ -768,7 +768,7 @@ const profileImageUrlPreview = computed(() => {
                 </p>
               </div>
 
-              <div class="flex items-center gap-2">
+              <!-- <div class="flex items-center gap-2">
                 <label class="text-sm font-semibold">Status:</label>
                 <span
                   class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -776,7 +776,7 @@ const profileImageUrlPreview = computed(() => {
                 >
                   {{ displayStatus(status) }}
                 </span>
-              </div>
+              </div> -->
 
               <!-- Buttons -->
               <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">
