@@ -114,7 +114,7 @@ function formatDateTime(datetimeStr) {
   return datetimeStr.replace('T', ' ')
 }
 const getInitial = (name) => {
-  if (!name) return 'C'
+  if (!name) return ''
   return name.trim()[0].toUpperCase()
 }
 
@@ -272,7 +272,7 @@ const getInitial = (name) => {
                   v-else
                   class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
                 >
-                  {{ getInitial(p.fullName) }}
+                  {{ getInitial(p.fullName) || getInitial(p.firstName) }}
                 </div>
               </div>
             </div>

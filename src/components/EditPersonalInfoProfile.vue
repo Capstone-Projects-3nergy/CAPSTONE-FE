@@ -401,8 +401,13 @@ function cancel() {
 
 const authStore = useAuthManager()
 const userName = computed(() => authStore.user?.fullName || 'Courier')
+const getInitial = (name) => {
+  if (!name) return ''
+  return name.trim()[0].toUpperCase()
+}
+
 const userInitial = computed(() =>
-  userName.value ? userName.value[0].toUpperCase() : 'C'
+  userName.value ? userName.value[0].toUpperCase() : ''
 )
 
 // function updateUser(data) {
@@ -1187,7 +1192,7 @@ const isSaveDisabled = computed(() => {
                     'bg-white text-black text-xl': props.mode === 'add'
                   }"
                 >
-                  {{ userInitial }}
+                  {{ getInitial(fullName) || getInitial(firstName) }}
                 </div>
               </div>
 
