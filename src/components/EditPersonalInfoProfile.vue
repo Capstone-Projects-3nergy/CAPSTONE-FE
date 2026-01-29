@@ -406,10 +406,35 @@ const getInitial = (name) => {
   if (!name) return ''
   return name.trim()[0].toUpperCase()
 }
+const userInitial = computed(() => {
+  // 🟢 edit resident detail → ใช้ firstName ของ resident เสมอ
+  if (props.editResidentDetail) {
+    return form.value.firstName
+      ? form.value.firstName.trim()[0].toUpperCase()
+      : ''
+  }
 
-const userInitial = computed(() =>
-  userName.value ? userName.value[0].toUpperCase() : ''
-)
+  // 🔵 profile login
+  const currentFirst = form.value.firstName?.trim()
+  const originalFirst = originalForm.value.firstName?.trim()
+
+  // ⛔ ถ้า form ว่าง → ให้ initial ว่างตาม
+  if (!currentFirst) {
+    return ''
+  }
+
+  // ✏️ กำลังพิมพ์แก้ชื่อ → ใช้จาก form
+  if (currentFirst !== originalFirst) {
+    return currentFirst[0].toUpperCase()
+  }
+
+  // 📌 ยังไม่แก้ / revert / ยังไม่ save → ใช้ userName
+  return userName.value ? userName.value.trim()[0].toUpperCase() : ''
+})
+
+// const userInitial = computed(() =>
+//   userName.value ? userName.value[0].toUpperCase() : ''
+// )
 
 // function updateUser(data) {
 //   console.log('ข้อมูลใหม่:', data)
