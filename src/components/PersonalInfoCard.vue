@@ -133,7 +133,6 @@ onMounted(async () => {
 
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-    id,
     router
   )
 
