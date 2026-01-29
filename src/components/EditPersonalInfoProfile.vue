@@ -21,6 +21,10 @@ const selectedResidentId = ref(null)
 const router = useRouter()
 const auth = useAuthManager()
 const props = defineProps({
+  userId: {
+    type: Number,
+    required: true
+  },
   mode: {
     type: String,
     default: 'edit' // 'edit' | 'add'
@@ -99,6 +103,26 @@ const resetFormForAdd = () => {
   })
   originalForm.value = { ...form.value }
 }
+watch(
+  () => props.userId,
+  (newId) => {
+    if (!newId) return
+
+    Object.assign(form.value, {
+      userId: newId,
+      firstName: props.firstName || '',
+      lastName: props.lastName || '',
+      email: props.email || '',
+      roomNumber: props.roomNumber || '',
+      dormName: props.dormName || '',
+      lineId: props.lineId || '',
+      phoneNumber: props.phoneNumber || ''
+    })
+
+    originalForm.value = { ...form.value }
+  },
+  { immediate: true }
+)
 
 onMounted(async () => {
   try {
@@ -162,6 +186,7 @@ onMounted(async () => {
     // -------------------------
     if (props.editResidentDetail) {
       Object.assign(form.value, {
+        userId: props.userId,
         firstName: props.firstName,
         lastName: props.lastName,
         email: props.email,
@@ -768,7 +793,6 @@ const saveEditDetail = async () => {
     // payload
     // -----------------------
     const body = {
-      userId: props.editResidentDetail?.id,
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
@@ -790,6 +814,7 @@ const saveEditDetail = async () => {
     // -----------------------
     const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      form.value.userId,
       body,
       router
     )
@@ -845,90 +870,6 @@ const saveEditDetail = async () => {
     emit('error', true)
   }
 }
-
-// const saveEditDetail = async () => {
-//   // -----------------------
-//   // validate name (ไทย + อังกฤษ)
-//   // -----------------------
-//   const nameRegex = /^[A-Za-zก-๙\s]+$/
-
-//   if (!nameRegex.test(form.value.firstName)) {
-//     emit('first-name-error', true)
-//     return
-//   }
-
-//   if (!nameRegex.test(form.value.lastName)) {
-//     emit('last-name-error', true)
-//     return
-//   }
-
-//   // -----------------------
-//   // validate phone (optional)
-//   // -----------------------
-//   if (form.value.phoneNumber) {
-//     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
-//       emit('phone-error', true)
-//       return
-//     }
-
-//     const digits = form.value.phoneNumber.replace(/-/g, '')
-//     if (digits.length < 9 || digits.length > 10) {
-//       emit('phone-error', true)
-//       return
-//     }
-//   }
-
-//   try {
-//     // -----------------------
-//     // payload
-//     // -----------------------
-//     const body = {
-//       userId: auth.user.id,
-//       firstName: form.value.firstName,
-//       lastName: form.value.lastName,
-//       roomNumber: form.value.roomNumber || null,
-//       lineId: form.value.lineId || null,
-//       phoneNumber: form.value.phoneNumber || null,
-//       dormId: form.value.dormId.dormId
-//     }
-
-//     if (isStaff) {
-//       body.position = form.value.position || null
-//     }
-
-//     if (newAvatar.value) {
-//       body.profileImage = newAvatar.value
-//     }
-
-//     // -----------------------
-//     // API call (คงไว้ตามที่ขอ)
-//     // -----------------------
-//     const updated = await updateProfileWithFile(
-//       `${import.meta.env.VITE_BASE_URL}/api/details`,
-//       body,
-//       router
-//     )
-
-//     if (!updated) {
-//       emit('error', true)
-//       return
-//     }
-
-//     userManager.editMember(updated.id, updated)
-
-//     // -----------------------
-//     // reset local state
-//     // -----------------------
-//     newAvatar.value = null
-//     originalForm.value = { ...form.value }
-
-//     emit('success', true)
-//     isEdit.value = false
-//   } catch (err) {
-//     console.error(err)
-//     emit('error', true)
-//   }
-// }
 
 const displayFullName = computed(() => {
   const first = form.value.firstName?.trim()
@@ -1369,9 +1310,9 @@ const isSaveDisabled = computed(() => {
                 />
               </div>
               <div class="flex flex-col">
-                <!-- <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
-                </label> 
+                </label>
                 <input
                   :disabled="mode === 'edit'"
                   :value="dormName"
@@ -1379,8 +1320,8 @@ const isSaveDisabled = computed(() => {
                     'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
                   ]"
-                /> -->
-                <label class="block text-sm text-black font-semibold mb-1">
+                />
+                <!-- <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>
                 <select
@@ -1395,7 +1336,7 @@ const isSaveDisabled = computed(() => {
                   >
                     {{ dorm.dormName }}
                   </option>
-                </select>
+                </select> -->
               </div>
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
@@ -1424,7 +1365,6 @@ const isSaveDisabled = computed(() => {
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
                   @click="submit"
-                  :disabled="isSaveDisabled"
                 />
                 <ButtonWeb
                   class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"

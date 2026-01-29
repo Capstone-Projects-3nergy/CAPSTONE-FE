@@ -108,7 +108,6 @@ const residentLastName = computed(() => {
 })
 
 const residentDetail = ref(null)
-const members = computed(() => userManager.getMembers())
 const getMemberDetail = async (userId) => {
   if (!userId) return
 
@@ -214,63 +213,7 @@ const lastName = computed(() => {
   if (!parcel.value?.recipientName) return '-'
   return parcel.value.recipientName.split(' ').slice(1).join(' ')
 })
-const getParcelDetail = async (tid) => {
-  if (!tid) return
 
-  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
-
-  if (localParcel) {
-    parcel.value = localParcel
-
-    if (localParcel.residentId) {
-      getMemberDetail(localParcel.residentId)
-    }
-    return
-  }
-
-  try {
-    const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      tid,
-      router
-    )
-
-    if (data) {
-      const mapped = mapParcelData(data)
-      parcel.value = mapped
-      parcelStore.addParcel(mapped)
-
-      if (mapped.residentId) {
-        getMemberDetail(mapped.residentId)
-      }
-    }
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-// const getParcelDetail = async (tid) => {
-//   if (!tid) return
-//   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
-//   if (localParcel) {
-//     parcel.value = localParcel
-
-//     return
-//   }
-
-//   try {
-//     const data = await getItemById(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-//       tid,
-//       router
-//     )
-//     if (data) {
-//       const mapped = mapParcelData(data)
-//       parcel.value = mapped
-//       parcelStore.addParcel(mapped)
-//     }
-//   } catch (err) {}
-// }
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -284,37 +227,7 @@ onUnmounted(() => {
 onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
-  const tidNum = Number(route.params.tid)
-  // getParcelDetail(tidNum)
-  const userId = Number(route.params.id)
 
-  // ✅ ถ้า store ว่าง → โหลดใหม่
-  // if (!userManager.getMembers().length) {
-  //   const dataUser = await getItems(
-  //     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-  //     router,
-  //     userId
-  //   )
-  //   console.log(dataUser)
-  //   if (dataUser) {
-  //     const mapped = dataUser.map((p) => ({
-  //       id: p.userId,
-  //       fullName: p.fullName,
-  //       email: p.email,
-  //       dormName: p.dormName,
-  //       roomNumber: p.roomNumber,
-  //       status: p.status,
-  //       photo: p.profileImageUrl,
-  //       phoneNumber: p.phoneNumber || '',
-  //       lineId: p.lineId || ''
-  //     }))
-
-  //     userManager.setMembers(mapped)
-  //   }
-  // }
-
-  // ✅ ดึง detail ตาม id
-  // getMemberDetail(userId)
   getMemberDetail(tid)
 })
 

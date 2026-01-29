@@ -68,7 +68,7 @@ const lastNameError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
-  id: null,
+  id: '',
   firstName: '',
   lastName: '',
   email: '',
@@ -1012,7 +1012,8 @@ const showLastNameError = () => {
         </div>
         <EditPersonalInfoProfile
           mode="edit"
-          :key="form.id"
+          v-if="form.id"
+          :userId="form.id"
           :profileImage="form.photo"
           :useCurrentProfile="false"
           :firstName="form.firstName"
