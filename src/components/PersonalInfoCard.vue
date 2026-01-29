@@ -124,7 +124,7 @@ const statusClass = (value) => {
   return {
     'bg-green-400': status === 'ACTIVE',
     'bg-gray-400': status === 'INACTIVE',
-    'bg-yellow-400': status === 'ERROR'
+    'bg-red-400': status === 'ERROR'
   }
 }
 onMounted(async () => {
