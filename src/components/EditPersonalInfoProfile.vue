@@ -1310,7 +1310,7 @@ const isSaveDisabled = computed(() => {
                 />
               </div>
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <!-- <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>
                 <input
@@ -1320,8 +1320,8 @@ const isSaveDisabled = computed(() => {
                     'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
                   ]"
-                />
-                <!-- <label class="block text-sm text-black font-semibold mb-1">
+                /> -->
+                <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>
                 <select
@@ -1336,7 +1336,7 @@ const isSaveDisabled = computed(() => {
                   >
                     {{ dorm.dormName }}
                   </option>
-                </select> -->
+                </select>
               </div>
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
