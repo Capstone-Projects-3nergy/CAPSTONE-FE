@@ -824,12 +824,6 @@ const saveEditDetail = async () => {
       return
     }
 
-    // -----------------------
-    // 🔥 sync ทุก store
-    // -----------------------
-    profileManager.setCurrentProfile(updated)
-    loginManager.updateUser(updated)
-
     // ⭐ sync userManager
     if (isStaff) {
       userManager.updateStaff({
@@ -857,10 +851,6 @@ const saveEditDetail = async () => {
       })
     }
 
-    // -----------------------
-    // reset state
-    // -----------------------
-    newAvatar.value = null
     originalForm.value = { ...form.value }
 
     emit('success', true)
