@@ -386,8 +386,8 @@ function autoClose(refVar, timeout = 10000) {
 }
 const deleteMemberPopUp = (id) => {
   MemberDetail.value = {
-    id: id.id,
-    fullName: id.fullName
+    id: id.id
+    // fullName: id.fullName
   }
 
   showDeleteMember.value = true

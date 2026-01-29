@@ -109,19 +109,9 @@ const residentLastName = computed(() => {
 
 const residentDetail = ref(null)
 const members = computed(() => userManager.getMembers())
-
 const getMemberDetail = async (userId) => {
   if (!userId) return
 
-  // 1️⃣ หาใน store ก่อน
-  const localMember = members.value.find((m) => m.id === userId)
-  if (localMember) {
-    residentDetail.value = { ...localMember }
-
-    return
-  }
-
-  // 2️⃣ ถ้าไม่มี ค่อยยิง API
   const data = await getItemById(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     userId,
@@ -129,54 +119,89 @@ const getMemberDetail = async (userId) => {
   )
 
   if (data) {
-    const mapped = mapUser(data)
-    residentDetail.value = mapped
-    userManager.addMember(mapped)
-    // const mapped = {
-    //   id: data.userId,
-    //   fullName: data.fullName,
-    //   email: data.email,
-    //   dormName: data.dormName,
-    //   roomNumber: data.roomNumber,
-    //   status: data.status,
-    //   photo: data.profileImageUrl,
-    //   phoneNumber: data.phoneNumber || '',
-    //   lineId: data.lineId || ''
-    // }
-
-    // residentDetail.value = mapped
-    // userManager.addMember(mapped)
+    residentDetail.value = {
+      id: data.userId,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      fullName: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      dormName: data.dormName,
+      roomNumber: data.roomNumber,
+      phoneNumber: data.phoneNumber,
+      lineId: data.lineId,
+      status: data.status,
+      photo: data.profileImageUrl
+    }
   }
 }
 
-// const getMemberDetail = async (residentId) => {
-//   if (!residentId) return
+// const getMemberDetail = async (userId) => {
+//   if (!userId) return
 
-//   // 🔹 1. หาใน store (ผ่าน computed)
-//   const localMember = members.value.find((m) => m.id === residentId)
-
+//   // 1️⃣ หาใน store ก่อน
+//   const localMember = members.value.find((m) => m.id === userId)
 //   if (localMember) {
-//     residentDetail.value = localMember
+//     residentDetail.value = { ...localMember }
+
 //     return
 //   }
 
-//   // 🔹 2. ดึงจาก API
-//   try {
-//     const data = await getItemById(
-//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-//       residentId,
-//       router
-//     )
+//   // 2️⃣ ถ้าไม่มี ค่อยยิง API
+//   const data = await getItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+//     userId,
+//     router
+//   )
 
-//     if (data) {
-//       const mapped = mapMemberData(data)
-//       residentDetail.value = mapped
-//       userManager.addMember(mapped)
-//     }
-//   } catch (err) {
-//     console.error(err)
+//   if (data) {
+//     const mapped = mapUser(data)
+//     residentDetail.value = mapped
+//     userManager.addMember(mapped)
+//     // const mapped = {
+//     //   id: data.userId,
+//     //   fullName: data.fullName,
+//     //   email: data.email,
+//     //   dormName: data.dormName,
+//     //   roomNumber: data.roomNumber,
+//     //   status: data.status,
+//     //   photo: data.profileImageUrl,
+//     //   phoneNumber: data.phoneNumber || '',
+//     //   lineId: data.lineId || ''
+//     // }
+
+//     // residentDetail.value = mapped
+//     // userManager.addMember(mapped)
 //   }
 // }
+
+// // const getMemberDetail = async (residentId) => {
+// //   if (!residentId) return
+
+// //   // 🔹 1. หาใน store (ผ่าน computed)
+// //   const localMember = members.value.find((m) => m.id === residentId)
+
+// //   if (localMember) {
+// //     residentDetail.value = localMember
+// //     return
+// //   }
+
+// //   // 🔹 2. ดึงจาก API
+// //   try {
+// //     const data = await getItemById(
+// //       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+// //       residentId,
+// //       router
+// //     )
+
+// //     if (data) {
+// //       const mapped = mapMemberData(data)
+// //       residentDetail.value = mapped
+// //       userManager.addMember(mapped)
+// //     }
+// //   } catch (err) {
+// //     console.error(err)
+// //   }
+// // }
 
 const parcelManager = useParcelManager()
 const parcels = computed(() => parcelManager.getParcels())
