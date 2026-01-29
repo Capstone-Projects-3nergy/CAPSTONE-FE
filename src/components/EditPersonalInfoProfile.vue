@@ -555,9 +555,6 @@ const addResidents = async () => {
 
     newAvatar.value = null
     isEdit.value = false
-
-    newAvatar.value = null
-    isEdit.value = false
   } catch (err) {
     console.error(err)
     emit('errorAddProfile')
