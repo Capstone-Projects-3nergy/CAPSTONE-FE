@@ -30,6 +30,7 @@ const MAX_PASSWORD_LENGTH = 14
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
 const closePopUp = (operate) => {
+  if (operate === 'success') success.value = false
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'notRegister') notRegisterError.value = false
