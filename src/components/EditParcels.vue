@@ -406,7 +406,7 @@ const closePopUp = (operate) => {
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
-  if (operate === 'select') selectName.value = false
+  if (operate === 'selectName') selectName.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
