@@ -424,8 +424,8 @@ const checkInputLength = (field) => {
 
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'success') success.value = false
+  if (operate === 'email') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
   if (operate === 'dorm') isNoDorm.value = false
@@ -434,8 +434,8 @@ const closePopUp = (operate) => {
   if (operate === 'notpositionrequired') isPositionRequired.value = false
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'notnumber') roomidnotnumber.value = false
-  if (operate === 'erroeposition ') isPositionWrong.value = false
-  if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'errorposition') isPositionWrong.value = false
+  if (operate === 'nametypewrong') isFullNameWrong.value = false
   if (operate === 'EmailNotExist') isEmailExist.value = false
   if (operate === 'EmailStaff') isEmailStaff.value = false
 }
