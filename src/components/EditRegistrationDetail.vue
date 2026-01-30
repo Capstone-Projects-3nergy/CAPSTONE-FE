@@ -979,7 +979,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="firstNameError"
-            :titles="'First name can only contain Thai or English letters.'"
+           titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="firstNameErrorMessage"
@@ -987,7 +987,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="lastNameError"
-            :titles="'Last name can only contain Thai or English letters.'"
+           titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="lastNameErrorMessage"
