@@ -266,6 +266,12 @@ const openStatusPopup = (parcel) => {
     parcelStatus: parcel.parcelStatus
   }
 }
+const canGoNext = computed(() => {
+  return paginatedResidents.value.length === perPage.value
+})
+const canGoNextStaff = computed(() => {
+  return paginatedStaffs.value.length === perPage.value
+})
 
 const showRegistrationDetail = (id) => {
   // id = user.id (จาก mapped)
@@ -1161,6 +1167,7 @@ const showResidentDetail = async function (id) {
           :showDelete="false"
           :showRoom="true"
           :showUpdateAt="true"
+          :can-next="canGoNext"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
@@ -1298,6 +1305,7 @@ const showResidentDetail = async function (id) {
           :showActionStatus="true"
           :showRoom="false"
           :showUpdateAt="true"
+          :can-next="canGoNextStaff"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"

@@ -241,6 +241,9 @@ const toggleSortRoom = () => {
     : sortByRoomNumberReverse(parcels.value)
   isRoomAsc.value = !isRoomAsc.value
 }
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
+})
 
 const toggleSortStatus = () => {
   isStatusAsc.value
@@ -626,6 +629,7 @@ const toggleSortDate = () => {
             </div>
           </div> -->
           <!-- <ParcelTable
+            :can-next="canGoNext"
             :items="paginatedParcels"
             :pages="visiblePages"
             :page="currentPage"

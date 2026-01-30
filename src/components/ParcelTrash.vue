@@ -467,11 +467,19 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
+})
+
 const paginatedMembers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredMembers.value.slice(start, end)
 })
+const canGoNextMember = computed(() => {
+  return paginatedMembers.value.length === perPage.value
+})
+
 // const showParcelDetail = async function (id) {
 //   router.push({
 //     name: 'detailparcels',
@@ -1288,6 +1296,7 @@ const closePopUp = (operate) => {
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
+          :can-next="canGoNext"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1466,6 +1475,7 @@ const closePopUp = (operate) => {
           :showDeletedAt="true"
           :showMemberTrashName="true"
           :showName="false"
+          :can-next="canGoNextMember"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"

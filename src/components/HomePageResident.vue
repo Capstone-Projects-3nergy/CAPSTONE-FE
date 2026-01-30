@@ -383,6 +383,9 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
+})
 
 const showParcelDetail = async function (id) {
   router.push({
@@ -1058,6 +1061,7 @@ function formatDateTime(datetimeStr) {
               :total="totalPages"
               :clickableStatus="false"
               :showDelete="false"
+              :can-next="canGoNext"
               @prev="prevPage"
               @next="nextPage"
               @go="goToPage"

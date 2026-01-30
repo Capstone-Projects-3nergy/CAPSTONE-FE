@@ -30,6 +30,10 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  canNext: {
+    type: Boolean,
+    default: true
+  },
 
   showPhoto: { type: Boolean, default: false },
   showActionStatus: { type: Boolean, default: false },
@@ -647,6 +651,7 @@ const getInitial = (name) => {
       &lt; Previous
     </button>
 
+
     <button
       v-for="pg in pages"
       :key="pg"
@@ -659,7 +664,7 @@ const getInitial = (name) => {
 
     <button
       @click="$emit('next')"
-      :disabled="page === total"
+      :disabled="!canNext"
       class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
     >
       Next &gt;

@@ -363,7 +363,7 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
+ 
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -395,6 +395,9 @@ const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
+})
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
 })
 
 const showParcelDetail = async function (id) {
@@ -951,6 +954,7 @@ const handleSortUpdate = (val) => {
           />
         </div>
         <ParcelTable
+          :can-next="canGoNext"
           :items="paginatedParcels"
           :pages="visiblePages"
           :page="currentPage"
