@@ -400,9 +400,9 @@ const isAllEmpty = computed(() => {
 })
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'editSuccessMessage ') editSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
-  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'editSuccessMessage') editSuccess.value = false
+  if (operate === 'roomNumber') roomNumberError.value = false
+  if (operate === 'SenderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
@@ -727,7 +727,7 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="trackingNumber"
-            @closePopUp="closePopUp('trackingNumber')"
+            @closePopUp="closePopUp"
           />
           <AlertPopUp
             v-if="SenderNameError"
@@ -750,7 +750,7 @@ function formatDateTime(datetimeStr) {
             :titles="'Parcel Type can only be typed as text.'"
             message="Error!!"
             styleType="red"
-            operate="parcelType "
+            operate="parcelType"
             @closePopUp="closePopUp"
           />
           <AlertPopUp

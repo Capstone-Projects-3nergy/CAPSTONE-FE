@@ -481,12 +481,16 @@ const emit = defineEmits(['scan-success', 'scan-error'])
 
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'addSuccessMessage ') addSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
-  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'addSuccessMessage') addSuccess.value = false
+  if (operate === 'roomNumber') roomNumberError.value = false
+  if (operate === 'SenderName') SenderNameError.value = false
+  if (operate === 'senderName') senderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+  if (operate === 'parcelTypeRequired') parcelTypeErrorRequired.value = false
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'recipientNameLetter') recipientNameLetterError.value = false
+  if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'companyId') companyIdError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -913,7 +917,7 @@ onMounted(async () => {
               :titles="'Parcel Type can only be typed as text.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType "
+              operate="parcelType"
               @closePopUp="closePopUp"
             />
             <AlertPopUp
@@ -922,7 +926,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
-              @closePopUp="closePopUp('trackingNumber')"
+              @closePopUp="closePopUp"
             />
             <AlertPopUp
               v-if="recipientNameError"
@@ -930,7 +934,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="recipientName"
-              @closePopUp="closePopUp('recipientName')"
+              @closePopUp="closePopUp"
             />
                <AlertPopUp
               v-if="recipientNameLetterError"
@@ -938,7 +942,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="recipientNameLetter"
-              @closePopUp="closePopUp('recipientNameLetter')"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -946,8 +950,8 @@ onMounted(async () => {
               :titles="'Parcel Type is required.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType"
-              @closePopUp="closePopUp('parcelType')"
+              operate="parcelTypeRequired"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -956,7 +960,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="senderName"
-              @closePopUp="closePopUp('senderName')"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -965,7 +969,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="companyId"
-              @closePopUp="closePopUp('companyId')"
+              @closePopUp="closePopUp"
             />
           </div>
 
