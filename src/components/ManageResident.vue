@@ -1109,14 +1109,14 @@ const showResidentDetail = async function (id) {
             operate="deleteSuccessMessage"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="statusSuccess"
             :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
             @closePopUp="closePopUp"
-          />
+          /> -->
           <AlertPopUp
             v-if="addSuccess"
             :titles="'Add New Resident is Successful.'"

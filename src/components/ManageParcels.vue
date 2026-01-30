@@ -519,6 +519,9 @@ const closePopUp = (operate) => {
     case 'editSuccessMessage':
       editSuccess.value = false
       break
+      case 'statusSuccessMessage':
+      statusSuccess.value = false
+      break
   }
 }
 const filterDate = ref('')
@@ -919,7 +922,7 @@ const handleSortUpdate = (val) => {
             :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="statusSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
