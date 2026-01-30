@@ -65,7 +65,8 @@ const emit = defineEmits([
   'dorm-ID-required',
   'room-number-required',
   'email-duplicate',
-  'email-form-error'
+  'email-form-error',
+  'room-number-error'
 ])
 
 const isEdit = ref(false)
@@ -493,6 +494,10 @@ const addResidents = async () => {
     emit('dorm-ID-required', true)
     return
   }
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    emit('room-number-error', true)
+    return
+  }
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -727,6 +732,10 @@ const saveEditProfile = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    emit('room-number-error', true)
+    return
+  }
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
@@ -821,12 +830,19 @@ const saveEditDetail = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
+  // -----------------------
+  // validate phone (optional)
+  // -----------------------
+  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    emit('room-number-error', true)
+    return
+  }
+
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
       return
     }
-
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       emit('phone-error', true)

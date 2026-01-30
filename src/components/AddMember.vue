@@ -38,6 +38,7 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showLogoutConfirm = ref(false)
 const addSuccess = ref(false)
+const roomNumberError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 const phoneError = ref(false)
@@ -159,6 +160,10 @@ function emailRequireFn() {
   emailRequire.value = true
   setTimeout(() => (emailRequire.value = false), 10000)
 }
+function roomNumberErrorFn() {
+  roomNumberError.value = true
+  setTimeout(() => (roomNumberError.value = false), 10000)
+}
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
@@ -181,6 +186,9 @@ const closePopUp = (operate) => {
       break
     case 'emailform':
       emailFormError.value = false
+      break
+    case 'roomNumber':
+      roomNumberError.value = false
       break
   }
 }
@@ -553,6 +561,14 @@ const showEmailFormError = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="roomNumberError"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="emailError"
             titles="An account with this email already exists. Please try another email."
             message="Error!!"
@@ -606,6 +622,7 @@ const showEmailFormError = () => {
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
           @cancel="ShowManageResidentPage"
+          @room-number-error="roomNumberErrorFn"
         />
         <!-- <div class="bg-white rounded-[5px]shadow p-6 md:p-8 max-w-5xl mx-auto">
           <div class="flex items-center justify-between mb-8">

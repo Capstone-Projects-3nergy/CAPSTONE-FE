@@ -255,6 +255,11 @@ const submitForm = async (roleType) => {
         setTimeout(() => (incorrectemailform.value = false), 10000)
         return
       }
+      if (!/^[0-9]+$/.test(form.roomNumber)) {
+        roomidnotnumber.value = true
+        setTimeout(() => (roomidnotnumber.value = false), 10000)
+        return
+      }
     }
 
     const [firstName = '', lastName = ''] = (form.fullName || '')

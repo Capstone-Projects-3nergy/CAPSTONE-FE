@@ -35,7 +35,6 @@ import {
   updateParcelStatus
 } from '@/utils/fetchUtils'
 const dormList = ref([])
-
 const router = useRouter()
 const route = useRoute()
 const tid = route.params.tid
@@ -624,7 +623,7 @@ const closePopUp = (operate) => {
   // -----------------
   if (operate === 'problem') error.value = false
   if (operate === 'editSuccessMessage') editSuccess.value = false
-
+  if (operate === 'roomNumberError') roomNumberError.value = false
   // -----------------
   // format error
   // -----------------
@@ -674,6 +673,10 @@ const showProfileError = () => {
 const showPhoneError = () => {
   phoneError.value = true
   setTimeout(() => (phoneError.value = false), 10000)
+}
+const roomNumberErrorFn = () => {
+  roomNumberError.value = true
+  setTimeout(() => (roomNumberError.value = false), 10000)
 }
 const showProfileSuccess = () => {
   editSuccess.value = true
@@ -1009,6 +1012,14 @@ const showLastNameError = () => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="roomNumberError"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1032,6 +1043,7 @@ const showLastNameError = () => {
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
+          @room-number-error="roomNumberErrorFn"
         />
 
         <!-- <EditPersonalInfoProfile

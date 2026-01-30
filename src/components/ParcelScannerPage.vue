@@ -39,6 +39,7 @@ const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
+const recipientNameLetterError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
@@ -404,6 +405,11 @@ const saveParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
+    recipientNameLetterError.value = true
+    setTimeout(() => (recipientNameLetterError.value = false), 10000)
+    return
+  }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -479,6 +485,8 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumber ') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+  if (operate === 'recipientName') recipientNameError.value = false
+  if (operate === 'recipientNameLetter') recipientNameLetterError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -923,6 +931,14 @@ onMounted(async () => {
               styleType="red"
               operate="recipientName"
               @closePopUp="closePopUp('recipientName')"
+            />
+               <AlertPopUp
+              v-if="recipientNameLetterError"
+              :titles="'Recipient Name must contain only Thai or English letters.'"
+              message="Error!!"
+              styleType="red"
+              operate="recipientNameLetter"
+              @closePopUp="closePopUp('recipientNameLetter')"
             />
 
             <AlertPopUp

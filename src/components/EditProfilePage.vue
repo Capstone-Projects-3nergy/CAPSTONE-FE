@@ -35,6 +35,7 @@ const lastNameRequired = ref(false)
 const emailRequired = ref(false)
 const dormRequired = ref(false)
 const roomNumberRequired = ref(false)
+const roomNumberError = ref(false)
 const positionError = ref(false)
 const phoneError = ref(false)
 const updateProfile = async (payload) => {
@@ -149,6 +150,10 @@ const showDormRequired = () => {
 const showRoomNumberRequired = () => {
   roomNumberRequired.value = true
   setTimeout(() => (roomNumberRequired.value = false), 10000)
+}
+const showRoomNumberError = () => {
+  roomNumberError.value = true
+  setTimeout(() => (roomNumberError.value = false), 10000)
 }
 
 const showHomePageStaffWeb = async () => {
@@ -307,6 +312,9 @@ const closePopUp = (operate) => {
 
     case 'roomNumberRequired':
       roomNumberRequired.value = false
+      break
+    case 'roomNumber':
+      roomNumberError.value = false
       break
 
     default:
@@ -874,6 +882,14 @@ const closePopUp = (operate) => {
             operate="roomNumberRequired"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="roomNumberError"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -887,6 +903,7 @@ const closePopUp = (operate) => {
           :profileImage="profileManager.currentProfile?.profileImage"
           :position="loginManager.user.position"
           :status="loginManager.user.status"
+          @roomNumberError="roomNumberErrorFn"
           @cancel="goBackProfilePage"
           @success="showProfileSuccess"
           @error="showProfileError"
