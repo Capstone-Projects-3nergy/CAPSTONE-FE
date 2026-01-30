@@ -41,6 +41,7 @@ const addSuccess = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 const phoneError = ref(false)
+const emailFormError = ref(false)
 const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
 })
@@ -163,10 +164,10 @@ const closePopUp = (operate) => {
     case 'problem':
       error.value = false
       break
-    case 'firstNameMessage':
+    case 'firstNameErrorMessage':
       firstNameError.value = false
       break
-    case 'lastNameMessageMessage':
+    case 'lastNameErrorMessage':
       lastNameError.value = false
       break
     case 'phoneMessage':
@@ -177,6 +178,9 @@ const closePopUp = (operate) => {
       break
     case 'emailErrorMessage':
       emailError.value = false
+      break
+    case 'emailform':
+      emailFormError.value = false
       break
   }
 }
@@ -231,6 +235,10 @@ const showLastNameError = () => {
 const showEmailError = () => {
   emailError.value = true
   setTimeout(() => (emailError.value = false), 10000)
+}
+const showEmailFormError = () => {
+  emailFormError.value = true
+  setTimeout(() => (emailFormError.value = false), 10000)
 }
 </script>
 
@@ -553,8 +561,16 @@ const showEmailError = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="emailFormError"
+            :titles="'Account Resident Email Must Be @gmail.com Only'"
+            message="Error!!"
+            styleType="red"
+            operate="emailform"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="error"
-            titles="There is a problem. Please try again later, or the email you entered may already be in use. Please check and try again."
+            titles="There is a problem. Please try again later."
             message="Error!!"
             styleType="red"
             operate="problem"
@@ -585,6 +601,7 @@ const showEmailError = () => {
           @successAddProfile="showAddProfileSuccess"
           @errorAddProfile="showAddProfileError"
           @email-duplicate="showEmailError"
+          @email-form-error="showEmailFormError"
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"

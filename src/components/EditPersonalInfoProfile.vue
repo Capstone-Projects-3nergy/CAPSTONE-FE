@@ -7,7 +7,8 @@ import {
   updateProfileWithFile,
   getProfile,
   addMemberWithFile,
-  updateDetailWithFile
+  updateDetailWithFile,
+  getItems
 } from '@/utils/fetchUtils'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { useRoute, useRouter } from 'vue-router'
@@ -63,7 +64,8 @@ const emit = defineEmits([
   'email-required',
   'dorm-ID-required',
   'room-number-required',
-  'email-duplicate'
+  'email-duplicate',
+  'email-form-error'
 ])
 
 const isEdit = ref(false)
@@ -509,10 +511,15 @@ const addResidents = async () => {
   // -----------------------
   // validate email
   // -----------------------
-  if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
-    emit('errorAddProfile')
+  if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
+    emit('email-form-error')
     return
   }
+
+  // if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
+  //   emit('errorAddProfile')
+  //   return
+  // }
 
   // -----------------------
   // validate phone (optional)
@@ -528,6 +535,24 @@ const addResidents = async () => {
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       emit('phone-error', true)
+      return
+    }
+  }
+  // -----------------------
+  // CHECK DUPLICATE EMAIL
+  // -----------------------
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    router
+  )
+
+  if (dataUser) {
+    const isDuplicate = dataUser.some(
+      (u) => u.email?.toLowerCase() === form.value.email.toLowerCase()
+    )
+
+    if (isDuplicate) {
+      emit('email-duplicate', true)
       return
     }
   }
