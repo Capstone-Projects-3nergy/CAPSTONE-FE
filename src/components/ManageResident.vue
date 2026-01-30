@@ -136,14 +136,14 @@ const mapStatus = (status) => {
       return status
   }
 }
-const mapActiveStatus = (activeStatus) => {
-  switch (activeStatus) {
-    case 'ACTIVE ':
+const mapActiveStatus = (status) => {
+  switch (status) {
+    case 'ACTIVE':
       return 'Active'
     case 'INACTIVE':
       return 'Inactive'
     default:
-      return activeStatus
+      return status
   }
 }
 
