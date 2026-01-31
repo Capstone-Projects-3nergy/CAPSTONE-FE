@@ -12,7 +12,7 @@ const authManager = useAuthManager()
 const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
-const email = ref('')
+const email = ref('') 
 const password = ref('')
 const showHomePage = ref(false)
 const showRegisterPage = ref(false)
@@ -30,6 +30,7 @@ const MAX_PASSWORD_LENGTH = 14
 const trimmedEmail = computed(() => email.value.trim())
 const trimmedPassword = computed(() => password.value.trim())
 const closePopUp = (operate) => {
+  if (operate === 'success') success.value = false
   if (operate === 'incorrect') incorrect.value = false
   if (operate === 'problem') error.value = false
   if (operate === 'notRegister') notRegisterError.value = false
@@ -39,9 +40,10 @@ const closePopUp = (operate) => {
 }
 
 onMounted(async () => {
-  await authManager.loadUserFromBackend()
+  if (authManager.user?.accessToken) {
+    await authManager.loadUserFromBackend()
+  }
 })
-
 const loginHomePageWeb = async () => {
   loading.value = true
   if (!email.value.trim() && !password.value.trim()) {

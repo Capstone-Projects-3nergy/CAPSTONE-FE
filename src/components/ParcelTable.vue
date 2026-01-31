@@ -9,7 +9,8 @@ const emit = defineEmits([
   'view-detail',
   'delete',
   'restore',
-  'deleteMember'
+  'deleteMember',
+  'restoreMember'
 ])
 
 const props = defineProps({
@@ -29,6 +30,10 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  canNext: {
+    type: Boolean,
+    default: true
+  },
 
   showPhoto: { type: Boolean, default: false },
   showActionStatus: { type: Boolean, default: false },
@@ -40,13 +45,15 @@ const props = defineProps({
   showDelete: { type: Boolean, default: false },
   showDeleteMember: { type: Boolean, default: false },
   showRestore: { type: Boolean, default: true },
+  showRestoreMember: { type: Boolean, default: false },
   clickableStatus: { type: Boolean, default: true },
   showTracking: { type: Boolean, default: true },
   showRoom: { type: Boolean, default: true },
   showStatus: { type: Boolean, default: true },
   showUpdateAt: { type: Boolean, default: true },
   showDeletedAt: { type: Boolean, default: false },
-  showDeleteResident: { type: Boolean, default: false }
+  showDeleteResident: { type: Boolean, default: false },
+  showMemberTrashName: { type: Boolean, default: false }
 })
 
 // defineProps({
@@ -111,7 +118,7 @@ function formatDateTime(datetimeStr) {
   return datetimeStr.replace('T', ' ')
 }
 const getInitial = (name) => {
-  if (!name) return 'C'
+  if (!name) return ''
   return name.trim()[0].toUpperCase()
 }
 
@@ -158,6 +165,12 @@ const getInitial = (name) => {
           </th>
           <th
             v-if="showMemberName"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Resident name
+          </th>
+          <th
+            v-if="showMemberTrashName"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
             Resident name
@@ -218,7 +231,10 @@ const getInitial = (name) => {
             v-if="showActionStatus"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
-            Status
+            <div class="flex items-center gap-2">
+              Status
+              <slot name="sort-status"></slot>
+            </div>
           </th>
           <th
             v-if="showAction"
@@ -260,7 +276,7 @@ const getInitial = (name) => {
                   v-else
                   class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
                 >
-                  {{ getInitial(p.fullName) }}
+                  {{ getInitial(p.fullName) || getInitial(p.firstName) }}
                 </div>
               </div>
             </div>
@@ -283,6 +299,15 @@ const getInitial = (name) => {
             {{ p.recipientName }}
           </td>
 
+          <td
+            v-if="showMemberTrashName"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]">
+              Resident name:
+            </span>
+            {{ p.firstName }} {{ p.lastName }}
+          </td>
           <td
             v-if="showMemberName"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
@@ -376,7 +401,9 @@ const getInitial = (name) => {
               :class="[
                 {
                   'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE'
+                  'bg-gray-400': p.status === 'INACTIVE',
+                  'bg-red-400': p.status === 'DELETED',
+                  'bg-yellow-400': p.status === 'PENDING'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
@@ -624,6 +651,7 @@ const getInitial = (name) => {
       &lt; Previous
     </button>
 
+
     <button
       v-for="pg in pages"
       :key="pg"
@@ -636,7 +664,7 @@ const getInitial = (name) => {
 
     <button
       @click="$emit('next')"
-      :disabled="page === total"
+      :disabled="!canNext"
       class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
     >
       Next &gt;

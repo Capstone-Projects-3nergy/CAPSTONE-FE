@@ -8,16 +8,12 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
-import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
-import { ref, computed } from 'vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
-import LineNotification from '@/components/LineNotification.vue'
-import { useLoginManager } from '@/stores/loginManager'
 
-const loginManager = useLoginManager()
+const loginManager = useAuthManager()
 
 // notification state
 const notification = ref({
@@ -47,7 +43,9 @@ const showSuccess = () => {
         : 'Staff profile updated successfully'
   }
 }
-
+const showNotificationPage = async () => {
+  router.replace({ name: 'notification' })
+}
 const showError = () => {
   notification.value = {
     show: true,
@@ -186,6 +184,183 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
 })
+// const menuClass = (tab) => {
+//   return [
+//     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
+//     activeTab.value === tab
+//       ? 'bg-[#D9D9D9] text-[#60a5fa]'
+//       : 'text-gray-500 hover:bg-gray-100'
+//   ]
+// }
+
+// แสดงค่า (default = ACTIVE)
+const displayStatus = (value) => {
+  if (!value || value.trim() === '') return 'ERROR'
+  return value.toUpperCase()
+}
+
+// กำหนดสีตามสถานะ
+const statusClass = (value) => {
+  const status = displayStatus(value)
+
+  return {
+    'bg-green-400': status === 'ACTIVE',
+    'bg-gray-400': status === 'INACTIVE',
+    'bg-yellow-400': status === 'ERROR'
+  }
+}
+
+const notifications = [
+  {
+    type: 'new',
+    label: 'New Parcel Arrived',
+    title: 'A new parcel has arrived at the dormitory office',
+    user: 'Parcel System',
+    time: '15 Jan 2026 · 09:10 AM'
+  },
+  {
+    type: 'message',
+    label: 'Pickup Reminder',
+    title: 'You have a parcel waiting for pickup',
+    user: 'Dormitory Office',
+    time: '15 Jan 2026 · 10:30 AM'
+  },
+  {
+    type: 'comment',
+    label: 'Parcel Note',
+    title: 'Staff added a note to your parcel record',
+    user: 'Admin Staff',
+    time: '15 Jan 2026 · 11:00 AM'
+  },
+  {
+    type: 'connect',
+    label: 'Parcel Assigned',
+    title: 'A parcel has been assigned to your room',
+    user: 'Parcel Management System',
+    time: '15 Jan 2026 · 11:45 AM'
+  },
+  {
+    type: 'message',
+    label: 'Pickup Confirmation',
+    title: 'Your parcel has been successfully picked up',
+    user: 'Dormitory Office',
+    time: '15 Jan 2026 · 01:15 PM'
+  },
+  {
+    type: 'new',
+    label: 'New Parcel Arrived',
+    title: 'A new parcel has arrived for Room 304',
+    user: 'Parcel System',
+    time: '15 Jan 2026 · 02:40 PM'
+  },
+  {
+    type: 'comment',
+    label: 'Delivery Update',
+    title: 'Courier updated the delivery status of your parcel',
+    user: 'Courier Service',
+    time: '15 Jan 2026 · 03:20 PM'
+  },
+  {
+    type: 'connect',
+    label: 'Room Verification',
+    title: 'Your room number has been verified for parcel delivery',
+    user: 'Dormitory Admin',
+    time: '15 Jan 2026 · 04:05 PM'
+  },
+  {
+    type: 'message',
+    label: 'Parcel Reminder',
+    title: 'Please collect your parcel before storage deadline',
+    user: 'Dormitory Office',
+    time: '15 Jan 2026 · 05:30 PM'
+  },
+  {
+    type: 'new',
+    label: 'Parcel Stored',
+    title: 'Your parcel is stored safely at the dormitory office',
+    user: 'Parcel System',
+    time: '15 Jan 2026 · 06:10 PM'
+  }
+]
+const activeNotifyTab = ref('all')
+const ACCOUNT_TYPES = ['message']
+const PARCEL_TYPES = ['new', 'comment', 'connect']
+const filteredNotifications = computed(() => {
+  if (activeNotifyTab.value === 'all') {
+    return notifications
+  }
+
+  if (activeNotifyTab.value === 'parcel') {
+    return notifications.filter((n) => PARCEL_TYPES.includes(n.type))
+  }
+
+  if (activeNotifyTab.value === 'announcement') {
+    return notifications.filter((n) => ACCOUNT_TYPES.includes(n.type))
+  }
+
+  return notifications
+})
+
+const badgeClass = (type) => {
+  if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
+  if (PARCEL_TYPES.includes(type)) return 'bg-blue-500'
+  return 'bg-gray-400'
+}
+
+const badgeIcon = (type) => {
+  // account / message
+  if (type === 'message') {
+    return `
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
+         fill="white"
+        />
+      </svg>
+    `
+  }
+
+  // parcel / notification
+  return `
+    <svg
+      width="25"
+      height="25"
+      viewBox="0 0 25 25"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+        fill="white"
+      />
+    </svg>
+  `
+}
+
+const notifyTabClass = (tab) => {
+  const isActive = activeNotifyTab.value === tab
+
+  if (!isActive) {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-500 hover:bg-gray-200 transition'
+  }
+
+  if (tab === 'all') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-yellow-500 text-white transition'
+  }
+
+  if (tab === 'parcel') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-blue-500 text-white transition'
+  }
+  if (tab === 'announcement') {
+    return 'px-4 py-2 rounded-full text-sm font-medium bg-green-500 text-white transition'
+  }
+}
 </script>
 
 <template>
@@ -312,7 +487,31 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
+            <SidebarItem
+              title="Notifications "
+              class="bg-[#81AFEA] cursor-default"
+              @click="showNotificationPage"
+            >
+              <template #icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none">
+                    <path
+                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
+                    />
+                  </g>
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Profile" class="bg-[#81AFEA] cursor-default">
               <template #icon>
                 <svg
                   width="24"
@@ -329,8 +528,8 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
-
+            </SidebarItem> -->
+            <!-- 
             <SidebarItem title="My parcel" @click="showResidentParcelPage">
               <template #icon>
                 <svg
@@ -346,7 +545,7 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
@@ -458,6 +657,30 @@ onMounted(async () => {
               </template>
             </SidebarItem>
             <SidebarItem
+              title="Notifications "
+              class="bg-[#81AFEA] cursor-default"
+              @click="showNotificationPage"
+            >
+              <template #icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none">
+                    <path
+                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
+                    />
+                  </g>
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem
               title="Profile"
               @click="showProfileStaffPage"
               class="bg-[#81AFEA] cursor-default"
@@ -478,7 +701,7 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
@@ -580,7 +803,7 @@ onMounted(async () => {
 
       <main class="flex-1 p-8 bg-gray-50 relative">
         <!-- LINE Notification -->
-        <div class="fixed top-5 right-5 z-50 space-y-3">
+        <!-- <div class="fixed top-5 right-5 z-50 space-y-3">
           <LineNotification
             v-if="notification.show"
             :type="notification.type"
@@ -590,7 +813,6 @@ onMounted(async () => {
           />
         </div>
 
-        <!-- Header Card -->
         <div
           class="bg-white rounded-xl shadow p-6 mb-6 flex items-center gap-3"
         >
@@ -615,16 +837,80 @@ onMounted(async () => {
             </p>
           </div>
         </div>
+        -->
 
         <!-- Content Card -->
-        <div class="bg-white rounded-xl shadow p-6">
-          <EditPersonalInfoProfile
-            :firstName="firstName"
-            :lastName="lastName"
-            :email="loginManager.user.email"
-            @save="updateProfile"
-            @cancel="goBackProfilePage"
-          />
+        <div
+          class="w-full bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        >
+          <!-- Header -->
+          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+            Notifications
+          </h2>
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-6">
+            <button
+              @click="activeNotifyTab = 'all'"
+              :class="notifyTabClass('all')"
+              class="cursor-pointer"
+            >
+              All Notify
+            </button>
+
+            <button
+              @click="activeNotifyTab = 'parcel'"
+              :class="notifyTabClass('parcel')"
+              class="cursor-pointer"
+            >
+              Parcel Notify
+            </button>
+
+            <button
+              @click="activeNotifyTab = 'announcement'"
+              :class="notifyTabClass('announcement')"
+              class="cursor-pointer"
+            >
+              Announcement Notify
+            </button>
+          </div>
+
+          <!-- Notification list -->
+          <div class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
+            <div
+              v-for="(item, index) in filteredNotifications"
+              :key="index"
+              class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
+            >
+              <!-- LEFT ICON -->
+              <div class="mt-1">
+                <span
+                  class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
+                  :class="badgeClass(item.type)"
+                  v-html="badgeIcon(item.type)"
+                />
+              </div>
+
+              <!-- CONTENT -->
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-gray-800">
+                  {{ item.label }}
+                </p>
+
+                <p class="text-sm text-gray-500 mt-0.5">
+                  {{ item.title }}
+                </p>
+
+                <p class="text-xs text-red-500 mt-1">
+                  {{ item.user }}
+                </p>
+              </div>
+
+              <!-- TIME -->
+              <div class="text-xs text-gray-400 whitespace-nowrap">
+                {{ item.time }}
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

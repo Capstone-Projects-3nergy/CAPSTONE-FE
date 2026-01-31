@@ -400,13 +400,13 @@ const isAllEmpty = computed(() => {
 })
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'editSuccessMessage ') editSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
-  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'editSuccessMessage') editSuccess.value = false
+  if (operate === 'roomNumber') roomNumberError.value = false
+  if (operate === 'SenderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
-  if (operate === 'select') selectName.value = false
+  if (operate === 'selectName') selectName.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -535,7 +535,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -552,7 +552,7 @@ function formatDateTime(datetimeStr) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -727,7 +727,7 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="trackingNumber"
-            @closePopUp="closePopUp('trackingNumber')"
+            @closePopUp="closePopUp"
           />
           <AlertPopUp
             v-if="SenderNameError"
@@ -750,7 +750,7 @@ function formatDateTime(datetimeStr) {
             :titles="'Parcel Type can only be typed as text.'"
             message="Error!!"
             styleType="red"
-            operate="parcelType "
+            operate="parcelType"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -829,7 +829,7 @@ function formatDateTime(datetimeStr) {
 
           <section>
             <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="mb-4">
+            <div v-if="form.status !== 'PICKED_UP'" class="mb-4">
               <label class="block font-semibold mb-1"
                 >Search Resident Name</label
               >

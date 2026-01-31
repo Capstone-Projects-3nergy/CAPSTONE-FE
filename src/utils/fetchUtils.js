@@ -1,7 +1,6 @@
 import { useAuthManager } from '@/stores/AuthManager.js'
 async function fetchWithAuth(url, optionsOrFactory, router) {
   const authManager = useAuthManager()
-
   const buildOptions = (token) => {
     const options =
       typeof optionsOrFactory === 'function'
@@ -10,9 +9,15 @@ async function fetchWithAuth(url, optionsOrFactory, router) {
 
     // 🔥 บังคับมี headers เสมอ
     options.headers = {
+      Accept: 'application/json',
       ...(options.headers || {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
+
+    // options.headers = {
+    //   ...(options.headers || {}),
+    //   ...(token ? { Authorization: `Bearer ${token}` } : {})
+    // }
 
     return options
   }
@@ -510,7 +515,157 @@ async function updateProfileWithFile(url, payload, router) {
     return null
   }
 }
+async function updateDetailWithFile(url, userId, body, router) {
+  const formData = new FormData()
 
+  // ✅ สร้าง plain object เอง
+  const data = {
+    firstName: body.firstName,
+    lastName: body.lastName,
+    roomNumber: body.roomNumber,
+    phoneNumber: body.phoneNumber,
+    lineId: body.lineId,
+    dormId: body.dormId
+  }
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(data)], { type: 'application/json' })
+  )
+
+  if (body.profileImage instanceof File) {
+    formData.append('profileImage', body.profileImage)
+  }
+
+  const res = await fetchWithAuth(
+    `${url}/${userId}`,
+    () => ({
+      method: 'PUT',
+      body: formData
+    }),
+    router
+  )
+
+  if (!res?.ok) return null
+  return await res.json()
+}
+// async function updateDetailWithFile(url, body, router) {
+//   try {
+//     const formData = new FormData()
+
+//     // ✅ ส่ง JSON ในนาม data
+//     formData.append(
+//       'data',
+//       new Blob(
+//         [
+//           JSON.stringify({
+//             userId: body.userId,
+//             firstName: body.firstName,
+//             lastName: body.lastName,
+//             roomNumber: body.roomNumber,
+//             lineId: body.lineId,
+//             phoneNumber: body.phoneNumber,
+//             dormId: body.dormId,
+//             position: body.position
+//           })
+//         ],
+//         { type: 'application/json' }
+//       )
+//     )
+
+//     // ✅ file ต้องชื่อ profileImage
+//     if (body.profileImage instanceof File) {
+//       formData.append('profileImage', body.profileImage)
+//     }
+
+//     const options = {
+//       method: 'PUT',
+//       body: formData
+//       // ❌ ห้ามใส่ Content-Type
+//     }
+
+//     const res = await fetchWithAuth(`${url}/${body.userId}`, options, router)
+
+//     if (!res || !res.ok) {
+//       console.error('updateDetailWithFile failed:', res?.status)
+//       return null
+//     }
+
+//     return await res.json()
+//   } catch (err) {
+//     console.error('updateDetailWithFile error:', err)
+//     return null
+//   }
+// }
+
+// async function updateDetailWithFile(url, payload, router) {
+//   const formData = new FormData()
+
+//   const { profileImage, ...residentData } = payload
+
+//   formData.append(
+//     'data',
+//     new Blob([JSON.stringify(residentData)], {
+//       type: 'application/json'
+//     })
+//   )
+
+//   if (profileImage instanceof File) {
+//     formData.append('profileImage', profileImage)
+//   }
+
+//   try {
+//     const res = await fetchWithAuth(
+//       url,
+//       () => ({
+//         method: 'PUT',
+//         body: formData // ✅ ต้องส่ง
+//         // ❌ ห้ามตั้ง Content-Type เอง
+//       }),
+//       router
+//     )
+
+//     if (!res || !res.ok) return null
+//     return await res.json()
+//   } catch (err) {
+//     console.error('updateDetailWithFile error:', err)
+//     return null
+//   }
+// }
+async function addMemberWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  const { profileImage, ...profileData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(profileData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (profileImage instanceof File) {
+    formData.append('profileImage', profileImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'POST',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('updateProfileWithFile error:', err)
+    return null
+  }
+}
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -547,5 +702,7 @@ export {
   deleteStaff,
   updateUserRole,
   toggleUserActive,
-  updateProfileWithFile
+  updateProfileWithFile,
+  addMemberWithFile,
+  updateDetailWithFile
 }

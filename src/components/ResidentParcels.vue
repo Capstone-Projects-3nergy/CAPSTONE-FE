@@ -643,7 +643,7 @@ const handleSortUpdate = (val) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileResidentPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileResidentPage">
               <template #icon>
                 <svg
                   width="24"
@@ -660,9 +660,9 @@ const handleSortUpdate = (val) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
-            <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
+            <!-- <SidebarItem title="My parcel" class="bg-[#81AFEA] cursor-default">
               <template #icon>
                 <svg
                   width="25"
@@ -677,7 +677,7 @@ const handleSortUpdate = (val) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>

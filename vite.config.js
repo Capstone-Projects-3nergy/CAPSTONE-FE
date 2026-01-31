@@ -11,5 +11,14 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      '/line-api': {
+        target: 'https://api.line.me',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/line-api/, '')
+      }
+    }
   }
 })

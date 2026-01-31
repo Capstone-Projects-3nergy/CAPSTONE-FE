@@ -294,7 +294,7 @@ const showProfileStaffPage = async function () {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -311,7 +311,7 @@ const showProfileStaffPage = async function () {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Dashboard" @click="showDashBoardPage">
               <template #icon>
                 <svg

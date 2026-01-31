@@ -15,17 +15,20 @@ const toggleSidebar = () => {
   emit('toggle-sidebar')
 }
 
-const openNotification = () => {
-  if (!role.value) return
+// const openNotification = () => {
+//   if (!role.value) return
 
-  if (role.value === 'STAFF') {
-    router.replace({ name: 'profilestaff' })
-  } else if (role.value === 'RESIDENT') {
-    router.replace({
-      name: 'profileresident',
-      query: { tab: 'notify' }
-    })
-  }
+//   if (role.value === 'STAFF') {
+//     router.replace({ name: 'profilestaff' })
+//   } else if (role.value === 'RESIDENT') {
+//     router.replace({
+//       name: 'profileresident',
+//       query: { tab: 'notify' }
+//     })
+//   }
+// }
+const openNotification = () => {
+  router.replace({ name: 'notification' })
 }
 const showNotification = computed(
   () => role.value === 'STAFF' || role.value === 'RESIDENT'

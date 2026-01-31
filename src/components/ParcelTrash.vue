@@ -39,6 +39,8 @@ import {
   sortByFirstNameReverse,
   sortByLastNameReverse,
   searchParcels,
+  sortByDeleteDateReverse,
+  sortByDeleteDate,
   filterByDay,
   filterByMonth,
   filterByYear
@@ -89,6 +91,7 @@ const showRestoreMember = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
+const residentDetail = ref(null)
 const addSuccess = ref(false)
 const editSuccess = ref(false)
 const deleteSuccess = ref(false)
@@ -185,29 +188,30 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
     parcelManager.setTrash(mapped)
   }
-  const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
-    router
-  )
-  if (dataUser) {
-    const mapped = dataUser.map((p) => ({
-      id: p.residentId,
-      firstName: p.firstName,
-      lastName: p.lastName,
-      mobile: p.mobile,
-      lineId: p.lineId,
-      email: p.contactEmail,
-      status: mapActiveStatus(p.activeStatus),
-      updateAt: p.updatedAt || null
-    }))
+  // const dataUser = await getItems(
+  //   `${import.meta.env.VITE_BASE_URL}/api/trash/resident`,
+  //   router
+  // )
+  // if (dataUser) {
+  //   const mapped = dataUser.map((p) => ({
+  //     id: p.userId,
+  //     fullName: p.fullName,
+  //     email: p.email,
+  //     dormName: p.dormName,
+  //     roomNumber: p.roomNumber,
+  //     role: p.role, // "RESIDENT" | "STAFF"
+  //     status: p.status,
+  //     deletedAt: p.deletedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
+  //     photo: p.profileImageUrl // 🔥 table ใช้ photo
+  //   }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+  //   mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
 
-    userManager.setTrash(mapped)
-  }
+  //   userManager.setTrash(mapped)
+  // }
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -236,38 +240,42 @@ autoClose(error)
 const searchKeyword = ref('')
 const activeTab = ref('Parcels')
 const tabs = ['Parcels', 'Residents']
-
+const usersByTab = computed(() => {
+  if (activeTab.value === 'Parcels') return trashList.value
+  if (activeTab.value === 'Residents') return trashMemberList.value
+  return [...trashList.value, ...trashMemberList.value]
+})
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-const sortRoomAsc = () => sortByRoomNumber(trashList.value)
-const sortRoomDesc = () => sortByRoomNumberReverse(trashList.value)
-const sortStatusAsc = () => sortByStatus(trashList.value)
-const sortStatusDesc = () => sortByStatusReverse(trashList.value)
-const sortDateAsc = () => sortByDate(trashList.value)
-const sortDateDesc = () => sortByDateReverse(trashList.value)
-const sortByNameAsc = () => sortByName(trashList.value)
-const sortByNameDesc = () => sortByNameReverse(trashList.value)
+const sortRoomAsc = () => sortByRoomNumber(usersByTab.value)
+const sortRoomDesc = () => sortByRoomNumberReverse(usersByTab.value)
+const sortStatusAsc = () => sortByStatus(usersByTab.value)
+const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
+const sortDateAsc = () => sortByDeleteDate(usersByTab.value)
+const sortDateDesc = () => sortByDeleteDateReverse(usersByTab.value)
+const sortByNameAsc = () => sortByName(usersByTab.value)
+const sortByNameDesc = () => sortByNameReverse(usersByTab.value)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
-    ? sortByRoomNumber(trashList.value)
-    : sortByRoomNumberReverse(trashList.value)
+    ? sortByRoomNumber(usersByTab.value)
+    : sortByRoomNumberReverse(usersByTab.value)
   isRoomAsc.value = !isRoomAsc.value
 }
 
 const toggleSortStatus = () => {
   isStatusAsc.value
-    ? sortByStatus(trashList.value)
-    : sortByStatusReverse(trashList.value)
+    ? sortByStatus(usersByTab.value)
+    : sortByStatusReverse(usersByTab.value)
   isStatusAsc.value = !isStatusAsc.value
 }
 
 const toggleSortDate = () => {
   isDateAsc.value
-    ? sortByDate(trashList.value)
-    : sortByDateReverse(trashList.value)
+    ? sortByDeleteDate(usersByTab.value)
+    : sortByDeleteDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
 }
 const selectedSort = ref('Sort by:')
@@ -395,15 +403,15 @@ function formatDateByTab(rawDate) {
   const mi = String(dateObj.getMinutes()).padStart(2, '0')
   const ss = String(dateObj.getSeconds()).padStart(2, '0')
 
-  if (activeTab.value === 'Day') {
+  if (usersByTab.value === 'Day') {
     return `${dd}-${mm}-${yyyy} ${hh}:${mi}:${ss}`
   }
 
-  if (activeTab.value === 'Month') {
+  if (usersByTab.value === 'Month') {
     return `${mm}-${dd}-${yyyy} ${hh}:${mi}:${ss}`
   }
 
-  if (activeTab.value === 'Year') {
+  if (usersByTab.value === 'Year') {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`
   }
 
@@ -451,7 +459,7 @@ const toggleSidebar = () => {
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
-  Math.ceil(trashList.value.length / perPage.value)
+  Math.ceil(usersByTab.value.length / perPage.value)
 )
 
 const paginatedParcels = computed(() => {
@@ -459,11 +467,19 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
+})
+
 const paginatedMembers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredMembers.value.slice(start, end)
 })
+const canGoNextMember = computed(() => {
+  return paginatedMembers.value.length === perPage.value
+})
+
 // const showParcelDetail = async function (id) {
 //   router.push({
 //     name: 'detailparcels',
@@ -525,18 +541,20 @@ const restoreParcelPopUp = (parcel) => {
     parcelNumber: parcel.trackingNumber
   }
 }
-const deleteMemberPopUp = (resident) => {
+const deleteMemberPopUp = (id) => {
   showDeleteMember.value = true
   residentDetail.value = {
-    id: resident.id,
-    residentName: resident.residentName
+    id: id.id,
+    firstName: id.firstName,
+    lastName: id.lastName
   }
 }
-const restoreMemberPopUp = (resident) => {
-  showRestoreMember.value = true
+const restoreMemberPopUp = (id) => {
+  showRestoreParcel.value = true
   residentDetail.value = {
-    id: resident.id,
-    residentName: resident.residentName
+    id: id.id,
+    firstName: id.firstName,
+    lastName: id.lastName
   }
 }
 
@@ -703,7 +721,7 @@ const fetchTrash = async () => {
 
 // const fetchTrash = async () => {
 //   const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
-//   trashList.value = await res.json()
+//   activeTab.value = await res.json()
 // }
 
 // const deleteForever = async (id) => {
@@ -726,36 +744,62 @@ const fetchTrash = async () => {
 //     setTimeout(() => (error.value = false), 10000)
 //   }
 // }
-
 const fetchTrashMembers = async () => {
   try {
     const dataUser = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+      `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
       router
     )
 
-    // ป้องกัน null / undefined
     const list = Array.isArray(dataUser) ? dataUser : []
 
-    // map ให้โครงสร้างที่ frontend ใช้
     const mapped = list.map((u) => ({
       id: u.userId,
       firstName: u.firstName,
       lastName: u.lastName,
+      phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,
-      role: u.role,
+      role: u.role || 'RESIDENT',
       status: u.status,
-      deletedAt: u.deletedAt || null
+      deletedAt: u.deletedAt || u.updatedAt || null,
+      photo: u.profileImageUrl // 🔥 แก้ typo (p → u)
     }))
 
-    // ใส่เข้า Pinia (clear ก่อน)
-    userManager.trash.length = 0
-    mapped.forEach((u) => userManager.trash.push(u))
+    userManager.setTrash(mapped)
   } catch (e) {
     console.warn('Fetch trash members failed', e)
   }
 }
+
+// const fetchTrashMembers = async () => {
+//   try {
+//     const dataUser = await getItems(
+//       `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
+//       router
+//     )
+
+//     // ป้องกัน null / undefined
+//     const list = Array.isArray(dataUser) ? dataUser : []
+
+//     // map ให้โครงสร้างที่ frontend ใช้
+//     const mapped = list.map((u) => ({
+//       id: u.userId,
+//       firstName: u.firstName,
+//       lastName: u.lastName,
+//       email: u.email,
+//       roomNumber: u.roomNumber,
+//       role: u.role,
+//       status: u.status,
+//       deletedAt: u.deletedAt || null
+//     }))
+
+//     // ใส่เข้า Pinia (clear ก่อน)
+//     userManager.trash.length = 0
+//     mapped.forEach((u) => userManager.trash.push(u))
+//   } catch (e) {
+//     console.warn('Fetch trash members failed', e)
+//   }
 
 onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
@@ -890,7 +934,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
             <!-- Profile -->
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -907,7 +951,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -1110,7 +1154,7 @@ const closePopUp = (operate) => {
           :modelSearch="filterSearch"
           :modelSort="filterSort"
           :show-add-button="false"
-          :hideNameSort="true"
+          :hideNameSort="false"
           :hideTrash="false"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
@@ -1252,6 +1296,7 @@ const closePopUp = (operate) => {
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
+          :can-next="canGoNext"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1414,21 +1459,28 @@ const closePopUp = (operate) => {
           :page="currentPage"
           :total="totalPages"
           :showTracking="false"
-          :showRoom="false"
-          :showMobile="true"
+          :showRoom="true"
+          :showMobile="false"
           :showDelete="true"
           :hideTrash="true"
+          :showPhoto="true"
           :showActionStatus="true"
           :showStatus="false"
+          :showMember="true"
+          :showParcel="false"
+          :showRestore="false"
+          :showRestoreMember="true"
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
-          :showMember="true"
+          :showMemberTrashName="true"
+          :showName="false"
+          :can-next="canGoNextMember"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
           @delete="deleteMemberPopUp"
-          @restore="restoreMemberPopUp"
+          @restoreMember="restoreMemberPopUp"
         >
           <template #sort-room>
             <svg
@@ -1906,6 +1958,8 @@ const closePopUp = (operate) => {
       @redAlert="openRedRestorePopup"
       :parcelData="parcelDetail"
       :residentData="residentDetail"
+      :showMember="true"
+      :showParcel="false"
     />
   </teleport>
   <teleport to="body" v-if="showDeleteMember">

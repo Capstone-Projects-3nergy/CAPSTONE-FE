@@ -136,14 +136,14 @@ const mapStatus = (status) => {
       return status
   }
 }
-const mapActiveStatus = (activeStatus) => {
-  switch (activeStatus) {
-    case 'ACTIVE ':
+const mapActiveStatus = (status) => {
+  switch (status) {
+    case 'ACTIVE':
       return 'Active'
     case 'INACTIVE':
       return 'Inactive'
     default:
-      return activeStatus
+      return status
   }
 }
 
@@ -266,6 +266,12 @@ const openStatusPopup = (parcel) => {
     parcelStatus: parcel.parcelStatus
   }
 }
+const canGoNext = computed(() => {
+  return paginatedResidents.value.length === perPage.value
+})
+const canGoNextStaff = computed(() => {
+  return paginatedStaffs.value.length === perPage.value
+})
 
 const showRegistrationDetail = (id) => {
   // id = user.id (จาก mapped)
@@ -396,12 +402,61 @@ const clearDeleteMemPopUp = () => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-const showDelMemComplete = () => {
-  showDeleteMemberSuccess.value = true
-  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+// เพิ่ม function สำหรับ refresh ข้อมูล
+const refreshUserData = async () => {
+  try {
+    const dataUser = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      router
+    )
+
+    if (dataUser) {
+      const mapped = dataUser.map((p) => ({
+        id: p.userId,
+        fullName: p.fullName,
+        email: p.email,
+        dormName: p.dormName,
+        roomNumber: p.roomNumber,
+        role: p.role,
+        status: p.status,
+        updateAt: p.updatedAt,
+        photo: p.profileImageUrl
+      }))
+
+      mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+
+      const residentList = mapped.filter((u) => u.role === 'RESIDENT')
+      const staffList = mapped.filter((u) => u.role === 'STAFF')
+
+      userManager.setMembers(residentList)
+      userManager.setStaffs(staffList)
+    }
+  } catch (error) {
+    console.error('Error refreshing user data:', error)
+  }
+}
+
+// แก้ไข showDelMemComplete
+const isLoading = ref(false)
+
+const showDelMemComplete = async () => {
+  isLoading.value = true
   showDeleteMember.value = false
   MemberDetail.value = null
+
+  // ✅ fetch ข้อมูลใหม่
+  await refreshUserData()
+
+  isLoading.value = false
+  showDeleteMemberSuccess.value = true
+  setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
 }
+// const showDelMemComplete = () => {
+//   showDeleteMemberSuccess.value = true
+//   setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
+//   showDeleteMember.value = false
+//   MemberDetail.value = null
+// }
 const openRedMemPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)
@@ -429,29 +484,31 @@ const isDateAsc = ref(true)
 
 // const sortRoomAsc = () => sortByRoomNumber(parcels.value)
 // const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
-const sortStatusAsc = () => sortByStatus(parcels.value)
-const sortStatusDesc = () => sortByStatusReverse(parcels.value)
-const sortDateAsc = () => sortByDate(parcels.value)
-const sortDateDesc = () => sortByDateReverse(parcels.value)
-const sortByNameAsc = () => sortByName(parcels.value)
-const sortByNameDesc = () => sortByNameReverse(parcels.value)
+const sortStatusAsc = () => sortByStatus(usersByTab.value)
+const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
+const sortDateAsc = () => sortByDate(usersByTab.value)
+const sortDateDesc = () => sortByDateReverse(usersByTab.value)
+const sortByNameAsc = () => sortByFullName(usersByTab.value)
+const sortByNameDesc = () => sortByFullNameReverse(usersByTab.value)
 
 const toggleSortRoom = () => {
   isRoomAsc.value
-    ? sortByRoomNumber(parcels.value)
-    : sortByRoomNumberReverse(parcels.value)
+    ? sortByRoomNumber(usersByTab.value)
+    : sortByRoomNumberReverse(usersByTab.value)
   isRoomAsc.value = !isRoomAsc.value
 }
 
 const toggleSortStatus = () => {
   isStatusAsc.value
-    ? sortByStatus(parcels.value)
-    : sortByStatusReverse(parcels.value)
+    ? sortByStatus(usersByTab.value)
+    : sortByStatusReverse(usersByTab.value)
   isStatusAsc.value = !isStatusAsc.value
 }
 
 const toggleSortDate = () => {
-  isDateAsc.value ? sortByDate(parcels.value) : sortByDateReverse(parcels.value)
+  isDateAsc.value
+    ? sortByDate(usersByTab.value)
+    : sortByDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
 }
 function parseDate(dateStr) {
@@ -762,7 +819,7 @@ const showResidentDetail = async function (id) {
             </span>
             Home</a
           > -->
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -779,7 +836,7 @@ const showResidentDetail = async function (id) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
@@ -1058,14 +1115,14 @@ const showResidentDetail = async function (id) {
             operate="deleteSuccessMessage"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
+          <!-- <AlertPopUp
             v-if="statusSuccess"
             :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
             operate="deleteSuccessMessage"
             @closePopUp="closePopUp"
-          />
+          /> -->
           <AlertPopUp
             v-if="addSuccess"
             :titles="'Add New Resident is Successful.'"
@@ -1110,6 +1167,7 @@ const showResidentDetail = async function (id) {
           :showDelete="false"
           :showRoom="true"
           :showUpdateAt="true"
+          :can-next="canGoNext"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
@@ -1247,6 +1305,7 @@ const showResidentDetail = async function (id) {
           :showActionStatus="true"
           :showRoom="false"
           :showUpdateAt="true"
+          :can-next="canGoNextStaff"
           @deleteMember="deleteMemberPopUp"
           @prev="prevPage"
           @next="nextPage"
@@ -1490,7 +1549,7 @@ const showResidentDetail = async function (id) {
       @cancelDetail="clearDeleteMemPopUp"
       @confirmDetail="showDelMemComplete"
       @redAlert="openRedMemPopup"
-      :residentData:="MemberDetail"
+      :residentData="MemberDetail"
       :isPermanent="false"
     />
   </teleport>

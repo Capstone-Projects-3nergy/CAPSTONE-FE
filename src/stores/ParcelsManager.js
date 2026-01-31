@@ -43,7 +43,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
   //   }
   // }
   const updateParcelStatus = (id, newStatus) => {
-    const index = findIndexById(parcel, id)
+    const index = findIndexByParcelId(parcel, id)
     if (index !== -1) {
       parcel.splice(index, 1, {
         ...parcel[index],

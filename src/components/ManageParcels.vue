@@ -363,7 +363,7 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-
+ 
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -395,6 +395,9 @@ const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
+})
+const canGoNext = computed(() => {
+  return paginatedParcels.value.length === perPage.value
 })
 
 const showParcelDetail = async function (id) {
@@ -518,6 +521,9 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       editSuccess.value = false
+      break
+    case 'statusSuccessMessage':
+      statusSuccess.value = false
       break
   }
 }
@@ -663,7 +669,7 @@ const handleSortUpdate = (val) => {
               </template>
             </SidebarItem>
             <!-- Profile -->
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -680,7 +686,7 @@ const handleSortUpdate = (val) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -919,7 +925,7 @@ const handleSortUpdate = (val) => {
             :titles="'Change Status is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="statusSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -948,6 +954,7 @@ const handleSortUpdate = (val) => {
           />
         </div>
         <ParcelTable
+          :can-next="canGoNext"
           :items="paginatedParcels"
           :pages="visiblePages"
           :page="currentPage"

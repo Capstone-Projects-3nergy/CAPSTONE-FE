@@ -91,12 +91,28 @@ export const useUserManager = defineStore('userManager', () => {
       const removed = members.splice(index, 1)[0]
       trash.push({
         ...removed,
-        role: 'MEMBER',
+        role: removed.role || 'RESIDENT', // ✅ ใช้ role เดิม
         original: { ...removed },
         deletedAt: new Date().toISOString()
       })
+
+      console.log('✅ Moved to trash:', removed) // debug
+    } else {
+      console.log('❌ Member not found:', id) // debug
     }
   }
+  // const moveMemberToTrash = (id) => {
+  //   const index = findIndexById(members, id)
+  //   if (index !== -1) {
+  //     const removed = members.splice(index, 1)[0]
+  //     trash.push({
+  //       ...removed,
+  //       role: 'RESIDENT',
+  //       original: { ...removed },
+  //       deletedAt: new Date().toISOString()
+  //     })
+  //   }
+  // }
 
   const moveStaffToTrash = (id) => {
     const index = findIndexById(staffs, id)

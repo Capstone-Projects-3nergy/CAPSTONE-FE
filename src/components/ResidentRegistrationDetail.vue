@@ -17,6 +17,7 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import {
+  getItems,
   getItemById,
   deleteItemById,
   addItem,
@@ -70,20 +71,32 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
-const mapMemberData = (data) => ({
-  id: data.id,
-  firstName: data.firstName || '',
-  lastName: data.lastName || '',
-  email: data.email || '',
-  roomNumber: data.roomNumber || '',
-  dormName: data.dormName || '',
-  phoneNumber: data.phoneNumber || '',
-  lineId: data.lineId || '',
-  status: data.status || 'INACTIVE',
-  profileImageUrl: data.profileImageUrl || '',
-  updatedAt: data.updatedAt || null,
-  createdAt: data.createdAt || null
+const mapUser = (u) => ({
+  id: u.userId || u.id,
+  fullName: u.fullName,
+  email: u.email,
+  dormName: u.dormName,
+  roomNumber: u.roomNumber,
+  status: u.status,
+  photo: u.profileImageUrl || u.photo,
+  phoneNumber: u.phoneNumber || '',
+  lineId: u.lineId || ''
 })
+
+// const mapMemberData = (data) => ({
+//   id: data.id,
+//   firstName: data.firstName || '',
+//   lastName: data.lastName || '',
+//   email: data.email || '',
+//   roomNumber: data.roomNumber || '',
+//   dormName: data.dormName || '',
+//   phoneNumber: data.phoneNumber || '',
+//   lineId: data.lineId || '',
+//   status: data.status || 'INACTIVE',
+//   profileImageUrl: data.profileImageUrl || '',
+//   updatedAt: data.updatedAt || null,
+//   createdAt: data.createdAt || null
+// })
 const residentFirstName = computed(() => {
   if (!residentDetail.value?.fullName) return ''
   return residentDetail.value.fullName.split(' ')[0]
@@ -95,19 +108,9 @@ const residentLastName = computed(() => {
 })
 
 const residentDetail = ref(null)
-const members = computed(() => userManager.getMembers())
 const getMemberDetail = async (userId) => {
   if (!userId) return
 
-  // 1️⃣ หาใน store ก่อน
-  const localMember = members.value.find((m) => m.id === userId)
-  if (localMember) {
-    residentDetail.value = { ...localMember }
-
-    return
-  }
-
-  // 2️⃣ ถ้าไม่มี ค่อยยิง API
   const data = await getItemById(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     userId,
@@ -115,51 +118,89 @@ const getMemberDetail = async (userId) => {
   )
 
   if (data) {
-    const mapped = {
+    residentDetail.value = {
       id: data.userId,
-      fullName: data.fullName,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      fullName: `${data.firstName} ${data.lastName}`,
       email: data.email,
       dormName: data.dormName,
       roomNumber: data.roomNumber,
+      phoneNumber: data.phoneNumber,
+      lineId: data.lineId,
       status: data.status,
-      photo: data.profileImageUrl,
-      phoneNumber: data.phoneNumber || '',
-      lineId: data.lineId || ''
+      photo: data.profileImageUrl
     }
-
-    residentDetail.value = mapped
-    userManager.addMember(mapped)
   }
 }
 
-// const getMemberDetail = async (residentId) => {
-//   if (!residentId) return
+// const getMemberDetail = async (userId) => {
+//   if (!userId) return
 
-//   // 🔹 1. หาใน store (ผ่าน computed)
-//   const localMember = members.value.find((m) => m.id === residentId)
-
+//   // 1️⃣ หาใน store ก่อน
+//   const localMember = members.value.find((m) => m.id === userId)
 //   if (localMember) {
-//     residentDetail.value = localMember
+//     residentDetail.value = { ...localMember }
+
 //     return
 //   }
 
-//   // 🔹 2. ดึงจาก API
-//   try {
-//     const data = await getItemById(
-//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-//       residentId,
-//       router
-//     )
+//   // 2️⃣ ถ้าไม่มี ค่อยยิง API
+//   const data = await getItemById(
+//     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+//     userId,
+//     router
+//   )
 
-//     if (data) {
-//       const mapped = mapMemberData(data)
-//       residentDetail.value = mapped
-//       userManager.addMember(mapped)
-//     }
-//   } catch (err) {
-//     console.error(err)
+//   if (data) {
+//     const mapped = mapUser(data)
+//     residentDetail.value = mapped
+//     userManager.addMember(mapped)
+//     // const mapped = {
+//     //   id: data.userId,
+//     //   fullName: data.fullName,
+//     //   email: data.email,
+//     //   dormName: data.dormName,
+//     //   roomNumber: data.roomNumber,
+//     //   status: data.status,
+//     //   photo: data.profileImageUrl,
+//     //   phoneNumber: data.phoneNumber || '',
+//     //   lineId: data.lineId || ''
+//     // }
+
+//     // residentDetail.value = mapped
+//     // userManager.addMember(mapped)
 //   }
 // }
+
+// // const getMemberDetail = async (residentId) => {
+// //   if (!residentId) return
+
+// //   // 🔹 1. หาใน store (ผ่าน computed)
+// //   const localMember = members.value.find((m) => m.id === residentId)
+
+// //   if (localMember) {
+// //     residentDetail.value = localMember
+// //     return
+// //   }
+
+// //   // 🔹 2. ดึงจาก API
+// //   try {
+// //     const data = await getItemById(
+// //       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+// //       residentId,
+// //       router
+// //     )
+
+// //     if (data) {
+// //       const mapped = mapMemberData(data)
+// //       residentDetail.value = mapped
+// //       userManager.addMember(mapped)
+// //     }
+// //   } catch (err) {
+// //     console.error(err)
+// //   }
+// // }
 
 const parcelManager = useParcelManager()
 const parcels = computed(() => parcelManager.getParcels())
@@ -172,63 +213,7 @@ const lastName = computed(() => {
   if (!parcel.value?.recipientName) return '-'
   return parcel.value.recipientName.split(' ').slice(1).join(' ')
 })
-const getParcelDetail = async (tid) => {
-  if (!tid) return
 
-  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
-
-  if (localParcel) {
-    parcel.value = localParcel
-
-    if (localParcel.residentId) {
-      getMemberDetail(localParcel.residentId)
-    }
-    return
-  }
-
-  try {
-    const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      tid,
-      router
-    )
-
-    if (data) {
-      const mapped = mapParcelData(data)
-      parcel.value = mapped
-      parcelStore.addParcel(mapped)
-
-      if (mapped.residentId) {
-        getMemberDetail(mapped.residentId)
-      }
-    }
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-// const getParcelDetail = async (tid) => {
-//   if (!tid) return
-//   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
-//   if (localParcel) {
-//     parcel.value = localParcel
-
-//     return
-//   }
-
-//   try {
-//     const data = await getItemById(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-//       tid,
-//       router
-//     )
-//     if (data) {
-//       const mapped = mapParcelData(data)
-//       parcel.value = mapped
-//       parcelStore.addParcel(mapped)
-//     }
-//   } catch (err) {}
-// }
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -238,12 +223,11 @@ const showParcelTrashPage = async function () {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
+
 onMounted(async () => {
   checkScreen()
-  console.log(parcels.value)
   window.addEventListener('resize', checkScreen)
-  const tidNum = Number(route.params.tid)
-  // getParcelDetail(tidNum)
+
   getMemberDetail(tid)
 })
 
@@ -321,12 +305,10 @@ function goToEditResident() {
 }
 
 watch(
-  () => route.params.tid,
-  (newTid) => {
-    residentDetail.value = null // ⭐ RESET ก่อน
-    getMemberDetail(Number(newTid))
-  },
-  { immediate: true }
+  () => parcel.value?.residentId,
+  (rid) => {
+    if (rid) getMemberDetail(rid)
+  }
 )
 </script>
 
@@ -451,7 +433,7 @@ watch(
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -468,7 +450,7 @@ watch(
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -616,6 +598,7 @@ watch(
             :profileImage="residentDetail.photo"
             :useCurrentProfile="false"
             :key="residentDetail.id"
+            :fullName="residentDetail.fullName"
             :firstName="residentFirstName"
             :lastName="residentLastName"
             :email="residentDetail.email"

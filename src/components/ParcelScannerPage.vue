@@ -39,6 +39,7 @@ const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
+const recipientNameLetterError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
@@ -404,6 +405,11 @@ const saveParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
+  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
+    recipientNameLetterError.value = true
+    setTimeout(() => (recipientNameLetterError.value = false), 10000)
+    return
+  }
   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -475,10 +481,16 @@ const emit = defineEmits(['scan-success', 'scan-error'])
 
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'addSuccessMessage ') addSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
-  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'addSuccessMessage') addSuccess.value = false
+  if (operate === 'roomNumber') roomNumberError.value = false
+  if (operate === 'SenderName') SenderNameError.value = false
+  if (operate === 'senderName') senderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+  if (operate === 'parcelTypeRequired') parcelTypeErrorRequired.value = false
+  if (operate === 'recipientName') recipientNameError.value = false
+  if (operate === 'recipientNameLetter') recipientNameLetterError.value = false
+  if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'companyId') companyIdError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -544,6 +556,7 @@ onMounted(async () => {
     )
     residents.value = res || []
   } catch (e) {}
+  console.log(residents.value)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
@@ -702,7 +715,7 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -719,7 +732,7 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -905,7 +918,7 @@ onMounted(async () => {
               :titles="'Parcel Type can only be typed as text.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType "
+              operate="parcelType"
               @closePopUp="closePopUp"
             />
             <AlertPopUp
@@ -914,7 +927,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
-              @closePopUp="closePopUp('trackingNumber')"
+              @closePopUp="closePopUp"
             />
             <AlertPopUp
               v-if="recipientNameError"
@@ -922,7 +935,15 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="recipientName"
-              @closePopUp="closePopUp('recipientName')"
+              @closePopUp="closePopUp"
+            />
+               <AlertPopUp
+              v-if="recipientNameLetterError"
+              :titles="'Recipient Name must contain only Thai or English letters.'"
+              message="Error!!"
+              styleType="red"
+              operate="recipientNameLetter"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -930,8 +951,8 @@ onMounted(async () => {
               :titles="'Parcel Type is required.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType"
-              @closePopUp="closePopUp('parcelType')"
+              operate="parcelTypeRequired"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -940,7 +961,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="senderName"
-              @closePopUp="closePopUp('senderName')"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -949,7 +970,7 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="companyId"
-              @closePopUp="closePopUp('companyId')"
+              @closePopUp="closePopUp"
             />
           </div>
 

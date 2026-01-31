@@ -75,6 +75,9 @@ const mapParcelData = (data) => ({
   lastName: data.lastName || '',
   imageUrl: data.imageUrl || ''
 })
+const showNotificationPage = async () => {
+  router.replace({ name: 'notification' })
+}
 const showResidentParcelPage = async function () {
   router.replace({
     name: 'residentparcels'
@@ -153,6 +156,16 @@ const showConfirmComplete = () => {
   confirmSuccess.value = true
   setTimeout(() => (confirmSuccess.value = false), 10000)
   showConfirmParcel.value = false
+
+  if (parcelConfirmDetail.value?.id) {
+    const updated = parcelStore
+      .getParcels()
+      .find((p) => p.parcelId === parcelConfirmDetail.value.id)
+    if (updated) {
+      parcel.value = updated
+    }
+  }
+
   parcelConfirmDetail.value = null
 }
 const showHomePageResidentWeb = async function () {
@@ -213,7 +226,7 @@ const closePopUp = (operate) => {
     case 'deleteSuccessMessage':
       deleteSuccess.value = false
       break
-    case ' confirmSuccessMessage':
+    case 'confirmSuccessMessage':
       confirmSuccess.value = false
       break
     case 'editSuccessMessage':
@@ -343,8 +356,31 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <SidebarItem
+              title="Notifications "
+              class="cursor-default"
+              @click="showNotificationPage"
+            >
+              <template #icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none">
+                    <path
+                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
+                    />
+                  </g>
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -361,9 +397,9 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
-            <SidebarItem
+            <!-- <SidebarItem
               title="My parcel"
               class="bg-[#81AFEA] cursor-default"
               @click="showResidentParcelPage"
@@ -382,7 +418,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Announcements (Next Release)">
               <template #icon>
@@ -569,11 +605,11 @@ const closePopUp = (operate) => {
                     >current status</label
                   >
                   <p
-                    class="w-full p-2 rounded-md text-gray-800"
+                    class="w-full p-2 rounded-md text-white"
                     :class="{
-                      'bg-yellow-300': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-300': parcel?.status === 'RECEIVED',
-                      'bg-green-300': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
+                      'bg-blue-400': parcel?.status === 'RECEIVED',
+                      'bg-green-400': parcel?.status === 'PICKED_UP'
                     }"
                   >
                     {{ parcel?.status || '-' }}
@@ -594,7 +630,7 @@ const closePopUp = (operate) => {
                 label="Back"
                 color="gray"
                 class="text-[#898989]"
-                @click="showManageParcelPage"
+                @click="showHomePageResidentWeb"
               />
             </div>
           </form>

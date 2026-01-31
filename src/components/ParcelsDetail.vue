@@ -291,7 +291,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -308,7 +308,7 @@ function formatDateTime(datetimeStr) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -552,7 +552,7 @@ function formatDateTime(datetimeStr) {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <p
-                  class="w-full p-2 text-gray-700 rounded-md"
+                  class="w-full p-2 text-white rounded-md"
                   :class="{
                     'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
                     'bg-blue-400': parcel?.status === 'RECEIVED',

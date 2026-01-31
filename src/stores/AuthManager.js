@@ -314,29 +314,62 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
   const logoutAccount = async (router) => {
-    try {
-      if (user.value?.accessToken) {
-        const baseURL = import.meta.env.VITE_BASE_URL
+  try {
+    const token = user.value?.accessToken
+    const baseURL = import.meta.env.VITE_BASE_URL
 
+    // 🔹 เรียก backend logout เฉพาะกรณีมี token และออนไลน์
+    if (token && navigator.onLine) {
+      try {
         await axios.post(
           `${baseURL}/api/auth/logout`,
           {},
           {
             headers: {
-              Authorization: `Bearer ${user.value.accessToken}`
-            }
+              Authorization: `Bearer ${token}`
+            },
+            timeout: 5000 // กันค้าง
           }
         )
+      } catch (apiErr) {
+        // ❗ ไม่ต้อง console.error
+        console.warn('Backend logout failed, continue frontend logout')
       }
-
-      await signOut(auth)
-    } catch (err) {
-      console.error('Logout error:', err)
-    } finally {
-      user.value = null
-      await router?.replace({ name: 'login' })
     }
+
+    // 🔹 logout Firebase
+    await signOut(auth)
+  } finally {
+    // ✅ เคลียร์ state เสมอ
+    user.value = null
+    await router?.replace({ name: 'login' })
   }
+}
+
+  // const logoutAccount = async (router) => {
+  //   try {
+  //     if (user.value?.accessToken) {
+  //       const baseURL = import.meta.env.VITE_BASE_URL
+
+  //       await axios.post(
+  //         `${baseURL}/api/auth/logout`,
+  //         {},
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${user.value.accessToken}`
+  //           }
+  //         }
+  //       )
+  //     }
+
+  //     await signOut(auth)
+  //   } catch (err) {
+  //     console.error('Logout error:', err)
+  //   } finally {
+  //     user.value = null
+  //     await router?.replace({ name: 'login' })
+  //   }
+  // }
 
   // const logoutAccount = async (router) => {
   //   try {

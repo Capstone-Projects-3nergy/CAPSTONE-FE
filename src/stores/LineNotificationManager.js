@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { LINE_CONFIG } from '../config/line.config.js'
+import { LINE_CONFIG } from '@/lineApi/line.config.js'
 
 class LineNotificationManager {
   constructor() {

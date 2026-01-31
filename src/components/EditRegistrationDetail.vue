@@ -35,7 +35,6 @@ import {
   updateParcelStatus
 } from '@/utils/fetchUtils'
 const dormList = ref([])
-
 const router = useRouter()
 const route = useRoute()
 const tid = route.params.tid
@@ -66,9 +65,9 @@ const phoneError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 
-const userId = Number(route.params.id)
+const userId = computed(() => Number(route.params.id))
 const form = ref({
-  id: null,
+  id: '',
   firstName: '',
   lastName: '',
   email: '',
@@ -122,6 +121,37 @@ const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
   () => JSON.stringify(form.value) === JSON.stringify(originalForm.value)
 )
+const loadMemberForEdit = async () => {
+  if (!userId.value) return
+
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      userId.value,
+      router
+    )
+
+    if (!data) return
+
+    form.value = {
+      id: data.userId,
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      email: data.email || '',
+      roomNumber: data.roomNumber || '',
+      dormName: data.dormName || '',
+      status: data.status || '',
+      lineId: data.lineId || '',
+      phoneNumber: data.phoneNumber || '',
+      photo: data.profileImageUrl || ''
+    }
+
+    originalForm.value = { ...form.value }
+  } catch (err) {
+    error.value = true
+  }
+}
+
 const loadDom = async () => {
   const auth = useAuthManager()
   try {
@@ -236,7 +266,8 @@ const getMemberDetail = async (id) => {
   if (!id) return
 
   const res = await getItemById(
-    `${import.meta.env.VITE_BASE_URL}/api/resident/${id}`,
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    id,
     router
   )
 
@@ -343,9 +374,10 @@ onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
   loadDom()
-  loadResidents()
+  // loadMemberForEdit()
+  // loadResidents()
   const tid = route.params.tid
-  getParcelDetail(tid)
+  getMemberDetail(tid)
 })
 const residents = ref([])
 const recipientSearch = ref('')
@@ -591,7 +623,7 @@ const closePopUp = (operate) => {
   // -----------------
   if (operate === 'problem') error.value = false
   if (operate === 'editSuccessMessage') editSuccess.value = false
-
+  if (operate === 'roomNumberError') roomNumberError.value = false
   // -----------------
   // format error
   // -----------------
@@ -641,6 +673,10 @@ const showProfileError = () => {
 const showPhoneError = () => {
   phoneError.value = true
   setTimeout(() => (phoneError.value = false), 10000)
+}
+const roomNumberErrorFn = () => {
+  roomNumberError.value = true
+  setTimeout(() => (roomNumberError.value = false), 10000)
 }
 const showProfileSuccess = () => {
   editSuccess.value = true
@@ -777,7 +813,7 @@ const showLastNameError = () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -794,7 +830,7 @@ const showLastNameError = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
@@ -946,7 +982,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="firstNameError"
-            :titles="'First name can only contain Thai or English letters.'"
+           titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="firstNameErrorMessage"
@@ -954,7 +990,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="lastNameError"
-            :titles="'Last name can only contain Thai or English letters.'"
+           titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="lastNameErrorMessage"
@@ -976,8 +1012,41 @@ const showLastNameError = () => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="roomNumberError"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
+          mode="edit"
+          v-if="form.id"
+          :userId="form.id"
+          :profileImage="form.photo"
+          :useCurrentProfile="false"
+          :firstName="form.firstName"
+          :lastName="form.lastName"
+          :email="form.email"
+          :roomNumber="form.roomNumber"
+          :dormName="form.dormName"
+          :status="form.status"
+          :lineId="form.lineId"
+          :phoneNumber="form.phoneNumber"
+          :editResidentDetail="true"
+          :editProfile="false"
+          @cancel="cancelEdit"
+          @success="showProfileSuccess"
+          @error="showProfileError"
+          @first-name-error="showFirstNameError"
+          @last-name-error="showLastNameError"
+          @phone-error="showPhoneError"
+          @room-number-error="roomNumberErrorFn"
+        />
+
+        <!-- <EditPersonalInfoProfile
           mode="edit"
           :key="form.id"
           :profileImage="form.photo"
@@ -998,7 +1067,7 @@ const showLastNameError = () => {
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
-        />
+        /> -->
 
         <!-- <form
           class="bg-white p-6 rounded-[5px] shadow space-y-8"

@@ -416,7 +416,7 @@ const saveParcel = async () => {
 onMounted(async () => {
   try {
     const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      `${import.meta.env.VITE_BASE_URL}/api/public/parcels/residents`,
       router
     )
     residents.value = res || []
@@ -459,10 +459,15 @@ const showManageParcelPage = async () => {
 }
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'addSuccessMessage ') addSuccess.value = false
-  if (operate === 'roomNumber ') roomNumberError.value = false
-  if (operate === 'senderName') SenderNameError.value = false
+  if (operate === 'addSuccessMessage') addSuccess.value = false
+  if (operate === 'roomNumber') roomNumberError.value = false
+  if (operate === 'SenderName') SenderNameError.value = false
+  if (operate === 'senderName') senderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
+  if (operate === 'parcelTypeRequired') parcelTypeErrorRequired.value = false
+  if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'recipientName') recipientNameError.value = false
+  if (operate === 'companyId') companyIdError.value = false
 }
 </script>
 
@@ -574,7 +579,7 @@ const closePopUp = (operate) => {
               :titles="'Parcel Type can only be typed as text.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType "
+              operate="parcelType"
               @closePopUp="closePopUp"
             />
             <AlertPopUp
@@ -583,7 +588,7 @@ const closePopUp = (operate) => {
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
-              @closePopUp="closePopUp('trackingNumber')"
+              @closePopUp="closePopUp"
             />
             <AlertPopUp
               v-if="recipientNameError"
@@ -591,7 +596,7 @@ const closePopUp = (operate) => {
               message="Error!!"
               styleType="red"
               operate="recipientName"
-              @closePopUp="closePopUp('recipientName')"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -599,8 +604,8 @@ const closePopUp = (operate) => {
               :titles="'Parcel Type is required.'"
               message="Error!!"
               styleType="red"
-              operate="parcelType"
-              @closePopUp="closePopUp('parcelType')"
+              operate="parcelTypeRequired"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -609,7 +614,7 @@ const closePopUp = (operate) => {
               message="Error!!"
               styleType="red"
               operate="senderName"
-              @closePopUp="closePopUp('senderName')"
+              @closePopUp="closePopUp"
             />
 
             <AlertPopUp
@@ -618,7 +623,7 @@ const closePopUp = (operate) => {
               message="Error!!"
               styleType="red"
               operate="companyId"
-              @closePopUp="closePopUp('companyId')"
+              @closePopUp="closePopUp"
             />
           </div>
 

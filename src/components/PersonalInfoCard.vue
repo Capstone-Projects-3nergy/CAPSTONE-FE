@@ -4,6 +4,8 @@ import { useAuthManager } from '@/stores/AuthManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
+import { useUserManager } from '@/stores/MemberAndStaffManager'
+import { getItems } from '@/utils/fetchUtils'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -12,6 +14,7 @@ const emit = defineEmits([
   'emailRequire',
   'cancel'
 ])
+const userManager = useUserManager()
 const profileManager = useProfileManager()
 const route = useRoute()
 const router = useRouter()
@@ -23,7 +26,10 @@ const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
   profileImage: { type: String, default: '' },
-  fullName: { type: String, required: true },
+  fullName: {
+    type: String,
+    default: ''
+  },
   firstName: { type: String, default: '-' },
   lastName: { type: String, default: '-' },
   dormName: { type: String, default: '-' },
@@ -46,6 +52,23 @@ const props = defineProps({
 const resetForm = () => {
   newEmail.value = ''
 }
+const routeUser = computed(() => {
+  const userId = route.params.id
+  if (!userId) return null
+
+  return (
+    userManager.members.find((u) => u.id == userId) ||
+    userManager.staffs.find((u) => u.id == userId) ||
+    null
+  )
+})
+const safeFullName = computed(() => {
+  return props.fullName || routeUser.value?.fullName || ''
+})
+
+const safeStatus = computed(() => {
+  return props.status || routeUser.value?.status || null
+})
 
 function display(value) {
   if (!value || value.trim() === '') return '-'
@@ -64,10 +87,18 @@ watch(
 const authStore = useAuthManager()
 
 const userName = computed(() => authStore.user?.fullName || 'Courier')
+const userInitial = computed(() => {
+  const name = safeFullName.value?.trim()
+  if (!name) return '?'
+  return name.charAt(0)
+})
 
-const userInitial = computed(() =>
-  userName.value ? userName.value[0].toUpperCase() : 'C'
-)
+// const userInitial = computed(() => {
+//   const name = props.fullName?.trim()
+//   if (!name) return '?'
+//   return name.split('')[0] // ไทยไม่ต้อง toUpperCase
+// })
+
 const hasProfileImageUrl = computed(
   () => props.profileImage && props.profileImage.trim() !== ''
 )
@@ -93,9 +124,40 @@ const statusClass = (value) => {
   return {
     'bg-green-400': status === 'ACTIVE',
     'bg-gray-400': status === 'INACTIVE',
-    'bg-yellow-400': status === 'ERROR'
+    'bg-red-400': status === 'ERROR'
   }
 }
+onMounted(async () => {
+  // กันกรณี refresh แล้ว store ว่าง
+  if (userManager.members.length || userManager.staffs.length) return
+
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    router
+  )
+
+  if (dataUser) {
+    const mapped = dataUser.map((p) => ({
+      id: p.userId,
+      fullName: p.fullName,
+      email: p.email,
+      dormName: p.dormName,
+      phoneNumber: p.phoneNumber || '',
+      lineId: p.lineId || '',
+      roomNumber: p.roomNumber,
+      role: p.role,
+      status: p.status,
+      updateAt: p.updatedAt,
+      photo: p.profileImageUrl
+    }))
+
+    // เรียงล่าสุด
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+
+    userManager.setMembers(mapped.filter((u) => u.role === 'RESIDENT'))
+    userManager.setStaffs(mapped.filter((u) => u.role === 'STAFF'))
+  }
+})
 
 const notifications = [
   {
@@ -334,7 +396,7 @@ const profileImageUrlPreview = computed(() => {
             <span>Personal Information</span>
           </button>
 
-          <button
+          <!-- <button
             v-if="showNotify"
             @click="activeTab = 'notify'"
             :class="menuClass('notify')"
@@ -352,7 +414,7 @@ const profileImageUrlPreview = computed(() => {
               />
             </svg>
             <span>Notifications</span>
-          </button>
+          </button> -->
         </div>
       </div>
       <!-- RIGHT : Information Card -->
@@ -527,9 +589,9 @@ const profileImageUrlPreview = computed(() => {
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
-              :class="statusClass(status)"
+              :class="statusClass(safeStatus)"
             >
-              {{ displayStatus(status) }}
+              {{ displayStatus(safeStatus) }}
             </span>
           </div>
         </div>
@@ -633,7 +695,7 @@ const profileImageUrlPreview = computed(() => {
                 class="w-full h-full object-cover"
               />
               <div
-                v-else
+                v-else-if="fullName"
                 class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
               >
                 {{ userInitial }}
@@ -652,7 +714,7 @@ const profileImageUrlPreview = computed(() => {
               <h2
                 class="md:block text-xl sm:text-2xl font-semibold text-gray-800"
               >
-                Details
+                User Information
               </h2>
             </div>
 
@@ -705,7 +767,7 @@ const profileImageUrlPreview = computed(() => {
                 </p>
               </div>
 
-              <div class="flex items-center gap-2">
+              <!-- <div class="flex items-center gap-2">
                 <label class="text-sm font-semibold">Status:</label>
                 <span
                   class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -713,7 +775,7 @@ const profileImageUrlPreview = computed(() => {
                 >
                   {{ displayStatus(status) }}
                 </span>
-              </div>
+              </div> -->
 
               <!-- Buttons -->
               <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">

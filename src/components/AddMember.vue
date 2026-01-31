@@ -15,8 +15,9 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
-const errorAccount = ref(false)
 import axios from 'axios'
+const errorAccount = ref(false)
+const emailError = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
 const emailRequire = ref(false)
@@ -37,9 +38,11 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showLogoutConfirm = ref(false)
 const addSuccess = ref(false)
+const roomNumberError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 const phoneError = ref(false)
+const emailFormError = ref(false)
 const firstName = computed(() => {
   return loginManager.user.fullName.split(' ')[0] || ''
 })
@@ -157,15 +160,19 @@ function emailRequireFn() {
   emailRequire.value = true
   setTimeout(() => (emailRequire.value = false), 10000)
 }
+function roomNumberErrorFn() {
+  roomNumberError.value = true
+  setTimeout(() => (roomNumberError.value = false), 10000)
+}
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
       error.value = false
       break
-    case 'firstNameMessage':
+    case 'firstNameErrorMessage':
       firstNameError.value = false
       break
-    case 'lastNameMessageMessage':
+    case 'lastNameErrorMessage':
       lastNameError.value = false
       break
     case 'phoneMessage':
@@ -173,6 +180,15 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       addSuccess.value = false
+      break
+    case 'emailErrorMessage':
+      emailError.value = false
+      break
+    case 'emailform':
+      emailFormError.value = false
+      break
+    case 'roomNumber':
+      roomNumberError.value = false
       break
   }
 }
@@ -223,6 +239,14 @@ const showFirstNameError = () => {
 const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
+}
+const showEmailError = () => {
+  emailError.value = true
+  setTimeout(() => (emailError.value = false), 10000)
+}
+const showEmailFormError = () => {
+  emailFormError.value = true
+  setTimeout(() => (emailFormError.value = false), 10000)
 }
 </script>
 
@@ -346,7 +370,7 @@ const showLastNameError = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Profile" @click="showProfileStaffPage">
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -363,7 +387,7 @@ const showLastNameError = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
@@ -506,7 +530,7 @@ const showLastNameError = () => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="addSuccess"
-            titles="Add Member is Successful."
+            titles="Add New Resident is Successful."
             message="Success!!"
             styleType="green"
             operate="editSuccessMessage"
@@ -514,7 +538,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="firstNameError"
-            titles="First name can only contain Thai or English letters."
+            titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="firstNameErrorMessage"
@@ -522,7 +546,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="lastNameError"
-            titles="Last name can only contain Thai or English letters."
+            titles="First name and Last name must contain only Thai or English letters."
             message="Error!!"
             styleType="red"
             operate="lastNameErrorMessage"
@@ -536,7 +560,30 @@ const showLastNameError = () => {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
-
+          <AlertPopUp
+            v-if="roomNumberError"
+            :titles="'Room Number can only be typed as number.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumber"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="emailError"
+            titles="An account with this email already exists. Please try another email."
+            message="Error!!"
+            styleType="red"
+            operate="emailErrorMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="emailFormError"
+            :titles="'Account Resident Email Must Be @gmail.com Only'"
+            message="Error!!"
+            styleType="red"
+            operate="emailform"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
             v-if="error"
             titles="There is a problem. Please try again later."
@@ -569,10 +616,13 @@ const showLastNameError = () => {
           :showEdit="false"
           @successAddProfile="showAddProfileSuccess"
           @errorAddProfile="showAddProfileError"
+          @email-duplicate="showEmailError"
+          @email-form-error="showEmailFormError"
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
           @cancel="ShowManageResidentPage"
+          @room-number-error="roomNumberErrorFn"
         />
         <!-- <div class="bg-white rounded-[5px]shadow p-6 md:p-8 max-w-5xl mx-auto">
           <div class="flex items-center justify-between mb-8">

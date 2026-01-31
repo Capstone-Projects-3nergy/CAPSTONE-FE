@@ -242,7 +242,8 @@ const submitForm = async (roleType) => {
     if (roleType === 'STAFF') {
       if (
         form.email.endsWith('@gmail.com') ||
-        form.email.endsWith('@email.com')
+        form.email.endsWith('@email.com') ||
+        form.email.endsWith('@outlook.com') 
       ) {
         isEmailStaff.value = true
         setTimeout(() => (isEmailStaff.value = false), 10000)
@@ -253,6 +254,11 @@ const submitForm = async (roleType) => {
       if (!form.email || !form.email.endsWith('@gmail.com')) {
         incorrectemailform.value = true
         setTimeout(() => (incorrectemailform.value = false), 10000)
+        return
+      }
+      if (!/^[0-9]+$/.test(form.roomNumber)) {
+        roomidnotnumber.value = true
+        setTimeout(() => (roomidnotnumber.value = false), 10000)
         return
       }
     }
@@ -419,8 +425,8 @@ const checkInputLength = (field) => {
 
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'success ') success.value = false
-  if (operate === 'email ') isEmailDuplicate.value = false
+  if (operate === 'success') success.value = false
+  if (operate === 'email') isEmailDuplicate.value = false
   if (operate === 'password') isPasswordWeak.value = false
   if (operate === 'errorpassword') isPasswordNotMatch.value = false
   if (operate === 'dorm') isNoDorm.value = false
@@ -429,8 +435,8 @@ const closePopUp = (operate) => {
   if (operate === 'notpositionrequired') isPositionRequired.value = false
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'notnumber') roomidnotnumber.value = false
-  if (operate === 'erroeposition ') isPositionWrong.value = false
-  if (operate === 'nametypewrong ') isFullNameWrong.value = false
+  if (operate === 'errorposition') isPositionWrong.value = false
+  if (operate === 'nametypewrong') isFullNameWrong.value = false
   if (operate === 'EmailNotExist') isEmailExist.value = false
   if (operate === 'EmailStaff') isEmailStaff.value = false
 }
@@ -658,7 +664,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isEmailStaff"
-            :titles="'Staff Email Cannot Use @gmail.com'"
+            :titles="'Staff Email Cannot Use @gmail.com, @email.com, @outlook.com'"
             message="Error!!"
             styleType="red"
             operate="EmailStaff"
