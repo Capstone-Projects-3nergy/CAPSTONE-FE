@@ -556,6 +556,7 @@ onMounted(async () => {
     )
     residents.value = res || []
   } catch (e) {}
+  console.log(residents.value)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {
