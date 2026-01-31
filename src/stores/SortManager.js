@@ -80,17 +80,37 @@ function sortByContactReverse(parcels) {
     })
   )
 }
+function normalize(value) {
+  return value?.toString().toLowerCase().trim() || ''
+}
+
 function searchParcels(parcels, keyword) {
   if (!keyword) return parcels
 
-  const lowerKeyword = keyword.toLowerCase().trim()
+  const key = normalize(keyword)
 
-  return parcels.filter((p) => {
+  const exactMatches = []
+  const partialMatches = []
+
+  parcels.forEach((p) => {
+    const fields = [
+      normalize(p.roomNumber),
+      normalize(p.trackingNumber),
+      normalize(p.recipientName),
+      normalize(p.firstName),
+      normalize(p.lastName),
+      normalize(p.fullName),
+      normalize(p.phoneNumber),
+      normalize(p.email),
+      normalize(p.status)
+    ]
+
+    // วันที่
     let displayDate = ''
     let isoDate = ''
 
-    if (p.updateAt) {
-      const date = new Date(p.updateAt)
+    if (p.updateAt || p.deletedAt) {
+      const date = new Date(p.updateAt || p.deletedAt)
 
       const dd = String(date.getDate()).padStart(2, '0')
       const mm = String(date.getMonth() + 1).padStart(2, '0')
@@ -99,92 +119,140 @@ function searchParcels(parcels, keyword) {
       const min = String(date.getMinutes()).padStart(2, '0')
       const ss = String(date.getSeconds()).padStart(2, '0')
 
-      // แสดงผลเดิม
       displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
-
-      // 🔥 สำหรับ search แบบ backend
       isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+
+      fields.push(normalize(displayDate))
+      fields.push(normalize(isoDate))
     }
-    if (p.deletedAt) {
-      const date = new Date(p.deletedAt)
 
-      const dd = String(date.getDate()).padStart(2, '0')
-      const mm = String(date.getMonth() + 1).padStart(2, '0')
-      const yyyy = date.getFullYear()
-      const hh = String(date.getHours()).padStart(2, '0')
-      const min = String(date.getMinutes()).padStart(2, '0')
-      const ss = String(date.getSeconds()).padStart(2, '0')
+    // 🔥 full name แบบเว้นวรรค
+    const fullNameSplice = normalize(`${p.firstName ?? ''} ${p.lastName ?? ''}`)
+    fields.push(fullNameSplice)
 
-      // แสดงผลเดิม
-      displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+    // ✅ exact match
+    const isExact = fields.some((f) => f === key)
 
-      // 🔥 สำหรับ search แบบ backend
-      isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+    // ✅ partial match
+    const isPartial = fields.some((f) => f.includes(key))
+
+    if (isExact) {
+      exactMatches.push(p)
+    } else if (isPartial) {
+      partialMatches.push(p)
     }
-    const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
-
-    const trackingMatch = p.trackingNumber
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    const nameMatch = p.recipientName
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    const firstNameMatch = p.firstName
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    const lastNameMatch = p.lastName
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-    const fullNameForSearch = `${p.firstName ?? ''} ${p.lastName ?? ''}`
-      .toLowerCase()
-      .trim()
-
-    const fullNameSpliceMatch = fullNameForSearch.includes(lowerKeyword)
-
-    const fullNameMatch = p.fullName
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    const phoneNumberMatch = p.phoneNumber
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
-
-    const statusMatch = p.status
-      ?.toString()
-      .toLowerCase()
-      .includes(lowerKeyword)
-
-    // ✅ รองรับทั้ง 2 format
-    const dateMatch =
-      displayDate.toLowerCase().includes(lowerKeyword) ||
-      isoDate.toLowerCase().includes(lowerKeyword)
-
-    return (
-      roomMatch ||
-      trackingMatch ||
-      nameMatch ||
-      firstNameMatch ||
-      lastNameMatch ||
-      fullNameMatch ||
-      emailMatch ||
-      statusMatch ||
-      dateMatch ||
-      phoneNumberMatch ||
-      fullNameSpliceMatch
-    )
   })
+
+  // 🔥 ถ้ามี exact → เอาเฉพาะ exact
+  return exactMatches.length > 0 ? exactMatches : partialMatches
 }
+
+
+// function searchParcels(parcels, keyword) {
+//   if (!keyword) return parcels
+
+//   const lowerKeyword = keyword.toLowerCase().trim()
+
+//   return parcels.filter((p) => {
+//     let displayDate = ''
+//     let isoDate = ''
+
+//     if (p.updateAt) {
+//       const date = new Date(p.updateAt)
+
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+
+//       // แสดงผลเดิม
+//       displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+//       // 🔥 สำหรับ search แบบ backend
+//       isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+//     }
+//     if (p.deletedAt) {
+//       const date = new Date(p.deletedAt)
+
+//       const dd = String(date.getDate()).padStart(2, '0')
+//       const mm = String(date.getMonth() + 1).padStart(2, '0')
+//       const yyyy = date.getFullYear()
+//       const hh = String(date.getHours()).padStart(2, '0')
+//       const min = String(date.getMinutes()).padStart(2, '0')
+//       const ss = String(date.getSeconds()).padStart(2, '0')
+
+//       // แสดงผลเดิม
+//       displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+
+//       // 🔥 สำหรับ search แบบ backend
+//       isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+//     }
+//     const roomMatch = p.roomNumber?.toString().toLowerCase() === lowerKeyword
+
+//     const trackingMatch = p.trackingNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const nameMatch = p.recipientName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const firstNameMatch = p.firstName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const lastNameMatch = p.lastName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+//     const fullNameForSearch = `${p.firstName ?? ''} ${p.lastName ?? ''}`
+//       .toLowerCase()
+//       .trim()
+
+//     const fullNameSpliceMatch = fullNameForSearch.includes(lowerKeyword)
+
+//     const fullNameMatch = p.fullName
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const phoneNumberMatch = p.phoneNumber
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     const emailMatch = p.email?.toString().toLowerCase().includes(lowerKeyword)
+
+//     const statusMatch = p.status
+//       ?.toString()
+//       .toLowerCase()
+//       .includes(lowerKeyword)
+
+//     // ✅ รองรับทั้ง 2 format
+//     const dateMatch =
+//       displayDate.toLowerCase().includes(lowerKeyword) ||
+//       isoDate.toLowerCase().includes(lowerKeyword)
+
+//     return (
+//       roomMatch ||
+//       trackingMatch ||
+//       nameMatch ||
+//       firstNameMatch ||
+//       lastNameMatch ||
+//       fullNameMatch ||
+//       emailMatch ||
+//       statusMatch ||
+//       dateMatch ||
+//       phoneNumberMatch ||
+//       fullNameSpliceMatch
+//     )
+//   })
+// }
 
 // function searchParcels(parcels, keyword) {
 //   if (!keyword) return parcels

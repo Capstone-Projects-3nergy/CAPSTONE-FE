@@ -67,15 +67,29 @@ const userRole = computed(() => {
   }
 })
 onMounted(async () => {
+  if (!authStore.user?.accessToken) return
+
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const profile = await getProfile(`${baseURL}/api/profile`, router)
-    if (!profile) return
-    profileManager.setCurrentProfile(profile)
+    if (profile) {
+      profileManager.setCurrentProfile(profile)
+    }
   } catch (err) {
-    console.error(err)
+    console.error('getProfile error:', err)
   }
 })
+
+// onMounted(async () => {
+//   try {
+//     const baseURL = import.meta.env.VITE_BASE_URL
+//     const profile = await getProfile(`${baseURL}/api/profile`, router)
+//     if (!profile) return
+//     profileManager.setCurrentProfile(profile)
+//   } catch (err) {
+//     console.error(err)
+//   }
+// })
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
