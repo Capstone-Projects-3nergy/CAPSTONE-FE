@@ -242,7 +242,8 @@ const submitForm = async (roleType) => {
     if (roleType === 'STAFF') {
       if (
         form.email.endsWith('@gmail.com') ||
-        form.email.endsWith('@email.com')
+        form.email.endsWith('@email.com') ||
+        form.email.endsWith('@outlook.com') 
       ) {
         isEmailStaff.value = true
         setTimeout(() => (isEmailStaff.value = false), 10000)
@@ -663,7 +664,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isEmailStaff"
-            :titles="'Staff Email Cannot Use @gmail.com'"
+            :titles="'Staff Email Cannot Use @gmail.com, @email.com, @outlook.com'"
             message="Error!!"
             styleType="red"
             operate="EmailStaff"

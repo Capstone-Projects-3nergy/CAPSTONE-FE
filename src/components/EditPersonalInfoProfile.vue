@@ -714,6 +714,7 @@ const addResidents = async () => {
 
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
+  // const isResident = loginManager.user?.role === 'RESIDENT'
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -732,10 +733,10 @@ const saveEditProfile = async () => {
   // -----------------------
   // validate phone (optional)
   // -----------------------
-  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
-    emit('room-number-error', true)
-    return
-  }
+  // if (isResident &&!/^[0-9]+$/.test(form.value.roomNumber)) {
+  //   emit('room-number-error', true)
+  //   return
+  // }
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
