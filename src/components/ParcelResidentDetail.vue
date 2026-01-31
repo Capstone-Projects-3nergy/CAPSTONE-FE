@@ -156,6 +156,16 @@ const showConfirmComplete = () => {
   confirmSuccess.value = true
   setTimeout(() => (confirmSuccess.value = false), 10000)
   showConfirmParcel.value = false
+
+  if (parcelConfirmDetail.value?.id) {
+    const updated = parcelStore
+      .getParcels()
+      .find((p) => p.parcelId === parcelConfirmDetail.value.id)
+    if (updated) {
+      parcel.value = updated
+    }
+  }
+
   parcelConfirmDetail.value = null
 }
 const showHomePageResidentWeb = async function () {
