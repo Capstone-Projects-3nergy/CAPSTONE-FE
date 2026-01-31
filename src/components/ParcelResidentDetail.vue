@@ -216,7 +216,7 @@ const closePopUp = (operate) => {
     case 'deleteSuccessMessage':
       deleteSuccess.value = false
       break
-    case ' confirmSuccessMessage':
+    case 'confirmSuccessMessage':
       confirmSuccess.value = false
       break
     case 'editSuccessMessage':
@@ -595,11 +595,11 @@ const closePopUp = (operate) => {
                     >current status</label
                   >
                   <p
-                    class="w-full p-2 rounded-md text-gray-800"
+                    class="w-full p-2 rounded-md text-white"
                     :class="{
-                      'bg-yellow-300': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-300': parcel?.status === 'RECEIVED',
-                      'bg-green-300': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
+                      'bg-blue-400': parcel?.status === 'RECEIVED',
+                      'bg-green-400': parcel?.status === 'PICKED_UP'
                     }"
                   >
                     {{ parcel?.status || '-' }}

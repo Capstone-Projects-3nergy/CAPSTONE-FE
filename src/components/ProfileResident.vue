@@ -204,13 +204,13 @@ const closePopUps = (operate) => {
     case 'SuccessAccount':
       successAccount.value = false
       break
-    case ' problemAccount':
+    case 'problemAccount':
       errorAccount.value = false
       break
     case 'emailForm':
       incorrectemail.value = false
       break
-    case ' require':
+    case 'require':
       emailRequire.value = false
       break
   }

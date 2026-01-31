@@ -416,7 +416,7 @@ const saveParcel = async () => {
 onMounted(async () => {
   try {
     const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
+      `${import.meta.env.VITE_BASE_URL}/api/public/parcels/residents`,
       router
     )
     residents.value = res || []

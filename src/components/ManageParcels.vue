@@ -522,7 +522,7 @@ const closePopUp = (operate) => {
     case 'editSuccessMessage':
       editSuccess.value = false
       break
-      case 'statusSuccessMessage':
+    case 'statusSuccessMessage':
       statusSuccess.value = false
       break
   }
