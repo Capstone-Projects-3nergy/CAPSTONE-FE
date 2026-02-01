@@ -643,7 +643,7 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem
+            <!-- <SidebarItem
               title="Profile"
               @click="showProfileStaffPage"
               class="bg-[#81AFEA] cursor-default"
@@ -664,7 +664,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
