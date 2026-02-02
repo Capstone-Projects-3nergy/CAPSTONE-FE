@@ -800,136 +800,74 @@ const notifyTabClass = (tab) => {
         -->
 
         <!-- Content Card -->
-        <div class="max-w-5xl mx-auto">
-          <div
-            class="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-gray-100 p-10 overflow-hidden relative"
-          >
-            <!-- Background Decoration -->
-            <div
-              class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-transparent rounded-full blur-3xl opacity-60 -mr-32 -mt-32 pointer-events-none"
-            ></div>
+        <div
+          class="w-full bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        >
+          <!-- Header -->
+          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+            Notifications
+          </h2>
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-6">
+            <button
+              @click="activeNotifyTab = 'all'"
+              :class="notifyTabClass('all')"
+              class="cursor-pointer"
+            >
+              All Notify
+            </button>
 
-            <!-- Header -->
-            <div class="relative z-10 mb-8 flex items-center justify-between">
-              <div>
-                <h2 class="text-3xl font-extrabold text-[#0E4B90] tracking-tight">
-                  Notifications
-                </h2>
-                <p class="text-gray-500 mt-2 font-medium">
-                  Stay updated with your latest activities
+            <button
+              @click="activeNotifyTab = 'parcel'"
+              :class="notifyTabClass('parcel')"
+              class="cursor-pointer"
+            >
+              Parcel Notify
+            </button>
+
+            <button
+              @click="activeNotifyTab = 'announcement'"
+              :class="notifyTabClass('announcement')"
+              class="cursor-pointer"
+            >
+              Announcement Notify
+            </button>
+          </div>
+
+          <!-- Notification list -->
+          <div class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
+            <div
+              v-for="(item, index) in filteredNotifications"
+              :key="index"
+              class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
+            >
+              <!-- LEFT ICON -->
+              <div class="mt-1">
+                <span
+                  class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
+                  :class="badgeClass(item.type)"
+                  v-html="badgeIcon(item.type)"
+                />
+              </div>
+
+              <!-- CONTENT -->
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-gray-800">
+                  {{ item.label }}
+                </p>
+
+                <p class="text-sm text-gray-500 mt-0.5">
+                  {{ item.title }}
+                </p>
+
+                <p class="text-xs text-red-500 mt-1">
+                  {{ item.user }}
                 </p>
               </div>
-            </div>
 
-            <!-- Tabs -->
-            <div class="relative z-10 mb-10">
-              <div class="bg-gray-100/80 p-1.5 rounded-2xl inline-flex gap-2">
-                <button
-                  @click="activeNotifyTab = 'all'"
-                  :class="[
-                    activeNotifyTab === 'all'
-                      ? 'bg-white text-[#0E4B90] shadow-md scale-100'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-white/50',
-                    'px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform'
-                  ]"
-                >
-                  All Notify
-                </button>
-
-                <button
-                  @click="activeNotifyTab = 'parcel'"
-                  :class="[
-                    activeNotifyTab === 'parcel'
-                      ? 'bg-white text-[#0E4B90] shadow-md scale-100'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-white/50',
-                    'px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform'
-                  ]"
-                >
-                  Parcel Notify
-                </button>
-
-                <button
-                  @click="activeNotifyTab = 'announcement'"
-                  :class="[
-                    activeNotifyTab === 'announcement'
-                      ? 'bg-white text-[#0E4B90] shadow-md scale-100'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-white/50',
-                    'px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform'
-                  ]"
-                >
-                  Announcement Notify
-                </button>
-              </div>
-            </div>
-
-            <!-- Notification list -->
-            <div class="relative z-10 space-y-5 max-h-[550px] overflow-y-auto pr-3 custom-scrollbar">
-              <div
-                v-for="(item, index) in filteredNotifications"
-                :key="index"
-                class="group flex items-start gap-6 bg-white border border-gray-100 rounded-2xl p-6 cursor-pointer hover:shadow-xl hover:border-blue-100/50 hover:bg-blue-50/10 transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <!-- LEFT ICON -->
-                <div class="mt-1 relative">
-                  <span
-                    class="inline-flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg ring-4 ring-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
-                    :class="badgeClass(item.type)"
-                    v-html="badgeIcon(item.type)"
-                  />
-                </div>
-
-                <!-- CONTENT -->
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-3 mb-1">
-                    <span
-                      class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
-                      :class="[
-                        item.type && PARCEL_TYPES.includes(item.type) ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                      ]"
-                    >
-                      {{ item.type && PARCEL_TYPES.includes(item.type) ? 'Parcel' : 'System' }}
-                    </span>
-                    <span class="text-xs text-gray-400 font-medium flex items-center gap-1">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {{ item.time }}
-                    </span>
-                  </div>
-
-                  <h3 class="text-lg font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors mb-1">
-                    {{ item.label }}
-                  </h3>
-
-                  <p class="text-base text-gray-500 leading-relaxed mb-3 group-hover:text-gray-600">
-                    {{ item.title }}
-                  </p>
-
-                  <div v-if="item.user" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-100">
-                    <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                    <span class="text-xs font-bold text-red-600">
-                      Action Required: {{ item.user }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- RIGHT ARROW (Decoration) -->
-                <div class="self-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300 text-gray-300">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Empty State (Optional visual polish if list is empty, utilizing existing structure notion) -->
-              <div v-if="filteredNotifications.length === 0" class="text-center py-20">
-                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900">No notifications</h3>
-                <p class="text-gray-500 mt-1">You're all caught up!</p>
+              <!-- TIME -->
+              <div class="text-xs text-gray-400 whitespace-nowrap">
+                {{ item.time }}
               </div>
             </div>
           </div>
