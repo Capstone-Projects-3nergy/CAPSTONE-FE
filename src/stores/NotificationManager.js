@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { getNotifications } from '@/utils/fetchUtils'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
-  const notifications = ref([
+  const defaultNotifications = [
     {
       type: 'new',
       label: 'New Parcel Arrived',
@@ -73,7 +74,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       user: 'Parcel System',
       time: '15 Jan 2026 · 06:10 PM'
     }
-  ])
+  ]
+
+  const notifications = ref([...defaultNotifications])
 
   const unreadCount = ref(notifications.value.length)
 
@@ -86,10 +89,25 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     unreadCount.value++
   }
 
+  const fetchNotifications = async (router) => {
+    // Replace with your actual backend endpoint
+    const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
+    if (data && Array.isArray(data) && data.length > 0) {
+      notifications.value = data
+      unreadCount.value = data.length // Or logic to count unread
+    } else {
+      // Fallback to default if backend returns nothing or specific error
+      if (notifications.value.length === 0) {
+         notifications.value = [...defaultNotifications]
+      }
+    }
+  }
+
   return {
     notifications,
     unreadCount,
     markAsRead,
-    addNotification
+    addNotification,
+    fetchNotifications
   }
 })

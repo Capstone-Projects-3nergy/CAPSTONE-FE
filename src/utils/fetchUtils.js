@@ -666,6 +666,11 @@ async function addMemberWithFile(url, payload, router) {
     return null
   }
 }
+
+async function getNotifications(url, router) {
+  return await getItems(url, router)
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -704,5 +709,6 @@ export {
   toggleUserActive,
   updateProfileWithFile,
   addMemberWithFile,
-  updateDetailWithFile
+  updateDetailWithFile,
+  getNotifications
 }

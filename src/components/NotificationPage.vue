@@ -218,7 +218,8 @@ import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationStore = useNotificationManager()
 const notifications = computed(() => notificationStore.notifications)
 
-onMounted(() => {
+onMounted(async () => {
+  await notificationStore.fetchNotifications(router)
   notificationStore.markAsRead()
 })
 
