@@ -351,6 +351,9 @@ const showHomePageStaffWeb = async () => {
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
+}
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -743,7 +746,7 @@ function formatDateTime(datetimeStr) {
              <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showVerifyParcelPage"
+              @click="showParcelResidentVerificationPage"
             >
               <template #icon>
                  <svg

@@ -46,6 +46,9 @@ const showSuccess = () => {
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
+}
 const showError = () => {
   notification.value = {
     show: true,
@@ -451,7 +454,7 @@ const notifyTabClass = (tab) => {
               <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showVerifyParcelPage"
+              @click="showParcelResidentVerificationPage "
             >
               <template #icon>
                  <svg

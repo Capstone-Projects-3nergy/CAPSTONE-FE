@@ -78,6 +78,9 @@ const mapParcelData = (data) => ({
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
+} 
 const showResidentParcelPage = async function () {
   router.replace({
     name: 'residentparcels'
@@ -383,7 +386,7 @@ const closePopUp = (operate) => {
                     <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showVerifyParcelPage"
+              @click="showParcelResidentVerificationPage "
             >
               <template #icon>
                  <svg

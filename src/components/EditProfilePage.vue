@@ -130,6 +130,9 @@ const returnLoginPage = async () => {
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
+} 
 const showFirstNameRequired = () => {
   firstNameRequired.value = true
   setTimeout(() => (firstNameRequired.value = false), 10000)
@@ -497,7 +500,7 @@ const closePopUp = (operate) => {
               <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showVerifyParcelPage"
+              @click="showParcelResidentVerificationPage "
             >
               <template #icon>
                  <svg

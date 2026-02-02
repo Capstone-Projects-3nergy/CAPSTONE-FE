@@ -41,6 +41,9 @@ const resident = ref({
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
+}
 const userDormName = computed(() => {
   const userDormId = loginManager.user?.dormId
   if (!userDormId || dormList.value.length === 0) return ''
@@ -373,7 +376,7 @@ const closePopUps = (operate) => {
              <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showVerifyParcelPage"
+              @click="showParcelResidentVerificationPage "
             >
               <template #icon>
                <svg
