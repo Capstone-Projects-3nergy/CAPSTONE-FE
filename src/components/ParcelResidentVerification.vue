@@ -30,7 +30,8 @@ import {
   declineInvite,
   editItemWithFile,
   deleteFile,
-  updateParcelStatus
+  updateParcelStatus,
+  getItems
 } from '@/utils/fetchUtils'
 
 const loginManager = useAuthManager()
@@ -56,6 +57,14 @@ const parcel = ref(null)
 const confirmSuccess = ref(false)
 const error = ref(false)
 const showLogoutConfirm = ref(false)
+const companyList = ref([])
+
+const form = ref({
+  trackingNumber: '',
+  companyId: '',
+  residentName: ''
+})
+
 const mapParcelData = (data) => ({
   parcelId: data.parcelId,
   trackingNumber: data.trackingNumber,
@@ -88,13 +97,28 @@ const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
 
+const getCompanies = async () => {
+  try {
+    const data = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/companies`,
+      router
+    )
+    companyList.value = data
+  } catch (error) {
+    console.error('Error fetching companies:', error)
+  }
+}
+
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
-
+    // Pre-fill form if viewing a specific parcel
+    form.value.trackingNumber = localParcel.trackingNumber
+    form.value.recipientName = localParcel.recipientName
+    form.value.companyId = localParcel.companyId
     return
   }
 
@@ -109,6 +133,10 @@ const getParcelDetail = async (tid) => {
       const mapped = mapParcelData(data)
       parcel.value = mapped
       parcelStore.addParcel(mapped)
+       // Pre-fill form
+      form.value.trackingNumber = mapped.trackingNumber
+      form.value.recipientName = mapped.recipientName
+      form.value.companyId = mapped.companyId
     }
   } catch (err) {}
 }
@@ -124,8 +152,18 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
-  getParcelDetail(tidNum)
+  await getCompanies()
+  if (tidNum) {
+      getParcelDetail(tidNum)
+  }
 })
+
+const submitVerification = async () => {
+    // Implement verification logic here
+    console.log('Verifying parcel:', form.value)
+    // You might want to call an API here
+}
+
 
 watch(
   () => route.params.tid,
@@ -488,11 +526,11 @@ const closePopUp = (operate) => {
       </button>
 
       <main class="flex-1 p-9 bg-[#f8f9fb]">
-        <div class="mb-6">
+        <!-- <div class="mb-6">
           <h2 class="text-2xl font-bold text-[#185dc0]">
-            Manage Parcel &gt; Details
+            Parcel Verification
           </h2>
-        </div>
+        </div> -->
 
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
@@ -513,147 +551,156 @@ const closePopUp = (operate) => {
           />
         </div>
 
-        <div
-          class="bg-white border border-gray-300 rounded-[5px] shadow-md p-10"
-        >
-          <form class="space-y-10">
-            <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >trackingNumber</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.trackingNumber || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recipient Name</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.recipientName || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >roomNumber</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.roomNumber || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1">email</label>
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.email || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >parcel type</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.parcelType || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >company</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.companyName || '-' }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >sender name</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ parcel?.senderName || '-' }}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h3 class="font-semibold text-lg mb-4">Date</h3>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recieved at</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ formatDateTime(parcel?.receivedAt || '-') }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >pick up at</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ formatDateTime(parcel?.pickedUpAt || '-') }}
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >confirm at</label
-                  >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
-                    {{ formatDateTime(parcel?.confirmAt || '-') }}
-                  </p>
-                </div>
-              </div>
-            </section>
-            <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >current status</label
-                  >
-                  <p
-                    class="w-full p-2 rounded-md text-white"
-                    :class="{
-                      'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-400': parcel?.status === 'RECEIVED',
-                      'bg-green-400': parcel?.status === 'PICKED_UP'
-                    }"
-                  >
-                    {{ parcel?.status || '-' }}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <div class="flex justify-end space-x-3 pt-4">
-              <ButtonWeb
-                v-if="currentParcelStatus === 'RECEIVED'"
-                type="button"
-                label="Confirm"
-                color="blue"
-                @click="confirmParcelPopUp(parcel)"
-              />
-              <ButtonWeb
-                label="Back"
-                color="gray"
-                class="text-[#898989]"
-                @click="showHomePageResidentWeb"
-              />
+        <div class="max-w-4xl mx-auto mt-6">
+          <div
+            class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
+          >
+            <div class="bg-[#0E4B90] px-8 py-6">
+              <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Enter Parcel Verification
+              </h3>
+              <p class="text-blue-100 mt-1 text-sm">
+                Please enter the parcel details below to verify ownership.
+              </p>
             </div>
-          </form>
+
+            <form class="p-8 space-y-8" @submit.prevent="submitVerification">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Tracking Number -->
+                <div class="col-span-1 md:col-span-2 space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700 ml-1"
+                    >Tracking Number</label
+                  >
+                  <div class="relative group">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      v-model="form.trackingNumber"
+                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
+                      placeholder="e.g. TH123456789"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Company -->
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700 ml-1"
+                    >Transport Company</label
+                  >
+                  <div class="relative group">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+                        />
+                        <path
+                          d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z"
+                        />
+                      </svg>
+                    </div>
+                    <select
+                      v-model="form.companyId"
+                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
+                      required
+                    >
+                      <option value="" disabled selected>Select Company</option>
+                      <option
+                        v-for="c in companyList"
+                        :key="c.companyId"
+                        :value="c.companyId"
+                      >
+                        {{ c.companyName }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Resident Name -->
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700 ml-1"
+                    >Recipient Name</label
+                  >
+                  <div class="relative group">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      v-model="form.residentName"
+                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
+                      placeholder="Name on Parcel"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end space-x-4 pt-6 mt-4">
+                <ButtonWeb
+                  label="Back"
+                  color="gray"
+                  class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#0E4B90] hover:border-[#0E4B90] transition-all duration-200 font-medium"
+                  @click="showHomePageResidentWeb"
+                />
+                <ButtonWeb
+                  type="submit"
+                  label="Verify"
+                  class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
+                  color="blue"
+                />
+              </div>
+            </form>
+          </div>
         </div>
       </main>
     </div>
