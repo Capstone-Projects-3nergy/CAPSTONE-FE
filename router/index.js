@@ -27,6 +27,7 @@ import ResidentRegistrationDetail from '@/components/ResidentRegistrationDetail.
 import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 import AddMember from '@/components/AddMember.vue'
 import NotificationPage from '@/components/NotificationPage.vue'
+import ParcelResidentVerification from '@/components/ParcelResidentVerification.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -173,6 +174,11 @@ const routes = [
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
+  },
+  {
+    path: '/homepage/staff/:id/parcelresidentverification',
+    name: 'parcelresidentverification',
+    component: ParcelResidentVerification
   },
   {
     path: '/homepage/staff/:id/profile/editprofile',
