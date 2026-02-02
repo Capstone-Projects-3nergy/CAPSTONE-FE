@@ -286,20 +286,12 @@ const badgeIcon = (type) => {
 const notifyTabClass = (tab) => {
   const isActive = activeNotifyTab.value === tab
 
-  if (!isActive) {
-    return 'px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-500 hover:bg-gray-200 transition'
-  }
-
-  if (tab === 'all') {
-    return 'px-4 py-2 rounded-full text-sm font-medium bg-yellow-500 text-white transition'
-  }
-
-  if (tab === 'parcel') {
-    return 'px-4 py-2 rounded-full text-sm font-medium bg-blue-500 text-white transition'
-  }
-  if (tab === 'announcement') {
-    return 'px-4 py-2 rounded-full text-sm font-medium bg-green-500 text-white transition'
-  }
+  return [
+    'flex-1 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ease-out relative z-10',
+    isActive
+      ? 'bg-white text-[#0E4B90] shadow-sm'
+      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
+  ]
 }
 </script>
 
@@ -801,20 +793,29 @@ const notifyTabClass = (tab) => {
 
         <!-- Content Card -->
         <div
-          class="w-full bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+          class="w-full bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white/50 p-8 overflow-hidden relative"
         >
+          <!-- Decor -->
+          <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50/50 to-transparent rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
+
           <!-- Header -->
-          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-            Notifications
-          </h2>
-          <!-- Tabs -->
-          <div class="flex gap-2 mb-6">
+          <div class="relative z-10 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+              Notifications
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+              Stay updated with your latest parcels and announcements
+            </p>
+          </div>
+
+          <!-- Tabs (Segmented Control) -->
+          <div class="bg-gray-100/50 p-1.5 rounded-2xl flex gap-1 mb-8 relative z-10">
             <button
               @click="activeNotifyTab = 'all'"
               :class="notifyTabClass('all')"
               class="cursor-pointer"
             >
-              All Notify
+              All Notifications
             </button>
 
             <button
@@ -822,7 +823,7 @@ const notifyTabClass = (tab) => {
               :class="notifyTabClass('parcel')"
               class="cursor-pointer"
             >
-              Parcel Notify
+              Parcels
             </button>
 
             <button
@@ -830,45 +831,61 @@ const notifyTabClass = (tab) => {
               :class="notifyTabClass('announcement')"
               class="cursor-pointer"
             >
-              Announcement Notify
+              Announcements
             </button>
           </div>
 
           <!-- Notification list -->
-          <div class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
+          <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
             <div
               v-for="(item, index) in filteredNotifications"
               :key="index"
-              class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
+              class="group flex items-start gap-4 bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md hover:border-gray-200/50 transition-all duration-300"
             >
               <!-- LEFT ICON -->
-              <div class="mt-1">
+              <div class="mt-1 relative">
+                <div 
+                  class="absolute inset-0 bg-current opacity-10 rounded-xl blur-sm transform group-hover:scale-110 transition-transform"
+                  :class="item.type === 'message' ? 'text-green-500' : 'text-blue-500'"
+                ></div>
                 <span
-                  class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
+                  class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-sm relative z-10"
                   :class="badgeClass(item.type)"
                   v-html="badgeIcon(item.type)"
                 />
               </div>
 
               <!-- CONTENT -->
-              <div class="flex-1">
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ item.label }}
-                </p>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-2">
+                  <p class="text-sm font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors">
+                    {{ item.label }}
+                  </p>
+                  <!-- TIME -->
+                  <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-gray-50 px-2 py-1 rounded-lg">
+                    {{ item.time }}
+                  </span>
+                </div>
 
-                <p class="text-sm text-gray-500 mt-0.5">
+                <p class="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">
                   {{ item.title }}
                 </p>
 
-                <p class="text-xs text-red-500 mt-1">
+                <p class="text-xs font-medium text-rose-500 mt-2 flex items-center gap-1.5" v-if="item.user">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                   {{ item.user }}
                 </p>
               </div>
-
-              <!-- TIME -->
-              <div class="text-xs text-gray-400 whitespace-nowrap">
-                {{ item.time }}
+            </div>
+            
+            <!-- Empty State -->
+            <div v-if="filteredNotifications.length === 0" class="text-center py-12">
+              <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
               </div>
+              <p class="text-gray-500 font-medium">No notifications found</p>
             </div>
           </div>
         </div>

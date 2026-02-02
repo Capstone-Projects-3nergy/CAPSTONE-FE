@@ -56,6 +56,7 @@ const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
 const error = ref(false)
+const errorMessage = ref('')
 const showLogoutConfirm = ref(false)
 const companyList = ref([])
 
@@ -63,6 +64,27 @@ const form = ref({
   trackingNumber: '',
   companyId: '',
   residentName: ''
+})
+
+const isFormValid = computed(() => {
+  // 1. Check required fields
+  if (!form.value.trackingNumber || !form.value.companyId || !form.value.residentName) {
+    return false
+  }
+
+  // 2. Validate Tracking Number (No Thai characters allowed)
+  const thaiRegex = /[\u0E00-\u0E7F]/
+  if (thaiRegex.test(form.value.trackingNumber)) {
+    return false
+  }
+
+  // 3. Validate Resident Name (No numbers allowed)
+  const numberRegex = /\d/
+  if (numberRegex.test(form.value.residentName)) {
+    return false
+  }
+
+  return true
 })
 
 const mapParcelData = (data) => ({
@@ -159,9 +181,24 @@ onMounted(async () => {
 })
 
 const submitVerification = async () => {
+    // Reset states
+    error.value = false
+    confirmSuccess.value = false
+    errorMessage.value = ''
+
+    // Double check validation logic just in case (though button should be disabled)
+    if (!isFormValid.value) {
+        return
+    }
+
     // Implement verification logic here
     console.log('Verifying parcel:', form.value)
-    // You might want to call an API here
+    
+    // Simulate success
+    confirmSuccess.value = true
+    
+    // Optional: Clear form or navigate
+    // form.value = { trackingNumber: '', companyId: '', residentName: '' }
 }
 
 
@@ -543,7 +580,7 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="error"
-            :titles="'There is a problem. Please try again later.'"
+            :titles="errorMessage"
             message="Error!!"
             styleType="red"
             operate="problem"
@@ -695,6 +732,7 @@ const closePopUp = (operate) => {
                 <ButtonWeb
                   type="submit"
                   label="Verify"
+                  :disabled="!isFormValid"
                   class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
                 />
