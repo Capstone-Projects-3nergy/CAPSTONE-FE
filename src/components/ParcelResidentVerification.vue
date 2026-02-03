@@ -744,6 +744,7 @@ const closePopUp = (operate) => {
                   :disabled="!isFormValid"
                   class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
+                  @click="submitVerification"
                 />
               </div>
             </form>
