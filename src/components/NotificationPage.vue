@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, onMounted, computed } from 'vue'
+import { ref, onUnmounted, onMounted, computed  } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -288,11 +288,28 @@ const notifyTabClass = (tab) => {
   const isActive = activeNotifyTab.value === tab
 
   return [
-    'flex-1 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ease-out relative z-10',
     isActive
       ? 'bg-white text-[#0E4B90] shadow-sm'
       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
   ]
+}
+
+const selectedNotification = ref(null)
+const showDetailModal = ref(false)
+
+const openDetail = (item) => {
+  selectedNotification.value = item
+  showDetailModal.value = true
+  if (!item.isRead) {
+    notificationStore.markAsRead(item.id)
+  }
+}
+
+const closeDetail = () => {
+  showDetailModal.value = false
+  setTimeout(() => {
+    selectedNotification.value = null
+  }, 300)
 }
 </script>
 
@@ -841,8 +858,13 @@ const notifyTabClass = (tab) => {
             <div
               v-for="(item, index) in filteredNotifications"
               :key="index"
-              class="group flex items-start gap-4 bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-md hover:border-gray-200/50 transition-all duration-300"
+              @click="openDetail(item)"
+              class="group flex items-start gap-4 border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-300 relative overflow-hidden"
+              :class="item.isRead ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
             >
+              <!-- Unread Indicator -->
+              <div v-if="!item.isRead" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500"></div>
+
               <!-- LEFT ICON -->
               <div class="mt-1 relative">
                 <div 
@@ -858,17 +880,20 @@ const notifyTabClass = (tab) => {
 
               <!-- CONTENT -->
               <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start gap-2">
+                <div class="flex justify-between items-center gap-2 pr-4">
                   <p class="text-sm font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors">
                     {{ item.label }}
                   </p>
                   <!-- TIME -->
-                  <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-gray-50 px-2 py-1 rounded-lg">
+                  <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-white/50 px-2 py-1 rounded-lg">
                     {{ item.time }}
                   </span>
                 </div>
 
-                <p class="text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2">
+                <p 
+                  class="text-sm mt-1 leading-relaxed line-clamp-2"
+                  :class="item.isRead ? 'text-gray-500' : 'text-gray-800 font-medium'"
+                >
                   {{ item.title }}
                 </p>
 
@@ -891,6 +916,77 @@ const notifyTabClass = (tab) => {
           </div>
         </div>
       </main>
+
+    <!-- Notification Detail Modal -->
+    <div v-if="showDetailModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity" @click="closeDetail"></div>
+      
+      <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl transform transition-all p-6 sm:p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <!-- Decor -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50/80 to-transparent rounded-bl-full -z-0 pointer-events-none"></div>
+
+        <button @click="closeDetail" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10">
+          <svg class="w-5 h-5 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div v-if="selectedNotification" class="relative z-10">
+          <div class="flex items-center gap-4 mb-6">
+             <div class="relative">
+                <div 
+                  class="absolute inset-0 bg-current opacity-10 rounded-2xl blur-sm"
+                  :class="selectedNotification.type === 'message' ? 'text-green-500' : 'text-blue-500'"
+                ></div>
+                <span
+                  class="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white shadow-sm relative z-10"
+                  :class="badgeClass(selectedNotification.type)"
+                  v-html="badgeIcon(selectedNotification.type)"
+                />
+              </div>
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+                  {{ selectedNotification.label }}
+                </p>
+                <h3 class="text-xl font-bold text-gray-900 leading-tight">
+                  {{ selectedNotification.title }}
+                </h3>
+              </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+               </svg>
+               <span>{{ selectedNotification.time }}</span>
+            </div>
+            
+            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
+               <!-- In a real app this would be a separate content/body field, falling back to title for now -->
+               {{ selectedNotification.message || selectedNotification.title }}
+               <br/><br/>
+               <span v-if="selectedNotification.type === 'new'" class="italic text-gray-400 text-xs">
+                 Please check with the office for your parcel.
+               </span>
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+               <div class="flex items-center gap-2" v-if="selectedNotification.user">
+                  <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                    {{ selectedNotification.user.charAt(0) }}
+                  </div>
+                  <span class="text-sm font-medium text-gray-900">{{ selectedNotification.user }}</span>
+               </div>
+               
+               <!-- <button @click="closeDetail" class="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
+                 Close
+               </button> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
   </div>
 
