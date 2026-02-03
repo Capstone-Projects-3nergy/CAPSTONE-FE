@@ -53,8 +53,12 @@ const props = defineProps({
   showUpdateAt: { type: Boolean, default: true },
   showDeletedAt: { type: Boolean, default: false },
   showDeleteResident: { type: Boolean, default: false },
-  showMemberTrashName: { type: Boolean, default: false }
+  showMemberTrashName: { type: Boolean, default: false },
+  hideTrash: { type: Boolean, default: false },
+  showMember: { type: Boolean, default: false },
+  showParcel: { type: Boolean, default: false },
 })
+
 
 // defineProps({
 //   items: Array,

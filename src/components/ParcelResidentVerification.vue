@@ -117,6 +117,13 @@ const showResidentParcelPage = async function () {
   })
   showResidentParcels.value = true
 }
+
+const showVerifyParcelPage = async () => {
+  // Stay on current page or navigate if needed
+  // Since we are already on ParcelResidentVerification, maybe just ensure state is correct
+  console.log('Already on Parcel Verification Page')
+}
+
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })

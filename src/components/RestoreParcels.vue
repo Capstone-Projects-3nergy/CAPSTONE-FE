@@ -15,6 +15,10 @@ const emit = defineEmits([
 ])
 
 const props = defineProps({
+  restoreType: {
+    type: String,
+    required: true // 'parcel' | 'resident' | 'staff'
+  },
   parcelData: Object,
   isPermanent: {
     type: Boolean,
@@ -22,9 +26,9 @@ const props = defineProps({
   },
   residentData: Object,
   staffData: Object,
-  showMember: { type: Boolean, default: false },
-  showStaff: { type: Boolean, default: false },
-  showParcel: { type: Boolean, default: true }
+  // showMember: { type: Boolean, default: false },
+  // showStaff: { type: Boolean, default: false },
+  // showParcel: { type: Boolean, default: true }
 })
 
 const router = useRouter()
@@ -140,22 +144,65 @@ const restoreStaffFn = async () => {
 const cancelAction = () => {
   emit('cancelDetail', true)
 }
+const restoreActionMap = {
+  parcel: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash`,
+      parcel.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    parcelManager.restoreFromTrash(parcel.value.id)
+    emit('confirmDetail', true)
+  },
+
+  resident: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
+      resident.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    userManager.restoreFromTrash(resident.value.id)
+    emit('confirmMemberDetail', true)
+  },
+
+  staff: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/staffs`,
+      staff.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    userManager.restoreFromTrash(staff.value.id)
+    emit('confirmStaffDetail', true)
+  }
+}
 const confirmRestore = async () => {
   try {
-    if (props.showMember) {
-      await restoreMemberFn()
-    } else if (props.showStaff) {
-      await restoreStaffFn()
-    } else {
-      await restoreParcelFn()
-    }
-
-    emit('confirmDetail', true)
+    await restoreActionMap[props.restoreType]()
   } catch (err) {
     emit('redAlert')
     emit('cancelDetail', true)
   }
 }
+
+// const confirmRestore = async () => {
+//   try {
+//     if (props.showMember) {
+//       await restoreMemberFn()
+//     } else if (props.showStaff) {
+//       await restoreStaffFn()
+//     } else {
+//       await restoreParcelFn()
+//     }
+
+//     emit('confirmDetail', true)
+//   } catch (err) {
+//     emit('redAlert')
+//     emit('cancelDetail', true)
+//   }
+// }
 </script>
 
 <template>
@@ -165,33 +212,33 @@ const confirmRestore = async () => {
     <div
       class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
     >
-      <div v-if="showParcel" class="flex flex-col justify-between p-4 border-b">
+      <div v-if="restoreType === 'parcel'" class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
           Restore Parcel
         </h1>
       </div>
-      <div v-if="showMember" class="flex flex-col justify-between p-4 border-b">
+      <div v-if="restoreType === 'resident'" class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
           Restore Resident Member
         </h1>
       </div>
-      <div v-if="showStaff" class="flex flex-col justify-between p-4 border-b">
+      <div v-if="restoreType === 'staff'" class="flex flex-col justify-between p-4 border-b">
         <h1 class="text-xl font-bold text-center sm:text-left">
           Restore Staff Member
         </h1>
       </div>
       <div class="p-4 text-center sm:text-left">
-        <template v-if="showMember">
+        <template v-if="restoreType === 'resident'">
           Do you want to restore this Resident name
           <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
         </template>
 
-        <template v-if="showStaff">
+        <template v-if="restoreType === 'staff'">
           Do you want to restore this Staff name
           <b>"{{ staff.fullName || '' }}"</b>
         </template>
 
-        <template v-if="showParcel">
+        <template v-if="restoreType === 'parcel'">
           Do you want to restore this Parcel
           <b>"{{ parcel.parcelNumber || '' }}"</b>?
         </template>

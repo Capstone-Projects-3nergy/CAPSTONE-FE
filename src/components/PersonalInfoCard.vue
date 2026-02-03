@@ -784,7 +784,6 @@ const profileImageUrlPreview = computed(() => {
                   label="Edit"
                   color="blue"
                   @click="$emit('edit')"
-                  :disabled="isSaveDisabled"
                 />
                 <ButtonWeb
                   class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"

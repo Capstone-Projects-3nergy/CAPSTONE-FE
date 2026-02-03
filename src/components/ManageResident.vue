@@ -252,13 +252,13 @@ onMounted(async () => {
   //   userManager.setStaffs(staffs)
   // }
 
-  try {
-    const res = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/residents`,
-      router
-    )
-    residents.value = res || []
-  } catch (e) {}
+  // try {
+  //   const res = await getItems(
+  //     `${import.meta.env.VITE_BASE_URL}/api/residents`,
+  //     router
+  //   )
+  //   residents.value = res || []
+  // } catch (e) {}
 })
 const openStatusPopup = (parcel) => {
   parcelStatusDetail.value = {
@@ -1525,7 +1525,7 @@ const showResidentDetail = async function (id) {
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <Teleport to="body" v-if="showHomePageStaff"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

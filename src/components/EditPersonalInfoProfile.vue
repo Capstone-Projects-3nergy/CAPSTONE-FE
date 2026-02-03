@@ -43,8 +43,8 @@ const props = defineProps({
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null },
-  editProfile: { type: String, default: true },
-  editResidentDetail: { type: String, required: false }
+  editProfile: { type: Boolean, default: true },
+  editResidentDetail: { type: Boolean, required: false }
 })
 const newAvatar = ref(null)
 const emit = defineEmits([
@@ -1136,7 +1136,7 @@ const isSaveDisabled = computed(() => {
           <div
             class="flex flex-col"
             v-if="
-              dormId !== null &&
+              form.dormId !== null &&
               mode !== 'add' &&
               loginManager.user.role === 'RESIDENT'
             "

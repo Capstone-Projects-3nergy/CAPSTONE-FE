@@ -479,6 +479,11 @@ const openRedPopup = () => {
   parcelConfirmDetail.value = null
 }
 
+const openStatusPopup = () => {
+  // Placeholder for status popup logic
+  console.log('Status popup clicked')
+}
+
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
@@ -1207,7 +1212,7 @@ function formatDateTime(datetimeStr) {
     </div>
   </div>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <ParcelScannerPage> </ParcelScannerPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>

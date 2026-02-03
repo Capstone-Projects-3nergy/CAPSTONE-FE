@@ -29,7 +29,7 @@ defineProps({
   }
 })
 
-defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash'])
+defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'addMember'])
 </script>
 <template>
   <div

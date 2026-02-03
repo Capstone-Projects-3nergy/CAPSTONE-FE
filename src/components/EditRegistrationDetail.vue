@@ -1029,6 +1029,7 @@ const showLastNameError = () => {
           :useCurrentProfile="false"
           :firstName="form.firstName"
           :lastName="form.lastName"
+          :fullName="`${form.firstName} ${form.lastName}`"
           :email="form.email"
           :roomNumber="form.roomNumber"
           :dormName="form.dormName"

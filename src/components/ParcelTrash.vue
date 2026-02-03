@@ -550,7 +550,7 @@ const deleteMemberPopUp = (id) => {
   }
 }
 const restoreMemberPopUp = (id) => {
-  showRestoreParcel.value = true
+  showRestoreMember.value = true
   residentDetail.value = {
     id: id.id,
     firstName: id.firstName,
@@ -582,6 +582,9 @@ const clearDeletePopUp = () => {
 const clearRestorePopUp = () => {
   showRestoreParcel.value = false
   parcelDetail.value = null
+}
+const clearRestoreMemberPopUp = () => {
+  showRestoreMember.value = false
   residentDetail.value = null
 }
 const clearDeleteMemPopUp = () => {
@@ -597,12 +600,11 @@ const showRestoreComplete = () => {
   setTimeout(() => (restoreSuccess.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
-  residentDetail.value = null
 }
 const showRestoreMemberComplete = () => {
   restoreMemberSuccess.value = true
   setTimeout(() => (restoreMemberSuccess = false), 10000)
-  showRestoreParcel.value = false
+  showRestoreMember.value = false
   residentDetail.value = null
 }
 const showDelMemComplete = () => {
@@ -690,16 +692,13 @@ const handleSortUpdate = (val) => {
 }
 const fetchTrash = async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/trash`)
+    const data = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/trash`,
+      router
+    )
 
-    if (!res.ok) return
-
-    const data = await res.json()
-
-    // ป้องกัน null / undefined
     const list = Array.isArray(data) ? data : []
 
-    // map ให้โครงสร้างตรงกับ parcel
     const mapped = list.map((p) => ({
       id: p.parcelId,
       trackingNumber: p.trackingNumber,
@@ -710,14 +709,42 @@ const fetchTrash = async () => {
       deletedAt: p.deletedAt || null
     }))
 
-    // ใส่เข้า Pinia
-    parcelManager.trash.length = 0
-    mapped.forEach((p) => parcelManager.trash.push(p))
+    parcelManager.setTrash(mapped)
   } catch (e) {
-    // ❗ไม่ throw error
     console.warn('Fetch trash failed', e)
   }
 }
+
+// const fetchTrash = async () => {
+//   try {
+//     const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/trash`)
+
+//     if (!res.ok) return
+
+//     const data = await res.json()
+
+//     // ป้องกัน null / undefined
+//     const list = Array.isArray(data) ? data : []
+
+//     // map ให้โครงสร้างตรงกับ parcel
+//     const mapped = list.map((p) => ({
+//       id: p.parcelId,
+//       trackingNumber: p.trackingNumber,
+//       recipientName: p.ownerName,
+//       roomNumber: p.roomNumber,
+//       email: p.contactEmail,
+//       status: p.status,
+//       deletedAt: p.deletedAt || null
+//     }))
+
+//     // ใส่เข้า Pinia
+//     parcelManager.trash.length = 0
+//     mapped.forEach((p) => parcelManager.trash.push(p))
+//   } catch (e) {
+//     // ❗ไม่ throw error
+//     console.warn('Fetch trash failed', e)
+//   }
+// }
 
 // const fetchTrash = async () => {
 //   const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
@@ -810,6 +837,7 @@ const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
   if (operate === 'deleteSuccessMessage ') deleteSuccess.value = false
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
+  if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
 }
 </script>
 
@@ -1273,7 +1301,7 @@ const closePopUp = (operate) => {
             :titles="'Restore Resident is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="restoreSuccessMessage"
+            operate="restoreMemberSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -1952,6 +1980,14 @@ const closePopUp = (operate) => {
   </teleport>
   <teleport to="body" v-if="showRestoreParcel">
     <RestoreParcels
+      restoreType="parcel"
+      :parcelData="parcelDetail"
+      @confirmDetail="showRestoreComplete"
+      @cancelDetail="clearRestorePopUp"
+      @redAlert="openRedRestorePopup"
+    />
+
+    <!-- <RestoreParcels
       @cancelDetail="clearRestorePopUp"
       @confirmDetail="showRestoreComplete"
       @confirmMemberDetail="showRestoreMemberComplete"
@@ -1960,6 +1996,15 @@ const closePopUp = (operate) => {
       :residentData="residentDetail"
       :showMember="true"
       :showParcel="false"
+    /> -->
+  </teleport>
+   <teleport to="body" v-if="showRestoreMember">
+    <RestoreParcels
+      restoreType="resident"
+      :residentData="residentDetail"
+      @confirmMemberDetail="showRestoreMemberComplete"
+      @cancelDetail="clearRestoreMemberPopUp"
+      @redAlert="openRedRestorePopup"
     />
   </teleport>
   <teleport to="body" v-if="showDeleteMember">
