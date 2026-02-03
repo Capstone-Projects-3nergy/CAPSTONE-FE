@@ -188,25 +188,59 @@ const submitVerification = async () => {
     confirmSuccess.value = false
     errorMessage.value = ''
 
-    // Double check validation logic just in case (though button should be disabled)
+    // Double check validation just in case (though button should be disabled)
     if (!isFormValid.value) {
         return
     }
 
-    // Call store action
-    const result = await parcelVerificationStore.saveParcelVerification({
-        trackingNumber: form.value.trackingNumber,
-        companyId: form.value.companyId,
-        residentName: form.value.residentName
-    }, router)
-    
-    if (result) {
+    try {
+        // -----------------------
+        // payload
+        // -----------------------
+        const body = {
+            trackingNumber: form.value.trackingNumber,
+            companyId: form.value.companyId,
+            residentName: form.value.residentName
+        }
+
+        // -----------------------
+        // API call
+        // -----------------------
+        const result = await parcelVerificationStore.saveParcelVerification(
+            body,
+            router
+        )
+
+        if (!result) {
+            error.value = true
+            errorMessage.value = 'Verification failed. Please try again.'
+            return
+        }
+        
+        // -----------------------
+        // success
+        // -----------------------
+        
+        // Add to Pinia store (like parcel)
+        if (result.parcelId) {
+             const mapped = mapParcelData(result)
+             parcelVerificationStore.addVerifiedParcel(mapped)
+        }
+
         confirmSuccess.value = true
-        // Optional: clear form
-        // form.value = { trackingNumber: '', companyId: '', residentName: '' }
-    } else {
+        
+        // Reset form
+        form.value.trackingNumber = ''
+        form.value.companyId = ''
+        form.value.residentName = ''
+
+        // Auto hide success msg
+        setTimeout(() => (confirmSuccess.value = false), 5000)
+
+    } catch (err) {
+        console.error(err)
         error.value = true
-        errorMessage.value = 'Verification failed. Please try again.'
+        errorMessage.value = 'An unexpected error occurred.'
     }
 }
 

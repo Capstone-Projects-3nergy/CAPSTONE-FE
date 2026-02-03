@@ -1,7 +1,14 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { addItem } from '@/utils/fetchUtils'
 
 export const useParcelVerificationManager = defineStore('parcelVerificationManager', () => {
+  const verifiedParcels = ref([])
+
+  const addVerifiedParcel = (parcel) => {
+    verifiedParcels.value.push(parcel)
+  }
+
   const saveParcelVerification = async (verificationData, router) => {
     const url = `${import.meta.env.VITE_BASE_URL}/api/verify`
     try {
@@ -14,6 +21,8 @@ export const useParcelVerificationManager = defineStore('parcelVerificationManag
   }
 
   return {
+    verifiedParcels,
+    addVerifiedParcel,
     saveParcelVerification
   }
 })
