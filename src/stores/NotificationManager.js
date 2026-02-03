@@ -96,19 +96,30 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     }
   ]
 
-  const notifications = ref([...defaultNotifications])
+  // Load from localStorage or use defaults
+  const storedNotifications = localStorage.getItem('notifications')
+  const initialNotifications = storedNotifications ? JSON.parse(storedNotifications) : [...defaultNotifications]
+  
+  const notifications = ref(initialNotifications)
 
   const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
+
+  // Helper to save to localStorage
+  const saveToLocalStorage = () => {
+    localStorage.setItem('notifications', JSON.stringify(notifications.value))
+  }
 
   const markAsRead = (id) => {
     if (id) {
         const notification = notifications.value.find(n => n.id === id)
         if (notification) {
             notification.isRead = true
+            saveToLocalStorage()
         }
     } else {
         // Mark all as read
         notifications.value.forEach(n => n.isRead = true)
+        saveToLocalStorage()
     }
   }
 
@@ -116,6 +127,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     // Generate a simple ID (in real app, use UUID or backend id)
     const newId = notifications.value.length > 0 ? Math.max(...notifications.value.map(n => n.id)) + 1 : 1
     notifications.value.unshift({ ...note, id: newId, isRead: false })
+    saveToLocalStorage()
   }
 
   const fetchNotifications = async (router) => {
@@ -127,10 +139,18 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           id: n.id || index + 1, // Ensure ID existence
           isRead: n.isRead !== undefined ? n.isRead : false
       }))
+      saveToLocalStorage()
     } else {
       // Fallback to default if backend returns nothing or specific error
       if (notifications.value.length === 0) {
-         notifications.value = [...defaultNotifications]
+         // Only reset to defaults if we have absolutely nothing even in local storage (handled by initial load)
+         // But if we want to force re-fetch logic to respect defaults on empty backend response:
+         // For now, let's keep the localStorage state if backend fails, or defaults if empty.
+         // Actually, if we are simulating backend with defaults, we should check if we already have data
+         if (!storedNotifications) {
+             notifications.value = [...defaultNotifications]
+             saveToLocalStorage()
+         }
       }
     }
   }
