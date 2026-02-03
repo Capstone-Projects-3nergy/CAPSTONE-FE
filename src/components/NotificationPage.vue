@@ -221,7 +221,6 @@ const notifications = computed(() => notificationStore.notifications)
 
 onMounted(async () => {
   await notificationStore.fetchNotifications(router)
-  notificationStore.markAsRead()
 })
 
 const activeNotifyTab = ref('all')
@@ -866,8 +865,8 @@ const closeDetail = () => {
               class="group flex items-start gap-4 border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-300 relative overflow-hidden"
               :class="item.isRead ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
             >
-              <!-- Unread Indicator -->
-              <div v-if="!item.isRead" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500"></div>
+              <!-- Unread Indicator (Dot only) -->
+              <div v-if="!item.isRead" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
 
               <!-- LEFT ICON -->
               <div class="mt-1 relative">
@@ -884,14 +883,23 @@ const closeDetail = () => {
 
               <!-- CONTENT -->
               <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-center gap-2 pr-4">
+                <div class="flex justify-between items-start gap-4 pr-1">
                   <p class="text-sm font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors">
                     {{ item.label }}
                   </p>
-                  <!-- TIME -->
-                  <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-white/50 px-2 py-1 rounded-lg">
-                    {{ item.time }}
-                  </span>
+                  
+                  <!-- TIME & READ STATUS -->
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-white/50 px-2 py-1 rounded-lg">
+                      {{ item.time }}
+                    </span>
+                    <div v-if="item.isRead" class="flex items-center gap-1 opacity-60">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-[#0E4B90]">Read</span>
+                      <svg class="w-3 h-3 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
                 <p 
