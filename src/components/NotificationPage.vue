@@ -11,6 +11,7 @@ import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
+import NotificationDetailModal from './NotificationDetailModal.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
 
 const loginManager = useAuthManager()
@@ -918,75 +919,11 @@ const closeDetail = () => {
       </main>
 
     <!-- Notification Detail Modal -->
-    <div v-if="showDetailModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity" @click="closeDetail"></div>
-      
-      <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl transform transition-all p-6 sm:p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <!-- Decor -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50/80 to-transparent rounded-bl-full -z-0 pointer-events-none"></div>
-
-        <button @click="closeDetail" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10">
-          <svg class="w-5 h-5 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <div v-if="selectedNotification" class="relative z-10">
-          <div class="flex items-center gap-4 mb-6">
-             <div class="relative">
-                <div 
-                  class="absolute inset-0 bg-current opacity-10 rounded-2xl blur-sm"
-                  :class="selectedNotification.type === 'message' ? 'text-green-500' : 'text-blue-500'"
-                ></div>
-                <span
-                  class="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white shadow-sm relative z-10"
-                  :class="badgeClass(selectedNotification.type)"
-                  v-html="badgeIcon(selectedNotification.type)"
-                />
-              </div>
-              <div>
-                <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
-                  {{ selectedNotification.label }}
-                </p>
-                <h3 class="text-xl font-bold text-gray-900 leading-tight">
-                  {{ selectedNotification.title }}
-                </h3>
-              </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="flex items-center gap-2 text-sm text-gray-500">
-               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-               </svg>
-               <span>{{ selectedNotification.time }}</span>
-            </div>
-            
-            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
-               <!-- In a real app this would be a separate content/body field, falling back to title for now -->
-               {{ selectedNotification.message || selectedNotification.title }}
-               <br/><br/>
-               <span v-if="selectedNotification.type === 'new'" class="italic text-gray-400 text-xs">
-                 Please check with the office for your parcel.
-               </span>
-            </div>
-
-            <div class="flex justify-between items-center pt-2">
-               <div class="flex items-center gap-2" v-if="selectedNotification.user">
-                  <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
-                    {{ selectedNotification.user.charAt(0) }}
-                  </div>
-                  <span class="text-sm font-medium text-gray-900">{{ selectedNotification.user }}</span>
-               </div>
-               
-               <!-- <button @click="closeDetail" class="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
-                 Close
-               </button> -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <NotificationDetailModal 
+      :show="showDetailModal" 
+      :notification="selectedNotification" 
+      @close="closeDetail" 
+    />
     </div>
   </div>
 
