@@ -13,6 +13,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
+import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
@@ -39,6 +40,7 @@ const router = useRouter()
 const route = useRoute()
 const tid = Number(route.params.tid)
 const parcelStore = useParcelManager()
+const parcelVerificationStore = useParcelVerificationManager()
 const showConfirmParcel = ref(false)
 const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
@@ -191,14 +193,21 @@ const submitVerification = async () => {
         return
     }
 
-    // Implement verification logic here
-    console.log('Verifying parcel:', form.value)
+    // Call store action
+    const result = await parcelVerificationStore.saveParcelVerification({
+        trackingNumber: form.value.trackingNumber,
+        companyId: form.value.companyId,
+        residentName: form.value.residentName
+    }, router)
     
-    // Simulate success
-    confirmSuccess.value = true
-    
-    // Optional: Clear form or navigate
-    // form.value = { trackingNumber: '', companyId: '', residentName: '' }
+    if (result) {
+        confirmSuccess.value = true
+        // Optional: clear form
+        // form.value = { trackingNumber: '', companyId: '', residentName: '' }
+    } else {
+        error.value = true
+        errorMessage.value = 'Verification failed. Please try again.'
+    }
 }
 
 
