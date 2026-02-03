@@ -136,6 +136,13 @@ const mapStatus = (status) => {
       return status
   }
 }
+const showAddParcelPage = () => {
+  // If this is meant to go to the add member page:
+  router.push({ name: 'addmember' })
+
+  // OR if you have a specific 'addparcel' route:
+  // router.push({ name: 'addparcel' })
+}
 const mapActiveStatus = (status) => {
   switch (status) {
     case 'ACTIVE':

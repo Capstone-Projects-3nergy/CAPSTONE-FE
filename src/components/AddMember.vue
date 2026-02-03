@@ -614,6 +614,8 @@ const showEmailFormError = () => {
           mode="add"
           title="Add New Resident"
           :showEdit="false"
+          :userId="0"
+          :fullName="''"
           @successAddProfile="showAddProfileSuccess"
           @errorAddProfile="showAddProfileError"
           @email-duplicate="showEmailError"

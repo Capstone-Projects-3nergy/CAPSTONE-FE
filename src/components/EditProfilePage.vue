@@ -347,6 +347,7 @@ const closePopUp = (operate) => {
 //       break
 //   }
 // }
+
 </script>
 
 <template>
@@ -955,7 +956,7 @@ const closePopUp = (operate) => {
           :position="loginManager.user.position"
           :userId="loginManager.user.id"
           :status="loginManager.user.status"
-          editProfile="true"
+         :editProfile="true"
           @roomNumberError="showRoomNumberError"
           @cancel="goBackProfilePage"
           @success="showProfileSuccess"
