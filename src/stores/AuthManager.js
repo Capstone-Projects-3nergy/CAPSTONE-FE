@@ -9,6 +9,7 @@ import {
   sendEmailVerification
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
+import { useNotificationManager } from './NotificationManager'
 
 export const useAuthManager = defineStore('authManager', () => {
   const user = ref(null)
@@ -340,6 +341,9 @@ export const useAuthManager = defineStore('authManager', () => {
     // 🔹 logout Firebase
     await signOut(auth)
   } finally {
+    // ✅ เคลียร์ notification state & localStorage
+    useNotificationManager().clearNotifications()
+    
     // ✅ เคลียร์ state เสมอ
     user.value = null
     await router?.replace({ name: 'login' })

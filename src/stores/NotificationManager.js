@@ -134,11 +134,23 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     // Replace with your actual backend endpoint
     const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
     if (data && Array.isArray(data) && data.length > 0) {
-      notifications.value = data.map((n, index) => ({
-          ...n,
-          id: n.id || index + 1, // Ensure ID existence
-          isRead: n.isRead !== undefined ? n.isRead : false
-      }))
+      notifications.value = data.map((n) => {
+        // Map Backend DB Schema to Frontend Model
+        return {
+          id: n.notification_id,
+          type: n.notification_type || 'message', // Default to message if missing
+          label: n.noti_title || 'Notification', // Header
+          title: n.noti_message || '', // Body/Content
+          user: n.sender_name || 'System', // Adjust if backend sends sender info, else default
+          time: n.sent_at 
+            ? new Date(n.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : '',
+          isRead: n.status === 'read', // Assuming 'read' vs 'unread'
+          // Keep raw data if needed
+          parcelId: n.parcel_id,
+          userId: n.user_id
+        }
+      })
       saveToLocalStorage()
     } else {
       // Fallback to default if backend returns nothing or specific error
@@ -155,12 +167,18 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     }
   }
 
+  const clearNotifications = () => {
+    notifications.value = []
+    localStorage.removeItem('notifications')
+  }
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     addNotification,
     fetchNotifications,
+    clearNotifications,
     notifyParcelAdded: (parcel) => {
       addNotification({
         type: 'new',
