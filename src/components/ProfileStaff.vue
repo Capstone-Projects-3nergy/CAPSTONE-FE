@@ -37,10 +37,11 @@ const showManageResident = ref(false)
 const showLogoutConfirm = ref(false)
 
 const firstName = computed(() => {
-  return loginManager.user.fullName.split(' ')[0] || ''
+  return loginManager.user?.fullName?.split(' ')[0] || ''
 })
 
 const lastName = computed(() => {
+  if (!loginManager.user?.fullName) return ''
   const parts = loginManager.user.fullName.split(' ')
   return parts.slice(1).join(' ') || ''
 })
@@ -489,6 +490,7 @@ const closePopUps = (operate) => {
         </div>
 
         <PersonalInfoCard
+          v-if="loginManager.user"
           :useCurrentProfile="true"
           :fullName="loginManager.user.fullName"
           :firstName="firstName"

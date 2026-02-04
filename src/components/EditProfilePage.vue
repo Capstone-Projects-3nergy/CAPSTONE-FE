@@ -113,12 +113,13 @@ const userDormName = computed(() => {
   return dorm ? dorm.dormName : ''
 })
 const firstName = computed(() => {
-  return loginManager.user.fullName.split(' ')[0] || ''
+  return loginManager.user?.fullName?.split(' ')[0] || ''
 })
 function goToEditProfile() {
   router.replace({ name: 'editprofile' })
 }
 const lastName = computed(() => {
+  if (!loginManager.user?.fullName) return ''
   const parts = loginManager.user.fullName.split(' ')
   return parts.slice(1).join(' ') || ''
 })
@@ -414,7 +415,7 @@ const closePopUp = (operate) => {
       <button
         @click="toggleSidebar"
         class="text-white focus:outline-none"
-        v-if="loginManager.user.role === 'RESIDENT'"
+        v-if="loginManager.user?.role === 'RESIDENT'"
       >
         <aside
           :class="[
@@ -607,7 +608,7 @@ const closePopUp = (operate) => {
       <button
         @click="toggleSidebar"
         class="text-white focus:outline-none"
-        v-if="loginManager.user.role === 'STAFF'"
+        v-if="loginManager.user?.role === 'STAFF'"
       >
         <aside
           :class="[
@@ -943,6 +944,7 @@ const closePopUp = (operate) => {
           />
         </div>
         <EditPersonalInfoProfile
+          v-if="loginManager.user"
           mode="edit"
           :firstName="firstName"
           :lastName="lastName"
