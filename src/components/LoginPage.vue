@@ -120,7 +120,7 @@ const loginHomePageWeb = async () => {
       const currentUser = authManager.user
       if (
         currentUser &&
-        (currentUser.role === 'RESIDENT' || currentUser.role === 'STAFF')
+        currentUser.role === 'RESIDENT'
       ) {
         const key = `welcome_shown_${currentUser.email}`
         if (!localStorage.getItem(key)) {

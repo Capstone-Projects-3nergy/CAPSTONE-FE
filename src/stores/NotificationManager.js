@@ -191,7 +191,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         isRead: false
       })
     },
-    notifyWelcome: (username) => {
+    notifyWelcome: (username, role = 'STAFF') => {
+      const roleText = role === 'RESIDENT' ? 'resident' : 'staff'
       addNotification({
         type: 'message',
         label: 'Welcome',
@@ -200,6 +201,14 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
       })
-    }
+    },
+    parcelNotifications: computed(() => {
+        const PARCEL_TYPES = ['new', 'comment', 'connect']
+        return notifications.value.filter(n => PARCEL_TYPES.includes(n.type))
+    }),
+    announcementNotifications: computed(() => {
+        const ACCOUNT_TYPES = ['message']
+        return notifications.value.filter(n => ACCOUNT_TYPES.includes(n.type))
+    })
   }
 })

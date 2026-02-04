@@ -237,11 +237,11 @@ const filteredNotifications = computed(() => {
   }
 
   if (activeNotifyTab.value === 'parcel') {
-    return notifications.value.filter((n) => PARCEL_TYPES.includes(n.type))
+    return notificationStore.parcelNotifications
   }
 
   if (activeNotifyTab.value === 'announcement') {
-    return notifications.value.filter((n) => ACCOUNT_TYPES.includes(n.type))
+    return notificationStore.announcementNotifications
   }
 
   return notifications.value
