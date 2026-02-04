@@ -5,10 +5,13 @@ import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager'
+import LineNotificationManager from '@/stores/LineNotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
 const authManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -111,7 +114,63 @@ const loginHomePageWeb = async () => {
       } catch (decodeErr) {
         error.value = true
 
-        await authManager.logoutAccount(router)
+      }
+
+      // Notification Logic
+      const currentUser = authManager.user
+      if (
+        currentUser &&
+        (currentUser.role === 'RESIDENT' || currentUser.role === 'STAFF')
+      ) {
+        const key = `welcome_shown_${currentUser.email}`
+        if (!localStorage.getItem(key)) {
+          // In-App Notification
+          notificationManager.notifyWelcome(
+            currentUser.fullName || currentUser.email,
+            currentUser.role
+          )
+          
+          // LINE Notification
+          try {
+            await LineNotificationManager.sendToGroup(
+              'GROUP_ID', 
+              `Users ${currentUser.fullName || currentUser.email} (${currentUser.role}) has logged in.`
+            )
+          } catch (e) {
+            console.error('Failed to send LINE notification', e)
+          }
+
+          localStorage.setItem(key, 'true')
+        }
+      }
+
+      // Manual Redirect
+      if (currentUser) {
+        switch (currentUser.role) {
+          case 'RESIDENT':
+            router.replace({
+              name: 'home',
+              params: { id: currentUser.id }
+            })
+            break
+          case 'STAFF':
+            router.replace({
+              name: 'homestaff',
+              params: { id: currentUser.id }
+            })
+            break
+          case 'SHIPPING':
+            router.replace({
+              name: 'parcelscannershipping',
+              params: { id: currentUser.id }
+            })
+            break
+          default:
+            router.replace({
+              name: 'parcelscanner'
+            })
+            break
+        }
       }
     } else if ([401, 403].includes(res.status)) {
       incorrect.value = true
