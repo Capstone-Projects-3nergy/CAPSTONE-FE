@@ -69,24 +69,7 @@ const form = ref({
 })
 
 const isFormValid = computed(() => {
-  // 1. Check required fields
-  if (!form.value.trackingNumber || !form.value.companyId || !form.value.residentName) {
-    return false
-  }
-
-  // 2. Validate Tracking Number (No Thai characters allowed)
-  const thaiRegex = /[\u0E00-\u0E7F]/
-  if (thaiRegex.test(form.value.trackingNumber)) {
-    return false
-  }
-
-  // 3. Validate Resident Name (No numbers allowed)
-  const numberRegex = /\d/
-  if (numberRegex.test(form.value.residentName)) {
-    return false
-  }
-
-  return true
+  return form.value.trackingNumber && form.value.companyId
 })
 
 const mapParcelData = (data) => ({
@@ -195,8 +178,10 @@ const submitVerification = async () => {
     confirmSuccess.value = false
     errorMessage.value = ''
 
-    // Double check validation just in case (though button should be disabled)
-    if (!isFormValid.value) {
+    const thaiRegex = /[\u0E00-\u0E7F]/
+    if (thaiRegex.test(form.value.trackingNumber)) {
+        error.value = true
+        errorMessage.value = 'Tracking number cannot contain Thai characters.'
         return
     }
 
@@ -247,7 +232,6 @@ const submitVerification = async () => {
     } catch (err) {
         console.error(err)
         error.value = true
-        errorMessage.value = 'An unexpected error occurred.'
     }
 }
 
@@ -694,7 +678,6 @@ const closePopUp = (operate) => {
                       v-model="form.trackingNumber"
                       class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
                       placeholder="e.g. TH123456789"
-                      required
                     />
                   </div>
                 </div>
@@ -725,7 +708,6 @@ const closePopUp = (operate) => {
                     <select
                       v-model="form.companyId"
                       class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
-                      required
                     >
                       <option value="" disabled selected>Select Company</option>
                       <option
@@ -766,7 +748,6 @@ const closePopUp = (operate) => {
                       v-model="form.residentName"
                       class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
                       placeholder="Name on Parcel"
-                      required
                     />
                   </div>
                 </div>

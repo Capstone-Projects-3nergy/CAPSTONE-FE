@@ -423,7 +423,6 @@ const showResetPasswordPageWeb = async function () {
               <input
                 v-model="email"
                 type="email"
-                required
                 placeholder="Email"
                 class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 @input="checkEmailLength"
