@@ -185,6 +185,13 @@ const submitVerification = async () => {
         return
     }
 
+    const numberRegex = /\d/
+    if (numberRegex.test(form.value.residentName)) {
+        error.value = true
+        errorMessage.value = 'Resident name cannot contain numbers.'
+        return
+    }
+
     try {
         // -----------------------
         // payload
@@ -653,9 +660,10 @@ const closePopUp = (operate) => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Tracking Number -->
                 <div class="col-span-1 md:col-span-2 space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700 ml-1"
-                    >Tracking Number</label
-                  >
+                  <div class="flex items-center mb-1 ml-1">
+                    <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+                    <span class="text-red-500 ml-1">*</span>
+                  </div>
                   <div class="relative group">
                     <div
                       class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -663,14 +671,10 @@ const closePopUp = (operate) => {
                       <svg
                         class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
                         xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
+                        viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                          clip-rule="evenodd"
-                        />
+                       <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
                       </svg>
                     </div>
                     <input
@@ -684,9 +688,10 @@ const closePopUp = (operate) => {
 
                 <!-- Company -->
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700 ml-1"
-                    >Transport Company</label
-                  >
+                  <div class="flex items-center mb-1 ml-1">
+                    <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
+                    <span class="text-red-500 ml-1">*</span>
+                  </div>
                   <div class="relative group">
                     <div
                       class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
