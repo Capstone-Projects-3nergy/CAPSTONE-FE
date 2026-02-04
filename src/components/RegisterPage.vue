@@ -5,8 +5,10 @@ import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
 const authManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
@@ -324,6 +326,8 @@ const submitForm = async (roleType) => {
         if (key === 'dormId') form[key] = null
         else form[key] = ''
       })
+
+
     } else if (res.status === 404) {
       isEmailExist.value = true
       setTimeout(() => (isEmailExist.value = false), 10000)

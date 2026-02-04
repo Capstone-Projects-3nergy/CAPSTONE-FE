@@ -16,6 +16,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import { getItems, addItem } from '@/utils/fetchUtils'
 import WebHeader from './WebHeader.vue'
 const addSuccess = ref(false)
@@ -44,6 +45,7 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
 
+const notificationManager = useNotificationManager()
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
   return (
@@ -390,6 +392,7 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
+    notificationManager.notifyParcelAdded(savedParcel)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 

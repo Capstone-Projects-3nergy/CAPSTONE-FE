@@ -160,6 +160,46 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     unreadCount,
     markAsRead,
     addNotification,
-    fetchNotifications
+    fetchNotifications,
+    notifyParcelAdded: (parcel) => {
+      addNotification({
+        type: 'new',
+        label: 'New Parcel Arrived',
+        title: `A new parcel (${parcel.trackingNumber}) has arrived for ${parcel.recipientName}`,
+        user: 'Parcel System',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
+    notifyParcelReceived: (parcel) => {
+      addNotification({
+        type: 'connect',
+        label: 'Parcel Received',
+        title: `Parcel ${parcel.trackingNumber} has been marked as Received`,
+        user: 'Parcel System',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
+    notifyParcelPickup: (parcel) => {
+      addNotification({
+        type: 'connect',
+        label: 'Parcel Picked Up',
+        title: `Parcel ${parcel.trackingNumber} has been picked up`,
+        user: 'Parcel System',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
+    notifyWelcome: (username) => {
+      addNotification({
+        type: 'message',
+        label: 'Welcome',
+        title: `Welcome ${username}! Your ${roleText} account has been created.`,
+        user: 'System Admin',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    }
   }
 })

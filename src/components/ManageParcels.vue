@@ -11,6 +11,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
 import ParcelsDetail from './ParcelsDetail.vue'
 import ChangeParcelStatus from './ChangeParcelStatus.vue'
@@ -63,6 +64,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const notificationManager = useNotificationManager()
 const emit = defineEmits(['add-success'])
 const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
@@ -488,6 +490,12 @@ const showDelComplete = () => {
 }
 const showStatusComplete = (updatedParcel) => {
   parcelManager.updateParcel(updatedParcel)
+
+  if (updatedParcel.parcelStatus === 'Received') {
+    notificationManager.notifyParcelReceived(updatedParcel)
+  } else if (updatedParcel.parcelStatus === 'Picked Up') {
+    notificationManager.notifyParcelPickup(updatedParcel)
+  }
 
   statusSuccess.value = true
   setTimeout(() => (statusSuccess.value = false), 10000)

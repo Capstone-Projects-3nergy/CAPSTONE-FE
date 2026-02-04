@@ -13,9 +13,14 @@ import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
-
+import LineNotificationManager from '@/stores/LineNotificationManager'
 const loginManager = useAuthManager()
 
+
+// await LineNotificationManager.sendToGroup(
+//   'GROUP_ID',
+//   'มีพัสดุมาถึงแล้ว 📦'
+// )
 // notification state
 const notification = ref({
   show: false,
