@@ -209,13 +209,13 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         isRead: false
       })
     },
-    notifyWelcome: (username, role = 'STAFF') => {
-      const roleText = role === 'RESIDENT' ? 'resident' : 'staff'
+    notifyWelcome: (username, role = 'RESIDENT') => {
+      const roleText = role === 'RESIDENT' ? 'resident' : 'user'
       addNotification({
         type: 'message',
         label: 'Welcome',
         title: `Welcome ${username}! Your ${roleText} account has been created.`,
-        user: 'System Admin',
+        user: 'Dormitory Office',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
       })
