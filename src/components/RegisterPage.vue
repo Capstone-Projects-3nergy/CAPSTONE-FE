@@ -327,6 +327,11 @@ const submitForm = async (roleType) => {
         else form[key] = ''
       })
 
+      // Trigger Welcome Notification
+      notificationManager.notifyWelcome(payload.firstName, payload.role)
+      const key = `welcome_shown_${payload.email}`
+      localStorage.setItem(key, 'true')
+
 
     } else if (res.status === 404) {
       isEmailExist.value = true

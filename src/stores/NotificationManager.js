@@ -126,15 +126,17 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const addNotification = (note) => {
     // Generate a simple ID (in real app, use UUID or backend id)
     const newId = notifications.value.length > 0 ? Math.max(...notifications.value.map(n => n.id)) + 1 : 1
-    notifications.value.unshift({ ...note, id: newId, isRead: false })
+    // Mark manual notifications as local so they aren't overwritten easily by full refreshes if we merge
+    notifications.value.unshift({ ...note, id: newId, isRead: false, isLocal: true })
     saveToLocalStorage()
   }
 
   const fetchNotifications = async (router) => {
     // Replace with your actual backend endpoint
     const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
+    
     if (data && Array.isArray(data) && data.length > 0) {
-      notifications.value = data.map((n) => {
+      const backendNotifications = data.map((n) => {
           // Map Backend DB Schema to Frontend Model
         return {
           id: n.notification_id,
@@ -153,18 +155,31 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           status: n.status, // Keep raw status too just in case
           // Keep raw data if needed
           parcelId: n.parcel_id,
-          userId: n.user_id
+          userId: n.user_id,
+          isLocal: false // Mark as coming from backend
         }
       })
+
+      // MERGE STRATEGY: Keep local notifications that are NOT in backend (e.g. temporary alerts like Welcome)
+      const localNotifications = notifications.value.filter(n => n.isLocal)
+      
+      // Combine: Local first (usually newer) or sort by time if prefer
+      // For now, let's put local ones at the top or try to merge intelligently.
+      // Simple merge: Properties from backend override, but we keep purely local ones.
+      
+      notifications.value = [...localNotifications, ...backendNotifications]
+      
+      // Optional: Sort by time desc if we had reliable date objects, but 'time' string is fmt. 
+      // If we use created_at/sentAt validation?
+      // Let's rely on unshift order for locals for now, assuming they are "new".
+
       saveToLocalStorage()
     } else {
       // Fallback to default if backend returns nothing or specific error
+      // Only reset to defaults if we have absolutely nothing in the current state (no local, no backend)
       if (notifications.value.length === 0) {
-         // Only reset to defaults if we have absolutely nothing even in local storage (handled by initial load)
-         // But if we want to force re-fetch logic to respect defaults on empty backend response:
-         // For now, let's keep the localStorage state if backend fails, or defaults if empty.
-         // Actually, if we are simulating backend with defaults, we should check if we already have data
-         if (!storedNotifications) {
+         const currentStored = localStorage.getItem('notifications')
+         if (!currentStored) {
              notifications.value = [...defaultNotifications]
              saveToLocalStorage()
          }
@@ -221,6 +236,16 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         label: 'Welcome',
         title: `Welcome ${username}! Your ${roleText} account has been created.`,
         user: 'Dormitory Office',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
+    notifyLogin: (username, role = 'RESIDENT') => {
+      addNotification({
+        type: 'message',
+        label: 'Login Success',
+        title: `Welcome back, ${username}! Login successful.`,
+        user: 'System',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
       })

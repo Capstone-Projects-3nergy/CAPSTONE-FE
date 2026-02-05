@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import {
@@ -17,6 +18,7 @@ import axios from 'axios'
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const selectedResidentId = ref(null)
 
 const router = useRouter()
@@ -600,6 +602,9 @@ const addResidents = async () => {
     }
     // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
+
+    // Trigger Welcome Notification
+    notificationManager.notifyWelcome(form.value.firstName, 'RESIDENT')
 
     // -----------------------
     // success

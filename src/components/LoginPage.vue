@@ -125,7 +125,7 @@ const loginHomePageWeb = async () => {
         const key = `welcome_shown_${currentUser.email}`
         if (!localStorage.getItem(key)) {
           // In-App Notification
-          notificationManager.notifyWelcome(
+          notificationManager.notifyLogin(
             currentUser.fullName || currentUser.email,
             currentUser.role
           )
