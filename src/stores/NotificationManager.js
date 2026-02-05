@@ -146,7 +146,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           time: n.sent_at 
             ? new Date(n.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
             : '',
+          sentAt: n.sent_at, // Raw sent_at
+          createdAt: n.created_at,
+          updatedAt: n.updated_at,
           isRead: n.status === 'read', // Assuming 'read' vs 'unread'
+          status: n.status, // Keep raw status too just in case
           // Keep raw data if needed
           parcelId: n.parcel_id,
           userId: n.user_id
