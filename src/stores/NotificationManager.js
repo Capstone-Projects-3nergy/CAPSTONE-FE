@@ -4,96 +4,96 @@ import { getNotifications } from '@/utils/fetchUtils'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
   const defaultNotifications = [
-    {
-      id: 1,
-      type: 'new',
-      label: 'New Parcel Arrived',
-      title: 'A new parcel has arrived at the dormitory office',
-      user: 'Parcel System',
-      time: '15 Jan 2026 · 09:10 AM',
-      isRead: false
-    },
-    {
-      id: 2,
-      type: 'message',
-      label: 'Pickup Reminder',
-      title: 'You have a parcel waiting for pickup',
-      user: 'Dormitory Office',
-      time: '15 Jan 2026 · 10:30 AM',
-      isRead: false
-    },
-    {
-      id: 3,
-      type: 'comment',
-      label: 'Parcel Note',
-      title: 'Staff added a note to your parcel record',
-      user: 'Admin Staff',
-      time: '15 Jan 2026 · 11:00 AM',
-      isRead: false
-    },
-    {
-      id: 4,
-      type: 'connect',
-      label: 'Parcel Assigned',
-      title: 'A parcel has been assigned to your room',
-      user: 'Parcel Management System',
-      time: '15 Jan 2026 · 11:45 AM',
-      isRead: false
-    },
-    {
-      id: 5,
-      type: 'message',
-      label: 'Pickup Confirmation',
-      title: 'Your parcel has been successfully picked up',
-      user: 'Dormitory Office',
-      time: '15 Jan 2026 · 01:15 PM',
-      isRead: false
-    },
-    {
-      id: 6,
-      type: 'new',
-      label: 'New Parcel Arrived',
-      title: 'A new parcel has arrived for Room 304',
-      user: 'Parcel System',
-      time: '15 Jan 2026 · 02:40 PM',
-      isRead: false
-    },
-    {
-      id: 7,
-      type: 'comment',
-      label: 'Delivery Update',
-      title: 'Courier updated the delivery status of your parcel',
-      user: 'Courier Service',
-      time: '15 Jan 2026 · 03:20 PM',
-      isRead: false
-    },
-    {
-      id: 8,
-      type: 'connect',
-      label: 'Room Verification',
-      title: 'Your room number has been verified for parcel delivery',
-      user: 'Dormitory Admin',
-      time: '15 Jan 2026 · 04:05 PM',
-      isRead: false
-    },
-    {
-      id: 9,
-      type: 'message',
-      label: 'Parcel Reminder',
-      title: 'Please collect your parcel before storage deadline',
-      user: 'Dormitory Office',
-      time: '15 Jan 2026 · 05:30 PM',
-      isRead: false
-    },
-    {
-      id: 10,
-      type: 'new',
-      label: 'Parcel Stored',
-      title: 'Your parcel is stored safely at the dormitory office',
-      user: 'Parcel System',
-      time: '15 Jan 2026 · 06:10 PM',
-      isRead: false
-    }
+    // {
+    //   id: 1,
+    //   type: 'new',
+    //   label: 'New Parcel Arrived',
+    //   title: 'A new parcel has arrived at the dormitory office',
+    //   user: 'Parcel System',
+    //   time: '15 Jan 2026 · 09:10 AM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 2,
+    //   type: 'message',
+    //   label: 'Pickup Reminder',
+    //   title: 'You have a parcel waiting for pickup',
+    //   user: 'Dormitory Office',
+    //   time: '15 Jan 2026 · 10:30 AM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 3,
+    //   type: 'comment',
+    //   label: 'Parcel Note',
+    //   title: 'Staff added a note to your parcel record',
+    //   user: 'Admin Staff',
+    //   time: '15 Jan 2026 · 11:00 AM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 4,
+    //   type: 'connect',
+    //   label: 'Parcel Assigned',
+    //   title: 'A parcel has been assigned to your room',
+    //   user: 'Parcel Management System',
+    //   time: '15 Jan 2026 · 11:45 AM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 5,
+    //   type: 'message',
+    //   label: 'Pickup Confirmation',
+    //   title: 'Your parcel has been successfully picked up',
+    //   user: 'Dormitory Office',
+    //   time: '15 Jan 2026 · 01:15 PM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 6,
+    //   type: 'new',
+    //   label: 'New Parcel Arrived',
+    //   title: 'A new parcel has arrived for Room 304',
+    //   user: 'Parcel System',
+    //   time: '15 Jan 2026 · 02:40 PM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 7,
+    //   type: 'comment',
+    //   label: 'Delivery Update',
+    //   title: 'Courier updated the delivery status of your parcel',
+    //   user: 'Courier Service',
+    //   time: '15 Jan 2026 · 03:20 PM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 8,
+    //   type: 'connect',
+    //   label: 'Room Verification',
+    //   title: 'Your room number has been verified for parcel delivery',
+    //   user: 'Dormitory Admin',
+    //   time: '15 Jan 2026 · 04:05 PM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 9,
+    //   type: 'message',
+    //   label: 'Parcel Reminder',
+    //   title: 'Please collect your parcel before storage deadline',
+    //   user: 'Dormitory Office',
+    //   time: '15 Jan 2026 · 05:30 PM',
+    //   isRead: false
+    // },
+    // {
+    //   id: 10,
+    //   type: 'new',
+    //   label: 'Parcel Stored',
+    //   title: 'Your parcel is stored safely at the dormitory office',
+    //   user: 'Parcel System',
+    //   time: '15 Jan 2026 · 06:10 PM',
+    //   isRead: false
+    // }
   ]
 
   // Load from localStorage or use defaults
@@ -124,9 +124,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   }
 
   const addNotification = (note) => {
-    // Generate a simple ID (in real app, use UUID or backend id)
-    const newId = notifications.value.length > 0 ? Math.max(...notifications.value.map(n => n.id)) + 1 : 1
-    // Mark manual notifications as local so they aren't overwritten easily by full refreshes if we merge
+    // Generate a unique ID using timestamp and random string to avoid collision with backend IDs
+    const newId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // Mark manual notifications as local so they aren't overwritten easily by full refreshes
     notifications.value.unshift({ ...note, id: newId, isRead: false, isLocal: true })
     saveToLocalStorage()
   }
@@ -135,11 +135,16 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     // Replace with your actual backend endpoint
     const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
     
-    if (data && Array.isArray(data) && data.length > 0) {
+    // Always preserve local notifications (e.g. Welcome)
+    // Harden: Check for isLocal flag OR if the ID starts with 'local-' to catch legacy items
+    const localNotifications = notifications.value.filter(n => n.isLocal || (typeof n.id === 'string' && n.id.startsWith('local-')))
+
+    if (data && Array.isArray(data)) { 
+      // If we got a valid array (empty or not), update the state
       const backendNotifications = data.map((n) => {
           // Map Backend DB Schema to Frontend Model
         return {
-          id: n.notification_id,
+          id: n.notification_id, // Ensure this is unique from local IDs
           type: n.notification_type || 'message', // Default to message if missing
           label: n.noti_title || 'Notification', // Header
           title: n.noti_message || '', // Body/Content
@@ -160,22 +165,15 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         }
       })
 
-      // MERGE STRATEGY: Keep local notifications that are NOT in backend (e.g. temporary alerts like Welcome)
-      const localNotifications = notifications.value.filter(n => n.isLocal)
+      // Combine: Local first (allow them to float to top if new) or backend first? 
+      // Usually we want newest on top.
+      const allNotifications = [...localNotifications, ...backendNotifications]
       
-      // Combine: Local first (usually newer) or sort by time if prefer
-      // For now, let's put local ones at the top or try to merge intelligently.
-      // Simple merge: Properties from backend override, but we keep purely local ones.
-      
-      notifications.value = [...localNotifications, ...backendNotifications]
-      
-      // Optional: Sort by time desc if we had reliable date objects, but 'time' string is fmt. 
-      // If we use created_at/sentAt validation?
-      // Let's rely on unshift order for locals for now, assuming they are "new".
-
+      // Optional: Sort by time if needed, but for now just replacing state
+      notifications.value = allNotifications
       saveToLocalStorage()
     } else {
-      // Fallback to default if backend returns nothing or specific error
+      // Fallback if backend returns null/undefined (error case)
       // Only reset to defaults if we have absolutely nothing in the current state (no local, no backend)
       if (notifications.value.length === 0) {
          const currentStored = localStorage.getItem('notifications')

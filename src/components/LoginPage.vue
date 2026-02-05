@@ -122,15 +122,15 @@ const loginHomePageWeb = async () => {
         currentUser &&
         currentUser.role === 'RESIDENT'
       ) {
+        // Always show In-App Login Notification
+        notificationManager.notifyLogin(
+          currentUser.fullName || currentUser.email,
+          currentUser.role
+        )
+
         const key = `welcome_shown_${currentUser.email}`
         if (!localStorage.getItem(key)) {
-          // In-App Notification
-          notificationManager.notifyLogin(
-            currentUser.fullName || currentUser.email,
-            currentUser.role
-          )
-          
-          // LINE Notification
+          // LINE Notification (First time only)
           try {
             await LineNotificationManager.sendToGroup(
               'GROUP_ID', 
