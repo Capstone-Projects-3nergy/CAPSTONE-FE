@@ -103,10 +103,10 @@ const showManageParcelPage = async function () {
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
-  showManageAnnouncement.value = true
+  // router.replace({
+  //   name: 'manageannouncement'
+  // })
+  // showManageAnnouncement.value = true
 }
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })

@@ -354,10 +354,7 @@ const showAddParcelPage = async function () {
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement' })
-  showManageAnnouncement.value = true
-}
+
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
@@ -534,10 +531,13 @@ const showHomePageResidentWeb = async function () {
   showHomePageResident.value = true
 }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
-  showAnnouncement.value = true
+  // router.replace({ name: 'announcement' })
+  // showAnnouncement.value = true
 }
-
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
 const showProfileResidentPage = async function () {
   router.replace({
     name: 'profileresident'
@@ -978,7 +978,7 @@ function formatDateTime(datetimeStr) {
           <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
             <!-- News Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showAnnouncementPage()"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
@@ -1007,7 +1007,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- Event Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
@@ -1036,7 +1036,7 @@ function formatDateTime(datetimeStr) {
 
              <!-- Community Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
@@ -1145,7 +1145,7 @@ function formatDateTime(datetimeStr) {
                 >
                 <template #sort-room>
                     <svg
-                    class="cursor-pointer hover:scale-110 transition-transform"
+                    class="cursor-pointer"
                     @click="toggleSortRoom"
                     width="17"
                     height="12"
@@ -1169,7 +1169,7 @@ function formatDateTime(datetimeStr) {
 
                 <template #sort-status>
                     <svg
-                    class="cursor-pointer hover:scale-110 transition-transform"
+                    class="cursor-pointer"
                     @click="toggleSortStatus"
                     width="17"
                     height="12"
@@ -1193,7 +1193,7 @@ function formatDateTime(datetimeStr) {
 
                 <template #sort-date>
                     <svg
-                    class="cursor-pointer hover:scale-110 transition-transform"
+                    class="cursor-pointer"
                     @click="toggleSortDate"
                     width="17"
                     height="12"
@@ -1216,46 +1216,42 @@ function formatDateTime(datetimeStr) {
                 </template>
 
                 <template #icon-view>
-                    <div class="hover:bg-blue-50 p-1.5 rounded-full transition-colors group">
-                        <svg
-                        class="cursor-pointer text-[#107EFF] group-hover:scale-110 transition-transform"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        >
-                        <path
-                            d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                            fill="currentColor"
-                        />
-                        <path
-                            d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                            fill="currentColor"
-                        />
-                        </svg>
-                    </div>
+                    <svg
+                    class="cursor-pointer text-[#107EFF]"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                        fill="currentColor"
+                    />
+                    <path
+                        d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                        fill="currentColor"
+                    />
+                    </svg>
                 </template>
                 <template #icon-delete>
-                    <div class="hover:bg-red-50 p-1.5 rounded-full transition-colors group">
-                        <svg
-                        class="cursor-pointer text-red-500 group-hover:scale-110 transition-transform"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 21"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        >
-                        <path
-                            d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-                1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-                V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-                21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-                V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                            fill="currentColor"
-                        />
-                        </svg>
-                    </div>
+                    <svg
+                    class="cursor-pointer text-red-500"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 21"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+            1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+            V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+            21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+            V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                        fill="currentColor"
+                    />
+                    </svg>
                 </template>
                 </ParcelTable>
             </div>
