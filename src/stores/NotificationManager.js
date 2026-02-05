@@ -135,12 +135,13 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
     if (data && Array.isArray(data) && data.length > 0) {
       notifications.value = data.map((n) => {
-        // Map Backend DB Schema to Frontend Model
+          // Map Backend DB Schema to Frontend Model
         return {
           id: n.notification_id,
           type: n.notification_type || 'message', // Default to message if missing
           label: n.noti_title || 'Notification', // Header
           title: n.noti_message || '', // Body/Content
+          message: n.noti_message || '', // Explicit mapping for clarity
           user: n.sender_name || 'System', // Adjust if backend sends sender info, else default
           time: n.sent_at 
             ? new Date(n.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })

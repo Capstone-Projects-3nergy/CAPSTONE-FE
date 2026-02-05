@@ -81,10 +81,10 @@ const badgeIcon = (type) => {
             </div>
             <div>
               <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
-                {{ notification.label }}
+                {{ notification.type }}
               </p>
               <h3 class="text-xl font-bold text-gray-900 leading-tight">
-                {{ notification.title }}
+                {{ notification.label }}
               </h3>
             </div>
         </div>
@@ -98,9 +98,16 @@ const badgeIcon = (type) => {
           </div>
           
           <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
-             <!-- In a real app this would be a separate content/body field, falling back to title for now -->
-             {{ notification.message || notification.title }}
-             <br/><br/>
+             {{ notification.title }}
+             
+             <div v-if="notification.parcelId" class="mt-4 pt-4 border-t border-gray-200">
+                <button class="text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1">
+                  View Parcel Details 
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </button>
+             </div>
+
+             <br v-if="notification.type === 'new'" /><br v-if="notification.type === 'new'" />
              <span v-if="notification.type === 'new'" class="italic text-gray-400 text-xs">
                Please check with the office for your parcel.
              </span>
@@ -113,9 +120,6 @@ const badgeIcon = (type) => {
                 </div>
                 <span class="text-sm font-medium text-gray-900">{{ notification.user }}</span>
              </div>
-             
-             <!-- Close button handled by top-right X or backdrop for now to match request implied simplicity, 
-                  but user commented out the bottom close button in previous edits. I'll leave it as is, using top-right X. -->
           </div>
         </div>
       </div>
