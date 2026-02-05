@@ -63,14 +63,36 @@ const showLogoutConfirm = ref(false)
 const companyList = ref([])
 
 const form = ref({
-  trackingNumber: '',
-  companyId: '',
-  residentName: ''
+  residentName: '',
+  items: [{
+    trackingNumber: '',
+    companyId: '',
+    trackingNumber: '',
+    companyId: '',
+    description: '',
+    parcelType: ''
+  }]
 })
 
 const isFormValid = computed(() => {
-  return form.value.trackingNumber && form.value.companyId
+  return form.value.residentName && form.value.items.every(item => item.trackingNumber && item.companyId)
 })
+
+const addParcelItem = () => {
+  form.value.items.push({
+    trackingNumber: '',
+    companyId: '',
+    companyId: '',
+    description: '',
+    parcelType: ''
+  })
+}
+
+const removeParcelItem = (index) => {
+  if (form.value.items.length > 1) {
+    form.value.items.splice(index, 1)
+  }
+}
 
 const mapParcelData = (data) => ({
   parcelId: data.parcelId,
@@ -130,9 +152,10 @@ const getParcelDetail = async (tid) => {
   if (localParcel) {
     parcel.value = localParcel
     // Pre-fill form if viewing a specific parcel
-    form.value.trackingNumber = localParcel.trackingNumber
-    form.value.recipientName = localParcel.recipientName
-    form.value.companyId = localParcel.companyId
+    form.value.items[0].trackingNumber = localParcel.trackingNumber
+    form.value.residentName = localParcel.recipientName
+    form.value.items[0].companyId = localParcel.companyId
+    form.value.items[0].parcelType = localParcel.parcelType || ''
     return
   }
 
@@ -148,9 +171,12 @@ const getParcelDetail = async (tid) => {
       parcel.value = mapped
       parcelStore.addParcel(mapped)
        // Pre-fill form
-      form.value.trackingNumber = mapped.trackingNumber
-      form.value.recipientName = mapped.recipientName
-      form.value.companyId = mapped.companyId
+      form.value.items[0].trackingNumber = mapped.trackingNumber
+      form.value.residentName = mapped.recipientName
+      form.value.items[0].trackingNumber = mapped.trackingNumber
+      form.value.residentName = mapped.recipientName
+      form.value.items[0].companyId = mapped.companyId
+      form.value.items[0].parcelType = mapped.parcelType
     }
   } catch (err) {}
 }
@@ -165,9 +191,14 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   await getCompanies()
   if (tidNum) {
+      // Ensure the first item has parcelType initialized if it wasn't
+      if (form.value.items[0] && !form.value.items[0].parcelType) {
+          form.value.items[0].parcelType = ''
+      }
       getParcelDetail(tidNum)
   }
 })
@@ -178,13 +209,6 @@ const submitVerification = async () => {
     confirmSuccess.value = false
     errorMessage.value = ''
 
-    const thaiRegex = /[\u0E00-\u0E7F]/
-    if (thaiRegex.test(form.value.trackingNumber)) {
-        error.value = true
-        errorMessage.value = 'Tracking number cannot contain Thai characters.'
-        return
-    }
-
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
@@ -192,53 +216,76 @@ const submitVerification = async () => {
         return
     }
 
-    try {
-        // -----------------------
-        // payload
-        // -----------------------
-        const body = {
-            trackingNumber: form.value.trackingNumber,
-            companyId: form.value.companyId,
-            residentName: form.value.residentName
-        }
-
-        // -----------------------
-        // API call
-        // -----------------------
-        const result = await parcelVerificationStore.saveParcelVerification(
-            body,
-            router
-        )
-
-        if (!result) {
+    const thaiRegex = /[\u0E00-\u0E7F]/
+    for (const item of form.value.items) {
+        if (thaiRegex.test(item.trackingNumber)) {
             error.value = true
-            errorMessage.value = 'Verification failed. Please try again.'
+            errorMessage.value = `Tracking number "${item.trackingNumber}" cannot contain Thai characters.`
             return
         }
-        
-        // -----------------------
-        // success
-        // -----------------------
-        
-        // Add to Pinia store (like parcel)
-        if (result.parcelId) {
-             const mapped = mapParcelData(result)
-             parcelVerificationStore.addVerifiedParcel(mapped)
+    }
+
+    try {
+        let successCount = 0
+        for (const item of form.value.items) {
+            // -----------------------
+            // payload
+            // -----------------------
+            const body = {
+                trackingNumber: item.trackingNumber,
+                companyId: item.companyId,
+                residentName: form.value.residentName,
+                trackingNumber: item.trackingNumber,
+                companyId: item.companyId,
+                residentName: form.value.residentName,
+                parcelType: item.parcelType
+            }
+
+            // -----------------------
+            // API call
+            // -----------------------
+            const result = await parcelVerificationStore.saveParcelVerification(
+                body,
+                router
+            )
+
+            // Check if result is valid object (success)
+            if (!result || typeof result !== 'object') {
+                error.value = true
+                errorMessage.value = typeof result === 'number' 
+                    ? `Verification failed for ${item.trackingNumber} with status: ${result}` 
+                    : `Verification failed for ${item.trackingNumber}. Please try again.`
+                return
+            }
+            
+            // -----------------------
+            // success
+            // -----------------------
+            
+            // Add to Pinia store (like parcel)
+            if (result.parcelId) {
+                 const mapped = mapParcelData(result)
+                 parcelVerificationStore.addVerifiedParcel(mapped)
+                 successCount++
+            }
         }
 
-        confirmSuccess.value = true
-        
-        // Reset form
-        form.value.trackingNumber = ''
-        form.value.companyId = ''
-        form.value.residentName = ''
+        if (successCount > 0) {
+            confirmSuccess.value = true
+            
+            // Reset form
+            form.value.residentName = ''
+            form.value.residentName = ''
+            form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
 
-        // Auto hide success msg
-        setTimeout(() => (confirmSuccess.value = false), 5000)
+            // Auto hide success msg
+            setTimeout(() => (confirmSuccess.value = false), 5000)
+        }
 
     } catch (err) {
         console.error(err)
         error.value = true
+        errorMessage.value = 'An unexpected error occurred.'
     }
 }
 
@@ -657,105 +704,132 @@ const closePopUp = (operate) => {
             </div>
 
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Tracking Number -->
-                <div class="col-span-1 md:col-span-2 space-y-2">
-                  <div class="flex items-center mb-1 ml-1">
-                    <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+              <div class="space-y-6">
+                <!-- Resident Name (Common) -->
+                <div>
+                  <div class="flex items-center ml-1">
+                    <label class="block text-sm font-semibold text-gray-700 ml-1 mb-1">Resident Name</label>
                     <span class="text-red-500 ml-1">*</span>
                   </div>
                   <div class="relative group">
-                    <div
-                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                    >
-                      <svg
-                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                       <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                       </svg>
                     </div>
                     <input
-                      type="text"
-                      v-model="form.trackingNumber"
-                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
-                      placeholder="e.g. TH123456789"
-                    />
-                  </div>
-                </div>
-
-                <!-- Company -->
-                <div class="space-y-2">
-                  <div class="flex items-center mb-1 ml-1">
-                    <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
-                    <span class="text-red-500 ml-1">*</span>
-                  </div>
-                  <div class="relative group">
-                    <div
-                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                    >
-                      <svg
-                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
-                        />
-                        <path
-                          d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z"
-                        />
-                      </svg>
-                    </div>
-                    <select
-                      v-model="form.companyId"
-                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
-                    >
-                      <option value="" disabled selected>Select Company</option>
-                      <option
-                        v-for="c in companyList"
-                        :key="c.companyId"
-                        :value="c.companyId"
-                      >
-                        {{ c.companyName }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Resident Name -->
-                <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700 ml-1"
-                    >Recipient Name</label
-                  >
-                  <div class="relative group">
-                    <div
-                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                    >
-                      <svg
-                        class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
                       v-model="form.residentName"
+                      type="text"
                       class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
-                      placeholder="Name on Parcel"
+                      placeholder="Ex. kong"
                     />
                   </div>
+                  <p class="text-xs text-gray-400 mt-1 ml-1">
+                    *Enter resident name to assign all parcels below.
+                  </p>
                 </div>
+
+                <!-- Dynamic Parcel List -->
+                <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
+                  <div class="absolute top-4 right-4" v-if="form.items.length > 1">
+                    <button @click="removeParcelItem(index)" type="button" class="text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full shadow-sm border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tracking Number -->
+                    <div class="col-span-1 md:col-span-2 space-y-2">
+                      <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+                        <span class="text-red-500 ml-1">*</span>
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
+                          </svg>
+                        </div>
+                        <input
+                          v-model="item.trackingNumber"
+                          type="text"
+                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                          placeholder="Ex. TH12345678"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Parcel Type (Optional) -->
+                    <div class="space-y-2">
+                       <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Parcel Type (Optional)</label>
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
+                          </svg>
+                        </div>
+                        <select
+                          v-model="item.parcelType"
+                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                        >
+                          <option disabled value="">Select Parcel Type</option>
+                          <option value="DOCUMENT">Document</option>
+                          <option value="BOX">Box</option>
+                          <option value="ELECTRONIC">Electronic</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="space-y-2">
+                      <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
+                        <span class="text-red-500 ml-1">*</span>
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                             <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                             <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
+                          </svg>
+                        </div>
+                        <select
+                          v-model="item.companyId"
+                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                        >
+                          <option value="" disabled>Select Company</option>
+                          <option
+                            v-for="comp in companyList"
+                            :key="comp.companyId"
+                            :value="comp.companyId"
+                          >
+                            {{ comp.companyName }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+
+                  </div>
+                </div>
+
+                <!-- Add Button -->
+                <button
+                  @click="addParcelItem"
+                  type="button"
+                  class="w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#0E4B90] hover:text-[#0E4B90] transition-colors flex items-center justify-center gap-2 group font-medium cursor-pointer"
+                >
+                  <div class="bg-gray-100 rounded-full p-1 group-hover:bg-blue-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  Add Another Parcel
+                </button>
               </div>
 
               <div class="flex items-center justify-end space-x-4 pt-6 mt-4">
