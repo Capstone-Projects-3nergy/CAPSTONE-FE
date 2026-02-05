@@ -275,7 +275,7 @@ const toggleSortDate = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-[#F5F7FA] flex flex-col font-sans"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -542,403 +542,179 @@ const toggleSortDate = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 w-full">
-        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
-          <section class="p-4">
-            <!-- <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 44 44"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+      <main class="flex-1 p-6 md:p-10 w-full font-sans">
+        <!-- Hero / Carousel Section -->
+        <div class="bg-white p-6 shadow-sm rounded-2xl mb-8">
+          <section class="relative rounded-xl overflow-hidden shadow-md group">
+            <div class="relative h-[350px] md:h-[450px] w-full">
+              <div
+                v-for="(slide, index) in slides"
+                :key="index"
+                class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
+                :class="{
+                  'opacity-100': index === currentIndex,
+                  'opacity-0': index !== currentIndex
+                }"
               >
-                <path
-                  d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
-                  fill="#185DC0"
-                />
-              </svg>
-              Home Page
-            </h1> -->
-
-            <div
-              class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
-            >
-              <button
-                @click="prevSlide"
-                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
-              >
-                ‹
-              </button>
-
-              <div class="relative w-full h-full">
                 <img
-                  :src="slides[currentIndex]"
-                  class="w-full h-full object-cover"
+                  :src="slide"
+                  alt="Carousel Image"
+                  class="w-full h-full object-cover transform transition-transform duration-10000 group-hover:scale-105"
                 />
-
-                <div
-                  class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"
-                ></div>
-
-                <div
-                  class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20"
-                >
-                  <h1 class="text-2xl font-bold drop-shadow-lg">
+              </div>
+              
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12">
+                  <h1 class="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg tracking-tight">
                     Welcome to Tractify
                   </h1>
-                  <p class="text-sm opacity-90">
-                    Track and manage your parcels easily
+                  <p class="text-white/90 text-lg md:text-2xl font-light tracking-wide max-w-2xl">
+                    Experience seamless community management and effortless parcel tracking.
                   </p>
-                </div>
               </div>
 
+              <!-- Navigation Buttons -->
+              <button
+                @click="prevSlide"
+                class="absolute left-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"
+                  />
+                </svg>
+              </button>
               <button
                 @click="nextSlide"
-                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
+                class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
               >
-                ›
-              </button>
-            </div>
-          </section>
-
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="newsImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="eventImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">
-                💬 COMMUNITY
-              </h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="communityImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-          </section>
-
-          <!-- <div class="p-4">
-            <div class="flex space-x-1">
-              <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
-                <path
-                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                  fill="#185DC0"
-                />
-              </svg>
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                Resident Parcel
-              </h2>
-            </div>
-          </div> -->
-          <!-- <ParcelTable
-            :can-next="canGoNext"
-            :items="paginatedParcels"
-            :pages="visiblePages"
-            :page="currentPage"
-            :total="totalPages"
-            :show-action="false"
-            @prev="prevPage"
-            @next="nextPage"
-            @go="goToPage"
-            @status-click="openStatusPopup"
-            @view-detail="showParcelDetail"
-          >
-            <template #sort-room>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortRoom"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-status>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortStatus"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-
-            <template #sort-date>
-              <svg
-                class="cursor-pointer"
-                @click="toggleSortDate"
-                width="17"
-                height="12"
-                viewBox="0 0 17 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                  fill="#185DC0"
-                />
-                <path
-                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                  stroke="#5C9BEB"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </template>
-          </ParcelTable> -->
-          <!-- 
-          <div
-            class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden"
-          >
-            <table class="min-w-full text-left border-collapse">
-              <thead
-                class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
-              >
-                <tr>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Tracking
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Name
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Room
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortRoom"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    Email
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Status
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortStatus"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                    <div class="flex items-center gap-2">
-                      Update At
-                      <svg
-                        class="cursor-pointer"
-                        @click="toggleSortDate"
-                        width="17"
-                        height="12"
-                        viewBox="0 0 17 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                          fill="#185DC0"
-                        />
-                        <path
-                          d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                          stroke="#5C9BEB"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y">
-                <tr
-                  v-for="p in paginatedParcels"
-                  :key="p.id"
-                  class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
                 >
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 hover:text-blue-900 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Tracking:
-                    </span>
-                    {{ p.trackingNumber }}
-                  </td>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </button>
+              
+              <!-- Dots Indicator -->
+               <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                <span
+                  v-for="(slide, index) in slides"
+                  :key="index"
+                  @click="currentIndex = index"
+                  class="h-2.5 rounded-full cursor-pointer transition-all duration-500 border border-white/30 shadow-sm"
+                  :class="index === currentIndex ? 'bg-white w-10' : 'bg-white/40 w-2.5 hover:bg-white/70'"
+                ></span>
+              </div>
+            </div>
+          </section>
 
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Name:
-                    </span>
-                    {{ p.recipientName }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Room:
-                    </span>
-                    {{ p.roomNumber }}
-                  </td>
-
-                  <td
-                    class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                  >
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Email:
-                    </span>
-                    {{ p.email }}
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 border-b md:border-none">
-                    <span class="md:hidden font-semibold text-blue-700"
-                      >Status:
-                    </span>
-                    <span
-                      class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                      :class="{
-                        'bg-yellow-400': p.status === 'Waiting for Staff',
-                        'bg-green-400': p.status === 'Picked Up',
-                        'bg-blue-400': p.status === 'Received'
-                      }"
-                    >
-                      {{ p.status }}
-                    </span>
-                  </td>
-
-                  <td class="px-4 py-2 md:py-3 text-sm text-gray-700">
-                    <span class="md:hidden font-semibold text-blue-700">
-                      Update:
-                    </span>
-                    {{ formatDateTime(p.updateAt) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+          <!-- Cards Section -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+            <!-- News Card -->
+            <div
+              @click="ShowManageAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
-              &lt; Previous
-            </button>
+              <div class="h-56 overflow-hidden relative">
+                 <div class="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="newsImg"
+                  alt="News"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-[#0E4B90] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    LATEST
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">NEWS</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                  Stay informed with the latest updates, official announcements, and important notices from the management.
+                </p>
+                <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    Read Articles <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
 
-            <button
-              class="cursor-pointer"
-              v-for="page in visiblePages"
-              :key="page + Math.random()"
-              @click="goToPage(page)"
-              :class="[
-                'px-3 py-1 rounded',
-                currentPage === page
-                  ? 'bg-blue-700 text-white'
-                  : 'hover:bg-gray-200',
-                page === '...' ? 'cursor-default' : ''
-              ]"
-              :disabled="page === '...'"
+            <!-- Event Card -->
+            <div
+              @click="ShowManageAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
-              {{ page }}
-            </button>
+              <div class="h-56 overflow-hidden relative">
+                  <div class="absolute inset-0 bg-purple-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="eventImg"
+                  alt="Event"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-purple-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    UPCOMING
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                 <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">EVENT</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                  Discover upcoming community gatherings, workshops, and social activities designed for you.
+                </p>
+                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    See Calendar <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
 
-            <button
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+             <!-- Community Card -->
+            <div
+              @click="ShowManageAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
-              Next &gt;
-            </button>
-          </div> -->
+              <div class="h-56 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-green-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="communityImg"
+                  alt="Community"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    SOCIAL
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">COMMUNITY</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                   Join the conversation, share your thoughts, and connect with neighbors to build a vibrant community.
+                </p>
+                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    Get Involved <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>

@@ -860,7 +860,7 @@ onMounted(async () => {
       </button>
 
       <main class="flex-1 p-9">
-        <div class="flex space-x-1 mb-4">
+    <div class="flex items-center space-x-2 mb-6">
           <svg
             width="25"
             height="25"
@@ -873,8 +873,8 @@ onMounted(async () => {
               fill="#185DC0"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcels ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0] mb-4">Add</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
         </div>
 
         <div

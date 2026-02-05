@@ -8,9 +8,9 @@ defineProps({
 <template>
   <div
     @click="$emit('click')"
-    class="flex items-center gap-3 p-4 cursor-pointer rounded transition-all duration-200"
+    class="flex items-center gap-3 p-4 cursor-pointer rounded-xl transition-all duration-300 ease-in-out hover:scale-[1.02]"
     :class="{
-      'hover:bg-[#81AFEA]': title !== 'Tractify'
+      'hover:bg-white/20 hover:shadow-lg': title !== 'Tractify'
     }"
   >
     <slot name="icon"></slot>
