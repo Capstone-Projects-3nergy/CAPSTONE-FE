@@ -242,7 +242,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       addNotification({
         type: 'message',
         label: 'Login Success',
-        title: `Welcome back, ${username}! Login successful.`,
+        title: `Welcome back, ${username}!`,
         user: 'System',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
