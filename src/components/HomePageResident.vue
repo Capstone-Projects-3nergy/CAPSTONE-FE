@@ -16,6 +16,8 @@ import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
+import { useNotificationManager } from '@/stores/NotificationManager'
+import { storeToRefs } from 'pinia'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -128,6 +130,9 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+    setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -180,6 +185,19 @@ autoClose(addSuccess)
 autoClose(editSuccess)
 autoClose(deleteSuccess)
 autoClose(error)
+
+const notificationStore = useNotificationManager()
+const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
+const { closeWelcomePopup } = notificationStore
+
+// Auto-close welcome popup
+watch(welcomePopupVisible, (val) => {
+  if (val) {
+    setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
+  }
+})
 
 const searchKeyword = ref('')
 const activeTab = ref('Day')
@@ -610,6 +628,15 @@ function formatDateTime(datetimeStr) {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
+    <div class="px-6 mt-4">
+      <AlertPopUp
+        v-if="welcomePopupVisible"
+        :message="'Hi'"
+        :titles="welcomePopupMessage"
+        styleType="blue"
+        @closePopUp="closeWelcomePopup"
+      />
+    </div>
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"

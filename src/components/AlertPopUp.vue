@@ -5,7 +5,7 @@ const props = defineProps({
   styleType: {
     type: String,
     validator(value) {
-      return ['green', 'red', 'yellow'].includes(value)
+      return ['green', 'red', 'yellow', 'blue'].includes(value)
     }
   },
   operate: {
@@ -28,6 +28,8 @@ const emit = defineEmits(['closePopUp'])
           ? 'bg-red-100 border border-red-400 text-red-700'
           : styleType === 'yellow'
           ? 'bg-yellow-100 border border-yellow-400 text-yellow-700'
+          : styleType === 'blue'
+          ? 'bg-blue-100 border border-blue-400 text-blue-700'
           : 'bg-gray-100 border border-gray-400 text-gray-700'
       "
       role="alert"
@@ -50,6 +52,8 @@ const emit = defineEmits(['closePopUp'])
               ? 'text-red-500'
               : styleType === 'yellow'
               ? 'text-yellow-500'
+              : styleType === 'black'
+              ? 'text-gray-400'
               : 'text-gray-500'
           "
           xmlns="http://www.w3.org/2000/svg"

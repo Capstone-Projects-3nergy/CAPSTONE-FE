@@ -101,6 +101,15 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const initialNotifications = storedNotifications ? JSON.parse(storedNotifications) : [...defaultNotifications]
   
   const notifications = ref(initialNotifications)
+  const welcomePopupVisible = ref(false)
+  const welcomePopupMessage = ref('')
+
+  const closeWelcomePopup = () => {
+    welcomePopupVisible.value = false
+    setTimeout(() => {
+      welcomePopupMessage.value = ''
+    }, 300)
+  }
 
   const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
 
@@ -228,25 +237,22 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       })
     },
     notifyWelcome: (username, role = 'RESIDENT') => {
-      const roleText = role === 'RESIDENT' ? 'resident' : 'user'
       addNotification({
         type: 'message',
         label: 'Welcome',
-        title: `Welcome ${username}! Your ${roleText} account has been created.`,
+        title: `Welcome ${username}! Your ${role === 'RESIDENT' ? 'resident' : 'user'} account has been created.`,
         user: 'Dormitory Office',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
       })
     },
+    welcomePopupVisible,
+    welcomePopupMessage,
+    closeWelcomePopup,
     notifyLogin: (username, role = 'RESIDENT') => {
-      addNotification({
-        type: 'message',
-        label: 'Login Success',
-        title: `Welcome back, ${username}!`,
-        user: 'System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+      const roleText = role === 'RESIDENT' ? 'resident' : 'user'
+      welcomePopupMessage.value = `Welcome , ${username}!`
+      welcomePopupVisible.value = true
     },
     parcelNotifications: computed(() => {
         const PARCEL_TYPES = ['new', 'comment', 'connect']

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch  } from 'vue'
 import ParcelScanner from '@/components/ParcelScannerPage.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AlertPopUp from './../components/AlertPopUp.vue'
@@ -14,6 +14,8 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
+import { useNotificationManager } from '@/stores/NotificationManager'
+import { storeToRefs } from 'pinia'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -132,6 +134,18 @@ const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
 
+const notificationStore = useNotificationManager()
+const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
+const { closeWelcomePopup } = notificationStore
+
+watch(welcomePopupVisible, (val) => {
+  if (val) {
+    setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
+  }
+})
+
 const parcelManager = useParcelManager()
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
@@ -140,8 +154,9 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  console.log(loginStore.user)
-  console.log()
+  setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
   checkScreen()
   window.addEventListener('resize', checkScreen)
   const data = await getItems(
@@ -264,6 +279,15 @@ const toggleSortDate = () => {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
+    <div class="px-6 mt-4">
+      <AlertPopUp
+        v-if="welcomePopupVisible"
+        :message="'Hi'"
+        :titles="welcomePopupMessage"
+        styleType="blue"
+        @closePopUp="closeWelcomePopup"
+      />
+    </div>
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
