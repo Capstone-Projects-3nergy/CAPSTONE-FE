@@ -244,10 +244,13 @@ const submitVerification = async () => {
             // -----------------------
             // API call
             // -----------------------
-            const result = await parcelVerificationStore.saveParcelVerification(
-                body,
-                router
-            )
+            const url = `${import.meta.env.VITE_BASE_URL}/api/verify`
+            let result = null 
+            try {
+               result = await addItem(url, body, router)
+            } catch (error) {
+               console.error('Error verifying parcel:', error)
+            }
 
             // Check if result is valid object (success)
             if (!result || typeof result !== 'object') {
