@@ -145,6 +145,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'PENDING':
+      return 'Pending'
     default:
       return status
   }
@@ -703,9 +705,9 @@ const fetchTrash = async () => {
       id: p.parcelId,
       trackingNumber: p.trackingNumber,
       recipientName: p.ownerName,
-      roomNumber: p.roomNumber,
       email: p.contactEmail,
-      status: p.status,
+      roomNumber: p.roomNumber,
+      status: mapStatus(p.status),
       deletedAt: p.deletedAt || null
     }))
 

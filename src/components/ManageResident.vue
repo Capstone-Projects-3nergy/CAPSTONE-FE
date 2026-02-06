@@ -132,6 +132,8 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
       return 'Received'
+    case 'PENDING':
+      return 'Pending'
     default:
       return status
   }
