@@ -157,10 +157,10 @@ const handleProfile = async () => {
     >
       <div
         v-if="showHoverInfo && !showDropdown"
-        class="absolute right-0 top-12 w-max max-w-xs bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-100 z-40 pointer-events-none"
+        class="absolute right-0 top-12 w-max max-w-xs bg-gray-400/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-400 z-40 pointer-events-none"
       >
-        <p class="font-medium text-sm text-gray-900">{{ userName }}</p>
-        <p class="text-xs text-gray-500">{{ userEmail }}</p>
+        <p class="font-medium text-sm text-white">{{ userName }}</p>
+        <p class="text-xs text-white">{{ userEmail }}</p>
       </div>
     </transition>
 

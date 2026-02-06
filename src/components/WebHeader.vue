@@ -62,6 +62,7 @@ const showNotification = computed(
       <div class="flex-1 flex justify-end items-center gap-5">
         <div class="relative group">
           <div class="relative">
+            <div class="transition-transform duration-200 ease-out hover:scale-110">
             <svg
               v-if="showNotification && authStore.user.role === 'RESIDENT'"
               @click="openNotification"
@@ -90,6 +91,7 @@ const showNotification = computed(
                 </clipPath>
               </defs>
             </svg>
+            </div>
             <div
               v-if="
                 notificationStore.unreadCount > 0 && role === 'RESIDENT'

@@ -197,7 +197,9 @@ const getInitial = (name) => {
           >
             <div class="flex items-center gap-2">
               Room
-              <slot name="sort-room"></slot>
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-room"></slot>
+              </div>
             </div>
           </th>
 
@@ -209,7 +211,9 @@ const getInitial = (name) => {
           >
             <div class="flex items-center gap-2">
               Status
-              <slot name="sort-status"></slot>
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-status"></slot>
+              </div>
             </div>
           </th>
 
@@ -219,7 +223,9 @@ const getInitial = (name) => {
           >
             <div class="flex items-center gap-2">
               Updated At
-              <slot name="sort-date"></slot>
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-date"></slot>
+              </div>
             </div>
           </th>
           <th
@@ -228,7 +234,9 @@ const getInitial = (name) => {
           >
             <div class="flex items-center gap-2">
               Deleted At
-              <slot name="sort-date"></slot>
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-date"></slot>
+              </div>
             </div>
           </th>
           <th
@@ -237,7 +245,9 @@ const getInitial = (name) => {
           >
             <div class="flex items-center gap-2">
               Status
-              <slot name="sort-status"></slot>
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-status"></slot>
+              </div>
             </div>
           </th>
           <th
@@ -425,7 +435,9 @@ const getInitial = (name) => {
               @click="$emit('view-detail', p.id)"
               class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
             >
-              <slot name="icon-view"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-view"></slot>
+              </div>
 
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
@@ -447,7 +459,9 @@ const getInitial = (name) => {
               @click="$emit('view-detail', p.id)"
               class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
             >
-              <slot name="icon-view-member"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-view-member"></slot>
+              </div>
 
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
@@ -470,7 +484,9 @@ const getInitial = (name) => {
               @click="$emit('delete', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -492,7 +508,9 @@ const getInitial = (name) => {
               @click="$emit('delete', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -515,7 +533,9 @@ const getInitial = (name) => {
               @click="$emit('delete', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete-permanent"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete-permanent"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -536,7 +556,9 @@ const getInitial = (name) => {
               @click="$emit('delete', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete-permanent"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete-permanent"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -557,7 +579,9 @@ const getInitial = (name) => {
               @click="$emit('restore', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="restore-trash"> </slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="restore-trash"> </slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -579,7 +603,9 @@ const getInitial = (name) => {
               @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -602,7 +628,9 @@ const getInitial = (name) => {
               @click="$emit('deleteMember', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="icon-delete-permanent"></slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="icon-delete-permanent"></slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
@@ -623,7 +651,9 @@ const getInitial = (name) => {
               @click="$emit('restoreMember', p)"
               class="relative group cursor-pointer"
             >
-              <slot name="restore-trash"> </slot>
+              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+                <slot name="restore-trash"> </slot>
+              </div>
               <div
                 class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
               >
