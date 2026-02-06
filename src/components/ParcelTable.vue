@@ -487,7 +487,7 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-2 md:table-cell md:gap-1 md:align-middle space-x-1 md:space-x-1"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-1 md:table-cell md:gap-1 md:align-middle md:space-x-1"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
 
