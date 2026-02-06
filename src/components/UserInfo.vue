@@ -18,10 +18,13 @@ const role = computed(() => authStore.user?.role)
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
+const userEmail = computed(() => authStore.user?.email || '')
 const showDropdown = ref(false)
+const showHoverInfo = ref(false)
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+  showHoverInfo.value = false
 }
 
 const closeDropdown = () => {
@@ -61,7 +64,7 @@ const userRole = computed(() => {
     case 'STAFF':
       return authStore.user.position
     case 'RESIDENT':
-      return 'Resident'
+      return 'Resident' 
     default:
       return 'User'
   }
@@ -107,6 +110,7 @@ const openProfile = () => {
     })
   }
 }
+
 const handleLogout = async () => {
   closeDropdown()
   await returnLoginPage()
@@ -119,7 +123,12 @@ const handleProfile = async () => {
 <template>
   <div class="relative">
     <!-- avatar trigger -->
-    <div class="flex items-center cursor-pointer" @click="toggleDropdown">
+    <div
+      class="flex items-center cursor-pointer"
+      @click="toggleDropdown"
+      @mouseenter="showHoverInfo = true"
+      @mouseleave="showHoverInfo = false"
+    >
       <div
         class="w-10 h-10 rounded-full overflow-hidden bg-[#0E4B90] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition"
       >
@@ -136,6 +145,24 @@ const handleProfile = async () => {
         </div>
       </div>
     </div>
+
+    <!-- hover info tooltip -->
+    <transition
+      enter-active-class="transition ease-out duration-150"
+      enter-from-class="opacity-0 translate-y-1"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0 translate-y-1"
+    >
+      <div
+        v-if="showHoverInfo && !showDropdown"
+        class="absolute right-0 top-12 w-max max-w-xs bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-100 z-40 pointer-events-none"
+      >
+        <p class="font-medium text-sm text-gray-900">{{ userName }}</p>
+        <p class="text-xs text-gray-500">{{ userEmail }}</p>
+      </div>
+    </transition>
 
     <!-- dropdown -->
     <transition
