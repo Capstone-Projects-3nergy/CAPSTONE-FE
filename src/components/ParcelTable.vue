@@ -383,7 +383,7 @@ const authStore = useAuthManager()
             v-if="showStatus"
             class="px-4 py-2 md:py-3 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
+            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
 
             <div class="relative group inline-block">
               <span
@@ -438,7 +438,7 @@ const authStore = useAuthManager()
             v-if="showActionStatus"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
+            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -487,7 +487,7 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-2 md:table-cell md:align-middle space-x-1 md:space-x-1"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-2 md:table-cell md:gap-1 md:align-middle space-x-1 md:space-x-1"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
 
