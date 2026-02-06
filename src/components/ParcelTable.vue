@@ -228,7 +228,7 @@ const authStore = useAuthManager()
               </div>
             </div>
           </th>
-          <th
+          <!-- <th
             v-if="showDeletedAt"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
           >
@@ -238,7 +238,7 @@ const authStore = useAuthManager()
                 <slot name="sort-date"></slot>
               </div>
             </div>
-          </th>
+          </th> -->
           <th
             v-if="showActionStatus"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
@@ -247,6 +247,17 @@ const authStore = useAuthManager()
               Status
               <div class="transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-status"></slot>
+              </div>
+            </div>
+          </th>
+           <th
+            v-if="showDeletedAt"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            <div class="flex items-center gap-2">
+              Deleted At
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-date"></slot>
               </div>
             </div>
           </th>
@@ -379,6 +390,7 @@ const authStore = useAuthManager()
                 class="px-3 py-1 rounded-full text-xs font-semibold text-white"
                 :class="[
                   {
+                    'bg-yellow-400': p.status === 'Waiting for Staff',
                     'bg-yellow-400': p.status === 'Pending',
                     'bg-green-400': p.status === 'Picked Up',
                     'bg-blue-400': p.status === 'Received',
@@ -422,16 +434,7 @@ const authStore = useAuthManager()
             >
             {{ formatDateTime(p.updateAt) }}
           </td>
-          <td
-            v-if="showDeletedAt"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-          >
-            <span class="md:hidden font-semibold text-[#185DC0]"
-              >Deleted At:</span
-            >
-            {{ formatDateTime(p.deletedAt) }}
-          </td>
-          <td
+            <td
             v-if="showActionStatus"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
@@ -452,6 +455,36 @@ const authStore = useAuthManager()
               {{ p.status }}
             </span>
           </td>
+          <td
+            v-if="showDeletedAt"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]"
+              >Deleted At:</span
+            >
+            {{ formatDateTime(p.deletedAt) }}
+          </td>
+          <!-- <td
+            v-if="showActionStatus"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
+
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              :class="[
+                {
+                  'bg-green-400': p.status === 'ACTIVE',
+                  'bg-gray-400': p.status === 'INACTIVE',
+                  'bg-red-400': p.status === 'DELETED',
+                  'bg-yellow-400': p.status === 'PENDING'
+                },
+                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
+              ]"
+            >
+              {{ p.status }}
+            </span>
+          </td> -->
           <td
             v-if="showAction"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-2 md:table-cell md:align-middle space-x-1 md:space-x-1"
