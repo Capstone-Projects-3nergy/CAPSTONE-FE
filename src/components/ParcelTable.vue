@@ -490,7 +490,7 @@ const authStore = useAuthManager()
             class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-1 md:table-cell md:gap-1 md:align-middle"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
-
+            <div class="flex items-center gap-1">
             <button
               @click="$emit('view-detail', p.id)"
               class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
@@ -730,6 +730,7 @@ const authStore = useAuthManager()
                 </div>
               </div>
             </button>
+            </div>
           </td>
         </tr>
       </tbody>
