@@ -9,6 +9,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 const emit = defineEmits(['click'])
@@ -37,9 +41,13 @@ const textClass = computed(() => {
 <template>
   <button
     @click="$emit('click')"
-    :disabled="disabled"
-    :class="`${bgClass} ${textClass} px-5 py-2 rounded cursor-pointer`"
+    :disabled="disabled || loading"
+    :class="`${bgClass} ${textClass} px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2`"
   >
-    {{ label }}
+    <div
+      v-if="loading"
+      class="w-5 h-5 rounded-full border-2 border-gray-200 border-t-white animate-spin"
+    ></div>
+    {{ loading ? 'Loading...' : label }}
   </button>
 </template>

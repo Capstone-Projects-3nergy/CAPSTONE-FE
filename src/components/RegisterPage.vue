@@ -48,6 +48,7 @@ const router = useRouter()
 const isPasswordVisible = ref(false)
 const isComfirmPasswordVisible = ref(false)
 const isEmailExist = ref(false)
+const loading = ref(false)
 const form = reactive({
   fullName: '',
   email: '',
@@ -316,6 +317,7 @@ const submitForm = async (roleType) => {
       }
     }
 
+    loading.value = true
     const res = await authManager.registerAccount(payload)
 
     if (res.status === 201 || res.status === 200) {
@@ -344,7 +346,10 @@ const submitForm = async (roleType) => {
       setTimeout(() => (error.value = false), 10000)
     } else {
     }
-  } catch (err) {}
+  } catch (err) {
+  } finally {
+    loading.value = false
+  }
 }
 
 const checkInputLength = (field) => {
@@ -1213,6 +1218,7 @@ const toggleComfirmPasswordVisibility = () => {
           <ButtonWeb
             v-if="role === 'resident'"
             label="Sign Up"
+            :loading="loading"
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
@@ -1246,6 +1252,7 @@ const toggleComfirmPasswordVisibility = () => {
           <ButtonWeb
             v-if="role === 'staff'"
             label="Sign Up"
+            :loading="loading"
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
