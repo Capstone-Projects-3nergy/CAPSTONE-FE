@@ -227,14 +227,14 @@ const submitVerification = async () => {
 
     try {
         let successCount = 0
+        let failCount = 0
+        let failedItems = []
+
         for (const item of form.value.items) {
             // -----------------------
             // payload
             // -----------------------
             const body = {
-                trackingNumber: item.trackingNumber,
-                companyId: item.companyId,
-                residentName: form.value.residentName,
                 trackingNumber: item.trackingNumber,
                 companyId: item.companyId,
                 residentName: form.value.residentName,
@@ -254,11 +254,9 @@ const submitVerification = async () => {
 
             // Check if result is valid object (success)
             if (!result || typeof result !== 'object') {
-                error.value = true
-                errorMessage.value = typeof result === 'number' 
-                    ? `Verification failed for ${item.trackingNumber} with status: ${result}` 
-                    : `Verification failed for ${item.trackingNumber}. Please try again.`
-                return
+                failCount++
+                failedItems.push(item.trackingNumber)
+                continue // Continue to next item
             }
             
             // -----------------------
@@ -273,16 +271,33 @@ const submitVerification = async () => {
             }
         }
 
+        // Summary handling
         if (successCount > 0) {
             confirmSuccess.value = true
             
-            // Reset form
-            form.value.residentName = ''
+            if (failCount > 0) {
+                // Partial success
+                error.value = true
+                errorMessage.value = `Verified ${successCount} parcels. Failed: ${failedItems.join(', ')}`
+            } else {
+                // All success
+                errorMessage.value = '' // Clear any previous errors
+            }
+
+            // Reset form completely if at least one succeeded (or maybe improve UX to keep failed ones? 
+            // For now, simpler to reset as per original logic, but user sees the error msg)
             form.value.residentName = ''
             form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
 
             // Auto hide success msg
-            setTimeout(() => (confirmSuccess.value = false), 5000)
+            setTimeout(() => {
+                confirmSuccess.value = false
+                error.value = false
+            }, 5000)
+        } else if (failCount > 0) {
+            // All failed
+            error.value = true
+            errorMessage.value = `Verification failed for all items (${failedItems.join(', ')}). Please try again.`
         }
 
     } catch (err) {
