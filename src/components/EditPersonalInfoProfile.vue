@@ -400,6 +400,13 @@ function onImageChange(e) {
   }
 }
 
+function removeImage() {
+  newAvatar.value = null
+  // Reset input if exists
+  const input = document.querySelector('input[type="file"]')
+  if (input) input.value = null
+}
+
 // function save() {
 //   const payload = {
 //     firstName: form.value.firstName,
@@ -1040,6 +1047,44 @@ const isSaveDisabled = computed(() => {
               class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-4xl"
             >
               {{ userInitial }}
+            </div>
+          </div>
+
+          <!-- ❌ Remove icon (only show when new image is selected) -->
+          <div
+            v-if="newAvatar"
+            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
+            @click.stop="removeImage"
+          >
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="#EF4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+
+            <!-- Tooltip -->
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
+              >
+                Remove Image
+              </div>
             </div>
           </div>
 
