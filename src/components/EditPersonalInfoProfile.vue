@@ -3,6 +3,7 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
+import LoadingPopUp from './LoadingPopUp.vue'
 import ImageCropperModal from './ImageCropperModal.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import {
@@ -50,6 +51,7 @@ const props = defineProps({
   editResidentDetail: { type: Boolean, required: false }
 })
 const newAvatar = ref(null)
+const loading = ref(false)
 const showCropper = ref(false)
 const tempImageSrc = ref('')
 
@@ -597,6 +599,7 @@ const addResidents = async () => {
   // -----------------------
   // CHECK DUPLICATE EMAIL
   // -----------------------
+  loading.value = true
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
@@ -608,6 +611,7 @@ const addResidents = async () => {
     )
 
     if (isDuplicate) {
+      loading.value = false
       emit('email-duplicate', true)
       return
     }
@@ -642,10 +646,12 @@ const addResidents = async () => {
     )
 
     if (!savedMember) {
+      loading.value = false
       emit('errorAddProfile')
       return
     }
     if (savedMember.status === 400) {
+      loading.value = false
       emit('email-duplicate', true)
       return
     }
@@ -671,100 +677,15 @@ const addResidents = async () => {
       phoneNumber: ''
     })
 
+    loading.value = false
     newAvatar.value = null
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('errorAddProfile')
   }
 }
-
-// const addResidents = async () => {
-//   // -----------------------
-//   // validate name (ไทย + อังกฤษ)
-//   // -----------------------
-//   const nameRegex = /^[A-Za-zก-๙\s]+$/
-
-//   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
-//     emit('first-name-error', true)
-//     return
-//   }
-
-//   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
-//     emit('last-name-error', true)
-//     return
-//   }
-
-//   // -----------------------
-//   // validate email
-//   // -----------------------
-//   if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
-//     emit('errorAddProfile')
-//     return
-//   }
-
-//   // -----------------------
-//   // validate phone (optional)
-//   // -----------------------
-//   if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
-//     emit('phone-error', true)
-//     return
-//   }
-
-//   try {
-//     // -----------------------
-//     // payload
-//     // -----------------------
-//     const body = {
-//       firstName: form.value.firstName.trim(),
-//       lastName: form.value.lastName.trim(),
-//       email: form.value.email.trim(),
-//       roomNumber: form.value.roomNumber || null,
-//       lineId: form.value.lineId || null,
-//       phoneNumber: form.value.phoneNumber || null
-//     }
-
-//     if (newAvatar.value) {
-//       body.profileImage = newAvatar.value
-//     }
-
-//     // -----------------------
-//     // API call
-//     // -----------------------
-//     const result = await addMemberWithFile(
-//       `${import.meta.env.VITE_BASE_URL}/api/members`,
-//       body,
-//       router
-//     )
-
-//     if (!result) {
-//       emit('errorAddProfile')
-//       return
-//     }
-
-//     // -----------------------
-//     // success
-//     // -----------------------
-//     emit('successAddProfile')
-
-//     // reset form (เหมือน saveParcel)
-//     form.value = {
-//       firstName: '',
-//       lastName: '',
-//       email: '',
-//       roomNumber: '',
-//       lineId: '',
-//       position: '',
-//       phoneNumber: ''
-//     }
-
-//     newAvatar.value = null
-//     isEdit.value = false
-//   } catch (err) {
-//     console.error(err)
-//     emit('errorAddProfile')
-//   }
-// }
 
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
@@ -838,6 +759,7 @@ const saveEditProfile = async () => {
     // -----------------------
     // API call
     // -----------------------
+    loading.value = true
     const updated = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
       body,
@@ -845,10 +767,12 @@ const saveEditProfile = async () => {
     )
 
     if (!updated) {
+      loading.value = false
       emit('error', true)
       return
     }
     await getProfile()
+    loading.value = false
     // profileManager.setCurrentProfile(profile)
     // 🔥 sync ทุก store
     profileManager.setCurrentProfile(updated)
@@ -861,6 +785,7 @@ const saveEditProfile = async () => {
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('error', true)
   }
 }
@@ -939,6 +864,7 @@ const saveEditDetail = async () => {
     // -----------------------
     // API call
     // -----------------------
+    loading.value = true
     const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       form.value.userId,
@@ -947,6 +873,7 @@ const saveEditDetail = async () => {
     )
 
     if (!updated) {
+      loading.value = false
       emit('error', true)
       return
     }
@@ -980,10 +907,12 @@ const saveEditDetail = async () => {
 
     originalForm.value = { ...form.value }
 
+    loading.value = false
     emit('success', true)
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('error', true)
   }
 }
@@ -1542,6 +1471,7 @@ const isSaveDisabled = computed(() => {
     @close="closeCropper"
     @crop="onCrop"
   />
+  <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>
