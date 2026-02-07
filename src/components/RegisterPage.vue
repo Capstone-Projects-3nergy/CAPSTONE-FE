@@ -809,7 +809,6 @@ const toggleComfirmPasswordVisibility = () => {
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
                     class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                    required
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -883,7 +882,6 @@ const toggleComfirmPasswordVisibility = () => {
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
                     class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                    required
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
