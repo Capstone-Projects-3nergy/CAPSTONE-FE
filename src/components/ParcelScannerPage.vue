@@ -1081,7 +1081,7 @@ onMounted(async () => {
 
               <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan QR"
+                  label="Scarn"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
