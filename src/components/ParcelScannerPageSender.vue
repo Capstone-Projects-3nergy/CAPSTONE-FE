@@ -140,7 +140,9 @@ async function extractParcelInfo(imageDataUrl) {
 
     const info = {
       recipientName: '',
-      trackingNumber: ''
+      trackingNumber: '',
+      senderName: '',
+      parcelType: ''
     }
 
     // 👤 Recipient
@@ -153,10 +155,62 @@ async function extractParcelInfo(imageDataUrl) {
     const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
     if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
+    // 📤 Sender
+    const senderMatch = text.match(
+      /(ชื่อผู้ส่ง|ผู้ส่ง|From|Sender)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
+    )
+    if (senderMatch) info.senderName = senderMatch[2].trim()
+
+    // 📦 Parcel Type
+    if (text.match(/(กล่อง|Box)/i)) info.parcelType = 'BOX'
+    else if (text.match(/(ซอง|Document|Letter|Envelope)/i))
+      info.parcelType = 'DOCUMENT'
+    else if (text.match(/(Electronic|Device)/i))
+      info.parcelType = 'ELECTRONIC'
+
     return info
   } catch {
     return null
   }
+}
+
+const processScanResult = (text) => {
+  if (!text) return
+
+  scanResult.value = text
+
+  try {
+    // Try to parse as JSON first
+    const data = JSON.parse(text)
+    
+    // If it's an object, map fields
+    if (typeof data === 'object' && data !== null) {
+      if (data.trackingNumber) form.value.trackingNumber = data.trackingNumber
+      if (data.recipientName) {
+        form.value.recipientName = data.recipientName
+        recipientSearch.value = data.recipientName
+        // Try to find resident by name if available
+        const resident = residents.value.find(r => {
+           const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
+           return fullName === data.recipientName.toLowerCase()
+        })
+        if (resident) {
+          selectedResidentId.value = resident.userId
+        }
+      }
+      if (data.senderName) form.value.senderName = data.senderName
+      if (data.parcelType) form.value.parcelType = data.parcelType
+      if (data.companyId) form.value.companyId = data.companyId
+      if (data.roomNumber) form.value.roomNumber = data.roomNumber
+      
+      return // Successfully processed as JSON
+    }
+  } catch (e) {
+    // Not JSON, fall back to simple string (tracking number)
+  }
+
+  // Fallback: Treat as tracking number
+  form.value.trackingNumber = text
 }
 
 const deleteScanResult = () => (scanResult.value = null)
@@ -212,8 +266,13 @@ async function capturePhoto() {
   if (!info) return
 
   // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
-  form.value.recipientName = info.recipientName || form.value.recipientName
-  form.value.trackingNumber = info.trackingNumber || ''
+  if (info.recipientName) {
+    form.value.recipientName = info.recipientName
+    recipientSearch.value = info.recipientName
+  }
+  if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
+  if (info.senderName) form.value.senderName = info.senderName
+  if (info.parcelType) form.value.parcelType = info.parcelType
 }
 
 function startQuagga() {
@@ -256,18 +315,17 @@ function startQuagga() {
   Quagga.onDetected((result) => {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
-
-      scanResult.value = detectedCode
-      form.value.trackingNumber = detectedCode
+      processScanResult(detectedCode)
 
       // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
-      if (detectedCode.startsWith('B')) {
-        // ตัวอย่าง logic
-        form.value.parcelType = 'BOX'
-      } else if (detectedCode.startsWith('D')) {
-        form.value.parcelType = 'DOCUMENT'
-      } else {
-        form.value.parcelType = 'ELECTRONIC'
+      if (!form.value.parcelType) {
+        if (detectedCode.startsWith('B')) {
+          form.value.parcelType = 'BOX'
+        } else if (detectedCode.startsWith('D')) {
+          form.value.parcelType = 'DOCUMENT'
+        } else {
+          form.value.parcelType = 'ELECTRONIC'
+        }
       }
 
       stopQuagga()
@@ -314,8 +372,7 @@ function startScan(mode) {
     html5QrCode
       .start({ facingMode: 'environment' }, config, (decodedText) => {
         const cleanText = decodedText.trim()
-        scanResult.value = cleanText
-        form.value.trackingNumber = cleanText
+        processScanResult(cleanText)
       })
       .catch((err) => {
         alert('Failed to start QR scanning.')
