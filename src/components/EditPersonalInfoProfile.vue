@@ -345,6 +345,22 @@ watch(
 //   emit('edit')
 // }
 
+const isFormEmpty = computed(() => {
+  const hasText =
+    form.value.firstName ||
+    form.value.lastName ||
+    form.value.email ||
+    form.value.roomNumber ||
+    form.value.lineId ||
+    form.value.position ||
+    form.value.phoneNumber ||
+    form.value.dormId
+
+  const hasImage = !!newAvatar.value
+
+  return !hasText && !hasImage
+})
+
 const profileImageUrlPreview = computed(() => {
   // ⭐ ADD MODE : ไม่ดึงรูปเก่าเด็ดขาด
   if (props.mode === 'add') {
@@ -1432,6 +1448,7 @@ const isSaveDisabled = computed(() => {
                   class="text-sm py-2 md:text-base md:py-2.5"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
+                  :disabled="isFormEmpty"
                   @click="submit"
                 />
                 <ButtonWeb
