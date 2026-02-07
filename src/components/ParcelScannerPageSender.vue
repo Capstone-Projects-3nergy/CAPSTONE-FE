@@ -276,6 +276,9 @@ async function capturePhoto() {
 }
 
 function startQuagga() {
+  let lastCode = ''
+  let count = 0
+
   Quagga.init(
     {
       inputStream: {
@@ -298,8 +301,6 @@ function startQuagga() {
           'ean_reader',
           'ean_8_reader',
           'code_39_reader',
-          'code_39_vin_reader',
-          'codabar_reader',
           'upc_reader',
           'upc_e_reader',
           'i2of5_reader'
@@ -308,6 +309,10 @@ function startQuagga() {
       locate: true
     },
     (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
       Quagga.start()
     }
   )
@@ -315,20 +320,30 @@ function startQuagga() {
   Quagga.onDetected((result) => {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
-      processScanResult(detectedCode)
 
-      // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
-      if (!form.value.parcelType) {
-        if (detectedCode.startsWith('B')) {
-          form.value.parcelType = 'BOX'
-        } else if (detectedCode.startsWith('D')) {
-          form.value.parcelType = 'DOCUMENT'
-        } else {
-          form.value.parcelType = 'ELECTRONIC'
-        }
+      if (detectedCode === lastCode) {
+        count++
+      } else {
+        lastCode = detectedCode
+        count = 0
       }
 
-      stopQuagga()
+      if (count >= 3) {
+        processScanResult(detectedCode)
+
+        // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
+        if (!form.value.parcelType) {
+          if (detectedCode.startsWith('B')) {
+            form.value.parcelType = 'BOX'
+          } else if (detectedCode.startsWith('D')) {
+            form.value.parcelType = 'DOCUMENT'
+          } else {
+            form.value.parcelType = 'ELECTRONIC'
+          }
+        }
+
+        stopScan()
+      }
     }
   })
 }
@@ -704,10 +719,18 @@ const closePopUp = (operate) => {
                   "
                 >
                   <div id="reader" class="w-full h-full"></div>
+                  <div
+                    v-if="scanningMode === 'barcode'"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                  >
+                    <div
+                      class="w-64 h-32 border-2 border-green-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
+                    ></div>
+                  </div>
                   <ButtonWeb
                     label="Cancel"
                     color="red"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600 z-20"
                     @click="stopScan"
                   />
                 </div>
@@ -731,9 +754,15 @@ const closePopUp = (operate) => {
 
               <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scarn"
+                  label="Scan QR"
                   color="blue"
                   @click="startScan('qr')"
+                  :disabled="scanningMode || videoStream"
+                />
+                <!-- <ButtonWeb
+                  label="Scan Barcode"
+                  color="blue"
+                  @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
@@ -748,7 +777,7 @@ const closePopUp = (operate) => {
                   color="green"
                   @click="capturePhoto"
                   :disabled="!isCameraReady"
-                />
+                /> -->
               </div>
 
               <div class="space-y-3 px-7">
@@ -960,7 +989,7 @@ const closePopUp = (operate) => {
                 />
                 <button
                   @click="deletePreview"
-                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100"
+                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100 cursor-pointer" 
                 >
                   ×
                 </button>
