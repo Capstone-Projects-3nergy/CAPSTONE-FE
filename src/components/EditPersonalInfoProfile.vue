@@ -3,6 +3,7 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
+import ImageCropperModal from './ImageCropperModal.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import {
   updateProfileWithFile,
@@ -49,6 +50,9 @@ const props = defineProps({
   editResidentDetail: { type: Boolean, required: false }
 })
 const newAvatar = ref(null)
+const showCropper = ref(false)
+const tempImageSrc = ref('')
+
 const emit = defineEmits([
   'edit',
   'save',
@@ -395,9 +399,31 @@ const profileImageUrlPreview = computed(() => {
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) {
-    newAvatar.value = file
-    e.target.value = null // ⭐ reset input
+    if (file.size > 2 * 1024 * 1024) {
+      emit('file-size-error', true)
+      e.target.value = null
+      return
+    }
+
+    // Open Cropper
+    tempImageSrc.value = URL.createObjectURL(file)
+    showCropper.value = true
+    e.target.value = null // Reset input to allow re-selecting same file
   }
+}
+
+function onCrop(blob) {
+  // Convert blob to File
+  const file = new File([blob], "avatar.jpg", { type: "image/jpeg" })
+  newAvatar.value = file
+  showCropper.value = false
+  // URL.revokeObjectURL(tempImageSrc.value) // Clean up
+  tempImageSrc.value = ''
+}
+
+function closeCropper() {
+  showCropper.value = false
+  tempImageSrc.value = ''
 }
 
 function removeImage() {
@@ -1509,6 +1535,13 @@ const isSaveDisabled = computed(() => {
       </div>
     </div>
   </div>
+
+  <ImageCropperModal
+    :isOpen="showCropper"
+    :imageSrc="tempImageSrc"
+    @close="closeCropper"
+    @crop="onCrop"
+  />
 </template>
 
 <style scoped></style>
