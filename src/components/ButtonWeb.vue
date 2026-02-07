@@ -27,7 +27,7 @@ const bgClass = computed(() => {
   if (props.color === 'black')
     return 'bg-black hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
   if (props.color === 'gray')
-    return 'bg-[#DADEE5] hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
+    return 'bg-[#DADEE5] hover:bg-gray-100 disabled:bg-gray-400 disabled:cursor-not-allowed'
 })
 const textClass = computed(() => {
   return props.color === 'gray' ? 'text-[#898989]' : 'text-white'

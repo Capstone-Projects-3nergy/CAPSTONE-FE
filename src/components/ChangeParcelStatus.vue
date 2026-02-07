@@ -219,7 +219,7 @@ const cancel = () => {
             <ButtonWeb
               label="Cancel"
               color="gray"
-              class="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition"
+              class="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium transition"
               @click="cancel"
             />
              <ButtonWeb
