@@ -672,7 +672,7 @@ const closePopUp = (operate) => {
                 />
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto">
+              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
