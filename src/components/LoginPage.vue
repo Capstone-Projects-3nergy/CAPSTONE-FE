@@ -119,7 +119,7 @@ const loginHomePageWeb = async () => {
       // Notification Logic
       const currentUser = authManager.user
       if (
-        currentUser &&
+        currentUser.role === 'STAFF' ||
         currentUser.role === 'RESIDENT'
       ) {
         // Always show In-App Login Notification
