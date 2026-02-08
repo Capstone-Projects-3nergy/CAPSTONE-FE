@@ -39,44 +39,7 @@ const profileManager = useProfileManager()
 const userManager = useUserManager()
 const resident = computed(() => props.residentData || {})
 const staff = computed(() => props.staffData || {})
-// const restoreParcelFn = async () => {
-//   if (!parcel.value?.id) return
-
-//   restoreParcels.value = await restoreParcel(
-//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
-//     parcel.value.id
-//   )
-//   if (restoreParcels.value === '404') {
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//     return
-//   }
-
-//   parcelManager.restoreFromTrash(parcel.value.id)
-//   emit('confirmDetail', true)
-// }
-const restoreResult = ref(null) // null | true | false
-
-// const restoreParcelFn = async () => {
-//   if (!parcel.value?.id) return
-
-//   restoreResult.value = null
-
-//   restoreResult.value = await restoreParcel(
-//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
-//     parcel.value.id,
-//     router
-//   )
-
-//   if (restoreResult.value !== true) {
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//     return
-//   }
-
-//   parcelManager.restoreFromTrash(parcel.value.id)
-//   emit('confirmDetail', true)
-// }
+const restoreResult = ref(null) 
 
 const restoreParcelFn = async () => {
   if (!parcel.value?.id) return
@@ -187,22 +150,6 @@ const confirmRestore = async () => {
   }
 }
 
-// const confirmRestore = async () => {
-//   try {
-//     if (props.showMember) {
-//       await restoreMemberFn()
-//     } else if (props.showStaff) {
-//       await restoreStaffFn()
-//     } else {
-//       await restoreParcelFn()
-//     }
-
-//     emit('confirmDetail', true)
-//   } catch (err) {
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//   }
-// }
 </script>
 
 <template>

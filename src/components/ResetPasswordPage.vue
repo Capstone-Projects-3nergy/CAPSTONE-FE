@@ -234,14 +234,6 @@ const returnLoginPage = () => {
             :disabled="isEmailOverLimit"
             @click="sendResetEmail"
           />
-          <!-- 
-          <p v-if="success" class="text-green-600 text-sm">
-            Reset password link has been sent to your email.
-          </p>
-
-          <p v-if="error" class="text-red-600 text-sm">
-            Failed to send reset password email.
-          </p> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-6">

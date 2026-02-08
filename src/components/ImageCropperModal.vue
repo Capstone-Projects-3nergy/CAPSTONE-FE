@@ -109,10 +109,6 @@ const cropImage = () => {
   // Get bounding rects (visual position)
   const containerRect = container.getBoundingClientRect()
   const imgRect = img.getBoundingClientRect()
-
-  // Calculate scaling relative to the output canvas size
-  // We want to map the visual representation in the container (256x256 visually)
-  // to the 500x500 canvas.
   const pixelRatio = size / containerRect.width
 
   // Calculate position relative to container

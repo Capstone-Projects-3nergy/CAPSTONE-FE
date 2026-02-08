@@ -59,64 +59,6 @@ const props = defineProps({
   showParcel: { type: Boolean, default: false },
 })
 
-
-// defineProps({
-//   items: Array,
-//   pages: Array,
-//   page: Number,
-//   total: Number,
-//   showPhoto: {
-//     type: Boolean,
-//     default: false
-//   },
-//   showActionStatus: {
-//     type: Boolean,
-//     default: false
-//   },
-//   showMemberName: {
-//     type: Boolean,
-//     default: false
-//   },
-//   showMobile: {
-//     type: Boolean,
-//     default: false
-//   },
-//   showName: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showAction: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showDelete: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showRestore: {
-//     type: Boolean,
-//     default: true
-//   },
-//   clickableStatus: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showTracking: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showRoom: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showStatus: {
-//     type: Boolean,
-//     default: true
-//   },
-//   showUpdateAt: { type: Boolean, default: true },
-//   showDeletedAt: { type: Boolean, default: false }
-// })
-
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
@@ -128,18 +70,6 @@ const getInitial = (name) => {
 
 const authStore = useAuthManager()
 
-// const userName = computed(() => authStore.user?.fullName || 'Courier')
-
-// const userInitial = computed(() =>
-//   userName.value ? userName.value[0].toUpperCase() : 'C'
-// )
-
-// // กรณีใช้ p.photo
-// // const hasAvatar = computed(() => !!p.photo)
-// // const avatar = computed(() => p.photo)
-
-// const avatar = computed(() => authStore.user?.photo || null)
-// const hasAvatar = computed(() => !!avatar.value)
 </script>
 <template>
   <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">

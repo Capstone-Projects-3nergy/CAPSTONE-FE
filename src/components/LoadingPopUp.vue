@@ -17,10 +17,6 @@ const emit = defineEmits(['closePopUp'])
         <div
           class="w-12 h-12 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin"
         ></div>
-        <!-- Optional: Center dot or icon -->
-        <!-- <div class="absolute inset-0 flex items-center justify-center">
-             <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
-        </div> -->
       </div>
       <div class="flex flex-col items-center">
         <h3 class="text-lg font-semibold text-gray-800">

@@ -79,11 +79,6 @@ const emit = defineEmits([
 
 const isEdit = ref(false)
 const dormList = ref([])
-// const forms = reactive({
-//   dormId: null
-// })
-
-// form data
 const form = ref({
   userId: null,
   firstName: '',
@@ -236,22 +231,6 @@ onMounted(async () => {
 
       originalForm.value = { ...form.value }
     }
-
-    // if (props.mode === 'edit') {
-    //   form.value = {
-    //     userId: profile.userId,
-    //     firstName: profile.firstName || '',
-    //     lastName: profile.lastName || '',
-    //     email: profile.email || '',
-    //     roomNumber: profile.roomNumber || '',
-    //     dormName: dormName || '',
-    //     lineId: profile.lineId || '',
-    //     position: profile.position || '',
-    //     phoneNumber: profile.phoneNumber || ''
-    //   }
-    // }
-    // // ใช้สำหรับ compare ตอน edit
-    // originalForm.value = { ...form.value }
   } catch (err) {
     console.error(err)
   }
@@ -488,14 +467,6 @@ const userInitial = computed(() => {
   return userName.value ? userName.value.trim()[0].toUpperCase() : ''
 })
 
-// const userInitial = computed(() =>
-//   userName.value ? userName.value[0].toUpperCase() : ''
-// )
-
-// function updateUser(data) {
-//   console.log('ข้อมูลใหม่:', data)
-//   // API update...
-// }
 const submit = async () => {
   if (props.mode === 'add') {
     await addResidents()
@@ -513,13 +484,6 @@ const submit = async () => {
   }
 }
 
-// const submit = async () => {
-//   if (props.mode === 'add') {
-//     await addResidents()
-//   } else {
-//     await saveEditProfile()
-//   }
-// }
 const addResidents = async () => {
   // -----------------------
   // REQUIRED FIELD CHECK
@@ -574,14 +538,6 @@ const addResidents = async () => {
     return
   }
 
-  // if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
-  //   emit('errorAddProfile')
-  //   return
-  // }
-
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
@@ -705,13 +661,6 @@ const saveEditProfile = async () => {
     return
   }
 
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
-  // if (isResident &&!/^[0-9]+$/.test(form.value.roomNumber)) {
-  //   emit('room-number-error', true)
-  //   return
-  // }
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
@@ -830,16 +779,6 @@ const saveEditDetail = async () => {
     }
   }
 
-  // -----------------------
-  // validate position (staff only)
-  // -----------------------
-  // if (isStaff && form.value.position) {
-  //   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
-  //     emit('position-error', true)
-  //     return
-  //   }
-  // }
-
   try {
     // -----------------------
     // payload
@@ -936,9 +875,6 @@ const isAvatarChanged = computed(() => {
   return !!newAvatar.value
 })
 
-// const isSaveDisabled = computed(() => {
-//   return isFormUnchanged.value && !isAvatarChanged.value
-// })
 const isAddFormValid = computed(() => {
   if (!form.value.firstName?.trim()) return false
   if (!form.value.lastName?.trim()) return false
@@ -1394,17 +1330,6 @@ const isSaveDisabled = computed(() => {
                 />
               </div>
               <div class="flex flex-col">
-                <!-- <label class="block text-sm text-black font-semibold mb-1">
-                  Dormitory
-                </label>
-                <input
-                  :disabled="mode === 'edit'"
-                  :value="dormName"
-                  :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
-                  ]"
-                /> -->
                 <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>

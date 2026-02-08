@@ -193,27 +193,6 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
     parcelManager.setTrash(mapped)
   }
-  // const dataUser = await getItems(
-  //   `${import.meta.env.VITE_BASE_URL}/api/trash/resident`,
-  //   router
-  // )
-  // if (dataUser) {
-  //   const mapped = dataUser.map((p) => ({
-  //     id: p.userId,
-  //     fullName: p.fullName,
-  //     email: p.email,
-  //     dormName: p.dormName,
-  //     roomNumber: p.roomNumber,
-  //     role: p.role, // "RESIDENT" | "STAFF"
-  //     status: p.status,
-  //     deletedAt: p.deletedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
-  //     photo: p.profileImageUrl // 🔥 table ใช้ photo
-  //   }))
-
-  //   mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
-
-  //   userManager.setTrash(mapped)
-  // }
   try {
     const res = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/residents`,
@@ -482,16 +461,6 @@ const canGoNextMember = computed(() => {
   return paginatedMembers.value.length === perPage.value
 })
 
-// const showParcelDetail = async function (id) {
-//   router.push({
-//     name: 'detailparcels',
-//     params: {
-//       id: route.params.id,
-//       tid: id
-//     }
-//   })
-// }
-
 const goToPage = (page) => {
   if (page < 1) page = 1
   if (page > totalPages.value) page = totalPages.value
@@ -559,23 +528,6 @@ const restoreMemberPopUp = (id) => {
     lastName: id.lastName
   }
 }
-
-// const openStatusPopup = (parcel) => {
-//   parcelStatusDetail.value = {
-//     id: parcel.id,
-//     parcelStatus: parcel.parcelStatus
-//   }
-
-//   router.push({
-//     name: 'editparcelstatus',
-//     params: {
-//       id: route.params.id,
-//       tid: parcel.id
-//     }
-//   })
-
-//   showStatusParcel.value = true
-// }
 
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
@@ -656,23 +608,6 @@ const openRedStatusPopup = () => {
   showStatusParcel.value = false
   parcelDetail.value = null
 }
-
-// const closePopUp = (operate) => {
-//   switch (operate) {
-//     case 'problem':
-//       error.value = false
-//       break
-//     case 'deleteSuccessMessage':
-//       deleteSuccess.value = false
-//       break
-//     case 'addSuccessMessage':
-//       addSuccess.value = false
-//       break
-//     case 'editSuccessMessage':
-//       editSuccess.value = false
-//       break
-//   }
-// }
 const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
@@ -717,62 +652,6 @@ const fetchTrash = async () => {
   }
 }
 
-// const fetchTrash = async () => {
-//   try {
-//     const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/trash`)
-
-//     if (!res.ok) return
-
-//     const data = await res.json()
-
-//     // ป้องกัน null / undefined
-//     const list = Array.isArray(data) ? data : []
-
-//     // map ให้โครงสร้างตรงกับ parcel
-//     const mapped = list.map((p) => ({
-//       id: p.parcelId,
-//       trackingNumber: p.trackingNumber,
-//       recipientName: p.ownerName,
-//       roomNumber: p.roomNumber,
-//       email: p.contactEmail,
-//       status: p.status,
-//       deletedAt: p.deletedAt || null
-//     }))
-
-//     // ใส่เข้า Pinia
-//     parcelManager.trash.length = 0
-//     mapped.forEach((p) => parcelManager.trash.push(p))
-//   } catch (e) {
-//     // ❗ไม่ throw error
-//     console.warn('Fetch trash failed', e)
-//   }
-// }
-
-// const fetchTrash = async () => {
-//   const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/parcels/trash`)
-//   activeTab.value = await res.json()
-// }
-
-// const deleteForever = async (id) => {
-//   if (!confirm('Delete permanently? This action cannot be undone.')) return
-
-//   try {
-//     const res = await fetch(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels/${id}/force`,
-//       { method: 'DELETE' }
-//     )
-
-//     if (!res.ok) throw new Error('delete failed')
-
-//     parcelManager.deletePermanent(id)
-
-//     deleteSuccess.value = true
-//     setTimeout(() => (deleteSuccess.value = false), 10000)
-//   } catch (e) {
-//     error.value = true
-//     setTimeout(() => (error.value = false), 10000)
-//   }
-// }
 const fetchTrashMembers = async () => {
   try {
     const dataUser = await getItems(
@@ -801,35 +680,6 @@ const fetchTrashMembers = async () => {
   }
 }
 
-// const fetchTrashMembers = async () => {
-//   try {
-//     const dataUser = await getItems(
-//       `${import.meta.env.VITE_BASE_URL}/api/trash/members`,
-//       router
-//     )
-
-//     // ป้องกัน null / undefined
-//     const list = Array.isArray(dataUser) ? dataUser : []
-
-//     // map ให้โครงสร้างที่ frontend ใช้
-//     const mapped = list.map((u) => ({
-//       id: u.userId,
-//       firstName: u.firstName,
-//       lastName: u.lastName,
-//       email: u.email,
-//       roomNumber: u.roomNumber,
-//       role: u.role,
-//       status: u.status,
-//       deletedAt: u.deletedAt || null
-//     }))
-
-//     // ใส่เข้า Pinia (clear ก่อน)
-//     userManager.trash.length = 0
-//     mapped.forEach((u) => userManager.trash.push(u))
-//   } catch (e) {
-//     console.warn('Fetch trash members failed', e)
-//   }
-
 onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
 const cancelPage = () => {
@@ -849,60 +699,6 @@ const closePopUp = (operate) => {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <!-- <header class="flex items-center w-full h-16 bg-white">
-      <div
-        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
-      >
-        <svg
-          @click="toggleSidebar"
-          class="md:hidden mr-4 cursor-pointer"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M3 7H21C21.2652 7 21.5196 6.89464 21.7071 6.70711C21.8946 6.51957 22 6.26522 22 6C22 5.73478 21.8946 5.48043 21.7071 5.29289C21.5196 5.10536 21.2652 5 21 5H3C2.73478 5 2.48043 5.10536 2.29289 5.29289C2.10536 5.48043 2 5.73478 2 6C2 6.26522 2.10536 6.51957 2.29289 6.70711C2.48043 6.89464 2.73478 7 3 7ZM21 17H3C2.73478 17 2.48043 17.1054 2.29289 17.2929C2.10536 17.4804 2 17.7348 2 18C2 18.2652 2.10536 18.5196 2.29289 18.7071C2.48043 18.8946 2.73478 19 3 19H21C21.2652 19 21.5196 18.8946 21.7071 18.7071C21.8946 18.5196 22 18.2652 22 18C22 17.7348 21.8946 17.4804 21.7071 17.2929C21.5196 17.1054 21.2652 17 21 17ZM21 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14C2 14.2652 2.10536 14.5196 2.29289 14.7071C2.48043 14.8946 2.73478 15 3 15H21C21.2652 15 21.5196 14.8946 21.7071 14.7071C21.8946 14.5196 22 14.2652 22 14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13ZM21 9H3C2.73478 9 2.48043 9.10536 2.29289 9.29289C2.10536 9.48043 2 9.73478 2 10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10C22 9.73478 21.8946 9.48043 21.7071 9.29289C21.5196 9.10536 21.2652 9 21 9Z"
-            fill="black"
-          />
-        </svg>
-
-        <div class="flex-1 flex justify-end items-center gap-5">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clip-path="url(#clip0_84_935)">
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M6.12715 0.5C6.58315 0.5 7.03215 0.568 7.46115 0.697C7.14875 1.2667 6.98973 1.90779 6.99968 2.55745C7.00962 3.2071 7.18819 3.84302 7.51788 4.40289C7.84757 4.96276 8.31707 5.42737 8.88037 5.75117C9.44366 6.07497 10.0814 6.24687 10.7311 6.25V8.477C10.7311 8.56835 10.7492 8.65881 10.7841 8.7432C10.8191 8.82758 10.8704 8.90424 10.9351 8.96879C10.9997 9.03334 11.0764 9.08452 11.1609 9.11938C11.2453 9.15425 11.3358 9.17213 11.4271 9.172C11.6261 9.172 11.8168 9.25102 11.9575 9.39167C12.0981 9.53232 12.1771 9.72309 12.1771 9.922C12.1771 10.1209 12.0981 10.3117 11.9575 10.4523C11.8168 10.593 11.6261 10.672 11.4271 10.672H0.827148C0.628236 10.672 0.437471 10.593 0.296818 10.4523C0.156166 10.3117 0.0771484 10.1209 0.0771484 9.922C0.0771484 9.72309 0.156166 9.53232 0.296818 9.39167C0.437471 9.25102 0.628236 9.172 0.827148 9.172C0.918501 9.17213 1.00898 9.15425 1.09342 9.11938C1.17786 9.08452 1.25459 9.03334 1.31923 8.96879C1.38388 8.90424 1.43516 8.82758 1.47015 8.7432C1.50514 8.65881 1.52315 8.56835 1.52315 8.477V5.104C1.52315 3.88294 2.00821 2.7119 2.87163 1.84848C3.73505 0.985063 4.90609 0.5 6.12715 0.5ZM5.12715 12C4.92824 12 4.73747 12.079 4.59682 12.2197C4.45617 12.3603 4.37715 12.5511 4.37715 12.75C4.37715 12.9489 4.45617 13.1397 4.59682 13.2803C4.73747 13.421 4.92824 13.5 5.12715 13.5H7.12715C7.32606 13.5 7.51683 13.421 7.65748 13.2803C7.79813 13.1397 7.87715 12.9489 7.87715 12.75C7.87715 12.5511 7.79813 12.3603 7.65748 12.2197C7.51683 12.079 7.32606 12 7.12715 12H5.12715Z"
-                fill="black"
-              />
-              <path
-                d="M10.75 5C11.413 5 12.0489 4.73661 12.5178 4.26777C12.9866 3.79893 13.25 3.16304 13.25 2.5C13.25 1.83696 12.9866 1.20107 12.5178 0.732233C12.0489 0.263392 11.413 0 10.75 0C10.087 0 9.45107 0.263392 8.98223 0.732233C8.51339 1.20107 8.25 1.83696 8.25 2.5C8.25 3.16304 8.51339 3.79893 8.98223 4.26777C9.45107 4.73661 10.087 5 10.75 5Z"
-                fill="#FFCC00"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_84_935">
-                <rect width="14" height="14" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-          <div class="flex items-center gap-3">
-            <div class="flex flex-col leading-tight">
-              <UserInfo />
-            </div>
-          </div>
-        </div>
-      </div>
-    </header> -->
-
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
@@ -963,26 +759,6 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- Profile -->
-            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
@@ -1131,37 +907,15 @@ const closePopUp = (operate) => {
                 />
               </g>
             </svg>
-            <!-- <svg
-              width="25"
-              height="25"
-              viewBox="0 0 25 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M13.9674 2.61776C13.0261 2.23614 11.9732 2.23614 11.032 2.61776L8.75072 3.54276L18.7424 7.42818L22.257 6.07089C22.1124 5.95203 21.9509 5.85547 21.7778 5.78443L13.9674 2.61776ZM22.9163 7.49068L13.2809 11.2136V22.5917C13.5143 22.5445 13.7431 22.4754 13.9674 22.3844L21.7778 19.2178C22.1142 19.0815 22.4023 18.8479 22.6051 18.5469C22.808 18.2459 22.9163 17.8912 22.9163 17.5282V7.49068ZM11.7184 22.5917V11.2136L2.08301 7.49068V17.5292C2.08321 17.892 2.19167 18.2465 2.39449 18.5473C2.59732 18.8481 2.88529 19.0816 3.22155 19.2178L11.032 22.3844C11.2563 22.4747 11.4851 22.5431 11.7184 22.5917ZM2.74238 6.07089L12.4997 9.84068L16.5799 8.2636L6.63926 4.39901L3.22155 5.78443C3.04377 5.85665 2.88405 5.95214 2.74238 6.07089Z"
-                fill="#185DC0"
-              />
-            </svg> -->
-
             <h2
               class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
             >
               Trash
             </h2>
           </div>
-
-          <!-- <ButtonWeb
-            label="Go Back"
-            color="gray"
-            @click="cancelPage"
-            class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 w-auto"
-          /> -->
         </div>
         <div class="flex items-center justify-between mb-4">
-          <!-- Left:  Tabs -->
           <div class="flex items-center space-x-4">
-            <!-- <h3 class="text-lg font-semibold text-[#185dc0]">Date</h3> -->
             <div class="flex bg-white rounded-lg overflow-hidden">
               <button
                 v-for="tab in tabs"
@@ -1191,88 +945,6 @@ const closePopUp = (operate) => {
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
         />
-        <!-- <ParcelFilterBar
-          :modelDate="filterDate"
-          :modelSearch="filterSearch"
-          :modelSort="filterSort"
-          @update:date="handleDateUpdate"
-          @update:search="handleSearchUpdate"
-          @update:sort="handleSortUpdate"
-          @add="showParcelScannerPage"
-          @trash="showParcelTrashPage"
-        /> -->
-
-        <!-- <div
-          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
-              <input
-                type="date"
-                v-model="selectedDate"
-                class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <div class="relative flex-1 min-w-[120px]">
-                <svg
-                  class="absolute left-2 top-1/2 -translate-y-1/2"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
-                    fill="#9A9FA7"
-                  />
-                </svg>
-
-                <input
-                  type="text"
-                  v-model="searchKeyword"
-                  placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
-                v-model="selectedSort"
-                @change="handleSort"
-              >
-                <option disabled>Sort by:</option>
-                <option>Newest</option>
-                <option>Oldest</option>
-                <option>Name (A→Z)</option>
-                <option>Name (Z→A)</option>
-              </select>
-
-              <button
-                @click="showParcelScannerPage"
-                class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-                    fill="white"
-                  />
-                </svg>
-                <span>Add parcel</span>
-              </button>
-            </div>
-          </div>
-        </div> -->
-
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="deleteSuccess"
@@ -1404,27 +1076,6 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
-          <!-- 
-          <template #icon-view>
-            <svg
-              class="cursor-pointer"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                fill="#107EFF"
-              />
-              <path
-                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                fill="#107EFF"
-              />
-            </svg>
-          </template> -->
-
           <template #icon-delete-permanent>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1437,22 +1088,6 @@ const closePopUp = (operate) => {
                 d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
               />
             </svg>
-            <!-- <svg
-              width="16"
-              height="16"
-              viewBox="0 0 18 21"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                fill="red"
-              />
-            </svg> -->
           </template>
           <template #restore-trash>
             <svg
@@ -1583,27 +1218,6 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
-          <!-- 
-          <template #icon-view>
-            <svg
-              class="cursor-pointer"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                fill="#107EFF"
-              />
-              <path
-                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                fill="#107EFF"
-              />
-            </svg>
-          </template> -->
-
           <template #icon-delete-permanent>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1616,22 +1230,6 @@ const closePopUp = (operate) => {
                 d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
               />
             </svg>
-            <!-- <svg
-              width="16"
-              height="16"
-              viewBox="0 0 18 21"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                fill="red"
-              />
-            </svg> -->
           </template>
           <template #restore-trash>
             <svg
@@ -1661,316 +1259,9 @@ const closePopUp = (operate) => {
             </svg>
           </template>
         </ParcelTable>
-        <!-- <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
-          <table class="min-w-full text-left border-collapse">
-            <thead
-              class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
-            >
-              <tr>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Tracking
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Name
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div class="flex items-center gap-2">
-                    Room
-                    <svg
-                      class="cursor-pointer"
-                      @click="toggleSortRoom"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Email
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div class="flex items-center gap-2">
-                    Status
-                    <svg
-                      class="cursor-pointer"
-                      @click="toggleSortStatus"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  <div class="flex items-center gap-2">
-                    Update
-                    <svg
-                      class="cursor-pointer"
-                      @click="toggleSortDate"
-                      width="17"
-                      height="12"
-                      viewBox="0 0 17 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                      />
-                      <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody class="divide-y">
-              <tr
-                v-for="p in paginatedParcels"
-                :key="p.id"
-                class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
-              >
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Tracking:
-                  </span>
-                  {{ p.trackingNumber }}
-                </td>
-
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Name:
-                  </span>
-                  {{ p.recipientName }}
-                </td>
-
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Room:
-                  </span>
-                  {{ p.roomNumber }}
-                </td>
-
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Email:
-                  </span>
-                  {{ p.email }}
-                </td>
-
-                <td class="px-4 py-2 md:py-3 border-b md:border-none">
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Status:
-                  </span>
-                  <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold text-white cursor-pointer"
-                    :class="{
-                      'bg-yellow-400': p.status === 'Waiting for Staff',
-                      'bg-green-400': p.status === 'Picked Up',
-                      'bg-blue-400': p.status === 'Received'
-                    }"
-                    @click="
-                      openStatusPopup({
-                        id: p.id,
-                        parcelStatus: p.status
-                      })
-                    "
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Update:
-                  </span>
-                  {{ formatDateByTab(p.deletedAt) }}
-                </td>
-
-                <td
-                  class="px-4 py-2 md:py-3 text-sm text-gray-700 flex md:table-cell space-x-2 md:space-x-2"
-                >
-                  <span class="md:hidden font-semibold text-blue-700"
-                    >Action:</span
-                  >
-                  <button
-                    @click="showParcelDetail(p.id)"
-                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                        fill="#107EFF"
-                      />
-                      <path
-                        d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                        fill="#107EFF"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-          <button
-            @click="prevPage"
-            :disabled="currentPage === 1"
-            class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-          >
-            &lt; Previous
-          </button>
-
-          <button
-            class="cursor-pointer"
-            v-for="page in visiblePages"
-            :key="page + Math.random()"
-            @click="goToPage(page)"
-            :class="[
-              'px-3 py-1 rounded',
-              currentPage === page
-                ? 'bg-blue-700 text-white'
-                : 'hover:bg-gray-200',
-              page === '...' ? 'cursor-default' : ''
-            ]"
-            :disabled="page === '...'"
-          >
-            {{ page }}
-          </button>
-
-          <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages"
-            class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-          >
-            Next &gt;
-          </button>
-        </div> -->
       </main>
     </div>
   </div>
-  <!-- <div class="p-5">
-    <h1 class="text-2xl font-bold mb-4">🗑 Trash (Deleted Parcels)</h1>
-
-    <div v-if="trashList.length === 0" class="text-gray-500 text-center py-10">
-      No Parcels In Trash
-      <div class="fixed top-5 left-5 z-50">
-        <AlertPopUp
-          v-if="deleteSuccess"
-          :titles="'Add New Parcel is Successful.'"
-          message="Success!!"
-          styleType="green"
-          operate="errorSuccessMessage"
-          @closePopUp="closePopUp"
-        />
-        <AlertPopUp
-          v-if="error"
-          :titles="'There is a problem. Please try again later.'"
-          message="Error!!"
-          styleType="red"
-          operate="problem"
-          @closePopUp="closePopUp"
-        />
-      </div>
-    </div>
-
-    <div v-else class="overflow-x-auto">
-      <table class="min-w-full bg-white shadow-md rounded-xl">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="px-4 py-2 text-left">Tracking Number</th>
-            <th class="px-4 py-2 text-left">Recipient</th>
-            <th class="px-4 py-2 text-left">Type</th>
-            <th class="px-4 py-2 text-left">Deleted At</th>
-            <th class="px-4 py-2 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="p in trashList"
-            :key="p.id"
-            class="border-t hover:bg-gray-50"
-          >
-            <td class="px-4 py-2">{{ p.trackingNumber }}</td>
-            <td class="px-4 py-2">{{ p.recipientName }}</td>
-            <td class="px-4 py-2">{{ p.parcelType }}</td>
-            <td class="px-4 py-2">
-              {{ new Date(p.deletedAt).toLocaleString() }}
-            </td>
-
-            <td class="px-4 py-2 flex gap-2">
-              <ButtonWeb
-                label="Delete Permanently"
-                color="red"
-                @click="deleteForever(p.id)"
-                class="w-full md:w-auto"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <ButtonWeb
-      label="Cancel"
-      color="gray"
-      @click="cancelPage"
-      class="w-full md:w-auto"
-    />
-  </div> -->
   <teleport to="body" v-if="showDeleteParcel">
     <DeleteParcels
       @cancelDetail="clearDeletePopUp"
@@ -1988,17 +1279,6 @@ const closePopUp = (operate) => {
       @cancelDetail="clearRestorePopUp"
       @redAlert="openRedRestorePopup"
     />
-
-    <!-- <RestoreParcels
-      @cancelDetail="clearRestorePopUp"
-      @confirmDetail="showRestoreComplete"
-      @confirmMemberDetail="showRestoreMemberComplete"
-      @redAlert="openRedRestorePopup"
-      :parcelData="parcelDetail"
-      :residentData="residentDetail"
-      :showMember="true"
-      :showParcel="false"
-    /> -->
   </teleport>
    <teleport to="body" v-if="showRestoreMember">
     <RestoreParcels

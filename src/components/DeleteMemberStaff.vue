@@ -57,35 +57,6 @@ const moveToTrash = async () => {
     emit('cancelDetail', true)
   }
 }
-// const moveToTrash = async () => {
-//   if (!resident.value.id) {
-//     console.error('No resident ID found')
-//     return
-//   }
-
-//   console.log('Deleting resident with ID:', resident.value.id)
-
-//   try {
-//     deletedProfile.value = await deleteItemById(
-//       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-//       resident.value.id
-//     )
-
-//     if (deletedProfile.value === '404') {
-//       emit('redAlert')
-//       emit('cancelDetail', true)
-//       return
-//     }
-
-//     // Update store
-//     userManager.moveMemberToTrash(resident.value.id)
-//     emit('confirmDetail', true)
-//   } catch (error) {
-//     console.error('Error moving to trash:', error)
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//   }
-// }
 
 /* ---------- delete permanent ---------- */
 const deletePermanent = async () => {
