@@ -710,7 +710,7 @@ const toggleComfirmPasswordVisibility = () => {
           </button>
         </div>
 
-        <form @submit.prevent="submitForm" class="space-y-4">
+        <form @submit.prevent="submitForm" class="space-y-4" novalidate>
           <transition name="fade" mode="out-in">
             <div v-if="role === 'resident'" key="resident">
               <div class="mb-1">

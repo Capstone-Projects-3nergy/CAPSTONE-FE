@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useResetPasswordManager } from '@/stores/ResetPasswordManager'
 import AlertPopUp from './AlertPopUp.vue'
-import LoadingPopUp from './LoadingPopUp.vue'
+import ButtonWeb from './ButtonWeb.vue'
 const router = useRouter()
 const resetStore = useResetPasswordManager()
 const emailRequire = ref(false)
@@ -211,7 +211,7 @@ const returnLoginPage = () => {
           @closePopUp="closePopUp"
         />
 
-        <form @submit.prevent="sendResetEmail" class="space-y-4">
+        <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
           <div class="relative">
             <input
               v-model="form.email"
@@ -221,17 +221,19 @@ const returnLoginPage = () => {
             />
           </div>
 
-          <p v-if="isEmailInvalid" class="text-sm text-red-600">
+          <!-- <p v-if="isEmailInvalid" class="text-sm text-red-600">
             Please enter a valid email address.
-          </p>
+          </p> -->
 
-          <button
+          <ButtonWeb
+            label="Reset Password"
+            :loading="loading"
             type="submit"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 cursor-pointer"
+            color="black"
+            class="w-full"
             :disabled="isEmailOverLimit"
-          >
-            Reset Password
-          </button>
+            @click="sendResetEmail"
+          />
           <!-- 
           <p v-if="success" class="text-green-600 text-sm">
             Reset password link has been sent to your email.
@@ -258,7 +260,6 @@ const returnLoginPage = () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>
