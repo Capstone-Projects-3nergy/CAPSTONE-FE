@@ -220,6 +220,63 @@ onMounted(async () => {
 
 const submitForm = async (roleType) => {
   try {
+    const MAX_NAME_LENGTH = 50
+    const MAX_EMAIL_LENGTH = 50
+    const MAX_PASSWORD_LENGTH = 50
+    const MAX_STAFFPOSITION_LENGTH = 20
+    const MAX_ROMNUMBER_LENGTH = 10
+    const MIN_PASSWORD_LENGTH = 6
+    const MIN_FULLNAME_LENGTH = 6
+
+    if (form.fullName.trim().length > MAX_NAME_LENGTH) {
+      isNameOverLimit.value = true
+      return
+    }
+    const lettersOnly = form.fullName.trim().replace(/\s+/g, '')
+    if (lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH) {
+      isFullNameWeak.value = true
+      return
+    }
+
+    if (form.email.trim().length > MAX_EMAIL_LENGTH) {
+      isEmailOverLimit.value = true
+      return
+    }
+
+    if (form.position.trim().length > MAX_STAFFPOSITION_LENGTH) {
+      isStaffPositionOverLimit.value = true
+      return
+    }
+
+    if (form.password.trim().length > MAX_PASSWORD_LENGTH) {
+      isPasswordOverLimit.value = true
+      return
+    }
+    if (
+      form.password.trim().length > 0 &&
+      form.password.trim().length < MIN_PASSWORD_LENGTH
+    ) {
+      isPasswordTooShort.value = true
+      return
+    }
+
+    if (form.confirmPassword.trim().length > MAX_PASSWORD_LENGTH) {
+      isConfirmPasswordOverLimit.value = true
+      return
+    }
+    if (
+      form.confirmPassword.trim().length > 0 &&
+      form.confirmPassword.trim().length < MIN_PASSWORD_LENGTH
+    ) {
+      isConfirmPasswordTooShort.value = true
+      return
+    }
+
+    if (form.roomNumber.trim().length > MAX_ROMNUMBER_LENGTH) {
+      isRoomNumberOverLimit.value = true
+      return
+    }
+
     if (form.password !== form.confirmPassword) {
       isNotMatch.value = true
       setTimeout(() => (isNotMatch.value = false), 10000)
@@ -364,7 +421,7 @@ const checkInputLength = (field) => {
     const trimmed = form.fullName.trim()
     if (trimmed.length > MAX_NAME_LENGTH) {
       isNameOverLimit.value = true
-      form.fullName = trimmed.substring(0, MAX_NAME_LENGTH)
+      // form.fullName = trimmed.substring(0, MAX_NAME_LENGTH)
       setTimeout(() => {
         isNameOverLimit.value = false
       }, 1000)
@@ -379,7 +436,7 @@ const checkInputLength = (field) => {
     const trimmed = form.email.trim()
     if (trimmed.length > MAX_EMAIL_LENGTH) {
       isEmailOverLimit.value = true
-      form.email = trimmed.substring(0, MAX_EMAIL_LENGTH)
+      // form.email = trimmed.substring(0, MAX_EMAIL_LENGTH)
       setTimeout(() => {
         isEmailOverLimit.value = false
       }, 1000)
@@ -390,7 +447,7 @@ const checkInputLength = (field) => {
     const trimmed = form.position.trim()
     if (trimmed.length > MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = true
-      form.position = trimmed.substring(0, MAX_STAFFPOSITION_LENGTH)
+      // form.position = trimmed.substring(0, MAX_STAFFPOSITION_LENGTH)
       setTimeout(() => {
         isStaffPositionOverLimit.value = false
       }, 1000)
@@ -402,7 +459,7 @@ const checkInputLength = (field) => {
 
     if (trimmed.length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
-      form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
+      // form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
       setTimeout(() => (isPasswordOverLimit.value = false), 1000)
     } else {
       isPasswordOverLimit.value = false
@@ -427,7 +484,7 @@ const checkInputLength = (field) => {
     const trimmed = form.roomNumber.trim()
     if (trimmed.length > MAX_ROMNUMBER_LENGTH) {
       isRoomNumberOverLimit.value = true
-      form.roomNumber = trimmed.substring(0, MAX_ROMNUMBER_LENGTH)
+      // form.roomNumber = trimmed.substring(0, MAX_ROMNUMBER_LENGTH)
       setTimeout(() => {
         isRoomNumberOverLimit.value = false
       }, 1000)
@@ -453,6 +510,15 @@ const closePopUp = (operate) => {
   if (operate === 'nametypewrong') isFullNameWrong.value = false
   if (operate === 'EmailNotExist') isEmailExist.value = false
   if (operate === 'EmailStaff') isEmailStaff.value = false
+  if (operate === 'nameOverLimit') isNameOverLimit.value = false
+  if (operate === 'emailOverLimit') isEmailOverLimit.value = false
+  if (operate === 'positionOverLimit') isStaffPositionOverLimit.value = false
+  if (operate === 'passwordOverLimit') isPasswordOverLimit.value = false
+  if (operate === 'passwordTooShort') isPasswordTooShort.value = false
+  if (operate === 'confirmPasswordOverLimit') isConfirmPasswordOverLimit.value = false
+  if (operate === 'confirmPasswordTooShort') isConfirmPasswordTooShort.value = false
+  if (operate === 'roomNumberOverLimit') isRoomNumberOverLimit.value = false
+  if (operate === 'fullNameWeak') isFullNameWeak.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -682,6 +748,78 @@ const toggleComfirmPasswordVisibility = () => {
             message="Error!!"
             styleType="red"
             operate="EmailStaff"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNameOverLimit"
+            titles="Limit Full Name to 50 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="nameOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isFullNameWeak"
+            titles="Full Name must be at least 6 letters."
+            message="Error!!"
+            styleType="red"
+            operate="fullNameWeak"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailOverLimit"
+            titles="Limit Email to 50 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="emailOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isStaffPositionOverLimit"
+            titles="Limit Position to 20 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="positionOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPasswordOverLimit"
+            titles="Limit Password to 50 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="passwordOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isPasswordTooShort"
+            titles="Password must be at least 6 characters."
+            message="Error!!"
+            styleType="red"
+            operate="passwordTooShort"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isConfirmPasswordOverLimit"
+            titles="Limit Confirm Password to 50 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="confirmPasswordOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isConfirmPasswordTooShort"
+            titles="Confirm Password must be at least 6 characters."
+            message="Error!!"
+            styleType="red"
+            operate="confirmPasswordTooShort"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isRoomNumberOverLimit"
+            titles="Limit Room Number to 10 characters or less."
+            message="Error!!"
+            styleType="red"
+            operate="roomNumberOverLimit"
             @closePopUp="closePopUp"
           />
         </div>
