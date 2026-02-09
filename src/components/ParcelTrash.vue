@@ -687,7 +687,7 @@ const cancelPage = () => {
 }
 const closePopUp = (operate) => {
   if (operate === 'problem') error.value = false
-  if (operate === 'deleteSuccessMessage ') deleteSuccess.value = false
+  if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
   if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
 }
