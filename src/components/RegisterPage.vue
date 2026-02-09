@@ -812,7 +812,6 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Room Number"
                     class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                    @input="checkInputLength('roomNumber')"
                   />
                 </div>
               </div>
@@ -1060,7 +1059,6 @@ const toggleComfirmPasswordVisibility = () => {
                       type="text"
                       placeholder="Position"
                       class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                      @input="checkInputLength('position')"
                     />
                   </div>
                 </div>
