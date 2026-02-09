@@ -34,6 +34,7 @@ const firstNameRequired = ref(false)
 const lastNameRequired = ref(false)
 const emailRequired = ref(false)
 const dormRequired = ref(false)
+const lineIdError = ref(false)
 const roomNumberRequired = ref(false)
 const roomNumberError = ref(false)
 const positionError = ref(false)
@@ -153,7 +154,10 @@ const showDormRequired = () => {
   dormRequired.value = true
   setTimeout(() => (dormRequired.value = false), 10000)
 }
-
+function lineIdErrorFn() {
+  lineIdError.value = true
+  setTimeout(() => (lineIdError.value = false), 10000)
+}
 const showRoomNumberRequired = () => {
   roomNumberRequired.value = true
   setTimeout(() => (roomNumberRequired.value = false), 10000)
@@ -322,6 +326,9 @@ const closePopUp = (operate) => {
       break
     case 'roomNumber':
       roomNumberError.value = false
+      break
+    case 'lineId':
+      lineIdError.value = false
       break
 
     default:
@@ -730,6 +737,14 @@ const closePopUp = (operate) => {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
+            <AlertPopUp
+            v-if="lineIdError"
+            titles="Line ID must contain only English letters (A–Z), Arabic digits (0–9), dot (.), and underscore (_). Thai characters and Thai numerals are not allowed."
+            message="Error!!"
+            styleType="red"
+            operate="lineId"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
             v-if="positionError"
             title="Position can only type as text."
@@ -829,6 +844,7 @@ const closePopUp = (operate) => {
           @email-required="showEmailRequired"
           @dorm-ID-required="showDormRequired"
           @room-number-required="showRoomNumberRequired"
+          @line-id-error="lineIdErrorFn"
         ></EditPersonalInfoProfile>
       </main>
     </div>

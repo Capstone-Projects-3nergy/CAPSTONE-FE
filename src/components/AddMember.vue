@@ -39,6 +39,7 @@ const showManageResident = ref(false)
 const showLogoutConfirm = ref(false)
 const addSuccess = ref(false)
 const roomNumberError = ref(false)
+const lineIdError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
 const phoneError = ref(false)
@@ -164,6 +165,10 @@ function roomNumberErrorFn() {
   roomNumberError.value = true
   setTimeout(() => (roomNumberError.value = false), 10000)
 }
+function lineIdErrorFn() {
+  lineIdError.value = true
+  setTimeout(() => (lineIdError.value = false), 10000)
+}
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
@@ -189,6 +194,9 @@ const closePopUp = (operate) => {
       break
     case 'roomNumber':
       roomNumberError.value = false
+      break
+    case 'lineId':
+      lineIdError.value = false
       break
   }
 }
@@ -469,6 +477,14 @@ const showEmailFormError = () => {
             operate="roomNumber"
             @closePopUp="closePopUp"
           />
+           <AlertPopUp
+            v-if="lineIdError"
+            titles="Line ID must contain only English letters (A–Z), Arabic digits (0–9), dot (.), and underscore (_). Thai characters and Thai numerals are not allowed."
+            message="Error!!"
+            styleType="red"
+            operate="lineId"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
             v-if="emailError"
             titles="An account with this email already exists. Please try another email."
@@ -509,6 +525,7 @@ const showEmailFormError = () => {
           @phone-error="showPhoneError"
           @cancel="ShowManageResidentPage"
           @room-number-error="roomNumberErrorFn"
+          @line-id-error="lineIdErrorFn"
         />
       </main>
     </div>

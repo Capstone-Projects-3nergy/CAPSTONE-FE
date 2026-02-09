@@ -53,6 +53,7 @@ const showProfileStaff = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
 const roomNumberError = ref(false)
+const lineIdError = ref(false)
 const SenderNameError = ref(false)
 const recipientNameError = ref(false)
 const selectName = ref(false)
@@ -650,6 +651,7 @@ const closePopUp = (operate) => {
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'select') selectName.value = false
+  if (operate === 'lineId') lineIdError.value = false
 }
 
 // const closePopUp = (operate) => {
@@ -677,6 +679,10 @@ const showPhoneError = () => {
 const roomNumberErrorFn = () => {
   roomNumberError.value = true
   setTimeout(() => (roomNumberError.value = false), 10000)
+}
+function lineIdErrorFn() {
+  lineIdError.value = true
+  setTimeout(() => (lineIdError.value = false), 10000)
 }
 const showProfileSuccess = () => {
   editSuccess.value = true
@@ -930,6 +936,14 @@ const showLastNameError = () => {
             operate="phoneMessage"
             @closePopUp="closePopUp"
           />
+            <AlertPopUp
+            v-if="lineIdError"
+            titles="Line ID must contain only English letters (A–Z), Arabic digits (0–9), dot (.), and underscore (_). Thai characters and Thai numerals are not allowed."
+            message="Error!!"
+            styleType="red"
+            operate="lineId"
+            @closePopUp="closePopUp"
+          />
           <AlertPopUp
             v-if="error"
             :titles="'There is a problem. Please try again later.'"
@@ -971,6 +985,7 @@ const showLastNameError = () => {
           @last-name-error="showLastNameError"
           @phone-error="showPhoneError"
           @room-number-error="roomNumberErrorFn"
+          @line-id-error="lineIdErrorFn"
         />
       </main>
     </div>

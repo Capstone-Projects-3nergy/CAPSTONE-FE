@@ -516,6 +516,10 @@ const addResidents = async () => {
     emit('room-number-error', true)
     return
   }
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -539,13 +543,14 @@ const addResidents = async () => {
     return
   }
 
+
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
       return
     }
-
+    
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
@@ -587,11 +592,6 @@ const addResidents = async () => {
       lineId: form.value.lineId,
       phoneNumber: form.value.phoneNumber,
       dormId: form.value.dormId
-    }
-
-    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
-      emit('line-id-error', true)
-      return
     }
 
     if (newAvatar.value) {
@@ -661,7 +661,10 @@ const saveEditProfile = async () => {
     emit('first-name-error', true)
     return
   }
-
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
     return
@@ -673,7 +676,6 @@ const saveEditProfile = async () => {
       emit('phone-error', true)
       return
     }
-
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
@@ -702,12 +704,6 @@ const saveEditProfile = async () => {
       lineId: form.value.lineId || null,
       phoneNumber: form.value.phoneNumber || null,
       lineId: form.value.lineId || null
-    }
-
-    // Validate Line ID (Alphanumeric, ., _)
-    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
-      emit('line-id-error', true)
-      return
     }
 
     if (isStaff) {
@@ -779,7 +775,10 @@ const saveEditDetail = async () => {
     emit('room-number-error', true)
     return
   }
-
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
@@ -803,11 +802,6 @@ const saveEditDetail = async () => {
       lineId: form.value.lineId || null,
       phoneNumber: form.value.phoneNumber || null,
       dormId: form.value.dormId || null
-    }
-
-    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
-      emit('line-id-error', true)
-      return
     }
 
     if (isStaff) {
