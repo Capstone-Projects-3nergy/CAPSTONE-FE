@@ -942,7 +942,7 @@ const isSaveDisabled = computed(() => {
           </div>
 
           <!-- ❌ Remove icon (only show when new image is selected) -->
-          <div
+          <!-- <div
             v-if="newAvatar"
             class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
             @click.stop="removeImage"
@@ -966,8 +966,6 @@ const isSaveDisabled = computed(() => {
                 />
               </svg>
             </div>
-
-            <!-- Tooltip -->
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
             >
@@ -977,27 +975,36 @@ const isSaveDisabled = computed(() => {
                 Remove Image
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
           <div
             class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
             @click="$refs.imageInput.click()"
           >
-            <svg
-              class="transition hover:text-[#8C8F91]"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
             >
-              <path
-                d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                fill="#8C8F91"
-              />
-            </svg>
-
+              <svg
+                class="transition text-[#8C8F91]"
+                width="20"
+                height="20"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="3"
+                >
+                  <path
+                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
+                  />
+                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+                </g>
+              </svg>
+            </div>
             <!-- Tooltip -->
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
@@ -1223,24 +1230,69 @@ const isSaveDisabled = computed(() => {
                   {{ userInitial }}
                 </div>
               </div>
-
+  <!-- ❌ Remove icon (only show when new image is selected) -->
+          <!-- <div
+            v-if="newAvatar"
+            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
+            @click.stop="removeImage"
+          >
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="#EF4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
+              >
+                Remove Image
+              </div>
+            </div>
+          </div> -->
               <!-- ✏️ Edit icon -->
               <div
                 class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
                 @click="$refs.imageInput.click()"
               >
-                <svg
-                  class="transition hover:text-[#8C8F91]"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+               <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                class="transition text-[#8C8F91]"
+                width="20"
+                height="20"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="3"
                 >
                   <path
-                    d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                    fill="#8C8F91"
+                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
                   />
-                </svg>
+                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+                </g>
+              </svg>
+            </div>
 
                 <!-- Tooltip -->
                 <div
