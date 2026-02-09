@@ -927,7 +927,7 @@ onMounted(async () => {
             />
             <AlertPopUp
               v-if="trackingNumberError"
-         :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+              :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
