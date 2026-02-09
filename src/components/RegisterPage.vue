@@ -59,6 +59,8 @@ const form = reactive({
   roomNumber: '',
   position: ''
 })
+const showPasswordPopup = ref(false)
+const showConfirmPasswordPopup = ref(false)
 
 const dormList = ref([])
 
@@ -92,131 +94,6 @@ onMounted(async () => {
     dormList.value = parsedDorms
   } catch (err) {}
 })
-
-// const submitForm = async (roleType) => {
-//   try {
-//     if (form.password !== form.confirmPassword) {
-//       isNotMatch.value = true
-//       setTimeout(() => (isNotMatch.value = false), 10000)
-//       return
-//     }
-
-//     if (/\d/.test(form.fullName)) {
-//       isFullNameWrong.value = true
-//       setTimeout(() => (isFullNameWrong.value = false), 10000)
-//       return
-//     }
-
-//     if (!form.email || !form.email.endsWith('@gmail.com')) {
-//       incorrectemailform.value = true
-//       setTimeout(() => (incorrectemailform.value = false), 10000)
-//       return
-//     }
-
-//     /* =======================
-//        CHECK EMAIL EXIST (REAL)
-//        ======================= */
-//     const baseURL = import.meta.env.VITE_BASE_URL
-
-//     try {
-//       await axios.post(`${baseURL}/api/public/email/check`, {
-//         email: form.email.trim()
-//       })
-//       // ถ้าเข้า try แปลว่า email มีจริง → ผ่าน
-//     } catch (error) {
-//       if (error.response?.status === 404) {
-//         // ❌ email ไม่มีอยู่จริง
-//         isEmailExist.value = true
-//         setTimeout(() => (isEmailExist.value = false), 10000)
-//         return
-//       } else {
-//         throw error
-//       }
-//     }
-
-//     /* =======================
-//        PREPARE PAYLOAD
-//        ======================= */
-//     const [firstName = '', lastName = ''] = (form.fullName || '')
-//       .trim()
-//       .split(/\s+/, 2)
-
-//     const roleUpper = String(roleType).toUpperCase()
-
-//     const payload =
-//       roleUpper === 'RESIDENT'
-//         ? {
-//             email: form.email.trim(),
-//             firstName,
-//             lastName,
-//             role: roleUpper,
-//             dormId: form.dormId || '',
-//             roomNumber: (form.roomNumber || '').trim(),
-//             password: form.password,
-//             fullName: form.fullName.trim()
-//           }
-//         : {
-//             email: form.email.trim(),
-//             firstName,
-//             lastName,
-//             role: roleUpper,
-//             position: (form.position || '').trim(),
-//             password: form.password,
-//             fullName: form.fullName.trim()
-//           }
-
-//     /* =======================
-//        ROLE VALIDATION
-//        ======================= */
-//     if (roleUpper === 'RESIDENT') {
-//       if (!payload.dormId) {
-//         isNoDorm.value = true
-//         setTimeout(() => (isNoDorm.value = false), 10000)
-//         return
-//       }
-//       if (!payload.roomNumber) {
-//         isRoomRequired.value = true
-//         setTimeout(() => (isRoomRequired.value = false), 10000)
-//         return
-//       }
-//     } else if (roleUpper === 'STAFF') {
-//       if (!payload.position) {
-//         isPositionRequired.value = true
-//         setTimeout(() => (isPositionRequired.value = false), 10000)
-//         return
-//       }
-//       if (/\d/.test(payload.position)) {
-//         isPositionWrong.value = true
-//         setTimeout(() => (isPositionWrong.value = false), 10000)
-//         return
-//       }
-//     }
-
-//     /* =======================
-//        REGISTER
-//        ======================= */
-//     const res = await authManager.registerAccount(payload)
-
-//     if (res.status === 201 || res.status === 200) {
-//       success.value = true
-//       setTimeout(() => (success.value = false), 10000)
-
-//       Object.keys(form).forEach((key) => {
-//         if (key === 'dormId') form[key] = null
-//         else form[key] = ''
-//       })
-//     } else if (res.status === 409) {
-//       isEmailDuplicate.value = true
-//       setTimeout(() => (isEmailDuplicate.value = false), 10000)
-//     } else if (res.status === 500) {
-//       error.value = true
-//       setTimeout(() => (error.value = false), 10000)
-//     }
-//   } catch (err) {
-//     error.value = true
-//     setTimeout(() => (error.value = false), 10000)
-//   }
-// }
 
 const submitForm = async (roleType) => {
   try {
@@ -257,6 +134,7 @@ const submitForm = async (roleType) => {
       form.password.trim().length < MIN_PASSWORD_LENGTH
     ) {
       isPasswordTooShort.value = true
+      showPasswordPopup.value = true
       return
     }
 
@@ -269,6 +147,7 @@ const submitForm = async (roleType) => {
       form.confirmPassword.trim().length < MIN_PASSWORD_LENGTH
     ) {
       isConfirmPasswordTooShort.value = true
+      showConfirmPasswordPopup.value = true
       return
     }
 
@@ -419,49 +298,28 @@ const checkInputLength = (field) => {
   const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
-    if (trimmed.length > MAX_NAME_LENGTH) {
-      isNameOverLimit.value = true
-      // form.fullName = trimmed.substring(0, MAX_NAME_LENGTH)
-      setTimeout(() => {
-        isNameOverLimit.value = false
-      }, 1000)
-    } else {
+    if (trimmed.length <= MAX_NAME_LENGTH) {
       isNameOverLimit.value = false
     }
 
     const lettersOnly = trimmed.replace(/\s+/g, '')
-    isFullNameWeak.value =
-      lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH
+    if (lettersOnly.length === 0 || lettersOnly.length >= MIN_FULLNAME_LENGTH) {
+      isFullNameWeak.value = false
+    }
   } else if (field === 'email') {
     const trimmed = form.email.trim()
-    if (trimmed.length > MAX_EMAIL_LENGTH) {
-      isEmailOverLimit.value = true
-      // form.email = trimmed.substring(0, MAX_EMAIL_LENGTH)
-      setTimeout(() => {
-        isEmailOverLimit.value = false
-      }, 1000)
-    } else {
+    if (trimmed.length <= MAX_EMAIL_LENGTH) {
       isEmailOverLimit.value = false
     }
   } else if (field === 'position') {
     const trimmed = form.position.trim()
-    if (trimmed.length > MAX_STAFFPOSITION_LENGTH) {
-      isStaffPositionOverLimit.value = true
-      // form.position = trimmed.substring(0, MAX_STAFFPOSITION_LENGTH)
-      setTimeout(() => {
-        isStaffPositionOverLimit.value = false
-      }, 1000)
-    } else {
+    if (trimmed.length <= MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = false
     }
   } else if (field === 'password') {
     const trimmed = form.password.trim()
 
-    if (trimmed.length > MAX_PASSWORD_LENGTH) {
-      isPasswordOverLimit.value = true
-      // form.password = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => (isPasswordOverLimit.value = false), 1000)
-    } else {
+    if (trimmed.length <= MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = false
     }
 
@@ -470,11 +328,7 @@ const checkInputLength = (field) => {
   } else if (field === 'confirmPassword') {
     const trimmed = form.confirmPassword.trim()
 
-    if (trimmed.length > MAX_PASSWORD_LENGTH) {
-      isConfirmPasswordOverLimit.value = true
-      form.confirmPassword = trimmed.substring(0, MAX_PASSWORD_LENGTH)
-      setTimeout(() => (isConfirmPasswordOverLimit.value = false), 1000)
-    } else {
+    if (trimmed.length <= MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = false
     }
 
@@ -482,13 +336,7 @@ const checkInputLength = (field) => {
       trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'roomNumber') {
     const trimmed = form.roomNumber.trim()
-    if (trimmed.length > MAX_ROMNUMBER_LENGTH) {
-      isRoomNumberOverLimit.value = true
-      // form.roomNumber = trimmed.substring(0, MAX_ROMNUMBER_LENGTH)
-      setTimeout(() => {
-        isRoomNumberOverLimit.value = false
-      }, 1000)
-    } else {
+    if (trimmed.length <= MAX_ROMNUMBER_LENGTH) {
       isRoomNumberOverLimit.value = false
     }
   }
@@ -514,9 +362,9 @@ const closePopUp = (operate) => {
   if (operate === 'emailOverLimit') isEmailOverLimit.value = false
   if (operate === 'positionOverLimit') isStaffPositionOverLimit.value = false
   if (operate === 'passwordOverLimit') isPasswordOverLimit.value = false
-  if (operate === 'passwordTooShort') isPasswordTooShort.value = false
+  if (operate === 'passwordTooShort') showPasswordPopup.value = false
   if (operate === 'confirmPasswordOverLimit') isConfirmPasswordOverLimit.value = false
-  if (operate === 'confirmPasswordTooShort') isConfirmPasswordTooShort.value = false
+  if (operate === 'confirmPasswordTooShort') showConfirmPasswordPopup.value = false
   if (operate === 'roomNumberOverLimit') isRoomNumberOverLimit.value = false
   if (operate === 'fullNameWeak') isFullNameWeak.value = false
 }
@@ -791,7 +639,7 @@ const toggleComfirmPasswordVisibility = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="isPasswordTooShort"
+            v-if="showPasswordPopup"
             titles="Password must be at least 6 characters."
             message="Error!!"
             styleType="red"
@@ -807,7 +655,7 @@ const toggleComfirmPasswordVisibility = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="isConfirmPasswordTooShort"
+            v-if="showConfirmPasswordTooShort"
             titles="Confirm Password must be at least 6 characters."
             message="Error!!"
             styleType="red"
