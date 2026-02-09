@@ -455,7 +455,7 @@ const showEmailFormError = () => {
           />
           <AlertPopUp
             v-if="phoneError"
-            titles="Phone number must contain 9–10 digits only."
+            :titles="'Phone number must have 9–10 digits (hyphens allowed; text and Thai numerals are not allowed).'"
             message="Error!!"
             styleType="red"
             operate="phoneMessage"
