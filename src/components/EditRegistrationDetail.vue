@@ -940,7 +940,7 @@ const showLastNameError = () => {
           />
           <AlertPopUp
             v-if="roomNumberError"
-            :titles="'Room Number can only be typed as number.'"
+           :titles="'Room number must contain only Arabic digits (0–9). Thai numerals are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="roomNumber"
