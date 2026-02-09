@@ -743,30 +743,6 @@ const toggleComfirmPasswordVisibility = () => {
               <div class="mb-1">
                 <div class="relative">
                   <svg
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M2.535 11A3.981 3.981 0 0 0 2 13v4a1 1 0 0 0 1 1h2v1a1 1 0 1 0 2 0v-1h10v1a1 1 0 1 0 2 0v-1h2a1 1 0 0 0 1-1v-4c0-.729-.195-1.412-.535-2H2.535ZM20 9V8a4 4 0 0 0-4-4h-3v5h7Zm-9-5H8a4 4 0 0 0-4 4v1h7V4Z"
-                    />
-                  </svg>
-                  <input
-                    v-model="form.roomNumber"
-                    type="text"
-                    placeholder="Room Number"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                    @input="checkInputLength('roomNumber')"
-                  />
-                </div>
-              </div>
-              <div class="mb-1">
-                <div class="relative">
-                  <svg
                     width="22"
                     height="22"
                     viewBox="0 0 22 22"
@@ -785,6 +761,58 @@ const toggleComfirmPasswordVisibility = () => {
                     placeholder="Email"
                     class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                     @input="checkInputLength('email')"
+                  />
+                </div>
+              </div>
+                <div class="mb-4">
+                <div class="relative">
+                  <svg
+                    width="21"
+                    height="17"
+                    viewBox="0 0 21 17"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                  >
+                    <path
+                      d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
+                      fill="#8C8F91"
+                    />
+                  </svg>
+
+                <select v-model="form.dormId" class="custom-select">
+                  <option disabled value="null">Select Dormitory</option>
+                  <option
+                    v-for="dorm in dormList"
+                    :key="dorm.dormId"
+                    :value="dorm.dormId"
+                  >
+                    {{ dorm.dormName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-1">
+              <div class="relative">
+                <svg
+                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                  aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M2.535 11A3.981 3.981 0 0 0 2 13v4a1 1 0 0 0 1 1h2v1a1 1 0 1 0 2 0v-1h10v1a1 1 0 1 0 2 0v-1h2a1 1 0 0 0 1-1v-4c0-.729-.195-1.412-.535-2H2.535ZM20 9V8a4 4 0 0 0-4-4h-3v5h7Zm-9-5H8a4 4 0 0 0-4 4v1h7V4Z"
+                    />
+                  </svg>
+                  <input
+                    v-model="form.roomNumber"
+                    type="text"
+                    placeholder="Room Number"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    @input="checkInputLength('roomNumber')"
                   />
                 </div>
               </div>
@@ -935,33 +963,6 @@ const toggleComfirmPasswordVisibility = () => {
                   </div>
                 </div>
               </div>
-
-              <div class="relative">
-                <svg
-                  width="21"
-                  height="17"
-                  viewBox="0 0 21 17"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
-                >
-                  <path
-                    d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
-                    fill="#8C8F91"
-                  />
-                </svg>
-
-                <select v-model="form.dormId" class="custom-select">
-                  <option disabled value="null">Select Dormitory</option>
-                  <option
-                    v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
-                  >
-                    {{ dorm.dormName }}
-                  </option>
-                </select>
-              </div>
             </div>
 
             <div v-else key="staff">
@@ -992,6 +993,31 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </div>
                 <div class="mb-1">
+                  <div class="relative">
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 22 22"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                    >
+                      <path
+                        d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                        fill="#8C8F91"
+                      />
+                    </svg>
+                    <input
+                      v-model="form.email"
+                      type="email"
+                      placeholder="Staff Email"
+                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                      @input="checkInputLength('email')"
+                    />
+                  </div>
+                </div>
+              </div>
+               <div class="mb-1">
                   <div class="relative">
                     <svg
                       width="20"
@@ -1038,31 +1064,6 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </div>
                 </div>
-                <div class="mb-1">
-                  <div class="relative">
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 22 22"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
-                    >
-                      <path
-                        d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
-                        fill="#8C8F91"
-                      />
-                    </svg>
-                    <input
-                      v-model="form.email"
-                      type="email"
-                      placeholder="Staff Email"
-                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
-                      @input="checkInputLength('email')"
-                    />
-                  </div>
-                </div>
-              </div>
               <div class="mb-1">
                 <div class="relative">
                   <svg
