@@ -74,7 +74,8 @@ const emit = defineEmits([
   'room-number-required',
   'email-duplicate',
   'email-form-error',
-  'room-number-error'
+  'room-number-error',
+  'line-id-error'
 ])
 
 const isEdit = ref(false)
@@ -588,6 +589,11 @@ const addResidents = async () => {
       dormId: form.value.dormId
     }
 
+    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
+      emit('line-id-error', true)
+      return
+    }
+
     if (newAvatar.value) {
       body.profileImage = newAvatar.value
     }
@@ -694,7 +700,14 @@ const saveEditProfile = async () => {
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null
+      phoneNumber: form.value.phoneNumber || null,
+      lineId: form.value.lineId || null
+    }
+
+    // Validate Line ID (Alphanumeric, ., _)
+    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
+      emit('line-id-error', true)
+      return
     }
 
     if (isStaff) {
@@ -790,6 +803,11 @@ const saveEditDetail = async () => {
       lineId: form.value.lineId || null,
       phoneNumber: form.value.phoneNumber || null,
       dormId: form.value.dormId || null
+    }
+
+    if (!/^[a-zA-Z0-9._]+$/.test(body.lineId)) {
+      emit('line-id-error', true)
+      return
     }
 
     if (isStaff) {
