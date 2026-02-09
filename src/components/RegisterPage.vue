@@ -1379,9 +1379,6 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
-              isRoomNumberOverLimit ||
-              isNameOverLimit ||
-              isEmailOverLimit ||
               isPasswordTooShort ||
               isConfirmPasswordTooShort
             "
@@ -1411,10 +1408,7 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedEmail.length === 0 ||
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
-              isNameOverLimit ||
-              isEmailOverLimit ||
               isPasswordTooShort ||
-              isStaffPositionOverLimit ||
               isConfirmPasswordTooShort
             "
           />
