@@ -836,6 +836,12 @@ const closePopUp = (operate) => {
 
               <div class="flex justify-end space-x-3 mt-3 px-7">
                 <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
+                  class="block md:hidden"
+                />
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
@@ -844,12 +850,6 @@ const closePopUp = (operate) => {
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden"
-                />
-                <ButtonWeb
-                  label="Reset"
-                  color="red"
-                  @click="cancelParcel"
                   class="block md:hidden"
                 />
               </div>
@@ -907,6 +907,12 @@ const closePopUp = (operate) => {
               </div>
               <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
                 <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
+                  class="w-auto"
+                />
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
@@ -915,12 +921,6 @@ const closePopUp = (operate) => {
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto"
-                />
-                <ButtonWeb
-                  label="Reset"
-                  color="red"
-                  @click="cancelParcel"
                   class="w-auto"
                 />
               </div>

@@ -1178,7 +1178,12 @@ onMounted(async () => {
                     class="w-auto"
                   />
                 </div>
-
+                <ButtonWeb
+                  label="Back"
+                  color="gray"
+                  @click="showManageParcelPage"
+                  class="text-[#898989] block md:hidden"
+                />
                 <ButtonWeb
                   label="Save"
                   color="green"
@@ -1189,13 +1194,6 @@ onMounted(async () => {
                   }"
                   :disabled="isAllFilled"
                   class="block md:hidden"
-                />
-
-                <ButtonWeb
-                  label="Back"
-                  color="gray"
-                  @click="showManageParcelPage"
-                  class="text-[#898989] block md:hidden"
                 />
               </div>
             </div>
@@ -1252,6 +1250,12 @@ onMounted(async () => {
               </div>
               <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
                 <ButtonWeb
+                  label="Back"
+                  color="gray"
+                  @click="showManageParcelPage"
+                  class="text-[#898989] w-auto"
+                />
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
@@ -1261,12 +1265,6 @@ onMounted(async () => {
                   }"
                   :disabled="isAllFilled"
                   class="w-auto"
-                />
-                <ButtonWeb
-                  label="Back"
-                  color="gray"
-                  @click="showManageParcelPage"
-                  class="text-[#898989] w-auto"
                 />
               </div>
 

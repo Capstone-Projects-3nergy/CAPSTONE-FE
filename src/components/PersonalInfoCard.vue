@@ -726,16 +726,16 @@ const profileImageUrlPreview = computed(() => {
               <!-- Buttons -->
               <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
-                  label="Edit"
-                  color="blue"
-                  @click="$emit('edit')"
-                />
-                <ButtonWeb
                   class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
                   label="Cancel"
                   color="gray"
                   @click="$emit('cancel')"
+                />
+                <ButtonWeb
+                  class="text-sm py-2 md:text-base md:py-2.5"
+                  label="Edit"
+                  color="blue"
+                  @click="$emit('edit')"
                 />
               </div>
             </div>

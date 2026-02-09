@@ -883,17 +883,16 @@ function formatDateTime(datetimeStr) {
 
           <div class="flex justify-end space-x-2 mt-6">
             <ButtonWeb
-              label="Save"
-              color="green"
-              @click="saveEditParcel"
-              :disabled="isUnchanged"
-            />
-
-            <ButtonWeb
               label="Cancel"
               color="gray"
               @click="cancelEdit"
               class="text-[#898989]"
+            />
+            <ButtonWeb
+              label="Save"
+              color="green"
+              @click="saveEditParcel"
+              :disabled="isUnchanged"
             />
           </div>
         </form>

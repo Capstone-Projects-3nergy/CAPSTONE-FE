@@ -502,16 +502,16 @@ function formatDateTime(datetimeStr) {
           </section>
           <div class="flex items-center gap-3 ml-auto justify-end">
             <ButtonWeb
-              label="Edit"
-              color="blue"
-              @click="showEditParacelDetail(parcel.parcelId)"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
-            />
-            <ButtonWeb
               label="Go Back"
               color="gray"
               @click="backToManageParcels"
               class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
+            />
+            <ButtonWeb
+              label="Edit"
+              color="blue"
+              @click="showEditParacelDetail(parcel.parcelId)"
+              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
             />
           </div>
         </form>

@@ -549,17 +549,17 @@ const closePopUp = (operate) => {
 
             <div class="flex justify-end space-x-3 pt-4">
               <ButtonWeb
+                label="Back"
+                color="gray"
+                class="text-[#898989]"
+                @click="showHomePageResidentWeb"
+              />
+              <ButtonWeb
                 v-if="currentParcelStatus === 'RECEIVED'"
                 type="button"
                 label="Confirm"
                 color="blue"
                 @click="confirmParcelPopUp(parcel)"
-              />
-              <ButtonWeb
-                label="Back"
-                color="gray"
-                class="text-[#898989]"
-                @click="showHomePageResidentWeb"
               />
             </div>
           </form>
