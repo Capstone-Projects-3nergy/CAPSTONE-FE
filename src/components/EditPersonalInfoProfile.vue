@@ -1175,17 +1175,17 @@ const isSaveDisabled = computed(() => {
           <!-- Actions -->
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end">
             <ButtonWeb
+              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              label="Cancel Changes"
+              color="gray"
+              @click="cancel"
+            />
+            <ButtonWeb
               class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
               :disabled="isSaveDisabled"
-            />
-            <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
-              label="Cancel Changes"
-              color="gray"
-              @click="cancel"
             />
           </div>
         </div>
