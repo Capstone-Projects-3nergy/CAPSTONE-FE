@@ -236,6 +236,16 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         isRead: false
       })
     },
+    notifyParcelUpdate: (updatedParcel) => {
+      addNotification({
+        type: 'comment',
+        label: 'Parcel Updated',
+        title: `Parcel ${updatedParcel.trackingNumber} has been updated. (Status: ${updatedParcel.status})`,
+        user: 'Parcel System',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
     notifyParcelSaved: (parcel) => {
       addNotification({
         type: 'new',

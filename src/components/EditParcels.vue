@@ -8,6 +8,8 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager'
+const notificationManager = useNotificationManager()
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
@@ -300,6 +302,7 @@ const saveEditParcel = async () => {
     }
 
     parcelStore.editParcel(form.value.parcelId, updatedParcel)
+    notificationManager.notifyParcelUpdate(updatedParcel)
 
     form.value = {
       ...form.value,

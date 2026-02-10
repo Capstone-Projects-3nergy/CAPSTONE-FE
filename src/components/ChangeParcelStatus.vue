@@ -9,6 +9,9 @@ const route = useRoute()
 const router = useRouter()
 const parcelStore = useParcelManager()
 
+import { useNotificationManager } from '@/stores/NotificationManager'
+const notificationManager = useNotificationManager()
+
 const emit = defineEmits([
   'cancelStatusDetail',
   'confirmStatusDetail',
@@ -98,6 +101,7 @@ const saveStatusChange = async () => {
     )
 
     parcelStore.updateParcel(updatedParcel)
+    notificationManager.notifyParcelUpdate(updatedParcel)
     form.value = { ...form.value, ...updatedParcel }
     currentStatus.value = newStatus.value
     statusChangedSuccessfuly.value = true
