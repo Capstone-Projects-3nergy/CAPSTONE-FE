@@ -14,7 +14,8 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
-import { useAuthManager } from '@/stores/AuthManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager'
+const notificationManager = useNotificationManager()
 import { useParcelManager } from '@/stores/ParcelsManager'
 import WebHeader from './WebHeader.vue'
 import {
@@ -517,6 +518,7 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
+    notificationManager.notifyParcelSaved(savedParcel)
 
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)

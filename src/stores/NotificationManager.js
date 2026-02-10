@@ -236,6 +236,16 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         isRead: false
       })
     },
+    notifyParcelSaved: (parcel) => {
+      addNotification({
+        type: 'new',
+        label: 'Parcel Saved',
+        title: `Parcel ${parcel.trackingNumber} for ${parcel.recipientName} (from ${parcel.senderName || 'Unknown'}) has been saved.`,
+        user: 'Parcel System',
+        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        isRead: false
+      })
+    },
     notifyWelcome: (username, role = 'RESIDENT') => {
       addNotification({
         type: 'message',
