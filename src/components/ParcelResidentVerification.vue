@@ -61,7 +61,8 @@ const error = ref(false)
 const errorMessage = ref('')
 const showLogoutConfirm = ref(false)
 const companyList = ref([])
-
+const isResidentNameWrong = ref(false)
+const trackingNumberError = ref(false)
 const form = ref({
   residentName: '',
   items: [{
@@ -209,6 +210,18 @@ const submitVerification = async () => {
     confirmSuccess.value = false
     errorMessage.value = ''
 
+    
+  if (/\d/.test(form.value.residentName)) {
+      isResidentNameWrong.value = true
+      setTimeout(() => (isResidentNameWrong.value = false), 10000)
+      return
+  }
+  if (!/^[A-Za-z0-9]+$/.test(form.value.items[0].trackingNumber)) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 10000)
+    return
+  }
+    
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
@@ -404,14 +417,14 @@ const closePopUp = (operate) => {
     case 'problem':
       error.value = false
       break
-    case 'deleteSuccessMessage':
-      deleteSuccess.value = false
-      break
     case 'confirmSuccessMessage':
       confirmSuccess.value = false
       break
-    case 'editSuccessMessage':
-      editSuccess.value = false
+    case 'nametypewrong':
+      isResidentNameWrong.value = false
+      break
+    case 'trackingNumber':
+      trackingNumberError.value = false
       break
   }
 }
@@ -693,6 +706,22 @@ const closePopUp = (operate) => {
             @closePopUp="closePopUp"
           />
         </div>
+        <AlertPopUp
+          v-if="isResidentNameWrong"
+          :titles="'Resident Name can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="nametypewrong"
+          @closePopUp="closePopUp"
+        /> 
+        <AlertPopUp
+          v-if="trackingNumberError"
+          :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+          message="Error!!"
+          styleType="red"
+          operate="trackingNumber"
+          @closePopUp="closePopUp"
+        />
 
         <div class="max-w-4xl mx-auto mt-6">
           <div
