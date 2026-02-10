@@ -21,6 +21,7 @@ const isConfirmPasswordTooShort = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
+const isEmailInvalidChars = ref(false)
 const isFullNameWrong = ref(false)
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
 const trimmedEmail = computed(() => form.email?.trim() || '')
@@ -100,7 +101,7 @@ const submitForm = async (roleType) => {
     const MAX_NAME_LENGTH = 50
     const MAX_EMAIL_LENGTH = 50
     const MAX_PASSWORD_LENGTH = 50
-    const MAX_STAFFPOSITION_LENGTH = 20
+    const MAX_STAFFPOSITION_LENGTH = 30
     const MAX_ROMNUMBER_LENGTH = 10
     const MIN_PASSWORD_LENGTH = 6
     const MIN_FULLNAME_LENGTH = 6
@@ -117,6 +118,11 @@ const submitForm = async (roleType) => {
 
     if (form.email.trim().length > MAX_EMAIL_LENGTH) {
       isEmailOverLimit.value = true
+      return
+    }
+
+    if (/[^a-zA-Z0-9.@]/.test(form.email)) {
+      isEmailInvalidChars.value = true
       return
     }
 
@@ -361,6 +367,7 @@ const closePopUp = (operate) => {
   if (operate === 'nameOverLimit') isNameOverLimit.value = false
   if (operate === 'emailOverLimit') isEmailOverLimit.value = false
   if (operate === 'positionOverLimit') isStaffPositionOverLimit.value = false
+  if (operate === 'emailInvalidChars') isEmailInvalidChars.value = false
   if (operate === 'passwordOverLimit') isPasswordOverLimit.value = false
   if (operate === 'passwordTooShort') showPasswordPopup.value = false
   if (operate === 'confirmPasswordOverLimit') isConfirmPasswordOverLimit.value = false
@@ -623,8 +630,16 @@ const toggleComfirmPasswordVisibility = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="isEmailInvalidChars"
+            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="isStaffPositionOverLimit"
-            titles="Limit Position to 20 characters or less."
+            titles="Limit Position to 30 characters or less."
             message="Error!!"
             styleType="red"
             operate="positionOverLimit"

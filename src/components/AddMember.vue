@@ -16,6 +16,7 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import axios from 'axios'
+const emailInvalidCharsError = ref(false)
 const errorAccount = ref(false)
 const emailError = ref(false)
 const successAccount = ref(false)
@@ -169,6 +170,10 @@ function lineIdErrorFn() {
   lineIdError.value = true
   setTimeout(() => (lineIdError.value = false), 10000)
 }
+function showEmailInvalidCharsError() {
+  emailInvalidCharsError.value = true
+  setTimeout(() => (emailInvalidCharsError.value = false), 10000)
+}
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
@@ -197,6 +202,9 @@ const closePopUp = (operate) => {
       break
     case 'lineId':
       lineIdError.value = false
+      break
+    case 'emailInvalidChars':
+      emailInvalidCharsError.value = false
       break
   }
 }
@@ -502,6 +510,14 @@ const showEmailFormError = () => {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="emailInvalidCharsError"
+            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="error"
             titles="There is a problem. Please try again later."
             message="Error!!"
@@ -526,6 +542,7 @@ const showEmailFormError = () => {
           @cancel="ShowManageResidentPage"
           @room-number-error="roomNumberErrorFn"
           @line-id-error="lineIdErrorFn"
+          @email-invalid-chars="showEmailInvalidCharsError"
         />
       </main>
     </div>

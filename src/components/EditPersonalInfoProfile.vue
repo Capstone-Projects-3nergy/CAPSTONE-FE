@@ -75,7 +75,8 @@ const emit = defineEmits([
   'email-duplicate',
   'email-form-error',
   'room-number-error',
-  'line-id-error'
+  'line-id-error',
+  'email-invalid-chars'
 ])
 
 const isEdit = ref(false)
@@ -538,6 +539,10 @@ const addResidents = async () => {
   // -----------------------
   // validate email
   // -----------------------
+  if (/[^a-zA-Z0-9.@]/.test(form.email)) {
+    emit('email-invalid-chars', true)
+    return
+  }
   if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
     emit('email-form-error')
     return
