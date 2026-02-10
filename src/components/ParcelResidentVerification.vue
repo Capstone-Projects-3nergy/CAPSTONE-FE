@@ -830,8 +830,8 @@ const handleTrackingInput = (event, index) => {
                       :value="form.residentName"
                       @input="handleResidentNameInput"
                       type="text"
-                      class="pl-10 w-full bg-gray-50 border text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
-                      :class="showResidentNameLengthError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'"
+                      class="pl-10 w-full bg-gray-50 border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200 hover:bg-white"
+                      :class="showResidentNameLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
                       placeholder="Ex. kong"
                     />
                   </div>
@@ -873,8 +873,8 @@ const handleTrackingInput = (event, index) => {
                           :value="item.trackingNumber"
                           @input="handleTrackingInput($event, index)"
                           type="text"
-                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
-                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'"
+                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
+                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
                           placeholder="Ex. TH12345678"
                         />
                          <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
