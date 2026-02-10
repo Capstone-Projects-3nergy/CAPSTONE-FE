@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
+import { useAuthManager } from '@/stores/AuthManager.js'
 import Quagga from 'quagga'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
