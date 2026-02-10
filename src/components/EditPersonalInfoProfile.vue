@@ -1044,7 +1044,7 @@ const isSaveDisabled = computed(() => {
           @change="onImageChange"
         />
 
-        <p class="mt-4 text-gray-800 font-semibold text-lg">
+        <p class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
           {{ displayFullName }}
         </p>
       </div>
@@ -1214,7 +1214,7 @@ const isSaveDisabled = computed(() => {
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <h2 class="text-xl font-semibold text-gray-800">
+          <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
             {{ displayFullName }}
           </h2>
         </div>
@@ -1333,7 +1333,7 @@ const isSaveDisabled = computed(() => {
               @change="onImageChange"
             />
             <h2
-              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5"
+              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]"
             >
               {{ displayFullName }}
             </h2>
@@ -1349,7 +1349,7 @@ const isSaveDisabled = computed(() => {
             </div>
 
             <!-- Form Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
                   Firstname
@@ -1357,7 +1357,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.firstName"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1368,7 +1368,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lastName"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1381,7 +1381,7 @@ const isSaveDisabled = computed(() => {
                   :disabled="mode === 'edit'"
                   v-model="form.email"
                   :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
                   ]"
                 />
@@ -1394,7 +1394,7 @@ const isSaveDisabled = computed(() => {
                 <input
                   v-model="form.roomNumber"
                   :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
+                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
                   ]"
                 />
               </div>
@@ -1404,7 +1404,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <select
                   v-model="form.dormId"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 >
                   <option disabled value="">Select Dormitory</option>
                   <option
@@ -1422,7 +1422,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lineId"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1432,7 +1432,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.phoneNumber"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
