@@ -858,7 +858,7 @@ const closePopUp = (operate) => {
             <div
               class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg px-15"
             >
-              <div class="flex items-center justify-end mb-4"></div>
+              <div class="flex items-center justify-start mb-4"></div>
 
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
@@ -867,11 +867,11 @@ const closePopUp = (operate) => {
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
                   <span>Tracking:</span>
-                  <span>{{ form.trackingNumber }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Recipient:</span>
-                  <span>{{
+                  <span class="truncate max-w-[320px] text-right">{{
                     selectedResident
                       ? selectedResident.fullName
                       : form.recipientName
@@ -879,21 +879,21 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Room:</span>
-                  <span>{{
+                  <span class="truncate max-w-[320px] text-right">{{
                     selectedResident ? selectedResident.roomNumber : ''
                   }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Type:</span>
-                  <span>{{ form.parcelType }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.parcelType }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Status:</span>
-                  <span>{{ form.status }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.status }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Company:</span>
-                  <span>
+                  <span class="truncate max-w-[320px] text-right">
                     {{
                       companyList.find((c) => c.companyId === form.companyId)
                         ?.companyName || ''
@@ -902,7 +902,7 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Sender:</span>
-                  <span>{{ form.senderName }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.senderName }}</span>
                 </div>
               </div>
               <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
