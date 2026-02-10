@@ -108,31 +108,37 @@ const submitForm = async (roleType) => {
 
     if (form.fullName.trim().length > MAX_NAME_LENGTH) {
       isNameOverLimit.value = true
+      setTimeout(() => (isNameOverLimit.value = false), 10000)
       return
     }
     const lettersOnly = form.fullName.trim().replace(/\s+/g, '')
     if (lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH) {
       isFullNameWeak.value = true
+      setTimeout(() => (isFullNameWeak.value = false), 10000)
       return
     }
 
     if (form.email.trim().length > MAX_EMAIL_LENGTH) {
       isEmailOverLimit.value = true
+      setTimeout(() => (isEmailOverLimit.value = false), 10000)
       return
     }
 
     if (/[^a-zA-Z0-9.@]/.test(form.email)) {
       isEmailInvalidChars.value = true
+      setTimeout(() => (isEmailInvalidChars.value = false), 10000)
       return
     }
 
     if (form.position.trim().length > MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = true
+      setTimeout(() => (isStaffPositionOverLimit.value = false), 10000)
       return
     }
 
     if (form.password.trim().length > MAX_PASSWORD_LENGTH) {
       isPasswordOverLimit.value = true
+      setTimeout(() => (isPasswordOverLimit.value = false), 10000)
       return
     }
     if (
@@ -146,6 +152,7 @@ const submitForm = async (roleType) => {
 
     if (form.confirmPassword.trim().length > MAX_PASSWORD_LENGTH) {
       isConfirmPasswordOverLimit.value = true
+      setTimeout(() => (isConfirmPasswordOverLimit.value = false), 10000)
       return
     }
     if (
@@ -159,6 +166,7 @@ const submitForm = async (roleType) => {
 
     if (form.roomNumber.trim().length > MAX_ROMNUMBER_LENGTH) {
       isRoomNumberOverLimit.value = true
+      setTimeout(() => (isRoomNumberOverLimit.value = false), 10000)
       return
     }
 
