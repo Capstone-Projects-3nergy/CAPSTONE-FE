@@ -27,6 +27,39 @@ const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+
+const showTrackingLengthError = ref(false)
+const showSenderLengthError = ref(false)
+
+const handleTrackingInput = (event) => {
+  const val = event.target.value
+  if (val.length > 60) {
+    const sliced = val.slice(0, 60)
+    form.value.trackingNumber = sliced
+    event.target.value = sliced
+    showTrackingLengthError.value = true
+    setTimeout(() => {
+      showTrackingLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.trackingNumber = val
+  }
+}
+
+const handleSenderInput = (event) => {
+  const val = event.target.value
+  if (val.length > 50) {
+    const sliced = val.slice(0, 50)
+    form.value.senderName = sliced
+    event.target.value = sliced
+    showSenderLengthError.value = true
+    setTimeout(() => {
+      showSenderLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.senderName = val
+  }
+}
 const auth = useAuthManager()
 const companyList = ref([])
 const router = useRouter()
@@ -49,13 +82,12 @@ const notificationManager = useNotificationManager()
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
   return (
-    form.value.trackingNumber &&
-    form.value.recipientName &&
-    form.value.parcelType &&
-    form.value.companyId &&
-    form.value.receiveAt &&
-    form.value.pickupAt &&
-    form.value.updateAt
+    !form.value.trackingNumber ||
+    !form.value.recipientName ||
+    !form.value.parcelType ||
+    !form.value.companyId ||
+    (form.value.trackingNumber && form.value.trackingNumber.length > 60) ||
+    (form.value.senderName && form.value.senderName.length > 50)
   )
 })
 
@@ -441,6 +473,17 @@ const saveParcel = async () => {
     return
   }
 
+  if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 10000)
+    return
+  }
+  if (form.value.senderName && form.value.senderName.length > 50) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 10000)
+    return
+  }
+
   try {
     const requestBody = {
       userId: selectedResidentId.value,
@@ -732,10 +775,36 @@ const closePopUp = (operate) => {
                     Tracking number <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="form.trackingNumber"
+                    :value="form.trackingNumber"
+                    @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    :class="[
+                      showTrackingLengthError
+                        ? 'border-red-500 focus:outline-red-500'
+                        : 'focus:outline-blue-500'
+                    ]"
                   />
+                  <div
+                    v-if="showTrackingLengthError"
+                    class="flex items-center text-sm text-red-600 mt-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="red"
+                      class="w-[15px] mr-1"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-sm text-red-600">
+                      Tracking number must be at most 60 characters
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label class="block font-semibold mb-1">
@@ -809,10 +878,36 @@ const closePopUp = (operate) => {
                 <div>
                   <label class="block font-semibold mb-1">Sender Name</label>
                   <input
-                    v-model="form.senderName"
+                    :value="form.senderName"
+                    @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    :class="[
+                      showSenderLengthError
+                        ? 'border-red-500 focus:outline-red-500'
+                        : 'focus:outline-blue-500'
+                    ]"
                   />
+                  <div
+                    v-if="showSenderLengthError"
+                    class="flex items-center text-sm text-red-600 mt-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="red"
+                      class="w-[15px] mr-1"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-sm text-red-600">
+                      Sender name must be at most 50 characters
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label class="block font-semibold mb-1">

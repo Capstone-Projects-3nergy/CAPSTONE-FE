@@ -59,6 +59,55 @@ const selectName = ref(false)
 const parcelTypeError = ref(false)
 const trackingNumberError = ref(false)
 const showLogoutConfirm = ref(false)
+
+const showTrackingLengthError = ref(false)
+const showRecipientLengthError = ref(false)
+const showSenderLengthError = ref(false)
+
+const handleTrackingInput = (event) => {
+  const val = event.target.value
+  if (val.length > 60) {
+    const sliced = val.slice(0, 60)
+    form.value.trackingNumber = sliced
+    event.target.value = sliced
+    showTrackingLengthError.value = true
+    setTimeout(() => {
+      showTrackingLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.trackingNumber = val
+  }
+}
+
+const handleRecipientInput = (event) => {
+  const val = event.target.value
+  if (val.length > 50) {
+    const sliced = val.slice(0, 50)
+    form.value.recipientName = sliced
+    event.target.value = sliced
+    showRecipientLengthError.value = true
+    setTimeout(() => {
+      showRecipientLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.recipientName = val
+  }
+}
+
+const handleSenderInput = (event) => {
+  const val = event.target.value
+  if (val.length > 50) {
+    const sliced = val.slice(0, 50)
+    form.value.senderName = sliced
+    event.target.value = sliced
+    showSenderLengthError.value = true
+    setTimeout(() => {
+      showSenderLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.senderName = val
+  }
+}
 const parcelStore = useParcelManager()
 const companyList = ref([])
 
@@ -271,9 +320,28 @@ const saveEditParcel = async () => {
     return
   }
 
-  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+  if (
+    form.value.trackingNumber &&
+    !/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)
+  ) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
+    return
+  }
+
+  if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 10000)
+    return
+  }
+  if (form.value.recipientName && form.value.recipientName.length > 50) {
+    recipientNameError.value = true
+    setTimeout(() => (recipientNameError.value = false), 10000)
+    return
+  }
+  if (form.value.senderName && form.value.senderName.length > 50) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
   try {
@@ -702,25 +770,103 @@ function formatDateTime(datetimeStr) {
                 <label class="block font-semibold mb-1">Tracking Number</label>
                 <input
                   type="text"
-                  v-model="form.trackingNumber"
-                  class="w-full border rounded-md p-2"
+                  :value="form.trackingNumber"
+                  @input="handleTrackingInput"
+                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  :class="[
+                    showTrackingLengthError
+                      ? 'border-red-500 focus:outline-red-500'
+                      : 'focus:outline-blue-500'
+                  ]"
                 />
+                <div
+                  v-if="showTrackingLengthError"
+                  class="flex items-center text-sm text-red-600 mt-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Tracking number must be at most 60 characters
+                  </div>
+                </div>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Recipient Name</label>
                 <input
                   type="text"
-                  v-model="form.recipientName"
-                  class="w-full border rounded-md p-2"
+                  :value="form.recipientName"
+                  @input="handleRecipientInput"
+                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  :class="[
+                    showRecipientLengthError
+                      ? 'border-red-500 focus:outline-red-500'
+                      : 'focus:outline-blue-500'
+                  ]"
                 />
+                <div
+                  v-if="showRecipientLengthError"
+                  class="flex items-center text-sm text-red-600 mt-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Recipient name must be at most 50 characters
+                  </div>
+                </div>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Sender Name</label>
                 <input
                   type="text"
-                  v-model="form.senderName"
-                  class="w-full border rounded-md p-2"
+                  :value="form.senderName"
+                  @input="handleSenderInput"
+                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  :class="[
+                    showSenderLengthError
+                      ? 'border-red-500 focus:outline-red-500'
+                      : 'focus:outline-blue-500'
+                  ]"
                 />
+                <div
+                  v-if="showSenderLengthError"
+                  class="flex items-center text-sm text-red-600 mt-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Sender name must be at most 50 characters
+                  </div>
+                </div>
               </div>
               <div>
                 <label class="block font-semibold mb-1">Parcel Type</label>

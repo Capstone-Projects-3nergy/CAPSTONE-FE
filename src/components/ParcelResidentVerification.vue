@@ -63,6 +63,8 @@ const showLogoutConfirm = ref(false)
 const companyList = ref([])
 const isResidentNameWrong = ref(false)
 const trackingNumberError = ref(false)
+const showResidentNameLengthError = ref(false)
+const showTrackingLengthError = ref(false)
 const form = ref({
   residentName: '',
   items: [{
@@ -210,7 +212,21 @@ const submitVerification = async () => {
     confirmSuccess.value = false
     errorMessage.value = ''
 
-    
+    if (form.value.residentName && form.value.residentName.length > 50) {
+      showResidentNameLengthError.value = true
+      setTimeout(() => {
+        showResidentNameLengthError.value = false
+      }, 5000)
+      return
+    }
+
+    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 60) {
+      showTrackingLengthError.value = true
+      setTimeout(() => {
+        showTrackingLengthError.value = false
+      }, 5000)
+      return
+    }
   if (/\d/.test(form.value.residentName)) {
       isResidentNameWrong.value = true
       setTimeout(() => (isResidentNameWrong.value = false), 10000)
@@ -428,6 +444,52 @@ const closePopUp = (operate) => {
       break
   }
 }
+
+const handleResidentNameInput = (event) => {
+  const val = event.target.value
+  const maxLength = 50
+  if (val.length > maxLength) {
+    const sliced = val.slice(0, maxLength)
+    form.value.residentName = sliced
+    event.target.value = sliced
+    showResidentNameLengthError.value = true
+    setTimeout(() => {
+      showResidentNameLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.residentName = val
+    if (showResidentNameLengthError.value && val.length <= maxLength) {
+      showResidentNameLengthError.value = false
+    }
+  }
+}
+
+const handleTrackingInput = (event, index) => {
+  const val = event.target.value
+  const maxLength = 60
+  if (val.length > maxLength) {
+    const sliced = val.slice(0, maxLength)
+    if (index !== undefined) {
+       form.value.items[index].trackingNumber = sliced
+    } else {
+       // fallback if referenced directly (though likely used in v-for)
+       form.value.items[0].trackingNumber = sliced
+    }
+    event.target.value = sliced
+    showTrackingLengthError.value = true
+    setTimeout(() => {
+      showTrackingLengthError.value = false
+    }, 5000)
+  } else {
+    if (index !== undefined) {
+       form.value.items[index].trackingNumber = val
+    }
+    if (showTrackingLengthError.value && val.length <= maxLength) {
+      showTrackingLengthError.value = false
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -760,18 +822,26 @@ const closePopUp = (operate) => {
                   </div>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <svg class="h-5 w-5 transition-colors" :class="showResidentNameLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                       </svg>
                     </div>
                     <input
-                      v-model="form.residentName"
+                      :value="form.residentName"
+                      @input="handleResidentNameInput"
                       type="text"
-                      class="pl-10 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
+                      class="pl-10 w-full bg-gray-50 border text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200 hover:bg-white"
+                      :class="showResidentNameLengthError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'"
                       placeholder="Ex. kong"
                     />
                   </div>
-                  <p class="text-xs text-gray-400 mt-1 ml-1">
+                  <p class="text-xs text-red-500 mt-1 ml-1 flex items-center gap-1" v-if="showResidentNameLengthError">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Name cannot exceed 50 characters
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1 ml-1" v-else>
                     *Enter resident name to assign all parcels below.
                   </p>
                 </div>
@@ -795,16 +865,24 @@ const closePopUp = (operate) => {
                       </div>
                       <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="h-5 w-5 transition-colors" :class="showTrackingLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
                           </svg>
                         </div>
                         <input
-                          v-model="item.trackingNumber"
+                          :value="item.trackingNumber"
+                          @input="handleTrackingInput($event, index)"
                           type="text"
-                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'"
                           placeholder="Ex. TH12345678"
                         />
+                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                          Tracking number max 60 characters
+                        </p>
                       </div>
                     </div>
 

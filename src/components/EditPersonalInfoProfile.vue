@@ -55,6 +55,109 @@ const loading = ref(false)
 const showCropper = ref(false)
 const tempImageSrc = ref('')
 
+const showEmailLengthError = ref(false)
+const showRoomLengthError = ref(false)
+const showPhoneLengthError = ref(false)
+const showLineIdLengthError = ref(false)
+const showNameLengthError = ref(false)
+
+const handleEmailInput = (event) => {
+  const val = event.target.value
+  if (val.length > 100) {
+    const sliced = val.slice(0, 100)
+    form.value.email = sliced
+    event.target.value = sliced
+    showEmailLengthError.value = true
+    setTimeout(() => {
+      showEmailLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.email = val
+  }
+}
+
+const handleRoomInput = (event) => {
+  const val = event.target.value
+  if (val.length > 10) {
+    const sliced = val.slice(0, 10)
+    form.value.roomNumber = sliced
+    event.target.value = sliced
+    showRoomLengthError.value = true
+    setTimeout(() => {
+      showRoomLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.roomNumber = val
+  }
+}
+
+const handlePhoneInput = (event) => {
+  let val = event.target.value
+  const digits = val.replace(/-/g, '')
+  if (digits.length > 15) {
+    while (val.replace(/-/g, '').length > 15 && val.length > 0) {
+      val = val.slice(0, -1)
+    }
+    form.value.phoneNumber = val
+    event.target.value = val
+    showPhoneLengthError.value = true
+    setTimeout(() => {
+      showPhoneLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.phoneNumber = val
+  }
+}
+
+const handleLineIdInput = (event) => {
+  const val = event.target.value
+  if (val.length > 20) {
+    const sliced = val.slice(0, 20)
+    form.value.lineId = sliced
+    event.target.value = sliced
+    showLineIdLengthError.value = true
+    setTimeout(() => {
+      showLineIdLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.lineId = val
+  }
+}
+
+const handleFirstNameInput = (event) => {
+  const val = event.target.value
+  const lastNameLen = form.value.lastName ? form.value.lastName.length : 0
+  if (val.length + lastNameLen > 50) {
+    const allowed = 50 - lastNameLen
+    const sliced = val.slice(0, Math.max(0, allowed))
+    form.value.firstName = sliced
+    event.target.value = sliced
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.firstName = val
+  }
+}
+
+const handleLastNameInput = (event) => {
+  const val = event.target.value
+  const firstNameLen = form.value.firstName ? form.value.firstName.length : 0
+  if (val.length + firstNameLen > 50) {
+    const allowed = 50 - firstNameLen
+    const sliced = val.slice(0, Math.max(0, allowed))
+    form.value.lastName = sliced
+    event.target.value = sliced
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.lastName = val
+  }
+}
+
 const emit = defineEmits([
   'edit',
   'save',
@@ -470,6 +573,47 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
+  if (form.value.email && form.value.email.length > 100) {
+    showEmailLengthError.value = true
+    setTimeout(() => {
+      showEmailLengthError.value = false
+    }, 5000)
+    return
+  }
+  if (form.value.roomNumber && form.value.roomNumber.length > 10) {
+    showRoomLengthError.value = true
+    setTimeout(() => {
+      showRoomLengthError.value = false
+    }, 5000)
+    return
+  }
+  if (form.value.phoneNumber) {
+    const digits = form.value.phoneNumber.replace(/-/g, '')
+    if (digits.length > 15) {
+      showPhoneLengthError.value = true
+      setTimeout(() => {
+        showPhoneLengthError.value = false
+      }, 5000)
+      return
+    }
+  }
+  if (form.value.lineId && form.value.lineId.length > 20) {
+    showLineIdLengthError.value = true
+    setTimeout(() => {
+      showLineIdLengthError.value = false
+    }, 5000)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if (fName.length + lName.length > 50) {
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+    return
+  }
+
   if (props.mode === 'add') {
     await addResidents()
     return
@@ -1068,9 +1212,35 @@ const isSaveDisabled = computed(() => {
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              v-model="form.firstName"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.firstName"
+              @input="handleFirstNameInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showNameLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showNameLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined Firstname and Lastname must be at most 50 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1078,9 +1248,35 @@ const isSaveDisabled = computed(() => {
               Lastname <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              v-model="form.lastName"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.lastName"
+              @input="handleLastNameInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showNameLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showNameLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined Firstname and Lastname must be at most 50 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1089,12 +1285,36 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               :disabled="mode === 'edit'"
-              v-model="form.email"
+              :value="form.email"
+              @input="handleEmailInput"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                showEmailLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
               ]"
             />
+            <div
+              v-if="showEmailLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Email must be at most 100 characters
+              </div>
+            </div>
           </div>
 
           <div
@@ -1107,12 +1327,36 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               :disabled="mode === 'edit'"
-              v-model="form.roomNumber"
+              :value="form.roomNumber"
+              @input="handleRoomInput"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                showRoomLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
               ]"
             />
+            <div
+              v-if="showRoomLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Room Number must be at most 10 characters
+              </div>
+            </div>
           </div>
           <div
             class="flex flex-col"
@@ -1174,9 +1418,35 @@ const isSaveDisabled = computed(() => {
               Line ID
             </label>
             <input
-              v-model="form.lineId"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.lineId"
+              @input="handleLineIdInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showLineIdLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showLineIdLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Line ID must be at most 20 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1184,9 +1454,35 @@ const isSaveDisabled = computed(() => {
               Phone Number
             </label>
             <input
-              v-model="form.phoneNumber"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.phoneNumber"
+              @input="handlePhoneInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showPhoneLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showPhoneLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Phone Number must be at most 15 digits
+              </div>
+            </div>
           </div>
 
           <!-- Actions -->
