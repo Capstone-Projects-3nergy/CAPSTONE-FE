@@ -393,7 +393,7 @@ const toggleSidebar = () => {
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
-  Math.ceil(parcels.value.length / perPage.value)
+  Math.ceil(filteredParcels.value.length / perPage.value)
 )
 
 const paginatedParcels = computed(() => {

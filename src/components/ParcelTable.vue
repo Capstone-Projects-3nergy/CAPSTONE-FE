@@ -689,7 +689,7 @@ const authStore = useAuthManager()
 
     <button
       @click="$emit('next')"
-      :disabled="page >= pages.length"
+      :disabled="page >= total"
       class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
     >
       Next &gt;

@@ -269,9 +269,14 @@ const toggleSidebar = () => {
 }
 const currentPage = ref(1)
 const perPage = ref(10)
-const totalPages = computed(() =>
-  Math.ceil(parcels.value.length / perPage.value)
-)
+const totalPages = computed(() => {
+  if (activeTab.value === 'Residents') {
+    return Math.ceil(filteredResidents.value.length / perPage.value)
+  } else if (activeTab.value === 'Staffs') {
+    return Math.ceil(filteredStaffs.value.length / perPage.value)
+  }
+  return 0
+})
 
 const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
