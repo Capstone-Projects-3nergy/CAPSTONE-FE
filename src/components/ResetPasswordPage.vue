@@ -7,6 +7,7 @@ import ButtonWeb from './ButtonWeb.vue'
 const router = useRouter()
 const resetStore = useResetPasswordManager()
 const emailRequire = ref(false)
+const isEmailInvalidChars = ref(false)
 const form = ref({
   email: ''
 })
@@ -49,6 +50,13 @@ const sendResetEmail = async () => {
     return
   }
 
+  if (/[^a-zA-Z0-9.@]/.test(trimmedEmail.value)) {
+    isEmailInvalidChars.value = true
+    loading.value = false
+    setTimeout(() => (isEmailInvalidChars.value = false), 10000)
+    return
+  }
+
   try {
     await resetStore.sendResetEmail(trimmedEmail.value)
     form.value.email = ''
@@ -67,6 +75,7 @@ const closePopUp = (operate) => {
   if (operate === 'success') success.value = false
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'emailEmpty') emailRequire.value = false
+  if (operate === 'emailInvalidChars') isEmailInvalidChars.value = false
 }
 
 const returnLoginPage = () => {
@@ -210,6 +219,14 @@ const returnLoginPage = () => {
           operate="emailEmpty"
           @closePopUp="closePopUp"
         />
+         <AlertPopUp
+            v-if="isEmailInvalidChars"
+            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
+            message="Error!!"
+            styleType="red"
+            operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
 
         <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
           <div class="relative">

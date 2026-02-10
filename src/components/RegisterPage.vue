@@ -631,7 +631,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isEmailInvalidChars"
-            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed."
+            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
             message="Error!!"
             styleType="red"
             operate="emailInvalidChars"
