@@ -99,7 +99,7 @@ onMounted(async () => {
 const submitForm = async (roleType) => {
   try {
     const MAX_NAME_LENGTH = 50
-    const MAX_EMAIL_LENGTH = 50
+    const MAX_EMAIL_LENGTH = 100
     const MAX_PASSWORD_LENGTH = 50
     const MAX_STAFFPOSITION_LENGTH = 30
     const MAX_ROMNUMBER_LENGTH = 10
@@ -304,7 +304,7 @@ const submitForm = async (roleType) => {
 
 const checkInputLength = (field) => {
   const MAX_NAME_LENGTH = 50
-  const MAX_EMAIL_LENGTH = 50
+  const MAX_EMAIL_LENGTH = 100
   const MAX_PASSWORD_LENGTH = 50
   const MAX_STAFFPOSITION_LENGTH = 20
   const MAX_ROMNUMBER_LENGTH = 10
@@ -631,7 +631,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isEmailOverLimit"
-            titles="Limit Email to 50 characters or less."
+            titles="Limit Email to 100 characters or less."
             message="Error!!"
             styleType="red"
             operate="emailOverLimit"
