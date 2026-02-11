@@ -135,6 +135,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const addNotification = (note) => {
     // Generate a unique ID using timestamp and random string to avoid collision with backend IDs
     const newId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    console.log('Adding local notification:', note.title)
     // Mark manual notifications as local so they aren't overwritten easily by full refreshes
     notifications.value.unshift({ ...note, id: newId, isRead: false, isLocal: true })
     saveToLocalStorage()
@@ -200,6 +201,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       notifications.value = allNotifications
       saveToLocalStorage()
     } else {
+      console.warn('Failed to fetch notifications from backend or empty response. Using local cache.')
       // Fallback if backend returns null/undefined (error case)
       // Only reset to defaults if we have absolutely nothing in the current state (no local, no backend)
       if (notifications.value.length === 0) {
