@@ -152,24 +152,38 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       // If we got a valid array (empty or not), update the state
       const backendNotifications = data.map((n) => {
           // Map Backend DB Schema to Frontend Model
+          // Backend uses camelCase: notificationId, notiTitle, notiMessage, etc.
+          
+          let derivedType = 'message'
+          const titleLower = (n.notiTitle || '').toLowerCase()
+          
+          if (n.notificationType === 'LINE' || n.notificationType === 'EMAIL') {
+             derivedType = 'message'
+          } else {
+             // Heuristics based on title
+             if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
+             else if (titleLower.includes('picked up') || titleLower.includes('collected')) derivedType = 'connect'
+             else if (titleLower.includes('received')) derivedType = 'connect'
+             else if (titleLower.includes('updated')) derivedType = 'comment'
+          }
+
         return {
-          id: n.notification_id, // Ensure this is unique from local IDs
-          type: n.notification_type || 'message', // Default to message if missing
-          label: n.noti_title || 'Notification', // Header
-          title: n.noti_message || '', // Body/Content
-          message: n.noti_message || '', // Explicit mapping for clarity
-          user: n.sender_name || 'System', // Adjust if backend sends sender info, else default
-          time: n.sent_at 
-            ? new Date(n.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-            : '',
-          sentAt: n.sent_at, // Raw sent_at
-          createdAt: n.created_at,
-          updatedAt: n.updated_at,
-          isRead: n.status === 'read', // Assuming 'read' vs 'unread'
-          status: n.status, // Keep raw status too just in case
+          id: n.notificationId, // Ensure this is unique from local IDs
+          type: derivedType,
+          label: n.notiTitle || 'Notification', // Header
+          title: n.notiMessage || '', // Body/Content
+          message: n.notiMessage || '', // Explicit mapping for clarity
+          user: 'Dormitory Office', // Backend 'user' is recipient. Notification sender is effectively the System/Office.
+          time: n.sentAt ? new Date(n.sentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
+          sentAt: n.sentAt, // Raw sent_at
+          createdAt: n.createdAt,
+          updatedAt: n.updatedAt,
+          isRead: n.status === 'read', // Assuming 'read' vs 'unread' status handling in backend if exists, otherwise local
+          status: n.status, // Keep raw status too
           // Keep raw data if needed
-          parcelId: n.parcel_id,
-          userId: n.user_id,
+          parcelId: n.parcel ? n.parcel.parcelId : null,
+          parcel: n.parcel,
+          userId: n.user ? n.user.userId : null,
           isLocal: false // Mark as coming from backend
         }
       })
