@@ -235,6 +235,7 @@ const submitVerification = async () => {
     return
   }
     
+    // Explicit number check redundant due to regex above but keeping for flow consistency if user code had it
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
@@ -295,10 +296,10 @@ const submitVerification = async () => {
                 parcelVerificationStore.addVerifiedParcel(mapped)
 
             } else {
-                // Check for duplicate error (status 500 often implies duplicate tracking number due to unique constraint)
+                // Backend returns 500 for unique constraint violation (duplicate)
+                // Treat this as a "soft success" - item is already processed
                 if (result?.status === 500) {
                     duplicateCount++
-                    // Treated as soft success/no-op, do not count as fail for popup
                 } else {
                     failCount++
                     console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
@@ -309,26 +310,26 @@ const submitVerification = async () => {
         }
 
         // Summary handling
+        // Show success if we had any successes OR duplicates (meaning work is done for those)
         if (successCount > 0 || duplicateCount > 0) {
-            // Show green popup if at least one success or duplicate (completed)
             confirmSuccess.value = true
             setTimeout(() => {
               confirmSuccess.value = false
             }, 10000)
 
             if (failCount > 0) {
-                // Genuine failures exist -> Show Red Popup for them
+                // Partial success (some failures)
                 error.value = true
                 setTimeout(() => {
                   error.value = false
                 }, 10000)
-                errorMessage.value = `Verified ${successCount + duplicateCount} items. Failed: ${failedItems.join(', ')}`
+                errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
                 
-                // Update form to show only true failed items
+                // Update form to show only failed items
                 form.value.items = nextItems
             } else {
-                // All good (success or duplicate)
-                errorMessage.value = '' // Clear any previous errors
+                // All success (including duplicates)
+                errorMessage.value = '' 
                 
                 // Reset form completely
                 form.value.residentName = ''
@@ -337,7 +338,7 @@ const submitVerification = async () => {
 
             // Auto hide success msg is handled above
         } else if (failCount > 0) {
-            // All failed (genuine errors)
+            // All failed (no successes, no duplicates)
             error.value = true
             setTimeout(() => {
               error.value = false
