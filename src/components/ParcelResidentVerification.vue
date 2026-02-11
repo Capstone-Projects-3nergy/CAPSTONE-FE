@@ -70,8 +70,6 @@ const form = ref({
   items: [{
     trackingNumber: '',
     companyId: '',
-    trackingNumber: '',
-    companyId: '',
     description: '',
     parcelType: ''
   }]
@@ -84,7 +82,6 @@ const isFormValid = computed(() => {
 const addParcelItem = () => {
   form.value.items.push({
     trackingNumber: '',
-    companyId: '',
     companyId: '',
     description: '',
     parcelType: ''
@@ -194,7 +191,6 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
-  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   await getCompanies()
   if (tidNum) {
@@ -267,7 +263,8 @@ const submitVerification = async () => {
                 trackingNumber: item.trackingNumber,
                 companyId: item.companyId,
                 residentName: form.value.residentName,
-                parcelType: item.parcelType
+                // Send null if parcelType is empty string to avoid backend 500 error
+                parcelType: item.parcelType || null
             }
 
             // -----------------------
