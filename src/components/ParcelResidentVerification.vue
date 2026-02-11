@@ -273,7 +273,7 @@ const submitVerification = async () => {
             // -----------------------
             // API call
             // -----------------------
-            const url = `${import.meta.env.VITE_BASE_URL}/api/verify`
+            const url = `${import.meta.env.VITE_BASE_URL}/api/resident/verify-parcel`
             let result = null 
             try {
                result = await addItem(url, body, router)
