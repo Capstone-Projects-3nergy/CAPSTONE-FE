@@ -32,7 +32,8 @@ import {
   editItemWithFile,
   deleteFile,
   updateParcelStatus,
-  getItems
+  getItems,
+  verifyParcelItem
 } from '@/utils/fetchUtils'
 
 const loginManager = useAuthManager()
@@ -256,46 +257,56 @@ const submitVerification = async () => {
         let successCount = 0
         let failCount = 0
         let failedItems = []
+        let nextItems = []
+
+        const url = `${import.meta.env.VITE_BASE_URL}/api/resident/verify-parcel`
 
         for (const item of form.value.items) {
             // -----------------------
-            // payload
+            // payload - simplified (trackingNumber & residentName only)
             // -----------------------
             const body = {
                 trackingNumber: item.trackingNumber,
-                companyId: item.companyId,
-                residentName: form.value.residentName,
-                // Send null if parcelType is empty string to avoid backend 500 error
-                parcelType: item.parcelType || null
+                residentName: form.value.residentName
             }
 
             // -----------------------
             // API call
             // -----------------------
-            const url = `${import.meta.env.VITE_BASE_URL}/api/resident/verify-parcel`
-            let result = null 
-            try {
-               result = await addItem(url, body, router)
-            } catch (error) {
-               console.error('Error verifying parcel:', error)
-            }
+            const result = await verifyParcelItem(url, body, router)
 
-            // Check if result is valid object (success)
-            if (!result || typeof result !== 'object') {
+            // Check if result is success
+            if (result && result.success) {
+                successCount++
+                
+                // Construct verified parcel object for store (since backend returns void)
+                // Use a temporary ID or tracking number as ID if needed by store logic
+                // Provide defaults for missing fields to avoid mapParcelData errors
+                const verifiedParcel = {
+                    parcelId: `verified-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    trackingNumber: item.trackingNumber,
+                    recipientName: form.value.residentName,
+                    companyId: item.companyId, 
+                    parcelType: item.parcelType || '',
+                    status: 'Verified',
+                    updatedAt: new Date().toISOString()
+                }
+
+                const mapped = mapParcelData(verifiedParcel)
+                parcelVerificationStore.addVerifiedParcel(mapped)
+
+            } else {
                 failCount++
-                failedItems.push(item.trackingNumber)
-                continue // Continue to next item
-            }
-            
-            // -----------------------
-            // success
-            // -----------------------
-            
-            // Add to Pinia store (like parcel)
-            if (result.parcelId) {
-                 const mapped = mapParcelData(result)
-                 parcelVerificationStore.addVerifiedParcel(mapped)
-                 successCount++
+                let itemLabel = item.trackingNumber
+                // 500 usually indicates unique constraint violation (duplicate) in this context
+                if (result?.status === 500) {
+                    itemLabel += ' (Already Verified)'
+                    // console warning removed per user request
+                } else {
+                    console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
+                }
+                failedItems.push(itemLabel)
+                nextItems.push(item) // Keep failed item to retry
             }
         }
 
@@ -305,6 +316,7 @@ const submitVerification = async () => {
             setTimeout(() => {
               confirmSuccess.value = false
             }, 10000)
+
             if (failCount > 0) {
                 // Partial success
                 error.value = true
@@ -312,15 +324,17 @@ const submitVerification = async () => {
                   error.value = false
                 }, 10000)
                 errorMessage.value = `Verified ${successCount} parcels. Failed: ${failedItems.join(', ')}`
+                
+                // Update form to show only failed items
+                form.value.items = nextItems
             } else {
                 // All success
                 errorMessage.value = '' // Clear any previous errors
+                
+                // Reset form completely
+                form.value.residentName = ''
+                form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
             }
-
-            // Reset form completely if at least one succeeded (or maybe improve UX to keep failed ones? 
-            // For now, simpler to reset as per original logic, but user sees the error msg)
-            form.value.residentName = ''
-            form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
 
             // Auto hide success msg
             setTimeout(() => {
@@ -333,7 +347,11 @@ const submitVerification = async () => {
             setTimeout(() => {
               error.value = false
             }, 10000)
-            errorMessage.value = `Verification failed for all items (${failedItems.join(', ')}). Please try again.`
+            
+            // Check for duplicate error (status 500 often implies duplicate tracking number in this context)
+            // But since we iterate, we just show generic failure list.
+            // If checking specific error codes is needed, we'd need to check 'result' inside the loop.
+             errorMessage.value = `Verification failed for all items (${failedItems.join(', ')}). Possible duplicate or invalid data.`
         }
 
     } catch (err) {

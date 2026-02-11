@@ -566,6 +566,36 @@ async function getNotifications(url, router) {
   return await getItems(url, router)
 }
 
+// used by ParcelResidentVerification
+async function verifyParcelItem(url, payload, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (!res) return { success: false, status: 'network_error' }
+
+    if (res.ok) {
+      return { success: true }
+    }
+
+    // Attempt to read error message
+    try {
+      const errData = await res.json()
+      return { success: false, status: res.status, message: errData.message }
+    } catch (e) {
+      return { success: false, status: res.status }
+    }
+  } catch (error) {
+    return { success: false, status: 'exception' }
+  }
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -605,5 +635,6 @@ export {
   updateProfileWithFile,
   addMemberWithFile,
   updateDetailWithFile,
-  getNotifications
+  getNotifications,
+  verifyParcelItem
 }
