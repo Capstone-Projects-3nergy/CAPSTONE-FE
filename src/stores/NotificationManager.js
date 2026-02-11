@@ -142,7 +142,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
 
   const fetchNotifications = async (router) => {
     // Replace with your actual backend endpoint
-    const data = await getNotifications(`${import.meta.env.VITE_API_URL}/notifications`, router)
+    // Using VITE_BASE_URL to match other components
+    const data = await getNotifications(`${import.meta.env.VITE_BASE_URL}/api/notifications`, router)
     
     // Always preserve local notifications (e.g. Welcome)
     // Harden: Check for isLocal flag OR if the ID starts with 'local-' to catch legacy items
@@ -167,6 +168,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
              else if (titleLower.includes('updated')) derivedType = 'comment'
           }
 
+          // Use createdAt if sentAt is null
+          const timeValue = n.sentAt || n.createdAt;
+
         return {
           id: n.notificationId, // Ensure this is unique from local IDs
           type: derivedType,
@@ -174,11 +178,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           title: n.notiMessage || '', // Body/Content
           message: n.notiMessage || '', // Explicit mapping for clarity
           user: 'Dormitory Office', // Backend 'user' is recipient. Notification sender is effectively the System/Office.
-          time: n.sentAt ? new Date(n.sentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
+          time: timeValue ? new Date(timeValue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
           sentAt: n.sentAt, // Raw sent_at
           createdAt: n.createdAt,
           updatedAt: n.updatedAt,
-          isRead: n.status === 'read', // Assuming 'read' vs 'unread' status handling in backend if exists, otherwise local
+          isRead: n.status === 'READ', // Update logic if backend supports READ status in future
           status: n.status, // Keep raw status too
           // Keep raw data if needed
           parcelId: n.parcel ? n.parcel.parcelId : null,

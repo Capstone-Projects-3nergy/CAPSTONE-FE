@@ -255,6 +255,7 @@ const submitVerification = async () => {
 
     try {
         let successCount = 0
+        let duplicateCount = 0
         let failCount = 0
         let failedItems = []
         let nextItems = []
@@ -280,8 +281,6 @@ const submitVerification = async () => {
                 successCount++
                 
                 // Construct verified parcel object for store (since backend returns void)
-                // Use a temporary ID or tracking number as ID if needed by store logic
-                // Provide defaults for missing fields to avoid mapParcelData errors
                 const verifiedParcel = {
                     parcelId: `verified-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     trackingNumber: item.trackingNumber,
@@ -296,39 +295,39 @@ const submitVerification = async () => {
                 parcelVerificationStore.addVerifiedParcel(mapped)
 
             } else {
-                failCount++
-                let itemLabel = item.trackingNumber
-                // 500 usually indicates unique constraint violation (duplicate) in this context
+                // Check for duplicate error (status 500 often implies duplicate tracking number due to unique constraint)
                 if (result?.status === 500) {
-                    itemLabel += ' (Already Verified)'
-                    // console warning removed per user request
+                    duplicateCount++
+                    // Treated as soft success/no-op, do not count as fail for popup
                 } else {
+                    failCount++
                     console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
+                    failedItems.push(item.trackingNumber)
+                    nextItems.push(item) // Keep failed item to retry
                 }
-                failedItems.push(itemLabel)
-                nextItems.push(item) // Keep failed item to retry
             }
         }
 
         // Summary handling
-        if (successCount > 0) {
+        if (successCount > 0 || duplicateCount > 0) {
+            // Show green popup if at least one success or duplicate (completed)
             confirmSuccess.value = true
             setTimeout(() => {
               confirmSuccess.value = false
             }, 10000)
 
             if (failCount > 0) {
-                // Partial success
+                // Genuine failures exist -> Show Red Popup for them
                 error.value = true
                 setTimeout(() => {
                   error.value = false
                 }, 10000)
-                errorMessage.value = `Verified ${successCount} parcels. Failed: ${failedItems.join(', ')}`
+                errorMessage.value = `Verified ${successCount + duplicateCount} items. Failed: ${failedItems.join(', ')}`
                 
-                // Update form to show only failed items
+                // Update form to show only true failed items
                 form.value.items = nextItems
             } else {
-                // All success
+                // All good (success or duplicate)
                 errorMessage.value = '' // Clear any previous errors
                 
                 // Reset form completely
@@ -336,22 +335,15 @@ const submitVerification = async () => {
                 form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
             }
 
-            // Auto hide success msg
-            setTimeout(() => {
-                confirmSuccess.value = false
-                error.value = false
-            }, 10000)
+            // Auto hide success msg is handled above
         } else if (failCount > 0) {
-            // All failed
+            // All failed (genuine errors)
             error.value = true
             setTimeout(() => {
               error.value = false
             }, 10000)
             
-            // Check for duplicate error (status 500 often implies duplicate tracking number in this context)
-            // But since we iterate, we just show generic failure list.
-            // If checking specific error codes is needed, we'd need to check 'result' inside the loop.
-             errorMessage.value = `Verification failed for all items (${failedItems.join(', ')}). Possible duplicate or invalid data.`
+             errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
         }
 
     } catch (err) {
