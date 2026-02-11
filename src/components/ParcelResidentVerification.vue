@@ -237,6 +237,7 @@ const submitVerification = async () => {
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
+        setTimeout(() => (error.value = false), 10000)
         errorMessage.value = 'Resident name cannot contain numbers.'
         return
     }
@@ -245,6 +246,7 @@ const submitVerification = async () => {
     for (const item of form.value.items) {
         if (thaiRegex.test(item.trackingNumber)) {
             error.value = true
+            setTimeout(() => (error.value = false), 10000)
             errorMessage.value = `Tracking number "${item.trackingNumber}" cannot contain Thai characters.`
             return
         }
@@ -300,10 +302,15 @@ const submitVerification = async () => {
         // Summary handling
         if (successCount > 0) {
             confirmSuccess.value = true
-            
+            setTimeout(() => {
+              confirmSuccess.value = false
+            }, 10000)
             if (failCount > 0) {
                 // Partial success
                 error.value = true
+                setTimeout(() => {
+                  error.value = false
+                }, 10000)
                 errorMessage.value = `Verified ${successCount} parcels. Failed: ${failedItems.join(', ')}`
             } else {
                 // All success
@@ -319,16 +326,22 @@ const submitVerification = async () => {
             setTimeout(() => {
                 confirmSuccess.value = false
                 error.value = false
-            }, 5000)
+            }, 10000)
         } else if (failCount > 0) {
             // All failed
             error.value = true
+            setTimeout(() => {
+              error.value = false
+            }, 10000)
             errorMessage.value = `Verification failed for all items (${failedItems.join(', ')}). Please try again.`
         }
 
     } catch (err) {
         console.error(err)
         error.value = true
+        setTimeout(() => {
+          error.value = false
+        }, 10000)
         errorMessage.value = 'An unexpected error occurred.'
     }
 }
