@@ -37,6 +37,7 @@ import {
 } from '@/utils/fetchUtils'
 
 const loginManager = useAuthManager()
+const authStore = useAuthManager()
 const router = useRouter()
 const route = useRoute()
 const tid = Number(route.params.tid)
@@ -68,7 +69,7 @@ const trackingNumberError = ref(false)
 const showResidentNameLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const form = ref({
-  residentName: '',
+  residentName: authStore.user?.fullName ,
   items: [{
     trackingNumber: '',
     companyId: '',
