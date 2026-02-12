@@ -208,6 +208,7 @@ const submitVerification = async () => {
     error.value = false
     confirmSuccess.value = false
     errorMessage.value = ''
+    isNotFound.value = false
     let hasNotFound = false
 
     if (form.value.residentName && form.value.residentName.length > 50) {
@@ -324,15 +325,16 @@ const submitVerification = async () => {
 
             if (failCount > 0) {
                 // Partial success (some failures)
-                error.value = true
-                setTimeout(() => {
-                  error.value = false
-                }, 10000)
                 
                 if (hasNotFound) {
-                     errorMessage.value = `Some parcels not found in database: ${failedItems.join(', ')}`
+                    isNotFound.value = true
+                    setTimeout(() => isNotFound.value = false, 10000)
                 } else {
-                     errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
+                    error.value = true
+                    setTimeout(() => {
+                      error.value = false
+                    }, 10000)
+                    errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
                 }
                 
                 // Update form to show only failed items
@@ -349,15 +351,16 @@ const submitVerification = async () => {
             // Auto hide success msg is handled above
         } else if (failCount > 0) {
             // All failed (no successes, no duplicates)
-            error.value = true
-            setTimeout(() => {
-              error.value = false
-            }, 10000)
             
             if (hasNotFound) {
-                errorMessage.value = `Parcel not found in database: ${failedItems.join(', ')}`
+                isNotFound.value = true
+                setTimeout(() => isNotFound.value = false, 10000)
             } else {
-                errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
+                 error.value = true
+                 setTimeout(() => {
+                   error.value = false
+                 }, 10000)
+                 errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
             }
         }
 
@@ -1041,4 +1044,30 @@ const handleTrackingInput = (event, index) => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
+  <Teleport to="body">
+    <AlertPopUp
+      v-if="isResidentNameWrong"
+      :titles="'Resident Name can only be typed as text.'"
+      message="Error!!"
+      styleType="red"
+      operate="nametypewrong"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="trackingNumberError"
+      :titles="'Tracking Number can only be English letters or numbers'"
+      message="Error!!"
+      styleType="red"
+      operate="trackingNumber"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="isNotFound"
+      :titles="'Parcel not found in database.'"
+      message="Error!!"
+      styleType="red"
+      operate="notFound"
+      @closePopUp="closePopUp"
+    />
+  </Teleport>
 </template>
