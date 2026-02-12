@@ -307,7 +307,7 @@ const openDetail = (item) => {
   selectedNotification.value = item
   showDetailModal.value = true
   if (item.status !== 'READ') {
-    notificationStore.markAsRead(item.id)
+    notificationStore.markAsRead(item.id, router)
   }
 }
 
@@ -870,7 +870,7 @@ const closeDetail = () => {
             :class="item.status === 'READ' ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
             >
               <!-- Unread Indicator (Dot only) -->
-              <div v-if="item.status === 'UNREAD'" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
+              <div v-if="item.status !== 'READ'" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
 
               <!-- LEFT ICON -->
               <div class="mt-1 relative">

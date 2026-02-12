@@ -596,6 +596,29 @@ async function verifyParcelItem(url, payload, router) {
   }
 }
 
+async function markNotificationAsRead(url, id, router) {
+  try {
+    const options = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({}) // Explicitly send empty body
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/read`, options, router)
+    if (!res) return null // Auth failed or network error
+
+    if (res.ok) {
+        return { success: true }
+    }
+    return { success: false, status: res.status, statusText: res.statusText }
+  } catch (error) {
+    console.error('markNotificationAsRead error:', error)
+    return { success: false, error }
+  }
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -636,5 +659,6 @@ export {
   addMemberWithFile,
   updateDetailWithFile,
   getNotifications,
-  verifyParcelItem
+  verifyParcelItem,
+  markNotificationAsRead
 }
