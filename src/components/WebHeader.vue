@@ -1,6 +1,6 @@
 <script setup>
 import UserInfo from '@/components/UserInfo.vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useRouter } from 'vue-router'
 import { useNotificationManager } from '@/stores/NotificationManager'
@@ -23,6 +23,12 @@ const openNotification = () => {
 const showNotification = computed(
   () => role.value === 'STAFF' || role.value === 'RESIDENT'
 )
+
+onMounted(async () => {
+  if (role.value === 'RESIDENT') {
+    await notificationStore.fetchNotifications(router)
+  }
+})
 </script>
 
 <template>
