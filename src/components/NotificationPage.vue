@@ -969,7 +969,6 @@ const goToPage = (page) => {
             </div>
           </div>
 
-          <!-- Pagination Controls -->
           <div class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
             <button
               @click="prevPage"

@@ -1,5 +1,9 @@
 <script setup>
 import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const props = defineProps({
   show: Boolean,
@@ -49,6 +53,16 @@ const badgeIcon = (type) => {
       />
     </svg>
   `
+}
+
+const showParcelDetail = async function (id) {
+  router.push({
+    name: 'residentparcelsDetail',
+    params: {
+      id: route.params.id,
+      tid: id
+    }
+  })
 }
 </script>
 
@@ -108,7 +122,10 @@ const badgeIcon = (type) => {
              {{ notification.title }}
              
              <div v-if="notification.parcelId" class="mt-4 pt-4 border-t border-gray-200">
-                <button class="text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1">
+                <button 
+                  @click="showParcelDetail(notification.parcelId)"
+                  class="text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
+                >
                   View Parcel Details 
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
