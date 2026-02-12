@@ -204,13 +204,30 @@ onMounted(async () => {
   }
 })
 
+const isNameMismatch = ref(false)
+
 const submitVerification = async () => {
     // Reset states
     error.value = false
     confirmSuccess.value = false
     errorMessage.value = ''
     isNotFound.value = false
+    isNameMismatch.value = false
     let hasNotFound = false
+
+    const authStore = useAuthManager()
+    const currentUserFullName = authStore.user?.fullName || ''
+
+    // Only apply the check if we have both values.
+    // Assuming we want to force residentName to match the logged-in user's name.
+    if (form.value.residentName && currentUserFullName) {
+        // Case-insensitive comparison and trimming
+        if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {
+            isNameMismatch.value = true
+            setTimeout(() => isNameMismatch.value = false, 5000)
+            return
+        }
+    }
 
     if (form.value.residentName && form.value.residentName.length > 50) {
       showResidentNameLengthError.value = true
@@ -265,6 +282,8 @@ const submitVerification = async () => {
         let nextItems = []
 
         const url = `${import.meta.env.VITE_BASE_URL}/api/resident/verify-parcel`
+        const authStore = useAuthManager()
+        const senderName = authStore.user?.fullName || 'Courier'
 
         for (const item of form.value.items) {
             // -----------------------
@@ -272,7 +291,8 @@ const submitVerification = async () => {
             // -----------------------
             const body = {
                 trackingNumber: item.trackingNumber,
-                residentName: form.value.residentName
+                residentName: form.value.residentName,
+                senderName: senderName 
             }
 
             // -----------------------
@@ -480,6 +500,12 @@ const closePopUp = (operate) => {
       break
     case 'trackingNumber':
       trackingNumberError.value = false
+      break
+    case 'notFound':
+      isNotFound.value = false
+      break
+    case 'nameMismatch':
+      isNameMismatch.value = false
       break
   }
 }
@@ -823,6 +849,38 @@ const handleTrackingInput = (event, index) => {
           operate="trackingNumber"
           @closePopUp="closePopUp"
         />
+        <AlertPopUp
+      v-if="isResidentNameWrong"
+      :titles="'Resident Name can only be typed as text.'"
+      message="Error!!"
+      styleType="red"
+      operate="nametypewrong"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="trackingNumberError"
+      :titles="'Tracking Number can only be English letters or numbers'"
+      message="Error!!"
+      styleType="red"
+      operate="trackingNumber"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="isNotFound"
+      :titles="'Parcel not found in database.'"
+      message="Error!!"
+      styleType="red"
+      operate="notFound"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="isNameMismatch"
+      :titles="'Resident Name must match your account name.'"
+      message="Name Mismatch Error"
+      styleType="red"
+      operate="nameMismatch"
+      @closePopUp="closePopUp"
+    />
 
         <div class="max-w-4xl mx-auto mt-6">
           <div
@@ -1045,7 +1103,7 @@ const handleTrackingInput = (event, index) => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
-  <Teleport to="body">
+  <!-- <Teleport to="body">
     <AlertPopUp
       v-if="isResidentNameWrong"
       :titles="'Resident Name can only be typed as text.'"
@@ -1070,5 +1128,13 @@ const handleTrackingInput = (event, index) => {
       operate="notFound"
       @closePopUp="closePopUp"
     />
-  </Teleport>
+    <AlertPopUp
+      v-if="isNameMismatch"
+      :titles="'Resident Name must match your account name.'"
+      message="Name Mismatch Error"
+      styleType="red"
+      operate="nameMismatch"
+      @closePopUp="closePopUp"
+    />
+  </Teleport> -->
 </template>
