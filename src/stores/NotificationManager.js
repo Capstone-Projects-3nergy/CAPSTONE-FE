@@ -154,12 +154,18 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       // If we got a valid array (empty or not), update the state
       const backendNotifications = data.map((n) => {
           // Map Backend DB Schema to Frontend Model
-          // Backend uses camelCase: notificationId, notiTitle, notiMessage, etc.
+          // Backend uses DTO: title, message, type, parcelId, trackingNumber
+          // Fallback to Entity fields: notiTitle, notiMessage, notificationType, Parcel
           
+          const backendTitle = n.title || n.notiTitle || ''
+          const backendMessage = n.message || n.notiMessage || ''
+          const backendType = n.type || n.notificationType
+          const backendParcelId = n.parcelId || (n.parcel ? n.parcel.parcelId : null) || (n.Parcel ? n.Parcel.parcelId : null)
+
           let derivedType = 'message'
-          const titleLower = (n.notiTitle || '').toLowerCase()
+          const titleLower = backendTitle.toLowerCase()
           
-          if (n.notificationType === 'LINE' || n.notificationType === 'EMAIL') {
+          if (backendType === 'LINE' || backendType === 'EMAIL') {
              derivedType = 'message'
           } else {
              // Heuristics based on title
@@ -175,9 +181,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         return {
           id: n.notificationId, // Ensure this is unique from local IDs
           type: derivedType,
-          label: n.notiTitle || 'Notification', // Header
-          title: n.notiMessage || '', // Body/Content
-          message: n.notiMessage || '', // Explicit mapping for clarity
+          label: backendTitle || 'Notification', // Header
+          title: backendMessage || '', // Body/Content
+          message: backendMessage || '', // Explicit mapping for clarity
           user: 'Dormitory Office', // Backend 'user' is recipient. Notification sender is effectively the System/Office.
           time: timeValue ? new Date(timeValue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
           sentAt: n.sentAt, // Raw sent_at
@@ -186,8 +192,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           isRead: n.status === 'READ', // Update logic if backend supports READ status in future
           status: n.status, // Keep raw status too
           // Keep raw data if needed
-          parcelId: n.parcel ? n.parcel.parcelId : null,
-          parcel: n.parcel,
+          parcelId: backendParcelId,
+          parcel: n.parcel || n.Parcel, // Keep original if available
           userId: n.user ? n.user.userId : null,
           isLocal: false // Mark as coming from backend
         }
