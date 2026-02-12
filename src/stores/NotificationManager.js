@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref ,  computed } from 'vue'
 import { getNotifications } from '@/utils/fetchUtils'
+import { useAuthManager } from '@/stores/AuthManager'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
   const defaultNotifications = [
@@ -118,16 +119,64 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     localStorage.setItem('notifications', JSON.stringify(notifications.value))
   }
 
-  const markAsRead = (id) => {
+  const markAsRead = async (id, router) => {
     if (id) {
+        // Optimistic UI update for immediate feedback
         const notification = notifications.value.find(n => n.id === id)
         if (notification) {
             notification.isRead = true
+            notification.status = 'READ'
             saveToLocalStorage()
         }
+
+        // Call backend to mark as read
+        try {
+            const authStore = useAuthManager()
+            const token = authStore.token || localStorage.getItem('token')
+            
+            if (!token) {
+                 console.warn('No token found, cannot mark notification as read on backend.')
+                 return
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/notifications/${id}/read`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (!response.ok) {
+                 // Revert optimistic update if failed (optional, but good practice)
+                 if (notification) {
+                    notification.isRead = false
+                    notification.status = 'UNREAD'
+                    saveToLocalStorage()
+                 }
+                 
+                 // Handle specific error cases if needed, e.g. 401
+                 if (response.status === 401 && router) {
+                     authStore.logoutAccount(router)
+                 }
+                 console.error('Failed to mark notification as read on backend:', response.statusText)
+            }
+        } catch (error) {
+             console.error('Error marking notification as read:', error)
+             // Revert optimistic update
+             if (notification) {
+                notification.isRead = false
+                notification.status = 'UNREAD'
+                saveToLocalStorage()
+             }
+        }
     } else {
-        // Mark all as read
-        notifications.value.forEach(n => n.isRead = true)
+        // Mark all as read (if supported by backend, otherwise loop or just local)
+        // For now, keep local loop but consider backend bulk endpoint if available
+        notifications.value.forEach(n => {
+            n.isRead = true
+            n.status = 'READ'
+        })
         saveToLocalStorage()
     }
   }
@@ -189,8 +238,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           sentAt: n.sentAt, // Raw sent_at
           createdAt: n.createdAt,
           updatedAt: n.updatedAt,
-          isRead: n.status === 'READ', // Update logic if backend supports READ status in future
-          status: n.status, // Keep raw status too
+          // Ensure status is handled correctly
+          status: n.status || 'UNREAD', // Default to UNREAD if missing
+          isRead: n.status === 'READ', 
           // Keep raw data if needed
           parcelId: backendParcelId,
           parcel: n.parcel || n.Parcel, // Keep original if available

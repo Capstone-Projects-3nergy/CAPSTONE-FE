@@ -306,7 +306,7 @@ const showDetailModal = ref(false)
 const openDetail = (item) => {
   selectedNotification.value = item
   showDetailModal.value = true
-  if (!item.isRead) {
+  if (item.status !== 'READ') {
     notificationStore.markAsRead(item.id)
   }
 }
@@ -864,13 +864,13 @@ const closeDetail = () => {
           <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
             <div
               v-for="(item, index) in filteredNotifications"
-              :key="index"
+              :key="item.id || index"
               @click="openDetail(item)"
               class="group flex items-start gap-4 border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-300 relative overflow-hidden"
-              :class="item.isRead ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
+            :class="item.status === 'READ' ? 'bg-white border-gray-100 opacity-70 hover:opacity-100' : 'bg-blue-50/30 border-blue-100 shadow-sm'"
             >
               <!-- Unread Indicator (Dot only) -->
-              <div v-if="!item.isRead" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
+              <div v-if="item.status === 'UNREAD'" class="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-sm ring-2 ring-white"></div>
 
               <!-- LEFT ICON -->
               <div class="mt-1 relative">
@@ -897,8 +897,8 @@ const closeDetail = () => {
                     <span class="text-xs font-medium text-gray-400 whitespace-nowrap bg-white/50 px-2 py-1 rounded-lg">
                       {{ item.time }}
                     </span>
-                    <div v-if="item.isRead" class="flex items-center gap-1 opacity-60">
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-[#0E4B90]">Read</span>
+                    <div v-if="item.status === 'READ'" class="flex items-center gap-1 opacity-60">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-[#0E4B90]">{{ item.status }}</span>
                       <svg class="w-3 h-3 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
@@ -908,7 +908,7 @@ const closeDetail = () => {
 
                 <p 
                   class="text-sm mt-1 leading-relaxed line-clamp-2"
-                  :class="item.isRead ? 'text-gray-500' : 'text-gray-800 font-medium'"
+                  :class="item.status === 'READ' ? 'text-gray-500' : 'text-gray-800 font-medium'"
                 >
                   {{ item.title }}
                 </p>

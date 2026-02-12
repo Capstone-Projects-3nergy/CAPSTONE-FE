@@ -95,6 +95,13 @@ const badgeIcon = (type) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
              </svg>
              <span>{{ notification.time }}</span>
+             <span 
+               v-if="notification.status" 
+               class="ml-auto text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md transition-colors"
+               :class="notification.status === 'READ' ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'"
+             >
+               {{ notification.status }}
+             </span>
           </div>
           
           <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
