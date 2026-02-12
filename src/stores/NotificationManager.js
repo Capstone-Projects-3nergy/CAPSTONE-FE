@@ -125,7 +125,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         // Optimistic UI update for immediate feedback
         const notification = notifications.value.find(n => n.id === id)
         if (notification) {
-            notification.isRead = true
+            notification.isRead = 1
             saveToLocalStorage()
         }
 
@@ -138,7 +138,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
              console.error('Failed to mark notification as read on backend:', result ? result.status : 'Unknown error')
              // Revert optimistic update
              if (notification) {
-                notification.isRead = false
+                notification.isRead = 0
                 saveToLocalStorage()
              }
         }
@@ -146,7 +146,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         // Mark all as read (if supported by backend, otherwise loop or just local)
         // For now, keep local loop but consider backend bulk endpoint if available
         notifications.value.forEach(n => {
-            n.isRead = true
+            n.isRead = 1
         })
         saveToLocalStorage()
     }
@@ -157,7 +157,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     const newId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     console.log('Adding local notification:', note.title)
     // Mark manual notifications as local so they aren't overwritten easily by full refreshes
-    notifications.value.unshift({ ...note, id: newId, isRead: false, isLocal: true })
+    notifications.value.unshift({ ...note, id: newId, isRead: 0, isLocal: true })
     saveToLocalStorage()
   }
 
@@ -211,7 +211,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           updatedAt: n.updatedAt,
           // Ensure status is handled correctly
           status: n.status || 'PENDING', // Default to PENDING if missing
-          isRead: (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1), 
+          isRead: (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1) ? 1 : 0, 
           // Keep raw data if needed
           parcelId: backendParcelId,
           parcel: n.parcel || n.Parcel, // Keep original if available
@@ -275,7 +275,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         title: `Welcome ${username}! Your ${role === 'RESIDENT' ? 'resident' : 'user'} account has been created.`,
         user: 'Dormitory Office',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
+        isRead: 0
       })
     },
     welcomePopupVisible,
