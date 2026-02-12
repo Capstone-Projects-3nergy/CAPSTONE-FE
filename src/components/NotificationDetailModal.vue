@@ -98,9 +98,9 @@ const badgeIcon = (type) => {
              <span 
                v-if="notification.status" 
                class="ml-auto text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md transition-colors"
-               :class="notification.status === 'READ' ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'"
+               :class="(notification.isRead === true || notification.isRead === 1) ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'"
              >
-               {{ notification.status }}
+               {{ (notification.isRead === true || notification.isRead === 1) ? 'READ' : notification.status }}
              </span>
           </div>
           

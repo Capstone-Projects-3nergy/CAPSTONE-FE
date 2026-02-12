@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref ,  computed } from 'vue'
-import { getNotifications, markNotificationAsRead } from '@/utils/fetchUtils'
+import { getNotifications, markNotificationAsRead, createWelcomeNotification } from '@/utils/fetchUtils'
 import { useAuthManager } from '@/stores/AuthManager'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
@@ -126,7 +126,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         const notification = notifications.value.find(n => n.id === id)
         if (notification) {
             notification.isRead = true
-            notification.status = 'READ'
             saveToLocalStorage()
         }
 
@@ -140,7 +139,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
              // Revert optimistic update
              if (notification) {
                 notification.isRead = false
-                notification.status = 'PENDING'
                 saveToLocalStorage()
              }
         }
@@ -149,7 +147,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         // For now, keep local loop but consider backend bulk endpoint if available
         notifications.value.forEach(n => {
             n.isRead = true
-            n.status = 'READ'
         })
         saveToLocalStorage()
     }
@@ -214,7 +211,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           updatedAt: n.updatedAt,
           // Ensure status is handled correctly
           status: n.status || 'PENDING', // Default to PENDING if missing
-          isRead: n.status === 'READ', 
+          isRead: (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1), 
           // Keep raw data if needed
           parcelId: backendParcelId,
           parcel: n.parcel || n.Parcel, // Keep original if available
@@ -288,6 +285,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       const roleText = role === 'RESIDENT' ? 'resident' : 'user'
       welcomePopupMessage.value = `Welcome , ${username}!`
       welcomePopupVisible.value = true
+    },
+    sendWelcomeNotification: async (router) => {
+        await createWelcomeNotification(`${import.meta.env.VITE_BASE_URL}/api/notifications`, router)
     },
     parcelNotifications: computed(() => {
         const PARCEL_TYPES = ['new', 'comment', 'connect']

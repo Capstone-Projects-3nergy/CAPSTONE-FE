@@ -1,6 +1,6 @@
 <script setup>
 import UserInfo from '@/components/UserInfo.vue'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useRouter } from 'vue-router'
 import { useNotificationManager } from '@/stores/NotificationManager'
@@ -24,11 +24,17 @@ const showNotification = computed(
   () => role.value === 'STAFF' || role.value === 'RESIDENT'
 )
 
-onMounted(async () => {
-  if (role.value === 'RESIDENT') {
-    await notificationStore.fetchNotifications(router)
-  }
-})
+// Watch for role changes to fetch notifications when user is identified as RESIDENT
+import { watch } from 'vue'
+watch(
+  role,
+  async (newRole) => {
+    if (newRole === 'RESIDENT') {
+      await notificationStore.fetchNotifications(router)
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

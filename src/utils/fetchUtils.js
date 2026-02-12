@@ -619,6 +619,30 @@ async function markNotificationAsRead(url, id, router) {
   }
 }
 
+
+async function createWelcomeNotification(url, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    }
+
+    const res = await fetchWithAuth(`${url}/welcome`, options, router)
+    if (!res) return null
+
+    if (res.ok) {
+        return { success: true }
+    }
+    return { success: false, status: res.status, statusText: res.statusText }
+  } catch (error) {
+    console.error('createWelcomeNotification error:', error)
+    return { success: false, error }
+  }
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -660,5 +684,6 @@ export {
   updateDetailWithFile,
   getNotifications,
   verifyParcelItem,
-  markNotificationAsRead
+  markNotificationAsRead,
+  createWelcomeNotification
 }
