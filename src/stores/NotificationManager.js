@@ -227,10 +227,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     fetchNotifications,
     clearNotifications,
     notifyParcelAdded: (parcel) => {
+      // "Your parcel with tracking number TH131111111 has arrived at the dormitory."
       addNotification({
         type: 'new',
         label: 'New Parcel Arrived',
-        title: `A new parcel (${parcel.trackingNumber}) has arrived for ${parcel.recipientName}`,
+        title: `Your parcel with tracking number ${parcel.trackingNumber} has arrived at the dormitory.`,
         user: 'Parcel System',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
@@ -250,7 +251,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       addNotification({
         type: 'connect',
         label: 'Parcel Picked Up',
-        title: `Parcel ${parcel.trackingNumber} has been picked up`,
+        title: `Your parcel with tracking number ${parcel.trackingNumber} has been picked up.`,
         user: 'Parcel System',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
@@ -269,8 +270,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     notifyParcelSaved: (parcel) => {
       addNotification({
         type: 'new',
-        label: 'Parcel Saved',
-        title: `Parcel ${parcel.trackingNumber} for ${parcel.recipientName} (from ${parcel.senderName || 'Unknown'}) has been saved.`,
+        label: 'New Parcel Arrived',
+        title: `Your parcel with tracking number ${parcel.trackingNumber} has arrived at the dormitory.`,
         user: 'Parcel System',
         time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         isRead: false
