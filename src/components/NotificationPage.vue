@@ -970,7 +970,7 @@ const goToPage = (page) => {
           </div>
 
           <!-- Pagination Controls -->
-          <div v-if="totalPages > 1" class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
+          <div class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
             <button
               @click="prevPage"
               :disabled="currentPage === 1"
