@@ -769,8 +769,7 @@ const addResidents = async () => {
     // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
 
-    // Trigger Welcome Notification
-    notificationManager.notifyWelcome(form.value.firstName, 'RESIDENT')
+
 
     // -----------------------
     // success

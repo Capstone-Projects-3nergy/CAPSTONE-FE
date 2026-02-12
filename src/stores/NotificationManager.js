@@ -152,14 +152,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     }
   }
 
-  const addNotification = (note) => {
-    // Generate a unique ID using timestamp and random string to avoid collision with backend IDs
-    const newId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    console.log('Adding local notification:', note.title)
-    // Mark manual notifications as local so they aren't overwritten easily by full refreshes
-    notifications.value.unshift({ ...note, id: newId, isRead: 0, isLocal: true })
-    saveToLocalStorage()
-  }
+
 
   const fetchNotifications = async (router) => {
     // Replace with your actual backend endpoint
@@ -250,7 +243,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     notifications,
     unreadCount,
     markAsRead,
-    addNotification,
+
     fetchNotifications,
     clearNotifications,
     notifyParcelAdded: async (parcel, router) => {
@@ -268,16 +261,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     notifyParcelSaved: async (parcel, router) => {
       await fetchNotifications(router)
     },
-    notifyWelcome: (username, role = 'RESIDENT') => {
-      addNotification({
-        type: 'message',
-        label: 'Welcome',
-        title: `Welcome ${username}! Your ${role === 'RESIDENT' ? 'resident' : 'user'} account has been created.`,
-        user: 'Dormitory Office',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: 0
-      })
-    },
+
     welcomePopupVisible,
     welcomePopupMessage,
     closeWelcomePopup,
