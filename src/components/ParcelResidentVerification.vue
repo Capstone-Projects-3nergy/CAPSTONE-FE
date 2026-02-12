@@ -79,7 +79,7 @@ const form = ref({
 })
 
 const isFormValid = computed(() => {
-  return form.value.residentName && form.value.items.every(item => item.trackingNumber && item.companyId)
+  return form.value.residentName && form.value.items.every(item => item.trackingNumber)
 })
 
 const addParcelItem = () => {
@@ -1011,7 +1011,7 @@ const handleTrackingInput = (event, index) => {
                     <div class="space-y-2">
                       <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
-                        <span class="text-red-500 ml-1">*</span>
+                        <!-- <span class="text-red-500 ml-1">*</span> -->
                       </div>
                       <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
