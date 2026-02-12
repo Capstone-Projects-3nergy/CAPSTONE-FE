@@ -224,7 +224,7 @@ const submitVerification = async () => {
         // Case-insensitive comparison and trimming
         if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {
             isNameMismatch.value = true
-            setTimeout(() => isNameMismatch.value = false, 5000)
+            setTimeout(() => isNameMismatch.value = false, 10000)
             return
         }
     }
@@ -233,7 +233,7 @@ const submitVerification = async () => {
       showResidentNameLengthError.value = true
       setTimeout(() => {
         showResidentNameLengthError.value = false
-      }, 5000)
+      }, 10000)
       return
     }
 
@@ -241,7 +241,7 @@ const submitVerification = async () => {
       showTrackingLengthError.value = true
       setTimeout(() => {
         showTrackingLengthError.value = false
-      }, 5000)
+      }, 10000)
       return
     }
   if (/\d/.test(form.value.residentName)) {
@@ -327,7 +327,7 @@ const submitVerification = async () => {
                     failCount++
                      // Check for Not Found (404)
                     if (result?.status === 404) {
-                        hasNotFound = true
+                        isNotFound.value = true
                     }
                     console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
                     failedItems.push(item.trackingNumber)
@@ -520,7 +520,7 @@ const handleResidentNameInput = (event) => {
     showResidentNameLengthError.value = true
     setTimeout(() => {
       showResidentNameLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.residentName = val
     if (showResidentNameLengthError.value && val.length <= maxLength) {
@@ -544,7 +544,7 @@ const handleTrackingInput = (event, index) => {
     showTrackingLengthError.value = true
     setTimeout(() => {
       showTrackingLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     if (index !== undefined) {
        form.value.items[index].trackingNumber = val
@@ -867,7 +867,7 @@ const handleTrackingInput = (event, index) => {
     />
     <AlertPopUp
       v-if="isNotFound"
-      :titles="'Parcel not found in database.'"
+      :titles="'Verification failed. Parcel record does not exist.'"
       message="Error!!"
       styleType="red"
       operate="notFound"
@@ -876,7 +876,7 @@ const handleTrackingInput = (event, index) => {
     <AlertPopUp
       v-if="isNameMismatch"
       :titles="'Resident Name must match your account name.'"
-      message="Name Mismatch Error"
+      message="Error!!"
       styleType="red"
       operate="nameMismatch"
       @closePopUp="closePopUp"
