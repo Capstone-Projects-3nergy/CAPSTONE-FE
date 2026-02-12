@@ -292,8 +292,7 @@ const submitVerification = async () => {
             // -----------------------
             const body = {
                 trackingNumber: item.trackingNumber,
-                residentName: form.value.residentName,
-                senderName: senderName 
+                residentName: form.value.residentName
             }
 
             // -----------------------
