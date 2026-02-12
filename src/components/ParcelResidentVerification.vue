@@ -208,6 +208,7 @@ const submitVerification = async () => {
     error.value = false
     confirmSuccess.value = false
     errorMessage.value = ''
+    let hasNotFound = false
 
     if (form.value.residentName && form.value.residentName.length > 50) {
       showResidentNameLengthError.value = true
@@ -302,6 +303,10 @@ const submitVerification = async () => {
                     duplicateCount++
                 } else {
                     failCount++
+                     // Check for Not Found (404)
+                    if (result?.status === 404) {
+                        hasNotFound = true
+                    }
                     console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
                     failedItems.push(item.trackingNumber)
                     nextItems.push(item) // Keep failed item to retry
@@ -323,7 +328,12 @@ const submitVerification = async () => {
                 setTimeout(() => {
                   error.value = false
                 }, 10000)
-                errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
+                
+                if (hasNotFound) {
+                     errorMessage.value = `Some parcels not found in database: ${failedItems.join(', ')}`
+                } else {
+                     errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
+                }
                 
                 // Update form to show only failed items
                 form.value.items = nextItems
@@ -344,7 +354,11 @@ const submitVerification = async () => {
               error.value = false
             }, 10000)
             
-             errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
+            if (hasNotFound) {
+                errorMessage.value = `Parcel not found in database: ${failedItems.join(', ')}`
+            } else {
+                errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
+            }
         }
 
     } catch (err) {
