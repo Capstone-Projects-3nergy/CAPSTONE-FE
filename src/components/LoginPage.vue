@@ -140,14 +140,14 @@ const loginHomePageWeb = async () => {
             console.error('Failed to send LINE notification', e)
           }
 
-          // Backend Notification (First time only)
-          try {
-             await notificationManager.sendWelcomeNotification(router)
-          } catch (e) {
-             console.error('Failed to send backend welcome notification', e)
-          }
-
           localStorage.setItem(key, 'true')
+        }
+
+        // Fetch notifications from backend
+        try {
+            await notificationManager.fetchNotifications(router)
+        } catch (e) {
+             console.error('Failed to fetch notifications', e)
         }
       }
 

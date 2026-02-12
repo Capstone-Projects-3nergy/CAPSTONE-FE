@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, onMounted, computed  } from 'vue'
+import { ref, onUnmounted, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -316,6 +316,44 @@ const closeDetail = () => {
   setTimeout(() => {
     selectedNotification.value = null
   }, 300)
+}
+
+// Pagination Logic
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredNotifications.value.length / itemsPerPage)
+})
+
+const paginatedNotifications = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredNotifications.value.slice(start, end)
+})
+
+const pages = computed(() => {
+  const p = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    p.push(i)
+  }
+  return p
+})
+
+watch(activeNotifyTab, () => {
+  currentPage.value = 1
+})
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const goToPage = (page) => {
+  currentPage.value = page
 }
 </script>
 
@@ -863,7 +901,7 @@ const closeDetail = () => {
           <!-- Notification list -->
           <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar relative z-10">
             <div
-              v-for="(item, index) in filteredNotifications"
+              v-for="(item, index) in paginatedNotifications"
               :key="item.id || index"
               @click="openDetail(item)"
               class="group flex items-start gap-4 border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all duration-300 relative overflow-hidden"
@@ -929,6 +967,35 @@ const closeDetail = () => {
               </div>
               <p class="text-gray-500 font-medium">No notifications at the moment.</p>
             </div>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div v-if="totalPages > 1" class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+            >
+              &lt; Previous
+            </button>
+
+            <button
+              v-for="pg in pages"
+              :key="pg"
+              @click="goToPage(pg)"
+              class="cursor-pointer px-3 py-1 rounded transition-colors"
+              :class="currentPage === pg ? 'bg-[#0E4B90] text-white shadow-md' : 'hover:bg-gray-200'"
+            >
+              {{ pg }}
+            </button>
+
+            <button
+              @click="nextPage"
+              :disabled="currentPage >= totalPages"
+              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+            >
+              Next &gt;
+            </button>
           </div>
         </div>
       </main>

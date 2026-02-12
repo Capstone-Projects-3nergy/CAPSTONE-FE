@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref ,  computed } from 'vue'
-import { getNotifications, markNotificationAsRead, createWelcomeNotification } from '@/utils/fetchUtils'
+import { getNotifications, markNotificationAsRead } from '@/utils/fetchUtils'
 import { useAuthManager } from '@/stores/AuthManager'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
@@ -269,9 +269,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       const roleText = role === 'RESIDENT' ? 'resident' : 'user'
       welcomePopupMessage.value = `Welcome , ${username}!`
       welcomePopupVisible.value = true
-    },
-    sendWelcomeNotification: async (router) => {
-        await createWelcomeNotification(`${import.meta.env.VITE_BASE_URL}/api/notifications`, router)
     },
     parcelNotifications: computed(() => {
         const PARCEL_TYPES = ['new', 'comment', 'connect']
