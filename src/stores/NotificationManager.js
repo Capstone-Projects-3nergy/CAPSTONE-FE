@@ -226,56 +226,20 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     addNotification,
     fetchNotifications,
     clearNotifications,
-    notifyParcelAdded: (parcel) => {
-      // "Your parcel with tracking number TH131111111 has arrived at the dormitory."
-      addNotification({
-        type: 'new',
-        label: 'New Parcel Arrived',
-        title: `Your parcel with tracking number ${parcel.trackingNumber} has arrived at the dormitory.`,
-        user: 'Parcel System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+    notifyParcelAdded: async (parcel, router) => {
+      await fetchNotifications(router)
     },
-    notifyParcelReceived: (parcel) => {
-      addNotification({
-        type: 'connect',
-        label: 'Parcel Received',
-        title: `Parcel ${parcel.trackingNumber} has been marked as Received`,
-        user: 'Parcel System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+    notifyParcelReceived: async (parcel, router) => {
+      await fetchNotifications(router)
     },
-    notifyParcelPickup: (parcel) => {
-      addNotification({
-        type: 'connect',
-        label: 'Parcel Picked Up',
-        title: `Your parcel with tracking number ${parcel.trackingNumber} has been picked up.`,
-        user: 'Parcel System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+    notifyParcelPickup: async (parcel, router) => {
+      await fetchNotifications(router)
     },
-    notifyParcelUpdate: (updatedParcel) => {
-      addNotification({
-        type: 'comment',
-        label: 'Parcel Updated',
-        title: `Parcel ${updatedParcel.trackingNumber} has been updated. (Status: ${updatedParcel.status})`,
-        user: 'Parcel System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+    notifyParcelUpdate: async (updatedParcel, router) => {
+      await fetchNotifications(router)
     },
-    notifyParcelSaved: (parcel) => {
-      addNotification({
-        type: 'new',
-        label: 'New Parcel Arrived',
-        title: `Your parcel with tracking number ${parcel.trackingNumber} has arrived at the dormitory.`,
-        user: 'Parcel System',
-        time: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        isRead: false
-      })
+    notifyParcelSaved: async (parcel, router) => {
+      await fetchNotifications(router)
     },
     notifyWelcome: (username, role = 'RESIDENT') => {
       addNotification({

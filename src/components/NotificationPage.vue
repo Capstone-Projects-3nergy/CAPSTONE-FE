@@ -225,6 +225,8 @@ const notificationStore = useNotificationManager()
 const notifications = computed(() => notificationStore.notifications)
 
 onMounted(async () => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
   await notificationStore.fetchNotifications(router)
 })
 
