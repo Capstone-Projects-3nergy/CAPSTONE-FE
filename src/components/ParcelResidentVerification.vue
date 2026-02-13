@@ -329,7 +329,7 @@ const submitVerification = async () => {
                     if (result?.status === 404) {
                         isNotFound.value = true
                     }
-                    console.error(`Failed to verify ${item.trackingNumber}:`, result?.message || result?.status)
+                    console.error(`Failed to Add Tracking Number ${item.trackingNumber}:`, result?.message || result?.status)
                     failedItems.push(item.trackingNumber)
                     nextItems.push(item) // Keep failed item to retry
                 }
@@ -350,7 +350,7 @@ const submitVerification = async () => {
                     setTimeout(() => {
                       error.value = false
                     }, 10000)
-                    errorMessage.value = `Verified ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
+                    errorMessage.value = `Add Tracking Number failed for ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
                 }
                 
                 // Update form to show only failed items
@@ -380,7 +380,7 @@ const submitVerification = async () => {
                  setTimeout(() => {
                    error.value = false
                  }, 10000)
-                 errorMessage.value = `Verification failed for items (${failedItems.join(', ')}). Invalid data or network error.`
+                 errorMessage.value = `Add Tracking Number failed for items (${failedItems.join(', ')}). Invalid data or network error.`
             }
         }
 
@@ -817,7 +817,7 @@ const handleTrackingInput = (event, index) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="confirmSuccess"
-            :titles="'Parcel Verification Successful.'"
+            :titles="'Add Tracking Number Successful.'"
             message="Success!!"
             styleType="green"
             operate="confirmSuccessMessage"
@@ -866,7 +866,7 @@ const handleTrackingInput = (event, index) => {
     />
     <AlertPopUp
       v-if="isNotFound"
-      :titles="'Verification failed. Parcel record does not exist.'"
+      :titles="'Add Tracking Number failed. Parcel record does not exist.'"
       message="Error!!"
       styleType="red"
       operate="notFound"
@@ -901,7 +901,7 @@ const handleTrackingInput = (event, index) => {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Enter Parcel Verification
+                Enter Tracking Number
               </h3>
               <p class="text-blue-100 mt-1 text-sm">
                 Please enter the parcel details below to verify ownership.
@@ -1062,7 +1062,7 @@ const handleTrackingInput = (event, index) => {
                 />
                 <ButtonWeb
                   type="submit"
-                  label="Verify"
+                  label="Add"
                   :disabled="!isFormValid"
                   class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
