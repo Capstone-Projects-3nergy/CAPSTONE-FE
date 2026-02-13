@@ -14,6 +14,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
@@ -43,6 +44,7 @@ const route = useRoute()
 const tid = Number(route.params.tid)
 const parcelStore = useParcelManager()
 const parcelVerificationStore = useParcelVerificationManager()
+const notificationStore = useNotificationManager()
 const showConfirmParcel = ref(false)
 const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
@@ -319,6 +321,7 @@ const submitVerification = async () => {
 
                 const mapped = mapParcelData(verifiedParcel)
                 parcelVerificationStore.addVerifiedParcel(mapped)
+                await notificationStore.notifyParcelSaved(mapped, router)
 
             } else {
                 // Backend returns 500 for unique constraint violation (duplicate)
