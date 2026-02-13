@@ -38,6 +38,7 @@ const lineIdError = ref(false)
 const roomNumberRequired = ref(false)
 const roomNumberError = ref(false)
 const positionError = ref(false)
+const positionRequired = ref(false)
 const phoneError = ref(false)
 const updateProfile = async (payload) => {
   try {
@@ -76,6 +77,11 @@ const updateProfile = async (payload) => {
 const showPositionError = () => {
   positionError.value = true
   setTimeout(() => (positionError.value = false), 10000)
+}
+
+const showPositionRequired = () => {
+  positionRequired.value = true
+  setTimeout(() => (positionRequired.value = false), 10000)
 }
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
@@ -297,6 +303,9 @@ const closePopUp = (operate) => {
       break
     case 'positionMessage':
       positionError.value = false
+      break
+    case 'positionRequired':
+      positionRequired.value = false
       break
     case 'phoneMessage':
       phoneError.value = false
@@ -719,7 +728,7 @@ const closePopUp = (operate) => {
           />
             <AlertPopUp
             v-if="lineIdError"
-            titles="Line ID must contain only English letters (A–Z), Arabic digits (0–9), dot (.), and underscore (_). Thai characters and Thai numerals are not allowed."
+            :titles="'Line ID must contain only English letters (A–Z), Arabic digits (0–9), dot (.), and underscore (_). Thai characters and Thai numerals are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="lineId"
@@ -727,10 +736,19 @@ const closePopUp = (operate) => {
           />
           <AlertPopUp
             v-if="positionError"
-            title="Position can only type as text."
+            :titles="'Position can only type as text.'"
             message="Error!!"
             styleType="red"
             operate="positionMessage"
+            @closePopUp="closePopUp"
+          />
+
+          <AlertPopUp
+            v-if="positionRequired"
+            :titles="'Position is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="positionRequired"
             @closePopUp="closePopUp"
           />
 
@@ -818,6 +836,7 @@ const closePopUp = (operate) => {
           @first-name-error="showFirstNameError"
           @last-name-error="showLastNameError"
           @position-error="showPositionError"
+          @position-required="showPositionRequired"
           @phone-error="showPhoneError"
           @first-name-required="showFirstNameRequired"
           @last-name-required="showLastNameRequired"

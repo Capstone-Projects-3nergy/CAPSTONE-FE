@@ -805,16 +805,30 @@ const saveEditProfile = async () => {
   // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
+  if (!form.value.firstName?.trim()) {
+    emit('first-name-required', true)
+    return
+  }
   if (!nameRegex.test(form.value.firstName)) {
     emit('first-name-error', true)
     return
   }
-  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
-    emit('line-id-error', true)
+  if (!form.value.lastName?.trim()) {
+    emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
+    return
+  }
+
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
+
+  if (!isStaff && !form.value.roomNumber?.trim()) {
+    emit('room-number-required', true)
     return
   }
 
@@ -835,8 +849,12 @@ const saveEditProfile = async () => {
   // -----------------------
   // validate position (staff only)
   // -----------------------
-  if (isStaff && form.value.position) {
-    if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+  if (isStaff) {
+    if (!form.value.position?.trim()) {
+      emit('position-required', true)
+      return
+    }
+    if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
       emit('position-error', true)
       return
     }
@@ -903,23 +921,39 @@ const saveEditDetail = async () => {
   // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
+  if (!form.value.firstName?.trim()) {
+    emit('first-name-required', true)
+    return
+  }
   if (!nameRegex.test(form.value.firstName)) {
     emit('first-name-error', true)
     return
   }
 
+  if (!form.value.lastName?.trim()) {
+    emit('last-name-required', true)
+    return
+  }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
     return
   }
 
+  if (!form.value.roomNumber?.trim()) {
+    emit('room-number-required', true)
+    return
+  }
+  // if (isStaff && !form.value.position?.trim()) {
+  //   emit('position-required', true)
+  //   return
+  // }
   // -----------------------
   // validate phone (optional)
   // -----------------------
   // -----------------------
   // validate phone (optional)
   // -----------------------
-  if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+  if (form.value.roomNumber && !/^[0-9]+$/.test(form.value.roomNumber)) {
     emit('room-number-error', true)
     return
   }
@@ -1209,7 +1243,7 @@ const isSaveDisabled = computed(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
-              Firstname
+              First Name
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
@@ -1239,14 +1273,14 @@ const isSaveDisabled = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined Firstname and Lastname must be at most 50 characters
+                Combined First Name and Last Name must be at most 50 characters
               </div>
             </div>
           </div>
 
           <div class="flex flex-col">
             <label class="block text-sm text-black font-semibold mb-1">
-              Lastname <span v-if="mode === 'add'" class="text-red-500">*</span>
+              Last Name <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               :value="form.lastName"
@@ -1275,7 +1309,7 @@ const isSaveDisabled = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined Firstname and Lastname must be at most 50 characters
+                Combined First Name and Last Name must be at most 50 characters
               </div>
             </div>
           </div>
@@ -1649,7 +1683,7 @@ const isSaveDisabled = computed(() => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
-                  Firstname
+                  First Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
@@ -1660,7 +1694,7 @@ const isSaveDisabled = computed(() => {
 
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
-                  Lastname
+                  Last Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
