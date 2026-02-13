@@ -488,11 +488,20 @@ const saveParcel = async () => {
   }
 
   form.value.userId = auth.user.id
-  if (!form.value.trackingNumber) {
+    if (
+    form.value.trackingNumber &&
+    !/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)
+  ) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
+
+  // if (!form.value.trackingNumber) {
+  //   trackingNumberError.value = true
+  //   setTimeout(() => (trackingNumberError.value = false), 10000)
+  //   return
+  // }
   if (!form.value.recipientName) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
@@ -525,11 +534,11 @@ const saveParcel = async () => {
     setTimeout(() => (recipientNameLetterError.value = false), 10000)
     return
   }
-  if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
-    trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 10000)
-    return
-  }
+  // if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
+  //   trackingNumberError.value = true
+  //   setTimeout(() => (trackingNumberError.value = false), 10000)
+  //   return
+  // }
   if (form.value.senderName && form.value.senderName.length > 50) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)

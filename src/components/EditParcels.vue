@@ -309,7 +309,7 @@ const saveEditParcel = async () => {
     setTimeout(() => (selectName.value = false), 10000)
     return
   }
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+  if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
