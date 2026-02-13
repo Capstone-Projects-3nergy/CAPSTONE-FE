@@ -58,6 +58,8 @@ const recipientNameError = ref(false)
 const selectName = ref(false)
 const parcelTypeError = ref(false)
 const trackingNumberError = ref(false)
+const trackingNumberRequired = ref(false)
+const recipientNameRequired = ref(false)
 const showLogoutConfirm = ref(false)
 
 const showTrackingLengthError = ref(false)
@@ -309,12 +311,25 @@ const saveEditParcel = async () => {
     setTimeout(() => (selectName.value = false), 10000)
     return
   }
+  if (!form.value.trackingNumber) {
+    trackingNumberRequired.value = true
+    setTimeout(() => (trackingNumberRequired.value = false), 10000)
+    return
+  }
+  if (!form.value.recipientName) {
+    recipientNameRequired.value = true
+    setTimeout(() => (recipientNameRequired.value = false), 10000)
+    return
+  }
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName)) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
+  if (
+    form.value.recipientName &&
+    !/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)
+  ) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
     return
@@ -478,6 +493,8 @@ const closePopUp = (operate) => {
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
   if (operate === 'selectName') selectName.value = false
+  if (operate === 'trackingNumberRequired') trackingNumberRequired.value = false
+  if (operate === 'recipientNameRequired') recipientNameRequired.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -756,6 +773,22 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="selectName"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="trackingNumberRequired"
+            :titles="'Tracking Number is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumberRequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="recipientNameRequired"
+            :titles="'Recipient Name is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="recipientNameRequired"
             @closePopUp="closePopUp"
           />
         </div>
@@ -1039,7 +1072,7 @@ function formatDateTime(datetimeStr) {
             />
             <ButtonWeb
               label="Save"
-              color="green"
+              color="blue"
               @click="saveEditParcel"
               :disabled="isUnchanged"
             />

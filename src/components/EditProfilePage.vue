@@ -841,7 +841,7 @@ const closePopUp = (operate) => {
           @first-name-required="showFirstNameRequired"
           @last-name-required="showLastNameRequired"
           @email-required="showEmailRequired"
-          @dorm-ID-required="showDormRequired"
+          @dorm-id-required="showDormRequired"
           @room-number-required="showRoomNumberRequired"
           @line-id-error="lineIdErrorFn"
         ></EditPersonalInfoProfile>

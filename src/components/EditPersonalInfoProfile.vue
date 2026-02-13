@@ -48,7 +48,9 @@ const props = defineProps({
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null },
   editProfile: { type: Boolean, default: true },
-  editResidentDetail: { type: Boolean, required: false }
+  editResidentDetail: { type: Boolean, required: false },
+  useCurrentProfile: { type: Boolean, default: true },
+  status: { type: String, default: '' }
 })
 const newAvatar = ref(null)
 const loading = ref(false)
@@ -168,12 +170,13 @@ const emit = defineEmits([
   'last-name-error',
   'phone-error',
   'position-error',
+  'position-required',
   'successAddProfile',
   'errorAddProfile',
   'first-name-required',
   'last-name-required',
   'email-required',
-  'dorm-ID-required',
+  'dorm-id-required',
   'room-number-required',
   'email-duplicate',
   'email-form-error',
@@ -654,7 +657,7 @@ const addResidents = async () => {
     return
   }
   if (form.value.dormId === null || form.value.dormId === '') {
-    emit('dorm-ID-required', true)
+    emit('dorm-id-required', true)
     return
   }
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
