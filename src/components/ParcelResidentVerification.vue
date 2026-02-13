@@ -68,6 +68,7 @@ const isResidentNameWrong = ref(false)
 const trackingNumberError = ref(false)
 const showResidentNameLengthError = ref(false)
 const showTrackingLengthError = ref(false)
+const isLoading = ref(false)
 const form = ref({
   residentName: authStore.user?.fullName ,
   items: [{
@@ -274,7 +275,8 @@ const submitVerification = async () => {
             return
         }
     }
-
+    
+    isLoading.value = true
     try {
         let successCount = 0
         let duplicateCount = 0
@@ -391,6 +393,8 @@ const submitVerification = async () => {
           error.value = false
         }, 10000)
         errorMessage.value = 'An unexpected error occurred.'
+    } finally {
+        isLoading.value = false
     }
 }
 
@@ -1063,6 +1067,7 @@ const handleTrackingInput = (event, index) => {
                 <ButtonWeb
                   type="submit"
                   label="Add"
+                  :loading="isLoading"
                   :disabled="!isFormValid"
                   class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
