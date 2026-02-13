@@ -339,11 +339,6 @@ const submitVerification = async () => {
         // Summary handling
         // Show success if we had any successes OR duplicates (meaning work is done for those)
         if (successCount > 0 || duplicateCount > 0) {
-            confirmSuccess.value = true
-            setTimeout(() => {
-              confirmSuccess.value = false
-            }, 10000)
-
             if (failCount > 0) {
                 // Partial success (some failures)
                 
@@ -362,6 +357,11 @@ const submitVerification = async () => {
                 form.value.items = nextItems
             } else {
                 // All success (including duplicates)
+                confirmSuccess.value = true
+                setTimeout(() => {
+                  confirmSuccess.value = false
+                }, 10000)
+
                 errorMessage.value = '' 
                 
                 // Reset form completely
@@ -818,7 +818,7 @@ const handleTrackingInput = (event, index) => {
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="confirmSuccess"
-            :titles="'Confirm Parcel is Successful.'"
+            :titles="'Parcel Verification Successful.'"
             message="Success!!"
             styleType="green"
             operate="confirmSuccessMessage"
