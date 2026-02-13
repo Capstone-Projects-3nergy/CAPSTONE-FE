@@ -983,7 +983,7 @@ const goToPage = (page) => {
               :key="pg"
               @click="goToPage(pg)"
               class="cursor-pointer px-3 py-1 rounded transition-colors"
-              :class="currentPage === pg ? 'bg-[#0E4B90] text-white shadow-md' : 'hover:bg-gray-200'"
+              :class="currentPage === pg ? 'bg-blue-700 text-white shadow-md' : 'hover:bg-gray-200'"
             >
               {{ pg }}
             </button>
