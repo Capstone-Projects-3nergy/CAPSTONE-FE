@@ -182,9 +182,9 @@ const selectResident = (resident) => {
 }
 
 watch(recipientSearch, (val) => {
+  form.value.recipientName = val // Sync manual input
   if (!val) {
     selectedResidentId.value = null
-    form.value.recipientName = ''
   }
 })
 
@@ -513,7 +513,7 @@ const saveParcel = async () => {
     setTimeout(() => (parcelTypeError.value = false), 10000)
     return
   }
-  if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
+  if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName || '')) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
     return

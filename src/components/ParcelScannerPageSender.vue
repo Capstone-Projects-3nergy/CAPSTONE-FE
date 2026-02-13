@@ -145,9 +145,9 @@ const selectResident = (resident) => {
 }
 
 watch(recipientSearch, (val) => {
+  form.value.recipientName = val // Sync manual input
   if (!val) {
     selectedResidentId.value = null
-    form.value.recipientName = ''
   }
 })
 
@@ -524,7 +524,7 @@ const saveParcel = async () => {
       status: 'waiting for staff',
       pickupAt: null,
       updateAt: null,
-      senderName: null,
+      senderName: '',
       companyId: '',
       receiveAt: null
     }

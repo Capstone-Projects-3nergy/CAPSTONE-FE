@@ -410,7 +410,7 @@ const showResetPasswordPageWeb = async function () {
           />
         </div>
 
-        <form @submit.prevent="signIn" class="space-y-4">
+        <form @submit.prevent="loginHomePageWeb" class="space-y-4">
           <div class="mb-1">
             <div class="relative">
               <svg
@@ -521,7 +521,6 @@ const showResetPasswordPageWeb = async function () {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="loginHomePageWeb"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
                 isEmailOverLimit,
