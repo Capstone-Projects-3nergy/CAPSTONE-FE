@@ -444,7 +444,7 @@ const profileImageUrlPreview = computed(() => {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 truncate">
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Firstname
+              First Name
             </label>
             <p class="text-[#8C8F91] font-medium">
               {{ firstName }}
@@ -453,7 +453,7 @@ const profileImageUrlPreview = computed(() => {
 
           <div>
             <label class="block text-sm text-black font-semibold mb-1">
-              Lastname
+              Last Name
             </label>
             <p class="text-[#8C8F91] font-medium">
               {{ lastName }}
@@ -679,13 +679,13 @@ const profileImageUrlPreview = computed(() => {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
                 <label class="block text-sm font-semibold mb-1"
-                  >Firstname</label
+                  >First Name</label
                 >
                 <p class="text-[#8C8F91] font-medium">{{ firstName }}</p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Lastname</label>
+                <label class="block text-sm font-semibold mb-1">Last Name</label>
                 <p class="text-[#8C8F91] font-medium">{{ lastName }}</p>
               </div>
 

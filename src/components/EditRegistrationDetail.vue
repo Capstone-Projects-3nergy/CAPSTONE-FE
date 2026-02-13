@@ -65,6 +65,9 @@ const companyList = ref([])
 const phoneError = ref(false)
 const firstNameError = ref(false)
 const lastNameError = ref(false)
+const firstNameRequired = ref(false)
+const lastNameRequired = ref(false)
+const roomNumberRequired = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -652,6 +655,12 @@ const closePopUp = (operate) => {
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'select') selectName.value = false
   if (operate === 'lineId') lineIdError.value = false
+  // -----------------
+  // new required fields
+  // -----------------
+  if (operate === 'firstNameRequired') firstNameRequired.value = false
+  if (operate === 'lastNameRequired') lastNameRequired.value = false
+  if (operate === 'roomNumberRequired') roomNumberRequired.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -685,6 +694,18 @@ const showFirstNameError = () => {
 const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
+}
+const showFirstNameRequired = () => {
+  firstNameRequired.value = true
+  setTimeout(() => (firstNameRequired.value = false), 10000)
+}
+const showLastNameRequired = () => {
+  lastNameRequired.value = true
+  setTimeout(() => (lastNameRequired.value = false), 10000)
+}
+const showRoomNumberRequired = () => {
+  roomNumberRequired.value = true
+  setTimeout(() => (roomNumberRequired.value = false), 10000)
 }
 </script>
 
@@ -950,6 +971,30 @@ const showLastNameError = () => {
             operate="roomNumber"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="firstNameRequired"
+            :titles="'First name is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="firstNameRequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="lastNameRequired"
+            :titles="'Last name is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="lastNameRequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="roomNumberRequired"
+            :titles="'Room number is required.'"
+            message="Error!!"
+            styleType="red"
+            operate="roomNumberRequired"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -976,6 +1021,9 @@ const showLastNameError = () => {
           @phone-error="showPhoneError"
           @room-number-error="roomNumberErrorFn"
           @line-id-error="lineIdErrorFn"
+          @first-name-required="showFirstNameRequired"
+          @last-name-required="showLastNameRequired"
+          @room-number-required="showRoomNumberRequired"
         />
       </main>
     </div>
