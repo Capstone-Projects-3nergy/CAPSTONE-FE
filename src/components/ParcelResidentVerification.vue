@@ -365,7 +365,6 @@ const submitVerification = async () => {
                 errorMessage.value = '' 
                 
                 // Reset form completely
-                form.value.residentName = ''
                 form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
             }
 
