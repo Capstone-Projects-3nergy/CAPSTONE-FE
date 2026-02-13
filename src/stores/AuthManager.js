@@ -9,6 +9,7 @@ import {
   sendEmailVerification
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
+import { useNotificationManager } from './NotificationManager'
 
 export const useAuthManager = defineStore('authManager', () => {
   const user = ref(null)
@@ -340,46 +341,14 @@ export const useAuthManager = defineStore('authManager', () => {
     // 🔹 logout Firebase
     await signOut(auth)
   } finally {
+    // ✅ เคลียร์ notification state & localStorage
+    useNotificationManager().clearNotifications()
+    
     // ✅ เคลียร์ state เสมอ
     user.value = null
     await router?.replace({ name: 'login' })
   }
 }
-
-  // const logoutAccount = async (router) => {
-  //   try {
-  //     if (user.value?.accessToken) {
-  //       const baseURL = import.meta.env.VITE_BASE_URL
-
-  //       await axios.post(
-  //         `${baseURL}/api/auth/logout`,
-  //         {},
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${user.value.accessToken}`
-  //           }
-  //         }
-  //       )
-  //     }
-
-  //     await signOut(auth)
-  //   } catch (err) {
-  //     console.error('Logout error:', err)
-  //   } finally {
-  //     user.value = null
-  //     await router?.replace({ name: 'login' })
-  //   }
-  // }
-
-  // const logoutAccount = async (router) => {
-  //   try {
-  //     await signOut(auth)
-  //   } catch (err) {
-  //   } finally {
-  //     user.value = null
-  //     await router?.replace({ name: 'login' })
-  //   }
-  // }
 
   const refreshToken = async () => {
     try {

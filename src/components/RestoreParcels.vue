@@ -15,6 +15,10 @@ const emit = defineEmits([
 ])
 
 const props = defineProps({
+  restoreType: {
+    type: String,
+    required: true // 'parcel' | 'resident' | 'staff'
+  },
   parcelData: Object,
   isPermanent: {
     type: Boolean,
@@ -22,9 +26,6 @@ const props = defineProps({
   },
   residentData: Object,
   staffData: Object,
-  showMember: { type: Boolean, default: false },
-  showStaff: { type: Boolean, default: false },
-  showParcel: { type: Boolean, default: true }
 })
 
 const router = useRouter()
@@ -35,44 +36,7 @@ const profileManager = useProfileManager()
 const userManager = useUserManager()
 const resident = computed(() => props.residentData || {})
 const staff = computed(() => props.staffData || {})
-// const restoreParcelFn = async () => {
-//   if (!parcel.value?.id) return
-
-//   restoreParcels.value = await restoreParcel(
-//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
-//     parcel.value.id
-//   )
-//   if (restoreParcels.value === '404') {
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//     return
-//   }
-
-//   parcelManager.restoreFromTrash(parcel.value.id)
-//   emit('confirmDetail', true)
-// }
-const restoreResult = ref(null) // null | true | false
-
-// const restoreParcelFn = async () => {
-//   if (!parcel.value?.id) return
-
-//   restoreResult.value = null
-
-//   restoreResult.value = await restoreParcel(
-//     `${import.meta.env.VITE_BASE_URL}/api/trash`,
-//     parcel.value.id,
-//     router
-//   )
-
-//   if (restoreResult.value !== true) {
-//     emit('redAlert')
-//     emit('cancelDetail', true)
-//     return
-//   }
-
-//   parcelManager.restoreFromTrash(parcel.value.id)
-//   emit('confirmDetail', true)
-// }
+const restoreResult = ref(null) 
 
 const restoreParcelFn = async () => {
   if (!parcel.value?.id) return
@@ -140,85 +104,142 @@ const restoreStaffFn = async () => {
 const cancelAction = () => {
   emit('cancelDetail', true)
 }
+const restoreActionMap = {
+  parcel: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash`,
+      parcel.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    parcelManager.restoreFromTrash(parcel.value.id)
+    emit('confirmDetail', true)
+  },
+
+  resident: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/residents`,
+      resident.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    userManager.restoreFromTrash(resident.value.id)
+    emit('confirmMemberDetail', true)
+  },
+
+  staff: async () => {
+    const res = await restoreParcel(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/staffs`,
+      staff.value.id,
+      router
+    )
+    if (!res?.ok) throw new Error()
+    userManager.restoreFromTrash(staff.value.id)
+    emit('confirmStaffDetail', true)
+  }
+}
 const confirmRestore = async () => {
   try {
-    if (props.showMember) {
-      await restoreMemberFn()
-    } else if (props.showStaff) {
-      await restoreStaffFn()
-    } else {
-      await restoreParcelFn()
-    }
-
-    emit('confirmDetail', true)
+    await restoreActionMap[props.restoreType]()
   } catch (err) {
     emit('redAlert')
     emit('cancelDetail', true)
   }
 }
+
 </script>
 
 <template>
-  <div
-    class="message bg-gray-500/50 backdrop-blur-sm w-screen h-screen fixed top-0 left-0 flex items-center justify-center p-2"
-  >
+  <Transition name="modal-fade" appear>
     <div
-      class="bg-white w-full max-w-xs sm:max-w-md rounded-lg shadow-lg overflow-hidden h-auto max-h-96 sm:max-h-[32rem] flex flex-col sm:translate-x-0 sm:translate-y-0 sm:right-auto sm:top-auto right-8 top-16"
+      class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4"
     >
-      <div v-if="showParcel" class="flex flex-col justify-between p-4 border-b">
-        <h1 class="text-xl font-bold text-center sm:text-left">
-          Restore Parcel
-        </h1>
-      </div>
-      <div v-if="showMember" class="flex flex-col justify-between p-4 border-b">
-        <h1 class="text-xl font-bold text-center sm:text-left">
-          Restore Resident Member
-        </h1>
-      </div>
-      <div v-if="showStaff" class="flex flex-col justify-between p-4 border-b">
-        <h1 class="text-xl font-bold text-center sm:text-left">
-          Restore Staff Member
-        </h1>
-      </div>
-      <div class="p-4 text-center sm:text-left">
-        <template v-if="showMember">
-          Do you want to restore this Resident name
-          <b>"{{ resident.firstName }} {{ resident.lastName }}"</b>
-        </template>
+      <div
+        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all"
+        @click.stop
+      >
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <h1 class="text-xl font-bold text-gray-800">
+            <template v-if="restoreType === 'parcel'">Restore Parcel</template>
+            <template v-else-if="restoreType === 'resident'">Restore Resident</template>
+            <template v-else-if="restoreType === 'staff'">Restore Staff</template>
+          </h1>
+        </div>
 
-        <template v-if="showStaff">
-          Do you want to restore this Staff name
-          <b>"{{ staff.fullName || '' }}"</b>
-        </template>
+        <!-- Body -->
+        <div class="px-6 py-8">
+          <div class="flex flex-col items-center text-center">
+            
+            <div class="h-16 w-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
 
-        <template v-if="showParcel">
-          Do you want to restore this Parcel
-          <b>"{{ parcel.parcelNumber || '' }}"</b>?
-        </template>
-      </div>
+            <p class="text-gray-600 text-lg mb-2">
+              <template v-if="restoreType === 'resident'">
+                Restore resident account <br>
+                <span class="font-bold text-gray-900 block mt-1 text-xl">"{{ resident.firstName }} {{ resident.lastName }}"</span>
+              </template>
 
-      <!-- <div class="p-4 text-center sm:text-left">
-        Do you want to restore the parcel with tracking number
-        <b>"{{ parcel.parcelNumber || '' }}"</b>?
-      </div> -->
+              <template v-else-if="restoreType === 'staff'">
+                Restore staff account <br>
+                <span class="font-bold text-gray-900 block mt-1 text-xl">"{{ staff.fullName || 'Unknown' }}"</span>
+              </template>
 
-      <div class="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
-        <ButtonWeb
-          label="Confirm"
-          color="green"
-          class="w-full sm:w-auto"
-          @click="confirmRestore"
-        />
+              <template v-else-if="restoreType === 'parcel'">
+                Restore parcel tracking <br>
+                <span class="font-bold text-gray-900 block mt-1 text-xl">"{{ parcel.parcelNumber || 'Unknown' }}"</span>
+              </template>
+            </p>
 
-        <ButtonWeb
-          label="Cancel"
-          color="gray"
-          class="w-full sm:w-auto text-[#898989]"
-          @click="cancelAction"
-        />
+            <div class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              This item will be moved back to the active list.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-6 bg-gray-50 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-gray-100">
+          <ButtonWeb
+            label="Cancel"
+            color="gray"
+            class="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium transition shadow-sm"
+            @click="cancelAction"
+          />
+          <ButtonWeb
+            label="Confirm Restore"
+            color="green"
+            class="w-full sm:w-auto px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg font-medium transition flex items-center justify-center"
+            @click="confirmRestore"
+          />
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
-<style scoped></style>
+<style scoped>
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active .bg-white,
+.modal-fade-leave-active .bg-white {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-fade-enter-from .bg-white,
+.modal-fade-leave-to .bg-white {
+  transform: scale(0.95);
+}
+</style>

@@ -14,11 +14,6 @@ async function fetchWithAuth(url, optionsOrFactory, router) {
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
 
-    // options.headers = {
-    //   ...(options.headers || {}),
-    //   ...(token ? { Authorization: `Bearer ${token}` } : {})
-    // }
-
     return options
   }
 
@@ -396,24 +391,6 @@ export async function getProfile(url, router) {
   }
 }
 
-// async function restoreParcel(url, id, router) {
-//   try {
-//     const options = {
-//       method: 'PUT',
-//       headers: {}
-//     }
-
-//     const res = await fetchWithAuth(`${url}/${id}/restore`, options, router)
-
-//     if (res?.ok) {
-//       return true
-//     }
-//     return false
-//   } catch (error) {
-//     return false
-//   }
-// }
-
 //Member and stadd
 async function getMembers(url, router) {
   return await getItems(url, router)
@@ -549,89 +526,7 @@ async function updateDetailWithFile(url, userId, body, router) {
   if (!res?.ok) return null
   return await res.json()
 }
-// async function updateDetailWithFile(url, body, router) {
-//   try {
-//     const formData = new FormData()
 
-//     // ✅ ส่ง JSON ในนาม data
-//     formData.append(
-//       'data',
-//       new Blob(
-//         [
-//           JSON.stringify({
-//             userId: body.userId,
-//             firstName: body.firstName,
-//             lastName: body.lastName,
-//             roomNumber: body.roomNumber,
-//             lineId: body.lineId,
-//             phoneNumber: body.phoneNumber,
-//             dormId: body.dormId,
-//             position: body.position
-//           })
-//         ],
-//         { type: 'application/json' }
-//       )
-//     )
-
-//     // ✅ file ต้องชื่อ profileImage
-//     if (body.profileImage instanceof File) {
-//       formData.append('profileImage', body.profileImage)
-//     }
-
-//     const options = {
-//       method: 'PUT',
-//       body: formData
-//       // ❌ ห้ามใส่ Content-Type
-//     }
-
-//     const res = await fetchWithAuth(`${url}/${body.userId}`, options, router)
-
-//     if (!res || !res.ok) {
-//       console.error('updateDetailWithFile failed:', res?.status)
-//       return null
-//     }
-
-//     return await res.json()
-//   } catch (err) {
-//     console.error('updateDetailWithFile error:', err)
-//     return null
-//   }
-// }
-
-// async function updateDetailWithFile(url, payload, router) {
-//   const formData = new FormData()
-
-//   const { profileImage, ...residentData } = payload
-
-//   formData.append(
-//     'data',
-//     new Blob([JSON.stringify(residentData)], {
-//       type: 'application/json'
-//     })
-//   )
-
-//   if (profileImage instanceof File) {
-//     formData.append('profileImage', profileImage)
-//   }
-
-//   try {
-//     const res = await fetchWithAuth(
-//       url,
-//       () => ({
-//         method: 'PUT',
-//         body: formData // ✅ ต้องส่ง
-//         // ❌ ห้ามตั้ง Content-Type เอง
-//       }),
-//       router
-//     )
-
-//     if (!res || !res.ok) return null
-//     return await res.json()
-//   } catch (err) {
-//     console.error('updateDetailWithFile error:', err)
-//     return null
-//   }
-// }
 async function addMemberWithFile(url, payload, router) {
   const formData = new FormData()
 
@@ -666,6 +561,88 @@ async function addMemberWithFile(url, payload, router) {
     return null
   }
 }
+
+async function getNotifications(url, router) {
+  return await getItems(url, router)
+}
+
+// used by ParcelResidentVerification
+async function verifyParcelItem(url, payload, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (!res) return { success: false, status: 'network_error' }
+
+    if (res.ok) {
+      return { success: true }
+    }
+
+    // Attempt to read error message
+    try {
+      const errData = await res.json()
+      return { success: false, status: res.status, message: errData.message }
+    } catch (e) {
+      return { success: false, status: res.status }
+    }
+  } catch (error) {
+    return { success: false, status: 'exception' }
+  }
+}
+
+async function markNotificationAsRead(url, id, router) {
+  try {
+    const options = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({}) // Explicitly send empty body
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/read`, options, router)
+    if (!res) return null // Auth failed or network error
+
+    if (res.ok) {
+        return { success: true }
+    }
+    return { success: false, status: res.status, statusText: res.statusText }
+  } catch (error) {
+    console.error('markNotificationAsRead error:', error)
+    return { success: false, error }
+  }
+}
+
+// async function createWelcomeNotification(url, router) {
+//   try {
+//     const options = {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({})
+//     }
+
+//     const res = await fetchWithAuth(`${url}/welcome`, options, router)
+//     if (!res) return null
+
+//     if (res.ok) {
+//         return { success: true }
+//     }
+//     return { success: false, status: res.status, statusText: res.statusText }
+//   } catch (error) {
+//     console.error('createWelcomeNotification error:', error)
+//     return { success: false, error }
+//   }
+// }
+
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -704,5 +681,8 @@ export {
   toggleUserActive,
   updateProfileWithFile,
   addMemberWithFile,
-  updateDetailWithFile
+  updateDetailWithFile,
+  getNotifications,
+  verifyParcelItem,
+  markNotificationAsRead
 }

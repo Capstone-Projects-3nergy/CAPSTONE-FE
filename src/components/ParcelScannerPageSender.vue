@@ -16,6 +16,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import { getItems, addItem } from '@/utils/fetchUtils'
 import WebHeader from './WebHeader.vue'
 const addSuccess = ref(false)
@@ -25,7 +26,42 @@ const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
+const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+const isLoading = ref(false)
+
+const showTrackingLengthError = ref(false)
+const showSenderLengthError = ref(false)
+
+const handleTrackingInput = (event) => {
+  const val = event.target.value
+  if (val.length > 60) {
+    const sliced = val.slice(0, 60)
+    form.value.trackingNumber = sliced
+    event.target.value = sliced
+    showTrackingLengthError.value = true
+    setTimeout(() => {
+      showTrackingLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.trackingNumber = val
+  }
+}
+
+const handleSenderInput = (event) => {
+  const val = event.target.value
+  if (val.length > 50) {
+    const sliced = val.slice(0, 50)
+    form.value.senderName = sliced
+    event.target.value = sliced
+    showSenderLengthError.value = true
+    setTimeout(() => {
+      showSenderLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.senderName = val
+  }
+}
 const auth = useAuthManager()
 const companyList = ref([])
 const router = useRouter()
@@ -44,16 +80,17 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
 
+const notificationManager = useNotificationManager()
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
   return (
-    form.value.trackingNumber &&
-    form.value.recipientName &&
-    form.value.parcelType &&
-    form.value.companyId &&
-    form.value.receiveAt &&
-    form.value.pickupAt &&
-    form.value.updateAt
+    !form.value.trackingNumber ||
+    !form.value.recipientName ||
+    !form.value.parcelType ||
+    form.value.companyId === '' ||
+    form.value.companyId === null ||
+    (form.value.trackingNumber && form.value.trackingNumber.length > 60) ||
+    (form.value.senderName && form.value.senderName.length > 50)
   )
 })
 
@@ -110,9 +147,9 @@ const selectResident = (resident) => {
 }
 
 watch(recipientSearch, (val) => {
+  form.value.recipientName = val // Sync manual input
   if (!val) {
     selectedResidentId.value = null
-    form.value.recipientName = ''
   }
 })
 
@@ -138,7 +175,9 @@ async function extractParcelInfo(imageDataUrl) {
 
     const info = {
       recipientName: '',
-      trackingNumber: ''
+      trackingNumber: '',
+      senderName: '',
+      parcelType: ''
     }
 
     // 👤 Recipient
@@ -151,10 +190,62 @@ async function extractParcelInfo(imageDataUrl) {
     const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
     if (trackingMatch) info.trackingNumber = trackingMatch[0]
 
+    // 📤 Sender
+    const senderMatch = text.match(
+      /(ชื่อผู้ส่ง|ผู้ส่ง|From|Sender)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
+    )
+    if (senderMatch) info.senderName = senderMatch[2].trim()
+
+    // 📦 Parcel Type
+    if (text.match(/(กล่อง|Box)/i)) info.parcelType = 'BOX'
+    else if (text.match(/(ซอง|Document|Letter|Envelope)/i))
+      info.parcelType = 'DOCUMENT'
+    else if (text.match(/(Electronic|Device)/i))
+      info.parcelType = 'ELECTRONIC'
+
     return info
   } catch {
     return null
   }
+}
+
+const processScanResult = (text) => {
+  if (!text) return
+
+  scanResult.value = text
+
+  try {
+    // Try to parse as JSON first
+    const data = JSON.parse(text)
+    
+    // If it's an object, map fields
+    if (typeof data === 'object' && data !== null) {
+      if (data.trackingNumber) form.value.trackingNumber = data.trackingNumber
+      if (data.recipientName) {
+        form.value.recipientName = data.recipientName
+        recipientSearch.value = data.recipientName
+        // Try to find resident by name if available
+        const resident = residents.value.find(r => {
+           const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
+           return fullName === data.recipientName.toLowerCase()
+        })
+        if (resident) {
+          selectedResidentId.value = resident.userId
+        }
+      }
+      if (data.senderName) form.value.senderName = data.senderName
+      if (data.parcelType) form.value.parcelType = data.parcelType
+      if (data.companyId) form.value.companyId = data.companyId
+      if (data.roomNumber) form.value.roomNumber = data.roomNumber
+      
+      return // Successfully processed as JSON
+    }
+  } catch (e) {
+    // Not JSON, fall back to simple string (tracking number)
+  }
+
+  // Fallback: Treat as tracking number
+  form.value.trackingNumber = text
 }
 
 const deleteScanResult = () => (scanResult.value = null)
@@ -210,11 +301,19 @@ async function capturePhoto() {
   if (!info) return
 
   // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
-  form.value.recipientName = info.recipientName || form.value.recipientName
-  form.value.trackingNumber = info.trackingNumber || ''
+  if (info.recipientName) {
+    form.value.recipientName = info.recipientName
+    recipientSearch.value = info.recipientName
+  }
+  if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
+  if (info.senderName) form.value.senderName = info.senderName
+  if (info.parcelType) form.value.parcelType = info.parcelType
 }
 
 function startQuagga() {
+  let lastCode = ''
+  let count = 0
+
   Quagga.init(
     {
       inputStream: {
@@ -237,8 +336,6 @@ function startQuagga() {
           'ean_reader',
           'ean_8_reader',
           'code_39_reader',
-          'code_39_vin_reader',
-          'codabar_reader',
           'upc_reader',
           'upc_e_reader',
           'i2of5_reader'
@@ -247,6 +344,10 @@ function startQuagga() {
       locate: true
     },
     (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
       Quagga.start()
     }
   )
@@ -255,20 +356,29 @@ function startQuagga() {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
 
-      scanResult.value = detectedCode
-      form.value.trackingNumber = detectedCode
-
-      // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
-      if (detectedCode.startsWith('B')) {
-        // ตัวอย่าง logic
-        form.value.parcelType = 'BOX'
-      } else if (detectedCode.startsWith('D')) {
-        form.value.parcelType = 'DOCUMENT'
+      if (detectedCode === lastCode) {
+        count++
       } else {
-        form.value.parcelType = 'ELECTRONIC'
+        lastCode = detectedCode
+        count = 0
       }
 
-      stopQuagga()
+      if (count >= 3) {
+        processScanResult(detectedCode)
+
+        // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
+        if (!form.value.parcelType) {
+          if (detectedCode.startsWith('B')) {
+            form.value.parcelType = 'BOX'
+          } else if (detectedCode.startsWith('D')) {
+            form.value.parcelType = 'DOCUMENT'
+          } else {
+            form.value.parcelType = 'ELECTRONIC'
+          }
+        }
+
+        stopScan()
+      }
     }
   })
 }
@@ -312,8 +422,7 @@ function startScan(mode) {
     html5QrCode
       .start({ facingMode: 'environment' }, config, (decodedText) => {
         const cleanText = decodedText.trim()
-        scanResult.value = cleanText
-        form.value.trackingNumber = cleanText
+        processScanResult(cleanText)
       })
       .catch((err) => {
         alert('Failed to start QR scanning.')
@@ -335,11 +444,11 @@ function stopScan() {
 }
 
 const saveParcel = async () => {
-  if (!form.value.trackingNumber) {
-    trackingNumberError.value = true
-    setTimeout(() => (trackingNumberError.value = false), 10000)
-    return
-  }
+  // if (!form.value.trackingNumber) {
+  //   trackingNumberError.value = true
+  //   setTimeout(() => (trackingNumberError.value = false), 10000)
+  //   return
+  // }
   if (!form.value.recipientName) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
@@ -361,12 +470,55 @@ const saveParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
-  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+    if (
+    form.value.trackingNumber &&
+    !/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)
+  ) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
 
+  // if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+  //   trackingNumberError.value = true
+  //   setTimeout(() => (trackingNumberError.value = false), 10000)
+  //   return
+  // }
+
+  // if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
+  //   trackingNumberError.value = true
+  //   setTimeout(() => (trackingNumberError.value = false), 10000)
+  //   return
+  // }
+  if (form.value.senderName && form.value.senderName.length > 50) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 10000)
+    return
+  }
+
+  try {
+    const existingParcels = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      router
+    )
+    if (Array.isArray(existingParcels)) {
+      const isDuplicate = existingParcels.some(
+        (p) =>
+          p.trackingNumber === form.value.trackingNumber &&
+          p.companyId === Number(form.value.companyId)
+      )
+
+      if (isDuplicate) {
+        duplicateParcelError.value = true
+        setTimeout(() => (duplicateParcelError.value = false), 10000)
+        return
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
+
+  isLoading.value = true
   try {
     const requestBody = {
       userId: selectedResidentId.value,
@@ -390,12 +542,13 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
+    notificationManager.notifyParcelAdded(savedParcel)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 
     selectedResidentId.value = null
     recipientSearch.value = ''
-    form.value = {
+    Object.assign(form.value, {
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
@@ -406,10 +559,12 @@ const saveParcel = async () => {
       senderName: null,
       companyId: '',
       receiveAt: null
-    }
+    })
   } catch (err) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -468,66 +623,13 @@ const closePopUp = (operate) => {
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'companyId') companyIdError.value = false
+  if (operate === 'duplicateParcel') duplicateParcelError.value = false
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col">
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <!-- <header class="flex items-center w-full h-16 bg-white">
-      <div
-        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
-      >
-        <svg
-          @click="toggleSidebar"
-          class="md:hidden mr-4 cursor-pointer"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M3 7H21C21.2652 7 21.5196 6.89464 21.7071 6.70711C21.8946 6.51957 22 6.26522 22 6C22 5.73478 21.8946 5.48043 21.7071 5.29289C21.5196 5.10536 21.2652 5 21 5H3C2.73478 5 2.48043 5.10536 2.29289 5.29289C2.10536 5.48043 2 5.73478 2 6C2 6.26522 2.10536 6.51957 2.29289 6.70711C2.48043 6.89464 2.73478 7 3 7ZM21 17H3C2.73478 17 2.48043 17.1054 2.29289 17.2929C2.10536 17.4804 2 17.7348 2 18C2 18.2652 2.10536 18.5196 2.29289 18.7071C2.48043 18.8946 2.73478 19 3 19H21C21.2652 19 21.5196 18.8946 21.7071 18.7071C21.8946 18.5196 22 18.2652 22 18C22 17.7348 21.8946 17.4804 21.7071 17.2929C21.5196 17.1054 21.2652 17 21 17ZM21 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14C2 14.2652 2.10536 14.5196 2.29289 14.7071C2.48043 14.8946 2.73478 15 3 15H21C21.2652 15 21.5196 14.8946 21.7071 14.7071C21.8946 14.5196 22 14.2652 22 14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13ZM21 9H3C2.73478 9 2.48043 9.10536 2.29289 9.29289C2.10536 9.48043 2 9.73478 2 10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10C22 9.73478 21.8946 9.48043 21.7071 9.29289C21.5196 9.10536 21.2652 9 21 9Z"
-            fill="black"
-          />
-        </svg>
-
-        <div class="flex-1 flex justify-end items-center gap-5">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clip-path="url(#clip0_84_935)">
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M6.12715 0.5C6.58315 0.5 7.03215 0.568 7.46115 0.697C7.14875 1.2667 6.98973 1.90779 6.99968 2.55745C7.00962 3.2071 7.18819 3.84302 7.51788 4.40289C7.84757 4.96276 8.31707 5.42737 8.88037 5.75117C9.44366 6.07497 10.0814 6.24687 10.7311 6.25V8.477C10.7311 8.56835 10.7492 8.65881 10.7841 8.7432C10.8191 8.82758 10.8704 8.90424 10.9351 8.96879C10.9997 9.03334 11.0764 9.08452 11.1609 9.11938C11.2453 9.15425 11.3358 9.17213 11.4271 9.172C11.6261 9.172 11.8168 9.25102 11.9575 9.39167C12.0981 9.53232 12.1771 9.72309 12.1771 9.922C12.1771 10.1209 12.0981 10.3117 11.9575 10.4523C11.8168 10.593 11.6261 10.672 11.4271 10.672H0.827148C0.628236 10.672 0.437471 10.593 0.296818 10.4523C0.156166 10.3117 0.0771484 10.1209 0.0771484 9.922C0.0771484 9.72309 0.156166 9.53232 0.296818 9.39167C0.437471 9.25102 0.628236 9.172 0.827148 9.172C0.918501 9.17213 1.00898 9.15425 1.09342 9.11938C1.17786 9.08452 1.25459 9.03334 1.31923 8.96879C1.38388 8.90424 1.43516 8.82758 1.47015 8.7432C1.50514 8.65881 1.52315 8.56835 1.52315 8.477V5.104C1.52315 3.88294 2.00821 2.7119 2.87163 1.84848C3.73505 0.985063 4.90609 0.5 6.12715 0.5ZM5.12715 12C4.92824 12 4.73747 12.079 4.59682 12.2197C4.45617 12.3603 4.37715 12.5511 4.37715 12.75C4.37715 12.9489 4.45617 13.1397 4.59682 13.2803C4.73747 13.421 4.92824 13.5 5.12715 13.5H7.12715C7.32606 13.5 7.51683 13.421 7.65748 13.2803C7.79813 13.1397 7.87715 12.9489 7.87715 12.75C7.87715 12.5511 7.79813 12.3603 7.65748 12.2197C7.51683 12.079 7.32606 12 7.12715 12H5.12715Z"
-                fill="black"
-              />
-              <path
-                d="M10.75 5C11.413 5 12.0489 4.73661 12.5178 4.26777C12.9866 3.79893 13.25 3.16304 13.25 2.5C13.25 1.83696 12.9866 1.20107 12.5178 0.732233C12.0489 0.263392 11.413 0 10.75 0C10.087 0 9.45107 0.263392 8.98223 0.732233C8.51339 1.20107 8.25 1.83696 8.25 2.5C8.25 3.16304 8.51339 3.79893 8.98223 4.26777C9.45107 4.73661 10.087 5 10.75 5Z"
-                fill="#FFCC00"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_84_935">
-                <rect width="14" height="14" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-          <div class="flex items-center gap-3">
-            <div class="flex flex-col leading-tight">
-              <UserInfo />
-            </div>
-          </div>
-        </div>
-      </div>
-    </header> -->
-
     <div class="flex flex-1">
       <main class="flex-1 p-9">
         <div class="flex space-x-1 mb-4">
@@ -584,7 +686,7 @@ const closePopUp = (operate) => {
             />
             <AlertPopUp
               v-if="trackingNumberError"
-              :titles="'Thai characters are not allowed in the Tracking Number.'"
+         :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
@@ -625,6 +727,14 @@ const closePopUp = (operate) => {
               operate="companyId"
               @closePopUp="closePopUp"
             />
+            <AlertPopUp
+              v-if="duplicateParcelError"
+              :titles="'This tracking number is already associated with another resident. Please verify the information again.'"
+              message="Error!!"
+              styleType="red"
+              operate="duplicateParcel"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -644,10 +754,18 @@ const closePopUp = (operate) => {
                   "
                 >
                   <div id="reader" class="w-full h-full"></div>
+                  <div
+                    v-if="scanningMode === 'barcode'"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                  >
+                    <div
+                      class="w-64 h-32 border-2 border-green-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
+                    ></div>
+                  </div>
                   <ButtonWeb
                     label="Cancel"
                     color="red"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600 z-20"
                     @click="stopScan"
                   />
                 </div>
@@ -669,11 +787,17 @@ const closePopUp = (operate) => {
                 />
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto">
+              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
                   label="Scan QR"
                   color="blue"
                   @click="startScan('qr')"
+                  :disabled="scanningMode || videoStream"
+                />
+                <!-- <ButtonWeb
+                  label="Scan Barcode"
+                  color="blue"
+                  @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
@@ -688,7 +812,7 @@ const closePopUp = (operate) => {
                   color="green"
                   @click="capturePhoto"
                   :disabled="!isCameraReady"
-                />
+                /> -->
               </div>
 
               <div class="space-y-3 px-7">
@@ -697,10 +821,36 @@ const closePopUp = (operate) => {
                     Tracking number <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="form.trackingNumber"
+                    :value="form.trackingNumber"
+                    @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    :class="[
+                      showTrackingLengthError
+                        ? 'border-red-500 focus:outline-red-500'
+                        : 'focus:outline-blue-500'
+                    ]"
                   />
+                  <div
+                    v-if="showTrackingLengthError"
+                    class="flex items-center text-sm text-red-600 mt-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="red"
+                      class="w-[15px] mr-1"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-sm text-red-600">
+                      Tracking number must be at most 60 characters
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label class="block font-semibold mb-1">
@@ -774,10 +924,36 @@ const closePopUp = (operate) => {
                 <div>
                   <label class="block font-semibold mb-1">Sender Name</label>
                   <input
-                    v-model="form.senderName"
+                    :value="form.senderName"
+                    @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
+                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    :class="[
+                      showSenderLengthError
+                        ? 'border-red-500 focus:outline-red-500'
+                        : 'focus:outline-blue-500'
+                    ]"
                   />
+                  <div
+                    v-if="showSenderLengthError"
+                    class="flex items-center text-sm text-red-600 mt-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="red"
+                      class="w-[15px] mr-1"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-sm text-red-600">
+                      Sender name must be at most 50 characters
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label class="block font-semibold mb-1">
@@ -801,20 +977,21 @@ const closePopUp = (operate) => {
 
               <div class="flex justify-end space-x-3 mt-3 px-7">
                 <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
+                  class="block md:hidden"
+                />
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
+                  :loading="isLoading"
                   :class="{
                     'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden"
-                />
-                <ButtonWeb
-                  label="Reset"
-                  color="red"
-                  @click="cancelParcel"
                   class="block md:hidden"
                 />
               </div>
@@ -823,7 +1000,7 @@ const closePopUp = (operate) => {
             <div
               class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-lg px-15"
             >
-              <div class="flex items-center justify-end mb-4"></div>
+              <div class="flex items-center justify-start mb-4"></div>
 
               <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
                 Parcel Information
@@ -832,11 +1009,11 @@ const closePopUp = (operate) => {
               <div class="space-y-2 text-[#185DC0] font-medium">
                 <div class="flex justify-between border-b py-2">
                   <span>Tracking:</span>
-                  <span>{{ form.trackingNumber }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.trackingNumber }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Recipient:</span>
-                  <span>{{
+                  <span class="truncate max-w-[320px] text-right">{{
                     selectedResident
                       ? selectedResident.fullName
                       : form.recipientName
@@ -844,21 +1021,21 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Room:</span>
-                  <span>{{
+                  <span class="truncate max-w-[320px] text-right">{{
                     selectedResident ? selectedResident.roomNumber : ''
                   }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Type:</span>
-                  <span>{{ form.parcelType }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.parcelType }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Status:</span>
-                  <span>{{ form.status }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.status }}</span>
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Company:</span>
-                  <span>
+                  <span class="truncate max-w-[320px] text-right">
                     {{
                       companyList.find((c) => c.companyId === form.companyId)
                         ?.companyName || ''
@@ -867,25 +1044,26 @@ const closePopUp = (operate) => {
                 </div>
                 <div class="flex justify-between border-b py-2">
                   <span>Sender:</span>
-                  <span>{{ form.senderName }}</span>
+                  <span class="truncate max-w-[320px] text-right">{{ form.senderName }}</span>
                 </div>
               </div>
               <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
                 <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  @click="cancelParcel"
+                  class="w-auto"
+                />
+                <ButtonWeb
                   label="Save"
                   color="green"
                   @click="saveParcel"
+                  :loading="isLoading"
                   :class="{
                     'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto"
-                />
-                <ButtonWeb
-                  label="Reset"
-                  color="red"
-                  @click="cancelParcel"
                   class="w-auto"
                 />
               </div>
@@ -900,7 +1078,7 @@ const closePopUp = (operate) => {
                 />
                 <button
                   @click="deletePreview"
-                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100"
+                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100 cursor-pointer" 
                 >
                   ×
                 </button>

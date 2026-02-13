@@ -10,30 +10,25 @@ const router = useRouter()
 const authStore = useAuthManager()
 const profileManager = useProfileManager()
 const newAvatar = ref(null)
-// --------------------
-// name + initial
-// --------------------
 const userName = computed(() => authStore.user?.fullName || 'Courier')
 const role = computed(() => authStore.user?.role)
 const userInitial = computed(() =>
   userName.value ? userName.value[0].toUpperCase() : 'C'
 )
+const userEmail = computed(() => authStore.user?.email || '')
 const showDropdown = ref(false)
+const showHoverInfo = ref(false)
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+  showHoverInfo.value = false
 }
 
 const closeDropdown = () => {
   showDropdown.value = false
 }
 
-// --------------------
-// profile image
-// --------------------
-// const profileImage = computed(() => {
-//   return profileManager.currentProfile?.profileImage || null
-// })
+
 const profileImageUrlPreview = computed(() => {
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
@@ -46,13 +41,7 @@ const profileImageUrlPreview = computed(() => {
 
   return ''
 })
-// const profileImage = computed(() => {
-//   const img = profileManager.currentProfile?.profileImage
-//   if (!img) return null
-//   return img.startsWith('http')
-//     ? img
-//     : `${import.meta.env.VITE_BASE_URL}${img}`
-// })
+
 
 const userRole = computed(() => {
   const role = authStore.user?.role
@@ -61,7 +50,7 @@ const userRole = computed(() => {
     case 'STAFF':
       return authStore.user.position
     case 'RESIDENT':
-      return 'Resident'
+      return 'Resident' 
     default:
       return 'User'
   }
@@ -80,16 +69,7 @@ onMounted(async () => {
   }
 })
 
-// onMounted(async () => {
-//   try {
-//     const baseURL = import.meta.env.VITE_BASE_URL
-//     const profile = await getProfile(`${baseURL}/api/profile`, router)
-//     if (!profile) return
-//     profileManager.setCurrentProfile(profile)
-//   } catch (err) {
-//     console.error(err)
-//   }
-// })
+
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -103,10 +83,10 @@ const openProfile = () => {
   } else if (role.value === 'RESIDENT') {
     router.replace({
       name: 'profileresident'
-      // query: { tab: 'notify' }
     })
   }
 }
+
 const handleLogout = async () => {
   closeDropdown()
   await returnLoginPage()
@@ -118,8 +98,12 @@ const handleProfile = async () => {
 </script>
 <template>
   <div class="relative">
-    <!-- avatar trigger -->
-    <div class="flex items-center cursor-pointer" @click="toggleDropdown">
+    <div
+      class="flex items-center cursor-pointer"
+      @click="toggleDropdown"
+      @mouseenter="showHoverInfo = true"
+      @mouseleave="showHoverInfo = false"
+    >
       <div
         class="w-10 h-10 rounded-full overflow-hidden bg-[#0E4B90] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition"
       >
@@ -137,7 +121,23 @@ const handleProfile = async () => {
       </div>
     </div>
 
-    <!-- dropdown -->
+    <transition
+      enter-active-class="transition ease-out duration-150"
+      enter-from-class="opacity-0 translate-y-1"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0 translate-y-1"
+    >
+      <div
+        v-if="showHoverInfo && !showDropdown"
+        class="absolute right-0 top-12 w-max max-w-xs bg-gray-400/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-400 z-40 pointer-events-none"
+      >
+        <p class="font-medium text-sm text-white">{{ userName }}</p>
+        <p class="text-xs text-white">{{ userEmail }}</p>
+      </div>
+    </transition>
+
     <transition
       enter-active-class="transition ease-out duration-150"
       enter-from-class="opacity-0 translate-y-1 scale-95"
@@ -150,7 +150,7 @@ const handleProfile = async () => {
         v-if="showDropdown"
         class="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
       >
-        <!-- header -->
+ 
         <div class="relative px-6 py-5 flex flex-col items-center gap-2">
           <button
             class="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -195,12 +195,12 @@ const handleProfile = async () => {
 
         <div class="border-t" />
 
-        <!-- profile -->
+
         <button
           class="w-full flex items-center gap-3 px-6 py-3 hover:bg-gray-50 transition text-sm cursor-pointer"
           @click="handleProfile"
         >
-          <!-- profile svg -->
+ 
           <svg
             width="22"
             height="22"
@@ -219,12 +219,12 @@ const handleProfile = async () => {
           <span class="text-[#0E4B90]">Personal Information</span>
         </button>
 
-        <!-- logout -->
+     
         <button
           class="w-full flex items-center gap-3 px-6 py-3 hover:bg-red-50 transition text-sm text-red-600 cursor-pointer"
           @click="handleLogout"
         >
-          <!-- logout svg -->
+       
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="22"
@@ -249,7 +249,7 @@ const handleProfile = async () => {
       </div>
     </transition>
 
-    <!-- overlay -->
+
     <div
       v-if="showDropdown"
       class="fixed inset-0 z-40"
@@ -258,100 +258,3 @@ const handleProfile = async () => {
   </div>
 </template>
 
-<!-- <template>
-  <div class="relative">
-   
-    <div
-      class="flex items-center gap-3 cursor-pointer group"
-      @click="toggleDropdown"
-    >
-      <div
-        class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-[#0E4B90] ring-2 ring-transparent group-hover:ring-[#0E4B90]/40 transition-all duration-200"
-      >
-        <img
-          v-if="profileImageUrlPreview"
-          :src="profileImageUrlPreview"
-          alt="profile"
-          class="w-full h-full object-cover"
-        />
-
-        <span v-else class="text-white font-semibold text-lg">
-          {{ userInitial }}
-        </span>
-      </div>
-    </div>
-
-   
-    <transition
-      enter-active-class="transition ease-out duration-150"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-100"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <div
-        v-if="showDropdown"
-        class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
-      >
-        
-        <div class="px-4 py-3 bg-[#0E4B90]">
-          <p class="text-white font-medium text-sm truncate">
-            {{ userName }}
-          </p>
-          <p class="text-white/80 text-xs">
-            {{ userRole }}
-          </p>
-        </div>
-
-       
-        <button
-          class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-100 transition"
-          @click="handleProfile"
-        >
-          <span>👤</span>
-          Profile
-        </button>
-
-        <button
-          class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
-          @click="handleLogout"
-        >
-          <span>🚪</span>
-          Logout
-        </button>
-      </div>
-    </transition>
-
-  
-    <div
-      v-if="showDropdown"
-      class="fixed inset-0 z-40"
-      @click="closeDropdown"
-    />
-  </div>
-</template> -->
-
-<!-- <template>
-  <div class="flex items-center gap-3">
-    <div
-      class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-[#185DC0]"
-    >
-      <img
-        v-if="profileImageUrlPreview"
-        :src="profileImageUrlPreview"
-        alt="profile"
-        class="w-full h-full object-cover"
-      />
-
-      <span v-else class="text-white font-semibold text-lg">
-        {{ userInitial }}
-      </span>
-    </div>
-
-    <div class="flex flex-col leading-tight">
-      <span class="font-medium text-[#185DC0]">{{ userName }}</span>
-      <span class="text-[#185DC0] text-sm">{{ userRole }}</span>
-    </div> 
-  </div>
-</template> -->

@@ -1,7 +1,10 @@
 <script setup>
 import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
+import LoadingPopUp from './LoadingPopUp.vue'
+import ImageCropperModal from './ImageCropperModal.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import {
   updateProfileWithFile,
@@ -17,6 +20,7 @@ import axios from 'axios'
 const profileManager = useProfileManager()
 const userManager = useUserManager()
 const loginManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const selectedResidentId = ref(null)
 
 const router = useRouter()
@@ -43,10 +47,117 @@ const props = defineProps({
   roomNumber: { type: String, default: null },
   lineId: { type: String, default: null },
   phoneNumber: { type: String, default: null },
-  editProfile: { type: String, default: true },
-  editResidentDetail: { type: String, required: false }
+  editProfile: { type: Boolean, default: true },
+  editResidentDetail: { type: Boolean, required: false }
 })
 const newAvatar = ref(null)
+const loading = ref(false)
+const showCropper = ref(false)
+const tempImageSrc = ref('')
+
+const showEmailLengthError = ref(false)
+const showRoomLengthError = ref(false)
+const showPhoneLengthError = ref(false)
+const showLineIdLengthError = ref(false)
+const showNameLengthError = ref(false)
+
+const handleEmailInput = (event) => {
+  const val = event.target.value
+  if (val.length > 100) {
+    const sliced = val.slice(0, 100)
+    form.value.email = sliced
+    event.target.value = sliced
+    showEmailLengthError.value = true
+    setTimeout(() => {
+      showEmailLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.email = val
+  }
+}
+
+const handleRoomInput = (event) => {
+  const val = event.target.value
+  if (val.length > 10) {
+    const sliced = val.slice(0, 10)
+    form.value.roomNumber = sliced
+    event.target.value = sliced
+    showRoomLengthError.value = true
+    setTimeout(() => {
+      showRoomLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.roomNumber = val
+  }
+}
+
+const handlePhoneInput = (event) => {
+  let val = event.target.value
+  const digits = val.replace(/-/g, '')
+  if (digits.length > 15) {
+    while (val.replace(/-/g, '').length > 15 && val.length > 0) {
+      val = val.slice(0, -1)
+    }
+    form.value.phoneNumber = val
+    event.target.value = val
+    showPhoneLengthError.value = true
+    setTimeout(() => {
+      showPhoneLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.phoneNumber = val
+  }
+}
+
+const handleLineIdInput = (event) => {
+  const val = event.target.value
+  if (val.length > 20) {
+    const sliced = val.slice(0, 20)
+    form.value.lineId = sliced
+    event.target.value = sliced
+    showLineIdLengthError.value = true
+    setTimeout(() => {
+      showLineIdLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.lineId = val
+  }
+}
+
+const handleFirstNameInput = (event) => {
+  const val = event.target.value
+  const lastNameLen = form.value.lastName ? form.value.lastName.length : 0
+  if (val.length + lastNameLen > 50) {
+    const allowed = 50 - lastNameLen
+    const sliced = val.slice(0, Math.max(0, allowed))
+    form.value.firstName = sliced
+    event.target.value = sliced
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.firstName = val
+  }
+}
+
+const handleLastNameInput = (event) => {
+  const val = event.target.value
+  const firstNameLen = form.value.firstName ? form.value.firstName.length : 0
+  if (val.length + firstNameLen > 50) {
+    const allowed = 50 - firstNameLen
+    const sliced = val.slice(0, Math.max(0, allowed))
+    form.value.lastName = sliced
+    event.target.value = sliced
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.lastName = val
+  }
+}
+
 const emit = defineEmits([
   'edit',
   'save',
@@ -66,16 +177,13 @@ const emit = defineEmits([
   'room-number-required',
   'email-duplicate',
   'email-form-error',
-  'room-number-error'
+  'room-number-error',
+  'line-id-error',
+  'email-invalid-chars'
 ])
 
 const isEdit = ref(false)
 const dormList = ref([])
-// const forms = reactive({
-//   dormId: null
-// })
-
-// form data
 const form = ref({
   userId: null,
   firstName: '',
@@ -228,22 +336,6 @@ onMounted(async () => {
 
       originalForm.value = { ...form.value }
     }
-
-    // if (props.mode === 'edit') {
-    //   form.value = {
-    //     userId: profile.userId,
-    //     firstName: profile.firstName || '',
-    //     lastName: profile.lastName || '',
-    //     email: profile.email || '',
-    //     roomNumber: profile.roomNumber || '',
-    //     dormName: dormName || '',
-    //     lineId: profile.lineId || '',
-    //     position: profile.position || '',
-    //     phoneNumber: profile.phoneNumber || ''
-    //   }
-    // }
-    // // ใช้สำหรับ compare ตอน edit
-    // originalForm.value = { ...form.value }
   } catch (err) {
     console.error(err)
   }
@@ -343,6 +435,22 @@ watch(
 //   emit('edit')
 // }
 
+const isFormEmpty = computed(() => {
+  const hasText =
+    form.value.firstName ||
+    form.value.lastName ||
+    form.value.email ||
+    form.value.roomNumber ||
+    form.value.lineId ||
+    form.value.position ||
+    form.value.phoneNumber ||
+    form.value.dormId
+
+  const hasImage = !!newAvatar.value
+
+  return !hasText && !hasImage
+})
+
 const profileImageUrlPreview = computed(() => {
   // ⭐ ADD MODE : ไม่ดึงรูปเก่าเด็ดขาด
   if (props.mode === 'add') {
@@ -377,9 +485,38 @@ const profileImageUrlPreview = computed(() => {
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) {
-    newAvatar.value = file
-    e.target.value = null // ⭐ reset input
+    if (file.size > 2 * 1024 * 1024) {
+      emit('file-size-error', true)
+      e.target.value = null
+      return
+    }
+
+    // Open Cropper
+    tempImageSrc.value = URL.createObjectURL(file)
+    showCropper.value = true
+    e.target.value = null // Reset input to allow re-selecting same file
   }
+}
+
+function onCrop(blob) {
+  // Convert blob to File
+  const file = new File([blob], "avatar.jpg", { type: "image/jpeg" })
+  newAvatar.value = file
+  showCropper.value = false
+  // URL.revokeObjectURL(tempImageSrc.value) // Clean up
+  tempImageSrc.value = ''
+}
+
+function closeCropper() {
+  showCropper.value = false
+  tempImageSrc.value = ''
+}
+
+function removeImage() {
+  newAvatar.value = null
+  // Reset input if exists
+  const input = document.querySelector('input[type="file"]')
+  if (input) input.value = null
 }
 
 // function save() {
@@ -435,15 +572,48 @@ const userInitial = computed(() => {
   return userName.value ? userName.value.trim()[0].toUpperCase() : ''
 })
 
-// const userInitial = computed(() =>
-//   userName.value ? userName.value[0].toUpperCase() : ''
-// )
-
-// function updateUser(data) {
-//   console.log('ข้อมูลใหม่:', data)
-//   // API update...
-// }
 const submit = async () => {
+  if (form.value.email && form.value.email.length > 100) {
+    showEmailLengthError.value = true
+    setTimeout(() => {
+      showEmailLengthError.value = false
+    }, 5000)
+    return
+  }
+  if (form.value.roomNumber && form.value.roomNumber.length > 10) {
+    showRoomLengthError.value = true
+    setTimeout(() => {
+      showRoomLengthError.value = false
+    }, 5000)
+    return
+  }
+  if (form.value.phoneNumber) {
+    const digits = form.value.phoneNumber.replace(/-/g, '')
+    if (digits.length > 15) {
+      showPhoneLengthError.value = true
+      setTimeout(() => {
+        showPhoneLengthError.value = false
+      }, 5000)
+      return
+    }
+  }
+  if (form.value.lineId && form.value.lineId.length > 20) {
+    showLineIdLengthError.value = true
+    setTimeout(() => {
+      showLineIdLengthError.value = false
+    }, 5000)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if (fName.length + lName.length > 50) {
+    showNameLengthError.value = true
+    setTimeout(() => {
+      showNameLengthError.value = false
+    }, 5000)
+    return
+  }
+
   if (props.mode === 'add') {
     await addResidents()
     return
@@ -460,13 +630,6 @@ const submit = async () => {
   }
 }
 
-// const submit = async () => {
-//   if (props.mode === 'add') {
-//     await addResidents()
-//   } else {
-//     await saveEditProfile()
-//   }
-// }
 const addResidents = async () => {
   // -----------------------
   // REQUIRED FIELD CHECK
@@ -498,6 +661,10 @@ const addResidents = async () => {
     emit('room-number-error', true)
     return
   }
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   // -----------------------
   // validate name (ไทย + อังกฤษ)
   // -----------------------
@@ -516,26 +683,23 @@ const addResidents = async () => {
   // -----------------------
   // validate email
   // -----------------------
+  if (/[^a-zA-Z0-9.@]/.test(form.email)) {
+    emit('email-invalid-chars', true)
+    return
+  }
   if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
     emit('email-form-error')
     return
   }
 
-  // if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
-  //   emit('errorAddProfile')
-  //   return
-  // }
 
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
       return
     }
-
+    
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
@@ -546,6 +710,7 @@ const addResidents = async () => {
   // -----------------------
   // CHECK DUPLICATE EMAIL
   // -----------------------
+  loading.value = true
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
@@ -557,6 +722,7 @@ const addResidents = async () => {
     )
 
     if (isDuplicate) {
+      loading.value = false
       emit('email-duplicate', true)
       return
     }
@@ -591,15 +757,19 @@ const addResidents = async () => {
     )
 
     if (!savedMember) {
+      loading.value = false
       emit('errorAddProfile')
       return
     }
     if (savedMember.status === 400) {
+      loading.value = false
       emit('email-duplicate', true)
       return
     }
     // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
+
+
 
     // -----------------------
     // success
@@ -617,100 +787,15 @@ const addResidents = async () => {
       phoneNumber: ''
     })
 
+    loading.value = false
     newAvatar.value = null
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('errorAddProfile')
   }
 }
-
-// const addResidents = async () => {
-//   // -----------------------
-//   // validate name (ไทย + อังกฤษ)
-//   // -----------------------
-//   const nameRegex = /^[A-Za-zก-๙\s]+$/
-
-//   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
-//     emit('first-name-error', true)
-//     return
-//   }
-
-//   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
-//     emit('last-name-error', true)
-//     return
-//   }
-
-//   // -----------------------
-//   // validate email
-//   // -----------------------
-//   if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
-//     emit('errorAddProfile')
-//     return
-//   }
-
-//   // -----------------------
-//   // validate phone (optional)
-//   // -----------------------
-//   if (form.value.phoneNumber && !/^[0-9]{9,10}$/.test(form.value.phoneNumber)) {
-//     emit('phone-error', true)
-//     return
-//   }
-
-//   try {
-//     // -----------------------
-//     // payload
-//     // -----------------------
-//     const body = {
-//       firstName: form.value.firstName.trim(),
-//       lastName: form.value.lastName.trim(),
-//       email: form.value.email.trim(),
-//       roomNumber: form.value.roomNumber || null,
-//       lineId: form.value.lineId || null,
-//       phoneNumber: form.value.phoneNumber || null
-//     }
-
-//     if (newAvatar.value) {
-//       body.profileImage = newAvatar.value
-//     }
-
-//     // -----------------------
-//     // API call
-//     // -----------------------
-//     const result = await addMemberWithFile(
-//       `${import.meta.env.VITE_BASE_URL}/api/members`,
-//       body,
-//       router
-//     )
-
-//     if (!result) {
-//       emit('errorAddProfile')
-//       return
-//     }
-
-//     // -----------------------
-//     // success
-//     // -----------------------
-//     emit('successAddProfile')
-
-//     // reset form (เหมือน saveParcel)
-//     form.value = {
-//       firstName: '',
-//       lastName: '',
-//       email: '',
-//       roomNumber: '',
-//       lineId: '',
-//       position: '',
-//       phoneNumber: ''
-//     }
-
-//     newAvatar.value = null
-//     isEdit.value = false
-//   } catch (err) {
-//     console.error(err)
-//     emit('errorAddProfile')
-//   }
-// }
 
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
@@ -724,26 +809,21 @@ const saveEditProfile = async () => {
     emit('first-name-error', true)
     return
   }
-
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
     return
   }
 
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
-  // if (isResident &&!/^[0-9]+$/.test(form.value.roomNumber)) {
-  //   emit('room-number-error', true)
-  //   return
-  // }
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
       return
     }
-
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
@@ -770,7 +850,8 @@ const saveEditProfile = async () => {
       lastName: form.value.lastName,
       roomNumber: form.value.roomNumber || null,
       lineId: form.value.lineId || null,
-      phoneNumber: form.value.phoneNumber || null
+      phoneNumber: form.value.phoneNumber || null,
+      lineId: form.value.lineId || null
     }
 
     if (isStaff) {
@@ -784,6 +865,7 @@ const saveEditProfile = async () => {
     // -----------------------
     // API call
     // -----------------------
+    loading.value = true
     const updated = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
       body,
@@ -791,10 +873,12 @@ const saveEditProfile = async () => {
     )
 
     if (!updated) {
+      loading.value = false
       emit('error', true)
       return
     }
     await getProfile()
+    loading.value = false
     // profileManager.setCurrentProfile(profile)
     // 🔥 sync ทุก store
     profileManager.setCurrentProfile(updated)
@@ -807,6 +891,7 @@ const saveEditProfile = async () => {
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('error', true)
   }
 }
@@ -838,7 +923,10 @@ const saveEditDetail = async () => {
     emit('room-number-error', true)
     return
   }
-
+  if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    emit('line-id-error', true)
+    return
+  }
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       emit('phone-error', true)
@@ -850,16 +938,6 @@ const saveEditDetail = async () => {
       return
     }
   }
-
-  // -----------------------
-  // validate position (staff only)
-  // -----------------------
-  // if (isStaff && form.value.position) {
-  //   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
-  //     emit('position-error', true)
-  //     return
-  //   }
-  // }
 
   try {
     // -----------------------
@@ -885,6 +963,7 @@ const saveEditDetail = async () => {
     // -----------------------
     // API call
     // -----------------------
+    loading.value = true
     const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       form.value.userId,
@@ -893,6 +972,7 @@ const saveEditDetail = async () => {
     )
 
     if (!updated) {
+      loading.value = false
       emit('error', true)
       return
     }
@@ -926,10 +1006,12 @@ const saveEditDetail = async () => {
 
     originalForm.value = { ...form.value }
 
+    loading.value = false
     emit('success', true)
     isEdit.value = false
   } catch (err) {
     console.error(err)
+    loading.value = false
     emit('error', true)
   }
 }
@@ -953,9 +1035,6 @@ const isAvatarChanged = computed(() => {
   return !!newAvatar.value
 })
 
-// const isSaveDisabled = computed(() => {
-//   return isFormUnchanged.value && !isAvatarChanged.value
-// })
 const isAddFormValid = computed(() => {
   if (!form.value.firstName?.trim()) return false
   if (!form.value.lastName?.trim()) return false
@@ -1010,8 +1089,10 @@ const isSaveDisabled = computed(() => {
             <!-- ADD MODE + ยังไม่เลือกรูป -->
             <div
               v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-xl"
-            ></div>
+              class="w-full h-full flex items-center justify-center font-semibold bg-gray-400 text-white text-xl"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
+            </div>
 
             <!-- EDIT MODE + ไม่มีรูป -->
             <div
@@ -1022,25 +1103,70 @@ const isSaveDisabled = computed(() => {
             </div>
           </div>
 
+          <!-- ❌ Remove icon (only show when new image is selected) -->
+          <!-- <div
+            v-if="newAvatar"
+            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
+            @click.stop="removeImage"
+          >
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="#EF4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
+              >
+                Remove Image
+              </div>
+            </div>
+          </div> -->
+
           <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
           <div
             class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
             @click="$refs.imageInput.click()"
           >
-            <svg
-              class="transition hover:text-[#8C8F91]"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
             >
-              <path
-                d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                fill="#8C8F91"
-              />
-            </svg>
-
+              <svg
+                class="transition text-[#8C8F91]"
+                width="20"
+                height="20"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="3"
+                >
+                  <path
+                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
+                  />
+                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+                </g>
+              </svg>
+            </div>
             <!-- Tooltip -->
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
@@ -1063,7 +1189,7 @@ const isSaveDisabled = computed(() => {
           @change="onImageChange"
         />
 
-        <p class="mt-4 text-gray-800 font-semibold text-lg">
+        <p class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
           {{ displayFullName }}
         </p>
       </div>
@@ -1087,9 +1213,35 @@ const isSaveDisabled = computed(() => {
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              v-model="form.firstName"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.firstName"
+              @input="handleFirstNameInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showNameLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showNameLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined Firstname and Lastname must be at most 50 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1097,9 +1249,35 @@ const isSaveDisabled = computed(() => {
               Lastname <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              v-model="form.lastName"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.lastName"
+              @input="handleLastNameInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showNameLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showNameLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined Firstname and Lastname must be at most 50 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1108,12 +1286,36 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               :disabled="mode === 'edit'"
-              v-model="form.email"
+              :value="form.email"
+              @input="handleEmailInput"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                showEmailLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
               ]"
             />
+            <div
+              v-if="showEmailLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Email must be at most 100 characters
+              </div>
+            </div>
           </div>
 
           <div
@@ -1126,17 +1328,41 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               :disabled="mode === 'edit'"
-              v-model="form.roomNumber"
+              :value="form.roomNumber"
+              @input="handleRoomInput"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
+                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                showRoomLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
               ]"
             />
+            <div
+              v-if="showRoomLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Room Number must be at most 10 characters
+              </div>
+            </div>
           </div>
           <div
             class="flex flex-col"
             v-if="
-              dormId !== null &&
+              form.dormId !== null &&
               mode !== 'add' &&
               loginManager.user.role === 'RESIDENT'
             "
@@ -1193,9 +1419,35 @@ const isSaveDisabled = computed(() => {
               Line ID
             </label>
             <input
-              v-model="form.lineId"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.lineId"
+              @input="handleLineIdInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showLineIdLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showLineIdLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Line ID must be at most 20 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1203,25 +1455,51 @@ const isSaveDisabled = computed(() => {
               Phone Number
             </label>
             <input
-              v-model="form.phoneNumber"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              :value="form.phoneNumber"
+              @input="handlePhoneInput"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showPhoneLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showPhoneLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Phone Number must be at most 15 digits
+              </div>
+            </div>
           </div>
 
           <!-- Actions -->
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end">
+            <ButtonWeb
+              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              label="Cancel Changes"
+              color="gray"
+              @click="cancel"
+            />
             <ButtonWeb
               class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
               :disabled="isSaveDisabled"
-            />
-            <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
-              label="Cancel Changes"
-              color="gray"
-              @click="cancel"
             />
           </div>
         </div>
@@ -1233,7 +1511,7 @@ const isSaveDisabled = computed(() => {
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <h2 class="text-xl font-semibold text-gray-800">
+          <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
             {{ displayFullName }}
           </h2>
         </div>
@@ -1266,24 +1544,69 @@ const isSaveDisabled = computed(() => {
                   {{ userInitial }}
                 </div>
               </div>
-
+  <!-- ❌ Remove icon (only show when new image is selected) -->
+          <!-- <div
+            v-if="newAvatar"
+            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
+            @click.stop="removeImage"
+          >
+            <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="#EF4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div
+              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
+            >
+              <div
+                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
+              >
+                Remove Image
+              </div>
+            </div>
+          </div> -->
               <!-- ✏️ Edit icon -->
               <div
                 class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
                 @click="$refs.imageInput.click()"
               >
-                <svg
-                  class="transition hover:text-[#8C8F91]"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+               <div
+              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                class="transition text-[#8C8F91]"
+                width="20"
+                height="20"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="3"
                 >
                   <path
-                    d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                    fill="#8C8F91"
+                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
                   />
-                </svg>
+                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
+                </g>
+              </svg>
+            </div>
 
                 <!-- Tooltip -->
                 <div
@@ -1307,7 +1630,7 @@ const isSaveDisabled = computed(() => {
               @change="onImageChange"
             />
             <h2
-              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5"
+              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]"
             >
               {{ displayFullName }}
             </h2>
@@ -1323,7 +1646,7 @@ const isSaveDisabled = computed(() => {
             </div>
 
             <!-- Form Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
                 <label class="block text-sm text-black font-semibold mb-1">
                   Firstname
@@ -1331,7 +1654,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.firstName"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1342,7 +1665,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lastName"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1355,7 +1678,7 @@ const isSaveDisabled = computed(() => {
                   :disabled="mode === 'edit'"
                   v-model="form.email"
                   :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
                   ]"
                 />
@@ -1368,28 +1691,17 @@ const isSaveDisabled = computed(() => {
                 <input
                   v-model="form.roomNumber"
                   :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
+                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
                   ]"
                 />
               </div>
               <div class="flex flex-col">
-                <!-- <label class="block text-sm text-black font-semibold mb-1">
-                  Dormitory
-                </label>
-                <input
-                  :disabled="mode === 'edit'"
-                  :value="dormName"
-                  :class="[
-                    'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
-                  ]"
-                /> -->
                 <label class="block text-sm text-black font-semibold mb-1">
                   Dormitory
                 </label>
                 <select
                   v-model="form.dormId"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 >
                   <option disabled value="">Select Dormitory</option>
                   <option
@@ -1407,7 +1719,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lineId"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
@@ -1417,23 +1729,24 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.phoneNumber"
-                  class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
 
               <!-- Actions -->
               <div class="md:col-span-2 flex gap-3 mt-6 justify-end">
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
-                  :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
-                  color="blue"
-                  @click="submit"
-                />
-                <ButtonWeb
                   class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
                   label="Cancel Changes"
                   color="gray"
                   @click="cancel"
+                />
+                <ButtonWeb
+                  class="text-sm py-2 md:text-base md:py-2.5"
+                  :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
+                  color="blue"
+                  :disabled="isFormEmpty"
+                  @click="submit"
                 />
               </div>
             </div>
@@ -1442,6 +1755,14 @@ const isSaveDisabled = computed(() => {
       </div>
     </div>
   </div>
+
+  <ImageCropperModal
+    :isOpen="showCropper"
+    :imageSrc="tempImageSrc"
+    @close="closeCropper"
+    @crop="onCrop"
+  />
+  <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>

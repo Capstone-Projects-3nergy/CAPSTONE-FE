@@ -1,85 +1,473 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
+import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
-import HomePageStaff from './HomePageStaff.vue'
+import ConfirmParcels from './ConfirmParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import PersonalInfoCard from './PersonalInfoCard.vue'
+import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
+import { useParcelManager } from '@/stores/ParcelsManager.js'
+import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-import { useProfileManager } from '@/stores/ProfileManager'
+import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
-import { getProfile } from '@/utils/fetchUtils'
-const errorAccount = ref(false)
-const successAccount = ref(false)
-const incorrectemail = ref(false)
-const emailRequire = ref(false)
+import {
+  getItemById,
+  deleteItemById,
+  addItem,
+  editItem,
+  deleteAndTransferItem,
+  toggleVisibility,
+  editReadWrite,
+  acceptInvite,
+  cancelInvite,
+  editInviteReadWrite,
+  declineInvite,
+  editItemWithFile,
+  deleteFile,
+  updateParcelStatus,
+  getItems,
+  verifyParcelItem
+} from '@/utils/fetchUtils'
 
-const profileManager = useProfileManager()
 const loginManager = useAuthManager()
+const authStore = useAuthManager()
 const router = useRouter()
-const EditSuccess = ref(false)
-const error = ref(false)
+const route = useRoute()
+const tid = Number(route.params.tid)
+const parcelStore = useParcelManager()
+const parcelVerificationStore = useParcelVerificationManager()
+const notificationStore = useNotificationManager()
+const showConfirmParcel = ref(false)
 const showHomePage = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
+const isNotFound = ref(false)
 const returnLogin = ref(false)
-const showDashBoard = ref(false)
 const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showLogoutConfirm = ref(false)
-
-const firstName = computed(() => {
-  return loginManager.user?.fullName?.split(' ')[0] || ''
-})
-
-const lastName = computed(() => {
-  if (!loginManager.user?.fullName) return ''
-  const parts = loginManager.user.fullName.split(' ')
-  return parts.slice(1).join(' ') || ''
-})
-
+const showDashBoard = ref(false)
+const showProfileStaff = ref(false)
+const showHomePageResident = ref(false)
 const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+const parcelConfirmDetail = ref(null)
+const parcel = ref(null)
+const confirmSuccess = ref(false)
+const error = ref(false)
+const errorMessage = ref('')
+const showLogoutConfirm = ref(false)
+const companyList = ref([])
+const isResidentNameWrong = ref(false)
+const trackingNumberError = ref(false)
+const showResidentNameLengthError = ref(false)
+const showTrackingLengthError = ref(false)
+const isLoading = ref(false)
+const form = ref({
+  residentName: authStore.user?.fullName ,
+  items: [{
+    trackingNumber: '',
+    companyId: '',
+    description: '',
+    parcelType: ''
+  }]
+})
+
+const isFormValid = computed(() => {
+  return form.value.residentName && form.value.items.every(item => item.trackingNumber)
+})
+
+const addParcelItem = () => {
+  form.value.items.push({
+    trackingNumber: '',
+    companyId: '',
+    description: '',
+    parcelType: ''
+  })
+}
+
+const removeParcelItem = (index) => {
+  if (form.value.items.length > 1) {
+    form.value.items.splice(index, 1)
+  }
+}
+
+const mapParcelData = (data) => ({
+  parcelId: data.parcelId,
+  trackingNumber: data.trackingNumber,
+  recipientName: data.recipientName,
+  roomNumber: data.roomNumber,
+  email: data.email,
+  parcelType: data.parcelType || '',
+  status: data.status,
+  receivedAt: data.receivedAt,
+  pickedUpAt: data.pickedUpAt || null,
+  updatedAt: data.updatedAt || null,
+  senderName: data.senderName || '',
+  companyId: data.companyId || null,
+  companyName: data.companyName || '',
+  residentId: data.residentId || null,
+  firstName: data.firstName || '',
+  lastName: data.lastName || '',
+  imageUrl: data.imageUrl || ''
+})
+const showNotificationPage = async () => {
+  router.replace({ name: 'notification' })
+}
+const showResidentParcelPage = async function () {
+  router.replace({
+    name: 'residentparcels'
+  })
+  showResidentParcels.value = true
+}
+
+const showVerifyParcelPage = async () => {
+  // Stay on current page or navigate if needed
+  // Since we are already on ParcelResidentVerification, maybe just ensure state is correct
+  console.log('Already on Parcel Verification Page')
+}
+
+const currentParcelStatus = computed(() => {
+  return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
+})
+
+const getCompanies = async () => {
+  try {
+    const data = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/companies`,
+      router
+    )
+    companyList.value = data
+  } catch (error) {
+    console.error('Error fetching companies:', error)
+  }
+}
+
+const getParcelDetail = async (tid) => {
+  if (!tid) return
+
+  const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
+  if (localParcel) {
+    parcel.value = localParcel
+    // Pre-fill form if viewing a specific parcel
+    form.value.items[0].trackingNumber = localParcel.trackingNumber
+    form.value.residentName = localParcel.recipientName
+    form.value.items[0].companyId = localParcel.companyId
+    form.value.items[0].parcelType = localParcel.parcelType || ''
+    return
+  }
+
+  try {
+    const data = await getItemById(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      tid,
+      router
+    )
+
+    if (data) {
+      const mapped = mapParcelData(data)
+      parcel.value = mapped
+      parcelStore.addParcel(mapped)
+       // Pre-fill form
+      form.value.items[0].trackingNumber = mapped.trackingNumber
+      form.value.residentName = mapped.recipientName
+      form.value.items[0].trackingNumber = mapped.trackingNumber
+      form.value.residentName = mapped.recipientName
+      form.value.items[0].companyId = mapped.companyId
+      form.value.items[0].parcelType = mapped.parcelType
+    }
+  } catch (err) {}
+}
+
+const checkScreen = () => {
+  isCollapsed.value = window.innerWidth < 768
+}
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen)
+})
+onMounted(async () => {
+  checkScreen()
+
+  window.addEventListener('resize', checkScreen)
+  const tidNum = Number(route.params.tid)
+  await getCompanies()
+  if (tidNum) {
+      // Ensure the first item has parcelType initialized if it wasn't
+      if (form.value.items[0] && !form.value.items[0].parcelType) {
+          form.value.items[0].parcelType = ''
+      }
+      getParcelDetail(tidNum)
+  }
+})
+
+const isNameMismatch = ref(false)
+
+const submitVerification = async () => {
+    // Reset states
+    error.value = false
+    confirmSuccess.value = false
+    errorMessage.value = ''
+    isNotFound.value = false
+    isNameMismatch.value = false
+    let hasNotFound = false
+
+    const authStore = useAuthManager()
+    const currentUserFullName = authStore.user?.fullName || ''
+
+    // Only apply the check if we have both values.
+    // Assuming we want to force residentName to match the logged-in user's name.
+    if (form.value.residentName && currentUserFullName) {
+        // Case-insensitive comparison and trimming
+        if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {
+            isNameMismatch.value = true
+            setTimeout(() => isNameMismatch.value = false, 10000)
+            return
+        }
+    }
+
+    if (form.value.residentName && form.value.residentName.length > 50) {
+      showResidentNameLengthError.value = true
+      setTimeout(() => {
+        showResidentNameLengthError.value = false
+      }, 10000)
+      return
+    }
+
+    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 60) {
+      showTrackingLengthError.value = true
+      setTimeout(() => {
+        showTrackingLengthError.value = false
+      }, 10000)
+      return
+    }
+  if (/\d/.test(form.value.residentName)) {
+      isResidentNameWrong.value = true
+      setTimeout(() => (isResidentNameWrong.value = false), 10000)
+      return
+  }
+  if (!/^[A-Za-z0-9]+$/.test(form.value.items[0].trackingNumber)) {
+    trackingNumberError.value = true
+    setTimeout(() => (trackingNumberError.value = false), 10000)
+    return
+  }
+    
+    // Explicit number check redundant due to regex above but keeping for flow consistency if user code had it
+    const numberRegex = /\d/
+    if (numberRegex.test(form.value.residentName)) {
+        error.value = true
+        setTimeout(() => (error.value = false), 10000)
+        errorMessage.value = 'Resident name cannot contain numbers.'
+        return
+    }
+
+    const thaiRegex = /[\u0E00-\u0E7F]/
+    for (const item of form.value.items) {
+        if (thaiRegex.test(item.trackingNumber)) {
+            error.value = true
+            setTimeout(() => (error.value = false), 10000)
+            errorMessage.value = `Tracking number "${item.trackingNumber}" cannot contain Thai characters.`
+            return
+        }
+    }
+    
+    isLoading.value = true
+    try {
+        let successCount = 0
+        let duplicateCount = 0
+        let failCount = 0
+        let failedItems = []
+        let nextItems = []
+
+        const url = `${import.meta.env.VITE_BASE_URL}/api/resident/verify-parcel`
+        const authStore = useAuthManager()
+        const senderName = authStore.user?.fullName || 'Courier'
+
+        for (const item of form.value.items) {
+            // -----------------------
+            // payload - simplified (trackingNumber & residentName only)
+            // -----------------------
+            const body = {
+                trackingNumber: item.trackingNumber,
+                residentName: form.value.residentName
+            }
+
+            // -----------------------
+            // API call
+            // -----------------------
+            const result = await verifyParcelItem(url, body, router)
+
+            // Check if result is success
+            if (result && result.success) {
+                successCount++
+                
+                // Construct verified parcel object for store (since backend returns void)
+                const verifiedParcel = {
+                    parcelId: `verified-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    trackingNumber: item.trackingNumber,
+                    recipientName: form.value.residentName,
+                    companyId: item.companyId, 
+                    parcelType: item.parcelType || '',
+                    status: 'Verified',
+                    updatedAt: new Date().toISOString()
+                }
+
+                const mapped = mapParcelData(verifiedParcel)
+                parcelVerificationStore.addVerifiedParcel(mapped)
+                await notificationStore.notifyParcelSaved(mapped, router)
+
+            } else {
+                // Backend returns 500 for unique constraint violation (duplicate)
+                // Treat this as a "soft success" - item is already processed
+                if (result?.status === 500) {
+                    duplicateCount++
+                } else {
+                    failCount++
+                     // Check for Not Found (404)
+                    if (result?.status === 404) {
+                        isNotFound.value = true
+                    }
+                    console.error(`Failed to Add Tracking Number ${item.trackingNumber}:`, result?.message || result?.status)
+                    failedItems.push(item.trackingNumber)
+                    nextItems.push(item) // Keep failed item to retry
+                }
+            }
+        }
+
+        // Summary handling
+        // Show success if we had any successes OR duplicates (meaning work is done for those)
+        if (successCount > 0 || duplicateCount > 0) {
+            if (failCount > 0) {
+                // Partial success (some failures)
+                
+                if (hasNotFound) {
+                    isNotFound.value = true
+                    setTimeout(() => isNotFound.value = false, 10000)
+                } else {
+                    error.value = true
+                    setTimeout(() => {
+                      error.value = false
+                    }, 10000)
+                    errorMessage.value = `Add Tracking Number failed for ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
+                }
+                
+                // Update form to show only failed items
+                form.value.items = nextItems
+            } else {
+                // All success (including duplicates)
+                confirmSuccess.value = true
+                setTimeout(() => {
+                  confirmSuccess.value = false
+                }, 10000)
+
+                errorMessage.value = '' 
+                
+                // Reset form completely
+                form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
+            }
+
+            // Auto hide success msg is handled above
+        } else if (failCount > 0) {
+            // All failed (no successes, no duplicates)
+            
+            if (hasNotFound) {
+                isNotFound.value = true
+                setTimeout(() => isNotFound.value = false, 10000)
+            } else {
+                 error.value = true
+                 setTimeout(() => {
+                   error.value = false
+                 }, 10000)
+                 errorMessage.value = `Add Tracking Number failed for items (${failedItems.join(', ')}). Invalid data or network error.`
+            }
+        }
+
+    } catch (err) {
+        console.error(err)
+        error.value = true
+        setTimeout(() => {
+          error.value = false
+        }, 10000)
+        errorMessage.value = 'An unexpected error occurred.'
+    } finally {
+        isLoading.value = false
+    }
+}
+
+
+watch(
+  () => route.params.tid,
+  (newTid) => {
+    const tidNum = Number(newTid)
+    getParcelDetail(tidNum)
+  }
+)
+
+const backToManageParcels = () => router.replace({ name: 'staffparcels' })
+const showParcelScannerPage = async () => {
+  router.replace({ name: 'parcelscanner' })
+  showParcelScanner.value = true
+}
+const confirmParcelPopUp = (parcel) => {
+  parcelConfirmDetail.value = {
+    id: parcel.parcelId
+  }
+
+  showConfirmParcel.value = true
+}
+const clearConfirmPopUp = () => {
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+
+const showConfirmComplete = () => {
+  confirmSuccess.value = true
+  setTimeout(() => (confirmSuccess.value = false), 10000)
+  showConfirmParcel.value = false
+
+  if (parcelConfirmDetail.value?.id) {
+    const updated = parcelStore
+      .getParcels()
+      .find((p) => p.parcelId === parcelConfirmDetail.value.id)
+    if (updated) {
+      parcel.value = updated
+    }
+  }
+
+  parcelConfirmDetail.value = null
+}
+const showHomePageResidentWeb = async function () {
+  router.replace({ name: 'home' })
+  showHomePageResident.value = true
+}
+const openRedPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showConfirmParcel.value = false
+  parcelConfirmDetail.value = null
+}
+const showManageParcelPage = async () => {
+  router.replace({ name: 'residentparcels' })
+  showResidentParcels.value = true
+}
+const ShowManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
+const ShowManageResidentPage = async () => {
+  router.replace({ name: 'manageresident' })
+  showManageResident.value = true
 }
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
-}
-const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
-  showProfileStaff.value = true
-}
-
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
-  showParcelScanner.value = true
-}
-
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
-  showStaffParcels.value = true
-}
-const ShowManageAnnouncementPage = async function () {
-  router.replace({
-    name: 'manageannouncement'
-  })
-  showManageAnnouncement.value = true
-}
-const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' })
-  showManageResident.value = true
-}
-const showParcelTrashPage = async function () {
-  router.replace({ name: 'trashparcels' })
 }
 
 const returnLoginPage = async () => {
@@ -90,75 +478,89 @@ const returnLoginPage = async () => {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
-const showDashBoardPage = async function () {
+const showDashBoardPage = async () => {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
+const showProfileStaffPage = async () => {
+  router.replace({ name: 'profilestaff' })
+  showProfileStaff.value = true
 }
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-const originalForm = ref(null)
-onMounted(async () => {
-  checkScreen()
-  console.log(loginManager.user)
-  console.log(profileManager.currentProfile)
-  window.addEventListener('resize', checkScreen)
-  const profile = await getProfile(
-    `${import.meta.env.VITE_BASE_URL}/api/profile`,
-    router
-  )
-
-  if (profile) {
-    profileManager.setCurrentProfile(profile)
-
-    // sync form    form.value = { ...profile }
-    originalForm.value = { ...profile }
-  }
-})
-
-function goToEditProfile() {
-  router.replace({ name: 'editprofilestaff' })
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
 }
-function confirmAccountFn() {
-  successAccount.value = true
-  setTimeout(() => (successAccount.value = false), 10000)
+function formatDateTime(datetimeStr) {
+  if (!datetimeStr) return ''
+  return datetimeStr.replace('T', ' ')
 }
-
-function redAlertErrorFn() {
-  errorAccount.value = true
-  setTimeout(() => (errorAccount.value = false), 10000)
-}
-function incorrectemailformFn() {
-  incorrectemail.value = true
-  setTimeout(() => (incorrectemail.value = false), 10000)
-}
-function emailRequireFn() {
-  emailRequire.value = true
-  setTimeout(() => (emailRequire.value = false), 10000)
-}
-
-const closePopUp = () => {
-  profileManager.clearAlert()
-}
-const closePopUps = (operate) => {
+const closePopUp = (operate) => {
   switch (operate) {
-    case 'SuccessAccount':
-      successAccount.value = false
+    case 'problem':
+      error.value = false
       break
-    case 'problemAccount':
-      errorAccount.value = false
+    case 'confirmSuccessMessage':
+      confirmSuccess.value = false
       break
-    case 'emailForm':
-      incorrectemail.value = false
+    case 'nametypewrong':
+      isResidentNameWrong.value = false
       break
-    case 'require':
-      emailRequire.value = false
+    case 'trackingNumber':
+      trackingNumberError.value = false
+      break
+    case 'notFound':
+      isNotFound.value = false
+      break
+    case 'nameMismatch':
+      isNameMismatch.value = false
       break
   }
 }
+
+const handleResidentNameInput = (event) => {
+  const val = event.target.value
+  const maxLength = 50
+  if (val.length > maxLength) {
+    const sliced = val.slice(0, maxLength)
+    form.value.residentName = sliced
+    event.target.value = sliced
+    showResidentNameLengthError.value = true
+    setTimeout(() => {
+      showResidentNameLengthError.value = false
+    }, 10000)
+  } else {
+    form.value.residentName = val
+    if (showResidentNameLengthError.value && val.length <= maxLength) {
+      showResidentNameLengthError.value = false
+    }
+  }
+}
+
+const handleTrackingInput = (event, index) => {
+  const val = event.target.value
+  const maxLength = 60
+  if (val.length > maxLength) {
+    const sliced = val.slice(0, maxLength)
+    if (index !== undefined) {
+       form.value.items[index].trackingNumber = sliced
+    } else {
+       // fallback if referenced directly (though likely used in v-for)
+       form.value.items[0].trackingNumber = sliced
+    }
+    event.target.value = sliced
+    showTrackingLengthError.value = true
+    setTimeout(() => {
+      showTrackingLengthError.value = false
+    }, 10000)
+  } else {
+    if (index !== undefined) {
+       form.value.items[index].trackingNumber = val
+    }
+    if (showTrackingLengthError.value && val.length <= maxLength) {
+      showTrackingLengthError.value = false
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -167,6 +569,60 @@ const closePopUps = (operate) => {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
+    <!-- <header class="flex items-center w-full h-16 bg-white">
+      <div
+        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
+      >
+        <svg
+          @click="toggleSidebar"
+          class="md:hidden mr-4 cursor-pointer"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3 7H21C21.2652 7 21.5196 6.89464 21.7071 6.70711C21.8946 6.51957 22 6.26522 22 6C22 5.73478 21.8946 5.48043 21.7071 5.29289C21.5196 5.10536 21.2652 5 21 5H3C2.73478 5 2.48043 5.10536 2.29289 5.29289C2.10536 5.48043 2 5.73478 2 6C2 6.26522 2.10536 6.51957 2.29289 6.70711C2.48043 6.89464 2.73478 7 3 7ZM21 17H3C2.73478 17 2.48043 17.1054 2.29289 17.2929C2.10536 17.4804 2 17.7348 2 18C2 18.2652 2.10536 18.5196 2.29289 18.7071C2.48043 18.8946 2.73478 19 3 19H21C21.2652 19 21.5196 18.8946 21.7071 18.7071C21.8946 18.5196 22 18.2652 22 18C22 17.7348 21.8946 17.4804 21.7071 17.2929C21.5196 17.1054 21.2652 17 21 17ZM21 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14C2 14.2652 2.10536 14.5196 2.29289 14.7071C2.48043 14.8946 2.73478 15 3 15H21C21.2652 15 21.5196 14.8946 21.7071 14.7071C21.8946 14.5196 22 14.2652 22 14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13ZM21 9H3C2.73478 9 2.48043 9.10536 2.29289 9.29289C2.10536 9.48043 2 9.73478 2 10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10C22 9.73478 21.8946 9.48043 21.7071 9.29289C21.5196 9.10536 21.2652 9 21 9Z"
+            fill="black"
+          />
+        </svg>
+
+        <div class="flex-1 flex justify-end items-center gap-5">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_84_935)">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M6.12715 0.5C6.58315 0.5 7.03215 0.568 7.46115 0.697C7.14875 1.2667 6.98973 1.90779 6.99968 2.55745C7.00962 3.2071 7.18819 3.84302 7.51788 4.40289C7.84757 4.96276 8.31707 5.42737 8.88037 5.75117C9.44366 6.07497 10.0814 6.24687 10.7311 6.25V8.477C10.7311 8.56835 10.7492 8.65881 10.7841 8.7432C10.8191 8.82758 10.8704 8.90424 10.9351 8.96879C10.9997 9.03334 11.0764 9.08452 11.1609 9.11938C11.2453 9.15425 11.3358 9.17213 11.4271 9.172C11.6261 9.172 11.8168 9.25102 11.9575 9.39167C12.0981 9.53232 12.1771 9.72309 12.1771 9.922C12.1771 10.1209 12.0981 10.3117 11.9575 10.4523C11.8168 10.593 11.6261 10.672 11.4271 10.672H0.827148C0.628236 10.672 0.437471 10.593 0.296818 10.4523C0.156166 10.3117 0.0771484 10.1209 0.0771484 9.922C0.0771484 9.72309 0.156166 9.53232 0.296818 9.39167C0.437471 9.25102 0.628236 9.172 0.827148 9.172C0.918501 9.17213 1.00898 9.15425 1.09342 9.11938C1.17786 9.08452 1.25459 9.03334 1.31923 8.96879C1.38388 8.90424 1.43516 8.82758 1.47015 8.7432C1.50514 8.65881 1.52315 8.56835 1.52315 8.477V5.104C1.52315 3.88294 2.00821 2.7119 2.87163 1.84848C3.73505 0.985063 4.90609 0.5 6.12715 0.5ZM5.12715 12C4.92824 12 4.73747 12.079 4.59682 12.2197C4.45617 12.3603 4.37715 12.5511 4.37715 12.75C4.37715 12.9489 4.45617 13.1397 4.59682 13.2803C4.73747 13.421 4.92824 13.5 5.12715 13.5H7.12715C7.32606 13.5 7.51683 13.421 7.65748 13.2803C7.79813 13.1397 7.87715 12.9489 7.87715 12.75C7.87715 12.5511 7.79813 12.3603 7.65748 12.2197C7.51683 12.079 7.32606 12 7.12715 12H5.12715Z"
+                fill="black"
+              />
+              <path
+                d="M10.75 5C11.413 5 12.0489 4.73661 12.5178 4.26777C12.9866 3.79893 13.25 3.16304 13.25 2.5C13.25 1.83696 12.9866 1.20107 12.5178 0.732233C12.0489 0.263392 11.413 0 10.75 0C10.087 0 9.45107 0.263392 8.98223 0.732233C8.51339 1.20107 8.25 1.83696 8.25 2.5C8.25 3.16304 8.51339 3.79893 8.98223 4.26777C9.45107 4.73661 10.087 5 10.75 5Z"
+                fill="#FFCC00"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_84_935">
+                <rect width="14" height="14" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col leading-tight">
+              <UserInfo />
+            </div>
+          </div>
+        </div>
+      </div>
+    </header> -->
+
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
@@ -211,7 +667,7 @@ const closePopUps = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+            <SidebarItem title="Home" @click="showHomePageResidentWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -227,7 +683,51 @@ const closePopUps = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
+            <SidebarItem
+              title="Notifications "
+              class="cursor-default"
+              @click="showNotificationPage"
+            >
+              <template #icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none">
+                    <path
+                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
+                    />
+                  </g>
+                </svg>
+              </template>
+            </SidebarItem>
+                <SidebarItem    
+              title="Parcel Verification"
+            class="bg-[#81AFEA] cursor-default"
+              @click="showVerifyParcelPage"
+            >
+              <template #icon>
+                 <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 25 25"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Profile" @click="showProfileStaffPage">
               <template #icon>
                 <svg
                   width="24"
@@ -237,13 +737,20 @@ const closePopUps = (operate) => {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
                     fill="white"
                   />
                 </svg>
               </template>
-            </SidebarItem>
-            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+            </SidebarItem> -->
+
+            <!-- <SidebarItem
+              title="My parcel"
+              class="bg-[#81AFEA] cursor-default"
+              @click="showResidentParcelPage"
+            >
               <template #icon>
                 <svg
                   width="25"
@@ -258,27 +765,9 @@ const closePopUps = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
-            <SidebarItem
-              title="Manage Residents"
-              @click="ShowManageResidentPage"
-            >
-              <template #icon>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="white"
-                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Announcements (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -294,28 +783,7 @@ const closePopUps = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Trash" @click="showParcelTrashPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
           </nav>
-
           <SidebarItem
             title="Log Out"
             class="flex justify-center mt-auto"
@@ -346,73 +814,267 @@ const closePopUps = (operate) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-9">
+      <main class="flex-1 p-9 bg-[#f8f9fb]">
+        <!-- <div class="mb-6">
+          <h2 class="text-2xl font-bold text-[#185dc0]">
+            Parcel Verification
+          </h2>
+        </div> -->
+
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
-            v-if="profileManager.editSuccess"
-            titles="Edit Profile Successful."
+            v-if="confirmSuccess"
+            :titles="'Add Tracking Number Successful.'"
             message="Success!!"
             styleType="green"
-            operate="editSuccessMessage"
+            operate="confirmSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
-            v-if="profileManager.error"
-            titles="There is a problem. Please try again later."
+            v-if="error"
+            :titles="errorMessage"
             message="Error!!"
             styleType="red"
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
-            v-if="errorAccount"
-            titles="There is a problem. Please try again later."
-            message="Error!!"
-            styleType="red"
-            operate="problemAccount"
-            @closePopUp="closePopUps"
-          />
-          <AlertPopUp
-            v-if="incorrectemail"
-            titles="Please enter a valid email address (example: name@email.com)."
-            message="Error!!"
-            styleType="red"
-            operate="emailForm"
-            @closePopUp="closePopUps"
-          />
-          <AlertPopUp
-            v-if="emailRequire"
-            titles="Email is required"
-            message="Error!!"
-            styleType="red"
-            operate="require"
-            @closePopUp="closePopUps"
-          />
         </div>
-
-        <PersonalInfoCard
-          v-if="loginManager.user"
-          :useCurrentProfile="true"
-          :fullName="loginManager.user.fullName"
-          :firstName="firstName"
-          :lastName="lastName"
-          :email="loginManager.user.email"
-          :roomNumber="loginManager.user.roomNumber"
-          :position="loginManager.user.position"
-          :dormName="loginManager.user.dormName"
-          :status="profileManager.currentProfile?.status"
-          :lineId="profileManager.currentProfile?.lineId"
-          :phoneNumber="profileManager.currentProfile?.phoneNumber"
-          :showNotify="false"
-          @edit="goToEditProfile"
-          @confirmAccount="confirmAccountFn"
-          @redAlertError="redAlertErrorFn"
-          @incorrectemailform="incorrectemailformFn"
-          @emailRequire="emailRequireFn"
+        <AlertPopUp
+          v-if="isResidentNameWrong"
+          :titles="'Resident Name can only be typed as text.'"
+          message="Error!!"
+          styleType="red"
+          operate="nametypewrong"
+          @closePopUp="closePopUp"
+        /> 
+        <AlertPopUp
+          v-if="trackingNumberError"
+          :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+          message="Error!!"
+          styleType="red"
+          operate="trackingNumber"
+          @closePopUp="closePopUp"
         />
+    <AlertPopUp
+      v-if="isNotFound"
+      :titles="'Add Tracking Number failed. Parcel record does not exist.'"
+      message="Error!!"
+      styleType="red"
+      operate="notFound"
+      @closePopUp="closePopUp"
+    />
+    <AlertPopUp
+      v-if="isNameMismatch"
+      :titles="'Resident Name must match your account name.'"
+      message="Error!!"
+      styleType="red"
+      operate="nameMismatch"
+      @closePopUp="closePopUp"
+    />
+
+        <div class="max-w-4xl mx-auto mt-6">
+          <div
+            class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
+          >
+            <div class="bg-[#0E4B90] px-8 py-6">
+              <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Enter Tracking Number
+              </h3>
+              <p class="text-blue-100 mt-1 text-sm">
+                Please enter the parcel details below to verify ownership.
+              </p>
+            </div>
+
+            <form class="p-8 space-y-8" @submit.prevent="submitVerification">
+              <div class="space-y-6">
+                <!-- Resident Name (Common) -->
+                <div>
+                  <div class="flex items-center ml-1">
+                    <label class="block text-sm font-semibold text-gray-700 ml-1 mb-1">Resident Name</label>
+                    <span class="text-red-500 ml-1">*</span>
+                  </div>
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 transition-colors" :class="showResidentNameLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <input
+                      :value="form.residentName"
+                      @input="handleResidentNameInput"
+                      type="text"
+                      class="pl-10 w-full bg-gray-50 border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200 hover:bg-white"
+                      :class="showResidentNameLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
+                      placeholder="Ex. kong"
+                    />
+                  </div>
+                  <p class="text-xs text-red-500 mt-1 ml-1 flex items-center gap-1" v-if="showResidentNameLengthError">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Name cannot exceed 50 characters
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1 ml-1" v-else>
+                    *Enter resident name to assign all parcels below.
+                  </p>
+                </div>
+
+                <!-- Dynamic Parcel List -->
+                <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
+                  <div class="absolute top-4 right-4" v-if="form.items.length > 1">
+                    <button @click="removeParcelItem(index)" type="button" class="text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full shadow-sm border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tracking Number -->
+                    <div class="col-span-1 md:col-span-2 space-y-2">
+                      <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+                        <span class="text-red-500 ml-1">*</span>
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 transition-colors" :class="showTrackingLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
+                          </svg>
+                        </div>
+                        <input
+                          :value="item.trackingNumber"
+                          @input="handleTrackingInput($event, index)"
+                          type="text"
+                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
+                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
+                          placeholder="Ex. TH12345678"
+                        />
+                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                          Tracking number max 60 characters
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Parcel Type (Optional) -->
+                    <div class="space-y-2">
+                       <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Parcel Type (Optional)</label>
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
+                          </svg>
+                        </div>
+                        <select
+                          v-model="item.parcelType"
+                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                        >
+                          <option disabled value="">Select Parcel Type</option>
+                          <option value="DOCUMENT">Document</option>
+                          <option value="BOX">Box</option>
+                          <option value="ELECTRONIC">Electronic</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="space-y-2">
+                      <div class="flex items-center ml-1">
+                        <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
+                        <!-- <span class="text-red-500 ml-1">*</span> -->
+                      </div>
+                      <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                             <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                             <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
+                          </svg>
+                        </div>
+                        <select
+                          v-model="item.companyId"
+                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
+                        >
+                          <option value="" disabled>Select Company</option>
+                          <option
+                            v-for="comp in companyList"
+                            :key="comp.companyId"
+                            :value="comp.companyId"
+                          >
+                            {{ comp.companyName }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+
+                  </div>
+                </div>
+
+                <!-- Add Button -->
+                <button
+                  @click="addParcelItem"
+                  type="button"
+                  class="w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#0E4B90] hover:text-[#0E4B90] transition-colors flex items-center justify-center gap-2 group font-medium cursor-pointer"
+                >
+                  <div class="bg-gray-100 rounded-full p-1 group-hover:bg-blue-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  Add Another Parcel
+                </button>
+              </div>
+
+              <div class="flex items-center justify-end space-x-4 pt-6 mt-4">
+                <ButtonWeb
+                  label="Back"
+                  color="gray"
+                  class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#0E4B90] hover:border-[#0E4B90] transition-all duration-200 font-medium"
+                  @click="showHomePageResidentWeb"
+                />
+                <ButtonWeb
+                  type="submit"
+                  label="Add"
+                  :loading="isLoading"
+                  :disabled="!isFormValid"
+                  class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
+                  color="blue"
+                  @click="submitVerification"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
       </main>
     </div>
   </div>
+  <teleport to="body" v-if="showConfirmParcel">
+    <ConfirmParcels
+      @cancelParcel="clearConfirmPopUp"
+      @confirmParcel="showConfirmComplete"
+      @redAlert="openRedPopup"
+      :parcelConfirmData="parcelConfirmDetail"
+    />
+  </teleport>
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
@@ -428,8 +1090,8 @@ const closePopUps = (operate) => {
   </Teleport>
   <Teleport to="body" v-if="showDashBoard">
     <DashBoard> </DashBoard>
-    <Teleport to="body" v-if="showLogoutConfirm"
-      ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-    ></Teleport>
   </Teleport>
+  <Teleport to="body" v-if="showLogoutConfirm"
+    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
+  ></Teleport>
 </template>

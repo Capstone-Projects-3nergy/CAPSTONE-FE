@@ -5,10 +5,13 @@ import HomePage from '@/components/HomePageResident.vue'
 import RegisterPage from './RegisterPage.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager'
+import LineNotificationManager from '@/stores/LineNotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
 const authManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const isPasswordVisible = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -111,7 +114,70 @@ const loginHomePageWeb = async () => {
       } catch (decodeErr) {
         error.value = true
 
-        await authManager.logoutAccount(router)
+      }
+
+      // Notification Logic
+      const currentUser = authManager.user
+      if (
+        currentUser.role === 'STAFF' ||
+        currentUser.role === 'RESIDENT'
+      ) {
+        // Always show In-App Login Notification
+        notificationManager.notifyLogin(
+          currentUser.fullName || currentUser.email,
+          currentUser.role
+        )
+
+        const key = `welcome_shown_${currentUser.email}`
+        if (!localStorage.getItem(key)) {
+          // LINE Notification (First time only)
+          try {
+            await LineNotificationManager.sendToGroup(
+              'GROUP_ID', 
+              `Users ${currentUser.fullName || currentUser.email} (${currentUser.role}) has logged in.`
+            )
+          } catch (e) {
+            console.error('Failed to send LINE notification', e)
+          }
+
+          localStorage.setItem(key, 'true')
+        }
+
+        // Fetch notifications from backend
+        try {
+            await notificationManager.fetchNotifications(router)
+        } catch (e) {
+             console.error('Failed to fetch notifications', e)
+        }
+      }
+
+      // Manual Redirect
+      if (currentUser) {
+        switch (currentUser.role) {
+          case 'RESIDENT':
+            router.replace({
+              name: 'home',
+              params: { id: currentUser.id }
+            })
+            break
+          case 'STAFF':
+            router.replace({
+              name: 'homestaff',
+              params: { id: currentUser.id }
+            })
+            break
+          case 'SHIPPING':
+            router.replace({
+              name: 'parcelscannershipping',
+              params: { id: currentUser.id }
+            })
+            break
+          default:
+            router.replace({
+              name: 'parcelscanner'
+            })
+            break
+        }
       }
     } else if ([401, 403].includes(res.status)) {
       incorrect.value = true
@@ -344,7 +410,7 @@ const showResetPasswordPageWeb = async function () {
           />
         </div>
 
-        <form @submit.prevent="signIn" class="space-y-4">
+        <form @submit.prevent="loginHomePageWeb" class="space-y-4">
           <div class="mb-1">
             <div class="relative">
               <svg
@@ -364,7 +430,6 @@ const showResetPasswordPageWeb = async function () {
               <input
                 v-model="email"
                 type="email"
-                required
                 placeholder="Email"
                 class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 @input="checkEmailLength"
@@ -456,7 +521,6 @@ const showResetPasswordPageWeb = async function () {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="loginHomePageWeb"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
                 isEmailOverLimit,

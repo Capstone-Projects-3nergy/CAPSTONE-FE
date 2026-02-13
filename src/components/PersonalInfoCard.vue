@@ -395,26 +395,6 @@ const profileImageUrlPreview = computed(() => {
             </svg>
             <span>Personal Information</span>
           </button>
-
-          <!-- <button
-            v-if="showNotify"
-            @click="activeTab = 'notify'"
-            :class="menuClass('notify')"
-            class="relative flex items-center gap-3 w-full cursor-pointer"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M19 12c-3.87 0-7 3.13-7 7c0 .34.03.67.08 1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4c0-1.1.9-2 2-2s2 .9 2 2v.29c2.97.88 5 3.61 5 6.71zm-9 9a2 2 0 0 0 2 2c.39 0 .75-.12 1.06-.31c-.32-.52-.56-1.09-.76-1.69zm13.77-.68c.1.07.12.21.06.32l-1 1.73c-.06.13-.19.13-.3.13l-1.25-.53c-.28.2-.53.37-.84.5l-.19 1.32c-.02.12-.12.21-.25.21h-2c-.12 0-.23-.09-.25-.21l-.18-1.32c-.32-.13-.57-.3-.85-.5l-1.22.53c-.13 0-.27 0-.33-.13l-1-1.73a.26.26 0 0 1 .06-.32l1.06-.82c-.02-.17-.04-.33-.04-.5s.02-.33.04-.5l-1.06-.82c-.09-.07-.12-.18-.06-.32l1-1.72c.06-.11.2-.14.33-.11l1.22.47c.28-.17.53-.34.85-.46l.18-1.33c.02-.12.13-.21.25-.21h2c.13 0 .23.09.25.21l.19 1.33c.31.12.56.29.84.46l1.25-.47c.11-.03.24 0 .3.11l1 1.72c.06.14.04.25-.06.32l-1.05.82a4.3 4.3 0 0 1 0 1zM20.75 19c0-.97-.78-1.75-1.75-1.75s-1.75.78-1.75 1.75s.79 1.75 1.75 1.75s1.75-.78 1.75-1.75"
-              />
-            </svg>
-            <span>Notifications</span>
-          </button> -->
         </div>
       </div>
       <!-- RIGHT : Information Card -->
@@ -514,29 +494,6 @@ const profileImageUrlPreview = computed(() => {
               <p class="font-medium break-all text-[#8C8F91]">
                 {{ email }}
               </p>
-
-              <!-- <div class="flex items-center gap-1 text-green-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  class="shrink-0"
-                >
-                  <g fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path
-                      d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m9.515 12.536l2.035 1.949l2.935-4.97"
-                    />
-                  </g>
-                </svg>
-
-                <span class="text-sm font-medium leading-none"> verified </span>
-              </div> -->
             </div>
           </div>
 
@@ -766,31 +723,19 @@ const profileImageUrlPreview = computed(() => {
                   {{ display(phoneNumber) }}
                 </p>
               </div>
-
-              <!-- <div class="flex items-center gap-2">
-                <label class="text-sm font-semibold">Status:</label>
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                  :class="statusClass(status)"
-                >
-                  {{ displayStatus(status) }}
-                </span>
-              </div> -->
-
               <!-- Buttons -->
               <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">
-                <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
-                  label="Edit"
-                  color="blue"
-                  @click="$emit('edit')"
-                  :disabled="isSaveDisabled"
-                />
                 <ButtonWeb
                   class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
                   label="Cancel"
                   color="gray"
                   @click="$emit('cancel')"
+                />
+                <ButtonWeb
+                  class="text-sm py-2 md:text-base md:py-2.5"
+                  label="Edit"
+                  color="blue"
+                  @click="$emit('edit')"
                 />
               </div>
             </div>

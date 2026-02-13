@@ -1,4 +1,3 @@
-// stores/RegistrationResidentManager.js
 import { reactive } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 

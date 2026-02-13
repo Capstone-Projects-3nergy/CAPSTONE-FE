@@ -16,6 +16,8 @@ import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
+import { useNotificationManager } from '@/stores/NotificationManager'
+import { storeToRefs } from 'pinia'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -128,6 +130,9 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+    setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -180,6 +185,19 @@ autoClose(addSuccess)
 autoClose(editSuccess)
 autoClose(deleteSuccess)
 autoClose(error)
+
+const notificationStore = useNotificationManager()
+const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
+const { closeWelcomePopup } = notificationStore
+
+// Auto-close welcome popup
+watch(welcomePopupVisible, (val) => {
+  if (val) {
+    setTimeout(() => {
+      closeWelcomePopup()
+    }, 10000)
+  }
+})
 
 const searchKeyword = ref('')
 const activeTab = ref('Day')
@@ -336,10 +354,7 @@ const showAddParcelPage = async function () {
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement' })
-  showManageAnnouncement.value = true
-}
+
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
@@ -350,6 +365,9 @@ const showHomePageStaffWeb = async () => {
 }
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
+}
+const showParcelResidentVerificationPage = async () => {
+  router.replace({ name: 'parcelresidentverification' })
 }
 const returnLoginPage = async () => {
   try {
@@ -375,7 +393,7 @@ const toggleSidebar = () => {
 const currentPage = ref(1)
 const perPage = ref(10)
 const totalPages = computed(() =>
-  Math.ceil(parcels.value.length / perPage.value)
+  Math.ceil(filteredParcels.value.length / perPage.value)
 )
 
 const paginatedParcels = computed(() => {
@@ -476,6 +494,11 @@ const openRedPopup = () => {
   parcelConfirmDetail.value = null
 }
 
+const openStatusPopup = () => {
+  // Placeholder for status popup logic
+  console.log('Status popup clicked')
+}
+
 const closePopUp = (operate) => {
   switch (operate) {
     case 'problem':
@@ -508,10 +531,13 @@ const showHomePageResidentWeb = async function () {
   showHomePageResident.value = true
 }
 const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
-  showAnnouncement.value = true
+  // router.replace({ name: 'announcement' })
+  // showAnnouncement.value = true
 }
-
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement' })
+  showManageAnnouncement.value = true
+}
 const showProfileResidentPage = async function () {
   router.replace({
     name: 'profileresident'
@@ -602,60 +628,15 @@ function formatDateTime(datetimeStr) {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <!-- <header class="flex items-center w-full h-16 bg-white">
-      <div
-        class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
-      >
-        <svg
-          @click="toggleSidebar"
-          class="md:hidden mr-4 cursor-pointer"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M3 7H21C21.2652 7 21.5196 6.89464 21.7071 6.70711C21.8946 6.51957 22 6.26522 22 6C22 5.73478 21.8946 5.48043 21.7071 5.29289C21.5196 5.10536 21.2652 5 21 5H3C2.73478 5 2.48043 5.10536 2.29289 5.29289C2.10536 5.48043 2 5.73478 2 6C2 6.26522 2.10536 6.51957 2.29289 6.70711C2.48043 6.89464 2.73478 7 3 7ZM21 17H3C2.73478 17 2.48043 17.1054 2.29289 17.2929C2.10536 17.4804 2 17.7348 2 18C2 18.2652 2.10536 18.5196 2.29289 18.7071C2.48043 18.8946 2.73478 19 3 19H21C21.2652 19 21.5196 18.8946 21.7071 18.7071C21.8946 18.5196 22 18.2652 22 18C22 17.7348 21.8946 17.4804 21.7071 17.2929C21.5196 17.1054 21.2652 17 21 17ZM21 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14C2 14.2652 2.10536 14.5196 2.29289 14.7071C2.48043 14.8946 2.73478 15 3 15H21C21.2652 15 21.5196 14.8946 21.7071 14.7071C21.8946 14.5196 22 14.2652 22 14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13ZM21 9H3C2.73478 9 2.48043 9.10536 2.29289 9.29289C2.10536 9.48043 2 9.73478 2 10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10C22 9.73478 21.8946 9.48043 21.7071 9.29289C21.5196 9.10536 21.2652 9 21 9Z"
-            fill="black"
-          />
-        </svg>
-
-        <div class="flex-1 flex justify-end items-center gap-5">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clip-path="url(#clip0_84_935)">
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M6.12715 0.5C6.58315 0.5 7.03215 0.568 7.46115 0.697C7.14875 1.2667 6.98973 1.90779 6.99968 2.55745C7.00962 3.2071 7.18819 3.84302 7.51788 4.40289C7.84757 4.96276 8.31707 5.42737 8.88037 5.75117C9.44366 6.07497 10.0814 6.24687 10.7311 6.25V8.477C10.7311 8.56835 10.7492 8.65881 10.7841 8.7432C10.8191 8.82758 10.8704 8.90424 10.9351 8.96879C10.9997 9.03334 11.0764 9.08452 11.1609 9.11938C11.2453 9.15425 11.3358 9.17213 11.4271 9.172C11.6261 9.172 11.8168 9.25102 11.9575 9.39167C12.0981 9.53232 12.1771 9.72309 12.1771 9.922C12.1771 10.1209 12.0981 10.3117 11.9575 10.4523C11.8168 10.593 11.6261 10.672 11.4271 10.672H0.827148C0.628236 10.672 0.437471 10.593 0.296818 10.4523C0.156166 10.3117 0.0771484 10.1209 0.0771484 9.922C0.0771484 9.72309 0.156166 9.53232 0.296818 9.39167C0.437471 9.25102 0.628236 9.172 0.827148 9.172C0.918501 9.17213 1.00898 9.15425 1.09342 9.11938C1.17786 9.08452 1.25459 9.03334 1.31923 8.96879C1.38388 8.90424 1.43516 8.82758 1.47015 8.7432C1.50514 8.65881 1.52315 8.56835 1.52315 8.477V5.104C1.52315 3.88294 2.00821 2.7119 2.87163 1.84848C3.73505 0.985063 4.90609 0.5 6.12715 0.5ZM5.12715 12C4.92824 12 4.73747 12.079 4.59682 12.2197C4.45617 12.3603 4.37715 12.5511 4.37715 12.75C4.37715 12.9489 4.45617 13.1397 4.59682 13.2803C4.73747 13.421 4.92824 13.5 5.12715 13.5H7.12715C7.32606 13.5 7.51683 13.421 7.65748 13.2803C7.79813 13.1397 7.87715 12.9489 7.87715 12.75C7.87715 12.5511 7.79813 12.3603 7.65748 12.2197C7.51683 12.079 7.32606 12 7.12715 12H5.12715Z"
-                fill="black"
-              />
-              <path
-                d="M10.75 5C11.413 5 12.0489 4.73661 12.5178 4.26777C12.9866 3.79893 13.25 3.16304 13.25 2.5C13.25 1.83696 12.9866 1.20107 12.5178 0.732233C12.0489 0.263392 11.413 0 10.75 0C10.087 0 9.45107 0.263392 8.98223 0.732233C8.51339 1.20107 8.25 1.83696 8.25 2.5C8.25 3.16304 8.51339 3.79893 8.98223 4.26777C9.45107 4.73661 10.087 5 10.75 5Z"
-                fill="#FFCC00"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_84_935">
-                <rect width="14" height="14" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-          <div class="flex items-center gap-3">
-            <div class="flex flex-col leading-tight">
-              <UserInfo />
-            </div>
-          </div>
-        </div>
-      </div>
-    </header> -->
-
+    <div class="px-6 mt-4">
+      <AlertPopUp
+        v-if="welcomePopupVisible"
+        :message="'Hi'"
+        :titles="welcomePopupMessage"
+        styleType="blue"
+        @closePopUp="closeWelcomePopup"
+      />
+    </div>
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
@@ -740,35 +721,13 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem
-              title="Profile"
-              @click="showProfileResidentPage"
-              :collapsed="isCollapsed"
+             <SidebarItem
+              title="Parcel Verification"
+              class="cursor-default"
+              @click="showParcelResidentVerificationPage"
             >
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-            <!-- <SidebarItem
-              title="My parcel"
-              :collapsed="isCollapsed"
-              @click="showResidentParcelPage"
-            >
-              <template #icon>
-                <svg
+                 <svg
                   width="25"
                   height="25"
                   viewBox="0 0 25 25"
@@ -781,8 +740,7 @@ function formatDateTime(datetimeStr) {
                   />
                 </svg>
               </template>
-            </SidebarItem> -->
-
+            </SidebarItem>
             <SidebarItem
               title="Announcements (Next Release)"
               :collapsed="isCollapsed"
@@ -835,127 +793,196 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 w-full">
-        <div class="sm:bg-white p-6 sm:shadow rounded-[5px] mb-10">
-          <section class="p-4">
-            <!-- <h1 class="text-xl font-bold flex items-center mb-4 text-[#185dc0]">
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 44 44"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+      <main class="flex-1 p-6 md:p-10 w-full font-sans">
+        <!-- Hero / Carousel Section -->
+        <div class="bg-white p-6 shadow-sm rounded-2xl mb-8">
+          <section class="relative rounded-xl overflow-hidden shadow-md group">
+            <div class="relative h-[350px] md:h-[450px] w-full">
+              <div
+                v-for="(slide, index) in slides"
+                :key="index"
+                class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
+                :class="{
+                  'opacity-100': index === currentIndex,
+                  'opacity-0': index !== currentIndex
+                }"
               >
-                <path
-                  d="M7.33331 34.8334V18.3334C7.33331 17.7529 7.46348 17.2029 7.72381 16.6834C7.98415 16.164 8.34287 15.7362 8.79998 15.4001L19.8 7.15008C20.4416 6.66119 21.175 6.41675 22 6.41675C22.825 6.41675 23.5583 6.66119 24.2 7.15008L35.2 15.4001C35.6583 15.7362 36.0176 16.164 36.278 16.6834C36.5383 17.2029 36.6679 17.7529 36.6666 18.3334V34.8334C36.6666 35.8417 36.3073 36.7052 35.5886 37.4239C34.87 38.1426 34.0071 38.5013 33 38.5001H27.5C26.9805 38.5001 26.5454 38.3241 26.1946 37.9721C25.8439 37.6201 25.6679 37.185 25.6666 36.6667V27.5001C25.6666 26.9806 25.4906 26.5455 25.1386 26.1947C24.7866 25.844 24.3515 25.668 23.8333 25.6667H20.1666C19.6472 25.6667 19.2121 25.8427 18.8613 26.1947C18.5105 26.5467 18.3345 26.9819 18.3333 27.5001V36.6667C18.3333 37.1862 18.1573 37.6219 17.8053 37.9739C17.4533 38.3259 17.0182 38.5013 16.5 38.5001H11C9.99165 38.5001 9.12876 38.1414 8.41131 37.4239C7.69387 36.7065 7.33454 35.843 7.33331 34.8334Z"
-                  fill="#185DC0"
-                />
-              </svg>
-              Home Page
-            </h1> -->
-
-            <div
-              class="relative bg-white max-w-4xl mx-auto h-56 rounded-[5px] shadow border border-gray-300 overflow-hidden flex items-center"
-            >
-              <button
-                @click="prevSlide"
-                class="absolute left-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
-              >
-                ‹
-              </button>
-
-              <div class="relative w-full h-full">
                 <img
-                  :src="slides[currentIndex]"
-                  class="w-full h-full object-cover"
+                  :src="slide"
+                  alt="Carousel Image"
+                  class="w-full h-full object-cover transform transition-transform duration-10000 group-hover:scale-105"
                 />
-
-                <div
-                  class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"
-                ></div>
-
-                <div
-                  class="absolute left-6 top-1/2 -translate-y-1/2 text-white z-20"
-                >
-                  <h1 class="text-2xl font-bold drop-shadow-lg">
+              </div>
+              
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12">
+                  <h1 class="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg tracking-tight">
                     Welcome to Tractify
                   </h1>
-                  <p class="text-sm opacity-90">
-                    Track and manage your parcels easily
+                  <p class="text-white/90 text-lg md:text-2xl font-light tracking-wide max-w-2xl">
+                    Experience seamless community management and effortless parcel tracking.
                   </p>
-                </div>
               </div>
 
+              <!-- Navigation Buttons -->
+              <button
+                @click="prevSlide"
+                class="absolute left-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"
+                  />
+                </svg>
+              </button>
               <button
                 @click="nextSlide"
-                class="absolute right-2 text-3xl text-blue-700 hover:text-blue-900 z-20 cursor-pointer"
+                class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
               >
-                ›
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
               </button>
-            </div>
-          </section>
-
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 pb-4 mt-5">
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📰 NEWS</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="newsImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">📅 EVENT</h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="eventImg" class="w-full h-full object-cover" />
-              </div>
-            </div>
-
-            <div
-              class="bg-white p-2 rounded-lg shadow border border-gray-200 flex flex-col h-[250px]"
-            >
-              <h2 class="font-bold mb-2 text-blue-800 text-base">
-                💬 COMMUNITY
-              </h2>
-              <div
-                class="bg-blue-100 h-28 rounded-xl overflow-hidden flex-1 flex items-center justify-center"
-              >
-                <img :src="communityImg" class="w-full h-full object-cover" />
+              
+              <!-- Dots Indicator -->
+               <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                <span
+                  v-for="(slide, index) in slides"
+                  :key="index"
+                  @click="currentIndex = index"
+                  class="h-2.5 rounded-full cursor-pointer transition-all duration-500 border border-white/30 shadow-sm"
+                  :class="index === currentIndex ? 'bg-white w-10' : 'bg-white/40 w-2.5 hover:bg-white/70'"
+                ></span>
               </div>
             </div>
           </section>
 
-          <!-- <div class="p-4">
-            <div class="flex space-x-1">
-              <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
-                <path
-                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                  fill="#185DC0"
+          <!-- Cards Section -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+            <!-- News Card -->
+            <div
+              @click="showAnnouncementPage()"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+            >
+              <div class="h-56 overflow-hidden relative">
+                 <div class="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="newsImg"
+                  alt="News"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
-              </svg>
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-[#0E4B90] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    LATEST
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">NEWS</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                  Stay informed with the latest updates, official announcements, and important notices from the management.
+                </p>
+                <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    Read Articles <span class="ml-2">→</span>
+                </div>
+              </div>
             </div>
-          </div> -->
+
+            <!-- Event Card -->
+            <div
+              @click="showAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+            >
+              <div class="h-56 overflow-hidden relative">
+                  <div class="absolute inset-0 bg-purple-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="eventImg"
+                  alt="Event"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-purple-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    UPCOMING
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                 <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">EVENT</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                  Discover upcoming community gatherings, workshops, and social activities designed for you.
+                </p>
+                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    See Calendar <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
+
+             <!-- Community Card -->
+            <div
+              @click="showAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+            >
+              <div class="h-56 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-green-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+                <img
+                  :src="communityImg"
+                  alt="Community"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    SOCIAL
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">COMMUNITY</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                   Join the conversation, share your thoughts, and connect with neighbors to build a vibrant community.
+                </p>
+                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    Get Involved <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-        <div class="sm:bg-white p-6 sm:shadow rounded-[5px]">
-          <div class="p-4">
-            <div class="flex space-x-1">
-              <!-- <svg width="41" height="41" viewBox="0 0 41 41" fill="none">
-                <path
-                  d="M22.9071 4.29313C21.3634 3.66726 19.6366 3.66726 18.093 4.29313L14.3517 5.81013L30.7381 12.1822L36.502 9.95626C36.2649 9.76132 36.0001 9.60297 35.7161 9.48646L22.9071 4.29313ZM37.5834 12.2847L21.7813 18.3903V37.0504C22.1639 36.973 22.5392 36.8597 22.9071 36.7105L35.7161 31.5171C36.2679 31.2936 36.7403 30.9105 37.073 30.4169C37.4056 29.9232 37.5834 29.3415 37.5834 28.7462V12.2847ZM19.2188 37.0504V18.3903L3.41669 12.2847V28.7479C3.41702 29.3429 3.59489 29.9243 3.92752 30.4176C4.26016 30.9109 4.73243 31.2938 5.2839 31.5171L18.093 36.7105C18.4608 36.8585 18.8361 36.9707 19.2188 37.0504ZM4.49806 9.95626L20.5 16.1387L27.1916 13.5523L10.8889 7.21438L5.2839 9.48646C4.99234 9.60491 4.7304 9.76151 4.49806 9.95626Z"
-                  fill="#185DC0"
-                />
-              </svg> -->
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">My Parcel</h2>
-            </div>
-            <ParcelFilterBar
+
+        <!-- My Parcel Section -->
+        <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
+          <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
+             <div class="bg-[#0E4B90]/10 p-2 rounded-lg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
+                  <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 12L12 17L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+             </div>
+            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">My Parcels</h2>
+          </div>
+          
+          <div class="mb-6">
+             <ParcelFilterBar
               :modelDate="filterDate"
               :modelSearch="filterSearch"
               :modelSort="filterSort"
@@ -967,58 +994,7 @@ function formatDateTime(datetimeStr) {
               @update:sort="handleSortUpdate"
               @add="showAddParcelPage"
             />
-
-            <!-- <div
-          class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
-                <input
-                  type="date"
-                  v-model="selectedDate"
-                  class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <div class="relative flex-1 min-w-[120px]">
-                <svg
-                  class="absolute left-2 top-1/2 -translate-y-1/2"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.5 11H11.71L11.43 10.73C12.444 9.55407 13.0012 8.05271 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z"
-                    fill="#9A9FA7"
-                  />
-                </svg>
-
-                <input
-                  type="text"
-                  v-model="searchKeyword"
-                  placeholder="Search ..."
-                  class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <select
-                class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
-                v-model="selectedSort"
-                @change="handleSort"
-              >
-                <option disabled>Sort by:</option>
-                <option>Newest</option>
-                <option>Oldest</option>
-              </select>
-            </div>
           </div>
-        </div> -->
 
             <div class="fixed top-5 left-5 z-50">
               <AlertPopUp
@@ -1054,137 +1030,140 @@ function formatDateTime(datetimeStr) {
                 @closePopUp="closePopUp"
               />
             </div>
-            <ParcelTable
-              :items="paginatedParcels"
-              :pages="visiblePages"
-              :page="currentPage"
-              :total="totalPages"
-              :clickableStatus="false"
-              :showDelete="false"
-              :can-next="canGoNext"
-              @prev="prevPage"
-              @next="nextPage"
-              @go="goToPage"
-              @status-click="openStatusPopup"
-              @view-detail="showParcelDetail"
-            >
-              <template #sort-room>
-                <svg
-                  class="cursor-pointer"
-                  @click="toggleSortRoom"
-                  width="17"
-                  height="12"
-                  viewBox="0 0 17 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+            
+            <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+                <ParcelTable
+                :items="paginatedParcels"
+                :pages="visiblePages"
+                :page="currentPage"
+                :total="totalPages"
+                :clickableStatus="false"
+                :showDelete="false"
+                :can-next="canGoNext"
+                @prev="prevPage"
+                @next="nextPage"
+                @go="goToPage"
+                @status-click="openStatusPopup"
+                @view-detail="showParcelDetail"
                 >
-                  <path
-                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                    fill="#185DC0"
-                  />
-                  <path
-                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                    stroke="#5C9BEB"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </template>
+                <template #sort-room>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortRoom"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
 
-              <template #sort-status>
-                <svg
-                  class="cursor-pointer"
-                  @click="toggleSortStatus"
-                  width="17"
-                  height="12"
-                  viewBox="0 0 17 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                    fill="#185DC0"
-                  />
-                  <path
-                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                    stroke="#5C9BEB"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </template>
+                <template #sort-status>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortStatus"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
 
-              <template #sort-date>
-                <svg
-                  class="cursor-pointer"
-                  @click="toggleSortDate"
-                  width="17"
-                  height="12"
-                  viewBox="0 0 17 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                    fill="#185DC0"
-                  />
-                  <path
-                    d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                    stroke="#5C9BEB"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </template>
+                <template #sort-date>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortDate"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#5C9BEB"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
 
-              <template #icon-view>
-                <svg
-                  class="cursor-pointer"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                    fill="#107EFF"
-                  />
-                  <path
-                    d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                    fill="#107EFF"
-                  />
-                </svg>
-              </template>
-              <template #icon-delete>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 18 21"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                    fill="red"
-                  />
-                </svg>
-              </template>
-            </ParcelTable>
+                <template #icon-view>
+                    <svg
+                    class="cursor-pointer text-[#107EFF]"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
+                        fill="currentColor"
+                    />
+                    <path
+                        d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
+                        fill="currentColor"
+                    />
+                    </svg>
+                </template>
+                <template #icon-delete>
+                    <svg
+                    class="cursor-pointer text-red-500"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 21"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+            1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+            V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+            21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+            V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                        fill="currentColor"
+                    />
+                    </svg>
+                </template>
+                </ParcelTable>
+            </div>
           </div>
-        </div>
       </main>
     </div>
   </div>
   <Teleport to="body" v-if="showParcelScanner">
-    <ParcelScanner> </ParcelScanner>
+    <ParcelScannerPage> </ParcelScannerPage>
   </Teleport>
   <Teleport to="body" v-if="showResidentParcels">
     <ResidentParcelsPage> </ResidentParcelsPage>

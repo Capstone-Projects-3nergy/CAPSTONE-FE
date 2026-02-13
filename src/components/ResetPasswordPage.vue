@@ -3,10 +3,11 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useResetPasswordManager } from '@/stores/ResetPasswordManager'
 import AlertPopUp from './AlertPopUp.vue'
-import LoadingPopUp from './LoadingPopUp.vue'
+import ButtonWeb from './ButtonWeb.vue'
 const router = useRouter()
 const resetStore = useResetPasswordManager()
 const emailRequire = ref(false)
+const isEmailInvalidChars = ref(false)
 const form = ref({
   email: ''
 })
@@ -49,6 +50,13 @@ const sendResetEmail = async () => {
     return
   }
 
+  if (/[^a-zA-Z0-9.@]/.test(trimmedEmail.value)) {
+    isEmailInvalidChars.value = true
+    loading.value = false
+    setTimeout(() => (isEmailInvalidChars.value = false), 10000)
+    return
+  }
+
   try {
     await resetStore.sendResetEmail(trimmedEmail.value)
     form.value.email = ''
@@ -67,6 +75,7 @@ const closePopUp = (operate) => {
   if (operate === 'success') success.value = false
   if (operate === 'emailform') incorrectemailform.value = false
   if (operate === 'emailEmpty') emailRequire.value = false
+  if (operate === 'emailInvalidChars') isEmailInvalidChars.value = false
 }
 
 const returnLoginPage = () => {
@@ -210,8 +219,16 @@ const returnLoginPage = () => {
           operate="emailEmpty"
           @closePopUp="closePopUp"
         />
+         <AlertPopUp
+            v-if="isEmailInvalidChars"
+            titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
+            message="Error!!"
+            styleType="red"
+            operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
 
-        <form @submit.prevent="sendResetEmail" class="space-y-4">
+        <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
           <div class="relative">
             <input
               v-model="form.email"
@@ -221,25 +238,19 @@ const returnLoginPage = () => {
             />
           </div>
 
-          <p v-if="isEmailInvalid" class="text-sm text-red-600">
+          <!-- <p v-if="isEmailInvalid" class="text-sm text-red-600">
             Please enter a valid email address.
-          </p>
-
-          <button
-            type="submit"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 cursor-pointer"
-            :disabled="isEmailOverLimit"
-          >
-            Reset Password
-          </button>
-          <!-- 
-          <p v-if="success" class="text-green-600 text-sm">
-            Reset password link has been sent to your email.
-          </p>
-
-          <p v-if="error" class="text-red-600 text-sm">
-            Failed to send reset password email.
           </p> -->
+
+          <ButtonWeb
+            label="Reset Password"
+            :loading="loading"
+            type="submit"
+            color="black"
+            class="w-full"
+            :disabled="isEmailOverLimit"
+            @click="sendResetEmail"
+          />
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-6">
@@ -258,7 +269,6 @@ const returnLoginPage = () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
 <style scoped></style>
