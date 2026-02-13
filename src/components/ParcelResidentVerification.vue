@@ -855,22 +855,6 @@ const handleTrackingInput = (event, index) => {
           operate="trackingNumber"
           @closePopUp="closePopUp"
         />
-        <AlertPopUp
-      v-if="isResidentNameWrong"
-      :titles="'Resident Name can only be typed as text.'"
-      message="Error!!"
-      styleType="red"
-      operate="nametypewrong"
-      @closePopUp="closePopUp"
-    />
-    <AlertPopUp
-      v-if="trackingNumberError"
-      :titles="'Tracking Number can only be English letters or numbers'"
-      message="Error!!"
-      styleType="red"
-      operate="trackingNumber"
-      @closePopUp="closePopUp"
-    />
     <AlertPopUp
       v-if="isNotFound"
       :titles="'Add Tracking Number failed. Parcel record does not exist.'"
