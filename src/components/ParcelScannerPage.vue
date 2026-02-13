@@ -44,6 +44,7 @@ const recipientNameError = ref(false)
 const recipientNameLetterError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
+const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const isLoading = ref(false)
 
@@ -108,7 +109,8 @@ const isAllFilled = computed(() => {
     !form.value.trackingNumber ||
     !form.value.recipientName ||
     !form.value.parcelType ||
-    !form.value.companyId ||
+    form.value.companyId === '' ||
+    form.value.companyId === null ||
     (form.value.trackingNumber && form.value.trackingNumber.length > 60) ||
     (form.value.senderName && form.value.senderName.length > 50)
   )
@@ -523,12 +525,38 @@ const saveParcel = async () => {
     setTimeout(() => (recipientNameLetterError.value = false), 10000)
     return
   }
-  if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
+  if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
     return
   }
+  if (form.value.senderName && form.value.senderName.length > 50) {
+    SenderNameError.value = true
+    setTimeout(() => (SenderNameError.value = false), 10000)
+    return
+  }
 
+  try {
+    const existingParcels = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      router
+    )
+    if (Array.isArray(existingParcels)) {
+      const isDuplicate = existingParcels.some(
+        (p) =>
+          p.trackingNumber === form.value.trackingNumber &&
+          p.companyId === Number(form.value.companyId)
+      )
+
+      if (isDuplicate) {
+        duplicateParcelError.value = true
+        setTimeout(() => (duplicateParcelError.value = false), 10000)
+        return
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
 
   isLoading.value = true
   try {
@@ -561,7 +589,7 @@ const saveParcel = async () => {
 
     selectedResidentId.value = null
     recipientSearch.value = ''
-    form.value = {
+    Object.assign(form.value, {
       trackingNumber: '',
       recipientName: '',
       roomNumber: '',
@@ -570,10 +598,10 @@ const saveParcel = async () => {
       status: 'received',
       pickupAt: null,
       updateAt: null,
-      senderName: '',
+      senderName: null,
       companyId: '',
       receiveAt: null
-    }
+    })
   if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
     trackingNumberError.value = true
     setTimeout(() => (trackingNumberError.value = false), 10000)
@@ -620,6 +648,7 @@ const closePopUp = (operate) => {
   if (operate === 'recipientNameLetter') recipientNameLetterError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
   if (operate === 'companyId') companyIdError.value = false
+  if (operate === 'duplicateParcel') duplicateParcelError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -674,7 +703,11 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
-
+   const existingParcels = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      router
+    )
+console.log(existingParcels)
   window.addEventListener('resize', checkScreen)
   const auth = useAuthManager()
 
@@ -1025,6 +1058,14 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="companyId"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="duplicateParcelError"
+              :titles="'This tracking number is already associated with another resident. Please verify the information again.'"
+              message="Error!!"
+              styleType="red"
+              operate="duplicateParcel"
               @closePopUp="closePopUp"
             />
           </div>
