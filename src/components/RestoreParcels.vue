@@ -26,9 +26,6 @@ const props = defineProps({
   },
   residentData: Object,
   staffData: Object,
-  // showMember: { type: Boolean, default: false },
-  // showStaff: { type: Boolean, default: false },
-  // showParcel: { type: Boolean, default: true }
 })
 
 const router = useRouter()

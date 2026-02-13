@@ -413,23 +413,13 @@ const showDelMemComplete = async () => {
   showDeleteMemberSuccess.value = true
   setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
 }
-// const showDelMemComplete = () => {
-//   showDeleteMemberSuccess.value = true
-//   setTimeout(() => (showDeleteMemberSuccess.value = false), 10000)
-//   showDeleteMember.value = false
-//   MemberDetail.value = null
-// }
+
 const openRedMemPopup = () => {
   error.value = true
   setTimeout(() => (error.value = false), 10000)
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-
-// const clearDeletePopUp = () => {
-//   showDeleteMember.value = false
-//   MemberDetail.value = null
-// }
 
 autoClose(addSuccess)
 autoClose(editSuccess)

@@ -99,21 +99,8 @@ onMounted(async () => {
 
   if (profile) {
     profileManager.setCurrentProfile(profile)
-
-    // sync form    form.value = { ...profile }
     originalForm.value = { ...profile }
   }
-
-  // const profile = await getProfile(
-  //   `${import.meta.env.VITE_BASE_URL}/api/profile`,
-  //   router
-  // )
-
-  // if (profile) {
-  //   profileManager.setCurrentProfile(profile)
-  //   loginManager.updateUser(profile)
-  //   profileManager.updateProfile(profile)
-  // }
 })
 const originalForm = ref(null)
 const cancelEdit = () => {
@@ -175,16 +162,7 @@ onMounted(async () => {
 const closePopUp = () => {
   profileManager.clearAlert()
 }
-// const closePopUp = (operate) => {
-//   switch (operate) {
-//     case 'problem':
-//       error.value = false
-//       break
-//     case ' editSuccessMessage':
-//       editSuccess.value = false
-//       break
-//   }
-// }
+
 function confirmAccountFn() {
   successAccount.value = true
   setTimeout(() => (successAccount.value = false), 10000)
@@ -219,15 +197,6 @@ const closePopUps = (operate) => {
       break
   }
 }
-// const dormName = computed(() => {
-//   if (!loginManager.user?.dormId || dormList.value.length === 0) {
-//     return '-'
-//   }
-
-//   const dorm = dormList.value.find((d) => d.dormId === loginManager.user.dormId)
-
-//   return dorm ? dorm.dormName : '-'
-// })
 </script>
 
 <template>

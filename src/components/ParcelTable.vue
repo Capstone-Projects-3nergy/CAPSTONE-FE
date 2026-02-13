@@ -158,17 +158,6 @@ const authStore = useAuthManager()
               </div>
             </div>
           </th>
-          <!-- <th
-            v-if="showDeletedAt"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
-          >
-            <div class="flex items-center gap-2">
-              Deleted At
-              <div class="transition-transform duration-200 ease-out hover:scale-110">
-                <slot name="sort-date"></slot>
-              </div>
-            </div>
-          </th> -->
           <th
             v-if="showActionStatus"
             class="px-4 py-3 text-sm font-semibold text-[#185DC0]"

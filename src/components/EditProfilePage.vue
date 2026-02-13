@@ -336,26 +336,6 @@ const closePopUp = (operate) => {
   }
 }
 
-// const closePopUp = (operate) => {
-//   switch (operate) {
-//     case 'problem':
-//       error.value = false
-//       break
-//     case 'firstNameMessage':
-//       firstNameError.value = false
-//       break
-//     case 'lastNameMessageMessage':
-//       lastNameError.value = false
-//       break
-//     case 'phoneMessage':
-//       phoneError.value = false
-//       break
-//     case 'editSuccessMessage':
-//       editSuccess.value = false
-//       break
-//   }
-// }
-
 </script>
 
 <template>

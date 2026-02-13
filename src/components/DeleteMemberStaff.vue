@@ -37,9 +37,8 @@ const moveToTrash = async () => {
       router
     )
 
-    console.log('📡 Delete response:', response) // ✅ เพิ่ม debug
+    console.log('📡 Delete response:', response) 
 
-    // ตรวจสอบ response
     if (!response || response === '404') {
       console.error('❌ Delete failed')
       emit('redAlert')
@@ -58,7 +57,7 @@ const moveToTrash = async () => {
   }
 }
 
-/* ---------- delete permanent ---------- */
+
 const deletePermanent = async () => {
   if (!resident.value.id) {
     console.error('No resident ID found')

@@ -83,20 +83,6 @@ const mapUser = (u) => ({
   lineId: u.lineId || ''
 })
 
-// const mapMemberData = (data) => ({
-//   id: data.id,
-//   firstName: data.firstName || '',
-//   lastName: data.lastName || '',
-//   email: data.email || '',
-//   roomNumber: data.roomNumber || '',
-//   dormName: data.dormName || '',
-//   phoneNumber: data.phoneNumber || '',
-//   lineId: data.lineId || '',
-//   status: data.status || 'INACTIVE',
-//   profileImageUrl: data.profileImageUrl || '',
-//   updatedAt: data.updatedAt || null,
-//   createdAt: data.createdAt || null
-// })
 const residentFirstName = computed(() => {
   if (!residentDetail.value?.fullName) return ''
   return residentDetail.value.fullName.split(' ')[0]

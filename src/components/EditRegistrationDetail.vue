@@ -654,16 +654,6 @@ const closePopUp = (operate) => {
   if (operate === 'lineId') lineIdError.value = false
 }
 
-// const closePopUp = (operate) => {
-//   if (operate === 'problem') error.value = false
-//   if (operate === 'editSuccessMessage ') editSuccess.value = false
-//   if (operate === 'roomNumber ') roomNumberError.value = false
-//   if (operate === 'senderName') SenderNameError.value = false
-//   if (operate === 'parcelType') parcelTypeError.value = false
-//   if (operate === 'trackingNumber') trackingNumberError.value = false
-//   if (operate === 'RecipientName') recipientNameError.value = false
-//   if (operate === 'select') selectName.value = false
-// }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
