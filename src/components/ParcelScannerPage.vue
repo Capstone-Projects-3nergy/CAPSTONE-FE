@@ -45,6 +45,7 @@ const recipientNameLetterError = ref(false)
 const senderNameError = ref(false)
 const companyIdError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+const isLoading = ref(false)
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -528,6 +529,8 @@ const saveParcel = async () => {
     return
   }
 
+
+  isLoading.value = true
   try {
     const requestBody = {
       userId: selectedResidentId.value,
@@ -585,6 +588,8 @@ const saveParcel = async () => {
   } catch (err) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
+  } finally {
+    isLoading.value = false
   }
 }
 const isAllEmpty = computed(() => {
@@ -1286,6 +1291,7 @@ onMounted(async () => {
                   label="Save"
                   color="green"
                   @click="saveParcel"
+                  :loading="isLoading"
                   :class="{
                     'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
@@ -1357,6 +1363,7 @@ onMounted(async () => {
                   label="Save"
                   color="green"
                   @click="saveParcel"
+                  :loading="isLoading"
                   :class="{
                     'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
                     'bg-black hover:bg-gray-600 text-white': !isAllFilled
