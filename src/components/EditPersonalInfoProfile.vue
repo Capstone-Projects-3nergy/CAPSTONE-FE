@@ -182,7 +182,8 @@ const emit = defineEmits([
   'email-form-error',
   'room-number-error',
   'line-id-error',
-  'email-invalid-chars'
+  'email-invalid-chars',
+  'file-size-error'
 ])
 
 const isEdit = ref(false)
