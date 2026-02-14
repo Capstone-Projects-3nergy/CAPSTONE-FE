@@ -14,8 +14,6 @@ class LineNotificationManager {
         groupId,
         message
       })
-
-      console.log('✅ ส่งคำขอ LINE สำเร็จ')
       return response.data
     } catch (error) {
       console.error('❌ ส่งคำขอ LINE ล้มเหลว')

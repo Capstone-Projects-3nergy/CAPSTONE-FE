@@ -132,7 +132,6 @@ const showResidentParcelPage = async function () {
 const showVerifyParcelPage = async () => {
   // Stay on current page or navigate if needed
   // Since we are already on ParcelResidentVerification, maybe just ensure state is correct
-  console.log('Already on Parcel Verification Page')
 }
 
 const currentParcelStatus = computed(() => {

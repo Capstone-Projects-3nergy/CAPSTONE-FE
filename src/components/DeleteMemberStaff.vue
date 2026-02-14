@@ -28,8 +28,6 @@ const moveToTrash = async () => {
     return
   }
 
-  console.log('🗑️ Deleting resident with ID:', resident.value.id)
-
   try {
     const response = await deleteItemById(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
@@ -37,7 +35,6 @@ const moveToTrash = async () => {
       router
     )
 
-    console.log('📡 Delete response:', response) 
 
     if (!response || response === '404') {
       console.error('❌ Delete failed')
@@ -47,11 +44,9 @@ const moveToTrash = async () => {
     }
 
     // ✅ สำเร็จ
-    console.log('✅ Delete successful')
     userManager.moveMemberToTrash(resident.value.id)
     emit('confirmDetail', true)
   } catch (error) {
-    console.error('❌ Error moving to trash:', error)
     emit('redAlert')
     emit('cancelDetail', true)
   }

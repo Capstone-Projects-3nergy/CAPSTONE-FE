@@ -117,7 +117,6 @@ onMounted(async () => {
     const res = await axios.get(`${baseURL}/api/dorms/list`, {
       headers: { Accept: 'application/json' }
     })
-    console.log(res)
     const rawData = res.data
 
     let parsedDorms = []
@@ -140,7 +139,6 @@ onMounted(async () => {
 
     dormList.value = parsedDorms
   } catch (err) {}
-  console.log(dormList)
 })
 function goToEditProfile() {
   router.replace({ name: 'editprofilestaff' })

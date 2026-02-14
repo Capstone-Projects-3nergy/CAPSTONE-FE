@@ -95,10 +95,7 @@ export const useUserManager = defineStore('userManager', () => {
         original: { ...removed },
         deletedAt: new Date().toISOString()
       })
-
-      console.log('✅ Moved to trash:', removed) // debug
     } else {
-      console.log('❌ Member not found:', id) // debug
     }
   }
 

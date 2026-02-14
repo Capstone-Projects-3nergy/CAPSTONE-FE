@@ -724,7 +724,6 @@ onMounted(async () => {
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
       router
     )
-console.log(existingParcels)
   window.addEventListener('resize', checkScreen)
   const auth = useAuthManager()
 
@@ -735,7 +734,6 @@ console.log(existingParcels)
     )
     residents.value = res || []
   } catch (e) {}
-  console.log(residents.value)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/companies`, {

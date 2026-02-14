@@ -121,7 +121,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
 
   const markAsRead = async (id, router) => {
     if (id) {
-        console.log(`[NotificationManager] Marking notification ${id} as READ`)
         // Optimistic UI update for immediate feedback
         const notification = notifications.value.find(n => n.id === id)
         if (notification) {
@@ -132,8 +131,6 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         // Call backend to mark as read
         const result = await markNotificationAsRead(`${import.meta.env.VITE_BASE_URL}/api/notifications`, id, router)
         
-        console.log(`[NotificationManager] Backend response for ${id}:`, result)
-
         if (!result || !result.success) {
              console.error('Failed to mark notification as read on backend:', result ? result.status : 'Unknown error')
              // Revert optimistic update

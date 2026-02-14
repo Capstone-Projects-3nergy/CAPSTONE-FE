@@ -496,7 +496,6 @@ const openRedPopup = () => {
 
 const openStatusPopup = () => {
   // Placeholder for status popup logic
-  console.log('Status popup clicked')
 }
 
 const closePopUp = (operate) => {

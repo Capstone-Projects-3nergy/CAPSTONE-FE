@@ -103,8 +103,6 @@ onUnmounted(() => {
 const originalForm = ref(null)
 onMounted(async () => {
   checkScreen()
-  console.log(loginManager.user)
-  console.log(profileManager.currentProfile)
   window.addEventListener('resize', checkScreen)
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,
