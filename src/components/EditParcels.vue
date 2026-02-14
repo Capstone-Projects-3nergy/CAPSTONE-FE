@@ -9,7 +9,6 @@ import LoginPage from './LoginPage.vue'
 import DashBoard from './DashBoard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager'
-const notificationManager = useNotificationManager()
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
@@ -37,10 +36,11 @@ import {
 
 const router = useRouter()
 const route = useRoute()
+const notificationManager = useNotificationManager()
 const tid = route.params.tid
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
-
+const duplicateParcelError = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -359,6 +359,27 @@ const saveEditParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
+   try {
+    const existingParcels = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+      router
+    )
+    if (Array.isArray(existingParcels)) {
+      const isDuplicate = existingParcels.some(
+        (p) =>
+          p.trackingNumber === form.value.trackingNumber 
+          // && p.companyId === Number(form.value.companyId)
+      )
+
+      if (isDuplicate) {
+        duplicateParcelError.value = true
+        setTimeout(() => (duplicateParcelError.value = false), 10000)
+        return
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
   try {
     const body = {
       trackingNumber: form.value.trackingNumber,
@@ -495,6 +516,7 @@ const closePopUp = (operate) => {
   if (operate === 'selectName') selectName.value = false
   if (operate === 'trackingNumberRequired') trackingNumberRequired.value = false
   if (operate === 'recipientNameRequired') recipientNameRequired.value = false
+  if (operate === 'duplicateParcel') duplicateParcelError.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -789,6 +811,14 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="recipientNameRequired"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="duplicateParcelError"
+            :titles="'This tracking number is already associated with another resident. Please verify the information again.'"
+            message="Error!!"
+            styleType="red"
+            operate="duplicateParcel"
             @closePopUp="closePopUp"
           />
         </div>

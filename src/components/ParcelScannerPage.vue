@@ -553,8 +553,8 @@ const saveParcel = async () => {
     if (Array.isArray(existingParcels)) {
       const isDuplicate = existingParcels.some(
         (p) =>
-          p.trackingNumber === form.value.trackingNumber &&
-          p.companyId === Number(form.value.companyId)
+          p.trackingNumber === form.value.trackingNumber 
+          // && p.companyId === Number(form.value.companyId)
       )
 
       if (isDuplicate) {
