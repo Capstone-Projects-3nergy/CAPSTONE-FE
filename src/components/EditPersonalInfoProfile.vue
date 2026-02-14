@@ -1782,7 +1782,7 @@ const isSaveDisabled = computed(() => {
                   class="text-sm py-2 md:text-base md:py-2.5"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
-                  :disabled="isFormEmpty"
+                  :disabled="isSaveDisabled"
                   @click="submit"
                 />
               </div>
