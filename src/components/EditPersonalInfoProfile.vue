@@ -1364,7 +1364,7 @@ const isSaveDisabled = computed(() => {
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              :disabled="mode === 'edit'"
+              :disabled="mode === 'edit' && loginManager.user.role === 'RESIDENT'"
               :value="form.roomNumber"
               @input="handleRoomInput"
               :class="[
@@ -1408,7 +1408,7 @@ const isSaveDisabled = computed(() => {
               Dormitory
             </label>
             <input
-              :disabled="mode === 'edit'"
+              :disabled="mode === 'edit' && loginManager.user.role === 'RESIDENT'"
               :value="dormName"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
