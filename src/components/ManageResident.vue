@@ -160,7 +160,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  console.log(loginManager.user.value)
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
@@ -215,7 +214,6 @@ onMounted(async () => {
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
   }
-  console.log(dataUser)
 })
 const openStatusPopup = (parcel) => {
   parcelStatusDetail.value = {
