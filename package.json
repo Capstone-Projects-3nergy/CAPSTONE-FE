@@ -23,6 +23,7 @@
     "jwt-decode": "^4.0.0",
     "onscan.js": "^1.5.2",
     "pinia": "^3.0.3",
+    "qr-scanner": "^1.4.2",
     "quagga": "^0.12.1",
     "tesseract.js": "^6.0.1",
     "vue": "^3.5.22",
