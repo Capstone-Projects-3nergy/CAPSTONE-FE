@@ -1364,12 +1364,12 @@ const isSaveDisabled = computed(() => {
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
-              :disabled="mode === 'edit' && loginManager.user.role === 'RESIDENT'"
+              :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="form.roomNumber"
               @input="handleRoomInput"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white',
                 showRoomLengthError
                   ? 'border-red-500 focus:ring-red-500'
                   : 'focus:ring-[#185DC0]'
@@ -1408,11 +1408,11 @@ const isSaveDisabled = computed(() => {
               Dormitory
             </label>
             <input
-              :disabled="mode === 'edit' && loginManager.user.role === 'RESIDENT'"
+              :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white'
               ]"
             />
           </div>
@@ -1727,8 +1727,10 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.roomNumber"
+                  :disabled="loginManager.user?.role === 'RESIDENT'"
                   :class="[
-                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0] bg-white'
+                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'
                   ]"
                 />
               </div>
@@ -1738,7 +1740,9 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <select
                   v-model="form.dormId"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  :disabled="loginManager.user?.role === 'RESIDENT'"
+                  class="w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  :class="loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'"
                 >
                   <option disabled value="">Select Dormitory</option>
                   <option
