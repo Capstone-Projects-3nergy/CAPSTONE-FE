@@ -759,7 +759,6 @@ const goToPage = (page) => {
             </p>
           </div>
 
-          <!-- Tabs (Segmented Control) -->
           <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
             <button
               @click="activeNotifyTab = 'all'"
