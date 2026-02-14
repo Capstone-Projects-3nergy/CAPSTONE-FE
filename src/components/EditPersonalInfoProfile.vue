@@ -1057,7 +1057,7 @@ const displayFullName = computed(() => {
   const first = form.value.firstName?.trim()
   const last = form.value.lastName?.trim()
 
-  if (!first && !last) return '-'
+  if (!first && !last) return ''
   return `${first || ''} ${last || ''}`.trim()
 })
 
@@ -1225,8 +1225,10 @@ const isSaveDisabled = computed(() => {
           ref="imageInput"
           @change="onImageChange"
         />
-
-        <p class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
+        <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+          Resident Name
+        </p>
+        <p class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
           {{ displayFullName }}
         </p>
       </div>
@@ -1252,6 +1254,7 @@ const isSaveDisabled = computed(() => {
             <input
               :value="form.firstName"
               @input="handleFirstNameInput"
+              placeholder="Enter First Name"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
               :class="[
                 showNameLengthError
@@ -1288,6 +1291,7 @@ const isSaveDisabled = computed(() => {
             <input
               :value="form.lastName"
               @input="handleLastNameInput"
+              placeholder="Enter Last Name"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
               :class="[
                 showNameLengthError
@@ -1325,6 +1329,7 @@ const isSaveDisabled = computed(() => {
               :disabled="mode === 'edit'"
               :value="form.email"
               @input="handleEmailInput"
+              placeholder="Enter Email"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
                 mode === 'edit' ? 'bg-gray-100' : 'bg-white',
@@ -1367,6 +1372,7 @@ const isSaveDisabled = computed(() => {
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="form.roomNumber"
               @input="handleRoomInput"
+              placeholder="Enter Room Number"
               :class="[
                 'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white',
@@ -1447,6 +1453,7 @@ const isSaveDisabled = computed(() => {
             </label>
             <input
               v-model="form.position"
+              placeholder="Enter Position"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
             />
           </div>
@@ -1458,6 +1465,7 @@ const isSaveDisabled = computed(() => {
             <input
               :value="form.lineId"
               @input="handleLineIdInput"
+              placeholder="Enter Line ID"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
               :class="[
                 showLineIdLengthError
@@ -1494,6 +1502,7 @@ const isSaveDisabled = computed(() => {
             <input
               :value="form.phoneNumber"
               @input="handlePhoneInput"
+              placeholder="Enter Phone Number"
               class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
               :class="[
                 showPhoneLengthError
@@ -1548,7 +1557,10 @@ const isSaveDisabled = computed(() => {
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]">
+          <p class="hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-6">
+          Resident Name
+        </p>
+          <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
             {{ displayFullName }}
           </h2>
         </div>
@@ -1666,8 +1678,12 @@ const isSaveDisabled = computed(() => {
               ref="imageInput"
               @change="onImageChange"
             />
+      
+            <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+              Resident Name
+            </p>
             <h2
-              class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-800 pt-5 truncate max-w-[200px]"
+              class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]"
             >
               {{ displayFullName }}
             </h2>
@@ -1691,6 +1707,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.firstName"
+                  placeholder="Enter First Name"
                   class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
@@ -1702,6 +1719,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lastName"
+                  placeholder="Enter Last Name"
                   class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
@@ -1714,6 +1732,7 @@ const isSaveDisabled = computed(() => {
                 <input
                   :disabled="mode === 'edit'"
                   v-model="form.email"
+                  placeholder="Enter Email"
                   :class="[
                     'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     mode === 'edit' ? 'bg-gray-100' : 'bg-white'
@@ -1728,6 +1747,7 @@ const isSaveDisabled = computed(() => {
                 <input
                   v-model="form.roomNumber"
                   :disabled="loginManager.user?.role === 'RESIDENT'"
+                  placeholder="Enter Room Number"
                   :class="[
                     'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
                     loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'
@@ -1760,6 +1780,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.lineId"
+                  placeholder="Enter Line ID"
                   class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>
@@ -1770,6 +1791,7 @@ const isSaveDisabled = computed(() => {
                 </label>
                 <input
                   v-model="form.phoneNumber"
+                  placeholder="Enter Phone Number"
                   class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
                 />
               </div>

@@ -356,8 +356,10 @@ const profileImageUrlPreview = computed(() => {
               {{ userInitial }}
             </div>
           </div>
-
-          <p class="mt-4 text-black font-semibold text-lg">
+          <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+          Resident Name
+        </p>
+          <p class="mt-4 text-black font-semibold text-lg text-gray-500">
             {{ fullName }}
           </p>
         </div>
@@ -633,7 +635,10 @@ const profileImageUrlPreview = computed(() => {
         class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <h2 class="text-xl font-semibold text-gray-800">
+          <p class=" hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-2">
+            Resident Name
+          </p>
+          <h2 class="hidden md:block text-xl font-semibold text-gray-500">
             {{ fullName }}
           </h2>
         </div>
@@ -658,8 +663,11 @@ const profileImageUrlPreview = computed(() => {
                 {{ userInitial }}
               </div>
             </div>
+              <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+          Resident Name
+        </p>
             <p
-              class="hidden md:block mb-4 text-black font-semibold text-lg pt-5"
+              class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500"
             >
               {{ fullName }}
             </p>
