@@ -1,8 +1,8 @@
 <script setup>
-import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
-import Quagga from 'quagga'
+import QrScanner from 'qr-scanner'
+import Quagga from '@ericblade/quagga2'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
@@ -155,9 +155,10 @@ watch(recipientSearch, (val) => {
 
 const savedParcels = ref([])
 const scanningMode = ref('')
-let html5QrCode = null
+let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
+const barcodeReaderRef = ref(null)
 const isCameraReady = ref(false)
 
 async function extractParcelInfo(imageDataUrl) {
@@ -319,7 +320,7 @@ function startQuagga() {
       inputStream: {
         name: 'Live',
         type: 'LiveStream',
-        target: document.querySelector('#reader'),
+        target: barcodeReaderRef.value,
         constraints: {
           video: {
             facingMode: 'environment',
@@ -346,6 +347,7 @@ function startQuagga() {
     (err) => {
       if (err) {
         console.error(err)
+        alert('Barcode Scanner Error: ' + err)
         return
       }
       Quagga.start()
@@ -355,30 +357,20 @@ function startQuagga() {
   Quagga.onDetected((result) => {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
-
-      if (detectedCode === lastCode) {
-        count++
-      } else {
-        lastCode = detectedCode
-        count = 0
-      }
-
-      if (count >= 3) {
-        processScanResult(detectedCode)
-
-        // แปลงประเภทพัสดุจาก barcode หรือ pattern ให้ตรง enum backend
-        if (!form.value.parcelType) {
-          if (detectedCode.startsWith('B')) {
-            form.value.parcelType = 'BOX'
-          } else if (detectedCode.startsWith('D')) {
-            form.value.parcelType = 'DOCUMENT'
-          } else {
-            form.value.parcelType = 'ELECTRONIC'
-          }
+      
+      processScanResult(detectedCode)
+      
+      if (!form.value.parcelType) {
+        if (detectedCode.startsWith('B')) {
+           form.value.parcelType = 'BOX'
+        } else if (detectedCode.startsWith('D')) {
+           form.value.parcelType = 'DOCUMENT'
+        } else {
+           form.value.parcelType = 'ELECTRONIC'
         }
-
-        stopScan()
       }
+
+      stopScan()
     }
   })
 }
@@ -405,39 +397,49 @@ const getResponsiveSize = () => {
   }
 }
 
+
 function startScan(mode) {
   scanningMode.value = mode
+  nextTick(async () => {
+    if (mode === 'qr') {
+      const videoElem = document.getElementById('qr-video-sender')
+      if (!videoElem) {
+        alert('Video element not found')
+        scanningMode.value = ''
+        return
+      }
 
-  if (mode === 'qr') {
-    html5QrCode = new Html5Qrcode('reader')
-    html5QrCode = new Html5Qrcode('reader')
-    const config = {
-      fps: 10,
-      qrbox: function () {
-        return getResponsiveSize()
-      },
-      formatsToSupport: Object.values(Html5QrcodeSupportedFormats)
+      qrScanner = new QrScanner(
+        videoElem,
+        (result) => {
+            if (result?.data) processScanResult(result.data)
+            else if (typeof result === 'string') processScanResult(result)
+        },
+        { 
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            returnDetailedScanResult: true
+        }
+      )
+      
+      try {
+        await qrScanner.start()
+      } catch (e) {
+        alert('Failed to start QR scanning: ' + e)
+        scanningMode.value = ''
+      }
+    } else if (mode === 'barcode') {
+      startQuagga()
     }
-
-    html5QrCode
-      .start({ facingMode: 'environment' }, config, (decodedText) => {
-        const cleanText = decodedText.trim()
-        processScanResult(cleanText)
-      })
-      .catch((err) => {
-        alert('Failed to start QR scanning.')
-      })
-  } else if (mode === 'barcode') {
-    startQuagga()
-  }
+  })
 }
 
 function stopScan() {
   scanningMode.value = ''
-  if (html5QrCode) {
-    html5QrCode.stop().catch(() => {})
-    html5QrCode.clear()
-    html5QrCode = null
+  if (qrScanner) {
+    qrScanner.stop()
+    qrScanner.destroy()
+    qrScanner = null
   }
   stopQuagga()
   stopCameraOnly()
@@ -753,7 +755,8 @@ const closePopUp = (operate) => {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div id="reader" class="w-full h-full"></div>
+                  <div ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full"></div>
+                  <video id="qr-video-sender" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
                     class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
@@ -789,7 +792,7 @@ const closePopUp = (operate) => {
 
               <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan QR"
+                  label="Scan"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
@@ -799,8 +802,8 @@ const closePopUp = (operate) => {
                   color="blue"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
-                />
-                <ButtonWeb
+                /> -->
+                <!-- <ButtonWeb
                   label="Open Camera"
                   color="blue"
                   @click="startCamera"
