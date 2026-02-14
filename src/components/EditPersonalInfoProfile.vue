@@ -899,7 +899,6 @@ const saveEditProfile = async () => {
       emit('error', true)
       return
     }
-    await getProfile()
     loading.value = false
     // profileManager.setCurrentProfile(profile)
     // 🔥 sync ทุก store

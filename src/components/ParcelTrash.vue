@@ -562,7 +562,7 @@ const showRestoreComplete = () => {
 }
 const showRestoreMemberComplete = () => {
   restoreMemberSuccess.value = true
-  setTimeout(() => (restoreMemberSuccess = false), 10000)
+  setTimeout(() => (restoreMemberSuccess.value = false), 10000)
   showRestoreMember.value = false
   residentDetail.value = null
 }
