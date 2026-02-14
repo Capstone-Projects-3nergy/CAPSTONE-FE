@@ -760,7 +760,7 @@ const goToPage = (page) => {
           </div>
 
           <!-- Tabs (Segmented Control) -->
-          <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit">
+          <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
             <button
               @click="activeNotifyTab = 'all'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
