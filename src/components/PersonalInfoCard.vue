@@ -131,6 +131,9 @@ onMounted(async () => {
   // กันกรณี refresh แล้ว store ว่าง
   if (userManager.members.length || userManager.staffs.length) return
 
+  // Only STAFF can fetch all users
+  if (loginManager.user?.role !== 'STAFF') return
+
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
