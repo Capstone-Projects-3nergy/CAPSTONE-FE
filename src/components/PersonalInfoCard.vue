@@ -334,6 +334,11 @@ const profileImageUrlPreview = computed(() => {
     ? props.profileImage
     : ''
 })
+
+const userRoleLabel = computed(() => {
+  if (props.residentDetail) return 'Resident Name'
+  return loginManager.user?.role === 'STAFF' ? 'Staff Name' : 'Resident Name'
+})
 </script>
 <template>
   <div class="w-full mx-auto px-4">
@@ -360,8 +365,8 @@ const profileImageUrlPreview = computed(() => {
             </div>
           </div>
           <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-          Resident Name
-        </p>
+            {{ userRoleLabel }}
+          </p>
           <p class="mt-4 text-black font-semibold text-lg text-gray-500">
             {{ fullName }}
           </p>
@@ -639,7 +644,7 @@ const profileImageUrlPreview = computed(() => {
       >
         <div class="mb-6 text-center md:hidden">
           <p class=" hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-2">
-            Resident Name
+            {{ userRoleLabel }}
           </p>
           <h2 class="hidden md:block text-xl font-semibold text-gray-500">
             {{ fullName }}
@@ -667,7 +672,7 @@ const profileImageUrlPreview = computed(() => {
               </div>
             </div>
               <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-          Resident Name
+          {{ userRoleLabel }}
         </p>
             <p
               class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500"

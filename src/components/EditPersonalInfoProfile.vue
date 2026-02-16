@@ -1103,6 +1103,16 @@ const isSaveDisabled = computed(() => {
   // -------------------------
   return isFormUnchanged.value && !isAvatarChanged.value
 })
+
+const userRoleLabel = computed(() => {
+  if (props.editResidentDetail) {
+    return 'Resident Name'
+  }
+  if (loginManager.user?.role === 'STAFF' && props.mode !== 'add') {
+    return 'Staff Name'
+  }
+  return 'Resident Name'
+})
 </script>
 
 <template>
@@ -1226,7 +1236,7 @@ const isSaveDisabled = computed(() => {
           @change="onImageChange"
         />
         <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-          Resident Name
+          {{ userRoleLabel }}
         </p>
         <p class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
           {{ displayFullName }}
@@ -1558,7 +1568,7 @@ const isSaveDisabled = computed(() => {
       >
         <div class="mb-6 text-center md:hidden">
           <p class="hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-6">
-          Resident Name
+          {{ userRoleLabel }}
         </p>
           <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
             {{ displayFullName }}
@@ -1680,7 +1690,7 @@ const isSaveDisabled = computed(() => {
             />
       
             <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-              Resident Name
+              {{ userRoleLabel }}
             </p>
             <h2
               class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]"
