@@ -176,7 +176,7 @@ const routes = [
     component: ProfileStaff
   },
   {
-    path: '/homepage/staff/:id/parcelresidentverification',
+    path: '/homepage/resident/:id/parcelresidentverification',
     name: 'parcelresidentverification',
     component: ParcelResidentVerification
   },
