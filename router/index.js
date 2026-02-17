@@ -96,7 +96,11 @@ const routes = [
     name: 'editprofileresident',
     component: EditProfilePage
   },
-
+  {
+    path: '/homepage/resident/:id/parcelresidentverification',
+    name: 'parcelresidentverification',
+    component: ParcelResidentVerification
+  },
   /* =======================
    * Staff
    * ======================= */
@@ -174,11 +178,6 @@ const routes = [
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
-  },
-  {
-    path: '/homepage/resident/:id/parcelresidentverification',
-    name: 'parcelresidentverification',
-    component: ParcelResidentVerification
   },
   {
     path: '/homepage/staff/:id/profile/editprofile',
