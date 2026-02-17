@@ -269,6 +269,16 @@ const submitForm = async (roleType) => {
     }
 
     loading.value = true
+    
+    // 🔹 Check Firebase Auth first
+    const isFirebaseDuplicate = await authManager.checkEmailInFirebase(payload.email)
+    if (isFirebaseDuplicate) {
+      isEmailDuplicate.value = true
+      setTimeout(() => (isEmailDuplicate.value = false), 10000)
+      loading.value = false
+      return
+    }
+
     const res = await authManager.registerAccount(payload)
 
     if (res.status === 201 || res.status === 200) {

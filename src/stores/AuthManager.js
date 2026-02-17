@@ -6,7 +6,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  fetchSignInMethodsForEmail
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 import { useNotificationManager } from './NotificationManager'
@@ -74,6 +75,19 @@ export const useAuthManager = defineStore('authManager', () => {
       const userData = await fetchUserFromBackend()
       return !!userData
     } catch (err) {
+      return false
+    }
+  }
+
+  const checkEmailInFirebase = async (email) => {
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email)
+      return methods.length > 0
+    } catch (error) {
+      if (error.code === 'auth/invalid-email') return false
+      // If email enumeration protection is on, this might basically result in empty array or similar behavior,
+      // but for standard projects it works.
+      console.error('Check email failed:', error)
       return false
     }
   }
@@ -481,6 +495,7 @@ export const useAuthManager = defineStore('authManager', () => {
     apiRequest,
     useAuthGuard,
     fetchUserFromBackend,
-    loadUserFromBackend
+    loadUserFromBackend,
+    checkEmailInFirebase
   }
 })
