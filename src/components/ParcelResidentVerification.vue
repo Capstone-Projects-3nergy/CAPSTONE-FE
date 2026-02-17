@@ -901,7 +901,7 @@ const handleTrackingInput = (event, index) => {
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
               <div class="space-y-6">
                 <!-- Resident Name (Common) -->
-                <div>
+                <!-- <div>
                   <div class="flex items-center ml-1">
                     <label class="block text-sm font-semibold text-gray-700 ml-1 mb-1">Resident Name</label>
                     <span class="text-red-500 ml-1">*</span>
@@ -930,7 +930,7 @@ const handleTrackingInput = (event, index) => {
                   <p class="text-xs text-gray-400 mt-1 ml-1" v-else>
                     *Enter resident name to assign all parcels below.
                   </p>
-                </div>
+                </div> -->
 
                 <!-- Dynamic Parcel List -->
                 <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
