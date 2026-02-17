@@ -404,10 +404,13 @@ export const useAuthManager = defineStore('authManager', () => {
         if (!newToken) return next({ name: 'login' })
       }
 
-      if (
-        (to.name === 'home' && user.value.role !== 'RESIDENT') ||
-        (to.name === 'homestaff' && user.value.role !== 'STAFF')
-      ) {
+      // Protect Resident Routes
+      if (to.path.startsWith('/homepage/resident') && user.value.role !== 'RESIDENT') {
+        return next({ name: 'login' })
+      }
+
+      // Protect Staff Routes
+      if (to.path.startsWith('/homepage/staff') && user.value.role !== 'STAFF') {
         return next({ name: 'login' })
       }
 
