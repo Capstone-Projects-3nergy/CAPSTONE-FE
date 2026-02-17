@@ -384,6 +384,23 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
   const useAuthGuard = (router) => {
+    // 🔹 Listen for auth state changes (e.g. login from another tab)
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // If user is already logged in but firebaseUser changed (switched account in another tab)
+        if (user.value && user.value.uid !== firebaseUser.uid) {
+           await loadUserFromBackend() // reload new user role
+           router.replace({ name: 'login' }) // force re-login/check
+        }
+      } else {
+        // Logged out in another tab
+        if (user.value) {
+           user.value = null
+           router.replace({ name: 'login' })
+        }
+      }
+    })
+
     router.beforeEach(async (to, from, next) => {
       const publicPages = [
         'login',
