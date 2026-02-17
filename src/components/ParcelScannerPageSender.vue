@@ -28,6 +28,7 @@ const senderNameError = ref(false)
 const companyIdError = ref(false)
 const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
 
 const showTrackingLengthError = ref(false)
@@ -467,6 +468,42 @@ const saveParcel = async () => {
     return
   }
 
+  const selectedCompany = companyList.value.find(
+    (c) => c.companyId === Number(form.value.companyId)
+  )
+  if (selectedCompany) {
+    const name = selectedCompany.companyName.toLowerCase()
+    const tracking = form.value.trackingNumber
+    let isValid = true
+    if (
+      (name.includes('thailand post') || name.includes('thailandpost')) &&
+      !/^[A-Z]{2}\d{9}TH$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('kerry') &&
+      !/^[A-Z0-9]{10,15}$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('flash') &&
+      !/^TH\d{11}[A-Z]$/.test(tracking)
+    )
+      isValid = false
+    else if (name.includes('j&t') && !/^JD\d{13}$/.test(tracking))
+      isValid = false
+    else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
+      isValid = false
+    else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking))
+      isValid = false
+
+    if (!isValid) {
+      trackingNumberFormatError.value = true
+      setTimeout(() => (trackingNumberFormatError.value = false), 10000)
+      return
+    }
+  }
+
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName || '')) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -623,6 +660,7 @@ const closePopUp = (operate) => {
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'parcelTypeRequired') parcelTypeErrorRequired.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'trackingNumberFormat') trackingNumberFormatError.value = false
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'companyId') companyIdError.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
@@ -692,6 +730,14 @@ const closePopUp = (operate) => {
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
               @closePopUp="closePopUp"
             />
             <AlertPopUp

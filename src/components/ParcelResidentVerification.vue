@@ -71,6 +71,7 @@ const trackingNumberError = ref(false)
 const showResidentNameLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const isLoading = ref(false)
+const trackingNumberFormatError = ref(false)
 const form = ref({
   residentName: authStore.user?.fullName ,
   items: [{
@@ -274,6 +275,26 @@ const submitVerification = async () => {
             setTimeout(() => (error.value = false), 10000)
             errorMessage.value = `Tracking number "${item.trackingNumber}" cannot contain Thai characters.`
             return
+        }
+        
+        // Company Format Validation
+        const selectedCompany = companyList.value.find(c => c.companyId === item.companyId)
+        if (selectedCompany) {
+            const name = selectedCompany.companyName.toLowerCase()
+            const tracking = item.trackingNumber
+            let isValid = true
+            if ((name.includes('thailand post') || name.includes('thailandpost')) && !/^[A-Z]{2}\d{9}TH$/.test(tracking)) isValid = false
+            else if (name.includes('kerry') && !/^[A-Z0-9]{10,15}$/.test(tracking)) isValid = false
+            else if (name.includes('flash') && !/^TH\d{11}[A-Z]$/.test(tracking)) isValid = false
+            else if (name.includes('j&t') && !/^JD\d{13}$/.test(tracking)) isValid = false
+            else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking)) isValid = false
+            else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking)) isValid = false
+
+            if (!isValid) {
+                trackingNumberFormatError.value = true
+                setTimeout(() => (trackingNumberFormatError.value = false), 10000)
+                return
+            }
         }
     }
     
@@ -870,7 +891,14 @@ const handleTrackingInput = (event, index) => {
       operate="nameMismatch"
       @closePopUp="closePopUp"
     />
-
+    <AlertPopUp
+      v-if="trackingNumberFormatError"
+      :titles="'Tracking Number format is incorrect for the selected company.'"
+      message="Error!!"
+      styleType="red"
+      operate="trackingNumberFormat"
+      @closePopUp="closePopUp"
+    />
         <div class="max-w-4xl mx-auto mt-6">
           <div
             class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
