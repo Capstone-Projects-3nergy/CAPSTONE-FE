@@ -989,7 +989,7 @@ const handleTrackingInput = (event, index) => {
                           type="text"
                           class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
                           :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
-                          placeholder="Ex. TH12345678"
+                          placeholder="Enter tracking number"
                         />
                          <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
