@@ -99,6 +99,9 @@ const showProfileResidentPage = async function () {
   })
   showProfileResident.value = true
 }
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const goBackProfilePage = async function () {
   if (loginManager.user.role === 'RESIDENT') {
     router.replace({
@@ -459,7 +462,9 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem   
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"

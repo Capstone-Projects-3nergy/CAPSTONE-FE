@@ -62,6 +62,9 @@ const dormName = computed(() => {
 
   return dorm ? dorm.dormName : ''
 })
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -309,7 +312,9 @@ const closePopUps = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem   
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
