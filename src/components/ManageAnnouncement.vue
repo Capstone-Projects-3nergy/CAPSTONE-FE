@@ -13,6 +13,10 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
+import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
+import AnnouncementTable from './AnnouncementTable.vue'
+import { computed } from 'vue'
+
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -23,6 +27,121 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
+const isCollapsed = ref(false)
+
+// Announcement Data & Logic
+const announcements = ref([
+  {
+    id: 1,
+    title: 'Elevator Maintenance',
+    subtitle: 'Scheduled for Block A',
+    category: 'Maintenance',
+    datePosted: 'Oct 24, 2025',
+    status: 'Active'
+  },
+  {
+    id: 2,
+    title: 'Community BBQ',
+    subtitle: 'Annual get together',
+    category: 'Events',
+    datePosted: 'Nov 02, 2025',
+    status: 'Upcoming'
+  },
+  {
+    id: 3,
+    title: 'Water Supply Interruption',
+    subtitle: 'Emergency repairs on Main St.',
+    category: 'Maintenance',
+    datePosted: 'Oct 28, 2025',
+    status: 'Active'
+  },
+  {
+    id: 4,
+    title: 'New Gym Equipment',
+    subtitle: 'Treadmills have been upgraded',
+    category: 'News',
+    datePosted: 'Oct 15, 2025',
+    status: 'Past'
+  },
+  {
+    id: 5,
+    title: 'Yoga Class Schedule Change',
+    subtitle: 'Evening classes moved to 6pm',
+    category: 'Events',
+    datePosted: 'Oct 10, 2025',
+    status: 'Active'
+  },
+  {
+    id: 6,
+    title: 'Parking Lot Resurfacing',
+    subtitle: 'Visitor spots unavailable',
+    category: 'Maintenance',
+    datePosted: 'Nov 10, 2025',
+    status: 'Upcoming'
+  },
+  {
+    id: 7,
+    title: 'Town Hall Meeting',
+    subtitle: 'Discussing new security measures',
+    category: 'Community',
+    datePosted: 'Nov 15, 2025',
+    status: 'Upcoming'
+  }
+])
+
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 5
+
+const filteredAnnouncements = computed(() => {
+  return announcements.value.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
+    return matchesSearch && matchesCategory
+  })
+})
+
+const totalPages = computed(() => Math.ceil(filteredAnnouncements.value.length / itemsPerPage))
+
+const paginatedAnnouncements = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredAnnouncements.value.slice(start, end)
+})
+
+const pages = computed(() => {
+  const p = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    p.push(i)
+  }
+  return p
+})
+
+const canGoNext = computed(() => currentPage.value < totalPages.value)
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (canGoNext.value) currentPage.value++
+}
+
+const goToPage = (p) => {
+  currentPage.value = p
+}
+
+const handleEdit = (item) => {
+  console.log('Edit item:', item)
+}
+
+const handleDelete = (item) => {
+  console.log('Delete item:', item)
+  announcements.value = announcements.value.filter(a => a.id !== item.id)
+}
+
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -34,99 +153,7 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
 })
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
-const isCollapsed = ref(false)
+
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
@@ -389,123 +416,28 @@ const showProfileStaffPage = async function () {
             </button>
           </div>
 
-          <!-- Toolbar -->
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
-             <div class="relative w-full sm:w-96">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search announcements..."
-                  class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition duration-150 ease-in-out sm:text-sm"
-                />
-             </div>
-             
-             <div class="flex gap-2">
-                <select class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-200 focus:outline-none focus:ring-blue-100 focus:border-blue-400 sm:text-sm rounded-xl bg-gray-50 text-gray-600">
-                  <option>All Categories</option>
-                  <option>News</option>
-                  <option>Events</option>
-                  <option>Maintenance</option>
-                </select>
-             </div>
-          </div>
+          <!-- Announcement Filters -->
+          <AnnouncementFilterBar
+            :modelSearch="searchQuery"
+            :modelCategory="selectedCategory"
+            :categories="['News', 'Events', 'Maintenance', 'Community']"
+            @update:search="searchQuery = $event"
+            @update:category="selectedCategory = $event"
+          />
 
-          <!-- Content Table -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50/50">
-                  <tr>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Posted</th>
-                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                  <!-- Row 1 -->
-                  <tr class="hover:bg-gray-50/50 transition-colors duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <div class="ml-4">
-                          <div class="text-sm font-bold text-gray-900">Elevator Maintenance</div>
-                          <div class="text-xs text-gray-500">Scheduled for Block A</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Maintenance
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Oct 24, 2025</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Active
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button class="text-gray-400 hover:text-blue-600 transition-colors mx-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      </button>
-                      <button class="text-gray-400 hover:text-red-600 transition-colors mx-2">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </td>
-                  </tr>
-                   <!-- Row 2 -->
-                  <tr class="hover:bg-gray-50/50 transition-colors duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <div class="ml-4">
-                          <div class="text-sm font-bold text-gray-900">Community BBQ</div>
-                          <div class="text-xs text-gray-500">Annual get together</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                        Event
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nov 02, 2025</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        Upcoming
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                       <button class="text-gray-400 hover:text-blue-600 transition-colors mx-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      </button>
-                      <button class="text-gray-400 hover:text-red-600 transition-colors mx-2">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-             <!-- Pagination Placeholder -->
-            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                <span class="text-sm text-gray-500">Showing <span class="font-medium">1</span> to <span class="font-medium">2</span> of <span class="font-medium">12</span> results</span>
-                <div class="flex gap-2">
-                    <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Previous</button>
-                    <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Next</button>
-                </div>
-            </div>
-          </div>
+          <!-- Announcement Table -->
+          <AnnouncementTable
+            :items="paginatedAnnouncements"
+            :pages="pages"
+            :page="currentPage"
+            :total="filteredAnnouncements.length"
+            :can-next="canGoNext"
+            @prev="prevPage"
+            @next="nextPage"
+            @go="goToPage"
+            @edit="handleEdit"
+            @delete="handleDelete"
+          />
         </div>
       </main>
     </div>
