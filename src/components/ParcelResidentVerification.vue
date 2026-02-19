@@ -326,7 +326,9 @@ const submitVerification = async () => {
             // -----------------------
             const body = {
                 trackingNumber: item.trackingNumber,
-                residentName: form.value.residentName
+                residentName: form.value.residentName,
+                companyId: item.companyId,
+                parcelType: item.parcelType
             }
 
             // -----------------------
@@ -545,6 +547,9 @@ const closePopUp = (operate) => {
       break
     case 'residentNameMin':
       showResidentNameMinLengthError.value = false
+      break
+    case 'trackingNumberFormat':
+      trackingNumberFormatError.value = false
       break
   }
 }
