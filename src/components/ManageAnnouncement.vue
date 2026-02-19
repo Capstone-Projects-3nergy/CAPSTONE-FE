@@ -256,7 +256,7 @@ const showProfileStaffPage = async function () {
               </template>
             </SidebarItem>
 
-            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+            <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
                   width="25"
@@ -311,6 +311,7 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
                 <svg
@@ -321,11 +322,7 @@ const showProfileStaffPage = async function () {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445 21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
                   />
                 </svg>
@@ -363,33 +360,161 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
-           <div class="flex items-center space-x-2 mb-6">
-              <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
-                      fill="#185DC0"
-                  />
+      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
+        <div class="max-w-7xl mx-auto">
+          <!-- Header & Actions -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                 </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Announcement </h2>
+              </div>
+              <div>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Manage Announcements
+                  </span>
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Create, edit, and manage community news and events.</p>
+              </div>
+            </div>
+            
+            <button class="flex items-center gap-2 bg-[#0E4B90] hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              New Announcement
+            </button>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+             <div class="relative w-full sm:w-96">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search announcements..."
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition duration-150 ease-in-out sm:text-sm"
+                />
+             </div>
+             
+             <div class="flex gap-2">
+                <select class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-200 focus:outline-none focus:ring-blue-100 focus:border-blue-400 sm:text-sm rounded-xl bg-gray-50 text-gray-600">
+                  <option>All Categories</option>
+                  <option>News</option>
+                  <option>Events</option>
+                  <option>Maintenance</option>
+                </select>
+             </div>
+          </div>
+
+          <!-- Content Table -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50/50">
+                  <tr>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Posted</th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                  <!-- Row 1 -->
+                  <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-bold text-gray-900">Elevator Maintenance</div>
+                          <div class="text-xs text-gray-500">Scheduled for Block A</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Maintenance
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Oct 24, 2025</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button class="text-gray-400 hover:text-blue-600 transition-colors mx-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+                      <button class="text-gray-400 hover:text-red-600 transition-colors mx-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </td>
+                  </tr>
+                   <!-- Row 2 -->
+                  <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-bold text-gray-900">Community BBQ</div>
+                          <div class="text-xs text-gray-500">Annual get together</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                        Event
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nov 02, 2025</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        Upcoming
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                       <button class="text-gray-400 hover:text-blue-600 transition-colors mx-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+                      <button class="text-gray-400 hover:text-red-600 transition-colors mx-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+             <!-- Pagination Placeholder -->
+            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+                <span class="text-sm text-gray-500">Showing <span class="font-medium">1</span> to <span class="font-medium">2</span> of <span class="font-medium">12</span> results</span>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Previous</button>
+                    <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+          </div>
         </div>
-
-        <div class="flex space-x-2 mb-4"></div>
-
-        <div class="overflow-x-auto bg-white rounded-[5px] shadow"></div>
-
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700"></div>
       </main>
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <Teleport to="body" v-if="showProfileStaff">
+    <UserInfo> </UserInfo>
+  </Teleport>
+  <Teleport to="body" v-if="showHomePageStaff"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

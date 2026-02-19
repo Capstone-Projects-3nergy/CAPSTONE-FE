@@ -616,7 +616,7 @@ const authStore = useAuthManager()
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
-                  Delete Member
+                  Delete Resident
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
                       class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
@@ -639,7 +639,7 @@ const authStore = useAuthManager()
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
-                  Restore Members
+                  Restore Resident
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
