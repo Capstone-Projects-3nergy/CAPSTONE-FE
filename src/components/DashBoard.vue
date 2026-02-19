@@ -13,7 +13,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
+// const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)

@@ -352,7 +352,9 @@ const toggleSortDate = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
+            <SidebarItem 
+            title="Dashboard" 
+            @click="showDashBoardPage" >
               <template #icon>
                 <svg
                   width="24"
