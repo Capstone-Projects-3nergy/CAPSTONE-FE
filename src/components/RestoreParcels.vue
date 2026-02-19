@@ -211,7 +211,7 @@ const confirmRestore = async () => {
             @click="cancelAction"
           />
           <ButtonWeb
-            label="Confirm Restore"
+            label="Confirm"
             color="green"
             class="w-full sm:w-auto px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg font-medium transition flex items-center justify-center"
             @click="confirmRestore"
