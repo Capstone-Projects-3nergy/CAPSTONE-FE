@@ -66,11 +66,12 @@ const showLogoutConfirm = ref(false)
 const showTrackingLengthError = ref(false)
 const showRecipientLengthError = ref(false)
 const showSenderLengthError = ref(false)
+const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
-  if (val.length > 60) {
-    const sliced = val.slice(0, 60)
+  if (val.length > 22) {
+    const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
     event.target.value = sliced
     showTrackingLengthError.value = true
@@ -99,8 +100,8 @@ const handleRecipientInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
-  if (val.length > 50) {
-    const sliced = val.slice(0, 50)
+  if (val.length > 100) {
+    const sliced = val.slice(0, 100)
     form.value.senderName = sliced
     event.target.value = sliced
     showSenderLengthError.value = true
@@ -355,9 +356,16 @@ const saveEditParcel = async () => {
     setTimeout(() => (recipientNameError.value = false), 10000)
     return
   }
-  if (form.value.senderName && form.value.senderName.length > 50) {
+  if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
+    return
+  }
+  if (form.value.senderName && form.value.senderName.length < 6) {
+    showSenderMinLengthError.value = true
+    setTimeout(() => {
+      showSenderMinLengthError.value = false
+    }, 10000)
     return
   }
    try {
@@ -554,7 +562,9 @@ const closePopUp = (operate) => {
   if (operate === 'selectName') selectName.value = false
   if (operate === 'trackingNumberRequired') trackingNumberRequired.value = false
   if (operate === 'recipientNameRequired') recipientNameRequired.value = false
+  if (operate === 'recipientNameRequired') recipientNameRequired.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
+  if (operate === 'senderNameMin') showSenderMinLengthError.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -812,6 +822,14 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="showSenderMinLengthError"
+            :titles="'Sender Name must be at least 6 characters.'"
+            message="Error!!"
+            styleType="red"
+            operate="senderNameMin"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="recipientNameError"
             :titles="'Recipient Name can only be typed as text.'"
             message="Error!!"
@@ -905,7 +923,7 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Tracking number must be at most 60 characters
+                    Tracking number must be at most 22 characters
                   </div>
                 </div>
               </div>
@@ -973,7 +991,7 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Sender name must be at most 50 characters
+                    Sender name must be at most 100 characters
                   </div>
                 </div>
               </div>

@@ -99,12 +99,12 @@ onMounted(async () => {
 
 const submitForm = async (roleType) => {
   try {
-    const MAX_NAME_LENGTH = 50
+    const MAX_NAME_LENGTH = 100
     const MAX_EMAIL_LENGTH = 100
-    const MAX_PASSWORD_LENGTH = 50
-    const MAX_STAFFPOSITION_LENGTH = 30
-    const MAX_ROMNUMBER_LENGTH = 10
-    const MIN_PASSWORD_LENGTH = 6
+    const MAX_PASSWORD_LENGTH = 100
+    const MAX_STAFFPOSITION_LENGTH = 50
+    const MAX_ROOMNUMBER_LENGTH = 20
+    const MIN_PASSWORD_LENGTH = 8
     const MIN_FULLNAME_LENGTH = 6
 
     if (form.fullName.trim().length > MAX_NAME_LENGTH) {
@@ -165,7 +165,7 @@ const submitForm = async (roleType) => {
       return
     }
 
-    if (form.roomNumber.trim().length > MAX_ROMNUMBER_LENGTH) {
+    if (form.roomNumber.trim().length > MAX_ROOMNUMBER_LENGTH) {
       isRoomNumberOverLimit.value = true
       setTimeout(() => (isRoomNumberOverLimit.value = false), 10000)
       return
@@ -311,12 +311,12 @@ const submitForm = async (roleType) => {
 }
 
 const checkInputLength = (field) => {
-  const MAX_NAME_LENGTH = 50
+  const MAX_NAME_LENGTH = 100
   const MAX_EMAIL_LENGTH = 100
-  const MAX_PASSWORD_LENGTH = 50
-  const MAX_STAFFPOSITION_LENGTH = 20
-  const MAX_ROMNUMBER_LENGTH = 10
-  const MIN_PASSWORD_LENGTH = 6
+  const MAX_PASSWORD_LENGTH = 100
+  const MAX_STAFFPOSITION_LENGTH = 50
+  const MAX_ROOMNUMBER_LENGTH = 20
+  const MIN_PASSWORD_LENGTH = 8
   const MIN_FULLNAME_LENGTH = 6
   if (field === 'fullName') {
     const trimmed = form.fullName.trim()
@@ -358,7 +358,7 @@ const checkInputLength = (field) => {
       trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
   } else if (field === 'roomNumber') {
     const trimmed = form.roomNumber.trim()
-    if (trimmed.length <= MAX_ROMNUMBER_LENGTH) {
+    if (trimmed.length <= MAX_ROOMNUMBER_LENGTH) {
       isRoomNumberOverLimit.value = false
     }
   }
@@ -623,7 +623,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isNameOverLimit"
-            titles="Limit Full Name to 50 characters or less."
+            titles="Limit Full Name to 100 characters or less."
             message="Error!!"
             styleType="red"
             operate="nameOverLimit"
@@ -655,7 +655,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isStaffPositionOverLimit"
-            titles="Limit Position to 30 characters or less."
+            titles="Limit Position to 50 characters or less."
             message="Error!!"
             styleType="red"
             operate="positionOverLimit"
@@ -687,7 +687,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="showConfirmPasswordTooShort"
-            titles="Confirm Password must be at least 6 characters."
+            titles="Confirm Password must be at least 8 characters."
             message="Error!!"
             styleType="red"
             operate="confirmPasswordTooShort"
@@ -695,7 +695,7 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isRoomNumberOverLimit"
-            titles="Limit Room Number to 10 characters or less."
+            titles="Limit Room Number to 20 characters or less."
             message="Error!!"
             styleType="red"
             operate="roomNumberOverLimit"
@@ -911,7 +911,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Password must be at least 6 characters.
+                    Password must be at least 8 characters.
                   </div>
                 </div>
               </div>
@@ -994,7 +994,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Password must be at least 6 characters.
+                    Password must be at least 8 characters.
                   </div>
                 </div>
               </div>
@@ -1177,7 +1177,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Password must be at least 6 characters.
+                    Password must be at least 8 characters.
                   </div>
                 </div>
               </div>
@@ -1259,7 +1259,7 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Password must be at least 6 characters.
+                    Password must be at least 8 characters.
                   </div>
                 </div>
               </div>

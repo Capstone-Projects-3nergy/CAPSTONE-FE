@@ -69,6 +69,7 @@ const companyList = ref([])
 const isResidentNameWrong = ref(false)
 const trackingNumberError = ref(false)
 const showResidentNameLengthError = ref(false)
+const showResidentNameMinLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const isLoading = ref(false)
 const trackingNumberFormatError = ref(false)
@@ -237,11 +238,20 @@ const submitVerification = async () => {
       showResidentNameLengthError.value = true
       setTimeout(() => {
         showResidentNameLengthError.value = false
+      showResidentNameLengthError.value = false
       }, 10000)
       return
     }
 
-    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 60) {
+    if (form.value.residentName && form.value.residentName.length < 6) {
+      showResidentNameMinLengthError.value = true
+      setTimeout(() => {
+        showResidentNameMinLengthError.value = false
+      }, 10000)
+      return
+    }
+
+    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 22) {
       showTrackingLengthError.value = true
       setTimeout(() => {
         showTrackingLengthError.value = false
@@ -287,7 +297,7 @@ const submitVerification = async () => {
             else if (name.includes('kerry') && !/^[A-Z0-9]{10,15}$/.test(tracking)) isValid = false
             else if (name.includes('flash') && !/^TH\d{11}[A-Z]$/.test(tracking)) isValid = false
             else if (name.includes('j&t') && !/^JD\d{13}$/.test(tracking)) isValid = false
-            else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking)) isValid = false
+            else if (name.includes('dhl') && !/^\d{10,20}$/.test(tracking)) isValid = false
             else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking)) isValid = false
 
             if (!isValid) {
@@ -533,6 +543,9 @@ const closePopUp = (operate) => {
     case 'nameMismatch':
       isNameMismatch.value = false
       break
+    case 'residentNameMin':
+      showResidentNameMinLengthError.value = false
+      break
   }
 }
 
@@ -557,7 +570,7 @@ const handleResidentNameInput = (event) => {
 
 const handleTrackingInput = (event, index) => {
   const val = event.target.value
-  const maxLength = 60
+  const maxLength = 22
   if (val.length > maxLength) {
     const sliced = val.slice(0, maxLength)
     if (index !== undefined) {
@@ -995,7 +1008,7 @@ const handleTrackingInput = (event, index) => {
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
-                          Tracking number max 60 characters
+                          Tracking number max 22 characters
                         </p>
                       </div>
                     </div>

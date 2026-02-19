@@ -23,6 +23,13 @@ const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const selectedResidentId = ref(null)
 
+const MAX_NAME_LENGTH = 100
+const MAX_STAFFPOSITION_LENGTH = 50
+const MAX_ROOMNUMBER_LENGTH = 20
+const MAX_EMAIL_LENGTH = 100
+const MAX_PHONE_LENGTH = 15
+const MAX_LINE_ID_LENGTH = 20
+
 const router = useRouter()
 const auth = useAuthManager()
 const props = defineProps({
@@ -61,12 +68,13 @@ const showEmailLengthError = ref(false)
 const showRoomLengthError = ref(false)
 const showPhoneLengthError = ref(false)
 const showLineIdLengthError = ref(false)
+const showPositionLengthError = ref(false)
 const showNameLengthError = ref(false)
 
 const handleEmailInput = (event) => {
   const val = event.target.value
-  if (val.length > 100) {
-    const sliced = val.slice(0, 100)
+  if (val.length > MAX_EMAIL_LENGTH) {
+    const sliced = val.slice(0, MAX_EMAIL_LENGTH)
     form.value.email = sliced
     event.target.value = sliced
     showEmailLengthError.value = true
@@ -80,8 +88,8 @@ const handleEmailInput = (event) => {
 
 const handleRoomInput = (event) => {
   const val = event.target.value
-  if (val.length > 10) {
-    const sliced = val.slice(0, 10)
+  if (val.length > MAX_ROOMNUMBER_LENGTH) {
+    const sliced = val.slice(0, MAX_ROOMNUMBER_LENGTH)
     form.value.roomNumber = sliced
     event.target.value = sliced
     showRoomLengthError.value = true
@@ -96,8 +104,8 @@ const handleRoomInput = (event) => {
 const handlePhoneInput = (event) => {
   let val = event.target.value
   const digits = val.replace(/-/g, '')
-  if (digits.length > 15) {
-    while (val.replace(/-/g, '').length > 15 && val.length > 0) {
+  if (digits.length > MAX_PHONE_LENGTH) {
+    while (val.replace(/-/g, '').length > MAX_PHONE_LENGTH && val.length > 0) {
       val = val.slice(0, -1)
     }
     form.value.phoneNumber = val
@@ -113,8 +121,8 @@ const handlePhoneInput = (event) => {
 
 const handleLineIdInput = (event) => {
   const val = event.target.value
-  if (val.length > 20) {
-    const sliced = val.slice(0, 20)
+  if (val.length > MAX_LINE_ID_LENGTH) {
+    const sliced = val.slice(0, MAX_LINE_ID_LENGTH)
     form.value.lineId = sliced
     event.target.value = sliced
     showLineIdLengthError.value = true
@@ -126,11 +134,26 @@ const handleLineIdInput = (event) => {
   }
 }
 
+const handlePositionInput = (event) => {
+  const val = event.target.value
+  if (val.length > MAX_STAFFPOSITION_LENGTH) {
+    const sliced = val.slice(0, MAX_STAFFPOSITION_LENGTH)
+    form.value.position = sliced
+    event.target.value = sliced
+    showPositionLengthError.value = true
+    setTimeout(() => {
+      showPositionLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.position = val
+  }
+}
+
 const handleFirstNameInput = (event) => {
   const val = event.target.value
   const lastNameLen = form.value.lastName ? form.value.lastName.length : 0
-  if (val.length + lastNameLen > 50) {
-    const allowed = 50 - lastNameLen
+  if (val.length + lastNameLen > MAX_NAME_LENGTH) {
+    const allowed = MAX_NAME_LENGTH - lastNameLen
     const sliced = val.slice(0, Math.max(0, allowed))
     form.value.firstName = sliced
     event.target.value = sliced
@@ -146,8 +169,8 @@ const handleFirstNameInput = (event) => {
 const handleLastNameInput = (event) => {
   const val = event.target.value
   const firstNameLen = form.value.firstName ? form.value.firstName.length : 0
-  if (val.length + firstNameLen > 50) {
-    const allowed = 50 - firstNameLen
+  if (val.length + firstNameLen > MAX_NAME_LENGTH) {
+    const allowed = MAX_NAME_LENGTH - firstNameLen
     const sliced = val.slice(0, Math.max(0, allowed))
     form.value.lastName = sliced
     event.target.value = sliced
@@ -577,14 +600,14 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
-  if (form.value.email && form.value.email.length > 100) {
+  if (form.value.email && form.value.email.length > MAX_EMAIL_LENGTH) {
     showEmailLengthError.value = true
     setTimeout(() => {
       showEmailLengthError.value = false
     }, 5000)
     return
   }
-  if (form.value.roomNumber && form.value.roomNumber.length > 10) {
+  if (form.value.roomNumber && form.value.roomNumber.length > MAX_ROOMNUMBER_LENGTH) {
     showRoomLengthError.value = true
     setTimeout(() => {
       showRoomLengthError.value = false
@@ -593,7 +616,7 @@ const submit = async () => {
   }
   if (form.value.phoneNumber) {
     const digits = form.value.phoneNumber.replace(/-/g, '')
-    if (digits.length > 15) {
+    if (digits.length > MAX_PHONE_LENGTH) {
       showPhoneLengthError.value = true
       setTimeout(() => {
         showPhoneLengthError.value = false
@@ -601,7 +624,7 @@ const submit = async () => {
       return
     }
   }
-  if (form.value.lineId && form.value.lineId.length > 20) {
+  if (form.value.lineId && form.value.lineId.length > MAX_LINE_ID_LENGTH) {
     showLineIdLengthError.value = true
     setTimeout(() => {
       showLineIdLengthError.value = false
@@ -610,7 +633,7 @@ const submit = async () => {
   }
   const fName = form.value.firstName || ''
   const lName = form.value.lastName || ''
-  if (fName.length + lName.length > 50) {
+  if (fName.length + lName.length > MAX_NAME_LENGTH) {
     showNameLengthError.value = true
     setTimeout(() => {
       showNameLengthError.value = false
@@ -856,6 +879,10 @@ const saveEditProfile = async () => {
   if (isStaff) {
     if (!form.value.position?.trim()) {
       emit('position-required', true)
+      return
+    }
+    if (form.value.position && form.value.position.length > MAX_STAFFPOSITION_LENGTH) {
+      emit('position-error', true)
       return
     }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
@@ -1289,7 +1316,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined First Name and Last Name must be at most 50 characters
+                Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1326,7 +1353,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined First Name and Last Name must be at most 50 characters
+                Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1365,7 +1392,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Email must be at most 100 characters
+                Email must be at most {{ MAX_EMAIL_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1408,7 +1435,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Room Number must be at most 10 characters
+                Room Number must be at most {{ MAX_ROOMNUMBER_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1462,10 +1489,36 @@ const userRoleLabel = computed(() => {
               Position
             </label>
             <input
-              v-model="form.position"
+              :value="form.position"
+              @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              :class="[
+                showPositionLengthError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'focus:ring-[#185DC0]'
+              ]"
             />
+            <div
+              v-if="showPositionLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Position must be at most {{ MAX_STAFFPOSITION_LENGTH }} characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1500,7 +1553,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Line ID must be at most 20 characters
+                Line ID must be at most {{ MAX_LINE_ID_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1537,7 +1590,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Phone Number must be at most 15 digits
+                Phone Number must be at most {{ MAX_PHONE_LENGTH }} digits
               </div>
             </div>
           </div>
