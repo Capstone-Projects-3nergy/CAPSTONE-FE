@@ -72,8 +72,9 @@ const authStore = useAuthManager()
 
 </script>
 <template>
-  <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
-    <table class="min-w-full text-left border-collapse">
+  <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-left border-collapse">
       <thead
         class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
       >
@@ -654,34 +655,37 @@ const authStore = useAuthManager()
         </tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-    <button
-      @click="$emit('prev')"
-      :disabled="page === 1"
-      class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-    >
-      &lt; Previous
-    </button>
+    <!-- Pagination -->
+    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="items.length > 0">
+      <div class="flex gap-2 w-full sm:w-auto justify-center">
+        <button
+          @click="$emit('prev')"
+          :disabled="page === 1"
+          class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          &lt; Previous
+        </button>
 
+        <button
+          v-for="pg in pages"
+          :key="pg"
+          @click="$emit('go', pg)"
+          class="px-3 py-1 border border-gray-200 rounded-lg text-sm cursor-pointer"
+          :class="page === pg ? 'bg-blue-50 text-blue-600 font-medium border-blue-200' : 'text-gray-500 hover:bg-gray-50'"
+        >
+          {{ pg }}
+        </button>
 
-    <button
-      v-for="pg in pages"
-      :key="pg"
-      @click="$emit('go', pg)"
-      class="cursor-pointer px-3 py-1 rounded"
-      :class="page === pg ? 'bg-blue-700 text-white' : 'hover:bg-gray-200'"
-    >
-      {{ pg }}
-    </button>
-
-    <button
-      @click="$emit('next')"
-      :disabled="page >= total"
-      class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-    >
-      Next &gt;
-    </button>
+        <button
+          @click="$emit('next')"
+          :disabled="page >= total"
+          class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Next &gt;
+        </button>
+      </div>
+    </div>
   </div>
 </template>

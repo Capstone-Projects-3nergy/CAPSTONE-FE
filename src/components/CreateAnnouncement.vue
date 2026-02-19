@@ -347,23 +347,23 @@ const returnLoginPage = async () => {
              </div>
 
              <!-- Footer Actions -->
-             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 border-t border-gray-100">
+             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex items-center justify-end gap-3 border-t border-gray-100">
                 <button 
                   @click="goBack" 
-                  class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all shadow-sm cursor-pointer"
+                  class="px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all shadow-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   @click="submitAnnouncement" 
-                  class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-white bg-[#0E4B90] hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
+                  class="px-5 py-2.5 rounded-xl text-white bg-[#0E4B90] hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                     <polyline points="17 21 17 13 7 13 7 21"></polyline>
                     <polyline points="7 3 7 8 15 8"></polyline>
                   </svg>
-                  Publish Announcement
+                  Publish
                 </button>
              </div>
           </div>
