@@ -2,214 +2,97 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
-import StaffParcelsPage from '@/components/ManageParcels.vue'
-import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
-import HomePageStaff from './HomePageStaff.vue'
-import UserInfo from '@/components/UserInfo.vue'
-import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
-import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
-import AnnouncementTable from './AnnouncementTable.vue'
-import { computed } from 'vue'
 
-const showHomePageStaff = ref(false)
-const showParcelScanner = ref(false)
-const showStaffParcels = ref(false)
-const returnLogin = ref(false)
-const showDashBoard = ref(false)
-const showResidentParcels = ref(false)
-const showManageAnnouncement = ref(false)
-const showManageResident = ref(false)
-const showProfileStaff = ref(false)
-const showLogoutConfirm = ref(false)
 const isCollapsed = ref(false)
 
-// Announcement Data & Logic
-const announcements = ref([
-  {
-    id: 1,
-    title: 'Elevator Maintenance',
-    subtitle: 'Scheduled for Block A',
-    category: 'Maintenance',
-    datePosted: 'Oct 24, 2025',
-    status: 'Active'
-  },
-  {
-    id: 2,
-    title: 'Community BBQ',
-    subtitle: 'Annual get together',
-    category: 'Events',
-    datePosted: 'Nov 02, 2025',
-    status: 'Upcoming'
-  },
-  {
-    id: 3,
-    title: 'Water Supply Interruption',
-    subtitle: 'Emergency repairs on Main St.',
-    category: 'Maintenance',
-    datePosted: 'Oct 28, 2025',
-    status: 'Active'
-  },
-  {
-    id: 4,
-    title: 'New Gym Equipment',
-    subtitle: 'Treadmills have been upgraded',
-    category: 'News',
-    datePosted: 'Oct 15, 2025',
-    status: 'Past'
-  },
-  {
-    id: 5,
-    title: 'Yoga Class Schedule Change',
-    subtitle: 'Evening classes moved to 6pm',
-    category: 'Events',
-    datePosted: 'Oct 10, 2025',
-    status: 'Active'
-  },
-  {
-    id: 6,
-    title: 'Parking Lot Resurfacing',
-    subtitle: 'Visitor spots unavailable',
-    category: 'Maintenance',
-    datePosted: 'Nov 10, 2025',
-    status: 'Upcoming'
-  },
-  {
-    id: 7,
-    title: 'Town Hall Meeting',
-    subtitle: 'Discussing new security measures',
-    category: 'Community',
-    datePosted: 'Nov 15, 2025',
-    status: 'Upcoming'
-  }
-])
+// Form Data
+const title = ref('')
+const category = ref('')
+const content = ref('')
+const date = ref(new Date().toISOString().split('T')[0]) // Default today
 
-const searchQuery = ref('')
-const selectedCategory = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 5
+const categories = ['News', 'Events', 'Maintenance', 'Community']
 
-const filteredAnnouncements = computed(() => {
-  return announcements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
-    return matchesSearch && matchesCategory
-  })
-})
-
-const totalPages = computed(() => Math.ceil(filteredAnnouncements.value.length / itemsPerPage))
-
-const paginatedAnnouncements = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredAnnouncements.value.slice(start, end)
-})
-
-const pages = computed(() => {
-  const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
-  }
-  return p
-})
-
-const canGoNext = computed(() => currentPage.value < totalPages.value)
-
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-
-const nextPage = () => {
-  if (canGoNext.value) currentPage.value++
-}
-
-const goToPage = (p) => {
-  currentPage.value = p
-}
-
-const handleEdit = (item) => {
-  console.log('Edit item:', item)
-}
-
-const handleDelete = (item) => {
-  console.log('Delete item:', item)
-  announcements.value = announcements.value.filter(a => a.id !== item.id)
-}
-
+// Sidebar Logic
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
+
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
 })
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+
+// Navigation
+const goBack = () => {
+  router.back()
+}
+
+const submitAnnouncement = () => {
+  // Mock submission
+  console.log('Submitting announcement:', {
+    title: title.value,
+    category: category.value,
+    content: content.value,
+    date: date.value
+  })
+  alert('Announcement Created (Mock)')
+  router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+}
+
+// Sidebar Navigation (copied from ManageAnnouncement for consistency)
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
-  showParcelScanner.value = true
 }
 const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels', params: { id: route.params.id } })
-  showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement', params: { id: route.params.id } })
-  showManageAnnouncement.value = true
-}
-const showNewAnnouncementPage = async function () {
-  router.push({ name: 'addannouncement', params: { id: route.params.id } })
 }
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident', params: { id: route.params.id } })
-  showManageResident.value = true
 }
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels', params: { id: route.params.id } })
 }
-
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff', params: { id: route.params.id } })
-  showHomePageStaff.value = true
 }
-
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard', params: { id: route.params.id } })
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
+}
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
-  showDashBoard.value = true
-}
-const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
-  showProfileStaff.value = true
-}
+
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-50 flex flex-col"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+      <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
@@ -391,82 +274,102 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
-        <div class="max-w-7xl mx-auto">
-          <!-- Header & Actions -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <div class="flex items-center gap-4">
-              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+      <!-- Main Content -->
+      <main class="flex-1 p-6 md:p-10 min-h-screen font-sans">
+        <div class="max-w-4xl mx-auto">
+          <!-- Page Header -->
+          <div class="flex items-center gap-4 mb-8">
+             <button @click="goBack" class="p-2 hover:bg-gray-200 rounded-full transition-colors cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                  <path d="M19 12H5"></path>
+                  <path d="M12 19l-7-7 7-7"></path>
                 </svg>
-              </div>
-              <div>
-                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                    Manage Announcements
-                  </span>
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Create, edit, and manage community news and events.</p>
-              </div>
-            </div>
-            
-            <button class="flex items-center gap-2 bg-[#0E4B90] hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-medium cursor-pointer" @click="showNewAnnouncementPage">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              New 
-            </button>
+             </button>
+             <div>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Create Announcement</h2>
+                <p class="text-sm text-gray-500 mt-1">Share news and updates with the community.</p>
+             </div>
           </div>
 
-          <!-- Announcement Filters -->
-          <AnnouncementFilterBar
-            :modelSearch="searchQuery"
-            :modelCategory="selectedCategory"
-            :categories="['News', 'Events', 'Maintenance', 'Community']"
-            @update:search="searchQuery = $event"
-            @update:category="selectedCategory = $event"
-          />
+          <!-- Form Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+             <div class="p-8 space-y-6">
+                
+                <!-- Title Input -->
+                <div class="space-y-2">
+                   <label for="title" class="text-sm font-semibold text-gray-700">Title</label>
+                   <input 
+                      type="text" 
+                      id="title" 
+                      v-model="title"
+                      placeholder="e.g., Annual Community BBQ"
+                      class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                   />
+                </div>
 
-          <!-- Announcement Table -->
-          <AnnouncementTable
-            :items="paginatedAnnouncements"
-            :pages="pages"
-            :page="currentPage"
-            :total="filteredAnnouncements.length"
-            :can-next="canGoNext"
-            @prev="prevPage"
-            @next="nextPage"
-            @go="goToPage"
-            @edit="handleEdit"
-            @delete="handleDelete"
-          />
+                <!-- Category & Date Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div class="space-y-2">
+                      <label for="category" class="text-sm font-semibold text-gray-700">Category</label>
+                      <select 
+                         id="category" 
+                         v-model="category"
+                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none bg-white"
+                      >
+                         <option value="" disabled>Select a category</option>
+                         <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                      </select>
+                   </div>
+                   
+                   <div class="space-y-2">
+                      <label for="date" class="text-sm font-semibold text-gray-700">Date</label>
+                      <input 
+                         type="date" 
+                         id="date" 
+                         v-model="date"
+                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                      />
+                   </div>
+                </div>
+
+                <!-- Content Textarea -->
+                <div class="space-y-2">
+                   <label for="content" class="text-sm font-semibold text-gray-700">Content</label>
+                   <textarea 
+                      id="content" 
+                      v-model="content"
+                      rows="6"
+                      placeholder="Write your announcement details here..."
+                      class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-y"
+                   ></textarea>
+                </div>
+
+             </div>
+
+             <!-- Footer Actions -->
+             <div class="bg-gray-50 px-8 py-5 flex items-center justify-end gap-3 border-t border-gray-100">
+                <button 
+                  @click="goBack" 
+                  class="px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all shadow-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  @click="submitAnnouncement" 
+                  class="px-5 py-2.5 rounded-xl text-white bg-[#0E4B90] hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                  Publish Announcement
+                </button>
+             </div>
+          </div>
+
         </div>
       </main>
     </div>
   </div>
-
-  <Teleport to="body" v-if="showProfileStaff">
-    <UserInfo> </UserInfo>
-  </Teleport>
-  <Teleport to="body" v-if="showHomePageStaff"><HomePageStaff /></Teleport>
-  <Teleport to="body" v-if="showParcelScanner">
-    <StaffParcelsPage> </StaffParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="showStaffParcels">
-    <StaffParcelsPage> </StaffParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="returnLogin">
-    <LoginPage> </LoginPage>
-  </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
