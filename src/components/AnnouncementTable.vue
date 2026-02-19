@@ -52,24 +52,25 @@ const getIconClass = (category) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50/50">
+        <thead class="hidden md:table-header-group bg-gray-50/50">
           <tr>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Posted</th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            <th scope="col" class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+            <th scope="col" class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Posted</th>
+            <th scope="col" class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-4 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-100">
           <tr v-if="items.length === 0">
             <td colspan="5" class="text-center py-8 text-gray-500">No announcements found.</td>
           </tr>
-          <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50/50 transition-colors duration-150">
-            <td class="px-6 py-4 whitespace-nowrap">
+          <tr v-for="item in items" :key="item.id" class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150">
+            <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap">
+              <span class="md:hidden font-semibold text-[#185DC0] block mb-1">Title:</span>
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center" :class="getIconClass(item.category)">
                    <!-- Dynamic Icon based on category or default -->
@@ -83,18 +84,24 @@ const getIconClass = (category) => {
                 </div>
               </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap">
+              <span class="md:hidden font-semibold text-[#185DC0] mr-2">Category:</span>
               <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full" :class="getCategoryBadgeClass(item.category)">
                 {{ item.category }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.datePosted }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500">
+              <span class="md:hidden font-semibold text-[#185DC0] mr-2">Date Posted:</span>
+              {{ item.datePosted }}
+            </td>
+            <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap">
+              <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
               <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full" :class="getStatusBadgeClass(item.status)">
                 {{ item.status }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-right text-sm font-medium flex items-center md:table-cell gap-2">
+              <span class="md:hidden font-semibold text-[#185DC0] mr-2">Actions:</span>
               <button @click="$emit('edit', item)" class="group relative text-gray-400 hover:text-blue-600 transition-colors mx-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                 <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0">
@@ -124,9 +131,9 @@ const getIconClass = (category) => {
     </div>
     
     <!-- Pagination -->
-    <div class="px-6 py-4 flex items-center justify-between border-t border-gray-100 justify-end" v-if="total > 0">
+    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
         <!-- <span class="text-sm text-gray-500">Showing page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ total }}</span></span> -->
-        <div class="flex gap-2 ">
+        <div class="flex gap-2 w-full sm:w-auto justify-center">
             <button 
               @click="$emit('prev')" 
               :disabled="page === 1"
