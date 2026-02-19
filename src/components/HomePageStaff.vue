@@ -562,7 +562,7 @@ const toggleSortDate = () => {
           <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
             <!-- News Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showManageAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
@@ -591,7 +591,7 @@ const toggleSortDate = () => {
 
             <!-- Event Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showManageAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
@@ -620,7 +620,7 @@ const toggleSortDate = () => {
 
              <!-- Community Card -->
             <div
-              @click="ShowManageAnnouncementPage"
+              @click="showManageAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
             >
               <div class="h-56 overflow-hidden relative">
