@@ -1,255 +1,147 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
-import StaffParcelsPage from '@/components/ManageParcels.vue'
-import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
-import HomePageStaff from './HomePageStaff.vue'
-import UserInfo from '@/components/UserInfo.vue'
-import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import AlertPopUp from './AlertPopUp.vue'
+import { useAuthManager } from '@/stores/AuthManager.js'
+// No external icon library available, using inline SVGs
+
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
-import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
-import AnnouncementTable from './AnnouncementTable.vue'
-import DeleteAnnouncement from './DeleteAnnouncement.vue'
-import AlertPopUp from './AlertPopUp.vue'
-import { computed } from 'vue'
 
-const showHomePageStaff = ref(false)
-const showParcelScanner = ref(false)
-const showStaffParcels = ref(false)
-const returnLogin = ref(false)
-const showDashBoard = ref(false)
-const showResidentParcels = ref(false)
-const showManageAnnouncement = ref(false)
-const showManageResident = ref(false)
-const showProfileStaff = ref(false)
-const showLogoutConfirm = ref(false)
+// State
 const isCollapsed = ref(false)
-const showDeleteModal = ref(false)
-const selectedAnnouncement = ref(null)
-const deleteSuccess = ref(false)
+const showLogoutConfirm = ref(false)
+const isSubmitting = ref(false)
+const editSuccess = ref(false)
 const error = ref('')
 
 const closePopUp = (operate) => {
-  if (operate === 'deleteSuccessMessage') {
-    deleteSuccess.value = false
+  if (operate === 'editSuccessMessage') {
+    editSuccess.value = false
+  }
+  if (operate === 'errorMessage') {
+    error.value = ''
   }
 }
 
-// Announcement Data & Logic
+// Announcement Data (Mock Data similar to ManageAnnouncement)
 const announcements = ref([
   {
     id: 1,
     title: 'Elevator Maintenance',
     subtitle: 'Scheduled for Block A',
     category: 'Maintenance',
-    datePosted: 'Oct 24, 2025',
-    status: 'Active'
+    datePosted: '2025-10-24',
+    status: 'Active',
+    content: 'The elevator in Block A will be undergoing scheduled maintenance on Oct 24th from 10 AM to 2 PM. Please use the stairs during this time.'
   },
   {
     id: 2,
     title: 'Community BBQ',
     subtitle: 'Annual get together',
     category: 'Events',
-    datePosted: 'Nov 02, 2025',
-    status: 'Upcoming'
+    datePosted: '2025-11-02',
+    status: 'Upcoming',
+    content: 'Join us for the annual community BBQ at the central park area. Food and drinks will be provided!'
   },
   {
     id: 3,
     title: 'Water Supply Interruption',
     subtitle: 'Emergency repairs on Main St.',
     category: 'Maintenance',
-    datePosted: 'Oct 28, 2025',
-    status: 'Active'
+    datePosted: '2025-10-28',
+    status: 'Active',
+    content: 'Water supply will be interrupted due to emergency repairs.'
   },
   {
     id: 4,
     title: 'New Gym Equipment',
     subtitle: 'Treadmills have been upgraded',
     category: 'News',
-    datePosted: 'Oct 15, 2025',
-    status: 'Past'
+    datePosted: '2025-10-15',
+    status: 'Past',
+    content: 'We have installed brand new treadmills in the gym. Enjoy your workout!'
   },
-  {
-    id: 5,
-    title: 'Yoga Class Schedule Change',
-    subtitle: 'Evening classes moved to 6pm',
-    category: 'Events',
-    datePosted: 'Oct 10, 2025',
-    status: 'Active'
-  },
-  {
-    id: 6,
-    title: 'Parking Lot Resurfacing',
-    subtitle: 'Visitor spots unavailable',
-    category: 'Maintenance',
-    datePosted: 'Nov 10, 2025',
-    status: 'Upcoming'
-  },
-  {
-    id: 7,
-    title: 'Town Hall Meeting',
-    subtitle: 'Discussing new security measures',
-    category: 'Community',
-    datePosted: 'Nov 15, 2025',
-    status: 'Upcoming'
-  }
 ])
 
-const searchQuery = ref('')
-const selectedCategory = ref('')
-const currentPage = ref(1)
-const itemsPerPage = 5
-
-const filteredAnnouncements = computed(() => {
-  return announcements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
-    return matchesSearch && matchesCategory
-  })
+const announcementForm = reactive({
+  title: '',
+  subtitle: '',
+  category: 'News',
+  datePosted: '',
+  status: 'Active',
+  content: ''
 })
 
-const totalPages = computed(() => Math.ceil(filteredAnnouncements.value.length / itemsPerPage))
+// Categories for dropdown
+const categories = ['News', 'Events', 'Maintenance', 'Community', 'Alert']
+const statuses = ['Active', 'Upcoming', 'Past']
 
-const paginatedAnnouncements = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredAnnouncements.value.slice(start, end)
-})
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
 
-const pages = computed(() => {
-  const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
+  // Fetch/Find announcement
+  const aid = Number(route.params.aid) 
+  
+  if (aid) {
+    const found = announcements.value.find(a => a.id === aid)
+    if (found) {
+        Object.assign(announcementForm, found)
+    } 
   }
-  return p
 })
 
-const canGoNext = computed(() => currentPage.value < totalPages.value)
-
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-
-const nextPage = () => {
-  if (canGoNext.value) currentPage.value++
-}
-
-const goToPage = (p) => {
-  currentPage.value = p
-}
-
-const handleEdit = (item) => {
-  router.push({ name: 'editannouncement', params: { id: route.params.id, aid: item.id } })
-}
-
-const handleDelete = (item) => {
-  selectedAnnouncement.value = item
-  showDeleteModal.value = true
-}
-
-const onDeleteConfirm = () => {
-  if (selectedAnnouncement.value) {
-    announcements.value = announcements.value.filter(a => a.id !== selectedAnnouncement.value.id)
-    deleteSuccess.value = true
-  }
-  showDeleteModal.value = false
-  selectedAnnouncement.value = null
-}
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen)
+})
 
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
-})
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
-const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
-  showParcelScanner.value = true
-}
-const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels', params: { id: route.params.id } })
-  showStaffParcels.value = true
-}
-const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement', params: { id: route.params.id } })
-  showManageAnnouncement.value = true
-}
-const showNewAnnouncementPage = async function () {
-  router.push({ name: 'addannouncement', params: { id: route.params.id } })
-}
-const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident', params: { id: route.params.id } })
-  showManageResident.value = true
-}
-const showParcelTrashPage = async function () {
-  router.replace({ name: 'trashparcels', params: { id: route.params.id } })
+
+// Navigation Functions
+const navigateTo = (name) => {
+  router.push({ name, params: { id: route.params.id } })
 }
 
-const showHomePageStaffWeb = async () => {
-  router.replace({ name: 'homestaff', params: { id: route.params.id } })
-  showHomePageStaff.value = true
+const handleSave = async () => {
+  if (!announcementForm.title.trim() || !announcementForm.datePosted) {
+    error.value = 'Please fill in all required fields'
+    return
+  }
+  isSubmitting.value = true
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  // console.log('Saved:', announcementForm)
+  isSubmitting.value = false
+  editSuccess.value = true
+  setTimeout(() => {
+      router.push({ name: 'manageannouncement' })
+  }, 1500)
 }
 
-const returnLoginPage = async () => {
-  try {
-    await loginManager.logoutAccount(router)
-  } catch (err) {}
+const handleCancel = () => {
+  router.back()
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
-  showDashBoard.value = true
-}
-const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
-  showProfileStaff.value = true
-}
+
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
-    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
+    class="min-h-screen bg-gray-50 flex flex-col"
+    :class="isCollapsed ? 'md:ml-16' : 'md:ml-64'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <DeleteAnnouncement 
-      v-if="showDeleteModal"
-      :announcement-data="selectedAnnouncement"
-      :is-permanent="false"
-      @confirm-detail="onDeleteConfirm"
-      @cancel-detail="showDeleteModal = false"
-    />
-
-    <div class="fixed top-5 left-5 z-50">
-      <AlertPopUp
-        v-if="deleteSuccess"
-        :titles="'Delete Announcement to Trash is Successful.'"
-        message="Success!!"
-        styleType="green"
-        operate="deleteSuccessMessage"
-        @closePopUp="closePopUp"
-      />
-    </div>
-    <div class="flex flex-1">
+    
+  <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
@@ -430,82 +322,140 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
-        <div class="max-w-7xl mx-auto">
-          <!-- Header & Actions -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <div class="flex items-center gap-4">
-              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
-                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                    Manage Announcements
-                  </span>
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Create, edit, and manage community news and events.</p>
-              </div>
-            </div>
-            
-            <button class="flex items-center gap-2 bg-[#0E4B90] hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-medium cursor-pointer" @click="showNewAnnouncementPage">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              New 
-            </button>
+      <!-- Main Content -->
+      <main class="flex-1 p-6 md:p-8 transition-all duration-300 w-full" :class="isCollapsed ? 'md:ml-10' : 'md:ml-0'">
+        <div class="max-w-4xl mx-auto space-y-6">
+          
+          <!-- Header -->
+          <div class="flex items-center gap-4">
+             <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+             </button>
+             <div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Announcement</h1>
+                <p class="text-gray-500 text-sm">Update the details of this announcement</p>
+             </div>
           </div>
 
-          <!-- Announcement Filters -->
-          <AnnouncementFilterBar
-            :modelSearch="searchQuery"
-            :modelCategory="selectedCategory"
-            :categories="['News', 'Events', 'Maintenance', 'Community']"
-            @update:search="searchQuery = $event"
-            @update:category="selectedCategory = $event"
-          />
+          <!-- Edit Form Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 md:p-8 space-y-6">
+                <!-- Title -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
+                    <input 
+                        v-model="announcementForm.title"
+                        type="text" 
+                        required
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400"
+                        placeholder="e.g. Elevator Maintenance"
+                    />
+                </div>
 
-          <!-- Announcement Table -->
-          <AnnouncementTable
-            :items="paginatedAnnouncements"
-            :pages="pages"
-            :page="currentPage"
-            :total="filteredAnnouncements.length"
-            :can-next="canGoNext"
-            @prev="prevPage"
-            @next="nextPage"
-            @go="goToPage"
-            @edit="handleEdit"
-            @delete="handleDelete"
-          />
+                <!-- Subtitle -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700">Subtitle</label>
+                    <input 
+                        v-model="announcementForm.subtitle"
+                        type="text" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400"
+                        placeholder="Brief description"
+                    />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Category -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Category</label>
+                        <select 
+                            v-model="announcementForm.category"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 bg-white"
+                        >
+                            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">Status</label>
+                        <select 
+                            v-model="announcementForm.status"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 bg-white"
+                        >
+                            <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Date Posted -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700">Date Posted <span class="text-red-500">*</span></label>
+                    <input 
+                        v-model="announcementForm.datePosted"
+                        type="date" 
+                        required
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800"
+                    />
+                </div>
+
+                <!-- Content/Description -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700">Content</label>
+                    <textarea 
+                        v-model="announcementForm.content"
+                        rows="6"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400 resize-none"
+                        placeholder="Detailed announcement content..."
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                <button 
+                    @click="handleCancel"
+                    class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                    Cancel
+                </button>
+                <button 
+                    @click="handleSave"
+                    :disabled="isSubmitting"
+                    class="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-500/30 flex items-center gap-2 disabled:opacity-70 cursor-pointer"
+                >
+                    <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                    {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+                </button>
+            </div>
+          </div>
+
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp
+              v-if="editSuccess"
+              :titles="'Edit Announcement is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="editSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'Error'"
+              :message="error"
+              styleType="red"
+              operate="errorMessage"
+              @closePopUp="closePopUp"
+            />
+          </div>
+
         </div>
       </main>
     </div>
-  </div>
 
-  <Teleport to="body" v-if="showProfileStaff">
-    <UserInfo> </UserInfo>
-  </Teleport>
-  <Teleport to="body" v-if="showHomePageStaff"><HomePageStaff /></Teleport>
-  <Teleport to="body" v-if="showParcelScanner">
-    <StaffParcelsPage> </StaffParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="showStaffParcels">
-    <StaffParcelsPage> </StaffParcelsPage>
-  </Teleport>
-  <Teleport to="body" v-if="returnLogin">
-    <LoginPage> </LoginPage>
-  </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
+    <ConfirmLogout
+      v-if="showLogoutConfirm"
+      @confirm="returnLoginPage"
+      @cancel="showLogoutConfirm = false"
+    />
+  </div>
 </template>

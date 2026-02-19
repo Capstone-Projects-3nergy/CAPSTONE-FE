@@ -12,6 +12,7 @@ import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
 import ProfileResident from '@/components/ProfileResident.vue'
 import CreateAnnouncement from '@/components/CreateAnnouncement.vue'
+import EditAnnouncementDetails from '@/components/EditAnnouncementDetails.vue'
 import ProfileStaff from '@/components/ProfileStaff.vue'
 import EditParcels from '@/components/EditParcels.vue'
 import ParcelsDetail from '@/components/ParcelsDetail.vue'
@@ -174,6 +175,11 @@ const routes = [
     path: '/homepage/staff/:id/manageannouncement/add',
     name: 'addannouncement',
     component: CreateAnnouncement
+  },
+  {
+    path: '/homepage/staff/:id/manageannouncement/:aid/edit',
+    name: 'editannouncement',
+    component: EditAnnouncementDetails
   },
   {
     path: '/homepage/staff/:id/parcelscannerpage',
