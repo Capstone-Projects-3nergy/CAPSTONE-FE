@@ -69,7 +69,9 @@ const showRoomLengthError = ref(false)
 const showPhoneLengthError = ref(false)
 const showLineIdLengthError = ref(false)
 const showPositionLengthError = ref(false)
+const showPositionMinLengthError = ref(false)
 const showNameLengthError = ref(false)
+const showNameMinLengthError = ref(false)
 
 const handleEmailInput = (event) => {
   const val = event.target.value
@@ -640,6 +642,13 @@ const submit = async () => {
     }, 5000)
     return
   }
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
+    return
+  }
 
   if (props.mode === 'add') {
     await addResidents()
@@ -704,6 +713,15 @@ const addResidents = async () => {
 
   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
     return
   }
 
@@ -848,6 +866,15 @@ const saveEditProfile = async () => {
     emit('last-name-error', true)
     return
   }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
+    return
+  }
 
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
     emit('line-id-error', true)
@@ -887,6 +914,13 @@ const saveEditProfile = async () => {
     }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
       emit('position-error', true)
+      return
+    }
+    if (form.value.position && form.value.position.length < 2) {
+      showPositionMinLengthError.value = true
+      setTimeout(() => {
+        showPositionMinLengthError.value = false
+      }, 5000)
       return
     }
   }
@@ -966,6 +1000,15 @@ const saveEditDetail = async () => {
   }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
     return
   }
 
@@ -1319,6 +1362,26 @@ const userRoleLabel = computed(() => {
                 Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
               </div>
             </div>
+            <div
+              v-if="showNameMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined First Name and Last Name must be at least 6 characters
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col">
@@ -1354,6 +1417,26 @@ const userRoleLabel = computed(() => {
               </svg>
               <div class="text-sm text-red-600">
                 Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
+              </div>
+            </div>
+            <div
+              v-if="showNameMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined First Name and Last Name must be at least 6 characters
               </div>
             </div>
           </div>
@@ -1517,6 +1600,26 @@ const userRoleLabel = computed(() => {
               </svg>
               <div class="text-sm text-red-600">
                 Position must be at most {{ MAX_STAFFPOSITION_LENGTH }} characters
+              </div>
+            </div>
+            <div
+              v-if="showPositionMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Position must be at least 2 characters
               </div>
             </div>
           </div>

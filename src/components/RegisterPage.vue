@@ -21,6 +21,7 @@ const isConfirmPasswordTooShort = ref(false)
 const isNameOverLimit = ref(false)
 const isRoomNumberOverLimit = ref(false)
 const isStaffPositionOverLimit = ref(false)
+const isStaffPositionTooShort = ref(false)
 const isEmailInvalidChars = ref(false)
 const isFullNameWrong = ref(false)
 const trimmedFullName = computed(() => form.fullName?.trim() || '')
@@ -134,6 +135,11 @@ const submitForm = async (roleType) => {
     if (form.position.trim().length > MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = true
       setTimeout(() => (isStaffPositionOverLimit.value = false), 10000)
+      return
+    }
+    if (form.position.trim().length > 0 && form.position.trim().length < 2) {
+      isStaffPositionTooShort.value = true
+      setTimeout(() => (isStaffPositionTooShort.value = false), 10000)
       return
     }
 
@@ -338,6 +344,7 @@ const checkInputLength = (field) => {
     if (trimmed.length <= MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = false
     }
+    isStaffPositionTooShort.value = trimmed.length > 0 && trimmed.length < 2
   } else if (field === 'password') {
     const trimmed = form.password.trim()
 
@@ -383,6 +390,7 @@ const closePopUp = (operate) => {
   if (operate === 'nameOverLimit') isNameOverLimit.value = false
   if (operate === 'emailOverLimit') isEmailOverLimit.value = false
   if (operate === 'positionOverLimit') isStaffPositionOverLimit.value = false
+  if (operate === 'positionTooShort') isStaffPositionTooShort.value = false
   if (operate === 'emailInvalidChars') isEmailInvalidChars.value = false
   if (operate === 'passwordOverLimit') isPasswordOverLimit.value = false
   if (operate === 'passwordTooShort') showPasswordPopup.value = false
@@ -655,15 +663,23 @@ const toggleComfirmPasswordVisibility = () => {
           />
           <AlertPopUp
             v-if="isStaffPositionOverLimit"
-            titles="Limit Position to 50 characters or less."
+            title="Limit Position to 50 characters or less."
             message="Error!!"
             styleType="red"
             operate="positionOverLimit"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="isStaffPositionTooShort"
+            titles="Position must be at least 2 characters."
+            message="Error!!"
+            styleType="red"
+            operate="positionTooShort"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="isPasswordOverLimit"
-            titles="Limit Password to 50 characters or less."
+            titles="Limit Password to 100 characters or less."
             message="Error!!"
             styleType="red"
             operate="passwordOverLimit"
@@ -1096,7 +1112,28 @@ const toggleComfirmPasswordVisibility = () => {
                       placeholder="Position"
                       class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
                       @input="checkInputLength('position')"
+                      :class="{
+                        'border-red-600 text-red-600': isStaffPositionTooShort
+                      }"
                     />
+                  </div>
+                  <div
+                    v-if="isStaffPositionTooShort"
+                    class="flex items-center text-sm text-red-600 mb-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="red"
+                      class="w-[15px] mr-1"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    Position must be at least 2 characters.
                   </div>
                 </div>
               <div class="mb-1">
@@ -1322,7 +1359,8 @@ const toggleComfirmPasswordVisibility = () => {
               trimmedPassword.length === 0 ||
               trimmedConfirmPassword.length === 0 ||
               isPasswordTooShort ||
-              isConfirmPasswordTooShort
+              isConfirmPasswordTooShort ||
+              isStaffPositionTooShort
             "
           />
         </form>
