@@ -96,6 +96,9 @@ const addParcelItem = () => {
   })
 }
 
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const removeParcelItem = (index) => {
   if (form.value.items.length > 1) {
     form.value.items.splice(index, 1)
@@ -805,7 +808,9 @@ const handleTrackingInput = (event, index) => {
               </template>
             </SidebarItem> -->
 
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem  
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"

@@ -174,22 +174,6 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="My parcel" @click="showResidentParcelPage">
-              <template #icon>
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
             <SidebarItem
               title="Announcements"
               class="bg-blue-400 cursor-default"
@@ -241,129 +225,191 @@ onMounted(async () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 overflow-y-auto">
-        <section>
-          <h2
-            class="text-xl font-bold flex items-center gap-2 mb-4 text-[#185dc0]"
-          >
-            <svg
-              width="49"
-              height="49"
-              viewBox="0 0 49 49"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24.3379 16.2252H8.1127C7.0369 16.2252 6.00516 16.6525 5.24446 17.4132C4.48376 18.1739 4.0564 19.2057 4.0564 20.2815V28.3941C4.0564 29.4699 4.48376 30.5016 5.24446 31.2623C6.00516 32.023 7.0369 32.4504 8.1127 32.4504H10.1409V40.563C10.1409 41.1009 10.3545 41.6167 10.7349 41.9971C11.1152 42.3774 11.6311 42.5911 12.169 42.5911H16.2253C16.7632 42.5911 17.2791 42.3774 17.6594 41.9971C18.0398 41.6167 18.2535 41.1009 18.2535 40.563V32.4504H24.3379L34.4787 40.563V8.11255L24.3379 16.2252ZM43.6053 24.3378C43.6053 27.8059 41.6583 30.9495 38.535 32.4504V16.2252C41.638 17.7463 43.6053 20.8899 43.6053 24.3378Z"
-                fill="#22C55E"
-              />
-            </svg>
+      <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-50/50">
+        <section class="max-w-7xl mx-auto">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+              <div class="p-2 bg-blue-100 rounded-lg text-[#0E4B90]">
+                 <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"/>
+                </svg>
+              </div>
+              <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                Announcements
+              </span>
+            </h2>
+          </div>
 
-            Announcement
-          </h2>
-
-          <div
-            class="bg-white rounded-[5px] shadow p-6 mb-6 border-t-4 border-gray-200"
-          >
-            <div
-              class="h-56 bg-gray-200 rounded-lg mb-3 flex items-center justify-center text-gray-400 text-lg font-medium"
-            >
-              Banner Area
+          <!-- Featured Banner -->
+          <div class="relative overflow-hidden rounded-2xl shadow-lg mb-10 group">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90"></div>
+            <!-- Decorative circles -->
+            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
+            
+            <div class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
+              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
+                Featured
+              </span>
+              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+                Community Updates & Events
+              </h3>
+              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed">
+                Stay connected with everything happening in your residence. Check out the latest news and upcoming events below.
+              </p>
+              
+              <!-- Carousel Indicators -->
+              <div class="flex justify-center gap-3">
+                <button
+                  v-for="n in 4"
+                  :key="n"
+                  @click="currentSlide = n"
+                  class="transition-all duration-300 rounded-full h-2"
+                  :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
+                ></button>
+              </div>
             </div>
+          </div>
 
-            <div class="flex justify-center gap-2">
-              <span
-                v-for="n in 4"
-                :key="n"
+          <!-- Content Filter & Search -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <!-- Tabs -->
+            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
+              <button
+                @click="tab = 'event'"
                 :class="[
-                  'w-2.5 h-2.5 rounded-full',
-                  currentSlide === n ? 'bg-blue-600' : 'bg-gray-300'
+                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
+                  (tab === 'event' || !tab)
+                    ? 'bg-[#0E4B90] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
-              ></span>
+              >
+                Events
+              </button>
+              <button
+                @click="tab = 'news'"
+                :class="[
+                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
+                  tab === 'news'
+                    ? 'bg-[#0E4B90] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                News
+              </button>
             </div>
-          </div>
 
-          <div class="flex gap-2 mb-4">
-            <button
-              @click="tab = 'event'"
-              :class="[
-                'px-5 py-2 rounded-md font-medium border',
-                tab === 'event'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow'
-                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-              ]"
-            >
-              Event
-            </button>
-            <button
-              @click="tab = 'news'"
-              :class="[
-                'px-5 py-2 rounded-md font-medium border',
-                tab === 'news'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow'
-                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-              ]"
-            >
-              News
-            </button>
-          </div>
-
-          <div
-            class="bg-white rounded-[5px] shadow p-6 mb-8 border border-gray-200 border-t-4"
-          >
-            <div class="flex items-center gap-3 mb-4">
-              <label class="font-medium text-gray-800">Event Name</label>
+            <!-- Search -->
+            <div class="relative w-full md:w-80 group">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
               <input
                 type="text"
-                placeholder="Enter a keyword to search"
-                class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                placeholder="Search updates..."
+                class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
               />
             </div>
+          </div>
 
-            <div v-if="tab === 'event'">
-              <h3 class="text-lg font-semibold mb-2 text-gray-900">Event</h3>
-              <p class="text-gray-600 mb-6 text-sm">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
-
-              <div class="grid grid-cols-3 gap-6">
+          <!-- Content Grid -->
+          <div class="min-h-[400px]">
+            <!-- Events Grid -->
+            <div v-if="tab === 'event' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Upcoming Events</h3>
+                <span class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div
                   v-for="n in 6"
                   :key="n"
-                  class="bg-gray-100 rounded-lg shadow-sm hover:shadow-md transition p-4"
+                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
                 >
-                  <div class="h-32 bg-gray-300 rounded-lg mb-3"></div>
-                  <h4 class="font-semibold text-gray-800 text-sm mb-1">
-                    Title {{ n }}
-                  </h4>
-                  <p class="text-gray-500 text-xs">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  </p>
+                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                     <!-- Placeholder for Image -->
+                     <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                     </div>
+                     <!-- Date Badge -->
+                     <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                        2{{ n }} OCT
+                     </div>
+                  </div>
+                  
+                  <div class="p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                       <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2.5 py-0.5 rounded-md">Community</span>
+                       <span class="text-xs text-gray-400">•</span>
+                       <span class="text-xs text-gray-500">10:00 AM</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight">
+                      Community Gathering & Workshop {{ n }}
+                    </h4>
+                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
+                      Join us for an engaging session where we discuss community improvements and upcoming projects.
+                    </p>
+                    <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
+                       <div class="flex -space-x-2">
+                          <div v-for="i in 3" :key="i" class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white ring-1 ring-gray-100"></div>
+                       </div>
+                       <span class="text-sm font-medium text-gray-400 group-hover:text-gray-600 transition-colors">Details</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div v-else>
-              <h3 class="text-lg font-semibold mb-2 text-gray-900">News</h3>
-              <p class="text-gray-600 mb-6 text-sm">
-                Stay updated with the latest news from your dormitory office.
-              </p>
+            <!-- News List -->
+            <div v-else class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Latest News</h3>
+                <span class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>
+              </div>
 
               <div class="space-y-4">
                 <div
-                  v-for="n in 3"
+                  v-for="n in 4"
                   :key="'news-' + n"
-                  class="bg-gray-100 p-5 rounded-lg shadow-sm hover:shadow-md transition"
+                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6"
                 >
-                  <h4 class="font-semibold mb-1 text-gray-800">
-                    News Title {{ n }}
-                  </h4>
-                  <p class="text-gray-500 text-sm">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </p>
+                  <div class="w-full md:w-48 h-32 bg-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden">
+                     <div class="absolute inset-0 bg-gray-200"></div>
+                  </div>
+                  <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 mb-2">
+                       <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md">Update</span>
+                       <span class="text-xs text-gray-400">2 hours ago</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors">
+                      Important Maintenance Notice {{ n }}
+                    </h4>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0">
+                      There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly.
+                    </p>
+                  </div>
+                  <div class="flex items-center justify-end">
+                     <button class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#0E4B90] group-hover:text-white transition-all duration-300">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                     </button>
+                  </div>
                 </div>
               </div>
             </div>

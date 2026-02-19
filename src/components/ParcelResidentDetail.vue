@@ -90,7 +90,9 @@ const showResidentParcelPage = async function () {
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
-
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
@@ -349,7 +351,9 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem    
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"

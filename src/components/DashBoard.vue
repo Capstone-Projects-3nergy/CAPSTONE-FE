@@ -335,151 +335,152 @@ const toggleSidebar = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 bg-gray-50 min-h-screen">
-        <div class="flex items-center space-x-2 mb-6">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 3V23C5.9 22.5 2 18.2 2 13C2 7.8 5.9 3.5 11 3ZM13 3V12H22C21.5 7.2 17.8 3.5 13 3ZM13 14V23C17.7 22.5 21.5 18.8 22 14H13Z"
-              fill="#185DC0"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Dashboard</h2>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-[#185dc0]/10 p-3 rounded-xl text-[#185dc0] flex items-center justify-center"
-              >
+      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
+        <div class="max-w-7xl mx-auto">
+          <!-- Header -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  fill="none"
                   stroke="currentColor"
-                  class="w-6 h-6"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3.75 6.75l7.5-3 7.5 3M3.75 6.75v10.5l7.5 3m-7.5-13.5l7.5 3m0 10.5v-10.5m0 10.5l7.5-3V6.75m0 0l-7.5 3"
-                  />
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
                 </svg>
               </div>
               <div>
-                <p class="text-gray-600 text-sm">Total Parcel</p>
-                <p class="text-2xl font-bold">247</p>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Dashboard Overview
+                  </span>
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Welcome back, here's what's happening today.</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+               <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+               <span class="text-sm font-medium text-gray-600">Live Updates</span>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Total Parcel -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-xl bg-blue-50 text-[#0E4B90] group-hover:bg-[#0E4B90] group-hover:text-white transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                </div>
+                <span class="flex items-center text-green-600 text-xs font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                  +12% 
+                  <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                </span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Total Parcels</span>
+                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-[#0E4B90] transition-colors">247</span>
+              </div>
+            </div>
+
+            <!-- Unreceived Parcel -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-orange-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-xl bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <span class="flex items-center text-orange-600 text-xs font-bold bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
+                  Pending
+                </span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Unreceived</span>
+                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-orange-600 transition-colors">89</span>
+              </div>
+            </div>
+
+            <!-- Received Parcel -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-green-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-xl bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </div>
+                <span class="flex items-center text-green-600 text-xs font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                  Completed
+                </span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Received</span>
+                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-green-600 transition-colors">158</span>
+              </div>
+            </div>
+
+            <!-- All Resident -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-purple-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-xl bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+                <span class="flex items-center text-blue-600 text-xs font-bold bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                  Active
+                </span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Total Residents</span>
+                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-purple-600 transition-colors">342</span>
               </div>
             </div>
           </div>
 
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-green-100 p-3 rounded-xl text-green-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
+          <!-- Chart Section -->
+          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow duration-500">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
-                <p class="text-gray-600 text-sm">Unreceived Parcel</p>
-                <p class="text-2xl font-bold">89</p>
+                <h3 class="text-xl font-bold text-gray-900">Parcel Volume Trends</h3>
+                <p class="text-sm text-gray-500 mt-1">Overview of parcel traffic over the selected period</p>
+              </div>
+              
+              <div class="flex items-center p-1 bg-gray-100 rounded-xl">
+                <button
+                  class="px-4 py-2 text-sm font-bold rounded-lg bg-white text-[#0E4B90] shadow-sm transform transition-all hover:scale-105"
+                >
+                  This Week
+                </button>
+                <button
+                  class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  This Month
+                </button>
               </div>
             </div>
-          </div>
-
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-pink-100 p-3 rounded-xl text-pink-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6v6h4.5M3 12a9 9 0 1118 0 9 9 0 01-18 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-gray-600 text-sm">Received Parcel</p>
-                <p class="text-2xl font-bold">158</p>
-              </div>
+            <div class="h-[300px] w-full">
+               <canvas id="parcelChart"></canvas>
             </div>
           </div>
-
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-purple-100 p-3 rounded-xl text-purple-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17 20h5v-2a2 2 0 00-2-2h-3m0 0H7m10 0a2 2 0 00-2-2H9a2 2 0 00-2 2m0 0H4a2 2 0 00-2 2v2h5m10 0v-2a2 2 0 00-2-2h-6a2 2 0 00-2 2v2m10 0H7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-gray-600 text-sm">All Resident</p>
-                <p class="text-2xl font-bold">342</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-gray-700 font-semibold">Parcel Volume</h3>
-            <button
-              class="border rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
-            >
-              This Week ▾
-            </button>
-          </div>
-          <canvas id="parcelChart" height="120"></canvas>
         </div>
       </main>
     </div>

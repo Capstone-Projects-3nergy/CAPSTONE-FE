@@ -588,7 +588,9 @@ const handleSortUpdate = (val) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem 
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"

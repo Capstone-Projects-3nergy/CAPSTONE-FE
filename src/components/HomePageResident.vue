@@ -530,8 +530,8 @@ const showHomePageResidentWeb = async function () {
   showHomePageResident.value = true
 }
 const showAnnouncementPage = async function () {
-  // router.replace({ name: 'announcement' })
-  // showAnnouncement.value = true
+  router.replace({ name: 'announcement' })
+  showAnnouncement.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
@@ -741,7 +741,8 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
             <SidebarItem
-              title="Announcements (Next Release)"
+              title="Announcements"
+              @click="showAnnouncementPage"
               :collapsed="isCollapsed"
             >
               <template #icon>
@@ -817,10 +818,10 @@ function formatDateTime(datetimeStr) {
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12">
                   <h1 class="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg tracking-tight">
                     Welcome to Tractify
-                  </h1>
+                    </h1>
                   <p class="text-white/90 text-lg md:text-2xl font-light tracking-wide max-w-2xl">
                     Experience seamless community management and effortless parcel tracking.
-                  </p>
+                    </p>
               </div>
 
               <!-- Navigation Buttons -->
@@ -876,33 +877,44 @@ function formatDateTime(datetimeStr) {
             </div>
           </section>
 
-          <!-- Cards Section -->
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+          <!-- Explore Categories Header -->
+          <div class="flex items-center gap-3 mb-6 mt-12">
+             <div class="h-8 w-1 bg-[#0E4B90] rounded-full"></div>
+             <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Explore Community</h2>
+          </div>
+
+          <!-- Categorized Cards -->
+          <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- News Card -->
             <div
               @click="showAnnouncementPage()"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                 <div class="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-1/2 overflow-hidden relative">
+                 <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="newsImg"
                   alt="News"
                   class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-[#0E4B90] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    LATEST
-                </div>
+                 <div class="absolute top-4 left-4 z-20">
+                    <span class="bg-blue-600/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                      Latest Updates
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">NEWS</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                  Stay informed with the latest updates, official announcements, and important notices from the management.
+              <div class="p-8 flex flex-col flex-1 relative bg-white">
+                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                 </div>
+                <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">News & Announcements</h3>
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                  Check out the latest official notices, maintenance schedules, and important updates from the dormitory management team.
                 </p>
-                <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    Read Articles <span class="ml-2">→</span>
+                <div class="mt-auto pt-6 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    Read More <span>→</span>
                 </div>
               </div>
             </div>
@@ -910,28 +922,33 @@ function formatDateTime(datetimeStr) {
             <!-- Event Card -->
             <div
               @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                  <div class="absolute inset-0 bg-purple-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-1/2 overflow-hidden relative">
+                  <div class="absolute inset-0 bg-gradient-to-t from-purple-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="eventImg"
                   alt="Event"
                   class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-purple-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    UPCOMING
-                </div>
+                 <div class="absolute top-4 left-4 z-20">
+                    <span class="bg-purple-600/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                      Upcoming
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                 <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">EVENT</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                  Discover upcoming community gatherings, workshops, and social activities designed for you.
+              <div class="p-8 flex flex-col flex-1 relative bg-white">
+                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                 </div>
+                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Events & Activities</h3>
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                  Don't miss out on upcoming workshops, social gatherings, and recreational activities organized for residents.
                 </p>
-                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    See Calendar <span class="ml-2">→</span>
+                 <div class="mt-auto pt-6 flex items-center text-purple-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    View Calendar <span>→</span>
                 </div>
               </div>
             </div>
@@ -939,28 +956,33 @@ function formatDateTime(datetimeStr) {
              <!-- Community Card -->
             <div
               @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                   <div class="absolute inset-0 bg-green-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-1/2 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-gradient-to-t from-green-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="communityImg"
                   alt="Community"
                   class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    SOCIAL
-                </div>
+                 <div class="absolute top-4 left-4 z-20">
+                    <span class="bg-green-600/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                      Social
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">COMMUNITY</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                   Join the conversation, share your thoughts, and connect with neighbors to build a vibrant community.
+              <div class="p-8 flex flex-col flex-1 relative bg-white">
+                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                 </div>
+                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">Community Hub</h3>
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                   Connect with your neighbors, join discussion groups, and share your experiences in the community forum.
                 </p>
-                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    Get Involved <span class="ml-2">→</span>
+                 <div class="mt-auto pt-6 flex items-center text-green-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    Get Involved <span>→</span>
                 </div>
               </div>
             </div>

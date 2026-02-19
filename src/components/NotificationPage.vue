@@ -67,7 +67,9 @@ const showError = () => {
 const closeNotification = () => {
   notification.value.show = false
 }
-
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const router = useRouter()
 const editSuccess = ref(false)
 const error = ref(false)
@@ -471,7 +473,9 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem 
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
