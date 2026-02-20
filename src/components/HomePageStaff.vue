@@ -110,6 +110,49 @@ onMounted(async () => {
       }
     }
   })
+
+  const residentCtx = document.getElementById('residentChart')
+  if (residentCtx) {
+    new Chart(residentCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+        datasets: [
+          {
+            label: 'New Residents',
+            data: [0, 1, 1, 1, 3, 6],
+            backgroundColor: (context) => {
+              const index = context.dataIndex
+              return index === 5
+                ? 'rgba(99, 102, 241, 0.9)' // Indigo peak
+                : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
+            },
+            borderRadius: 6,
+            barThickness: 40
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `${context.parsed.y} residents`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            grid: { borderDash: [4, 4] },
+            ticks: { stepSize: 2 }
+          }
+        }
+      }
+    })
+  }
 })
 
 const showHomePageStaffWeb = async function () {
@@ -156,6 +199,7 @@ const isCollapsed = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
+const activeTab = ref('parcel')
 </script>
 
 <template>
@@ -351,7 +395,26 @@ const toggleSidebar = () => {
       <main class="flex-1 p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans">
         <div class="max-w-7xl mx-auto space-y-6">
           
-          <!-- Stats Grid -->
+          <!-- Tabs Header -->
+          <div class="flex items-center gap-6 mb-2 border-b border-gray-200">
+            <button 
+              @click="activeTab = 'parcel'" 
+              :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'parcel' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+            >
+              Parcel Dashboard
+            </button>
+            <button 
+              @click="activeTab = 'resident'"
+              :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'resident' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+            >
+              Resident Dashboard
+            </button>
+          </div>
+
+          <!-- Tab Content: Parcel Dashboard -->
+          <div v-show="activeTab === 'parcel'" class="space-y-6">
+          
+            <!-- Stats Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Parcels -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
@@ -679,6 +742,347 @@ const toggleSidebar = () => {
             </div>
 
           </div>
+          </div>
+          
+          <!-- Tab Content: Resident Dashboard -->
+          <div v-show="activeTab === 'resident'" class="space-y-6">
+            
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- Active Residents -->
+              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 border border-emerald-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  <span class="text-emerald-500 text-xs font-bold">Verified</span>
+                </div>
+                <div class="mt-4">
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">1</h3>
+                  <p class="text-gray-500 text-sm font-medium mt-1">Active Residents</p>
+                </div>
+              </div>
+
+              <!-- Pending Approval -->
+              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </div>
+                  <span class="text-orange-400 text-xs font-bold">Action needed</span>
+                </div>
+                <div class="mt-4">
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">2</h3>
+                  <p class="text-gray-500 text-sm font-medium mt-1">Pending Approval</p>
+                </div>
+              </div>
+
+              <!-- Inactive Residents -->
+              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100 text-xl">
+                    🥺
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">1</h3>
+                  <p class="text-gray-500 text-sm font-medium mt-1">Inactive Residents</p>
+                </div>
+              </div>
+
+              <!-- Total Registered -->
+              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                  </div>
+                  <span class="text-gray-400 text-xs font-bold">of 20 rooms</span>
+                </div>
+                <div class="mt-4">
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">4</h3>
+                  <p class="text-gray-500 text-sm font-medium mt-1">Total Registered</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              <!-- Resident Growth Chart -->
+              <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                <div class="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900">Resident Growth</h3>
+                    <p class="text-xs text-gray-500">New residents registered per month</p>
+                  </div>
+                  <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
+                    <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">2025</button>
+                    <button class="px-4 py-1.5 text-xs font-bold text-gray-900 bg-white rounded-md shadow-sm">2026</button>
+                  </div>
+                </div>
+                <div class="h-[250px] w-full relative flex-1">
+                   <canvas id="residentChart"></canvas>
+                </div>
+                <div class="mt-6 flex items-center justify-between">
+                  <span class="text-sm font-bold text-gray-800">Total: 4 residents</span>
+                  <span class="text-sm text-gray-500">Peak: February 2026</span>
+                </div>
+              </div>
+
+              <!-- Status Overview -->
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-900">Status Overview</h3>
+                <p class="text-xs text-transparent mb-8">.</p>
+                
+                <div class="flex justify-center mb-8 relative">
+                  <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-r-orange-500 flex items-center justify-center flex-col">
+                    <span class="text-3xl font-black text-gray-900 leading-none">4</span>
+                    <span class="text-xs text-gray-500">Residents</span>
+                  </div>
+                </div>
+
+                <div class="space-y-4 mt-auto">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div>
+                      <span class="text-sm text-gray-600">Active</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-bold text-gray-900">1</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">25%</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></div>
+                      <span class="text-sm text-gray-600">Pending</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-bold text-gray-900">2</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">50%</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2.5 h-2.5 rounded-sm bg-orange-500"></div>
+                      <span class="text-sm text-gray-600">Inactive</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-bold text-gray-900">1</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">25%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Grid Row 3 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+              
+              <!-- Most Parcels Received -->
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
+                <div class="mb-6">
+                  <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <span class="text-yellow-500">🏆</span> Most Parcels Received
+                  </h3>
+                  <p class="text-xs text-gray-500 mt-1">Residents ranked by total parcels</p>
+                </div>
+
+                <div class="space-y-4 flex-1">
+                  <!-- Item 1 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs font-bold">1</div>
+                      <div class="w-10 h-10 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold">K</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900">kong zeed</p>
+                        <p class="text-xs text-gray-500">Room 13 - Active</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-gray-900">47</p>
+                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
+                    </div>
+                  </div>
+
+                  <!-- Item 2 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">2</div>
+                      <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">S</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900">Suklita Mook</p>
+                        <p class="text-xs text-gray-500">Room 1 - Inactive</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-gray-900">31</p>
+                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
+                    </div>
+                  </div>
+
+                  <!-- Item 3 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">3</div>
+                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900">testkub</p>
+                        <p class="text-xs text-gray-500">Room 532 - Pending</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-gray-900">18</p>
+                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
+                    </div>
+                  </div>
+
+                  <!-- Item 4 -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-bold">4</div>
+                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900">testkubza</p>
+                        <p class="text-xs text-gray-500">Room 532 - Pending</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-lg font-bold text-gray-900">9</p>
+                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vacant Rooms -->
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full relative">
+                <div class="mb-6 flex justify-between items-start">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <span class="text-rose-500">🏠</span> Vacant Rooms
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">16 of 20 rooms available</p>
+                  </div>
+                  <span class="text-emerald-500 text-xs font-bold">80% vacant</span>
+                </div>
+
+                <div class="space-y-4 flex-1">
+                  <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Occupied</h4>
+                    <div class="flex flex-wrap gap-2">
+                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">1</div>
+                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">13</div>
+                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">532</div>
+                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">123</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-6">Vacant</h4>
+                    <div class="grid grid-cols-4 gap-2">
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">101</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">102</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">201</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">202</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">203</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">301</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">302</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-gray-700">401</p>
+                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2 text-center italic">+8 more rooms available</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Approval List -->
+              <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
+                <div class="mb-6 flex justify-between items-start">
+                  <div>
+                    <h3 class="text-lg font-bold text-yellow-700 flex items-center gap-2">
+                      <span class="text-xl">⏳</span> Pending Approval
+                    </h3>
+                    <p class="text-xs text-yellow-600/80 mt-1">2 residents awaiting verification</p>
+                  </div>
+                </div>
+
+                <div class="space-y-3 flex-1 overflow-y-auto">
+                  <!-- Item 1 -->
+                  <div class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative">
+                    <span class="absolute top-4 right-4 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Pending</span>
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900 leading-tight">testkub</p>
+                        <p class="text-xs text-gray-500">Room 532 • testkub@gmail.com</p>
+                      </div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-3">Registered: 2026-02-18 00:39:51</p>
+                    <div class="grid grid-cols-2 gap-2">
+                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Approve
+                      </button>
+                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1">
+                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Item 2 -->
+                   <div class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative">
+                    <span class="absolute top-4 right-4 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Pending</span>
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
+                      <div>
+                        <p class="text-sm font-bold text-gray-900 leading-tight">testkubza</p>
+                        <p class="text-xs text-gray-500">Room 532 • testkub@gmail.com</p>
+                      </div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-3">Registered: 2026-02-18 00:41:23</p>
+                    <div class="grid grid-cols-2 gap-2">
+                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Approve
+                      </button>
+                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1">
+                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </main>
     </div>
