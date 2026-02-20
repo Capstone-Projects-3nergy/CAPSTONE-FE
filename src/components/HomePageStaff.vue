@@ -392,12 +392,12 @@ const activeTab = ref('parcel')
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans">
+      <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans overflow-x-hidden">
         <div class="max-w-7xl mx-auto space-y-6">
           
           <!-- Tabs Header -->
-          <div class="flex items-center justify-between gap-6 mb-2 border-b border-gray-200">
-            <div class="flex items-center gap-8">
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 mb-2 border-b border-gray-200 pb-2 lg:pb-0">
+            <div class="flex items-center gap-4 lg:gap-8 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
               <button 
                 @click="activeTab = 'parcel'" 
                 class="cursor-pointer flex items-center gap-3 pt-2"
@@ -437,7 +437,7 @@ const activeTab = ref('parcel')
               </button>
             </div>
             
-            <div class="flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm mb-4 shadow-sm">
+            <div class="flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm lg:mb-4 shadow-sm whitespace-nowrap">
               <div class="mr-2 p-1.5 bg-blue-100 rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -608,8 +608,8 @@ const activeTab = ref('parcel')
           </div>
 
           <!-- Export Actions -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
               <span class="text-sm font-medium text-gray-500">Export:</span>
               <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
