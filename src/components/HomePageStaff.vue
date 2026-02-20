@@ -1012,9 +1012,8 @@ const toggleSortDate = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 w-full font-sans mt-16">
-
-        <div class="bg-white p-6 shadow-sm rounded-2xl mb-8">
+      <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
+        <div class="bg-white p-6 shadow-sm rounded-2xl">
           <section class="relative rounded-xl overflow-hidden shadow-md group">
             <div class="relative h-[350px] md:h-[450px] w-full">
               <div

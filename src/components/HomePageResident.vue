@@ -793,10 +793,10 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 w-full font-sans mt-16">
-            <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
-          <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
-             <div class="bg-[#1D355E]/10 p-2 rounded-lg">
+      <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
+            <div class=" p-8">
+          <div class="flex items-center space-x-3 mb-6 pb-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
                   <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -985,9 +985,9 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         <!-- Hero / Carousel Section -->
-        <div class="bg-white p-6 shadow-sm rounded-2xl mb-8 ">
-          <section class="relative rounded-xl overflow-hidden shadow-md group ">
-            <div class="relative h-[350px] md:h-[450px] w-full">
+        <div class="p-6  mb-8 ">
+          <section class="relative overflow-hidden group ">
+            <div class="relative h-[350px] md:h-[450px] w-full  rounded-2xl">
               <div
                 v-for="(slide, index) in slides"
                 :key="index"
