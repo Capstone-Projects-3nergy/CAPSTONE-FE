@@ -438,7 +438,14 @@ const activeTab = ref('parcel')
             </div>
             
             <div class="flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm mb-4 shadow-sm">
-              <span class="mr-2 text-blue-500">📅</span>
+              <div class="mr-2 p-1.5 bg-blue-100 rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
               Thu, 19 Feb 2026
             </div>
           </div>
@@ -451,7 +458,16 @@ const activeTab = ref('parcel')
             <!-- Total Parcels -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
               <div class="flex items-start justify-between mb-4">
-                <span class="text-2xl">📦</span>
+                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
+                    <path d="M12 12l8 -4.5" />
+                    <path d="M12 12l0 9" />
+                    <path d="M12 12l-8 -4.5" />
+                    <path d="M16 5.25l-8 4.5" />
+                  </svg>
+                </div>
                 <span class="flex items-center text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
                   <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                   12%
@@ -466,7 +482,15 @@ const activeTab = ref('parcel')
             <!-- Awaiting Pickup -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
               <div class="flex items-start justify-between mb-4">
-                <span class="text-2xl">⏳</span>
+                <div class="p-2.5 bg-yellow-100 rounded-xl text-yellow-600 shadow-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6.5 7h11" />
+                    <path d="M6.5 17h11" />
+                    <path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1z" />
+                    <path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" />
+                  </svg>
+                </div>
                 <span class="text-orange-400 text-xs font-bold bg-orange-50 px-2 py-1 rounded">
                   → 3 days avg
                 </span>
@@ -480,7 +504,14 @@ const activeTab = ref('parcel')
             <!-- Overdue -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative">
               <div class="flex items-start justify-between mb-4">
-                <span class="text-2xl">🚨</span>
+                <div class="p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                    <path d="M12 8l0 4" />
+                    <path d="M12 16l.01 0" />
+                  </svg>
+                </div>
                 <span class="flex items-center text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">
                   <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                   Action needed
@@ -512,10 +543,17 @@ const activeTab = ref('parcel')
           <!-- Overdue Alert Box -->
           <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
             <div class="flex items-center gap-3 mb-4">
-              <span class="text-2xl">🚨</span>
-              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
+              <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                  <path d="M12 8l0 4" />
+                  <path d="M12 16l.01 0" />
+                </svg>
+              </div>
+              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - Not picked up for >7 days</h3>
             </div>
-            <p class="text-red-500 text-sm mb-4">กรุณาติดต่อผู้พักอาศัยเพื่อรับพัสดุโดยเร็ว</p>
+            <p class="text-red-500 text-sm mb-4">Please contact residents to pick up their parcels immediately</p>
             
             <div class="space-y-3">
               <!-- Overdue Item -->
@@ -573,17 +611,16 @@ const activeTab = ref('parcel')
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <span class="text-sm font-medium text-gray-500">Export:</span>
-              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <span class="text-green-600">📊</span> Export Excel (.xlsx)
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
+                Export Excel (.xlsx)
               </button>
-              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <span class="text-red-500">📄</span> Export PDF Report
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
+                Export PDF Report
               </button>
-              <!-- <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <span class="text-orange-500">📑</span> Export CSV
-              </button> -->
             </div>
-            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
               Print Summary
             </button>
@@ -812,8 +849,8 @@ const activeTab = ref('parcel')
               <!-- Inactive Residents -->
               <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-4">
-                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100 text-xl">
-                    🥺
+                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h3" /><path d="M16 22l5 -5" /><path d="M21 21.5v-4.5h-4.5" /></svg>
                   </div>
                 </div>
                 <div class="mt-4">
@@ -914,8 +951,11 @@ const activeTab = ref('parcel')
               <!-- Most Parcels Received -->
               <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
                 <div class="mb-6">
-                  <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <span class="text-yellow-500">🏆</span> Most Parcels Received
+                  <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+                    <div class="p-1.5 bg-yellow-100 rounded-lg text-yellow-600 shadow-sm flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 21l8 0" /><path d="M12 17l0 4" /><path d="M7 4l10 0" /><path d="M17 4v8a5 5 0 0 1 -10 0v-8" /><path d="M5 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg>
+                    </div>
+                    Most Parcels Received
                   </h3>
                   <p class="text-xs text-gray-500 mt-1">Residents ranked by total parcels</p>
                 </div>
@@ -991,8 +1031,11 @@ const activeTab = ref('parcel')
               <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full relative">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                      <span class="text-rose-500">🏠</span> Vacant Rooms
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+                      <div class="p-1.5 bg-rose-100 rounded-lg text-rose-500 shadow-sm flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
+                      </div>
+                      Vacant Rooms
                     </h3>
                     <p class="text-xs text-gray-500 mt-1">16 of 20 rooms available</p>
                   </div>
@@ -1055,8 +1098,11 @@ const activeTab = ref('parcel')
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
-                    <h3 class="text-lg font-bold text-yellow-700 flex items-center gap-2">
-                      <span class="text-xl">⏳</span> Pending Approval
+                    <h3 class="text-lg font-bold text-yellow-700 flex items-center gap-3">
+                      <div class="p-1.5 bg-amber-100 rounded-lg text-amber-600 shadow-sm flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6.5 7h11" /><path d="M6.5 17h11" /><path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1z" /><path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" /></svg>
+                      </div>
+                      Pending Approval
                     </h3>
                     <p class="text-xs text-yellow-600/80 mt-1">2 residents awaiting verification</p>
                   </div>

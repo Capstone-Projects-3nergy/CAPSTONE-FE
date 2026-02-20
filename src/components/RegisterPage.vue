@@ -880,13 +880,13 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="togglePasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
+                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1 cursor-pointer"
                   >
                     <svg
                       v-if="isPasswordVisible"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
-                      class="h-5 w-5"
+                        class="h-5 w-5 text-[#8C8F91] cursor-pointer"
                       :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
@@ -899,7 +899,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-else
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
-                      class="h-5 w-5"
+                         class="h-5 w-5 text-[#8C8F91] cursor-pointer"
                       :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
@@ -1167,13 +1167,13 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="togglePasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
+                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1 cursor-pointer"
                   >
                     <svg
                       v-if="isPasswordVisible"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
-                      class="h-5 w-5"
+                      class="h-5 w-5 text-[#8C8F91] cursor-pointer"
                       :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
@@ -1186,7 +1186,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-else
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
-                      class="h-5 w-5"
+                      class="h-5 w-5 text-[#8C8F91] cursor-pointer"
                       :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
