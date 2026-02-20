@@ -16,7 +16,12 @@ defineProps({
     <slot name="icon"></slot>
     <span
       v-if="!collapsed"
-      class="whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left text-[13px]"
+      class="whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left"
+      :class="
+        title === 'Tractify'
+          ? 'text-[24px] font-black text-white tracking-wide'
+          : 'text-[15px] font-bold text-gray-300'
+      "
       >{{ title }}</span
     >
   </div>
