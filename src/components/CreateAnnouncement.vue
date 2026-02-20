@@ -53,7 +53,9 @@ const submitAnnouncement = () => {
   alert('Announcement Created (Mock)')
   router.push({ name: 'manageannouncement', params: { id: route.params.id } })
 }
-
+const handleCancel = () => {
+  router.back()
+}
 // Sidebar Navigation (copied from ManageAnnouncement for consistency)
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
@@ -302,19 +304,24 @@ const returnLoginPage = async () => {
 
       <!-- Main Content -->
       <main class="flex-1 p-4 md:p-10 min-h-screen font-sans">
-        <div class="max-w-4xl mx-auto">
-          <!-- Page Header -->
-          <div class="flex items-center gap-4 mb-8">
-             <button @click="goBack" class="p-2 hover:bg-gray-200 rounded-full transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
-                  <path d="M19 12H5"></path>
-                  <path d="M12 19l-7-7 7-7"></path>
-                </svg>
+         <div class="max-w-4xl mx-auto space-y-6">
+          
+          <!-- Header -->
+          <div class="flex items-center gap-4">
+              <div class="flex items-center gap-4">
+                <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
              </button>
-             <div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Create Announcement</h2>
-                <p class="text-sm text-gray-500 mt-1">Share news and updates with the community.</p>
-             </div>
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Create Announcement  </span>
+                </h2>
+          </div>
           </div>
 
           <!-- Form Card -->

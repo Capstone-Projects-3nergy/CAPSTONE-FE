@@ -131,7 +131,31 @@ const handleSave = async () => {
 const handleCancel = () => {
   router.back()
 }
-
+// Sidebar Navigation (copied from ManageAnnouncement for consistency)
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
+}
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels', params: { id: route.params.id } })
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement', params: { id: route.params.id } })
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident', params: { id: route.params.id } })
+}
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels', params: { id: route.params.id } })
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff', params: { id: route.params.id } })
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard', params: { id: route.params.id } })
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
+}
 </script>
 
 <template>
@@ -354,13 +378,20 @@ const handleCancel = () => {
           
           <!-- Header -->
           <div class="flex items-center gap-4">
-             <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+              <div class="flex items-center gap-4">
+                <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
              </button>
-             <div>
-                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Announcement</h1>
-                <p class="text-gray-500 text-sm">Update the details of this announcement</p>
-             </div>
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Edit Announcement  </span>
+                </h2>
+          </div>
           </div>
 
           <!-- Edit Form Card -->
