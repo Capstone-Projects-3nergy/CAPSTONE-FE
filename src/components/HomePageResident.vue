@@ -803,7 +803,11 @@ function formatDateTime(datetimeStr) {
                   <path d="M22 12L12 17L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
              </div>
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">My Parcels</h2>
+           <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   My Parcels
+                  </span>
+                </h2>
           </div>
           
           <div class="mb-6">
