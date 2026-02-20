@@ -708,12 +708,12 @@ const closePopUp = (operate) => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -895,6 +895,28 @@ const closePopUp = (operate) => {
       <main class="flex-1 p-9 w-full">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-1">
+               <div class="flex items-center gap-4">
+            <!-- <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g fill="#185DC0">
+                <path
+                  fill="#185DC0"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
+                />
+                <path
+                  stroke="#185DC0"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                />
+              </g>
+            </svg> -->
+           <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -915,12 +937,13 @@ const closePopUp = (operate) => {
                 />
               </g>
             </svg>
-            <h2
-              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
-            >
-              Trash
-            </h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                  Trash  </span>
+          </h2>
           </div>
+        </div>
         </div>
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-4">

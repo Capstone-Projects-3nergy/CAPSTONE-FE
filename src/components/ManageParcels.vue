@@ -566,12 +566,12 @@ const handleSortUpdate = (val) => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -751,7 +751,9 @@ const handleSortUpdate = (val) => {
 
       <main class="flex-1 p-9 w-full">
         <div class="flex items-center space-x-2 mb-6">
-          <svg
+             <div class="flex items-center gap-4">
+            <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+           <svg
             width="25"
             height="25"
             viewBox="0 0 25 25"
@@ -763,7 +765,12 @@ const handleSortUpdate = (val) => {
               fill="#185DC0"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel </h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Manage Parcel  </span>
+          </h2>
+        </div>
         </div>
         <ParcelFilterBar
           :modelDate="filterDate"

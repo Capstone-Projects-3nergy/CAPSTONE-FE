@@ -668,12 +668,12 @@ const handleTrackingInput = (event, index) => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -926,7 +926,7 @@ const handleTrackingInput = (event, index) => {
           <div
             class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
           >
-            <div class="bg-[#0E4B90] px-8 py-6">
+            <div class="bg-[#1D355E] px-8 py-6">
               <h3 class="text-2xl font-bold text-white flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -1106,7 +1106,7 @@ const handleTrackingInput = (event, index) => {
                   label="Add"
                   :loading="isLoading"
                   :disabled="!isFormValid"
-                  class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
+                  class="px-8 py-2.5 rounded-xl bg-[#1D355E] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
                   @click="submitVerification"
                 />

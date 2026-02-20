@@ -105,7 +105,7 @@ const handleProfile = async () => {
       @mouseleave="showHoverInfo = false"
     >
       <div
-        class="w-10 h-10 rounded-full overflow-hidden bg-[#0E4B90] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition"
+        class="w-10 h-10 rounded-full overflow-hidden bg-[#1D355E] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition"
       >
         <img
           v-if="profileImageUrlPreview"
@@ -171,7 +171,7 @@ const handleProfile = async () => {
               <path d="M6 6l12 12" />
             </svg>
           </button>
-          <div class="w-16 h-16 rounded-full overflow-hidden bg-[#0E4B90]">
+          <div class="w-16 h-16 rounded-full overflow-hidden bg-[#1D355E]">
             <img
               v-if="profileImageUrlPreview"
               :src="profileImageUrlPreview"

@@ -74,12 +74,12 @@ onMounted(async () => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -290,7 +290,7 @@ onMounted(async () => {
                 :class="[
                   'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
                   (tab === 'event' || !tab)
-                    ? 'bg-[#0E4B90] text-white shadow-md transform scale-105'
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
               >
@@ -301,7 +301,7 @@ onMounted(async () => {
                 :class="[
                   'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
                   tab === 'news'
-                    ? 'bg-[#0E4B90] text-white shadow-md transform scale-105'
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
               >
@@ -404,7 +404,7 @@ onMounted(async () => {
                     </p>
                   </div>
                   <div class="flex items-center justify-end">
-                     <button class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#0E4B90] group-hover:text-white transition-all duration-300">
+                     <button class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>

@@ -640,12 +640,12 @@ function formatDateTime(datetimeStr) {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -879,7 +879,7 @@ function formatDateTime(datetimeStr) {
 
           <!-- Explore Categories Header -->
           <div class="flex items-center gap-3 mb-6 mt-12">
-             <div class="h-8 w-1 bg-[#0E4B90] rounded-full"></div>
+             <div class="h-8 w-1 bg-[#1D355E] rounded-full"></div>
              <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Explore Community</h2>
           </div>
 
@@ -992,7 +992,7 @@ function formatDateTime(datetimeStr) {
         <!-- My Parcel Section -->
         <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
           <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
-             <div class="bg-[#0E4B90]/10 p-2 rounded-lg">
+             <div class="bg-[#1D355E]/10 p-2 rounded-lg">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
                   <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

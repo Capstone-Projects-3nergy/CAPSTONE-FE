@@ -373,12 +373,12 @@ const goToPage = (page) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -529,12 +529,12 @@ const goToPage = (page) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -748,19 +748,32 @@ const goToPage = (page) => {
 
         <!-- Content Card -->
         <div
-          class="w-full bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white/50 p-8 overflow-hidden relative"
+          class="w-full rounded-3xl p-8 overflow-hidden relative"
         >
           <!-- Decor -->
           <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50/50 to-transparent rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
 
           <!-- Header -->
           <div class="relative z-10 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
-              Notifications
-            </h2>
-            <p class="text-sm text-gray-500 mt-1">
-              Stay updated with your latest parcels and announcements
-            </p>
+              <div class="flex items-center gap-5">
+            <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+              <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#185DC0"
+                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+              />
+            </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Notifications </span>
+          </h2>
+        </div>
           </div>
 
           <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
