@@ -38,7 +38,7 @@ watch(
 </script>
 
 <template>
-  <header class="flex items-center w-full h-16 bg-white">
+ <header class="fixed top-0 left-0 w-full h-16 bg-white z-40 shadow">
     <div
       class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
     >

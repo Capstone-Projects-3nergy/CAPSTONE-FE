@@ -239,7 +239,7 @@ const showEmailFormError = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />

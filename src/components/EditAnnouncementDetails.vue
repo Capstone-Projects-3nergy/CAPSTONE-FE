@@ -136,7 +136,7 @@ const handleCancel = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-50 flex flex-col"
+    class="min-h-screen bg-gray-50 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-16' : 'md:ml-64'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />

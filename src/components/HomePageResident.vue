@@ -623,11 +623,11 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="px-6 mt-4">
+    <div class="fixed px-6 mt-4">
       <AlertPopUp
         v-if="welcomePopupVisible"
         :message="'Hi'"

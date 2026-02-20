@@ -677,7 +677,7 @@ const closePopUp = (operate) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+  <div class="min-h-screen bg-gray-100 flex flex-col pt-16">
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
       <main class="flex-1 p-9">

@@ -275,11 +275,11 @@ const toggleSortDate = () => {
 
 <template>
   <div
-    class="min-h-screen bg-[#F5F7FA] flex flex-col font-sans"
+    class="min-h-screen bg-[#F5F7FA] flex flex-col font-sans pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="px-6 mt-4">
+    <div class="fixed top-400 px-6 mt-4">
       <AlertPopUp
         v-if="welcomePopupVisible"
         :message="'Hi'"
