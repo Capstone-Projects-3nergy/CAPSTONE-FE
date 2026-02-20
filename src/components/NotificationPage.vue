@@ -609,7 +609,7 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
+            <!-- <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -624,7 +624,7 @@ const goToPage = (page) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
