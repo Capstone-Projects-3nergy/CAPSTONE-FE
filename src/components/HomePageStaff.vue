@@ -1014,8 +1014,8 @@ const toggleSortDate = () => {
 
       <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
         <div class="bg-white p-6 shadow-sm rounded-2xl">
-          <section class="relative rounded-xl overflow-hidden shadow-md group">
-            <div class="relative h-[350px] md:h-[450px] w-full">
+          <section class="relative group">
+            <div class="relative h-[350px] md:h-[450px] w-full rounded-3xl overflow-hidden shadow-lg">
               <div
                 v-for="(slide, index) in slides"
                 :key="index"
@@ -1096,7 +1096,7 @@ const toggleSortDate = () => {
           </section>
 
   
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+          <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mt-10">
   
             <div
               @click="showManageAnnouncementPage"
@@ -1183,6 +1183,36 @@ const toggleSortDate = () => {
                 </div>
               </div>
             </div>
+            <div
+              @click="showManageAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+            >
+              <div class="h-56 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-gray-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+          
+                <div class="absolute inset-0 bg-gray-100 z-0"></div>
+                <img
+                  :src="newsImg"
+                  alt="All Announcements"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out grayscale group-hover:grayscale-0 relative z-10 opacity-80"
+                />
+                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    HISTORY
+                </div>
+              </div>
+              <div class="p-7 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">ALL ARCHIVES</h2>
+                </div>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
+                   View the complete archive of all past and current notices, schedules, and official updates here.
+                </p>
+                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                    View Archive <span class="ml-2">→</span>
+                </div>
+              </div>
+            </div>
+
           </section>
         </div>
       </main>

@@ -794,7 +794,7 @@ function formatDateTime(datetimeStr) {
       </button>
 
       <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
-            <div class=" p-8">
+            <div class="pt-0">
           <div class="flex items-center space-x-3 mb-6 pb-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
@@ -985,9 +985,9 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         <!-- Hero / Carousel Section -->
-        <div class="p-6  mb-8 ">
-          <section class="relative overflow-hidden group ">
-            <div class="relative h-[350px] md:h-[450px] w-full  rounded-2xl">
+        <div class="p-6 pt-0 mb-8 ">
+          <section class="relative group ">
+            <div class="relative h-[350px] md:h-[450px] w-full rounded-3xl overflow-hidden shadow-lg">
               <div
                 v-for="(slide, index) in slides"
                 :key="index"
@@ -1074,7 +1074,7 @@ function formatDateTime(datetimeStr) {
           </div>
 
           <!-- Categorized Cards -->
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
             <!-- News Card -->
             <div
               @click="showAnnouncementPage()"
@@ -1099,7 +1099,7 @@ function formatDateTime(datetimeStr) {
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
                  </div>
-                <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">News & Announcements</h3>
+                <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">News Updates</h3>
                 <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
                   Check out the latest official notices, maintenance schedules, and important updates from the dormitory management team.
                 </p>
@@ -1176,6 +1176,43 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
             </div>
+
+            <!-- All Announcements Card -->
+            <div
+              @click="showAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
+            >
+              <div class="h-1/2 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
+                <!-- Adding bg-gray-100 as fallback if image overlaps -->
+                <div class="absolute inset-0 bg-gray-100 z-0"></div>
+                <img
+                  :src="newsImg"
+                  alt="All Announcements"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out grayscale group-hover:grayscale-0 relative z-10 opacity-80"
+                />
+                 <div class="absolute top-4 left-4 z-20">
+                    <span class="bg-gray-800/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                      History
+                    </span>
+                 </div>
+              </div>
+              <div class="p-8 flex flex-col flex-1 relative bg-white">
+                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                 </div>
+                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-gray-700 transition-colors">All Announcements</h3>
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                   View the complete archive of all past and current notices, schedules, and official updates here.
+                </p>
+                 <div class="mt-auto pt-6 flex items-center text-gray-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    View Archive <span>→</span>
+                </div>
+              </div>
+            </div>
+
           </section>
         </div>
 
