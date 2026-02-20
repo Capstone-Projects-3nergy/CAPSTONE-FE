@@ -1185,29 +1185,29 @@ function formatDateTime(datetimeStr) {
               <div class="h-1/2 overflow-hidden relative">
                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <!-- Adding bg-gray-100 as fallback if image overlaps -->
-                <div class="absolute inset-0 bg-gray-100 z-0"></div>
+                <div class="absolute inset-0 bg-yellow-100 z-0"></div>
                 <img
                   :src="newsImg"
                   alt="All Announcements"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out grayscale group-hover:grayscale-0 relative z-10 opacity-80"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out yellowscale group-hover:yellowscale-0 relative z-10 opacity-80"
                 />
                  <div class="absolute top-4 left-4 z-20">
-                    <span class="bg-gray-800/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                    <span class="bg-yellow-800/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
                       History
                     </span>
                  </div>
               </div>
               <div class="p-8 flex flex-col flex-1 relative bg-white">
                  <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
-                    <svg class="w-7 h-7 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-7 h-7 text-yellow-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                  </div>
-                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-gray-700 transition-colors">All Announcements</h3>
+                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-yellow-700 transition-colors">All Announcements</h3>
                 <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
                    View the complete archive of all past and current notices, schedules, and official updates here.
                 </p>
-                 <div class="mt-auto pt-6 flex items-center text-gray-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                 <div class="mt-auto pt-6 flex items-center text-yellow-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
                     View Archive <span>→</span>
                 </div>
               </div>
