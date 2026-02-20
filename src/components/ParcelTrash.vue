@@ -911,9 +911,9 @@ const closePopUp = (operate) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 w-full">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-1">
+      <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-100 min-h-screen font-sans overflow-x-hidden">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
+          <div class="flex items-center space-x-1 w-full md:w-auto">
                <div class="flex items-center gap-4">
             <!-- <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -935,7 +935,7 @@ const closePopUp = (operate) => {
                 />
               </g>
             </svg> -->
-           <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+           <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -964,15 +964,15 @@ const closePopUp = (operate) => {
           </div>
         </div>
         </div>
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-4">
-           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 w-full overflow-hidden gap-4">
+          <div class="flex items-center space-x-4 overflow-x-auto w-full pb-2 md:pb-0">
+           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 flex whitespace-nowrap overflow-x-auto w-full lg:w-auto">
               <button
                 v-for="tab in tabs"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
-                     'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                     'px-4 md:px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0',
                   activeTab === tab
                     ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'

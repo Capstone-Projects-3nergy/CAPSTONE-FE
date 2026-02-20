@@ -708,7 +708,7 @@ const goToPage = (page) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-8 bg-gray-50 relative">
+      <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-50 relative overflow-x-hidden font-sans">
         <!-- LINE Notification -->
         <!-- <div class="fixed top-5 right-5 z-50 space-y-3">
           <LineNotification
@@ -748,7 +748,7 @@ const goToPage = (page) => {
 
         <!-- Content Card -->
         <div
-          class="w-full rounded-3xl p-8 overflow-hidden relative"
+          class="w-full rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
         >
           <!-- Decor -->
           <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50/50 to-transparent rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
