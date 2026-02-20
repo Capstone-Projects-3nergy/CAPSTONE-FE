@@ -288,7 +288,7 @@ onMounted(async () => {
               <button
                 @click="tab = 'event'"
                 :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
+                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
                   (tab === 'event' || !tab)
                     ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
@@ -299,7 +299,7 @@ onMounted(async () => {
               <button
                 @click="tab = 'news'"
                 :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
+                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                   tab === 'news'
                     ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'

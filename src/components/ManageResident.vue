@@ -843,16 +843,16 @@ const showResidentDetail = async function (id) {
             <div
               class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8"
             >
-              <div class="flex bg-white rounded-lg overflow-hidden w-fit">
+              <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
                 <button
                   v-for="tab in tabs"
                   :key="tab"
                   @click="activeTab = tab"
                   :class="[
-                    'px-4 py-1 font-medium transition cursor-pointer',
+                    'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                     activeTab === tab
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-500 hover:bg-gray-200'
+                      ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   ]"
                 >
                   {{ tab }}

@@ -792,11 +792,12 @@ const goToPage = (page) => {
         </div>
           </div>
 
-          <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
+          <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
             <button
               @click="activeNotifyTab = 'all'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'all' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'all'? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               All
             </button>
@@ -804,7 +805,8 @@ const goToPage = (page) => {
             <button
               @click="activeNotifyTab = 'parcel'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'parcel' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'parcel' ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               Parcels
             </button>
@@ -812,7 +814,8 @@ const goToPage = (page) => {
             <button
               @click="activeNotifyTab = 'announcement'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'announcement' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'announcement'? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               Announcements
             </button>

@@ -947,16 +947,16 @@ const closePopUp = (operate) => {
         </div>
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-4">
-            <div class="flex bg-white rounded-lg overflow-hidden">
+           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
               <button
                 v-for="tab in tabs"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
-                  'px-4 py-1 font-medium transition  cursor-pointer',
+                     'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                   activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-500 hover:bg-gray-200'
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
               >
                 {{ tab }}
