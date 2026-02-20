@@ -357,150 +357,336 @@ const toggleSidebar = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
-        <div class="max-w-7xl mx-auto">
-          <!-- Header -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div class="flex items-center gap-4">
-              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
+      <main class="flex-1 p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans">
+        <div class="max-w-7xl mx-auto space-y-6">
+          
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Parcels -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">📦</span>
+                <span class="flex items-center text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
+                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                  12%
+                </span>
               </div>
-              <div>
-                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                    Dashboard Overview
-                  </span>
-                </h2>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">124</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels (Month)</p>
+              </div>
+            </div>
+
+            <!-- Awaiting Pickup -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">⏳</span>
+                <span class="text-orange-400 text-xs font-bold bg-orange-50 px-2 py-1 rounded">
+                  → 3 days avg
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">38</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Awaiting Pickup</p>
+              </div>
+            </div>
+
+            <!-- Overdue -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">🚨</span>
+                <span class="flex items-center text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">
+                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  Action needed
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">5</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Overdue (>7 days)</p>
+              </div>
+            </div>
+
+            <!-- Picked Up -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-emerald-500 text-xs font-bold">
+                  69% rate
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">86</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Picked Up</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overdue Alert Box -->
+          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-2xl">🚨</span>
+              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
+            </div>
+            <p class="text-red-500 text-sm mb-4">กรุณาติดต่อผู้พักอาศัยเพื่อรับพัสดุโดยเร็ว</p>
+            
+            <div class="space-y-3">
+              <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
+                  <span class="font-bold text-gray-800">kong zeed</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 13</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH198273645</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
+                  <span class="font-bold text-gray-800">Suklita Mook</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 1</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH291837465</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
+                  <span class="font-bold text-gray-800">testkub</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 532</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH001328374</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Export Actions -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-500">Export:</span>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-green-600">📊</span> Export Excel (.xlsx)
+              </button>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-red-500">📄</span> Export PDF Report
+              </button>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-orange-500">📑</span> Export CSV
+              </button>
+            </div>
+            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Print Summary
+            </button>
+          </div>
+
+          <!-- Charts Grid 1 -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Parcel Activity Chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-8">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">Parcel Activity</h3>
+                  <p class="text-xs text-gray-500">Received · Picked Up · Overdue</p>
+                </div>
+                <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
+                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Daily</button>
+                  <button class="px-4 py-1.5 text-xs font-bold text-gray-900 bg-white rounded-md shadow-sm">Weekly</button>
+                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Monthly</button>
+                </div>
+              </div>
+              <div class="h-[250px] w-full relative">
+                 <canvas id="parcelChart"></canvas>
+              </div>
+              <div class="flex items-center gap-6 mt-6">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-blue-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Received</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-emerald-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Picked Up</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-red-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Overdue</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Distribution -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 class="text-lg font-bold text-gray-900">Status Distribution</h3>
+              <p class="text-xs text-gray-500 mb-8">Current month</p>
+              
+              <div class="flex justify-center mb-8 relative">
+                <!-- Placeholder for Donut Chart -->
+                <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-l-red-500 flex items-center justify-center flex-col">
+                  <span class="text-3xl font-black text-gray-900 leading-none">124</span>
+                  <span class="text-xs text-gray-500">Total</span>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div>
+                    <span class="text-sm text-gray-600">Picked Up</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">86</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">69%</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></div>
+                    <span class="text-sm text-gray-600">Awaiting</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">38</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">27%</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-red-500"></div>
+                    <span class="text-sm text-gray-600">Overdue</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">5</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">4%</span>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
-               <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-               <span class="text-sm font-medium text-gray-600">Live Updates</span>
-            </div>
           </div>
 
-          <!-- Stats Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <!-- Total Parcel -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
-              <div class="flex items-center justify-between mb-4">
-                <div class="p-3 rounded-xl bg-blue-50 text-[#0E4B90] group-hover:bg-[#1D355E] group-hover:text-white transition-colors duration-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                  </svg>
+          <!-- Charts Grid 2 -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+            
+            <!-- Parcel by Room -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+              <div class="flex items-center justify-between mb-8">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">Parcel by Room</h3>
+                  <p class="text-xs text-gray-500">Heat map - darker = more parcels pending</p>
                 </div>
-                <span class="flex items-center text-green-600 text-xs font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                  +12% 
-                  <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                </span>
+                <div class="flex items-center gap-4">
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-gray-100"></div><span class="text-xs text-gray-400">0</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-100"></div><span class="text-xs text-gray-400">1-2</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-300"></div><span class="text-xs text-gray-400">3-4</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-600"></div><span class="text-xs text-gray-400">5+</span></div>
+                </div>
               </div>
-              <div class="flex flex-col">
-                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Total Parcels</span>
-                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-[#0E4B90] transition-colors">247</span>
+              <div class="w-full h-[280px] bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center text-gray-400">
+                Heat Map Container
               </div>
             </div>
 
-            <!-- Unreceived Parcel -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-orange-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
-              <div class="flex items-center justify-between mb-4">
-                <div class="p-3 rounded-xl bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-                <span class="flex items-center text-orange-600 text-xs font-bold bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
-                  Pending
-                </span>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Unreceived</span>
-                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-orange-600 transition-colors">89</span>
-              </div>
-            </div>
-
-            <!-- Received Parcel -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-green-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
-              <div class="flex items-center justify-between mb-4">
-                <div class="p-3 rounded-xl bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
-                </div>
-                <span class="flex items-center text-green-600 text-xs font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                  Completed
-                </span>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Received</span>
-                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-green-600 transition-colors">158</span>
-              </div>
-            </div>
-
-            <!-- All Resident -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-purple-100 transition-all duration-300 group cursor-pointer transform hover:-translate-y-1">
-              <div class="flex items-center justify-between mb-4">
-                <div class="p-3 rounded-xl bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                </div>
-                <span class="flex items-center text-blue-600 text-xs font-bold bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                  Active
-                </span>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Total Residents</span>
-                <span class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-purple-600 transition-colors">342</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Chart Section -->
-          <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow duration-500">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-              <div>
-                <h3 class="text-xl font-bold text-gray-900">Parcel Volume Trends</h3>
-                <p class="text-sm text-gray-500 mt-1">Overview of parcel traffic over the selected period</p>
-              </div>
-              
-              <div class="flex items-center p-1 bg-gray-100 rounded-xl">
-                <button
-                  class="px-4 py-2 text-sm font-bold rounded-lg bg-white text-[#0E4B90] shadow-sm transform transition-all hover:scale-105"
-                >
-                  This Week
-                </button>
-                <button
-                  class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  This Month
+            <!-- Recent Parcels -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
+                <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
+                  + Add
                 </button>
               </div>
+
+              <!-- Table Header -->
+              <div class="grid grid-cols-4 px-2 mb-4">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tracking</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Resident</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Room</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2">Status</span>
+              </div>
+
+              <!-- List -->
+              <div class="space-y-4">
+                <!-- Item 1 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH12322223</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
+                  <span class="text-xs text-gray-600 text-center">13</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                       <button class="p-1 rounded bg-gray-50 border border-gray-200 text-gray-400"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH123654789</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">Suklita Mook</span>
+                  <span class="text-xs text-gray-600 text-center">1</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                  </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH001928374</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">testkub</span>
+                  <span class="text-xs text-gray-600 text-center">532</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-yellow-100">⏳ Waiting</span>
+                  </div>
+                </div>
+                
+                 <!-- Item 4 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH009182736</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">testkubza</span>
+                  <span class="text-xs text-gray-600 text-center">532</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-blue-100">✉ Notified</span>
+                  </div>
+                </div>
+
+                 <!-- Item 5 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH198273645</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
+                  <span class="text-xs text-gray-600 text-center">13</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-red-100">⚠️ Overdue</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 border-t border-gray-100 pt-4 text-center">
+                <button class="text-xs font-medium text-blue-500 hover:text-blue-700">View all parcels →</button>
+              </div>
             </div>
-            <div class="h-[300px] w-full">
-               <canvas id="parcelChart"></canvas>
-            </div>
+
           </div>
         </div>
       </main>
