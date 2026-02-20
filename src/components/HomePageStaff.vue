@@ -396,19 +396,51 @@ const activeTab = ref('parcel')
         <div class="max-w-7xl mx-auto space-y-6">
           
           <!-- Tabs Header -->
-          <div class="flex items-center gap-6 mb-2 border-b border-gray-200">
-            <button 
-              @click="activeTab = 'parcel'" 
-              :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'parcel' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
-            >
-              Parcel Dashboard
-            </button>
-            <button 
-              @click="activeTab = 'resident'"
-              :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'resident' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
-            >
-              Resident Dashboard
-            </button>
+          <div class="flex items-center justify-between gap-6 mb-2 border-b border-gray-200">
+            <div class="flex items-center gap-8">
+              <button 
+                @click="activeTab = 'parcel'" 
+                class="cursor-pointer flex items-center gap-3 pt-2"
+                :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'parcel' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+              >
+                <div class="p-2.5 bg-orange-100 rounded-xl text-orange-500 shadow-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
+                    <path d="M12 12l8 -4.5" />
+                    <path d="M12 12l0 9" />
+                    <path d="M12 12l-8 -4.5" />
+                    <path d="M16 5.25l-8 4.5" />
+                  </svg>
+                </div>
+                Parcel Dashboard
+              </button>
+              <button 
+                @click="activeTab = 'resident'"
+                class="cursor-pointer flex items-center gap-3 pt-2"
+                :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'resident' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+              >
+                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center">
+                 <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+                  />
+                </svg>
+                </div> 
+                Resident Dashboard
+              </button>
+            </div>
+            
+            <div class="flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm mb-4 shadow-sm">
+              <span class="mr-2 text-blue-500">📅</span>
+              Thu, 19 Feb 2026
+            </div>
           </div>
 
           <!-- Tab Content: Parcel Dashboard -->
@@ -547,9 +579,9 @@ const activeTab = ref('parcel')
               <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                 <span class="text-red-500">📄</span> Export PDF Report
               </button>
-              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <!-- <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                 <span class="text-orange-500">📑</span> Export CSV
-              </button>
+              </button> -->
             </div>
             <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
