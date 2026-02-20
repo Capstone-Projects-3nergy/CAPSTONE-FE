@@ -20,7 +20,7 @@ defineProps({
       :class="
         title === 'Tractify'
           ? 'text-[24px] font-black text-white tracking-wide'
-          : 'text-[15px] font-bold text-gray-300'
+          : 'text-[14px] font-bold text-gray-300'
       "
       >{{ title }}</span
     >
