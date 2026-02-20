@@ -132,12 +132,11 @@ const getIconClass = (category) => {
     
     <!-- Pagination -->
     <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
-        <!-- <span class="text-sm text-gray-500">Showing page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ total }}</span></span> -->
-        <div class="flex gap-2 w-full sm:w-auto justify-center">
+        <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
             <button 
               @click="$emit('prev')" 
               :disabled="page === 1"
-              class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Previous</button>
             
             <!-- Page Numbers -->
@@ -145,8 +144,12 @@ const getIconClass = (category) => {
               v-for="p in pages"
               :key="p"
               @click="$emit('go', p)"
-              class="px-3 py-1 border border-gray-200 rounded-lg text-sm cursor-pointer"
-              :class="p === page ? 'bg-blue-50 text-blue-600 font-medium border-blue-200' : 'text-gray-500 hover:bg-gray-50d'"
+              :class="[
+                'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                p === page 
+                  ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+              ]"
             >
               {{ p }}
             </button>
@@ -154,7 +157,7 @@ const getIconClass = (category) => {
             <button 
               @click="$emit('next')" 
               :disabled="!canNext"
-              class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Next</button>
         </div>
     </div>

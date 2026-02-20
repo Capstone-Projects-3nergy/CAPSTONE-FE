@@ -232,7 +232,7 @@ watch(
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
@@ -433,7 +433,9 @@ watch(
 
       <main class="flex-1 p-9 bg-gray-100">
         <div class="flex items-center space-x-2 mb-6">
-          <svg
+              <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+             <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -444,9 +446,12 @@ watch(
               d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
             />
           </svg>
-          <h2 class="text-xl sm:text-xl md:text-2xl font-bold text-[#185dc0]">
-            Manages Resident &gt; Details
-          </h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Manages Resident &gt; Details  </span>
+                </h2>
+          </div>
         </div>
 
         <div class="flex flex-col mb-4 gap-4">
