@@ -386,7 +386,32 @@ const activeTab = ref('parcel')
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans overflow-x-hidden">
         <div class="max-w-7xl mx-auto space-y-6">
-          
+               <!-- Header & Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                     fill="#185DC0"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   DashBoard
+                  </span>
+                </h2>
+              </div>
+            </div>
+          </div>
           <!-- Tabs Header -->
           <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 mb-2 border-b border-gray-200 pb-2 lg:pb-0">
             <div class="flex items-center gap-4 lg:gap-8 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
