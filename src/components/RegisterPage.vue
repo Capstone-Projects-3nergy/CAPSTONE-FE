@@ -768,7 +768,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -792,7 +792,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model.trim="form.email"
                     type="email"
                     placeholder="Email"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('email')"
                   />
                 </div>
@@ -844,7 +844,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.roomNumber"
                     type="text"
                     placeholder="Room Number"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('roomNumber')"
                   />
                 </div>
@@ -871,7 +871,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -952,7 +952,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -1037,7 +1037,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -1060,7 +1060,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.email"
                       type="email"
                       placeholder="Staff Email"
-                      class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                       @input="checkInputLength('email')"
                     />
                   </div>
@@ -1108,7 +1108,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.position"
                       type="text"
                       placeholder="Position"
-                      class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                       @input="checkInputLength('position')"
                       :class="{
                         'border-red-600 text-red-600': isStaffPositionTooShort
@@ -1156,7 +1156,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -1238,7 +1238,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -1391,13 +1391,13 @@ const toggleComfirmPasswordVisibility = () => {
 }
 .custom-select {
   width: 100%;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: #181820;
   border: 1px solid #000000;
   border-radius: 0.6em;
   background-color: #fff;
 
-  padding: 0.375rem 2.5rem 0.375rem 2.6rem;
+  padding: 0.5rem 2.5rem 0.5rem 2.6rem;
 
   appearance: none;
   -webkit-appearance: none;
