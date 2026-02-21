@@ -88,7 +88,7 @@ onMounted(async () => {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (context) => `${context.parsed.y} พัสดุ`
+            label: (context) => `${context.parsed.y} parcels`
           }
         }
       },
