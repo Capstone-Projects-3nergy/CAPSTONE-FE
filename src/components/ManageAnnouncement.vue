@@ -46,66 +46,77 @@ const closePopUp = (operate) => {
 const announcements = ref([
   {
     id: 1,
-    title: 'Elevator Maintenance',
-    subtitle: 'Scheduled for Block A',
-    category: 'Maintenance',
-    datePosted: 'Oct 24, 2025',
-    status: 'Active'
+    title: 'Temporary Water Shutoff — Plumbing Repair',
+    subtitle: 'Water will be shut off from 08:00–14:00 on February 20, 2026, for main plumbing repairs. Please reserve water in advance. We apologize for the inconvenience. If you have any questions, please contact the staff at the counter.',
+    category: 'Urgent',
+    pinned: true,
+    datePosted: '19 Feb 2026 - 10:30',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 82
   },
   {
     id: 2,
-    title: 'Community BBQ',
-    subtitle: 'Annual get together',
-    category: 'Events',
-    datePosted: 'Nov 02, 2025',
-    status: 'Upcoming'
+    title: 'Temporary Elevator Shutdown for Annual Inspection',
+    subtitle: 'The elevator will be closed for service on February 21-22, 2026, for annual inspection and maintenance by specialized technicians. Residents may use the stairs on the left side of the building.',
+    category: 'Maintenance',
+    pinned: true,
+    datePosted: '18 Feb 2026 - 15:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 54
   },
   {
     id: 3,
-    title: 'Water Supply Interruption',
-    subtitle: 'Emergency repairs on Main St.',
-    category: 'Maintenance',
-    datePosted: 'Oct 28, 2025',
-    status: 'Active'
+    title: 'New Regulations for Parcel Collection',
+    subtitle: 'Starting from March 1, 2026, residents must collect their parcels within 7 days of notification. A storage fee may apply if overdue.',
+    category: 'General',
+    pinned: false,
+    datePosted: '17 Feb 2026 - 09:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 61
   },
   {
     id: 4,
-    title: 'New Gym Equipment',
-    subtitle: 'Treadmills have been upgraded',
-    category: 'News',
-    datePosted: 'Oct 15, 2025',
-    status: 'Past'
+    title: 'New Resident Welcome Party — March 2026',
+    subtitle: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area. There will be food, snacks, and many fun activities.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '15 Feb 2026 - 14:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 29
   },
   {
     id: 5,
-    title: 'Yoga Class Schedule Change',
-    subtitle: 'Evening classes moved to 6pm',
-    category: 'Events',
-    datePosted: 'Oct 10, 2025',
-    status: 'Active'
+    title: 'Notice of Office Hours Change',
+    subtitle: 'Starting in March, the office will be open from 08:30–18:30, Monday–Friday, and 09:00–14:00 on Saturday (closed on Sundays and public holidays).',
+    category: 'General',
+    pinned: false,
+    datePosted: '12 Feb 2026 - 11:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 17
   },
   {
     id: 6,
-    title: 'Parking Lot Resurfacing',
-    subtitle: 'Visitor spots unavailable',
-    category: 'Maintenance',
-    datePosted: 'Nov 10, 2025',
-    status: 'Upcoming'
-  },
-  {
-    id: 7,
-    title: 'Town Hall Meeting',
-    subtitle: 'Discussing new security measures',
-    category: 'Community',
-    datePosted: 'Nov 15, 2025',
-    status: 'Upcoming'
+    title: 'Notice of Common Area Renovation',
+    subtitle: 'Not yet published — content under revision. The renovation schedule for the ground floor hall and lounge area is expected to be completed by March 2026.',
+    category: 'General',
+    pinned: false,
+    datePosted: '10 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
   }
 ])
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const currentPage = ref(1)
-const itemsPerPage = 5
+const viewMode = ref('grid')
+const itemsPerPage = 6
 
 const filteredAnnouncements = computed(() => {
   return announcements.value.filter(item => {
@@ -456,7 +467,7 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 bg-gray-50/50 min-h-screen font-sans">
+      <main class="flex-1 p-6 md:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-7xl mx-auto">
           <!-- Header & Actions -->
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -475,22 +486,83 @@ const showProfileStaffPage = async function () {
               </div>
             </div>
             
-            <button class="flex items-center gap-2 bg-[#1D355E] hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-medium cursor-pointer" @click="showNewAnnouncementPage">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              New 
-            </button>
+            <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar">
+              <div class="flex items-center gap-2 bg-[#F2F5F9] text-[#1D355E] px-4 py-2.5 rounded-xl font-semibold shadow-sm border border-gray-200/60 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#185DC0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-sm">Thu, 19 Feb 2026</span>
+              </div>
+              <button class="flex items-center gap-2 bg-[#1D355E] hover:bg-[#185DC0] text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-semibold cursor-pointer whitespace-nowrap" @click="showNewAnnouncementPage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Announcement
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">6</div>
+                  <div class="text-sm font-semibold text-gray-500">Total Published</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">2</div>
+                  <div class="text-sm font-semibold text-gray-500">Pinned</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#F97316] bg-[#FFF7ED] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">1</div>
+                  <div class="text-sm font-semibold text-gray-500">Drafts</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">248</div>
+                  <div class="text-sm font-semibold text-gray-500">Total Views</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Announcement Filters -->
           <AnnouncementFilterBar
             :modelSearch="searchQuery"
             :modelCategory="selectedCategory"
-            :categories="['News', 'Events', 'Maintenance', 'Community']"
+            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :viewMode="viewMode"
             @update:search="searchQuery = $event"
             @update:category="selectedCategory = $event"
+            @update:viewMode="viewMode = $event"
           />
 
           <!-- Announcement Table -->
@@ -500,6 +572,7 @@ const showProfileStaffPage = async function () {
             :page="currentPage"
             :total="filteredAnnouncements.length"
             :can-next="canGoNext"
+            :viewMode="viewMode"
             @prev="prevPage"
             @next="nextPage"
             @go="goToPage"
