@@ -750,7 +750,7 @@ const activeTab = ref('parcel')
             </div> -->
 
             <!-- Recent Parcels -->
-          <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
                 <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
@@ -843,7 +843,7 @@ const activeTab = ref('parcel')
             </div>
 
            <!-- Overdue Alert Box -->
-          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
+          <div class="lg:col-span-2 bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
             <div class="flex items-center gap-3 mb-4">
               <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
