@@ -50,7 +50,7 @@ const closeModal = () => {
           <h2 class="text-xl font-bold text-gray-800 px-2 border-l-4 border-[#185DC0]">
             Announcement Details
           </h2>
-          <button @click="closeModal" class="p-2 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors">
+          <button @click="closeModal" class="p-2 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full transition-colors cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -123,7 +123,7 @@ const closeModal = () => {
         <div class="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end">
           <button
             @click="closeModal"
-            class="px-6 py-2.5 bg-[#1D355E] hover:bg-[#185DC0] text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-blue-100"
+            class="px-6 py-2.5 bg-[#1D355E] hover:bg-[#185DC0] text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-blue-100 cursor-pointer"
           >
             Close
           </button>

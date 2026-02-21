@@ -57,6 +57,10 @@ const props = defineProps({
   hideTrash: { type: Boolean, default: false },
   showMember: { type: Boolean, default: false },
   showParcel: { type: Boolean, default: false },
+  showEmail: { type: Boolean, default: true },
+  showTitle: { type: Boolean, default: false },
+  showCategory: { type: Boolean, default: false },
+  showDatePosted: { type: Boolean, default: false },
 })
 
 function formatDateTime(datetimeStr) {
@@ -134,7 +138,28 @@ const authStore = useAuthManager()
             </div>
           </th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Email</th>
+          <th v-if="showEmail" class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Email</th>
+
+          <th
+            v-if="showTitle"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Title
+          </th>
+
+          <th
+            v-if="showCategory"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Category
+          </th>
+
+          <th
+            v-if="showDatePosted"
+            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+          >
+            Date Posted
+          </th>
 
           <th
             v-if="showStatus"
@@ -293,10 +318,45 @@ const authStore = useAuthManager()
           </td>
 
           <td
+            v-if="showEmail"
             class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Email: </span>
             {{ p.email }}
+          </td>
+
+          <td
+            v-if="showTitle"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]">Title: </span>
+            <span class="font-medium">{{ p.title }}</span>
+          </td>
+
+          <td
+            v-if="showCategory"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none flex items-center md:table-cell"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Category: </span>
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+              :class="{
+                'bg-blue-50 text-blue-600': p.category === 'Updates',
+                'bg-emerald-50 text-emerald-600': p.category === 'Events',
+                'bg-purple-50 text-purple-600': p.category === 'Maintenance',
+                'bg-gray-100 text-gray-600': !['Updates', 'Events', 'Maintenance'].includes(p.category)
+              }"
+            >
+              {{ p.category || 'General' }}
+            </span>
+          </td>
+
+          <td
+            v-if="showDatePosted"
+            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+          >
+            <span class="md:hidden font-semibold text-[#185DC0]">Date Posted: </span>
+            {{ p.datePosted }}
           </td>
 
           <td
