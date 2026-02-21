@@ -768,7 +768,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -792,12 +792,12 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model.trim="form.email"
                     type="email"
                     placeholder="Email"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('email')"
                   />
                 </div>
               </div>
-                <div class="mb-4">
+                <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="21"
@@ -844,7 +844,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.roomNumber"
                     type="text"
                     placeholder="Room Number"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('roomNumber')"
                   />
                 </div>
@@ -871,7 +871,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -912,13 +912,13 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isPasswordTooShort"
-                  class="flex items-center text-sm text-red-600"
+                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="red"
-                    class="w-[15px] mr-1"
+                    class="w-[12px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -926,7 +926,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-sm text-red-600">
+                  <div class="text-xs text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -952,7 +952,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -991,25 +991,23 @@ const toggleComfirmPasswordVisibility = () => {
                     </svg>
                   </button>
                 </div>
-                <div
+              <div
                   v-if="isConfirmPasswordTooShort"
-                  class="flex items-center text-sm text-red-600"
+                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="red"
-                    class="w-[15px] mr-1"
-                    :class="isConfirmPasswordTooShort ? 'text-red-600' : 'text-[#918c8c]'"
+                    class="w-[12px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
                       d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
                       clip-rule="evenodd"
-                      :class="isConfirmPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                     />
                   </svg>
-                  <div class="text-sm text-red-600">
+                  <div class="text-xs text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1039,7 +1037,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -1062,7 +1060,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.email"
                       type="email"
                       placeholder="Staff Email"
-                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                      class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                       @input="checkInputLength('email')"
                     />
                   </div>
@@ -1110,7 +1108,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.position"
                       type="text"
                       placeholder="Position"
-                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                      class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                       @input="checkInputLength('position')"
                       :class="{
                         'border-red-600 text-red-600': isStaffPositionTooShort
@@ -1158,7 +1156,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -1199,13 +1197,13 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isPasswordTooShort"
-                  class="flex items-center text-sm text-red-600"
+                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="red"
-                    class="w-[15px] mr-1"
+                    class="w-[12px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -1213,7 +1211,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-sm text-red-600">
+                  <div class="text-xs text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1240,7 +1238,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-3"
+                    class="pl-10 w-full px-4 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -1281,13 +1279,13 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isConfirmPasswordTooShort"
-                  class="flex items-center text-sm text-red-600"
+                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="red"
-                    class="w-[15px] mr-1"
+                    class="w-[12px] mr-1"
                   >
                     <path
                       fill-rule="evenodd"
@@ -1295,7 +1293,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-sm text-red-600">
+                  <div class="text-xs text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1399,7 +1397,7 @@ const toggleComfirmPasswordVisibility = () => {
   border-radius: 0.6em;
   background-color: #fff;
 
-  padding: 0.55rem 2.5rem 0.55rem 2.6rem;
+  padding: 0.375rem 2.5rem 0.375rem 2.6rem;
 
   appearance: none;
   -webkit-appearance: none;
