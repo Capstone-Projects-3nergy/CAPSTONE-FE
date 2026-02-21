@@ -695,6 +695,7 @@ const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
   if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
+  if (operate === 'deleteMemberSuccessMessage') deleteMemberSuccess.value = false
 }
 </script>
 
@@ -1009,7 +1010,7 @@ const closePopUp = (operate) => {
             :titles="'Delete Resident is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="deleteMemberSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
