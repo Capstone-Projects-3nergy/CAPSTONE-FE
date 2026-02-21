@@ -557,8 +557,8 @@ const activeTab = ref('parcel')
             </div>
           </div>
 
-          <!-- Overdue Alert Box -->
-          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
+  
+          <!-- <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
             <div class="flex items-center gap-3 mb-4">
               <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -573,7 +573,7 @@ const activeTab = ref('parcel')
             <p class="text-red-500 text-sm mb-4">Please contact residents to pick up their parcels immediately</p>
             
             <div class="space-y-3">
-              <!-- Overdue Item -->
+           
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
                   <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
@@ -589,7 +589,7 @@ const activeTab = ref('parcel')
                 </div>
               </div>
 
-               <!-- Overdue Item -->
+            
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
                   <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
@@ -605,7 +605,7 @@ const activeTab = ref('parcel')
                 </div>
               </div>
 
-               <!-- Overdue Item -->
+         
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
                   <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
@@ -622,7 +622,7 @@ const activeTab = ref('parcel')
               </div>
 
             </div>
-          </div>
+          </div> -->
 
           <!-- Export Actions -->
           <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -731,7 +731,7 @@ const activeTab = ref('parcel')
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
             
             <!-- Parcel by Room -->
-            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+            <!-- <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
               <div class="flex items-center justify-between mb-8">
                 <div>
                   <h3 class="text-lg font-bold text-gray-900">Parcel by Room</h3>
@@ -747,10 +747,10 @@ const activeTab = ref('parcel')
               <div class="w-full h-[280px] bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center text-gray-400">
                 Heat Map Container
               </div>
-            </div>
+            </div> -->
 
             <!-- Recent Parcels -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
                 <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
@@ -774,7 +774,10 @@ const activeTab = ref('parcel')
                   <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
                   <span class="text-xs text-gray-600 text-center">13</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                    <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                      Picked Up
+                    </span>
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                        <button class="p-1 rounded bg-gray-50 border border-gray-200 text-gray-400"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
                     </div>
@@ -787,7 +790,10 @@ const activeTab = ref('parcel')
                   <span class="text-xs text-gray-600 truncate mr-2">Suklita Mook</span>
                   <span class="text-xs text-gray-600 text-center">1</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                    <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                      Picked Up
+                    </span>
                   </div>
                 </div>
 
@@ -797,7 +803,10 @@ const activeTab = ref('parcel')
                   <span class="text-xs text-gray-600 truncate mr-2">testkub</span>
                   <span class="text-xs text-gray-600 text-center">532</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-yellow-100">⏳ Waiting</span>
+                    <span class="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-yellow-100">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                      Waiting
+                    </span>
                   </div>
                 </div>
                 
@@ -807,7 +816,10 @@ const activeTab = ref('parcel')
                   <span class="text-xs text-gray-600 truncate mr-2">testkubza</span>
                   <span class="text-xs text-gray-600 text-center">532</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-blue-100">✉ Notified</span>
+                    <span class="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-blue-100">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg>
+                      Notified
+                    </span>
                   </div>
                 </div>
 
@@ -817,7 +829,10 @@ const activeTab = ref('parcel')
                   <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
                   <span class="text-xs text-gray-600 text-center">13</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-red-100">⚠️ Overdue</span>
+                    <span class="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-red-100">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                      Overdue
+                    </span>
                   </div>
                 </div>
               </div>
@@ -827,6 +842,72 @@ const activeTab = ref('parcel')
               </div>
             </div>
 
+           <!-- Overdue Alert Box -->
+          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                  <path d="M12 8l0 4" />
+                  <path d="M12 16l.01 0" />
+                </svg>
+              </div>
+              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - Not picked up for >7 days</h3>
+            </div>
+            <p class="text-red-500 text-sm mb-4">Please contact residents to pick up their parcels immediately</p>
+            
+            <div class="space-y-3 flex-1 overflow-y-auto pr-2">
+              <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
+                  <span class="font-bold text-gray-800">kong zeed</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 13</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH198273645</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
+                  <span class="font-bold text-gray-800">Suklita Mook</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 1</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH291837465</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
+                  <span class="font-bold text-gray-800">testkub</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 532</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH001328374</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
           </div>
           </div>
           
