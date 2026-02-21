@@ -627,7 +627,7 @@ function formatDateTime(datetimeStr) {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="fixed top-20 px-6 mt-4">
+    <div class="fixed top-20 px-6 mt-4 z-[9999]">
       <AlertPopUp
         v-if="welcomePopupVisible"
         :message="'Hi'"

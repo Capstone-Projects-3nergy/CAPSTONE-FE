@@ -359,7 +359,7 @@ const showResetPasswordPageWeb = async function () {
           </span>
         </p>
 
-        <div class="space-y-2">
+        <div class="fixed top-40 px-6 mt-2 z-[9999]">
           <AlertPopUp
             v-if="incorrect"
             :titles="'Email or Password is incorrect.'"
