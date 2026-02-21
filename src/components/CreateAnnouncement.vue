@@ -10,12 +10,17 @@ const router = useRouter()
 const route = useRoute()
 
 const isCollapsed = ref(false)
+const isCategoryOpen = ref(false)
 
 // Form Data
 const title = ref('')
 const category = ref('')
 const content = ref('')
-const date = ref(new Date().toISOString().split('T')[0]) // Default today
+const date = ref('')
+
+const targetAudience = ref('All')
+const isPinned = ref(false)
+const notifyEmail = ref(false)
 
 const categories = ['News', 'Events', 'Maintenance', 'Community']
 
@@ -91,7 +96,7 @@ const returnLoginPage = async () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-50 flex flex-col pt-16"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
       <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -303,7 +308,7 @@ const returnLoginPage = async () => {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-4 md:p-10 min-h-screen font-sans">
+      <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
          <div class="max-w-4xl mx-auto space-y-6">
           
           <!-- Header -->
@@ -313,90 +318,219 @@ const returnLoginPage = async () => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
              </button>
                 <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
               </div>
                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                   Create Announcement  </span>
+                   Create New Announcement </span>
                 </h2>
           </div>
           </div>
 
           <!-- Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-             <div class="p-8 space-y-6">
+             <div class="p-6 md:p-8 space-y-6">
                 
                 <!-- Title Input -->
                 <div class="space-y-2">
-                   <label for="title" class="text-sm font-semibold text-gray-700">Title</label>
+                   <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
                    <input 
                       type="text" 
-                      id="title" 
                       v-model="title"
-                      placeholder="e.g., Annual Community BBQ"
-                      class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                      placeholder="Enter announcement title..."
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                    />
                 </div>
 
                 <!-- Category & Date Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
-                      <label for="category" class="text-sm font-semibold text-gray-700">Category</label>
-                      <select 
-                         id="category" 
-                         v-model="category"
-                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none bg-white"
-                      >
-                         <option value="" disabled>Select a category</option>
-                         <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                      </select>
+                      <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
+                      <div class="relative" @click="isCategoryOpen = !isCategoryOpen" @mouseleave="isCategoryOpen = false">
+                        <div class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
+                            <span v-if="!category" class="text-gray-500">Select category...</span>
+                            <template v-else>
+                              <!-- General -->
+                              <svg v-if="category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              <!-- Maintenance -->
+                              <svg v-else-if="category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                              <!-- Events -->
+                              <svg v-else-if="category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              <!-- Urgent -->
+                              <svg v-else-if="category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                              <span class="text-gray-800">{{ category }}</span>
+                            </template>
+                        </div>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <!-- Dropdown Options -->
+                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
+                          <div @click="category = 'General'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                             General
+                          </div>
+                          <div @click="category = 'Maintenance'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                             Maintenance
+                          </div>
+                          <div @click="category = 'Events'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                             Activity/Events
+                          </div>
+                          <div @click="category = 'Urgent'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                             Urgent
+                          </div>
+                        </div>
+                      </div>
                    </div>
-                   
                    <div class="space-y-2">
-                      <label for="date" class="text-sm font-semibold text-gray-700">Date</label>
-                      <input 
-                         type="date" 
-                         id="date" 
-                         v-model="date"
-                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
-                      />
+                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
+                      <div class="relative">
+                        <input 
+                           type="datetime-local" 
+                           v-model="date"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
+                        />
+                      </div>
                    </div>
                 </div>
 
-                <!-- Content Textarea -->
+                <!-- Content -->
                 <div class="space-y-2">
-                   <label for="content" class="text-sm font-semibold text-gray-700">Content</label>
-                   <textarea 
-                      id="content" 
-                      v-model="content"
-                      rows="6"
-                      placeholder="Write your announcement details here..."
-                      class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-y"
-                   ></textarea>
+                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <!-- Mock Rich Text Toolbar -->
+                   <div class="border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                     <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
+                       <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                       </button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                       </button>
+                       <button class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                       </button>
+                     </div>
+                     <textarea 
+                        v-model="content"
+                        rows="6"
+                        class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                        placeholder="Enter announcement content... Supports text formatting."
+                     ></textarea>
+                   </div>
+                </div>
+
+                <!-- Cover Image -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Cover Image (if any)</label>
+                   <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]">
+                      <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                      </div>
+                      <p class="text-sm font-medium text-gray-700 mt-2">Click to upload or drag file here</p>
+                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
+                   </div>
+                </div>
+
+                <!-- Target Audience -->
+                <div class="space-y-3 pt-2">
+                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="All" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
+                      </div>
+                    </label>
+
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="Active" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
+                      </div>
+                    </label>
+
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Toggles -->
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-rose-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Pin Announcement</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
+                       </div>
+                     </div>
+                     <button @click="isPinned = !isPinned" :class="isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
+
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Email Notification</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Send email to notify residents immediately</p>
+                       </div>
+                     </div>
+                     <button @click="notifyEmail = !notifyEmail" :class="notifyEmail ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="notifyEmail ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
                 </div>
 
              </div>
 
              <!-- Footer Actions -->
-             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex items-center justify-end gap-3 border-t border-gray-100">
+             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-wrap-reverse md:flex-nowrap items-center justify-end gap-3 border-t border-gray-200">
                 <button 
                   @click="goBack" 
-                  class="px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all shadow-sm cursor-pointer"
+                  class="w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 font-medium transition-all shadow-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
-                  @click="submitAnnouncement" 
-                  class="px-5 py-2.5 rounded-xl text-white bg-[#1D355E] hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
+                  class="w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-700 bg-[#E8EDF2] hover:bg-[#D1D9E6] font-medium transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                    <polyline points="7 3 7 8 15 8"></polyline>
-                  </svg>
-                  Publish
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  Save Draft
+                </button>
+                <button 
+                  @click="submitAnnouncement" 
+                  class="w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-[#1D355E] hover:bg-[#152847] font-medium shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                  Publish Announcement
                 </button>
              </div>
           </div>

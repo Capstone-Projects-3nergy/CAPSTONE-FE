@@ -13,6 +13,7 @@ const route = useRoute()
 
 // State
 const isCollapsed = ref(false)
+const isCategoryOpen = ref(false)
 const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
 const editSuccess = ref(false)
@@ -35,8 +36,11 @@ const announcements = ref([
     subtitle: 'Scheduled for Block A',
     category: 'Maintenance',
     datePosted: '2025-10-24',
-    status: 'Active',
-    content: 'The elevator in Block A will be undergoing scheduled maintenance on Oct 24th from 10 AM to 2 PM. Please use the stairs during this time.'
+    status: 'Published',
+    content: 'The elevator in Block A will be undergoing scheduled maintenance on Oct 24th from 10 AM to 2 PM. Please use the stairs during this time.',
+    targetAudience: 'Zone',
+    isPinned: true,
+    notifyEmail: true
   },
   {
     id: 2,
@@ -44,41 +48,53 @@ const announcements = ref([
     subtitle: 'Annual get together',
     category: 'Events',
     datePosted: '2025-11-02',
-    status: 'Upcoming',
-    content: 'Join us for the annual community BBQ at the central park area. Food and drinks will be provided!'
+    status: 'Draft',
+    content: 'Join us for the annual community BBQ at the central park area. Food and drinks will be provided!',
+    targetAudience: 'All',
+    isPinned: false,
+    notifyEmail: false
   },
   {
     id: 3,
     title: 'Water Supply Interruption',
     subtitle: 'Emergency repairs on Main St.',
-    category: 'Maintenance',
+    category: 'Urgent',
     datePosted: '2025-10-28',
-    status: 'Active',
-    content: 'Water supply will be interrupted due to emergency repairs.'
+    status: 'Published',
+    content: 'Water supply will be interrupted due to emergency repairs.',
+    targetAudience: 'Active',
+    isPinned: true,
+    notifyEmail: true
   },
   {
     id: 4,
-    title: 'New Gym Equipment',
-    subtitle: 'Treadmills have been upgraded',
-    category: 'News',
-    datePosted: '2025-10-15',
-    status: 'Past',
-    content: 'We have installed brand new treadmills in the gym. Enjoy your workout!'
+    title: 'New Resident Welcome Party — March 2026',
+    subtitle: 'All residents are invited to join the welcome party for new members',
+    category: 'General',
+    datePosted: '2026-02-15',
+    status: 'Published',
+    content: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area.',
+    targetAudience: 'All',
+    isPinned: false,
+    notifyEmail: false
   },
 ])
 
 const announcementForm = reactive({
   title: '',
   subtitle: '',
-  category: 'News',
+  category: 'General',
   datePosted: '',
-  status: 'Active',
-  content: ''
+  status: 'Published',
+  content: '',
+  targetAudience: 'All',
+  isPinned: false,
+  notifyEmail: false
 })
 
 // Categories for dropdown
-const categories = ['News', 'Events', 'Maintenance', 'Community', 'Alert']
-const statuses = ['Active', 'Upcoming', 'Past']
+const categories = ['General', 'Maintenance', 'Events', 'Urgent']
+const statuses = ['Draft', 'Published']
 
 onMounted(() => {
   checkScreen()
@@ -160,8 +176,8 @@ const showProfileStaffPage = async function () {
 
 <template>
   <div
-    class="min-h-screen bg-gray-50 flex flex-col pt-16"
-    :class="isCollapsed ? 'md:ml-16' : 'md:ml-64'"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
+    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     
@@ -373,7 +389,7 @@ const showProfileStaffPage = async function () {
       </button>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 md:p-8 transition-all duration-300 w-full" :class="isCollapsed ? 'md:ml-10' : 'md:ml-0'">
+      <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-4xl mx-auto space-y-6">
           
           <!-- Header -->
@@ -396,94 +412,218 @@ const showProfileStaffPage = async function () {
 
           <!-- Edit Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 md:p-8 space-y-6">
-                <!-- Title -->
+             <div class="p-6 md:p-8 space-y-6">
+                
+                <!-- Title Input -->
                 <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
-                    <input 
-                        v-model="announcementForm.title"
-                        type="text" 
-                        required
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400"
-                        placeholder="e.g. Elevator Maintenance"
-                    />
+                   <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
+                   <input 
+                      type="text" 
+                      v-model="announcementForm.title"
+                      placeholder="Enter announcement title..."
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                   />
                 </div>
 
-                <!-- Subtitle -->
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Subtitle</label>
-                    <input 
-                        v-model="announcementForm.subtitle"
-                        type="text" 
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400"
-                        placeholder="Brief description"
-                    />
-                </div>
-
+                <!-- Subtitle / Status Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Category -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Category</label>
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Subtitle</label>
+                      <input 
+                          v-model="announcementForm.subtitle"
+                          type="text" 
+                          class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                          placeholder="Brief description"
+                      />
+                   </div>
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Status <span class="text-red-500">*</span></label>
+                      <div class="relative">
                         <select 
-                            v-model="announcementForm.category"
-                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 bg-white"
+                           v-model="announcementForm.status"
+                           class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none bg-white appearance-none"
                         >
-                            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                           <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
                         </select>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-gray-700">Status</label>
-                        <select 
-                            v-model="announcementForm.status"
-                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 bg-white"
-                        >
-                            <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
-                        </select>
-                    </div>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                      </div>
+                   </div>
                 </div>
 
-                <!-- Date Posted -->
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Date Posted <span class="text-red-500">*</span></label>
-                    <input 
-                        v-model="announcementForm.datePosted"
-                        type="date" 
-                        required
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800"
-                    />
+                <!-- Category & Date Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
+                      <div class="relative" @click="isCategoryOpen = !isCategoryOpen" @mouseleave="isCategoryOpen = false">
+                        <div class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
+                            <span v-if="!announcementForm.category" class="text-gray-500">Select category...</span>
+                            <template v-else>
+                              <!-- General -->
+                              <svg v-if="announcementForm.category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              <!-- Maintenance -->
+                              <svg v-else-if="announcementForm.category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                              <!-- Events -->
+                              <svg v-else-if="announcementForm.category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              <!-- Urgent -->
+                              <svg v-else-if="announcementForm.category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                              <span class="text-gray-800">{{ announcementForm.category }}</span>
+                            </template>
+                        </div>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <!-- Dropdown Options -->
+                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
+                          <div @click="announcementForm.category = 'General'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                             General
+                          </div>
+                          <div @click="announcementForm.category = 'Maintenance'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                             Maintenance
+                          </div>
+                          <div @click="announcementForm.category = 'Events'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                             Activity/Events
+                          </div>
+                          <div @click="announcementForm.category = 'Urgent'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                             Urgent
+                          </div>
+                        </div>
+                      </div>
+                   </div>
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
+                      <div class="relative">
+                        <input 
+                           type="text" 
+                           v-model="announcementForm.datePosted"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
+                           placeholder="e.g. 15 Feb 2026 - 14:00"
+                        />
+                      </div>
+                   </div>
                 </div>
 
-                <!-- Content/Description -->
+                <!-- Content -->
                 <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Content</label>
-                    <textarea 
+                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <!-- Mock Rich Text Toolbar -->
+                   <div class="border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                     <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
+                       <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                       </button>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                       </button>
+                     </div>
+                     <textarea 
                         v-model="announcementForm.content"
                         rows="6"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder:text-gray-400 resize-none"
-                        placeholder="Detailed announcement content..."
-                    ></textarea>
+                        class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                        placeholder="Detailed announcement content... Supports text formatting."
+                     ></textarea>
+                   </div>
                 </div>
-            </div>
 
-            <!-- Actions -->
-            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                <!-- Cover Image -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Cover Image (if any)</label>
+                   <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]">
+                      <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                      </div>
+                      <p class="text-sm font-medium text-gray-700 mt-2">Click to replace or drag file here</p>
+                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
+                   </div>
+                </div>
+
+                <!-- Target Audience -->
+                <div class="space-y-3 pt-2">
+                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="announcementForm.targetAudience" value="All" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
+                      </div>
+                    </label>
+
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="announcementForm.targetAudience" value="Active" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
+                      </div>
+                    </label>
+
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="announcementForm.targetAudience" value="Zone" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Toggles -->
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-rose-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Pin Announcement</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
+                       </div>
+                     </div>
+                     <button @click="announcementForm.isPinned = !announcementForm.isPinned" :class="announcementForm.isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="announcementForm.isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
+                </div>
+
+             </div>
+
+             <!-- Actions -->
+             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-wrap-reverse md:flex-nowrap items-center justify-end gap-3 border-t border-gray-200">
                 <button 
-                    @click="handleCancel"
-                    class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-200 transition-colors cursor-pointer"
+                  @click="handleCancel" 
+                  class="w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 font-medium transition-all shadow-sm cursor-pointer"
                 >
-                    Cancel
+                  Cancel
                 </button>
                 <button 
-                    @click="handleSave"
-                    :disabled="isSubmitting"
-                    class="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-500/30 flex items-center gap-2 disabled:opacity-70 cursor-pointer"
+                  @click="handleSave"
+                  :disabled="isSubmitting"
+                  class="w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-[#1D355E] hover:bg-[#152847] font-medium shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                     <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                    {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400">
+                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+                    </svg>
+                    {{ isSubmitting ? 'Saving...' : 'Update Announcement' }}
                 </button>
-            </div>
+             </div>
           </div>
 
           <div class="fixed top-5 left-5 z-50">
