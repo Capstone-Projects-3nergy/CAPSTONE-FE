@@ -467,10 +467,11 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 bg-[#F5F7FA] min-h-screen font-sans">
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-7xl mx-auto">
           <!-- Header & Actions -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
