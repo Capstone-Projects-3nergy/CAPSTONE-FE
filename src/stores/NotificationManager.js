@@ -104,6 +104,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const notifications = ref(initialNotifications)
   const welcomePopupVisible = ref(false)
   const welcomePopupMessage = ref('')
+  const hasShownWelcome = ref(false)
 
   const closeWelcomePopup = () => {
     welcomePopupVisible.value = false
@@ -234,6 +235,9 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const clearNotifications = () => {
     notifications.value = []
     localStorage.removeItem('notifications')
+    welcomePopupVisible.value = false
+    welcomePopupMessage.value = ''
+    hasShownWelcome.value = false
   }
 
   return {
@@ -261,11 +265,19 @@ export const useNotificationManager = defineStore('notificationManager', () => {
 
     welcomePopupVisible,
     welcomePopupMessage,
+    hasShownWelcome,
     closeWelcomePopup,
     notifyLogin: (username, role = 'RESIDENT') => {
+      if (hasShownWelcome.value) return
+      
       const roleText = role === 'RESIDENT' ? 'resident' : 'user'
       welcomePopupMessage.value = `Welcome , ${username}!`
       welcomePopupVisible.value = true
+      hasShownWelcome.value = true
+
+      setTimeout(() => {
+        closeWelcomePopup()
+      }, 4000)
     },
     parcelNotifications: computed(() => {
         const PARCEL_TYPES = ['new', 'comment', 'connect']

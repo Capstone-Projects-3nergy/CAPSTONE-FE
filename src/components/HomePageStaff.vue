@@ -22,14 +22,6 @@ const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
 
-watch(welcomePopupVisible, (val) => {
-  if (val) {
-    setTimeout(() => {
-      closeWelcomePopup()
-    }, 10000)
-  }
-})
-
 // const loginStore = useLoginManager()
 const router = useRouter()
 const showHomePageStaff = ref(false)

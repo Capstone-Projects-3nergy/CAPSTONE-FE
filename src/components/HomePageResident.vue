@@ -130,9 +130,7 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
-    setTimeout(() => {
-      closeWelcomePopup()
-    }, 10000)
+
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -189,15 +187,6 @@ autoClose(error)
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
-
-// Auto-close welcome popup
-watch(welcomePopupVisible, (val) => {
-  if (val) {
-    setTimeout(() => {
-      closeWelcomePopup()
-    }, 10000)
-  }
-})
 
 const searchKeyword = ref('')
 const activeTab = ref('Day')
