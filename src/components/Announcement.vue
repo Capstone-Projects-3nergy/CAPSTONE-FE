@@ -8,12 +8,67 @@ import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
+
 const loginManager = useAuthManager()
 const showLogoutConfirm = ref(false)
 const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
 const currentSlide = ref(1)
+const banners = ref([
+  {
+    tag: 'Featured',
+    title: 'Community Updates & Events',
+    description: 'Stay connected with everything happening in your residence. Check out the latest news and upcoming events below.'
+  },
+  {
+    tag: 'Notice',
+    title: 'Scheduled Maintenance',
+    description: 'Please be informed that there will be scheduled system maintenance this weekend. Access might be temporarily interrupted.'
+  },
+  {
+    tag: 'Event',
+    title: 'Annual General Meeting',
+    description: 'Join us for the Annual General Meeting next month. Your participation is important to shape the future of our community.'
+  },
+  {
+    tag: 'Alert',
+    title: 'New Security Guidelines',
+    description: 'We have updated our security policy regarding visitor registration. Ensure your guests are registered ahead of time.'
+  }
+])
+
+// Modal State
+const isModalOpen = ref(false)
+const selectedAnnouncement = ref(null)
+
+const openModal = (type, index) => {
+  if (type === 'event') {
+    selectedAnnouncement.value = {
+      title: `Community Gathering & Workshop ${index}`,
+      content: 'Join us for an engaging session where we discuss community improvements and upcoming projects. We will cover a variety of topics relevant to all residents.',
+      tag: 'Community',
+      date: `2${index} OCT 10:00 AM`
+    }
+  } else if (type === 'news') {
+    selectedAnnouncement.value = {
+      title: `Important Maintenance Notice ${index}`,
+      content: 'There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly. We apologize for any inconvenience caused.',
+      tag: 'Update',
+      date: '2 hours ago'
+    }
+  }
+  isModalOpen.value = true
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  setTimeout(() => {
+    selectedAnnouncement.value = null
+  }, 300)
+}
+
 const showResidentParcels = ref(false)
 const returnLogin = ref(false)
 const showProfileResident = ref(false)
@@ -259,22 +314,37 @@ onMounted(async () => {
             
             <div class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
               <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
-                Featured
+                {{ banners[currentSlide - 1].tag }}
               </span>
               <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
-                Community Updates & Events
+                {{ banners[currentSlide - 1].title }}
               </h3>
-              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed">
-                Stay connected with everything happening in your residence. Check out the latest news and upcoming events below.
+              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px]">
+                {{ banners[currentSlide - 1].description }}
               </p>
               
+              <!-- Navigation Arrows -->
+              <button 
+                @click="currentSlide = currentSlide === 1 ? 4 : currentSlide - 1" 
+                class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              
+              <button 
+                @click="currentSlide = currentSlide === 4 ? 1 : currentSlide + 1" 
+                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+
               <!-- Carousel Indicators -->
               <div class="flex justify-center gap-3">
                 <button
                   v-for="n in 4"
                   :key="n"
                   @click="currentSlide = n"
-                  class="transition-all duration-300 rounded-full h-2"
+                  class="transition-all duration-300 rounded-full h-2 cursor-pointer"
                   :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
                 ></button>
               </div>
@@ -333,11 +403,12 @@ onMounted(async () => {
                 <span class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div
                   v-for="n in 6"
                   :key="n"
-                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                  @click="openModal('event', n)"
+                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer"
                 >
                   <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
                      <!-- Placeholder for Image -->
@@ -386,7 +457,8 @@ onMounted(async () => {
                 <div
                   v-for="n in 4"
                   :key="'news-' + n"
-                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6"
+                  @click="openModal('news', n)"
+                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
                 >
                   <div class="w-full md:w-48 h-32 bg-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden">
                      <div class="absolute inset-0 bg-gray-200"></div>
@@ -428,4 +500,14 @@ onMounted(async () => {
   <Teleport to="body" v-if="showLogoutConfirm"
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
+
+  <!-- Detail Modal -->
+  <AnnouncementDetailModal 
+    :is-open="isModalOpen"
+    :title="selectedAnnouncement?.title || ''"
+    :content="selectedAnnouncement?.content || ''"
+    :tag="selectedAnnouncement?.tag || ''"
+    :date="selectedAnnouncement?.date || ''"
+    @close="closeModal"
+  />
 </template>
