@@ -85,7 +85,7 @@ const getCategoryIcon = (category) => {
               <div class="flex flex-col min-w-0 flex-1">
                 <span class="font-bold text-gray-900 text-sm truncate flex items-center gap-2">
                   {{ item.author || 'Staff Portal' }}
-                  <span v-if="item.pinned" class="text-blue-600" title="Pinned">
+                  <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                     </svg>
@@ -142,7 +142,7 @@ const getCategoryIcon = (category) => {
             </div>
             
             <div class="flex items-center gap-2">
-              <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-pink-500 hover:bg-pink-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
+              <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11.78l-2.02-2.31V4a1 1 0 0 0-2 0v5.47L9.96 11.78A2 2 0 0 0 10.96 15H13v6a1 1 0 0 0 2 0v-6h2v-1.22c0-.52-.18-1.02-.5-1.42zM15 13h-4l1.3-1.48c.18-.21.28-.48.28-.76V4h1.44v6.76c0 .28.1.55.28.76L15 13z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
               </button>
               <button @click="$emit('edit', item)" class="p-2 border-2 border-gray-100 text-orange-400 hover:bg-orange-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Edit">
@@ -188,7 +188,7 @@ const getCategoryIcon = (category) => {
                     <span class="md:hidden font-semibold text-[#185DC0] block mb-1">Title:</span>
                     <div class="flex items-center gap-2 mb-1">
                       <div class="text-sm font-bold text-gray-900 line-clamp-1">{{ item.title }}</div>
-                      <span v-if="item.pinned" class="text-blue-600 flex-shrink-0" title="Pinned">
+                      <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                         </svg>
@@ -244,7 +244,7 @@ const getCategoryIcon = (category) => {
                   </div>
 
                   <div class="flex items-center justify-end gap-2 w-full md:w-auto">
-                    <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-pink-500 hover:bg-pink-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
+                    <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11.78l-2.02-2.31V4a1 1 0 0 0-2 0v5.47L9.96 11.78A2 2 0 0 0 10.96 15H13v6a1 1 0 0 0 2 0v-6h2v-1.22c0-.52-.18-1.02-.5-1.42zM15 13h-4l1.3-1.48c.18-.21.28-.48.28-.76V4h1.44v6.76c0 .28.1.55.28.76L15 13z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
                     </button>
                     <button @click="$emit('edit', item)" class="p-2 border-2 border-gray-100 text-orange-400 hover:bg-orange-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Edit">
