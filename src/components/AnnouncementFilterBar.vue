@@ -35,9 +35,9 @@ defineEmits(['update:search', 'update:category', 'update:viewMode'])
 
     <div class="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
       <!-- Category Filter -->
-      <div class="flex items-center gap-3 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 hide-scrollbar">
+      <div class="flex items-center gap-3 overflow-x-auto w-full sm:w-auto pt-1.5 pb-2.5 sm:py-1.5 px-1 hide-scrollbar">
         <span class="text-sm font-medium text-gray-500 whitespace-nowrap ml-1">Category:</span>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
           <button
             @click="$emit('update:category', '')"
             class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap"
