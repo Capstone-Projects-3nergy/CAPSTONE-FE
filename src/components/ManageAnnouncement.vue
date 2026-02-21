@@ -17,6 +17,7 @@ const route = useRoute()
 import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
 import AnnouncementTable from './AnnouncementTable.vue'
 import DeleteAnnouncement from './DeleteAnnouncement.vue'
+import ViewAnnouncement from './ViewAnnouncement.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { computed } from 'vue'
 
@@ -32,6 +33,7 @@ const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
 const isCollapsed = ref(false)
 const showDeleteModal = ref(false)
+const showViewModal = ref(false)
 const selectedAnnouncement = ref(null)
 const deleteSuccess = ref(false)
 const error = ref('')
@@ -159,6 +161,16 @@ const goToPage = (p) => {
 
 const handleEdit = (item) => {
   router.push({ name: 'editannouncement', params: { id: route.params.id, aid: item.id } })
+}
+
+const handleView = (item) => {
+  selectedAnnouncement.value = item
+  showViewModal.value = true
+}
+
+const handlePin = (item) => {
+  // Toggle pinned status temporarily
+  item.pinned = !item.pinned
 }
 
 const handleDelete = (item) => {
@@ -579,11 +591,19 @@ const showProfileStaffPage = async function () {
             @go="goToPage"
             @edit="handleEdit"
             @delete="handleDelete"
+            @view="handleView"
+            @pin="handlePin"
           />
         </div>
       </main>
     </div>
   </div>
+
+  <ViewAnnouncement
+    v-if="showViewModal"
+    :announcementData="selectedAnnouncement"
+    @close="showViewModal = false; selectedAnnouncement = null"
+  />
 
   <Teleport to="body" v-if="showProfileStaff">
     <UserInfo> </UserInfo>

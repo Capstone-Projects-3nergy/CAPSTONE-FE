@@ -26,7 +26,7 @@ defineProps({
   }
 })
 
-defineEmits(['prev', 'next', 'go', 'edit', 'delete'])
+defineEmits(['prev', 'next', 'go', 'edit', 'delete', 'pin', 'view'])
 
 const getCategoryBadgeClass = (category) => {
   switch (category) {
@@ -123,19 +123,35 @@ const getCategoryIcon = (category) => {
           
           <!-- Card Footer -->
           <div class="flex items-center justify-between">
-            <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              {{ item.views || 0 }} Views
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                </svg>
+                <span>{{ item.datePosted }}</span>
+              </div>
+              <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
+                <div class="h-4 w-4 bg-blue-400 text-white rounded-full flex items-center justify-center text-[8px] font-bold">P</div>
+                <span>{{ item.author || 'Staff Portal' }} · </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>{{ item.views || 0 }} views</span>
+              </div>
             </div>
             
             <div class="flex items-center gap-2">
-              <button @click="$emit('edit', item)" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Edit">
+              <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-pink-500 hover:bg-pink-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11.78l-2.02-2.31V4a1 1 0 0 0-2 0v5.47L9.96 11.78A2 2 0 0 0 10.96 15H13v6a1 1 0 0 0 2 0v-6h2v-1.22c0-.52-.18-1.02-.5-1.42zM15 13h-4l1.3-1.48c.18-.21.28-.48.28-.76V4h1.44v6.76c0 .28.1.55.28.76L15 13z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+              </button>
+              <button @click="$emit('edit', item)" class="p-2 border-2 border-gray-100 text-orange-400 hover:bg-orange-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Edit">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               </button>
-              <button @click="$emit('delete', item)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Delete">
+              <button @click="$emit('view', item)" class="p-2 border-2 border-gray-100 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="View">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              </button>
+              <button @click="$emit('delete', item)" class="p-2 border-2 border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Delete">
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               </button>
             </div>
@@ -207,14 +223,40 @@ const getCategoryIcon = (category) => {
                 {{ item.views || 0 }}
               </td>
               <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-right text-sm font-medium flex items-center md:table-cell gap-2 align-top md:align-middle">
-                <span class="md:hidden font-semibold text-[#185DC0] mr-2">Actions:</span>
-                <div class="flex items-center justify-end gap-2">
-                  <button @click="$emit('edit', item)" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Edit">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                  </button>
-                  <button @click="$emit('delete', item)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Delete">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  </button>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <!-- The Date and Views part like in the screenshot -->
+                  <div class="md:hidden flex flex-col gap-1 w-full mt-2">
+                    <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                      </svg>
+                      <span>{{ item.datePosted }}</span>
+                    </div>
+                    <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
+                      <div class="h-4 w-4 bg-blue-400 text-white rounded-full flex items-center justify-center text-[8px] font-bold">P</div>
+                      <span>{{ item.author || 'Staff Portal' }} · </span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>{{ item.views || 0 }} views</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-end gap-2 w-full md:w-auto">
+                    <button @click="$emit('pin', item)" class="p-2 border-2 border-gray-100 text-pink-500 hover:bg-pink-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Pin">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11.78l-2.02-2.31V4a1 1 0 0 0-2 0v5.47L9.96 11.78A2 2 0 0 0 10.96 15H13v6a1 1 0 0 0 2 0v-6h2v-1.22c0-.52-.18-1.02-.5-1.42zM15 13h-4l1.3-1.48c.18-.21.28-.48.28-.76V4h1.44v6.76c0 .28.1.55.28.76L15 13z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+                    </button>
+                    <button @click="$emit('edit', item)" class="p-2 border-2 border-gray-100 text-orange-400 hover:bg-orange-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button @click="$emit('view', item)" class="p-2 border-2 border-gray-100 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="View">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </button>
+                    <button @click="$emit('delete', item)" class="p-2 border-2 border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm" title="Delete">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
