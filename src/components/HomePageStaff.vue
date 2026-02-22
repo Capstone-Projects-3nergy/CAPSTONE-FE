@@ -389,7 +389,7 @@ const activeTab = ref('parcel')
                <!-- Header & Actions -->
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
-              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+              <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-[#0E4B90] shadow-sm">
                   <svg
                   width="24"
                   height="24"
@@ -399,15 +399,13 @@ const activeTab = ref('parcel')
                 >
                   <path
                     d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                     fill="#185DC0"
+                     fill="currentColor"
                   />
                 </svg>
               </div>
               <div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
-                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight whitespace-nowrap">
                    DashBoard
-                  </span>
                 </h2>
               </div>
             </div>

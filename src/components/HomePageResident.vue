@@ -785,18 +785,16 @@ function formatDateTime(datetimeStr) {
       <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
             <div class="pt-0">
           <div class="flex items-center space-x-3 mb-6 pb-4">
-              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+              <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-800 shadow-sm">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
                   <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 12L12 17L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
              </div>
-           <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                   My Parcels
-                  </span>
-                </h2>
+             <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                My Parcels
+             </h2>
           </div>
           
           <div class="mb-6">
