@@ -72,6 +72,16 @@ const loginHomePageWeb = async () => {
     return
   }
 
+  // 🔹 เช็คก่อนว่า Email นี้มีลงทะเบียนไว้ในระบบหรือไม่ (ผ่าน Firebase)
+  // ⚠️ เราใช้ข้อมูลจาก /api/staff/users ไม่ได้เพราะต้องล็อกอินก่อนถึงจะดึงได้ (จะติด 401 และเด้งหลุด)
+  const isEmailExists = await authManager.checkEmailInFirebase(email.value.trim())
+  if (!isEmailExists) {
+    notRegisterError.value = true
+    setTimeout(() => (notRegisterError.value = false), 10000)
+    loading.value = false
+    return
+  }
+
   try {
     const res = await authManager.loginAccount(
       email.value.trim(),
