@@ -12,6 +12,7 @@ const notificationManager = useNotificationManager()
 const error = ref(false)
 const roomidnotnumber = ref(false)
 const isEmailDuplicate = ref(false)
+const isEmailFirebase = ref(false)
 const isEmailOverLimit = ref(false)
 const isPasswordMax = ref(false)
 const isPasswordOverLimit = ref(false)
@@ -276,15 +277,10 @@ const submitForm = async (roleType) => {
 
     loading.value = true
     
-    // 🔹 Check Firebase Auth first
+    // 🔹 เช็คจาก Firebase ไว้ก่อน 
     const isFirebaseDuplicate = await authManager.checkEmailInFirebase(payload.email)
-    if (isFirebaseDuplicate) {
-      isEmailDuplicate.value = true
-      setTimeout(() => (isEmailDuplicate.value = false), 10000)
-      loading.value = false
-      return
-    }
 
+    // ลองให้ระบบ Register เพื่อเช็ค Database ให้ หากคืนค่า 409 แปลว่ามีใน DB แล้ว
     const res = await authManager.registerAccount(payload)
 
     if (res.status === 201 || res.status === 200) {
@@ -296,19 +292,23 @@ const submitForm = async (roleType) => {
         else form[key] = ''
       })
 
-
-
-
     } else if (res.status === 404) {
       isEmailExist.value = true
       setTimeout(() => (isEmailExist.value = false), 10000)
     } else if (res.status === 409) {
+      // 📌 มีอีเมลซ้ำอยู่ใน Database แล้ว
       isEmailDuplicate.value = true
       setTimeout(() => (isEmailDuplicate.value = false), 10000)
-    } else if (res.status === 500) {
-      error.value = true
-      setTimeout(() => (error.value = false), 10000)
     } else {
+      // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว
+      // แปลว่า "มีใน Firebase แต่ไม่มีใน Database"
+      if (isFirebaseDuplicate) {
+        isEmailFirebase.value = true
+        setTimeout(() => (isEmailFirebase.value = false), 10000)
+      } else {
+        error.value = true
+        setTimeout(() => (error.value = false), 10000)
+      }
     }
   } catch (err) {
   } finally {
@@ -398,6 +398,7 @@ const closePopUp = (operate) => {
   if (operate === 'confirmPasswordTooShort') showConfirmPasswordPopup.value = false
   if (operate === 'roomNumberOverLimit') isRoomNumberOverLimit.value = false
   if (operate === 'fullNameWeak') isFullNameWeak.value = false
+  if (operate === 'emailFirebase') isEmailFirebase.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -715,6 +716,14 @@ const toggleComfirmPasswordVisibility = () => {
             message="Error!!"
             styleType="red"
             operate="roomNumberOverLimit"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailFirebase"
+            titles="Registration could not be completed. Please contact our support team for assistance."
+            message="Error!!"
+            styleType="red"
+            operate="emailFirebase"
             @closePopUp="closePopUp"
           />
         </div>

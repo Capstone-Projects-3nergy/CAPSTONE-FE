@@ -10,6 +10,7 @@ import LineNotificationManager from '@/stores/LineNotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 const router = useRouter()
+const isEmailFirebase = ref(false)
 const authManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const isPasswordVisible = ref(false)
@@ -40,6 +41,7 @@ const closePopUp = (operate) => {
   if (operate === 'emailEmpty') emailRequire.value = false
   if (operate === 'passwordEmpty') passwordRequire.value = false
   if (operate === 'emailPasswordEmpty') emailPasswordRequire.value = false
+  if (operate === 'emailFirebase') isEmailFirebase.value = false
 }
 
 onMounted(async () => {
@@ -219,8 +221,15 @@ const loginHomePageWeb = async () => {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 10000)
     } else {
-      error.value = true
-      setTimeout(() => (error.value = false), 10000)
+      // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว (เก็บค่าไว้ที่ isEmailExists ตอนต้น)
+      // แปลว่า "มีใน Firebase แต่ล็อกอินเข้า Database ไม่ได้ หรือไม่มีข้อมูลใน Database"
+      if (isEmailExists) {
+        isEmailFirebase.value = true
+        setTimeout(() => (isEmailFirebase.value = false), 10000)
+      } else {
+        error.value = true
+        setTimeout(() => (error.value = false), 10000)
+      }
     }
   }
 }
@@ -416,6 +425,14 @@ const showResetPasswordPageWeb = async function () {
             message="Error!!"
             styleType="red"
             operate="emailPasswordEmpty"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isEmailFirebase"
+            titles="Unable to complete login. Please contact our support team for assistance."
+            message="Error!!"
+            styleType="red"
+            operate="emailFirebase"
             @closePopUp="closePopUp"
           />
         </div>
