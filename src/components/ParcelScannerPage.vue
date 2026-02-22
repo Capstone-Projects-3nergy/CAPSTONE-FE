@@ -543,7 +543,7 @@ const saveParcel = async () => {
       isValid = false
     else if (
       name.includes('kerry') &&
-      !/^[A-Z0-9]{10,15}$/.test(tracking)
+      !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)
     )
       isValid = false
     else if (
@@ -551,9 +551,9 @@ const saveParcel = async () => {
       !/^TH\d{11}[A-Z]$/.test(tracking)
     )
       isValid = false
-    else if (name.includes('j&t') && !/^JD\d{13}$/.test(tracking))
+    else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking))
       isValid = false
-    else if (name.includes('dhl') && !/^\d{10,20}$/.test(tracking))
+    else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
       isValid = false
     else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking))
       isValid = false
