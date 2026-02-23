@@ -472,15 +472,16 @@ const authStore = useAuthManager()
             <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
             <div class="flex items-center gap-1">
             <button
+              v-if="!!$slots['icon-view']"
               @click="$emit('view-detail', p.id)"
-              class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-view"></slot>
               </div>
 
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -496,15 +497,16 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
+              v-if="!!$slots['icon-view-member']"
               @click="$emit('view-detail', p.id)"
-              class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-view-member"></slot>
               </div>
 
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[150px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -520,15 +522,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDelete && p.status !== 'Picked Up'"
+              v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -544,15 +546,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteResident"
+              v-if="showDeleteResident && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -569,15 +571,15 @@ const authStore = useAuthManager()
             </button>
 
             <button
-              v-if="showDelete && p.status !== 'Picked Up'"
+              v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -592,15 +594,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteResident"
+              v-if="showDeleteResident && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -615,15 +617,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showRestore"
+              v-if="showRestore && !!$slots['restore-trash']"
               @click="$emit('restore', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="restore-trash"> </slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -639,15 +641,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteMember && p.role === 'RESIDENT'"
+              v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete']"
               @click="$emit('deleteMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -664,15 +666,15 @@ const authStore = useAuthManager()
             </button>
 
             <button
-              v-if="showDeleteMember && p.role === 'RESIDENT'"
+              v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete-permanent']"
               @click="$emit('deleteMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -687,15 +689,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showRestoreMember"
+              v-if="showRestoreMember && !!$slots['restore-trash']"
               @click="$emit('restoreMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="transition-transform duration-200 ease-out group-hover/btn:scale-110">
                 <slot name="restore-trash"> </slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
