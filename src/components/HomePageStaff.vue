@@ -454,17 +454,35 @@ const activeTab = ref('parcel')
             </div>
           </div>
           
-          <div class="flex mt-4">
-            <div class="inline-flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm shadow-sm whitespace-nowrap">
-              <div class="mr-2 p-1.5 bg-blue-100 rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Welcome Banner & Date -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-4 transition-all duration-300 hover:shadow-md">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 tracking-tight" v-if="activeTab === 'parcel'">Parcel Management Overview</h3>
+                <h3 class="text-base font-extrabold text-gray-900 tracking-tight" v-if="activeTab === 'resident'">Resident Management Overview</h3>
+                <p class="text-xs font-medium text-gray-500 mt-0.5">Monitor and manage daily activities</p>
+              </div>
+            </div>
+            
+            <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-4 py-2.5 font-bold text-sm shadow-inner whitespace-nowrap">
+              <div class="mr-3 p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
               </div>
-              Thu, 19 Feb 2026
+              <span class="tracking-wide">Thu, 19 Feb 2026</span>
             </div>
           </div>
 
