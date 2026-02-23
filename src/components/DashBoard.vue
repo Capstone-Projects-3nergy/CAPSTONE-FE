@@ -7,14 +7,17 @@ import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useDashboardManager } from '@/stores/DashboardManager.js'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+
 const loginManager = useAuthManager()
-// const loginStore = useLoginManager()
+const dashboardStore = useDashboardManager()
 const router = useRouter()
+
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 const showParcelScanner = ref(false)
@@ -25,53 +28,25 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
-const monthsTH = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.'
-]
 
-const packagesPerMonth = [
-  120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
-]
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
+
 onMounted(async () => {
   checkScreen()
-
   window.addEventListener('resize', checkScreen)
+  
   const ctx = document.getElementById('parcelChart')
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      datasets: [
-        {
-          label: 'Parcel Volume',
-          data: [24, 15, 31, 40, 23, 15, 33],
-          backgroundColor: (context) => {
-            const index = context.dataIndex
-            return index === 3
-              ? 'rgba(37, 99, 235, 0.9)'
-              : 'rgba(59, 130, 246, 0.3)'
-          },
-          borderRadius: 8,
-          barThickness: 30
-        }
-      ]
+      labels: dashboardStore.chartData.labels,
+      datasets: dashboardStore.chartData.datasets
     },
     options: {
       responsive: true,
@@ -397,7 +372,7 @@ const toggleSidebar = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">124</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.totalParcels || 124 }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels (Month)</p>
               </div>
             </div>
@@ -411,7 +386,7 @@ const toggleSidebar = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">38</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.awaitingPickup || 38 }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Awaiting Pickup</p>
               </div>
             </div>
@@ -426,7 +401,7 @@ const toggleSidebar = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">5</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.overdue || 5 }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Overdue (>7 days)</p>
               </div>
             </div>
@@ -438,11 +413,11 @@ const toggleSidebar = () => {
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-500 text-xs font-bold">
-                  69% rate
+                  {{ dashboardStore.stats.pickedUpRate || '69%' }} rate
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">86</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.pickedUp || 86 }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Picked Up</p>
               </div>
             </div>
@@ -452,7 +427,7 @@ const toggleSidebar = () => {
           <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
             <div class="flex items-center gap-3 mb-4">
               <span class="text-2xl">🚨</span>
-              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
+              <h3 class="text-red-600 font-bold text-lg">{{ dashboardStore.stats.overdue || 5 }} Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
             </div>
             <p class="text-red-500 text-sm mb-4">กรุณาติดต่อผู้พักอาศัยเพื่อรับพัสดุโดยเร็ว</p>
             
@@ -571,7 +546,7 @@ const toggleSidebar = () => {
               <div class="flex justify-center mb-8 relative">
                 <!-- Placeholder for Donut Chart -->
                 <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-l-red-500 flex items-center justify-center flex-col">
-                  <span class="text-3xl font-black text-gray-900 leading-none">124</span>
+                  <span class="text-3xl font-black text-gray-900 leading-none">{{ dashboardStore.stats.totalParcels || 124 }}</span>
                   <span class="text-xs text-gray-500">Total</span>
                 </div>
               </div>
@@ -583,8 +558,8 @@ const toggleSidebar = () => {
                     <span class="text-sm text-gray-600">Picked Up</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">86</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">69%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.pickedUp || 86 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.pickedUpRate || '69%' }}</span>
                   </div>
                 </div>
                 <div class="flex items-center justify-between">
@@ -593,8 +568,8 @@ const toggleSidebar = () => {
                     <span class="text-sm text-gray-600">Awaiting</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">38</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">27%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.awaitingPickup || 38 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.awaitingRate || '27%' }}</span>
                   </div>
                 </div>
                 <div class="flex items-center justify-between">
@@ -603,8 +578,8 @@ const toggleSidebar = () => {
                     <span class="text-sm text-gray-600">Overdue</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">5</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">4%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.overdue || 5 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.overdueRate || '4%' }}</span>
                   </div>
                 </div>
               </div>

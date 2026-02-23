@@ -1,10 +1,42 @@
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
+  const monthsTH = [
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.'
+  ]
+
+  const packagesPerMonth = [
+    120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
+  ]
+
   const chartData = reactive({
-    labels: [],
-    datasets: []
+    labels: ['Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    datasets: [
+      {
+        label: 'Parcel Volume',
+        data: [24, 15, 31, 40, 23, 15, 33],
+        backgroundColor: (context) => {
+          const index = context.dataIndex
+          return index === 3
+            ? 'rgba(37, 99, 235, 0.9)'
+            : 'rgba(59, 130, 246, 0.3)'
+        },
+        borderRadius: 8,
+        barThickness: 30
+      }
+    ]
   })
   
   const stats = reactive({
@@ -14,6 +46,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   })
 
   /* ---------- getters ---------- */
+  const getMonthsTH = () => monthsTH
+  const getPackagesPerMonth = () => packagesPerMonth
   const getChartData = () => chartData
   const getStats = () => stats
 
@@ -35,9 +69,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   }
 
   return {
+    monthsTH,
+    packagesPerMonth,
     chartData,
     stats,
     
+    getMonthsTH,
+    getPackagesPerMonth,
     getChartData,
     getStats,
     
