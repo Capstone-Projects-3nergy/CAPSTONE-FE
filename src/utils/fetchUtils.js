@@ -643,6 +643,28 @@ async function markNotificationAsRead(url, id, router) {
 // }
 
 
+// Announcement
+async function getAnnouncements(url, router) {
+  return await getItems(url, router)
+}
+async function getAnnouncementById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+async function addAnnouncement(url, announcement, router) {
+  return await addItem(url, announcement, router)
+}
+async function editAnnouncement(url, id, editedAnnouncement, router) {
+  return await editItem(url, id, editedAnnouncement, router)
+}
+async function deleteAnnouncement(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
+
+// Dashboard
+async function getDashboardData(url, router) {
+  return await getItems(url, router)
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -684,5 +706,12 @@ export {
   updateDetailWithFile,
   getNotifications,
   verifyParcelItem,
-  markNotificationAsRead
+  markNotificationAsRead,
+  getAnnouncements,
+  getAnnouncementById,
+  addAnnouncement,
+  editAnnouncement,
+  deleteAnnouncement,
+  getDashboardData
 }
+
