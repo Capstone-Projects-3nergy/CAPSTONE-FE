@@ -389,7 +389,7 @@ const activeTab = ref('parcel')
                <!-- Header & Actions -->
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
-              <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-[#0E4B90] shadow-sm">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
                   <svg
                   width="24"
                   height="24"
@@ -404,8 +404,9 @@ const activeTab = ref('parcel')
                 </svg>
               </div>
               <div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight whitespace-nowrap">
-                   DashBoard
+                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   DashBoard </span>
                 </h2>
               </div>
             </div>
