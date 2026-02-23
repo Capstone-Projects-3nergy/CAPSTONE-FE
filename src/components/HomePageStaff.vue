@@ -452,8 +452,10 @@ const activeTab = ref('parcel')
                 Resident Dashboard
               </button>
             </div>
-            
-            <div class="flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm lg:mb-4 shadow-sm whitespace-nowrap">
+          </div>
+          
+          <div class="flex mt-4">
+            <div class="inline-flex items-center bg-blue-50/50 text-[#1D355E] border border-blue-100 rounded-lg px-4 py-2 font-medium text-sm shadow-sm whitespace-nowrap">
               <div class="mr-2 p-1.5 bg-blue-100 rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -727,7 +729,7 @@ const activeTab = ref('parcel')
           </div>
 
           <!-- Charts Grid 2 -->
-          <div class="flex flex-col xl:flex-row xl:justify-start gap-6 pb-12">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
             
             <!-- Parcel by Room -->
             <!-- <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
@@ -749,7 +751,7 @@ const activeTab = ref('parcel')
             </div> -->
 
             <!-- Recent Parcels -->
-          <div class="w-full flex-1 max-w-full xl:max-w-[560px] bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
                 <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
@@ -842,7 +844,7 @@ const activeTab = ref('parcel')
             </div>
 
            <!-- Overdue Alert Box -->
-          <div class="w-full flex-1 max-w-full xl:max-w-[500px] bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
+          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
             <div class="flex items-center gap-3 mb-4">
               <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1043,10 +1045,10 @@ const activeTab = ref('parcel')
             </div>
 
             <!-- Detailed Grid Row 3 -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               
               <!-- Most Parcels Received -->
-              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
+              <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
                 <div class="mb-6">
                   <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
                     <div class="p-1.5 bg-yellow-100 rounded-lg text-yellow-600 shadow-sm flex items-center justify-center">
@@ -1125,7 +1127,7 @@ const activeTab = ref('parcel')
               </div>
 
               <!-- Vacant Rooms -->
-              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full relative">
+              <!-- <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full relative">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
                     <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
@@ -1189,7 +1191,7 @@ const activeTab = ref('parcel')
                     <p class="text-xs text-gray-400 mt-2 text-center italic">+8 more rooms available</p>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <!-- Pending Approval List -->
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">

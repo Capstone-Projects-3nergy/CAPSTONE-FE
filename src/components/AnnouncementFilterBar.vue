@@ -12,7 +12,7 @@ defineProps({
   }
 })
 
-defineEmits(['update:search', 'update:category', 'update:viewMode'])
+defineEmits(['update:search', 'update:category', 'update:viewMode', 'new-announcement'])
 </script>
 
 <template>
@@ -34,27 +34,20 @@ defineEmits(['update:search', 'update:category', 'update:viewMode'])
     </div>
 
     <div class="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
-      <!-- Category Filter -->
-      <div class="flex items-center gap-3 overflow-x-auto w-full sm:w-auto pt-1.5 pb-2.5 sm:py-1.5 px-1 hide-scrollbar">
-        <span class="text-sm font-medium text-gray-500 whitespace-nowrap ml-1">Category:</span>
-        <div class="flex gap-2 items-center">
-          <button
-            @click="$emit('update:category', '')"
-            class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap"
-            :class="!modelCategory ? 'bg-[#0E2856] text-white shadow-md transform scale-105' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-700'"
-          >
-            All
-          </button>
-          <button
-            v-for="cat in categories"
-            :key="cat"
-            @click="$emit('update:category', cat)"
-            class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap"
-            :class="modelCategory === cat ? 'bg-[#0E2856] text-white shadow-md transform scale-105' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-700'"
-          >
-            {{ cat }}
-          </button>
+      <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar">
+        <div class="flex items-center gap-2 bg-[#F2F5F9] text-[#1D355E] px-4 py-2.5 rounded-xl font-semibold shadow-sm border border-gray-200/60 whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#185DC0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="text-sm">Thu, 19 Feb 2026</span>
         </div>
+        <button class="flex items-center gap-2 bg-[#1D355E] hover:bg-[#185DC0] text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-semibold cursor-pointer whitespace-nowrap" @click="$emit('new-announcement')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Announcement
+        </button>
       </div>
 
       <!-- Divider -->
