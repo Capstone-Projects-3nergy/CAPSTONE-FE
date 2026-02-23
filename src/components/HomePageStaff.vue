@@ -467,7 +467,7 @@ const activeTab = ref('parcel')
           </div>
 
           <!-- Tab Content: Parcel Dashboard -->
-          <div v-show="activeTab === 'parcel'" class="space-y-6">
+          <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
           
             <!-- Stats Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -575,7 +575,7 @@ const activeTab = ref('parcel')
            
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">10 days</span>
                   <span class="font-bold text-gray-800">kong zeed</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -591,7 +591,7 @@ const activeTab = ref('parcel')
             
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">9 days</span>
                   <span class="font-bold text-gray-800">Suklita Mook</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -607,7 +607,7 @@ const activeTab = ref('parcel')
          
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">7 days</span>
                   <span class="font-bold text-gray-800">testkub</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -860,7 +860,7 @@ const activeTab = ref('parcel')
               <!-- Overdue Item -->
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">10 days</span>
                   <span class="font-bold text-gray-800">kong zeed</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -876,7 +876,7 @@ const activeTab = ref('parcel')
                <!-- Overdue Item -->
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">9 days</span>
                   <span class="font-bold text-gray-800">Suklita Mook</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -892,7 +892,7 @@ const activeTab = ref('parcel')
                <!-- Overdue Item -->
               <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
                 <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">7 days</span>
                   <span class="font-bold text-gray-800">testkub</span>
                 </div>
                 <div class="flex items-center gap-6">
@@ -911,7 +911,7 @@ const activeTab = ref('parcel')
           </div>
           
           <!-- Tab Content: Resident Dashboard -->
-          <div v-show="activeTab === 'resident'" class="space-y-6">
+          <div v-show="activeTab === 'resident'" class="space-y-6 mt-8">
             
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
