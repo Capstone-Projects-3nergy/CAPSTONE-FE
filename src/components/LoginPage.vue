@@ -399,7 +399,7 @@ const showResetPasswordPageWeb = async function () {
           />
           <AlertPopUp
             v-if="notRegisterError"
-            :titles="'Please register before login.'"
+            :titles="'It looks like you do not have an account yet. Please complete the registration process before logging in.'"
             message="Error!!"
             styleType="red"
             operate="notRegister"
