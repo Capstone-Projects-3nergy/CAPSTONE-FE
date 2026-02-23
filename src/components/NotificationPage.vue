@@ -893,32 +893,38 @@ const goToPage = (page) => {
             </div>
           </div>
 
-          <div class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              &lt; Previous
-            </button>
+          <div class="flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-3 mt-4 relative z-10" v-if="filteredNotifications.length > 0">
+            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
+              <button
+                @click="prevPage"
+                :disabled="currentPage === 1"
+                class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+              >
+                Previous
+              </button>
 
-            <button
-              v-for="pg in pages"
-              :key="pg"
-              @click="goToPage(pg)"
-              class="cursor-pointer px-3 py-1 rounded transition-colors"
-              :class="currentPage === pg ? 'bg-blue-700 text-white shadow-md' : 'hover:bg-gray-200'"
-            >
-              {{ pg }}
-            </button>
+              <button
+                v-for="pg in pages"
+                :key="pg"
+                @click="goToPage(pg)"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                  currentPage === pg 
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                {{ pg }}
+              </button>
 
-            <button
-              @click="nextPage"
-              :disabled="currentPage >= totalPages"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              Next &gt;
-            </button>
+              <button
+                @click="nextPage"
+                :disabled="currentPage >= totalPages"
+                class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </main>
