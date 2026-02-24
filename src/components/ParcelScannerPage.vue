@@ -479,7 +479,23 @@ async function startScan(mode) {
       {
         highlightScanRegion: true,
         highlightCodeOutline: true,
-        returnDetailedScanResult: true 
+        returnDetailedScanResult: true,
+        calculateScanRegion: (video) => {
+          const width = window.innerWidth
+          let size = 400 // default desktop
+          if (width < 640) size = 250 // small mobile
+          else if (width < 768) size = 300 // mobile/tablet
+          
+          const smallestDimension = Math.min(video.videoWidth, video.videoHeight)
+          const scanRegionSize = Math.min(size, smallestDimension * 0.9)
+          
+          return {
+            x: Math.round((video.videoWidth - scanRegionSize) / 2),
+            y: Math.round((video.videoHeight - scanRegionSize) / 2),
+            width: scanRegionSize,
+            height: scanRegionSize
+          }
+        }
       }
     )
     
@@ -1214,7 +1230,7 @@ onMounted(async () => {
                     <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"></div>
                     
                     <!-- Scanner Frame -->
-                    <div class="relative w-72 h-40 md:w-96 md:h-48 z-20 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
+                    <div class="relative w-64 h-32 md:w-80 md:h-40 z-20 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
                       <!-- Top Left -->
                       <div class="absolute top-0 left-0 w-8 h-8 border-t-[4px] border-l-[4px] transition-colors duration-300" :class="isSuccessScan ? 'border-[#185DC0]' : 'border-white'"></div>
                       <!-- Top Right -->
