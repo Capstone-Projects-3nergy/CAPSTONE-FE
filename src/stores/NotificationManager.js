@@ -191,8 +191,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           const timeValue = n.sentAt || n.createdAt;
           const isReadVal = (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1) ? 1 : 0;
           
-          // Trigger Line Admin Notification for newly arrived unread parcels if not already notified
-          if (isReadVal === 0 && (derivedType === 'new' || derivedType === 'connect' || derivedType === 'comment')) {
+          // Trigger Line Admin Notification for ALL unread notifications from backend if not already notified
+          if (isReadVal === 0) {
               const notifiedKey = `line_notified_${n.notificationId}`
               if (!localStorage.getItem(notifiedKey)) {
                   // Fire and forget Line Notify
