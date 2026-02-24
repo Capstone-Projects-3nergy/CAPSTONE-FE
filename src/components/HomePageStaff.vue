@@ -55,11 +55,26 @@ const packagesPerMonth = [
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
+
+const currentDate = ref('')
+const updateDate = () => {
+  const date = new Date()
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
+  const day = date.getDate()
+  const month = date.toLocaleDateString('en-US', { month: 'short' })
+  const year = date.getFullYear()
+  currentDate.value = `${weekday}, ${day} ${month} ${year}`
+}
+let dateInterval
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
+  if (dateInterval) clearInterval(dateInterval)
 })
 onMounted(async () => {
   checkScreen()
+  updateDate()
+  dateInterval = setInterval(updateDate, 60000)
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
@@ -482,7 +497,7 @@ const activeTab = ref('parcel')
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
               </div>
-              <span class="tracking-wide">Thu, 19 Feb 2026</span>
+              <span class="tracking-wide">{{ currentDate }}</span>
             </div>
           </div>
 

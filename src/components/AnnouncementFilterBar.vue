@@ -12,7 +12,27 @@ defineProps({
   }
 })
 
-defineEmits(['update:search', 'update:category', 'update:viewMode', 'new-announcement'])
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const currentDate = ref('')
+const updateDate = () => {
+  const date = new Date()
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
+  const day = date.getDate()
+  const month = date.toLocaleDateString('en-US', { month: 'short' })
+  const year = date.getFullYear()
+  currentDate.value = `${weekday}, ${day} ${month} ${year}`
+}
+let dateInterval
+
+onMounted(() => {
+  updateDate()
+  dateInterval = setInterval(updateDate, 60000)
+})
+
+onUnmounted(() => {
+  if (dateInterval) clearInterval(dateInterval)
+})
 </script>
 
 <template>
@@ -39,7 +59,7 @@ defineEmits(['update:search', 'update:category', 'update:viewMode', 'new-announc
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#185DC0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span class="text-sm">Thu, 19 Feb 2026</span>
+          <span class="text-sm">{{ currentDate }}</span>
         </div>
         <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-semibold cursor-pointer whitespace-nowrap" @click="$emit('new-announcement')">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
