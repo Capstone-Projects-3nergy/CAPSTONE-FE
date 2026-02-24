@@ -21,6 +21,24 @@ class LineNotificationManager {
       throw error
     }
   }
+
+  /**
+   * ส่ง Event ให้ Backend ทำหน้าที่แจ้งเตือน Admin ผ่าน LINE 
+   * @param {string} message 
+   */
+  async notifyAdmin(message) {
+    try {
+      // ให้ Frontend ส่ง event เพื่อไปเรียกใช้ Backend API
+      const response = await axios.post('/api/notify-line', {
+        message
+      })
+      return response.data
+    } catch (error) {
+      console.error('❌ แจ้งเตือน Admin ล้มเหลว')
+      console.error(error.response?.data || error.message)
+      throw error
+    }
+  }
 }
 
 export default new LineNotificationManager()
