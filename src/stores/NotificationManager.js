@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref ,  computed } from 'vue'
 import { getNotifications, markNotificationAsRead } from '@/utils/fetchUtils'
 import { useAuthManager } from '@/stores/AuthManager'
+import LineNotificationManager from '@/stores/LineNotificationManager'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
   const defaultNotifications = [
@@ -188,6 +189,17 @@ export const useNotificationManager = defineStore('notificationManager', () => {
 
           // Use createdAt if sentAt is null
           const timeValue = n.sentAt || n.createdAt;
+          const isReadVal = (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1) ? 1 : 0;
+          
+          // Trigger Line Admin Notification for newly arrived unread parcels if not already notified
+          if (isReadVal === 0 && (derivedType === 'new' || derivedType === 'connect' || derivedType === 'comment')) {
+              const notifiedKey = `line_notified_${n.notificationId}`
+              if (!localStorage.getItem(notifiedKey)) {
+                  // Fire and forget Line Notify
+                  LineNotificationManager.notifyAdmin(`🔔 การแจ้งเตือนใหม่: ${backendTitle}\nรายละเอียด: ${backendMessage}`).catch(e => console.error("Line notification failed in background", e))
+                  localStorage.setItem(notifiedKey, 'true')
+              }
+          }
 
         return {
           id: n.notificationId, // Ensure this is unique from local IDs
@@ -202,7 +214,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           updatedAt: n.updatedAt,
           // Ensure status is handled correctly
           status: n.status || 'PENDING', // Default to PENDING if missing
-          isRead: (n.isRead === true || n.isRead === 1 || n.is_read === true || n.is_read === 1) ? 1 : 0, 
+          isRead: isReadVal, 
           // Keep raw data if needed
           parcelId: backendParcelId,
           parcel: n.parcel || n.Parcel, // Keep original if available
