@@ -1220,17 +1220,17 @@ onMounted(async () => {
 
               <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan"
+                  label="Scan QR code"
                   color="blue"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <ButtonWeb
+                <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
-                /> -->
+                />
                 <!-- <ButtonWeb
                   label="Open Camera"
                   color="blue"

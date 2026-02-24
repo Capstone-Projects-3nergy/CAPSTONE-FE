@@ -859,12 +859,12 @@ const closePopUp = (operate) => {
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <ButtonWeb
+                <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
-                /> -->
+                />
                 <!-- <ButtonWeb
                   label="Open Camera"
                   color="blue"
