@@ -14,7 +14,7 @@ const loginManager = useAuthManager()
 const showLogoutConfirm = ref(false)
 const router = useRouter()
 const showHomePageResident = ref(false)
-const tab = ref('event')
+const tab = ref('all')
 const currentSlide = ref(1)
 const banners = ref([
   {
@@ -432,10 +432,21 @@ onMounted(async () => {
             <!-- Tabs -->
             <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
               <button
+                @click="tab = 'all'"
+                :class="[
+                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
+                  (tab === 'all' || !tab)
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                All
+              </button>
+              <button
                 @click="tab = 'event'"
                 :class="[
                   'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  (tab === 'event' || !tab)
+                  tab === 'event'
                     ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
@@ -474,7 +485,7 @@ onMounted(async () => {
           <!-- Content Grid -->
           <div class="min-h-[400px]">
             <!-- Events Grid -->
-            <div v-if="tab === 'event' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div v-if="tab === 'event' || tab === 'all' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': tab === 'all'}">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Upcoming Events</h3>
                 <span @click="isCalendarOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
@@ -524,7 +535,7 @@ onMounted(async () => {
             </div>
 
             <!-- News List -->
-            <div v-else class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div v-if="tab === 'news' || tab === 'all'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
                <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Latest News</h3>
                 <span @click="isArchiveOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>

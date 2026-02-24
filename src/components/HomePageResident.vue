@@ -1070,9 +1070,9 @@ function formatDateTime(datetimeStr) {
             <!-- News Card -->
             <div
               @click="showAnnouncementPage()"
-              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
-              <div class="h-1/2 overflow-hidden relative">
+              <div class="h-[180px] shrink-0 overflow-hidden relative">
                  <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="newsImg"
@@ -1085,14 +1085,14 @@ function formatDateTime(datetimeStr) {
                     </span>
                  </div>
               </div>
-              <div class="p-8 flex flex-col flex-1 relative bg-white">
+              <div class="p-6 xl:p-8 flex flex-col flex-1 relative bg-white">
                  <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
                     <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
                  </div>
                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">News Updates</h3>
-                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                <p class="text-gray-500 text-sm leading-relaxed">
                   Check out the latest official notices, maintenance schedules, and important updates from the dormitory management team.
                 </p>
                 <div class="mt-auto pt-6 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
@@ -1104,9 +1104,9 @@ function formatDateTime(datetimeStr) {
             <!-- Event Card -->
             <div
               @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
-              <div class="h-1/2 overflow-hidden relative">
+              <div class="h-[180px] shrink-0 overflow-hidden relative">
                   <div class="absolute inset-0 bg-gradient-to-t from-purple-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="eventImg"
@@ -1119,14 +1119,14 @@ function formatDateTime(datetimeStr) {
                     </span>
                  </div>
               </div>
-              <div class="p-8 flex flex-col flex-1 relative bg-white">
+              <div class="p-6 xl:p-8 flex flex-col flex-1 relative bg-white">
                  <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
                     <svg class="w-7 h-7 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                  </div>
                  <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Events & Activities</h3>
-                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                <p class="text-gray-500 text-sm leading-relaxed">
                   Don't miss out on upcoming workshops, social gatherings, and recreational activities organized for residents.
                 </p>
                  <div class="mt-auto pt-6 flex items-center text-purple-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
@@ -1135,48 +1135,47 @@ function formatDateTime(datetimeStr) {
               </div>
             </div>
 
-             <!-- Community Card -->
+            <!-- All Announcements Card -->
             <div
               @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
-              <div class="h-1/2 overflow-hidden relative">
+              <div class="h-[180px] shrink-0 overflow-hidden relative">
                    <div class="absolute inset-0 bg-gradient-to-t from-green-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="communityImg"
-                  alt="Community"
+                  alt="All Announcements"
                   class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
                  <div class="absolute top-4 left-4 z-20">
                     <span class="bg-green-600/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
-                      Social
+                     History
                     </span>
                  </div>
               </div>
-              <div class="p-8 flex flex-col flex-1 relative bg-white">
+             <div class="p-8 flex flex-col flex-1 relative bg-white">
                  <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
-                    <svg class="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg class="w-7 h-7 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                  </div>
-                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">Community Hub</h3>
-                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
-                   Connect with your neighbors, join discussion groups, and share your experiences in the community forum.
+                   <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">All Announcements</h3>
+                 <p class="text-gray-500 text-sm leading-relaxed">
+                   View the complete archive of all past and current notices, schedules, and official updates here.
                 </p>
-                 <div class="mt-auto pt-6 flex items-center text-green-600 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
-                    Get Involved <span>→</span>
+                 <div class="mt-auto pt-6 flex items-center text-green-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    View Archive <span>→</span>
                 </div>
               </div>
             </div>
 
             <!-- All Announcements Card -->
-            <div
+            <!-- <div
               @click="showAnnouncementPage"
               class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
             >
               <div class="h-1/2 overflow-hidden relative">
                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <!-- Adding bg-gray-100 as fallback if image overlaps -->
                 <div class="absolute inset-0 bg-yellow-100 z-0"></div>
                 <img
                   :src="newsImg"
@@ -1203,7 +1202,7 @@ function formatDateTime(datetimeStr) {
                     View Archive <span>→</span>
                 </div>
               </div>
-            </div>
+            </div> -->
 
           </section>
         </div>
