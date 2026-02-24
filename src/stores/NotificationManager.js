@@ -196,7 +196,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
               const notifiedKey = `line_notified_${n.notificationId}`
               if (!localStorage.getItem(notifiedKey)) {
                   // Fire and forget Line Notify
-                  LineNotificationManager.notifyAdmin(`🔔 การแจ้งเตือนใหม่: ${backendTitle}\nรายละเอียด: ${backendMessage}`).catch(e => console.error("Line notification failed in background", e))
+                  LineNotificationManager.notifyAdmin(`🔔 New Notification: ${backendTitle}\nDetails: ${backendMessage}`).catch(e => console.error("Line notification failed in background", e))
                   localStorage.setItem(notifiedKey, 'true')
               }
           }
