@@ -195,6 +195,7 @@ watch(recipientSearch, (val) => {
 const savedParcels = ref([])
 
 const scanningMode = ref('')
+const isSuccessScan = ref(false)
 let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
@@ -392,9 +393,13 @@ function startQuagga() {
           'ean_reader',
           'ean_8_reader',
           'code_39_reader',
+          'code_39_vin_reader',
+          'codabar_reader',
           'upc_reader',
           'upc_e_reader',
-          'i2of5_reader'
+          'i2of5_reader',
+          '2of5_reader',
+          'code_93_reader'
         ]
       },
       locate: true
@@ -421,6 +426,11 @@ function startQuagga() {
       }
 
       if (count >= 5) {
+        isSuccessScan.value = true
+        setTimeout(() => {
+          isSuccessScan.value = false
+        }, 1000)
+
         processScanResult(detectedCode)
         
         // Additional barcode specific logic
@@ -1194,15 +1204,29 @@ onMounted(async () => {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full"></div>
+                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative"></div>
                   <video id="qr-video" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
                   >
-                    <div
-                      class="w-64 h-32 border-2 border-green-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
-                    ></div>
+                    <!-- Shadow overlay -->
+                    <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"></div>
+                    
+                    <!-- Scanner Frame -->
+                    <div class="relative w-72 h-40 md:w-96 md:h-48 z-20 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
+                      <!-- Top Left -->
+                      <div class="absolute top-0 left-0 w-8 h-8 border-t-[4px] border-l-[4px] transition-colors duration-300" :class="isSuccessScan ? 'border-[#185DC0]' : 'border-white'"></div>
+                      <!-- Top Right -->
+                      <div class="absolute top-0 right-0 w-8 h-8 border-t-[4px] border-r-[4px] transition-colors duration-300" :class="isSuccessScan ? 'border-[#185DC0]' : 'border-white'"></div>
+                      <!-- Bottom Left -->
+                      <div class="absolute bottom-0 left-0 w-8 h-8 border-b-[4px] border-l-[4px] transition-colors duration-300" :class="isSuccessScan ? 'border-[#185DC0]' : 'border-white'"></div>
+                      <!-- Bottom Right -->
+                      <div class="absolute bottom-0 right-0 w-8 h-8 border-b-[4px] border-r-[4px] transition-colors duration-300" :class="isSuccessScan ? 'border-[#185DC0]' : 'border-white'"></div>
+                      
+                      <!-- Scan Line animation -->
+                      <div class="absolute left-0 top-0 w-full h-[2px] animate-scan-line" :class="isSuccessScan ? 'bg-[#185DC0] shadow-[0_0_15px_4px_rgba(24,93,192,0.8)]' : 'bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.6)]'"></div>
+                    </div>
                   </div>
                   <ButtonWeb
                     label="Cancel"
@@ -1622,5 +1646,28 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#barcode-scanner-container :deep(video) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+#barcode-scanner-container :deep(canvas.drawingBuffer) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+@keyframes scan-line {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-scan-line {
+  animation: scan-line 2s linear infinite;
 }
 </style>
