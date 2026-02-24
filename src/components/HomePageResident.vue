@@ -518,8 +518,11 @@ const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
-const showAnnouncementPage = async function () {
-  router.replace({ name: 'announcement' })
+const showAnnouncementPage = async function (selectedTab) {
+  if (typeof selectedTab !== 'string') {
+    selectedTab = 'all'
+  }
+  router.replace({ name: 'announcement', query: { tab: selectedTab } })
   showAnnouncement.value = true
 }
 const ShowManageAnnouncementPage = async function () {
@@ -1069,7 +1072,7 @@ function formatDateTime(datetimeStr) {
           <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
             <!-- News Card -->
             <div
-              @click="showAnnouncementPage()"
+              @click="showAnnouncementPage('news')"
               class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
               <div class="h-[180px] shrink-0 overflow-hidden relative">
@@ -1103,7 +1106,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- Event Card -->
             <div
-              @click="showAnnouncementPage"
+              @click="showAnnouncementPage('event')"
               class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
               <div class="h-[180px] shrink-0 overflow-hidden relative">
@@ -1137,7 +1140,7 @@ function formatDateTime(datetimeStr) {
 
             <!-- All Announcements Card -->
             <div
-              @click="showAnnouncementPage"
+              @click="showAnnouncementPage('all')"
               class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full min-h-[420px]"
             >
               <div class="h-[180px] shrink-0 overflow-hidden relative">

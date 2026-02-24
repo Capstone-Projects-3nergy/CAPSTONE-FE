@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
@@ -13,8 +13,18 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 const loginManager = useAuthManager()
 const showLogoutConfirm = ref(false)
 const router = useRouter()
+const route = useRoute()
 const showHomePageResident = ref(false)
-const tab = ref('all')
+const tab = ref(route.query.tab || 'all')
+
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab) {
+      tab.value = newTab
+    }
+  }
+)
 const currentSlide = ref(1)
 const banners = ref([
   {
