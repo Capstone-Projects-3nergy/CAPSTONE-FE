@@ -360,19 +360,30 @@ function startQuagga() {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
       
-      processScanResult(detectedCode)
-      
-      if (!form.value.parcelType) {
-        if (detectedCode.startsWith('B')) {
-           form.value.parcelType = 'BOX'
-        } else if (detectedCode.startsWith('D')) {
-           form.value.parcelType = 'DOCUMENT'
-        } else {
-           form.value.parcelType = 'ELECTRONIC'
-        }
+      if (detectedCode === lastCode) {
+        count++
+      } else {
+        lastCode = detectedCode
+        count = 1
       }
 
-      stopScan()
+      if (count >= 5) {
+        processScanResult(detectedCode)
+        
+        if (!form.value.parcelType) {
+          if (detectedCode.startsWith('B')) {
+             form.value.parcelType = 'BOX'
+          } else if (detectedCode.startsWith('D')) {
+             form.value.parcelType = 'DOCUMENT'
+          } else {
+             form.value.parcelType = 'ELECTRONIC'
+          }
+        }
+
+        // Require another 5 matches to process again
+        lastCode = ''
+        count = 0
+      }
     }
   })
 }
