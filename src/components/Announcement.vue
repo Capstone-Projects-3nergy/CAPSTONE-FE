@@ -43,7 +43,48 @@ const banners = ref([
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
 
+// Calendar Modal State
+const isCalendarOpen = ref(false)
+
+// Archive Modal State
+const isArchiveOpen = ref(false)
+
 const searchQuery = ref('')
+
+const currentDate = ref('')
+const currentMonthName = ref('')
+const currentDay = ref(1)
+const calendarDays = ref([])
+
+const generateCalendar = () => {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  
+  const days = []
+  for (let i = 0; i < firstDay; i++) {
+    days.push(null)
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(i)
+  }
+  calendarDays.value = days
+  currentDay.value = date.getDate()
+  currentMonthName.value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+const updateDate = () => {
+  const date = new Date()
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
+  const day = date.getDate()
+  const month = date.toLocaleDateString('en-US', { month: 'short' })
+  const year = date.getFullYear()
+  const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  currentDate.value = `${weekday}, ${day} ${month} ${year} ${time}`
+}
+let dateInterval
 
 const allEvents = ref(Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
@@ -142,11 +183,15 @@ const checkScreen = () => {
 }
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
+  if (dateInterval) clearInterval(dateInterval)
 })
 onMounted(async () => {
   checkScreen()
-
   window.addEventListener('resize', checkScreen)
+
+  generateCalendar()
+  updateDate()
+  dateInterval = setInterval(updateDate, 60000)
 })
 </script>
 
@@ -432,7 +477,7 @@ onMounted(async () => {
             <div v-if="tab === 'event' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Upcoming Events</h3>
-                <span class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
+                <span @click="isCalendarOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
               </div>
               
                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -482,7 +527,7 @@ onMounted(async () => {
             <div v-else class="animate-in fade-in slide-in-from-bottom-4 duration-500">
                <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Latest News</h3>
-                <span class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>
+                <span @click="isArchiveOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>
               </div>
 
               <div class="space-y-4">
@@ -542,4 +587,146 @@ onMounted(async () => {
     :date="selectedAnnouncement?.date || ''"
     @close="closeModal"
   />
+
+  <!-- Calendar Pop-up -->
+  <Teleport to="body">
+    <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+        <!-- Calendar Header -->
+        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+          <div class="relative z-10 flex justify-between items-start">
+            <div>
+              <p class="text-blue-200 text-sm font-medium mb-1">Current Date & Time</p>
+              <h2 class="text-2xl font-bold mb-2">{{ currentDate }}</h2>
+            </div>
+            <button @click="isCalendarOpen = false" class="p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Calendar Body -->
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">{{ currentMonthName }}</h3>
+            <div class="flex gap-2">
+              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
+            <span v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']" :key="day" class="text-xs font-semibold text-gray-400">
+              {{ day }}
+            </span>
+          </div>
+          
+          <div class="grid grid-cols-7 gap-1 text-center">
+            <div 
+              v-for="(day, index) in calendarDays" 
+              :key="index"
+              class="aspect-square flex items-center justify-center text-sm rounded-full transition-colors"
+              :class="[
+                !day ? '' : 'cursor-pointer',
+                day === currentDay ? 'bg-[#0E4B90] text-white font-bold shadow-md' : 'text-gray-700 hover:bg-blue-50',
+              ]"
+            >
+              {{ day || '' }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+          <button @click="isCalendarOpen = false" class="px-5 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <!-- Archive Pop-up -->
+  <Teleport to="body">
+    <div v-if="isArchiveOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+        <!-- Archive Header -->
+        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden flex items-center gap-4">
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="2"></rect><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2V9"></path><path d="M10 13h4"></path></svg>
+          </div>
+          <div class="relative z-10 flex-1">
+            <h2 class="text-2xl font-bold tracking-tight">News Archive</h2>
+            <p class="text-blue-200 text-sm font-medium mt-1">Browse past announcements</p>
+          </div>
+          <button @click="isArchiveOpen = false" class="relative z-10 p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        
+        <!-- Archive Body -->
+        <div class="p-6">
+          <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+            <!-- Simulated Past Events -->
+            <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
+              <div class="flex items-center gap-4 mb-3">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ month }} 2026</h3>
+                <div class="h-px bg-gray-100 flex-1"></div>
+              </div>
+              
+              <div class="space-y-3 pl-2 border-l-2 border-blue-100 ml-2">
+                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
+                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-[#0E4B90] rounded-full group-hover:scale-125 transition-transform"></div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-100 px-2 py-0.5 rounded-md">General</span>
+                    <span class="text-xs text-gray-400">12 {{ month.slice(0,3) }}</span>
+                  </div>
+                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Quarterly Community Meeting Notes</h4>
+                  <p class="text-sm text-gray-500 line-clamp-1">Review the discussed topics and action items from our last gathering.</p>
+                </div>
+                
+                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
+                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2 py-0.5 rounded-md">Maintenance</span>
+                    <span class="text-xs text-gray-400">05 {{ month.slice(0,3) }}</span>
+                  </div>
+                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Completed: Elevator Service</h4>
+                  <p class="text-sm text-gray-500 line-clamp-1">The scheduled maintenance for Building A elevators is now complete.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+          <button @click="isArchiveOpen = false" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm cursor-pointer">
+            Close Archive
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+</style>
