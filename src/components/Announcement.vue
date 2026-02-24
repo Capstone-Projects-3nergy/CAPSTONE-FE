@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
@@ -43,21 +43,52 @@ const banners = ref([
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
 
-const openModal = (type, index) => {
-  if (type === 'event') {
-    selectedAnnouncement.value = {
-      title: `Community Gathering & Workshop ${index}`,
-      content: 'Join us for an engaging session where we discuss community improvements and upcoming projects. We will cover a variety of topics relevant to all residents.',
-      tag: 'Community',
-      date: `2${index} OCT 10:00 AM`
-    }
-  } else if (type === 'news') {
-    selectedAnnouncement.value = {
-      title: `Important Maintenance Notice ${index}`,
-      content: 'There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly. We apologize for any inconvenience caused.',
-      tag: 'Update',
-      date: '2 hours ago'
-    }
+const searchQuery = ref('')
+
+const allEvents = ref(Array.from({ length: 6 }, (_, i) => ({
+  id: i + 1,
+  type: 'event',
+  tag: 'Community',
+  title: `Community Gathering & Workshop ${i + 1}`,
+  content: 'Join us for an engaging session where we discuss community improvements and upcoming projects. We will cover a variety of topics relevant to all residents.',
+  date: `2${i + 1} OCT 10:00 AM`,
+  displayDate: `2${i + 1} OCT`,
+  time: '10:00 AM'
+})))
+
+const allNews = ref(Array.from({ length: 4 }, (_, i) => ({
+  id: i + 1,
+  type: 'news',
+  tag: 'Update',
+  title: `Important Maintenance Notice ${i + 1}`,
+  content: 'There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly. We apologize for any inconvenience caused.',
+  date: '2 hours ago'
+})))
+
+const filteredEvents = computed(() => {
+  if (!searchQuery.value) return allEvents.value
+  const query = searchQuery.value.toLowerCase()
+  return allEvents.value.filter(e => 
+    e.title.toLowerCase().includes(query) || 
+    e.content.toLowerCase().includes(query)
+  )
+})
+
+const filteredNews = computed(() => {
+  if (!searchQuery.value) return allNews.value
+  const query = searchQuery.value.toLowerCase()
+  return allNews.value.filter(n => 
+    n.title.toLowerCase().includes(query) || 
+    n.content.toLowerCase().includes(query)
+  )
+})
+
+const openModal = (item) => {
+  selectedAnnouncement.value = {
+    title: item.title,
+    content: item.content,
+    tag: item.tag,
+    date: item.date
   }
   isModalOpen.value = true
 }
@@ -387,6 +418,7 @@ onMounted(async () => {
                 </svg>
               </div>
               <input
+                v-model="searchQuery"
                 type="text"
                 placeholder="Search updates..."
                 class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
@@ -405,9 +437,9 @@ onMounted(async () => {
               
                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div
-                  v-for="n in 6"
-                  :key="n"
-                  @click="openModal('event', n)"
+                  v-for="item in filteredEvents"
+                  :key="item.id"
+                  @click="openModal(item)"
                   class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer"
                 >
                   <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
@@ -419,21 +451,21 @@ onMounted(async () => {
                      </div>
                      <!-- Date Badge -->
                      <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                        2{{ n }} OCT
+                        {{ item.displayDate }}
                      </div>
                   </div>
                   
                   <div class="p-6">
                     <div class="flex items-center gap-2 mb-3">
-                       <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2.5 py-0.5 rounded-md">Community</span>
+                       <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2.5 py-0.5 rounded-md">{{ item.tag }}</span>
                        <span class="text-xs text-gray-400">•</span>
-                       <span class="text-xs text-gray-500">10:00 AM</span>
+                       <span class="text-xs text-gray-500">{{ item.time }}</span>
                     </div>
                     <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight">
-                      Community Gathering & Workshop {{ n }}
+                      {{ item.title }}
                     </h4>
                     <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
-                      Join us for an engaging session where we discuss community improvements and upcoming projects.
+                      {{ item.content }}
                     </p>
                     <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
                        <div class="flex -space-x-2">
@@ -455,9 +487,9 @@ onMounted(async () => {
 
               <div class="space-y-4">
                 <div
-                  v-for="n in 4"
-                  :key="'news-' + n"
-                  @click="openModal('news', n)"
+                  v-for="item in filteredNews"
+                  :key="'news-' + item.id"
+                  @click="openModal(item)"
                   class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
                 >
                   <div class="w-full md:w-48 h-32 bg-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden">
@@ -465,14 +497,14 @@ onMounted(async () => {
                   </div>
                   <div class="flex-1 flex flex-col justify-center">
                     <div class="flex items-center gap-2 mb-2">
-                       <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md">Update</span>
-                       <span class="text-xs text-gray-400">2 hours ago</span>
+                       <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md">{{ item.tag }}</span>
+                       <span class="text-xs text-gray-400">{{ item.date }}</span>
                     </div>
                     <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors">
-                      Important Maintenance Notice {{ n }}
+                      {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0">
-                      There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly.
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0 line-clamp-2">
+                      {{ item.content }}
                     </p>
                   </div>
                   <div class="flex items-center justify-end">
