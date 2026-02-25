@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import AlertPopUp from './AlertPopUp.vue'
 
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -14,6 +15,7 @@ const isCategoryOpen = ref(false)
 
 // Form Data
 const title = ref('')
+const subtitle = ref('')
 const category = ref('')
 const content = ref('')
 const date = ref('')
@@ -23,6 +25,95 @@ const isPinned = ref(false)
 const notifyEmail = ref(false)
 
 const categories = ['News', 'Events', 'Maintenance', 'Community']
+
+const addSuccess = ref(false)
+const titleError = ref(false)
+const titleLengthError = ref(false)
+const titleThaiNumError = ref(false)
+const subtitleLengthError = ref(false)
+const subtitleThaiNumError = ref(false)
+const categoryError = ref(false)
+const contentError = ref(false)
+const contentLengthError = ref(false)
+
+const closePopUp = (operate) => {
+  if (operate === 'successMessage') { addSuccess.value = false }
+  if (operate === 'titleError') { titleError.value = false }
+  if (operate === 'titleLengthError') { titleLengthError.value = false }
+  if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
+  if (operate === 'categoryError') { categoryError.value = false }
+  if (operate === 'contentError') { contentError.value = false }
+}
+
+const MAX_TITLE_LENGTH = 100
+const MAX_CONTENT_LENGTH = 2000
+
+const handleTitleInput = (event) => {
+  let val = event.target.value
+  
+  if (/[๐-๙]/.test(val)) {
+    titleThaiNumError.value = true
+    val = val.replace(/[๐-๙]/g, '')
+    setTimeout(() => {
+      titleThaiNumError.value = false
+    }, 5000)
+  }
+
+  if (val.length > MAX_TITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_TITLE_LENGTH)
+    title.value = sliced
+    event.target.value = sliced
+    titleLengthError.value = true
+    setTimeout(() => {
+      titleLengthError.value = false
+    }, 5000)
+  } else {
+    title.value = val
+    event.target.value = val
+  }
+}
+
+const MAX_SUBTITLE_LENGTH = 150
+
+const handleSubtitleInput = (event) => {
+  let val = event.target.value
+  
+  if (/[๐-๙]/.test(val)) {
+    subtitleThaiNumError.value = true
+    val = val.replace(/[๐-๙]/g, '')
+    setTimeout(() => {
+      subtitleThaiNumError.value = false
+    }, 5000)
+  }
+
+  if (val.length > MAX_SUBTITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
+    subtitle.value = sliced
+    event.target.value = sliced
+    subtitleLengthError.value = true
+    setTimeout(() => {
+      subtitleLengthError.value = false
+    }, 5000)
+  } else {
+    subtitle.value = val
+    event.target.value = val
+  }
+}
+
+const handleContentInput = (event) => {
+  const val = event.target.value
+  if (val.length > MAX_CONTENT_LENGTH) {
+    const sliced = val.slice(0, MAX_CONTENT_LENGTH)
+    content.value = sliced
+    event.target.value = sliced
+    contentLengthError.value = true
+    setTimeout(() => {
+      contentLengthError.value = false
+    }, 5000)
+  } else {
+    content.value = val
+  }
+}
 
 // Sidebar Logic
 const checkScreen = () => {
@@ -48,15 +139,33 @@ const goBack = () => {
 }
 
 const submitAnnouncement = () => {
+  if (!title.value.trim()) {
+    titleError.value = true
+    return
+  }
+  if (!category.value) {
+    categoryError.value = true
+    return
+  }
+  if (!content.value.trim()) {
+    contentError.value = true
+    return
+  }
+
   // Mock submission
   console.log('Submitting announcement:', {
     title: title.value,
+    subtitle: subtitle.value,
     category: category.value,
     content: content.value,
     date: date.value
   })
-  alert('Announcement Created (Mock)')
-  router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+
+  addSuccess.value = true
+  setTimeout(() => {
+    addSuccess.value = false
+    router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+  }, 2000)
 }
 const handleCancel = () => {
   router.back()
@@ -327,6 +436,13 @@ const returnLoginPage = async () => {
           </div>
           </div>
 
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp v-if="addSuccess" titles="Announcement Created Successfully." message="Success!!" styleType="green" operate="successMessage" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
+          </div>
+
           <!-- Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
@@ -336,10 +452,49 @@ const returnLoginPage = async () => {
                    <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
                    <input 
                       type="text" 
-                      v-model="title"
+                      :value="title"
+                      @input="handleTitleInput"
                       placeholder="Enter announcement title..."
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                      class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
+                      :class="[
+                        titleLengthError || titleThaiNumError
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
+                      ]"
                    />
+                   <div v-if="titleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Announcement Title must be at most {{ MAX_TITLE_LENGTH }} characters</div>
+                   </div>
+                   <div v-if="titleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Announcement Title cannot contain Thai numerals</div>
+                   </div>
+                </div>
+
+                <!-- Subtitle Input -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Subtitle</label>
+                   <input 
+                      type="text" 
+                      :value="subtitle"
+                      @input="handleSubtitleInput"
+                      placeholder="Enter brief description..."
+                      class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
+                      :class="[
+                        subtitleLengthError || subtitleThaiNumError
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
+                      ]"
+                   />
+                   <div v-if="subtitleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Subtitle must be at most {{ MAX_SUBTITLE_LENGTH }} characters</div>
+                   </div>
+                   <div v-if="subtitleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Subtitle cannot contain Thai numerals</div>
+                   </div>
                 </div>
 
                 <!-- Category & Date Row -->
@@ -401,31 +556,37 @@ const returnLoginPage = async () => {
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
                    <!-- Mock Rich Text Toolbar -->
-                   <div class="border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                     <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                       <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
-                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                       </button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
-                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                       </button>
-                       <button class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                       </button>
-                     </div>
-                     <textarea 
-                        v-model="content"
-                        rows="6"
-                        class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                        placeholder="Enter announcement content... Supports text formatting."
-                     ></textarea>
-                   </div>
+                    <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
+                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                      <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
+                        <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </button>
+                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </button>
+                        <button class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                        </button>
+                      </div>
+                      <textarea 
+                         :value="content"
+                         @input="handleContentInput"
+                         rows="6"
+                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         placeholder="Enter announcement content... Supports text formatting."
+                      ></textarea>
+                    </div>
+                    <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Content must be at most {{ MAX_CONTENT_LENGTH }} characters</div>
+                    </div>
                 </div>
 
                 <!-- Cover Image -->

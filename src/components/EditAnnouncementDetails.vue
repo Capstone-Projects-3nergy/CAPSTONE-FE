@@ -22,6 +22,81 @@ const isSubmitting = ref(false)
 const editSuccess = ref(false)
 const error = ref('')
 
+const titleLengthError = ref(false)
+const titleThaiNumError = ref(false)
+const subtitleLengthError = ref(false)
+const subtitleThaiNumError = ref(false)
+const contentLengthError = ref(false)
+
+const MAX_TITLE_LENGTH = 100
+const MAX_SUBTITLE_LENGTH = 150
+const MAX_CONTENT_LENGTH = 2000
+
+const handleTitleInput = (event) => {
+  let val = event.target.value
+  
+  if (/[๐-๙]/.test(val)) {
+    titleThaiNumError.value = true
+    val = val.replace(/[๐-๙]/g, '')
+    setTimeout(() => {
+      titleThaiNumError.value = false
+    }, 5000)
+  }
+
+  if (val.length > MAX_TITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_TITLE_LENGTH)
+    announcementForm.title = sliced
+    event.target.value = sliced
+    titleLengthError.value = true
+    setTimeout(() => {
+      titleLengthError.value = false
+    }, 5000)
+  } else {
+    announcementForm.title = val
+    event.target.value = val
+  }
+}
+
+const handleSubtitleInput = (event) => {
+  let val = event.target.value
+  
+  if (/[๐-๙]/.test(val)) {
+    subtitleThaiNumError.value = true
+    val = val.replace(/[๐-๙]/g, '')
+    setTimeout(() => {
+      subtitleThaiNumError.value = false
+    }, 5000)
+  }
+
+  if (val.length > MAX_SUBTITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
+    announcementForm.subtitle = sliced
+    event.target.value = sliced
+    subtitleLengthError.value = true
+    setTimeout(() => {
+      subtitleLengthError.value = false
+    }, 5000)
+  } else {
+    announcementForm.subtitle = val
+    event.target.value = val
+  }
+}
+
+const handleContentInput = (event) => {
+  const val = event.target.value
+  if (val.length > MAX_CONTENT_LENGTH) {
+    const sliced = val.slice(0, MAX_CONTENT_LENGTH)
+    announcementForm.content = sliced
+    event.target.value = sliced
+    contentLengthError.value = true
+    setTimeout(() => {
+      contentLengthError.value = false
+    }, 5000)
+  } else {
+    announcementForm.content = val
+  }
+}
+
 const closePopUp = (operate) => {
   if (operate === 'editSuccessMessage') {
     editSuccess.value = false
@@ -181,7 +256,7 @@ const navigateTo = (name) => {
 }
 
 const handleSave = async () => {
-  if (!announcementForm.title.trim() || !announcementForm.datePosted) {
+  if (!announcementForm.title.trim() || !announcementForm.datePosted || !announcementForm.category || !announcementForm.content.trim()) {
     error.value = 'Please fill in all required fields'
     return
   }
@@ -471,10 +546,24 @@ const showProfileStaffPage = async function () {
                    <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
                    <input 
                       type="text" 
-                      v-model="announcementForm.title"
+                      :value="announcementForm.title"
+                      @input="handleTitleInput"
                       placeholder="Enter announcement title..."
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
+                      :class="[
+                        'w-full px-4 py-3 rounded-xl border transition-all outline-none',
+                        titleLengthError || titleThaiNumError 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
+                        : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                      ]"
                    />
+                   <div v-if="titleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                     Title exceeds the maximum limit of 100 characters.
+                   </div>
+                   <div v-if="titleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                     Announcement Title cannot contain Thai numerals.
+                   </div>
                 </div>
 
                 <!-- Subtitle / Status Row -->
@@ -482,11 +571,25 @@ const showProfileStaffPage = async function () {
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Subtitle</label>
                       <input 
-                          v-model="announcementForm.subtitle"
+                          :value="announcementForm.subtitle"
+                          @input="handleSubtitleInput"
                           type="text" 
-                          class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
                           placeholder="Brief description"
+                          :class="[
+                            'w-full px-4 py-3 rounded-xl border transition-all outline-none',
+                            subtitleLengthError || subtitleThaiNumError 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
+                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                          ]"
                       />
+                      <div v-if="subtitleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Subtitle exceeds the maximum limit of 150 characters.
+                      </div>
+                      <div v-if="subtitleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Subtitle cannot contain Thai numerals.
+                      </div>
                    </div>
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Status <span class="text-red-500">*</span></label>
@@ -564,7 +667,12 @@ const showProfileStaffPage = async function () {
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
                    <!-- Mock Rich Text Toolbar -->
-                   <div class="border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                   <div :class="[
+                     'border rounded-xl overflow-hidden transition-all',
+                     contentLengthError 
+                     ? 'border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100' 
+                     : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100'
+                   ]">
                      <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
                        <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
@@ -580,11 +688,16 @@ const showProfileStaffPage = async function () {
                        </button>
                      </div>
                      <textarea 
-                        v-model="announcementForm.content"
+                        :value="announcementForm.content"
+                        @input="handleContentInput"
                         rows="6"
                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
                         placeholder="Detailed announcement content... Supports text formatting."
                      ></textarea>
+                   </div>
+                   <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                     Content exceeds the maximum limit of 2000 characters.
                    </div>
                 </div>
 
