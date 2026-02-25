@@ -5,9 +5,12 @@ import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { getAnnouncementById } from '@/utils/fetchUtils.js'
 // No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
+const announcementStore = useAnnouncementManager()
 const router = useRouter()
 const route = useRoute()
 
@@ -28,58 +31,7 @@ const closePopUp = (operate) => {
   }
 }
 
-// Announcement Data (Mock Data similar to ManageAnnouncement)
-const announcements = ref([
-  {
-    id: 1,
-    title: 'Elevator Maintenance',
-    subtitle: 'Scheduled for Block A',
-    category: 'Maintenance',
-    datePosted: '2025-10-24',
-    status: 'Published',
-    content: 'The elevator in Block A will be undergoing scheduled maintenance on Oct 24th from 10 AM to 2 PM. Please use the stairs during this time.',
-    targetAudience: 'Zone',
-    isPinned: true,
-    notifyEmail: true
-  },
-  {
-    id: 2,
-    title: 'Community BBQ',
-    subtitle: 'Annual get together',
-    category: 'Events',
-    datePosted: '2025-11-02',
-    status: 'Draft',
-    content: 'Join us for the annual community BBQ at the central park area. Food and drinks will be provided!',
-    targetAudience: 'All',
-    isPinned: false,
-    notifyEmail: false
-  },
-  {
-    id: 3,
-    title: 'Water Supply Interruption',
-    subtitle: 'Emergency repairs on Main St.',
-    category: 'Urgent',
-    datePosted: '2025-10-28',
-    status: 'Published',
-    content: 'Water supply will be interrupted due to emergency repairs.',
-    targetAudience: 'Active',
-    isPinned: true,
-    notifyEmail: true
-  },
-  {
-    id: 4,
-    title: 'New Resident Welcome Party — March 2026',
-    subtitle: 'All residents are invited to join the welcome party for new members',
-    category: 'General',
-    datePosted: '2026-02-15',
-    status: 'Published',
-    content: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area.',
-    targetAudience: 'All',
-    isPinned: false,
-    notifyEmail: false
-  },
-])
-
+// Announcement Data Data will be fetched from the backend.
 const announcementForm = reactive({
   title: '',
   subtitle: '',
@@ -96,19 +48,119 @@ const announcementForm = reactive({
 const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 const statuses = ['Draft', 'Published']
 
+const fallbackAnnouncements = [
+  {
+    id: 1,
+    title: 'Temporary Water Shutoff — Plumbing Repair',
+    subtitle: 'Water will be shut off from 08:00–14:00 on February 20, 2026, for main plumbing repairs. Please reserve water in advance. We apologize for the inconvenience. If you have any questions, please contact the staff at the counter.',
+    category: 'Urgent',
+    isPinned: true,
+    datePosted: '19 Feb 2026 - 10:30',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 82
+  },
+  {
+    id: 2,
+    title: 'Temporary Elevator Shutdown for Annual Inspection',
+    subtitle: 'The elevator will be closed for service on February 21-22, 2026, for annual inspection and maintenance by specialized technicians. Residents may use the stairs on the left side of the building.',
+    category: 'Maintenance',
+    isPinned: true,
+    datePosted: '18 Feb 2026 - 15:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 54
+  },
+  {
+    id: 3,
+    title: 'New Regulations for Parcel Collection',
+    subtitle: 'Starting from March 1, 2026, residents must collect their parcels within 7 days of notification. A storage fee may apply if overdue.',
+    category: 'General',
+    isPinned: false,
+    datePosted: '17 Feb 2026 - 09:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 61
+  },
+  {
+    id: 4,
+    title: 'New Resident Welcome Party — March 2026',
+    subtitle: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area. There will be food, snacks, and many fun activities.',
+    category: 'Events',
+    isPinned: false,
+    datePosted: '15 Feb 2026 - 14:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 29
+  },
+  {
+    id: 5,
+    title: 'Notice of Office Hours Change',
+    subtitle: 'Starting in March, the office will be open from 08:30–18:30, Monday–Friday, and 09:00–14:00 on Saturday (closed on Sundays and public holidays).',
+    category: 'General',
+    isPinned: false,
+    datePosted: '12 Feb 2026 - 11:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 17
+  },
+  {
+    id: 6,
+    title: 'Notice of Common Area Renovation',
+    subtitle: 'Not yet published — content under revision. The renovation schedule for the ground floor hall and lounge area is expected to be completed by March 2026.',
+    category: 'General',
+    isPinned: false,
+    datePosted: '10 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  }
+]
+
+const fetchAnnouncementDetail = async () => {
+  const aid = Number(route.params.aid)
+  if (!aid) return
+
+  // 1) Find in Pinia first to show immediately
+  const existingAnnouncements = [
+    ...announcementStore.announcements,
+    ...announcementStore.trash
+  ]
+  const found = existingAnnouncements.find((a) => a.id === aid)
+
+  if (found) {
+    Object.assign(announcementForm, found)
+  }
+
+  try {
+    const data = await getAnnouncementById(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      aid,
+      router
+    )
+
+    if (data) {
+      Object.assign(announcementForm, data)
+    } else {
+      const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
+      if (fallbackFound) {
+        Object.assign(announcementForm, fallbackFound)
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching announcement:', error)
+    const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
+    if (fallbackFound) {
+      Object.assign(announcementForm, fallbackFound)
+    }
+  }
+}
+
 onMounted(() => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
 
-  // Fetch/Find announcement
-  const aid = Number(route.params.aid) 
-  
-  if (aid) {
-    const found = announcements.value.find(a => a.id === aid)
-    if (found) {
-        Object.assign(announcementForm, found)
-    } 
-  }
+  fetchAnnouncementDetail()
 })
 
 onUnmounted(() => {
