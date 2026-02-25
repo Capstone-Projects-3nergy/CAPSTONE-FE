@@ -13,6 +13,7 @@ import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { getDashboardData } from '@/utils/fetchUtils.js'
 
 const loginManager = useAuthManager()
 const dashboardStore = useDashboardManager()
@@ -41,6 +42,24 @@ onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
   
+  try {
+    const data = await getDashboardData(`${import.meta.env.VITE_BASE_URL}/api/dashboard`, router)
+    if (data) {
+      if (data.stats) {
+        dashboardStore.setStats(data.stats)
+      }
+      if (data.chartData && data.chartData.labels && data.chartData.datasets) {
+        dashboardStore.chartData.labels = data.chartData.labels
+        dashboardStore.chartData.datasets[0].data = data.chartData.datasets[0].data
+        if (data.chartData.datasets[0].label) {
+          dashboardStore.chartData.datasets[0].label = data.chartData.datasets[0].label
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error)
+  }
+
   const ctx = document.getElementById('parcelChart')
   new Chart(ctx, {
     type: 'bar',
