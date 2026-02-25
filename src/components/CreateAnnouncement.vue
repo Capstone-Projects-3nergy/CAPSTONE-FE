@@ -24,7 +24,7 @@ const targetAudience = ref('All')
 const isPinned = ref(false)
 const notifyEmail = ref(false)
 
-const categories = ['News', 'Events', 'Maintenance', 'Community']
+const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 
 const addSuccess = ref(false)
 const titleError = ref(false)
@@ -35,6 +35,50 @@ const subtitleThaiNumError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
+const imageFile = ref(null)
+const imagePreview = ref('')
+const contentArea = ref(null)
+
+const formatText = (style) => {
+  if (!contentArea.value) return
+  
+  const textarea = contentArea.value
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const selectedText = content.value.substring(start, end)
+  let before = content.value.substring(0, start)
+  let after = content.value.substring(end)
+  let newText = ""
+
+  switch(style) {
+    case 'bold': newText = `**${selectedText || 'ข้อความหนา'}**`; break;
+    case 'italic': newText = `*${selectedText || 'ข้อความเอียง'}*`; break;
+    case 'underline': newText = `<u>${selectedText || 'ข้อความขีดเส้นใต้'}</u>`; break;
+    case 'list': newText = `\n- ${selectedText || 'Item 1'}\n- Item 2`; break;
+    case 'ordered': newText = `\n1. ${selectedText || 'Step 1'}\n2. Step 2`; break;
+    case 'link': 
+       const url = prompt("Enter URL:", "https://")
+       if (url) {
+         newText = `[${selectedText || 'คลิกที่นี่'}](${url})`; 
+       } else {
+         return;
+       }
+       break;
+    case 'emoji': 
+       const emojis = ['😊', '📦', '🚀', '📢', '✨'];
+       newText = emojis[Math.floor(Math.random() * emojis.length)];
+       break;
+  }
+
+  content.value = before + newText + after
+  
+  // Set cursor position after formatting
+  setTimeout(() => {
+    textarea.focus()
+    const newPos = start + newText.length
+    textarea.setSelectionRange(newPos, newPos)
+  }, 0)
+}
 
 const isFormValid = computed(() => {
   return title.value.trim() !== '' && category.value !== '' && date.value !== '' && content.value.trim() !== ''
@@ -119,6 +163,29 @@ const handleContentInput = (event) => {
   }
 }
 
+const onFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  
+  // Basic validation for image type
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file.')
+    return
+  }
+
+  imageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    imagePreview.value = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeImage = () => {
+  imageFile.value = null
+  imagePreview.value = ''
+}
+
 // Sidebar Logic
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
@@ -162,7 +229,8 @@ const submitAnnouncement = () => {
     subtitle: subtitle.value,
     category: category.value,
     content: content.value,
-    date: date.value
+    date: date.value,
+    image: imageFile.value ? imageFile.value.name : 'No image'
   })
 
   addSuccess.value = true
@@ -563,23 +631,24 @@ const returnLoginPage = async () => {
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                        <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
                         <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                         </button>
-                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
                         <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                         </button>
-                        <button class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                         </button>
                       </div>
                       <textarea 
+                         ref="contentArea"
                          :value="content"
                          @input="handleContentInput"
                          rows="6"
@@ -593,16 +662,39 @@ const returnLoginPage = async () => {
                     </div>
                 </div>
 
-                <!-- Cover Image -->
+                <!-- Cover Image Upload -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Cover Image (if any)</label>
-                   <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]">
-                      <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
+                  <div 
+                    class="relative w-full h-48 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:bg-gray-100"
+                    :class="{ 'border-blue-400 bg-blue-50': imagePreview }"
+                  >
+                    <template v-if="!imagePreview">
+                      <div class="flex flex-col items-center justify-center p-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
                       </div>
-                      <p class="text-sm font-medium text-gray-700 mt-2">Click to upload or drag file here</p>
-                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
-                   </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        class="absolute inset-0 opacity-0 cursor-pointer" 
+                        @change="onFileChange"
+                      />
+                    </template>
+                    <template v-else>
+                      <img :src="imagePreview" class="w-full h-full object-cover" />
+                      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <button @click="removeImage" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
                 </div>
 
                 <!-- Target Audience -->

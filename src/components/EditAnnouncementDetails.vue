@@ -32,6 +32,71 @@ const MAX_TITLE_LENGTH = 100
 const MAX_SUBTITLE_LENGTH = 150
 const MAX_CONTENT_LENGTH = 2000
 
+// Image State
+const coverImage = ref(null)
+const imagePreview = ref(null)
+const contentArea = ref(null)
+
+const formatText = (style) => {
+  if (!contentArea.value) return
+  
+  const textarea = contentArea.value
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const selectedText = announcementForm.content.substring(start, end)
+  let before = announcementForm.content.substring(0, start)
+  let after = announcementForm.content.substring(end)
+  let newText = ""
+
+  switch(style) {
+    case 'bold': newText = `**${selectedText || 'ข้อความหนา'}**`; break;
+    case 'italic': newText = `*${selectedText || 'ข้อความเอียง'}*`; break;
+    case 'underline': newText = `<u>${selectedText || 'ข้อความขีดเส้นใต้'}</u>`; break;
+    case 'list': newText = `\n- ${selectedText || 'Item 1'}\n- Item 2`; break;
+    case 'ordered': newText = `\n1. ${selectedText || 'Step 1'}\n2. Step 2`; break;
+    case 'link': 
+       const url = prompt("Enter URL:", "https://")
+       if (url) {
+         newText = `[${selectedText || 'คลิกที่นี่'}](${url})`; 
+       } else {
+         return;
+       }
+       break;
+    case 'emoji': 
+       const emojis = ['😊', '📦', '🚀', '📢', '✨'];
+       newText = emojis[Math.floor(Math.random() * emojis.length)];
+       break;
+  }
+
+  announcementForm.content = before + newText + after
+  
+  // Set cursor position after formatting
+  setTimeout(() => {
+    textarea.focus()
+    const newPos = start + newText.length
+    textarea.setSelectionRange(newPos, newPos)
+  }, 0)
+}
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    coverImage.value = file
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeImage = () => {
+  coverImage.value = null
+  imagePreview.value = null
+  // Reset announcementForm.coverImage if it was there
+  announcementForm.coverImage = null
+}
+
 const handleTitleInput = (event) => {
   let val = event.target.value
   
@@ -116,7 +181,8 @@ const announcementForm = reactive({
   content: '',
   targetAudience: 'All',
   isPinned: false,
-  notifyEmail: false
+  notifyEmail: false,
+  coverImage: null
 })
 
 // Categories for dropdown
@@ -128,7 +194,17 @@ const initialForm = ref(null)
 
 const hasChanges = computed(() => {
   if (!initialForm.value) return false
-  return JSON.stringify(announcementForm) !== JSON.stringify(initialForm.value)
+  const formStr = JSON.stringify(announcementForm)
+  const initialStr = JSON.stringify(initialForm.value)
+  const imageChanged = imagePreview.value !== initialForm.value.coverImage
+  return formStr !== initialStr || imageChanged
+})
+
+const isFormValid = computed(() => {
+  return announcementForm.title.trim() !== '' && 
+         announcementForm.category !== '' && 
+         announcementForm.datePosted !== '' && 
+         announcementForm.content.trim() !== ''
 })
 
 const fallbackAnnouncements = [
@@ -224,10 +300,16 @@ const fetchAnnouncementDetail = async () => {
 
     if (data) {
       Object.assign(announcementForm, data)
+      if (data.coverImage) {
+        imagePreview.value = data.coverImage
+      }
     } else {
       const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
       if (fallbackFound) {
         Object.assign(announcementForm, fallbackFound)
+        if (fallbackFound.coverImage) {
+          imagePreview.value = fallbackFound.coverImage
+        }
       }
     }
   } catch (error) {
@@ -676,51 +758,86 @@ const showProfileStaffPage = async function () {
 
                 <!-- Content -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Content </label>
+                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
                    <!-- Mock Rich Text Toolbar -->
-                   <div :class="[
-                     'border rounded-xl overflow-hidden transition-all',
-                     contentLengthError 
-                     ? 'border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100' 
-                     : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100'
-                   ]">
-                     <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                       <button class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
-                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                       </button>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
-                       <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                       <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                       </button>
-                     </div>
-                     <textarea 
-                        :value="announcementForm.content"
-                        @input="handleContentInput"
-                        rows="6"
-                        class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                        placeholder="Detailed announcement content... Supports text formatting."
-                     ></textarea>
-                   </div>
-                   <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                     Content exceeds the maximum limit of 2000 characters.
-                   </div>
+                    <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
+                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                      <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
+                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </button>
+                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </button>
+                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                        </button>
+                      </div>
+                      <textarea 
+                         ref="contentArea"
+                         :value="announcementForm.content"
+                         @input="handleContentInput"
+                         rows="6"
+                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         placeholder="Enter announcement content... Supports text formatting."
+                      ></textarea>
+                    </div>
+                    <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                      Content exceeds the maximum limit of 2000 characters.
+                    </div>
                 </div>
 
                 <!-- Cover Image -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Cover Image (if any)</label>
-                   <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]">
+                   <label class="text-sm font-semibold text-gray-700">Cover Image</label>
+                   <div 
+                     v-if="!imagePreview"
+                     @click="$refs.fileInput.click()"
+                     class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]"
+                   >
                       <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       </div>
                       <p class="text-sm font-medium text-gray-700 mt-2">Click to replace or drag file here</p>
                       <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
+                      <input 
+                        type="file" 
+                        ref="fileInput" 
+                        class="hidden" 
+                        @change="handleImageUpload" 
+                        accept="image/*"
+                      />
+                   </div>
+                   <div v-else class="relative group">
+                      <img :src="imagePreview" alt="Preview" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                      <button 
+                        @click="removeImage" 
+                        class="absolute top-3 right-3 p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-rose-100 cursor-pointer"
+                        title="Remove image"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                      </button>
+                      <button 
+                        @click="$refs.fileInput.click()" 
+                        class="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-blue-100 cursor-pointer"
+                        title="Change image"
+                      >
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                      </button>
+                      <input 
+                        type="file" 
+                        ref="fileInput" 
+                        class="hidden" 
+                        @change="handleImageUpload" 
+                        accept="image/*"
+                      />
                    </div>
                 </div>
 
@@ -790,10 +907,10 @@ const showProfileStaffPage = async function () {
                 </button>
                 <button 
                   @click="handleSave"
-                  :disabled="isSubmitting || !hasChanges"
+                  :disabled="isSubmitting || !hasChanges || !isFormValid"
                   :class="[
                     'w-full md:w-auto px-6 py-2.5 rounded-xl text-white font-medium shadow-md transition-all flex items-center justify-center gap-2',
-                    (isSubmitting || !hasChanges) ? 'bg-[#1D355E] opacity-50 cursor-not-allowed' : 'bg-[#1D355E] hover:bg-[#152847] cursor-pointer'
+                    (isSubmitting || !hasChanges || !isFormValid) ? 'bg-[#1D355E] opacity-50 cursor-not-allowed' : 'bg-[#1D355E] hover:bg-[#152847] cursor-pointer'
                   ]"
                 >
                     <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
