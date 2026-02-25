@@ -38,10 +38,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 
-onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-  
+const fetchDashboardData = async () => {
   try {
     const data = await getDashboardData(`${import.meta.env.VITE_BASE_URL}/api/dashboard`, router)
     if (data) {
@@ -59,8 +56,11 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching dashboard data:', error)
   }
+}
 
+const renderChart = () => {
   const ctx = document.getElementById('parcelChart')
+  if (!ctx) return
   new Chart(ctx, {
     type: 'bar',
     data: {
@@ -87,6 +87,14 @@ onMounted(async () => {
       }
     }
   })
+}
+
+onMounted(async () => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+  
+  await fetchDashboardData()
+  renderChart()
 })
 
 const showHomePageStaffWeb = async function () {
