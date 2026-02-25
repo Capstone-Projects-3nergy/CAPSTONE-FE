@@ -20,7 +20,7 @@ const isCategoryOpen = ref(false)
 const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
 const editSuccess = ref(false)
-const error = ref('')
+const error = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -100,13 +100,13 @@ const removeImage = () => {
 const handleTitleInput = (event) => {
   let val = event.target.value
   
-  if (/[๐-๙]/.test(val)) {
-    titleThaiNumError.value = true
-    val = val.replace(/[๐-๙]/g, '')
-    setTimeout(() => {
-      titleThaiNumError.value = false
-    }, 5000)
-  }
+  // if (/[๐-๙]/.test(val)) {
+  //   titleThaiNumError.value = true
+  //   val = val.replace(/[๐-๙]/g, '')
+  //   setTimeout(() => {
+  //     titleThaiNumError.value = false
+  //   }, 5000)
+  // }
 
   if (val.length > MAX_TITLE_LENGTH) {
     const sliced = val.slice(0, MAX_TITLE_LENGTH)
@@ -350,18 +350,38 @@ const navigateTo = (name) => {
 
 const handleSave = async () => {
   if (!announcementForm.title.trim() || !announcementForm.datePosted || !announcementForm.category || !announcementForm.content.trim()) {
-    error.value = 'Please fill in all required fields'
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
     return
   }
-  isSubmitting.value = true
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  // console.log('Saved:', announcementForm)
-  isSubmitting.value = false
-  editSuccess.value = true
-  setTimeout(() => {
-      router.push({ name: 'manageannouncement' })
-  }, 1500)
+  
+  try {
+    isSubmitting.value = true
+    // Simulate API call
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Mock 10% chance of failure for testing
+        // if (Math.random() < 0.1) reject(new Error('API Failure'))
+        resolve()
+      }, 10000)
+    })
+    
+    isSubmitting.value = false
+    editSuccess.value = true
+    setTimeout(() => {
+      editSuccess.value = false
+      // router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+    }, 10000)
+  } catch (err) {
+    console.error('Update failed:', err)
+    isSubmitting.value = false
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+  }
 }
 
 const handleCancel = () => {
@@ -933,8 +953,8 @@ const showProfileStaffPage = async function () {
             />
             <AlertPopUp
               v-if="error"
-              :titles="'Error'"
-              :message="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
               styleType="red"
               operate="errorMessage"
               @closePopUp="closePopUp"

@@ -9,7 +9,7 @@ import AlertPopUp from './AlertPopUp.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
 const route = useRoute()
-
+const error = ref(false)
 const isCollapsed = ref(false)
 const isCategoryOpen = ref(false)
 
@@ -91,6 +91,7 @@ const closePopUp = (operate) => {
   if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
   if (operate === 'categoryError') { categoryError.value = false }
   if (operate === 'contentError') { contentError.value = false }
+  if (operate === 'errorMessage') { error.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -126,13 +127,13 @@ const MAX_SUBTITLE_LENGTH = 150
 const handleSubtitleInput = (event) => {
   let val = event.target.value
   
-  if (/[๐-๙]/.test(val)) {
-    subtitleThaiNumError.value = true
-    val = val.replace(/[๐-๙]/g, '')
-    setTimeout(() => {
-      subtitleThaiNumError.value = false
-    }, 5000)
-  }
+  // if (/[๐-๙]/.test(val)) {
+  //   subtitleThaiNumError.value = true
+  //   val = val.replace(/[๐-๙]/g, '')
+  //   setTimeout(() => {
+  //     subtitleThaiNumError.value = false
+  //   }, 5000)
+  // }
 
   if (val.length > MAX_SUBTITLE_LENGTH) {
     const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
@@ -223,21 +224,59 @@ const submitAnnouncement = () => {
     return
   }
 
-  // Mock submission
-  console.log('Submitting announcement:', {
-    title: title.value,
-    subtitle: subtitle.value,
-    category: category.value,
-    content: content.value,
-    date: date.value,
-    image: imageFile.value ? imageFile.value.name : 'No image'
-  })
+  try {
+    // Mock submission
+    console.log('Submitting announcement:', {
+      title: title.value,
+      subtitle: subtitle.value,
+      category: category.value,
+      content: content.value,
+      date: date.value,
+      image: imageFile.value ? imageFile.value.name : 'No image'
+    })
 
-  addSuccess.value = true
-  setTimeout(() => {
-    addSuccess.value = false
-    router.push({ name: 'manageannouncement', params: { id: route.params.id } })
-  }, 2000)
+    addSuccess.value = true
+    setTimeout(() => {
+      addSuccess.value = false
+      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+    }, 10000)
+  } catch (err) {
+    console.error('Submission failed:', err)
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+  }
+}
+
+const saveDraft = () => {
+  if (!isFormValid.value) {
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+    return
+  }
+
+  try {
+    // Mock draft saving
+    console.log('Saving draft:', {
+      title: title.value,
+      status: 'Draft'
+    })
+    
+    addSuccess.value = true
+    setTimeout(() => {
+      addSuccess.value = false
+      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+    }, 10000)
+  } catch (err) {
+    console.error('Save draft failed:', err)
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+  }
 }
 const handleCancel = () => {
   router.back()
@@ -513,6 +552,14 @@ const returnLoginPage = async () => {
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
+              <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="errorMessage"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <!-- Form Card -->
@@ -554,7 +601,7 @@ const returnLoginPage = async () => {
                       placeholder="Enter brief description..."
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        subtitleLengthError || subtitleThaiNumError
+                        subtitleLengthError 
                           ? 'border-red-500 focus:ring-red-500'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
@@ -777,6 +824,8 @@ const returnLoginPage = async () => {
                   Cancel
                 </button>
                 <button 
+                  type="button"
+                  @click="saveDraft"
                   :disabled="!isFormValid"
                   :class="[
                     'w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-700 bg-[#E8EDF2] font-medium transition-all shadow-sm flex items-center justify-center gap-2',
