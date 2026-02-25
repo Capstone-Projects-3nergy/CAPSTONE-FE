@@ -17,7 +17,7 @@ const route = useRoute()
 import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
 import AnnouncementTable from './AnnouncementTable.vue'
 import DeleteAnnouncement from './DeleteAnnouncement.vue'
-import ViewAnnouncement from './ViewAnnouncement.vue'
+import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { computed } from 'vue'
 
@@ -697,9 +697,17 @@ const showProfileStaffPage = async function () {
     </div>
   </div>
 
-  <ViewAnnouncement
-    v-if="showViewModal"
-    :announcementData="selectedAnnouncement"
+  <AnnouncementDetailModal
+    :isOpen="showViewModal"
+    :title="selectedAnnouncement?.title || ''"
+    :subtitle="''"
+    :content="selectedAnnouncement?.subtitle || ''"
+    :tag="selectedAnnouncement?.category || ''"
+    :status="selectedAnnouncement?.status || 'Published'"
+    :date="selectedAnnouncement?.datePosted || ''"
+    :author="selectedAnnouncement?.author || 'Staff Portal'"
+    :views="selectedAnnouncement?.views || 0"
+    :pinned="selectedAnnouncement?.pinned || false"
     @close="showViewModal = false; selectedAnnouncement = null"
   />
 
