@@ -126,11 +126,18 @@ const viewMode = ref('grid')
 const itemsPerPage = 6
 
 const filteredAnnouncements = computed(() => {
-  return announcements.value.filter(item => {
+  const filtered = announcements.value.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
                           item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
     return matchesSearch && matchesCategory
+  })
+
+  // Sort: Pinned items first, then ordered originally
+  return filtered.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    return 0
   })
 })
 

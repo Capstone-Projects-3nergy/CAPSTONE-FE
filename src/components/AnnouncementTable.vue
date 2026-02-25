@@ -105,7 +105,7 @@ const getCategoryIcon = (category) => {
           <!-- Card Body -->
           <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#185DC0] transition-colors">
             {{ item.title }}
-          </h3>
+          </h3> 
           <p class="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed flex-grow">
             {{ item.subtitle }}
           </p>
