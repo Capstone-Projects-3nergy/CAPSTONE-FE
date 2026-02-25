@@ -140,6 +140,7 @@ const filteredNews = computed(() => {
 const openModal = (item) => {
   selectedAnnouncement.value = {
     title: item.title,
+    subtitle: item.subtitle,
     content: item.content,
     tag: item.tag,
     date: item.date
@@ -215,8 +216,9 @@ const fetchAnnouncementData = async () => {
       const mapped = {
         id: item.id || item.announcementId,
         type: type,
-        tag: item.tag || (type === 'event' ? 'Community' : 'Update'),
+        tag: item.tag || item.category || (type === 'event' ? 'Community' : 'Update'),
         title: item.title || item.header || '',
+        subtitle: item.subtitle || '',
         content: item.content || item.description || '',
         date: item.createdAt || item.date || 'Just now',
         displayDate: item.createdAt || item.date || 'Just now',
@@ -576,8 +578,8 @@ onMounted(async () => {
                     <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight">
                       {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
-                      {{ item.content }}
+                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4 whitespace-pre-line">
+                      {{ item.subtitle || item.content }}
                     </p>
                     <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
                        <div class="flex -space-x-2">
@@ -615,8 +617,8 @@ onMounted(async () => {
                     <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors">
                       {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0 line-clamp-2">
-                      {{ item.content }}
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0 line-clamp-2 whitespace-pre-line">
+                      {{ item.subtitle || item.content }}
                     </p>
                   </div>
                   <div class="flex items-center justify-end">
@@ -645,10 +647,10 @@ onMounted(async () => {
     ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
   ></Teleport>
 
-  <!-- Detail Modal -->
   <AnnouncementDetailModal 
     :is-open="isModalOpen"
     :title="selectedAnnouncement?.title || ''"
+    :subtitle="selectedAnnouncement?.subtitle || ''"
     :content="selectedAnnouncement?.content || ''"
     :tag="selectedAnnouncement?.tag || ''"
     :date="selectedAnnouncement?.date || ''"

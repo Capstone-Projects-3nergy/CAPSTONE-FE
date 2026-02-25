@@ -10,6 +10,11 @@ const props = defineProps({
     type: String,
     required: true
   },
+  subtitle: {
+    type: String,
+    required: false,
+    default: ''
+  },
   content: {
     type: String,
     required: true
@@ -55,9 +60,11 @@ const closeModal = () => {
           <span class="text-sm font-medium text-gray-500">{{ date }}</span>
         </div>
         
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 leading-tight">{{ title }}</h2>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{{ title }}</h2>
+        <p v-if="subtitle" class="text-lg font-medium text-gray-700 mb-6">{{ subtitle }}</p>
+        <div v-else class="mb-6"></div>
         
-        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed">
+        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
           <p>{{ content }}</p>
           <slot></slot>
         </div>

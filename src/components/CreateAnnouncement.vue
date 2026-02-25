@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
@@ -35,6 +35,10 @@ const subtitleThaiNumError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
+
+const isFormValid = computed(() => {
+  return title.value.trim() !== '' && category.value !== '' && date.value !== '' && content.value.trim() !== ''
+})
 
 const closePopUp = (operate) => {
   if (operate === 'successMessage') { addSuccess.value = false }
@@ -541,7 +545,7 @@ const returnLoginPage = async () => {
                       </div>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
+                      <label class="text-sm font-semibold text-gray-700">Publish Date  <span class="text-red-500">*</span></label>
                       <div class="relative">
                         <input 
                            type="datetime-local" 
@@ -681,14 +685,22 @@ const returnLoginPage = async () => {
                   Cancel
                 </button>
                 <button 
-                  class="w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-700 bg-[#E8EDF2] hover:bg-[#D1D9E6] font-medium transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                  :disabled="!isFormValid"
+                  :class="[
+                    'w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-700 bg-[#E8EDF2] font-medium transition-all shadow-sm flex items-center justify-center gap-2',
+                    !isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#D1D9E6] cursor-pointer'
+                  ]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                   Save Draft
                 </button>
                 <button 
                   @click="submitAnnouncement" 
-                  class="w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 font-medium shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                  :disabled="!isFormValid"
+                  :class="[
+                    'w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-blue-600 font-medium shadow-md transition-all flex items-center justify-center gap-2',
+                    !isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 cursor-pointer'
+                  ]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
                   Publish Announcement

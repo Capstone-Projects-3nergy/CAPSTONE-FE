@@ -123,6 +123,14 @@ const announcementForm = reactive({
 const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 const statuses = ['Draft', 'Published']
 
+// Initial Form State
+const initialForm = ref(null)
+
+const hasChanges = computed(() => {
+  if (!initialForm.value) return false
+  return JSON.stringify(announcementForm) !== JSON.stringify(initialForm.value)
+})
+
 const fallbackAnnouncements = [
   {
     id: 1,
@@ -229,6 +237,9 @@ const fetchAnnouncementDetail = async () => {
       Object.assign(announcementForm, fallbackFound)
     }
   }
+
+  // Save initial state after data is loaded
+  initialForm.value = JSON.parse(JSON.stringify(announcementForm))
 }
 
 onMounted(() => {
@@ -543,7 +554,7 @@ const showProfileStaffPage = async function () {
                 
                 <!-- Title Input -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
+                   <label class="text-sm font-semibold text-gray-700">Announcement Title </label>
                    <input 
                       type="text" 
                       :value="announcementForm.title"
@@ -592,7 +603,7 @@ const showProfileStaffPage = async function () {
                       </div>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Status <span class="text-red-500">*</span></label>
+                      <label class="text-sm font-semibold text-gray-700">Status </label>
                       <div class="relative">
                         <select 
                            v-model="announcementForm.status"
@@ -610,7 +621,7 @@ const showProfileStaffPage = async function () {
                 <!-- Category & Date Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
+                      <label class="text-sm font-semibold text-gray-700">Category </label>
                       <div class="relative" @click="isCategoryOpen = !isCategoryOpen" @mouseleave="isCategoryOpen = false">
                         <div class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
                             <span v-if="!announcementForm.category" class="text-gray-500">Select category...</span>
@@ -665,7 +676,7 @@ const showProfileStaffPage = async function () {
 
                 <!-- Content -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <label class="text-sm font-semibold text-gray-700">Content </label>
                    <!-- Mock Rich Text Toolbar -->
                    <div :class="[
                      'border rounded-xl overflow-hidden transition-all',
@@ -779,8 +790,11 @@ const showProfileStaffPage = async function () {
                 </button>
                 <button 
                   @click="handleSave"
-                  :disabled="isSubmitting"
-                  class="w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-[#1D355E] hover:bg-[#152847] font-medium shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70"
+                  :disabled="isSubmitting || !hasChanges"
+                  :class="[
+                    'w-full md:w-auto px-6 py-2.5 rounded-xl text-white font-medium shadow-md transition-all flex items-center justify-center gap-2',
+                    (isSubmitting || !hasChanges) ? 'bg-[#1D355E] opacity-50 cursor-not-allowed' : 'bg-[#1D355E] hover:bg-[#152847] cursor-pointer'
+                  ]"
                 >
                     <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400">
