@@ -21,6 +21,11 @@ import ViewAnnouncement from './ViewAnnouncement.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { computed } from 'vue'
 
+import { getAnnouncements } from '@/utils/fetchUtils.js'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+
+const announcementManager = useAnnouncementManager()
+
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -187,6 +192,42 @@ const onDeleteConfirm = () => {
   selectedAnnouncement.value = null
 }
 
+const fetchAnnouncementData = async () => {
+  const data = await getAnnouncements(
+    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    router
+  )
+
+  if (data && data.length > 0) {
+    announcementManager.setAnnouncements(data)
+
+    const mapped = []
+
+    data.forEach((item) => {
+      const type = (item.type || item.category || 'General').toLowerCase()
+      // capitalize first letter of type
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      
+      mapped.push({
+        id: item.id || item.announcementId,
+        title: item.title || item.header || '',
+        subtitle: item.content || item.description || '',
+        category: item.tag || capitalizedType,
+        pinned: item.pinned || false,
+        datePosted: item.createdAt || item.date || 'Just now',
+        status: item.status || 'Published',
+        author: item.author || 'Staff Portal',
+        views: item.views || 0,
+        originalData: item
+      })
+    })
+
+    if (mapped.length > 0) {
+      announcements.value = mapped
+    }
+  }
+}
+
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -197,6 +238,8 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+  
+  await fetchAnnouncementData()
 })
 
 const toggleSidebar = () => {

@@ -21,6 +21,7 @@ import ParcelFilterBar from './ParcelFilterBar.vue'
 import RestoreParcels from './RestoreParcels.vue'
 import DeleteMemberStaff from './DeleteMemberStaff.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -69,12 +70,15 @@ const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const userManager = useUserManager()
+const announcementManager = useAnnouncementManager()
+
 const emit = defineEmits(['add-success'])
 const showLogoutConfirm = ref(null)
 const parcelStore = useParcelManager()
-// const trashList = ref([])
+
 const trashList = computed(() => parcelManager.getTrash?.() || [])
 const trashMemberList = computed(() => userManager.getTrash?.() || [])
+const trashAnnouncementList = computed(() => announcementManager.getTrash?.() || [])
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -224,7 +228,8 @@ const tabs = ['Parcels', 'Residents', 'Announcement']
 const usersByTab = computed(() => {
   if (activeTab.value === 'Parcels') return trashList.value
   if (activeTab.value === 'Residents') return trashMemberList.value
-  return [...trashList.value, ...trashMemberList.value]
+  if (activeTab.value === 'Announcement') return trashAnnouncementList.value
+  return [...trashList.value, ...trashMemberList.value, ...trashAnnouncementList.value]
 })
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -371,6 +376,32 @@ const filteredMembers = computed(() => {
 
   return result
 })
+
+const filteredAnnouncements = computed(() => {
+  let result = trashAnnouncementList.value.map((a) => ({
+    ...a,
+    parsedDate: parseDate(a.deletedAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = result.filter(item => {
+      const kw = searchKeyword.value.toLowerCase()
+      return (item.title && item.title.toLowerCase().includes(kw)) ||
+             (item.subtitle && item.subtitle.toLowerCase().includes(kw)) ||
+             (item.category && item.category.toLowerCase().includes(kw))
+    })
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((a) => {
+      if (!a.parsedDate) return false
+      const parcelDate = a.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
 function formatDateByTab(rawDate) {
   if (!rawDate) return rawDate
 
@@ -444,6 +475,8 @@ const totalPages = computed(() => {
     return Math.ceil(filteredParcels.value.length / perPage.value)
   } else if (activeTab.value === 'Residents') {
     return Math.ceil(filteredMembers.value.length / perPage.value)
+  } else if (activeTab.value === 'Announcement') {
+    return Math.ceil(filteredAnnouncements.value.length / perPage.value)
   }
   return 0
 })
@@ -464,6 +497,15 @@ const paginatedMembers = computed(() => {
 })
 const canGoNextMember = computed(() => {
   return paginatedMembers.value.length === perPage.value
+})
+
+const paginatedAnnouncements = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredAnnouncements.value.slice(start, end)
+})
+const canGoNextAnnouncement = computed(() => {
+  return paginatedAnnouncements.value.length === perPage.value
 })
 
 const goToPage = (page) => {
@@ -685,8 +727,42 @@ const fetchTrashMembers = async () => {
   }
 }
 
+const fetchTrashAnnouncements = async () => {
+  try {
+    const dataAnnouncement = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/announcements`,
+      router
+    )
+
+    const list = Array.isArray(dataAnnouncement) ? dataAnnouncement : []
+
+    const mapped = list.map((a) => {
+      const type = (a.type || a.category || 'General').toLowerCase()
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      return {
+        id: a.id || a.announcementId,
+        title: a.title || a.header || '',
+        subtitle: a.content || a.description || '',
+        category: a.tag || capitalizedType,
+        pinned: a.pinned || false,
+        datePosted: a.createdAt || a.date || 'Just now',
+        status: a.status || 'Published',
+        author: a.author || 'Staff Portal',
+        views: a.views || 0,
+        originalData: a,
+        deletedAt: a.deletedAt || null
+      }
+    })
+
+    announcementManager.setTrash(mapped)
+  } catch (e) {
+    console.warn('Fetch trash announcements failed', e)
+  }
+}
+
 onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
+onMounted(fetchTrashAnnouncements)
 const cancelPage = () => {
   router.replace({ name: 'staffparcels' })
 }
@@ -1312,7 +1388,7 @@ const closePopUp = (operate) => {
         </ParcelTable>
           <ParcelTable
           v-if="activeTab === 'Announcement'"
-          :items="paginatedParcels"
+          :items="paginatedAnnouncements"
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
@@ -1328,7 +1404,7 @@ const closePopUp = (operate) => {
           :showTitle="true"
           :showCategory="true"
           :showDatePosted="true"
-          :can-next="canGoNext"
+          :can-next="canGoNextAnnouncement"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"

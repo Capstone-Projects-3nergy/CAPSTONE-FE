@@ -9,8 +9,11 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
+import { getAnnouncements } from '@/utils/fetchUtils.js'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 
 const loginManager = useAuthManager()
+const announcementManager = useAnnouncementManager()
 const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
@@ -195,6 +198,47 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
   if (dateInterval) clearInterval(dateInterval)
 })
+const fetchAnnouncementData = async () => {
+  const data = await getAnnouncements(
+    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    router
+  )
+
+  if (data && data.length > 0) {
+    announcementManager.setAnnouncements(data)
+
+    const events = []
+    const news = []
+
+    data.forEach((item) => {
+      const type = (item.type || item.category || 'news').toLowerCase()
+      const mapped = {
+        id: item.id || item.announcementId,
+        type: type,
+        tag: item.tag || (type === 'event' ? 'Community' : 'Update'),
+        title: item.title || item.header || '',
+        content: item.content || item.description || '',
+        date: item.createdAt || item.date || 'Just now',
+        displayDate: item.createdAt || item.date || 'Just now',
+        time: ''
+      }
+
+      if (mapped.type === 'event') {
+        events.push(mapped)
+      } else {
+        news.push(mapped)
+      }
+    })
+
+    if (events.length > 0) {
+      allEvents.value = events
+    }
+    if (news.length > 0) {
+      allNews.value = news
+    }
+  }
+}
+
 onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
@@ -202,6 +246,8 @@ onMounted(async () => {
   generateCalendar()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
+
+  await fetchAnnouncementData()
 })
 </script>
 
