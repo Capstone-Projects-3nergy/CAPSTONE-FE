@@ -136,7 +136,7 @@ const getCategoryIcon = (category) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
-                <span class="truncate">{{ item.datePosted.replace(' - ', ' · ') }}</span>
+                <span class="truncate">{{ item.datePosted.split(' - ')[0] }}</span>
               </div>
               
               <!-- Row 2: Author and Views -->
@@ -259,7 +259,6 @@ const getCategoryIcon = (category) => {
                 <span class="md:hidden font-semibold text-[#185DC0] mr-2">Date Posted:</span>
                 <div class="flex flex-col">
                   <span>{{ item.datePosted.split(' - ')[0] }}</span>
-                  <span class="text-xs text-gray-400">{{ item.datePosted.split(' - ')[1] }}</span>
                 </div>
               </td>
               <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-top md:align-middle">
@@ -280,7 +279,7 @@ const getCategoryIcon = (category) => {
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                       </svg>
-                      <span>{{ item.datePosted }}</span>
+                      <span>{{ item.datePosted.split(' - ')[0] }}</span>
                     </div>
                     <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
                       <div class="h-4 w-4 bg-blue-400 text-white rounded-full flex items-center justify-center text-[8px] font-bold">P</div>

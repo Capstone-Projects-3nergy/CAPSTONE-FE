@@ -12,6 +12,26 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import { getAnnouncements } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 
+const getCategoryBadgeClass = (category) => {
+  switch (category) {
+    case 'Urgent': return 'bg-[#FEF2F2] text-[#EF4444]'
+    case 'Maintenance': return 'bg-[#FFFBEB] text-[#F59E0B]'
+    case 'Events': return 'bg-[#EFF6FF] text-[#3B82F6]'
+    case 'General': return 'bg-[#F0FDF4] text-[#10B981]'
+    default: return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getCategoryIcon = (category) => {
+  switch (category) {
+    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`
+    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>`
+    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>`
+    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>`
+    default: return ''
+  }
+}
+
 const loginManager = useAuthManager()
 const announcementManager = useAnnouncementManager()
 const showLogoutConfirm = ref(false)
@@ -29,28 +49,9 @@ watch(
   }
 )
 const currentSlide = ref(1)
-const banners = ref([
-  {
-    tag: 'Featured',
-    title: 'Community Updates & Events',
-    description: 'Stay connected with everything happening in your residence. Check out the latest news and upcoming events below.'
-  },
-  {
-    tag: 'Notice',
-    title: 'Scheduled Maintenance',
-    description: 'Please be informed that there will be scheduled system maintenance this weekend. Access might be temporarily interrupted.'
-  },
-  {
-    tag: 'Event',
-    title: 'Annual General Meeting',
-    description: 'Join us for the Annual General Meeting next month. Your participation is important to shape the future of our community.'
-  },
-  {
-    tag: 'Alert',
-    title: 'New Security Guidelines',
-    description: 'We have updated our security policy regarding visitor registration. Ensure your guests are registered ahead of time.'
-  }
-])
+const bannerAnnouncements = computed(() => {
+  return allPublishedAnnouncements.value.slice(0, 4)
+})
 
 // Modal State
 const isModalOpen = ref(false)
@@ -88,52 +89,67 @@ const generateCalendar = () => {
   currentMonthName.value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
+const formatDate = (dateString) => {
+  if (!dateString || dateString === 'Just now') return 'Just now'
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  const d = date.getDate()
+  const m = date.toLocaleDateString('en-US', { month: 'short' })
+  const y = date.getFullYear()
+  return `${d} ${m} ${y}`
+}
+
 const updateDate = () => {
   const date = new Date()
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
   const day = date.getDate()
   const month = date.toLocaleDateString('en-US', { month: 'short' })
   const year = date.getFullYear()
-  currentDate.value = `${weekday}, ${day} ${month} ${year}`
+  currentDate.value = `${day} ${month} ${year}`
 }
 let dateInterval
 
-const allEvents = ref(Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  type: 'event',
-  tag: 'Community',
-  title: `Community Gathering & Workshop ${i + 1}`,
-  content: 'Join us for an engaging session where we discuss community improvements and upcoming projects. We will cover a variety of topics relevant to all residents.',
-  date: `2${i + 1} OCT 10:00 AM`,
-  displayDate: `2${i + 1} OCT`,
-  time: '10:00 AM'
-})))
+const allPublishedAnnouncements = computed(() => {
+  return announcementManager.announcements
+    .filter(item => item.status === 'Published')
+    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+    .map(item => {
+      const type = (item.type || item.category || 'General').toLowerCase()
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      const rawDate = item.createdAt || item.date || 'Just now'
+      
+      return {
+        id: item.id || item.announcementId,
+        title: item.title || item.header || '',
+        subtitle: item.subtitle || item.description || '',
+        content: item.content || item.description || '',
+        category: item.tag || capitalizedType,
+        pinned: item.pinned || false,
+        date: formatDate(rawDate),
+        views: item.views || 0,
+        author: item.author || 'Staff Portal',
+        type: type.includes('event') ? 'event' : 'news'
+      }
+    })
+})
 
-const allNews = ref(Array.from({ length: 4 }, (_, i) => ({
-  id: i + 1,
-  type: 'news',
-  tag: 'Update',
-  title: `Important Maintenance Notice ${i + 1}`,
-  content: 'There will be scheduled maintenance for the water supply system this weekend. Please plan accordingly. We apologize for any inconvenience caused.',
-  date: '2 hours ago'
-})))
+const filteredAnnouncements = computed(() => {
+  const query = searchQuery.value.toLowerCase()
+  return allPublishedAnnouncements.value.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(query) || 
+                          item.subtitle.toLowerCase().includes(query)
+    const matchesTab = tab.value === 'all' || 
+                      (tab.value === 'event' && item.type === 'event') ||
+                      (tab.value === 'news' && item.type === 'news')
+    return matchesSearch && matchesTab
+  })
+})
 
 const filteredEvents = computed(() => {
-  if (!searchQuery.value) return allEvents.value
-  const query = searchQuery.value.toLowerCase()
-  return allEvents.value.filter(e => 
-    e.title.toLowerCase().includes(query) || 
-    e.content.toLowerCase().includes(query)
-  )
+  return filteredAnnouncements.value.filter(e => e.type === 'event')
 })
 
 const filteredNews = computed(() => {
-  if (!searchQuery.value) return allNews.value
-  const query = searchQuery.value.toLowerCase()
-  return allNews.value.filter(n => 
-    n.title.toLowerCase().includes(query) || 
-    n.content.toLowerCase().includes(query)
-  )
+  return filteredAnnouncements.value.filter(n => n.type === 'news')
 })
 
 const openModal = (item) => {
@@ -141,7 +157,7 @@ const openModal = (item) => {
     title: item.title,
     subtitle: item.subtitle,
     content: item.content,
-    tag: item.tag,
+    tag: item.category,
     date: item.date
   }
   isModalOpen.value = true
@@ -206,37 +222,6 @@ const fetchAnnouncementData = async () => {
 
   if (data && data.length > 0) {
     announcementManager.setAnnouncements(data)
-
-    const events = []
-    const news = []
-
-    data.forEach((item) => {
-      const type = (item.type || item.category || 'news').toLowerCase()
-      const mapped = {
-        id: item.id || item.announcementId,
-        type: type,
-        tag: item.tag || item.category || (type === 'event' ? 'Community' : 'Update'),
-        title: item.title || item.header || '',
-        subtitle: item.subtitle || '',
-        content: item.content || item.description || '',
-        date: item.createdAt || item.date || 'Just now',
-        displayDate: item.createdAt || item.date || 'Just now',
-        time: ''
-      }
-
-      if (mapped.type === 'event') {
-        events.push(mapped)
-      } else {
-        news.push(mapped)
-      }
-    })
-
-    if (events.length > 0) {
-      allEvents.value = events
-    }
-    if (news.length > 0) {
-      allNews.value = news
-    }
   }
 }
 
@@ -445,15 +430,15 @@ onMounted(async () => {
             <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
             <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
             
-            <div class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
+            <div v-if="bannerAnnouncements.length > 0" class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
               <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
-                {{ banners[currentSlide - 1].tag }}
+                {{ bannerAnnouncements[currentSlide - 1]?.category || 'Featured' }}
               </span>
-              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
-                {{ banners[currentSlide - 1].title }}
+              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight line-clamp-2">
+                {{ bannerAnnouncements[currentSlide - 1]?.title }}
               </h3>
-              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px]">
-                {{ banners[currentSlide - 1].description }}
+              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px] line-clamp-2">
+                {{ bannerAnnouncements[currentSlide - 1]?.subtitle }}
               </p>
               
               <!-- Navigation Arrows -->
@@ -474,13 +459,19 @@ onMounted(async () => {
               <!-- Carousel Indicators -->
               <div class="flex justify-center gap-3">
                 <button
-                  v-for="n in 4"
+                  v-for="n in bannerAnnouncements.length"
                   :key="n"
                   @click="currentSlide = n"
                   class="transition-all duration-300 rounded-full h-2 cursor-pointer"
                   :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
                 ></button>
               </div>
+            </div>
+            
+            <!-- Fallback when no banners -->
+            <div v-else class="relative z-10 p-16 flex flex-col items-center text-center text-white">
+              <h3 class="text-2xl font-bold mb-2">No Active Announcements</h3>
+              <p class="text-blue-100">Check back later for community updates.</p>
             </div>
           </div>
 
@@ -569,7 +560,7 @@ onMounted(async () => {
                   v-for="item in filteredEvents"
                   :key="item.id"
                   @click="openModal(item)"
-                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
                 >
                   <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
                      <!-- Placeholder for Image -->
@@ -578,29 +569,62 @@ onMounted(async () => {
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                      </div>
-                     <!-- Date Badge -->
-                     <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                        {{ item.displayDate }}
-                     </div>
                   </div>
                   
-                  <div class="p-6">
-                    <div class="flex items-center gap-2 mb-3">
-                       <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2.5 py-0.5 rounded-md">{{ item.tag }}</span>
-                       <span class="text-xs text-gray-400">•</span>
-                       <span class="text-xs text-gray-500">{{ item.time }}</span>
+                  <div class="p-6 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                      <div class="flex items-center gap-2 flex-wrap">
+
+                        <!-- Category Badge -->
+                        <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
+                          <span v-html="getCategoryIcon(item.category)"></span>
+                          {{ item.category }}
+                        </span>
+                      </div>
                     </div>
-                    <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight">
+
+                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight line-clamp-2">
                       {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4 whitespace-pre-line">
+                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-grow">
                       {{ item.subtitle || item.content }}
                     </p>
-                    <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
-                       <div class="flex -space-x-2">
-                          <div v-for="i in 3" :key="i" class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white ring-1 ring-gray-100"></div>
-                       </div>
-                       <span class="text-sm font-medium text-gray-400 group-hover:text-gray-600 transition-colors">Details</span>
+
+                    <!-- Divider -->
+                    <div class="h-px bg-gray-100 w-full mb-4"></div>
+
+                    <div class="flex items-center justify-between gap-2 mt-auto">
+                      <div class="flex flex-col gap-1.5 min-w-0">
+                        <!-- Row 1: Date -->
+                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                          </svg>
+                          <span class="truncate">{{ item.date }}</span>
+                        </div>
+                        
+                        <!-- Row 2: Author and Views -->
+                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
+                          <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
+                          <div class="flex items-center gap-1.5 truncate">
+                            <span class="truncate">{{ item.author }}</span>
+                            <span class="text-gray-300 flex-shrink-0">·</span>
+                            <div class="flex items-center gap-1 text-gray-400 flex-shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              <span>{{ item.views }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <span class="text-sm font-semibold text-[#0E4B90] flex items-center gap-1">
+                        View
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -614,34 +638,52 @@ onMounted(async () => {
                 <span @click="isArchiveOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>
               </div>
 
-              <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div
                   v-for="item in filteredNews"
                   :key="'news-' + item.id"
                   @click="openModal(item)"
                   class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
                 >
-                  <div class="w-full md:w-48 h-32 bg-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden">
-                     <div class="absolute inset-0 bg-gray-200"></div>
+                  <div class="w-full md:w-40 h-28 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden flex items-center justify-center text-gray-300 border border-gray-50">
+                    <svg class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
+                    </svg>
                   </div>
-                  <div class="flex-1 flex flex-col justify-center">
+                  <div class="flex-1 flex flex-col">
                     <div class="flex items-center gap-2 mb-2">
-                       <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md">{{ item.tag }}</span>
-                       <span class="text-xs text-gray-400">{{ item.date }}</span>
+                      <span class="px-2 py-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
+                        <span v-html="getCategoryIcon(item.category)"></span>
+                        {{ item.category }}
+                      </span>
+                      <span class="text-[10px] font-bold text-gray-400 ml-auto">{{ item.date }}</span>
                     </div>
-                    <h4 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#0E4B90] transition-colors">
+                    <h4 class="text-base font-bold text-gray-900 mb-1 group-hover:text-[#0E4B90] transition-colors line-clamp-1">
                       {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-0 line-clamp-2 whitespace-pre-line">
+                    <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 flex-grow">
                       {{ item.subtitle || item.content }}
                     </p>
-                  </div>
-                  <div class="flex items-center justify-end">
-                     <button class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
-                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                     </button>
+                    <div class="mt-3 flex items-center justify-between">
+                       <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
+                          <span class="flex items-center gap-1">
+                             <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px]">P</div>
+                             {{ item.author }}
+                          </span>
+                          <span class="flex items-center gap-1">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                             </svg>
+                             {{ item.views }}
+                          </span>
+                       </div>
+                       <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
+                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
