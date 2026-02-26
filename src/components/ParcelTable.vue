@@ -78,57 +78,57 @@ const authStore = useAuthManager()
 <template>
   <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="min-w-full text-left border-collapse">
+      <table class="min-w-full divide-y divide-gray-200">
       <thead
-        class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+        class="hidden md:table-header-group bg-gray-50/50"
       >
         <tr>
           <th
             v-if="showPhoto"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Photo
           </th>
           <th
             v-if="showTracking"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Tracking
           </th>
 
           <th
             v-if="showName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Name
           </th>
           <th
             v-if="showMemberName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Resident name
           </th>
           <th
             v-if="showMemberTrashName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Resident name
           </th>
           <th
             v-if="showStaffName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Staff name
           </th>
           <th
             v-if="showMobile"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Mobile
           </th>
           <th
             v-if="showRoom"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Room
@@ -138,32 +138,32 @@ const authStore = useAuthManager()
             </div>
           </th>
 
-          <th v-if="showEmail" class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Email</th>
+          <th v-if="showEmail" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Email</th>
 
           <th
             v-if="showTitle"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Title
           </th>
 
           <th
             v-if="showCategory"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Category
           </th>
 
           <th
             v-if="showDatePosted"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Date Posted
           </th>
 
           <th
             v-if="showStatus"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Status
@@ -175,7 +175,7 @@ const authStore = useAuthManager()
 
           <th
             v-if="showUpdateAt"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Updated At
@@ -186,7 +186,7 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showActionStatus"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Status
@@ -197,7 +197,7 @@ const authStore = useAuthManager()
           </th>
            <th
             v-if="showDeletedAt"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Deleted At
@@ -208,14 +208,14 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showAction"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider"
           >
             Action
           </th>
         </tr>
       </thead>
 
-      <tbody class="divide-y">
+      <tbody class="bg-transparent md:bg-white divide-y divide-gray-100">
         <tr v-if="items.length === 0">
           <td colspan="15" class="text-center py-12 text-gray-500 text-sm">
             <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -229,11 +229,11 @@ const authStore = useAuthManager()
         <tr
           v-for="p in items"
           :key="p.id"
-          class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
+          class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative"
         >
           <td
             v-if="showPhoto"
-            class="px-4 py-2 md:py-3 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none"
           >
             <div class="flex items-center gap-2">
               <span class="md:hidden font-semibold text-[#185DC0]">Photo:</span>
@@ -276,7 +276,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showMemberTrashName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">
               Resident name:
@@ -285,7 +285,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showMemberName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">
               Resident name:
@@ -294,7 +294,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showStaffName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">
               Staff name:
@@ -303,7 +303,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showMobile"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Mobile:</span>
             {{ p.mobile }}
@@ -311,7 +311,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showRoom"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Room: </span>
             {{ p.roomNumber }}
@@ -319,7 +319,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showEmail"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Email: </span>
             {{ p.email }}
@@ -327,7 +327,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showTitle"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Title: </span>
             <span class="font-medium">{{ p.title }}</span>
@@ -353,7 +353,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showDatePosted"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Date Posted: </span>
             {{ p.datePosted }}
@@ -361,20 +361,19 @@ const authStore = useAuthManager()
 
           <td
             v-if="showStatus"
-            class="px-4 py-2 md:py-3 border-b md:border-none"
+            class="px-4 py-2 md:py-4 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
 
             <div class="relative group inline-block">
               <span
-                class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                class="px-3 py-1 rounded-full text-xs font-bold"
                 :class="[
                   {
-                    'bg-yellow-400': p.status === 'Waiting for Staff',
-                    'bg-yellow-400': p.status === 'Pending',
-                    'bg-green-400': p.status === 'Picked Up',
-                    'bg-blue-400': p.status === 'Received',
-                    'bg-red-400': p.status === 'TRASH'
+                    'bg-yellow-50 text-yellow-600': p.status === 'Waiting for Staff' || p.status === 'Pending',
+                    'bg-green-50 text-green-600': p.status === 'Picked Up',
+                    'bg-blue-50 text-blue-600': p.status === 'Received',
+                    'bg-red-50 text-red-600': p.status === 'TRASH'
                   },
                   clickableStatus ? 'cursor-pointer ' : 'cursor-default '
                 ]"
@@ -407,7 +406,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showUpdateAt"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]"
               >Updated At:</span
@@ -416,7 +415,7 @@ const authStore = useAuthManager()
           </td>
             <td
             v-if="showActionStatus"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
 
@@ -437,7 +436,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showDeletedAt"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]"
               >Deleted At:</span
@@ -446,7 +445,7 @@ const authStore = useAuthManager()
           </td>
           <!-- <td
             v-if="showActionStatus"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
 
@@ -467,14 +466,15 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-1 md:table-cell md:gap-1 md:align-middle"
+            class="px-4 py-2 md:py-4 md:px-6 text-sm text-gray-700 flex items-center md:table-cell md:align-middle text-right"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4">
+              <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
+              <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
             <button
               v-if="!!$slots['icon-view']"
               @click="$emit('view-detail', p.id)"
-              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
+              class="relative group/btn p-1.5 border border-gray-100 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-view"></slot>
               </div>
@@ -498,7 +498,7 @@ const authStore = useAuthManager()
             <button
               v-if="!!$slots['icon-view-member']"
               @click="$emit('view-detail', p.id)"
-              class="relative group/btn p-1.5 border border-gray-100  text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100  text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-view-member"></slot>
@@ -523,7 +523,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
@@ -547,7 +547,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDeleteResident && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
@@ -572,7 +572,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
@@ -595,7 +595,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDeleteResident && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
@@ -618,7 +618,7 @@ const authStore = useAuthManager()
             <button
               v-if="showRestore && !!$slots['restore-trash']"
               @click="$emit('restore', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="restore-trash"> </slot>
@@ -642,7 +642,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete']"
               @click="$emit('deleteMember', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
@@ -667,7 +667,7 @@ const authStore = useAuthManager()
             <button
               v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete-permanent']"
               @click="$emit('deleteMember', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
@@ -690,7 +690,7 @@ const authStore = useAuthManager()
             <button
               v-if="showRestoreMember && !!$slots['restore-trash']"
               @click="$emit('restoreMember', p)"
-              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm"
+              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="restore-trash"> </slot>
@@ -712,14 +712,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             </div>
-          </td>
+          </div>
+        </td>
         </tr>
       </tbody>
     </table>
     </div>
 
     <!-- Pagination -->
-    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="items.length > 0">
+    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
         <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
             <button 
               @click="$emit('prev')" 
@@ -743,7 +744,7 @@ const authStore = useAuthManager()
 
             <button 
               @click="$emit('next')" 
-              :disabled="page >= total"
+              :disabled="!canNext"
               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Next</button>
         </div>

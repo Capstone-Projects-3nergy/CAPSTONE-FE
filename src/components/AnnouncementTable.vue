@@ -223,7 +223,7 @@ const getCategoryIcon = (category) => {
               <th scope="col" class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-100">
+          <tbody class="bg-transparent md:bg-white divide-y divide-gray-100">
             <tr v-if="items.length === 0">
               <td colspan="6" class="text-center py-8 text-gray-500">No announcements found.</td>
             </tr>
@@ -271,18 +271,18 @@ const getCategoryIcon = (category) => {
                 <span class="md:hidden font-semibold text-[#185DC0] mr-2">Views:</span>
                 {{ item.views || 0 }}
               </td>
-              <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-right text-sm font-medium flex items-center md:table-cell gap-2 align-top md:align-middle">
+              <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-right text-sm font-medium flex items-center md:table-cell md:align-middle">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                   <!-- The Date and Views part like in the screenshot -->
                   <div class="md:hidden flex flex-col gap-1 w-full mt-2">
-                    <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
+                    <div class="flex items-center text-gray-500 text-xs font-bold gap-1.5">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                       </svg>
                       <span>{{ item.datePosted.split(' - ')[0] }}</span>
                     </div>
-                    <div class="flex items-center text-gray-500 text-xs font-semibold gap-1.5">
-                      <div class="h-4 w-4 bg-blue-400 text-white rounded-full flex items-center justify-center text-[8px] font-bold">P</div>
+                    <div class="flex items-center text-gray-500 text-xs font-bold gap-1.5">
+                      <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold">P</div>
                       <span>{{ item.author || 'Staff Portal' }} · </span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -292,8 +292,10 @@ const getCategoryIcon = (category) => {
                     </div>
                   </div>
 
-                  <div class="flex items-center justify-end gap-1 sm:gap-1.5 w-full md:w-auto flex-shrink-0">
-                    <button @click="$emit('pin', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
+                  <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4 md:mt-0 mt-3">
+                    <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
+                    <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
+                    <button @click="$emit('pin', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M14.102 2.664c.628-.416 1.692-.713 2.495.09l4.647 4.648c.806.804.508 1.868.091 2.495a2.95 2.95 0 0 1-.863.85c-.334.213-.756.374-1.211.35a9 9 0 0 1-.658-.071l-.068-.01a9 9 0 0 0-.707-.073c-.504-.025-.698.06-.76.12l-2.49 2.491c-.08.08-.18.258-.256.6c-.073.33-.105.736-.113 1.186c-.007.432.008.874.024 1.3l.001.047c.015.423.03.855.009 1.194c-.065 1.031-.868 1.79-1.658 2.141c-.79.35-1.917.437-2.7-.347l-2.25-2.25L3.53 21.53a.75.75 0 1 1-1.06-1.06l4.104-4.105l-2.25-2.25c-.783-.784-.697-1.91-.346-2.7c.35-.79 1.11-1.593 2.14-1.658c.34-.021.772-.006 1.195.009l.047.001c.426.015.868.031 1.3.024c.45-.008.856-.04 1.186-.113c.342-.076.52-.177.6-.257l2.49-2.49c.061-.061.146-.256.12-.76a9 9 0 0 0-.073-.707l-.009-.068a9 9 0 0 1-.071-.658c-.025-.455.136-.877.348-1.211c.216-.34.515-.64.851-.863"/></svg>
                          <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0">
                            <div class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]">
@@ -304,7 +306,7 @@ const getCategoryIcon = (category) => {
                            </div>
                          </div>
                     </button>
-                    <button @click="$emit('edit', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-orange-400 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
+                    <button @click="$emit('edit', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-orange-400 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                       <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0">
                         <div class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]">
@@ -315,7 +317,7 @@ const getCategoryIcon = (category) => {
                         </div>
                       </div>
                     </button>
-                    <button @click="$emit('view', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
+                    <button @click="$emit('view', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                       <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0">
                         <div class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]">
@@ -326,7 +328,7 @@ const getCategoryIcon = (category) => {
                         </div>
                       </div>
                     </button>
-                    <button @click="$emit('delete', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
+                    <button @click="$emit('delete', item)" class="relative group/btn p-1.5 sm:p-2 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors clip-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0">
                         <div class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]">
@@ -337,6 +339,7 @@ const getCategoryIcon = (category) => {
                         </div>
                       </div>
                     </button>
+                    </div>
                   </div>
                 </div>
               </td>
