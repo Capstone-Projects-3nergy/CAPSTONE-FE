@@ -64,9 +64,10 @@ const getCategoryIcon = (category) => {
         No announcements found.
       </div>
       
-      <div v-for="item in items" :key="item.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col group relative">
-        <!-- Image display similar to Announcement.vue -->
-        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+      <template v-for="item in items" :key="item.id">
+        <div v-if="item.status !== 'Published'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col group relative">
+          <!-- Image display similar to Announcement.vue -->
+          <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
           <!-- Placeholder for Image -->
           <div class="absolute inset-0 flex items-center justify-center text-gray-400">
             <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,29 +77,42 @@ const getCategoryIcon = (category) => {
         </div>
 
         <div class="p-6 flex-grow flex flex-col">
-          <!-- Card Header (Author and Date) -->
+          <!-- Card Header (Pinned, Category, and Status Badges) -->
           <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3 w-full">
+            <div class="flex items-center gap-2 w-full flex-wrap">
+              <!-- Left Side Badges -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Pinned Badge -->
+                <span v-if="item.pinned" class="px-2.5 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-lg bg-red-100 text-red-600 shadow-sm" title="Pinned">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                  </svg>
+                  Pinned
+                </span>
+
+                <!-- Category Badge -->
+                <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
+                  <span v-html="getCategoryIcon(item.category)"></span>
+                  {{ item.category }}
+                </span>
+
+                <!-- Status Pill -->
+                <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </div>
+
+              <!-- Author Info (Hidden as requested)
               <div class="h-10 w-10 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-sm">
                 SP
               </div>
               <div class="flex flex-col min-w-0 flex-1">
                 <span class="font-bold text-gray-900 text-sm truncate flex items-center gap-2">
                   {{ item.author || 'Staff Portal' }}
-                  <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                    </svg>
-                  </span>
                 </span>
                 <span class="text-xs text-gray-500">{{ item.datePosted }}</span>
               </div>
-              <!-- Status Pill on top right of the author in grid mode -->
-              <div class="flex-shrink-0">
-                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(item.status)">
-                  {{ item.status }}
-                </span>
-              </div>
+              -->
             </div>
           </div>
           
@@ -106,47 +120,44 @@ const getCategoryIcon = (category) => {
           <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#185DC0] transition-colors">
             {{ item.title }}
           </h3> 
-          <p class="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed flex-grow">
+          <p class="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed flex-grow">
             {{ item.subtitle }}
           </p>
-          
-          <!-- Category label -->
-          <div class="mt-auto mb-4">
-            <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-xl" :class="getCategoryBadgeClass(item.category)">
-              <span v-html="getCategoryIcon(item.category)"></span>
-              {{ item.category }}
-            </span>
-          </div>
 
           <!-- Divider -->
           <div class="h-px bg-gray-100 w-full mb-4"></div>
           
           <!-- Card Footer -->
-          <div class="flex flex-col gap-2.5">
-            <div class="flex flex-wrap items-center text-gray-500 text-[11px] font-semibold gap-x-1.5 gap-y-1">
-              <div class="flex items-center gap-1 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+          <div class="flex items-center justify-between gap-2 mt-auto">
+            <!-- Left Side: Metadata rows -->
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <!-- Row 1: Date -->
+              <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
-                <span class="truncate max-w-[90px]">{{ item.datePosted }}</span>
+                <span class="truncate">{{ item.datePosted.replace(' - ', ' · ') }}</span>
               </div>
               
-              <div class="flex items-center gap-1 min-w-0 flex-shrink-0">
-                <div class="h-3.5 w-3.5 bg-blue-400 text-white rounded-full flex items-center justify-center text-[7px] font-bold">P</div>
-                <span class="truncate max-w-[80px]">{{ item.author || 'Staff' }}</span>
-              </div>
-              
-              <div class="flex items-center gap-1 flex-shrink-0 text-gray-400">
-                <span class="text-gray-300">·</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span>{{ item.views || 0 }}</span>
+              <!-- Row 2: Author and Views -->
+              <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
+                <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="truncate">{{ item.author || 'Staff Portal' }}</span>
+                  <span class="text-gray-300 flex-shrink-0">·</span>
+                  <div class="flex items-center gap-1 text-gray-400 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>{{ item.views || 0 }} views</span>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div class="flex items-center justify-end gap-1.5 pt-1">
+            <!-- Right Side: Action Buttons -->
+            <div class="flex items-center gap-1.5 flex-shrink-0">
               <button @click="$emit('pin', item)" class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white flex items-center justify-center shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M14.102 2.664c.628-.416 1.692-.713 2.495.09l4.647 4.648c.806.804.508 1.868.091 2.495a2.95 2.95 0 0 1-.863.85c-.334.213-.756.374-1.211.35a9 9 0 0 1-.658-.071l-.068-.01a9 9 0 0 0-.707-.073c-.504-.025-.698.06-.76.12l-2.49 2.491c-.08.08-.18.258-.256.6c-.073.33-.105.736-.113 1.186c-.007.432.008.874.024 1.3l.001.047c.015.423.03.855.009 1.194c-.065 1.031-.868 1.79-1.658 2.141c-.79.35-1.917.437-2.7-.347l-2.25-2.25L3.53 21.53a.75.75 0 1 1-1.06-1.06l4.104-4.105l-2.25-2.25c-.783-.784-.697-1.91-.346-2.7c.35-.79 1.11-1.593 2.14-1.658c.34-.021.772-.006 1.195.009l.047.001c.426.015.868.031 1.3.024c.45-.008.856-.04 1.186-.113c.342-.076.52-.177.6-.257l2.49-2.49c.061-.061.146-.256.12-.76a9 9 0 0 0-.073-.707l-.009-.068a9 9 0 0 1-.071-.658c-.025-.455.136-.877.348-1.211c.216-.34.515-.64.851-.863"/></svg>
                 <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0">
@@ -195,6 +206,7 @@ const getCategoryIcon = (category) => {
           </div>
         </div>
       </div>
+    </template>
     </div>
 
     <!-- List View -->
@@ -215,8 +227,9 @@ const getCategoryIcon = (category) => {
             <tr v-if="items.length === 0">
               <td colspan="6" class="text-center py-8 text-gray-500">No announcements found.</td>
             </tr>
-            <tr v-for="item in items" :key="item.id" class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">
-              <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none">
+            <template v-for="item in items" :key="item.id">
+              <tr v-if="item.status !== 'Published'" class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none">
                 <div class="flex items-start gap-4">
                   <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-sm mt-1">
                     SP
@@ -329,7 +342,8 @@ const getCategoryIcon = (category) => {
                 </div>
               </td>
             </tr>
-          </tbody>
+          </template>
+        </tbody>
         </table>
       </div>
     </div>

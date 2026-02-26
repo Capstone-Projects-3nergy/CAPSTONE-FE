@@ -116,6 +116,105 @@ const announcements = ref([
     status: 'Draft',
     author: 'Staff Portal',
     views: 0
+  },
+  {
+    id: 7,
+    title: 'Survey of Facilities Improvement',
+    subtitle: 'Draft - seeking feedback from management. This survey aims to gather resident opinions on potential upgrades to the gym and swimming pool facilities.',
+    category: 'General',
+    pinned: false,
+    datePosted: '08 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 8,
+    title: 'Upcoming Fire Drill Exercise',
+    subtitle: 'Draft - awaiting final schedule confirmation. Annual fire safety drill is tentatively planned for mid-March. All systems will be tested.',
+    category: 'Urgent',
+    pinned: false,
+    datePosted: '05 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 9,
+    title: 'Waste Management Workshop',
+    subtitle: 'Draft - coordinating with city waste department. A session to educate residents on new recycling guidelines and sustainable waste disposal practices.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '02 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 10,
+    title: 'Parking Lot Striping Project',
+    subtitle: 'Draft - reviewing contractor bids. Sections of the parking garage will be repainted. Resident notification letters will be sent once the schedule is fixed.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '28 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 11,
+    title: 'Water Quality Report Update',
+    subtitle: 'Draft - finalizing laboratory results. The annual water quality assessment is almost complete. Results will be shared with the community next week.',
+    category: 'General',
+    pinned: false,
+    datePosted: '25 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 12,
+    title: 'Gym Equipment Maintenance',
+    subtitle: 'Draft - scheduling with technician. Several cardio machines are due for service. A temporary partial closure of the fitness center may be required.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '20 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 13,
+    title: 'Roof Inspection Notice',
+    subtitle: 'Draft - awaiting weather forecast. Periodic roof maintenance and gutter cleaning are scheduled for the coming weeks to prevent leaks.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '15 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 14,
+    title: 'Community Garden Meeting',
+    subtitle: 'Draft - proposing agenda items. Join the discussion on how to improve our shared green spaces and prepare for the spring planting season.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '10 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 15,
+    title: 'Elevator Modernization Project',
+    subtitle: 'Draft - reviewing long-term project plan. We are in the early stages of planning a full elevator system upgrade over the next twelve months.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '05 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
   }
 ])
 
@@ -130,7 +229,10 @@ const filteredAnnouncements = computed(() => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
                           item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
-    return matchesSearch && matchesCategory
+    // Filter to show only non-published items in the management view
+    const isNotPublished = item.status !== 'Published'
+    
+    return matchesSearch && matchesCategory && isNotPublished
   })
 
   // Sort: Pinned items first, then ordered originally
@@ -229,9 +331,14 @@ const fetchAnnouncementData = async () => {
       })
     })
 
+    // For testing with mock data, we comment out the overwrite
+    // Or you can merge them: announcements.value = [...mapped, ...announcements.value]
+    /*
     if (mapped.length > 0) {
       announcements.value = mapped
     }
+    */
+    console.log('API data fetched:', mapped.length, 'items')
   }
 }
 
