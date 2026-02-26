@@ -1,22 +1,46 @@
-// src/lineApi/LineNotificationManager.js
+// src/stores/LineNotificationManager.js
 import axios from 'axios'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
+import { useAuthManager } from '@/stores/AuthManager.js'
 
 class LineNotificationManager {
+  /**
+   * Helper to get headers with Auth token
+   */
+  _getHeaders() {
+    const authManager = useAuthManager()
+    const token = authManager.user?.accessToken
+    return {
+      Authorization: token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    }
+  }
+
+  /**
+   * Helper to get base URL
+   */
+  _getBaseURL() {
+    return import.meta.env.VITE_BASE_URL || ''
+  }
+
   /**
    * ขอให้ backend ส่งข้อความเข้า LINE Group
    * @param {string} groupId
    * @param {string} message
    */
   async sendToGroup(groupId, message) {
+    const baseURL = this._getBaseURL()
+    const url = `${baseURL}${LINE_CONFIG.API_URL}`
+    
     try {
-      const response = await axios.post(LINE_CONFIG.API_URL, {
+      const response = await axios.post(url, {
         groupId,
         message
+      }, {
+        headers: this._getHeaders()
       })
       return response.data
     } catch (error) {
-      console.error('❌ ส่งคำขอ LINE ล้มเหลว')
       console.error(error.response?.data || error.message)
       throw error
     }
@@ -27,14 +51,18 @@ class LineNotificationManager {
    * @param {string} message 
    */
   async notifyAdmin(message) {
+    const baseURL = this._getBaseURL()
+    const url = `${baseURL}/api/notify-line`
+    
     try {
       // ให้ Frontend ส่ง event เพื่อไปเรียกใช้ Backend API
-      const response = await axios.post('/api/notify-line', {
+      const response = await axios.post(url, {
         message
+      }, {
+        headers: this._getHeaders()
       })
       return response.data
     } catch (error) {
-      console.error('❌ แจ้งเตือน Admin ล้มเหลว')
       console.error(error.response?.data || error.message)
       throw error
     }
