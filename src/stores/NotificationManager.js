@@ -271,6 +271,12 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     notifyParcelUpdate: async (updatedParcel, router) => {
       await fetchNotifications(router)
     },
+    notifyAnnouncementCreated: async (announcement, router) => {
+      // สำหรับประกาศใหม่ เราอาจจะส่ง Line Notify ตรงๆ ไปก่อนถ้า Backend ยังไม่รองรับการสร้าง Noti อัตโนมัติ
+      const message = `📢 ประกาศใหม่!\n📌 หัวข้อ: ${announcement.title}\n📂 หมวดหมู่: ${announcement.category}`
+      await LineNotificationManager.notifyAdmin(message).catch(e => console.error("Line notification failed", e))
+      await fetchNotifications(router)
+    },
     notifyParcelSaved: async (parcel, router) => {
       await fetchNotifications(router)
     },
