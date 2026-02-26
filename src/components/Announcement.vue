@@ -94,8 +94,7 @@ const updateDate = () => {
   const day = date.getDate()
   const month = date.toLocaleDateString('en-US', { month: 'short' })
   const year = date.getFullYear()
-  const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-  currentDate.value = `${weekday}, ${day} ${month} ${year} ${time}`
+  currentDate.value = `${weekday}, ${day} ${month} ${year}`
 }
 let dateInterval
 
@@ -544,9 +543,25 @@ onMounted(async () => {
           <div class="min-h-[400px]">
             <!-- Events Grid -->
             <div v-if="tab === 'event' || tab === 'all' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': tab === 'all'}">
-              <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-800">Upcoming Events</h3>
-                <span @click="isCalendarOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">View Calendar →</span>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
+                <div class="flex items-center gap-4">
+                  <div class="w-1.5 h-8 bg-[#0E4B90] rounded-full"></div>
+                  <div>
+                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Upcoming Events</h3>
+                    <p class="text-xs font-medium text-gray-500 mt-0.5">Stay updated with community activities</p>
+                  </div>
+                </div>
+                <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-4 py-2.5 font-bold text-sm shadow-inner whitespace-nowrap">
+                  <div class="mr-3 p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </div>
+                  <span class="tracking-wide">{{ currentDate }}</span>
+                </div>
               </div>
               
                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

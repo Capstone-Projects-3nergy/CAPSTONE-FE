@@ -456,7 +456,7 @@ const toggleSidebar = () => {
               <span class="text-2xl">🚨</span>
               <h3 class="text-red-600 font-bold text-lg">{{ dashboardStore.stats.overdue || 5 }} Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
             </div>
-            <p class="text-red-500 text-sm mb-4">กรุณาติดต่อผู้พักอาศัยเพื่อรับพัสดุโดยเร็ว</p>
+            <p class="text-red-500 text-sm mb-4">Please contact the resident to collect the parcel as soon as possible.</p>
             
             <div class="space-y-3">
               <!-- Overdue Item -->
