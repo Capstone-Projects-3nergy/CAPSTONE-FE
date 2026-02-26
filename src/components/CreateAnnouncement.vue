@@ -5,8 +5,10 @@ import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
 
 const loginManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const router = useRouter()
 const route = useRoute()
 const error = ref(false)
@@ -210,7 +212,7 @@ const goBack = () => {
   router.back()
 }
 
-const submitAnnouncement = () => {
+const submitAnnouncement = async () => {
   if (!title.value.trim()) {
     titleError.value = true
     return
@@ -225,15 +227,24 @@ const submitAnnouncement = () => {
   }
 
   try {
-    // Mock submission
-    console.log('Submitting announcement:', {
+    const announcementData = {
       title: title.value,
       subtitle: subtitle.value,
       category: category.value,
       content: content.value,
       date: date.value,
       image: imageFile.value ? imageFile.value.name : 'No image'
-    })
+    }
+
+    // Mock submission
+    console.log('Submitting announcement:', announcementData)
+
+    // ส่งแจ้งเตือนผ่าน Line และ Fetch data ใหม่
+    try {
+      await notificationManager.notifyAnnouncementCreated(announcementData)
+    } catch (lineError) {
+      console.error('Notification failed:', lineError)
+    }
 
     addSuccess.value = true
     setTimeout(() => {

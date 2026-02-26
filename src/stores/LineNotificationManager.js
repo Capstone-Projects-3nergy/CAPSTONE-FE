@@ -67,6 +67,7 @@ class LineNotificationManager {
       throw error
     }
   }
+
 }
 
 export default new LineNotificationManager()
