@@ -6,6 +6,7 @@ import WebHeader from './WebHeader.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
+import ButtonWeb from './ButtonWeb.vue'
 
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
@@ -828,35 +829,34 @@ const returnLoginPage = async () => {
 
              <!-- Footer Actions -->
              <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-wrap-reverse md:flex-nowrap items-center justify-end gap-3 border-t border-gray-200">
-                <button 
+                <ButtonWeb 
+                  label="Cancel" 
+                  color="white-outline" 
                   @click="goBack" 
-                  class="w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 font-medium transition-all shadow-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="button"
-                  @click="saveDraft"
+                  class="w-full md:w-auto"
+                />
+                <ButtonWeb 
+                  label="Save Draft" 
+                  color="light-gray" 
+                  @click="saveDraft" 
                   :disabled="!isFormValid"
-                  :class="[
-                    'w-full md:w-auto px-5 py-2.5 rounded-xl text-gray-700 bg-[#E8EDF2] font-medium transition-all shadow-sm flex items-center justify-center gap-2',
-                    !isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#D1D9E6] cursor-pointer'
-                  ]"
+                  class="w-full md:w-auto"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  Save Draft
-                </button>
-                <button 
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  </template>
+                </ButtonWeb>
+                <ButtonWeb 
+                  label="Publish Announcement" 
+                  color="blue" 
                   @click="submitAnnouncement" 
                   :disabled="!isFormValid"
-                  :class="[
-                    'w-full md:w-auto px-6 py-2.5 rounded-xl text-white bg-blue-600 font-medium shadow-md transition-all flex items-center justify-center gap-2',
-                    !isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 cursor-pointer'
-                  ]"
+                  class="w-full md:w-auto"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
-                  Publish Announcement
-                </button>
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                  </template>
+                </ButtonWeb>
              </div>
           </div>
 
