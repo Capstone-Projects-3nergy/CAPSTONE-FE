@@ -68,6 +68,24 @@ class LineNotificationManager {
     }
   }
 
+  /**
+   * Notify Admin about new parcel
+   * @param {Object} parcel 
+   */
+  async notifyNewParcel(parcel) {
+    const message = `📦 New Parcel Arrived!\n📌 Tracking: ${parcel.trackingNumber}\n👤 Recipient: ${parcel.receiverName || 'N/A'}\n🏠 Room: ${parcel.roomNumber || 'N/A'}\n🚚 Courier: ${parcel.courier || 'N/A'}`
+    return this.notifyAdmin(message)
+  }
+
+  /**
+   * Notify Admin about new announcement
+   * @param {Object} announcement 
+   */
+  async notifyNewAnnouncement(announcement) {
+    const message = `📢 New Announcement!\n📌 Title: ${announcement.title}\n📂 Category: ${announcement.category}${announcement.subtitle ? `\n📝 Subtitle: ${announcement.subtitle}` : ''}`
+    return this.notifyAdmin(message)
+  }
+
 }
 
 export default new LineNotificationManager()

@@ -239,7 +239,7 @@ const submitAnnouncement = async () => {
     // Mock submission
     console.log('Submitting announcement:', announcementData)
 
-    // ส่งแจ้งเตือนผ่าน Line และ Fetch data ใหม่
+    // Send Line notification and fetch updated data
     try {
       await notificationManager.notifyAnnouncementCreated(announcementData)
     } catch (lineError) {
