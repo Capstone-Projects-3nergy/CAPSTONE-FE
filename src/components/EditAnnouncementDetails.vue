@@ -884,7 +884,7 @@ const showProfileStaffPage = async function () {
                         <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
                     </label>
-
+<!-- 
                     <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="announcementForm.targetAudience" value="Zone" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
@@ -893,7 +893,7 @@ const showProfileStaffPage = async function () {
                         </div>
                         <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
                       </div>
-                    </label>
+                    </label> -->
                   </div>
                 </div>
 

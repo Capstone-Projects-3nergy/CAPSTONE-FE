@@ -779,7 +779,7 @@ const returnLoginPage = async () => {
                       </div>
                     </label>
 
-                    <label class="relative cursor-pointer h-full">
+                    <!-- <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
                         <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
@@ -787,7 +787,7 @@ const returnLoginPage = async () => {
                         </div>
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
                       </div>
-                    </label>
+                    </label> -->
                   </div>
                 </div>
 
