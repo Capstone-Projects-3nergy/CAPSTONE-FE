@@ -426,47 +426,61 @@ const activeTab = ref('parcel')
               </div>
             </div>
           </div>
-          <!-- Tabs Header -->
-          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 mb-2 border-b border-gray-200 pb-2 lg:pb-0">
-            <div class="flex items-center gap-4 lg:gap-8 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
+          <!-- Tabs Navigation (Premium Framed Style) -->
+          <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 mt-2">
+            <div class="inline-flex p-1.5 bg-white rounded-2xl border border-gray-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
               <button 
                 @click="activeTab = 'parcel'" 
-                class="cursor-pointer flex items-center gap-3 pt-2"
-                :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'parcel' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+                class="flex items-center justify-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
+                :class="activeTab === 'parcel' ? 'bg-[#0E2856] shadow-lg text-white transform scale-[1.02]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/40'"
               >
-                <div class="p-2.5 bg-orange-100 rounded-xl text-orange-500 shadow-sm flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div 
+                  class="p-2 rounded-lg transition-all duration-300"
+                  :class="activeTab === 'parcel' ? 'bg-white text-orange-400 border border-white/40' : 'bg-white/50 text-gray-400 group-hover:bg-gray-200 border border-transparent'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
                     <path d="M12 12l8 -4.5" />
                     <path d="M12 12l0 9" />
                     <path d="M12 12l-8 -4.5" />
-                    <path d="M16 5.25l-8 4.5" />
                   </svg>
                 </div>
-                Parcel Dashboard
+                <span class="font-bold text-sm tracking-tight whitespace-nowrap">Parcel Dashboard</span>
               </button>
+              
               <button 
                 @click="activeTab = 'resident'"
-                class="cursor-pointer flex items-center gap-3 pt-2"
-                :class="['pb-4 px-2 border-b-2 font-bold text-sm transition-colors', activeTab === 'resident' ? 'border-[#1D355E] text-[#1D355E]' : 'border-transparent text-gray-500 hover:text-gray-800']"
+                class="flex items-center justify-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
+                :class="activeTab === 'resident' ? 'bg-[#0E2856] shadow-lg text-white transform scale-[1.02]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/40'"
               >
-                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center">
-                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
+                <div 
+                  class="p-2 rounded-lg transition-all duration-300"
+                  :class="activeTab === 'resident' ? 'bg-white text-blue-400 border border-white/40' : 'bg-gray-200/50 text-gray-400 group-hover:bg-gray-200 border border-transparent'"
                 >
-                  <path
-                    fill="currentColor"
-                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
-                  />
-                </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"/>
+                  </svg>
                 </div> 
-                Resident Dashboard
+                <span class="font-bold text-sm tracking-tight whitespace-nowrap">Resident Dashboard</span>
               </button>
             </div>
+
+            <!-- Dashboard Status Badge (Visual Polish) -->
+            <!-- <div class="hidden lg:flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-white to-gray-50/50 rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex -space-x-2">
+                <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm">ST</div>
+                <div class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm">AD</div>
+                <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] text-gray-500 font-bold shadow-sm">+1</div>
+              </div>
+              <div class="flex flex-col h-full justify-center">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">System Live</span>
+                </div>
+                <span class="text-xs font-extrabold text-[#1D355E] mt-0.5">3 Staff Active</span>
+              </div>
+            </div> -->
           </div>
           
           <!-- Welcome Banner & Date -->
