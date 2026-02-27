@@ -53,20 +53,20 @@ onUnmounted(() => {
       />
     </div>
 
-    <div class="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
-      <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar">
-        <div class="flex items-center gap-2 bg-[#F2F5F9] text-[#1D355E] px-4 py-2.5 rounded-xl font-semibold shadow-sm border border-gray-200/60 whitespace-nowrap">
+    <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 w-full xl:w-auto mt-1 sm:mt-0">
+      <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 overflow-x-auto hide-scrollbar">
+        <div class="flex items-center gap-2 bg-[#F2F5F9] text-[#1D355E] px-3 sm:px-4 py-2.5 rounded-xl font-semibold shadow-sm border border-gray-200/60 whitespace-nowrap">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#185DC0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span class="text-sm">{{ currentDate }}</span>
         </div>
-        <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-semibold cursor-pointer whitespace-nowrap" @click="$emit('new-announcement')">
+        <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 font-semibold cursor-pointer whitespace-nowrap" @click="$emit('new-announcement')">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          New Announcement
+          <span>New <span class="hidden sm:inline">Announcement</span></span>
         </button>
       </div>
 
@@ -74,7 +74,7 @@ onUnmounted(() => {
       <div class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
 
       <!-- View Toggles -->
-      <div class="flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-full sm:w-auto justify-center">
+      <div class="flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-fit flex-shrink-0">
         <button 
           @click="$emit('update:viewMode', 'grid')"
           class="p-2 rounded-lg transition-all duration-200 cursor-pointer"
