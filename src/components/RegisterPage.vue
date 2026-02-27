@@ -4,10 +4,10 @@ import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
-import SelectWeb from './SelectWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
+import SelectWeb from './SelectWeb.vue'
 const authManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const error = ref(false)
@@ -68,6 +68,13 @@ const showPasswordPopup = ref(false)
 const showConfirmPasswordPopup = ref(false)
 
 const dormList = ref([])
+
+const dormOptions = computed(() => {
+  return dormList.value.map((dorm) => ({
+    value: dorm.dormId,
+    label: dorm.dormName
+  }))
+})
 
 onMounted(async () => {
   try {
@@ -808,29 +815,29 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
               </div>
                 <div class="mb-2">
-                <div class="relative">
-                  <svg
-                    width="21"
-                    height="17"
-                    viewBox="0 0 21 17"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
-                  >
-                    <path
-                      d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
-                      fill="#8C8F91"
-                    />
-                  </svg>
-
                 <SelectWeb
                   v-model="form.dormId"
-                  :options="dormList.map(dorm => ({ value: dorm.dormId, label: dorm.dormName }))"
+                  :options="dormOptions"
                   placeholder="Select Dormitory"
-                  class="mb-2"
-                />
+                  :error="isNoDorm"
+                >
+                  <template #icon>
+                    <svg
+                      width="21"
+                      height="17"
+                      viewBox="0 0 21 17"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5 text-[#8C8F91]"
+                    >
+                      <path
+                        d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
+                        fill="#8C8F91"
+                      />
+                    </svg>
+                  </template>
+                </SelectWeb>
               </div>
-            </div>
             <div class="mb-1">
               <div class="relative">
                 <svg

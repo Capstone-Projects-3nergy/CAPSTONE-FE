@@ -58,16 +58,20 @@ onUnmounted(() => {
       @click="toggleDropdown"
       :class="[
         'w-full bg-gray-50/50 border rounded-xl px-4 py-3 text-gray-800 transition-all duration-300 flex items-center justify-between cursor-pointer',
+        $slots.icon ? 'pl-10' : '',
         isOpen ? 'bg-white border-[#0E4B90] ring-4 ring-blue-100 shadow-sm' : 'border-gray-200 hover:border-gray-300',
         error ? 'border-red-400 ring-4 ring-red-50' : '',
         disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
       ]"
     >
-      <span :class="{ 'text-gray-400': !selectedOption }">
+      <div v-if="$slots.icon" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center">
+        <slot name="icon" />
+      </div>
+      <span :class="{ 'text-gray-400': !selectedOption }" class="flex-1 truncate text-left">
         {{ selectedOption ? selectedOption.label : placeholder }}
       </span>
       <svg
-        class="w-5 h-5 text-gray-400 transition-transform duration-300"
+        class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0"
         :class="{ 'rotate-180 text-[#0E4B90]': isOpen }"
         fill="none"
         stroke="currentColor"
