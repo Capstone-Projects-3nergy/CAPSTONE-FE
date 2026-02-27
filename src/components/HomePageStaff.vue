@@ -71,6 +71,81 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
   if (dateInterval) clearInterval(dateInterval)
 })
+const activityInterval = ref('weekly');
+let parcelChartInstance = null;
+
+const chartData = {
+  daily: {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    received: [12, 19, 15, 8, 22, 14, 10],
+    pickedUp: [10, 15, 12, 6, 18, 11, 8],
+    overdue: [2, 4, 3, 2, 4, 3, 2]
+  },
+  weekly: {
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    received: [45, 52, 38, 65],
+    pickedUp: [40, 48, 32, 58],
+    overdue: [5, 4, 6, 7]
+  },
+  monthly: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    received: [120, 150, 180, 140, 210, 190, 230, 210, 250, 220, 280, 310],
+    pickedUp: [110, 140, 170, 130, 190, 180, 210, 195, 230, 210, 260, 290],
+    overdue: [10, 10, 10, 10, 20, 10, 20, 15, 20, 10, 20, 20]
+  }
+};
+
+const updateParcelChart = (interval) => {
+  activityInterval.value = interval;
+  if (!parcelChartInstance) return;
+
+  const data = chartData[interval];
+  parcelChartInstance.data.labels = data.labels;
+  parcelChartInstance.data.datasets[0].data = data.received;
+  parcelChartInstance.data.datasets[1].data = data.pickedUp;
+  parcelChartInstance.data.datasets[2].data = data.overdue;
+  
+  // Update bar thickness based on interval
+  let thickness = 40;
+  if (interval === 'monthly') thickness = 8;
+  else if (interval === 'daily') thickness = 15;
+  else thickness = 25;
+
+  parcelChartInstance.data.datasets.forEach(ds => {
+    ds.barThickness = thickness;
+  });
+
+  parcelChartInstance.update();
+};
+
+const residentYear = ref('2026');
+let residentChartInstance = null;
+
+const residentChartData = {
+  '2025': {
+    labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: [2, 5, 8, 12, 15, 18],
+    total: 60,
+    peak: 'December 2025'
+  },
+  '2026': {
+    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+    data: [0, 1, 1, 1, 3, 6],
+    total: 12,
+    peak: 'February 2026'
+  }
+};
+
+const updateResidentChart = (year) => {
+  residentYear.value = year;
+  if (!residentChartInstance) return;
+
+  const data = residentChartData[year];
+  residentChartInstance.data.labels = data.labels;
+  residentChartInstance.data.datasets[0].data = data.data;
+  residentChartInstance.update();
+};
+
 onMounted(async () => {
   checkScreen()
   updateDate()
@@ -78,41 +153,57 @@ onMounted(async () => {
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
-  new Chart(ctx, {
+  parcelChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      labels: chartData.weekly.labels,
       datasets: [
         {
-          label: 'Parcel Volume',
-          data: [24, 15, 31, 40, 23, 15, 33],
-          backgroundColor: (context) => {
-            const index = context.dataIndex
-            return index === 3
-              ? 'rgba(37, 99, 235, 0.9)'
-              : 'rgba(59, 130, 246, 0.3)'
-          },
-          borderRadius: 8,
-          barThickness: 30
+          label: 'Received',
+          data: chartData.weekly.received,
+          backgroundColor: 'rgba(59, 130, 246, 0.9)', // blue-500
+          borderRadius: 4,
+          barThickness: 25
+        },
+        {
+          label: 'Picked Up',
+          data: chartData.weekly.pickedUp,
+          backgroundColor: 'rgba(16, 185, 129, 0.9)', // emerald-500
+          borderRadius: 4,
+          barThickness: 25
+        },
+        {
+          label: 'Overdue',
+          data: chartData.weekly.overdue,
+          backgroundColor: 'rgba(239, 68, 68, 0.9)', // red-500
+          borderRadius: 4,
+          barThickness: 25
         }
       ]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
+          mode: 'index',
+          intersect: false,
           callbacks: {
-            label: (context) => `${context.parsed.y} parcels`
+            label: (context) => ` ${context.dataset.label}: ${context.parsed.y} parcels`
           }
         }
       },
       scales: {
-        x: { grid: { display: false } },
+        x: { 
+          stacked: false,
+          grid: { display: false } 
+        },
         y: {
+          stacked: false,
           beginAtZero: true,
           grid: { borderDash: [4, 4] },
-          ticks: { stepSize: 10 }
+          ticks: { stepSize: 20 }
         }
       }
     }
@@ -120,17 +211,18 @@ onMounted(async () => {
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {
-    new Chart(residentCtx, {
+    residentChartInstance = new Chart(residentCtx, {
       type: 'bar',
       data: {
-        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+        labels: residentChartData['2026'].labels,
         datasets: [
           {
             label: 'New Residents',
-            data: [0, 1, 1, 1, 3, 6],
+            data: residentChartData['2026'].data,
             backgroundColor: (context) => {
-              const index = context.dataIndex
-              return index === 5
+              const data = context.dataset.data;
+              const max = Math.max(...data);
+              return context.parsed.y === max
                 ? 'rgba(99, 102, 241, 0.9)' // Indigo peak
                 : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
             },
@@ -141,6 +233,7 @@ onMounted(async () => {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -154,7 +247,7 @@ onMounted(async () => {
           y: {
             beginAtZero: true,
             grid: { borderDash: [4, 4] },
-            ticks: { stepSize: 2 }
+            ticks: { stepSize: 5 }
           }
         }
       }
@@ -731,9 +824,27 @@ const handlePrintSummary = () => {
                   <p class="text-xs text-gray-500">Received · Picked Up · Overdue</p>
                 </div>
                 <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Daily</button>
-                  <button class="px-4 py-1.5 text-xs font-bold text-gray-900 bg-white rounded-md shadow-sm">Weekly</button>
-                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Monthly</button>
+                  <button 
+                    @click="updateParcelChart('daily')"
+                    :class="activityInterval === 'daily' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
+                  >
+                    Daily
+                  </button>
+                  <button 
+                    @click="updateParcelChart('weekly')"
+                    :class="activityInterval === 'weekly' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
+                  >
+                    Weekly
+                  </button>
+                  <button 
+                    @click="updateParcelChart('monthly')"
+                    :class="activityInterval === 'monthly' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
+                  >
+                    Monthly
+                  </button>
                 </div>
               </div>
               <div class="h-[250px] w-full relative">
@@ -1074,16 +1185,24 @@ const handlePrintSummary = () => {
                     <p class="text-xs text-gray-500">New residents registered per month</p>
                   </div>
                   <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                    <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">2025</button>
-                    <button class="px-4 py-1.5 text-xs font-bold text-gray-900 bg-white rounded-md shadow-sm">2026</button>
+                    <button 
+                      @click="updateResidentChart('2025')"
+                      :class="residentYear === '2025' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
+                      class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
+                    >2025</button>
+                    <button 
+                      @click="updateResidentChart('2026')"
+                      :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
+                      class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
+                    >2026</button>
                   </div>
                 </div>
                 <div class="h-[250px] w-full relative flex-1">
                    <canvas id="residentChart"></canvas>
                 </div>
                 <div class="mt-6 flex items-center justify-between">
-                  <span class="text-sm font-bold text-gray-800">Total: 4 residents</span>
-                  <span class="text-sm text-gray-500">Peak: February 2026</span>
+                  <span class="text-sm font-bold text-gray-800">Total: {{ residentChartData[residentYear].total }} residents</span>
+                  <span class="text-sm text-gray-500">Peak: {{ residentChartData[residentYear].peak }}</span>
                 </div>
               </div>
 
