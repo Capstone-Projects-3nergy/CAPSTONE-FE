@@ -4,6 +4,7 @@ import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import AlertPopUp from './AlertPopUp.vue'
@@ -822,16 +823,12 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
 
-                <select v-model="form.dormId" class="custom-select">
-                  <option disabled value="null">Select Dormitory</option>
-                  <option
-                    v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
-                  >
-                    {{ dorm.dormName }}
-                  </option>
-                </select>
+                <SelectWeb
+                  v-model="form.dormId"
+                  :options="dormList.map(dorm => ({ value: dorm.dormId, label: dorm.dormName }))"
+                  placeholder="Select Dormitory"
+                  class="mb-2"
+                />
               </div>
             </div>
             <div class="mb-1">
