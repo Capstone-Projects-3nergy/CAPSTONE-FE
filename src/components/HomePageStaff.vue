@@ -207,6 +207,23 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 const activeTab = ref('parcel')
+
+const handleExportExcel = () => {
+  // Mock export functionality
+  console.log('Exporting to Excel...');
+  alert('Exporting data to Excel (.xlsx)...');
+};
+
+const handleExportPDF = () => {
+  // Mock export functionality
+  console.log('Exporting to PDF...');
+  alert('Generating PDF Report...');
+};
+
+const handlePrintSummary = () => {
+  // Trigger browser print
+  window.print();
+};
 </script>
 
 <template>
@@ -428,14 +445,14 @@ const activeTab = ref('parcel')
           </div>
           <!-- Tabs Navigation (Premium Framed Style) -->
           <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 mt-2">
-            <div class="inline-flex p-1.5 bg-white rounded-2xl border border-gray-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
+            <div class="inline-flex p-1 bg-white rounded-2xl border border-gray-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
               <button 
                 @click="activeTab = 'parcel'" 
-                class="flex items-center justify-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
+                class="flex items-center justify-center gap-1.5 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
                 :class="activeTab === 'parcel' ? 'bg-[#0E2856] shadow-lg text-white transform scale-[1.02]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/40'"
               >
                 <div 
-                  class="p-2 rounded-lg transition-all duration-300"
+                  class="p-1.5 sm:p-2 rounded-lg transition-all duration-300"
                   :class="activeTab === 'parcel' ? 'bg-white text-orange-400 border border-white/40' : 'bg-white/50 text-gray-400 group-hover:bg-gray-200 border border-transparent'"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -446,23 +463,23 @@ const activeTab = ref('parcel')
                     <path d="M12 12l-8 -4.5" />
                   </svg>
                 </div>
-                <span class="font-bold text-sm tracking-tight whitespace-nowrap">Parcel Dashboard</span>
+                <span class="font-bold text-xs sm:text-sm tracking-tight whitespace-nowrap">Parcel Dashboard</span>
               </button>
               
               <button 
                 @click="activeTab = 'resident'"
-                class="flex items-center justify-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
+                class="flex items-center justify-center gap-1.5 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 min-w-max flex-1 lg:flex-none cursor-pointer group"
                 :class="activeTab === 'resident' ? 'bg-[#0E2856] shadow-lg text-white transform scale-[1.02]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/40'"
               >
                 <div 
-                  class="p-2 rounded-lg transition-all duration-300"
+                  class="p-1.5 sm:p-2 rounded-lg transition-all duration-300"
                   :class="activeTab === 'resident' ? 'bg-white text-blue-400 border border-white/40' : 'bg-gray-200/50 text-gray-400 group-hover:bg-gray-200 border border-transparent'"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"/>
                   </svg>
                 </div> 
-                <span class="font-bold text-sm tracking-tight whitespace-nowrap">Resident Dashboard</span>
+                <span class="font-bold text-xs sm:text-sm tracking-tight whitespace-nowrap">Resident Dashboard</span>
               </button>
             </div>
 
@@ -673,21 +690,33 @@ const activeTab = ref('parcel')
           </div> -->
 
           <!-- Export Actions -->
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3">
               <span class="text-sm font-medium text-gray-500">Export:</span>
-              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+              <button 
+                @click="handleExportExcel"
+                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
-                Export Excel (.xlsx)
+                <span class="hidden sm:inline">Export Excel (.xlsx)</span>
+                <span class="sm:hidden">Excel</span>
               </button>
-              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+              <button 
+                @click="handleExportPDF"
+                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
-                Export PDF Report
+                <span class="hidden sm:inline">Export PDF Report</span>
+                <span class="sm:hidden">PDF</span>
               </button>
             </div>
-            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+            <button 
+              @click="handlePrintSummary"
+              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+            >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Print Summary
+              <span class="hidden sm:inline">Print Summary</span>
+              <span class="sm:hidden">Print</span>
             </button>
           </div>
 
@@ -890,73 +919,87 @@ const activeTab = ref('parcel')
               </div>
             </div>
 
-           <!-- Overdue Alert Box -->
-          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6 flex flex-col h-[400px]">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-4 md:p-6 flex flex-col h-[500px] md:h-[400px]">
+            <div class="flex items-center gap-3 mb-3 md:mb-4">
+              <div class="p-1.5 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                   <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
                   <path d="M12 8l0 4" />
                   <path d="M12 16l.01 0" />
                 </svg>
               </div>
-              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - Not picked up for >7 days</h3>
+              <h3 class="text-red-600 font-bold text-base md:text-lg">5 Overdue Parcels (>7 days)</h3>
             </div>
-            <p class="text-red-500 text-sm mb-4">Please contact residents to pick up their parcels immediately</p>
+            <p class="text-red-500 text-xs md:text-sm mb-4">Please contact residents immediately</p>
             
-            <div class="space-y-3 flex-1 overflow-y-auto pr-2">
+            <div class="space-y-3 flex-1 overflow-y-auto pr-2 no-scrollbar">
               <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">10 days</span>
-                  <span class="font-bold text-gray-800">kong zeed</span>
+              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
+                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">10 days</span>
+                    <span class="font-bold text-gray-800 text-sm md:text-base">kong zeed</span>
+                  </div>
+                  <span class="text-gray-500 text-xs md:hidden">Room 13</span>
                 </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 13</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH198273645</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
+                  <div class="flex items-center gap-3">
+                    <span class="hidden md:inline text-gray-500 text-sm">Room 13</span>
+                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH198273645</span>
+                  </div>
+                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                     <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     Notify
                   </button>
                 </div>
               </div>
 
                <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">9 days</span>
-                  <span class="font-bold text-gray-800">Suklita Mook</span>
+              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
+                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">9 days</span>
+                    <span class="font-bold text-gray-800 text-sm md:text-base">Suklita Mook</span>
+                  </div>
+                  <span class="text-gray-500 text-xs md:hidden">Room 1</span>
                 </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 1</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH291837465</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
+                  <div class="flex items-center gap-3">
+                    <span class="hidden md:inline text-gray-500 text-sm">Room 1</span>
+                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH291837465</span>
+                  </div>
+                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                     <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     Notify
                   </button>
                 </div>
               </div>
 
                <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">7 days</span>
-                  <span class="font-bold text-gray-800">testkub</span>
+              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
+                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">7 days</span>
+                    <span class="font-bold text-gray-800 text-sm md:text-base">testkub</span>
+                  </div>
+                  <span class="text-gray-500 text-xs md:hidden">Room 532</span>
                 </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 532</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH001328374</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
+                  <div class="flex items-center gap-3">
+                    <span class="hidden md:inline text-gray-500 text-sm">Room 532</span>
+                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH001328374</span>
+                  </div>
+                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                     <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     Notify
                   </button>
                 </div>
               </div>
 
+                </div>
+              </div>
             </div>
-          </div>
-          </div>
           </div>
           
           <!-- Tab Content: Resident Dashboard -->
@@ -1092,7 +1135,7 @@ const activeTab = ref('parcel')
             </div>
 
             <!-- Detailed Grid Row 3 -->
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               
               <!-- Most Parcels Received -->
               <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">

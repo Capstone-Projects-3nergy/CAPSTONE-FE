@@ -882,7 +882,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -906,7 +906,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -930,7 +930,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1288,7 +1288,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1312,7 +1312,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1336,7 +1336,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
