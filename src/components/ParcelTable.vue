@@ -67,6 +67,10 @@ function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
 }
+const formatStatus = (status) => {
+  if (!status) return ''
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+}
 const getInitial = (name) => {
   if (!name) return ''
   return name.trim()[0].toUpperCase()
@@ -236,7 +240,7 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none"
           >
             <div class="flex items-center gap-2">
-              <span class="md:hidden font-semibold text-[#185DC0]">Photo:</span>
+              <span class="md:hidden font-semibold text-[#0E4B90]">Photo:</span>
 
               <div
                 class="w-10 h-10 inline-flex flex-shrink-0 rounded-full overflow-hidden border border-gray-200 shadow-sm items-center justify-center"
@@ -249,7 +253,7 @@ const authStore = useAuthManager()
 
                 <div
                   v-else
-                  class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
+                  class="w-full h-full bg-[#0E4B90] flex items-center justify-center text-white text-sm font-semibold"
                 >
                   {{ getInitial(p.fullName) || getInitial(p.firstName) }}
                 </div>
@@ -258,9 +262,9 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showTracking"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Tracking:
             </span>
             {{ p.trackingNumber }}
@@ -268,76 +272,76 @@ const authStore = useAuthManager()
 
           <td
             v-if="showName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Name:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Name:</span>
             {{ p.recipientName }}
           </td>
 
           <td
             v-if="showMemberTrashName"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
             </span>
             {{ p.firstName }} {{ p.lastName }}
           </td>
           <td
             v-if="showMemberName"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
             </span>
             {{ p.fullName }}
           </td>
           <td
             v-if="showStaffName"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Staff name:
             </span>
             {{ p.fullName }}
           </td>
           <td
             v-if="showMobile"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Mobile:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Mobile:</span>
             {{ p.mobile }}
           </td>
 
           <td
             v-if="showRoom"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Room: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
             {{ p.roomNumber }}
           </td>
 
           <td
             v-if="showEmail"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Email: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Email: </span>
             {{ p.email }}
           </td>
 
           <td
             v-if="showTitle"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Title: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Title: </span>
             <span class="font-medium">{{ p.title }}</span>
           </td>
 
           <td
             v-if="showCategory"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none flex items-center md:table-cell"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none flex items-center md:table-cell md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Category: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Category: </span>
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold"
               :class="{
@@ -353,17 +357,17 @@ const authStore = useAuthManager()
 
           <td
             v-if="showDatePosted"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Date Posted: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Date Posted: </span>
             {{ p.datePosted }}
           </td>
 
           <td
             v-if="showStatus"
-            class="px-4 py-2 md:py-4 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
             <div class="relative group inline-block">
               <span
@@ -406,39 +410,39 @@ const authStore = useAuthManager()
 
           <td
             v-if="showUpdateAt"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Updated At:</span
             >
             {{ formatDateTime(p.updateAt) }}
           </td>
             <td
             v-if="showActionStatus"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
             <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              class="px-3 py-1 rounded-full text-xs font-bold"
               :class="[
                 {
-                  'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE',
-                  'bg-red-400': p.status === 'DELETED',
-                  'bg-yellow-400': p.status === 'PENDING'
+                  'bg-green-50 text-green-600': p.status === 'ACTIVE',
+                  'bg-gray-100/80 text-gray-600': p.status === 'INACTIVE',
+                  'bg-red-50 text-red-600': p.status === 'DELETED',
+                  'bg-yellow-50 text-yellow-600': p.status === 'PENDING'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
             >
-              {{ p.status }}
+              {{ formatStatus(p.status) }}
             </span>
           </td>
           <td
             v-if="showDeletedAt"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Deleted At:</span
             >
             {{ formatDateTime(p.deletedAt) }}
@@ -469,7 +473,7 @@ const authStore = useAuthManager()
             class="px-4 py-2 md:py-4 md:px-6 text-sm text-gray-700 flex items-center md:table-cell md:align-middle text-right"
           >
             <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4">
-              <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
+              <span class="md:hidden font-semibold text-[#0E4B90]">Action:</span>
               <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
             <button
               v-if="!!$slots['icon-view']"
@@ -735,7 +739,7 @@ const authStore = useAuthManager()
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                 page === pg 
-                  ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                  ? 'bg-[#0E4B90] text-white shadow-md transform scale-105' 
                   : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
               ]"
             >

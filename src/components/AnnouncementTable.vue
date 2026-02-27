@@ -40,9 +40,9 @@ const getCategoryBadgeClass = (category) => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'Published': return 'bg-green-100 text-green-800'
-    case 'Draft': return 'bg-orange-100 text-orange-800'
-    default: return 'bg-gray-100 text-gray-800'
+    case 'Published': return 'bg-green-50 text-green-600'
+    case 'Draft': return 'bg-orange-50 text-orange-600'
+    default: return 'bg-gray-50 text-gray-600'
   }
 }
 
@@ -105,7 +105,7 @@ const getCategoryIcon = (category) => {
           </div>
           
           <!-- Card Body -->
-          <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#185DC0] transition-colors">
+          <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#0E4B90] transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
           <p class="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed flex-grow">
@@ -211,13 +211,13 @@ const getCategoryIcon = (category) => {
             </tr>
             <template v-for="item in items" :key="item.id">
               <tr class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">
-                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none">
-                  <div class="flex items-start gap-4">
-                    <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-sm mt-1">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle">
+                  <div class="flex items-center gap-4">
+                    <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#0E4B90] rounded-full flex items-center justify-center font-bold text-sm">
                       SP
                     </div>
                     <div>
-                      <span class="md:hidden font-semibold text-[#185DC0] block mb-1 text-xs">Title:</span>
+                      <span class="md:hidden font-semibold text-[#0E4B90] block mb-1 text-xs">Title:</span>
                       <div class="flex items-center gap-2 mb-1">
                         <div class="text-sm font-bold text-gray-900 line-clamp-1">{{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}</div>
                         <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
@@ -232,27 +232,27 @@ const getCategoryIcon = (category) => {
                     </div>
                   </div>
                 </td>
-                <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-top md:align-middle">
-                  <span class="md:hidden font-semibold text-[#185DC0] mr-2 text-xs">Category:</span>
-                  <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold rounded-xl" :class="getCategoryBadgeClass(item.category)">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Category:</span>
+                  <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-full" :class="getCategoryBadgeClass(item.category)">
                     <span v-html="getCategoryIcon(item.category)"></span>
                     {{ item.category }}
                   </span>
                 </td>
-                <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-top md:align-middle">
-                  <span class="md:hidden font-semibold text-[#185DC0] mr-2 text-xs">Date Posted:</span>
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-middle md:align-middle">
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Date Posted:</span>
                   <span class="text-xs sm:text-sm">{{ item.datePosted.split(' - ')[0] }}</span>
                 </td>
-                <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-top md:align-middle">
-                  <span class="md:hidden font-semibold text-[#185DC0] mr-2 text-xs">Status:</span>
-                  <span class="px-2.5 py-1 inline-flex text-[11px] leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(item.status)">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Status:</span>
+                  <span class="px-3 py-1 inline-flex text-xs font-bold rounded-full" :class="getStatusBadgeClass(item.status)">
                     {{ item.status }}
                   </span>
                 </td>
-                <td class="px-4 py-2 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-top md:align-middle">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
                   <!-- Action row for mobile replaces Views row -->
                   <div class="md:hidden flex items-center justify-start gap-2 w-full">
-                    <span class="font-semibold text-[#185DC0] text-xs">Action:</span>
+                    <span class="font-semibold text-[#0E4B90] text-xs">Action:</span>
                     <div class="flex items-center gap-1">
                       <button @click="$emit('pin', item)" class="p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-white shadow-sm flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M14.102 2.664c.628-.416 1.692-.713 2.495.09l4.647 4.648c.806.804.508 1.868.091 2.495a2.95 2.95 0 0 1-.863.85c-.334.213-.756.374-1.211.35a9 9 0 0 1-.658-.071l-.068-.01a9 9 0 0 0-.707-.073c-.504-.025-.698.06-.76.12l-2.49 2.491c-.08.08-.18.258-.256.6c-.073.33-.105.736-.113 1.186c-.007.432.008.874.024 1.3l.001.047c.015.423.03.855.009 1.194c-.065 1.031-.868 1.79-1.658 2.141c-.79.35-1.917.437-2.7-.347l-2.25-2.25L3.53 21.53a.75.75 0 1 1-1.06-1.06l4.104-4.105l-2.25-2.25c-.783-.784-.697-1.91-.346-2.7c.35-.79 1.11-1.593 2.14-1.658c.34-.021.772-.006 1.195.009l.047.001c.426.015.868.031 1.3.024c.45-.008.856-.04 1.186-.113c.342-.076.52-.177.6-.257l2.49-2.49c.061-.061.146-.256.12-.76a9 9 0 0 0-.073-.707l-.009-.068a9 9 0 0 1-.071-.658c-.025-.455.136-.877.348-1.211c.216-.34.515-.64.851-.863"/></svg>
@@ -367,7 +367,7 @@ const getCategoryIcon = (category) => {
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                 p === page 
-                  ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                  ? 'bg-[#0E4B90] text-white shadow-md transform scale-105' 
                   : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
               ]"
             >
