@@ -478,7 +478,8 @@ const authStore = useAuthManager()
             <button
               v-if="!!$slots['icon-view']"
               @click="$emit('view-detail', p.id)"
-              class="relative group/btn p-1.5 border border-gray-100 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm">
+              class="relative group/btn p-1.5 border border-gray-100  text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
+            >
               <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-view"></slot>
               </div>
