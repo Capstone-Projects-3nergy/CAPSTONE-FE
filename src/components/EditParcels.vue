@@ -153,17 +153,27 @@ const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
 const statusOptions = computed(() => {
+  let options = []
   if (form.value.status === 'WAITING_FOR_STAFF') {
-    return ['WAITING_FOR_STAFF', 'RECEIVED']
+    options = ['WAITING_FOR_STAFF', 'RECEIVED']
+  } else if (form.value.status === 'RECEIVED') {
+    options = ['RECEIVED', 'PICKED_UP']
+  } else if (form.value.status === 'PICKED_UP') {
+    options = ['PICKED_UP']
+  } else {
+    options = ['RECEIVED', 'PICKED_UP']
   }
-  if (form.value.status === 'RECEIVED') {
-    return ['RECEIVED', 'PICKED_UP']
-  }
-  if (form.value.status === 'PICKED_UP') {
-    return ['PICKED_UP']
-  }
-  return ['RECEIVED', 'PICKED_UP']
+  return options.map((s) => ({
+    label: formatStatus(s),
+    value: s
+  }))
 })
+
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
@@ -935,7 +945,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -1067,6 +1077,7 @@ function formatDateTime(datetimeStr) {
                   v-model="form.parcelType"
                   :options="parcelTypeOptions"
                   placeholder="Select parcel type"
+                  class="w-[240px]"
                 />
               </div>
               <div>
@@ -1084,7 +1095,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Resident Info</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
             </div>
             <div v-if="form.status !== 'PICKED_UP'" class="mb-4 relative">
               <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
@@ -1155,7 +1166,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="flex-1">
@@ -1194,20 +1205,17 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Status</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Status</h3>
             </div>
 
             <div class="flex gap-6 items-start">
-              <div class="flex-1">
-                <select
+              <div>
+                <SelectWeb
                   v-model="form.status"
-                  class="border border-gray-100 bg-gray-50/30 rounded-2xl p-3 px-6 w-auto outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white cursor-pointer shadow-sm hover:border-blue-200"
+                  :options="statusOptions"
                   :disabled="form.status === 'PICKED_UP'"
-                >
-                  <option v-for="s in statusOptions" :key="s" :value="s">
-                    {{ s }}
-                  </option>
-                </select>
+                  class="w-[240px]"
+                />
 
                 <div class="mt-6 p-5 bg-blue-50/40 border border-blue-100/50 rounded-2xl flex items-start gap-4 backdrop-blur-sm transition-all hover:bg-blue-50/60 shadow-sm shadow-blue-900/5">
                   <div class="p-2 bg-white rounded-xl shadow-sm border border-blue-100 flex-shrink-0">

@@ -105,7 +105,7 @@ const handleProfile = async () => {
       @mouseleave="showHoverInfo = false"
     >
       <div
-        class="w-10 h-10 rounded-full overflow-hidden bg-[#1D355E] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition"
+        class="w-10 h-10 rounded-full overflow-hidden bg-[#1D355E] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition-all duration-300 hover:scale-110 active:scale-95"
       >
         <img
           v-if="profileImageUrlPreview"

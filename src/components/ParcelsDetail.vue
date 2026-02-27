@@ -67,6 +67,11 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -400,7 +405,7 @@ function formatDateTime(datetimeStr) {
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
           <h2 class="text-2xl font-bold text-[#185dc0]">Details</h2> -->
            <div class="flex items-center gap-4">
-                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                <div class="p-3 bg-blue-100 rounded-xl text-black shadow-sm">
            <svg
             width="25"
             height="25"
@@ -426,7 +431,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
@@ -481,7 +486,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Resident Info</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
@@ -510,7 +515,7 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
@@ -537,19 +542,19 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Status</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Status</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <div
-                  class="w-fit p-2.5 px-8 rounded-full font-extrabold shadow-sm transition-all duration-300 tracking-tight text-xs"
+                  class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs border"
                   :class="{
-                    'bg-yellow-50 text-yellow-600 border border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
-                    'bg-blue-50 text-blue-600 border border-blue-100': parcel?.status === 'RECEIVED',
-                    'bg-green-50 text-green-600 border border-green-100': parcel?.status === 'PICKED_UP'
+                    'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                    'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
+                    'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
                   }"
                 >
-                  {{ parcel?.status || '-' }}
+                  {{ formatStatus(parcel?.status) }}
                 </div>
               </div>
             </div>

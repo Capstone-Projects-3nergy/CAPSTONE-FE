@@ -1325,10 +1325,11 @@ const userRoleLabel = computed(() => {
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Header -->
-        <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
-          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+          <h3 class="font-extrabold text-xl text-black tracking-tight">
             {{ title }}
-          </h2>
+          </h3>
         </div>
 
         <!-- Form Grid -->
@@ -1845,13 +1846,13 @@ const userRoleLabel = computed(() => {
             </h2>
           </div>
 
-          <!-- ================= RIGHT : Edit Information ================= -->
           <div class="md:w-2/3">
             <!-- Header -->
-            <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
-              <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">
                 User Information
-              </h2>
+              </h3>
             </div>
 
             <!-- Form Grid -->

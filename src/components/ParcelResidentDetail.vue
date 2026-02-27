@@ -75,6 +75,11 @@ const mapParcelData = (data) => ({
   lastName: data.lastName || '',
   imageUrl: data.imageUrl || ''
 })
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
@@ -567,14 +572,14 @@ const closePopUp = (operate) => {
                     >Current status</label
                   >
                   <div
-                    class="w-fit p-2.5 px-8 rounded-full font-extrabold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center"
+                    class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center border"
                     :class="{
-                      'bg-yellow-50 text-yellow-600 border border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-50 text-blue-600 border border-blue-100': parcel?.status === 'RECEIVED',
-                      'bg-green-50 text-green-600 border border-green-100': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                      'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
+                      'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
                     }"
                   >
-                    {{ parcel?.status || '-' }}
+                    {{ formatStatus(parcel?.status) }}
                   </div>
                 </div>
               </div>

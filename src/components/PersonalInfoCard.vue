@@ -414,26 +414,29 @@ const userRoleLabel = computed(() => {
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
-          <div class="flex items-center gap-3">
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-4">
+            <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+            <h3 class="font-extrabold text-xl text-black tracking-tight">
               {{ title }}
-            </h2>
-            <div class="relative group ml-2">
-              <svg
-                class="cursor-pointer text-[#8C8F91] hover:text-[#0E4B90] transition-colors duration-300"
+            </h3>
+            <div class="relative group">
+              <div 
+                class="p-2 cursor-pointer text-[#8C8F91] hover:text-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center rounded-full hover:bg-blue-50"
                 @click="$emit('edit')"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="currentcolor"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                fill="#8C8F91"
-              />
-            </svg>
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentcolor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+                  />
+                </svg>
+              </div>
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
             >
@@ -570,10 +573,11 @@ const userRoleLabel = computed(() => {
         v-if="activeTab === 'notify'"
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
-        <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
-          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+          <h3 class="font-extrabold text-xl text-black tracking-tight">
             Notifications
-          </h2>
+          </h3>
         </div>
         <!-- Tabs -->
         <div class="flex gap-2 mb-6">
@@ -690,10 +694,11 @@ const userRoleLabel = computed(() => {
 
           <!-- ================= RIGHT : Personal Information ================= -->
           <div class="md:w-2/3">
-            <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
-              <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">
                 User Information
-              </h2>
+              </h3>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
