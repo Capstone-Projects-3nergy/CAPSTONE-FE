@@ -71,7 +71,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
   if (dateInterval) clearInterval(dateInterval)
 })
-const activityInterval = ref('weekly');
+const activityInterval = ref('daily');
 let parcelChartInstance = null;
 
 const chartData = {
