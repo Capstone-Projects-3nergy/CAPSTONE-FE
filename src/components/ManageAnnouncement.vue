@@ -721,62 +721,62 @@ const showProfileStaffPage = async function () {
           />
 
           <!-- Category Filter -->
-          <div class="mb-6 w-full overflow-x-auto hide-scrollbar">
-            <div class="inline-flex bg-white p-1.5 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1.5 items-center">
+          <div class="mb-6 w-full">
+            <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               
               <button
                 @click="selectedCategory = ''"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="order-last sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="!selectedCategory ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
                 All
               </button>
               
-              <div class="w-px h-6 bg-gray-200 mx-1"></div>
+              <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
 
               <button
                 @click="selectedCategory = 'General'"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="selectedCategory === 'General' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <div :class="selectedCategory === 'General' ? 'text-blue-300' : 'text-blue-500 bg-blue-50 p-1 rounded-lg'">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 General
               </button>
 
               <button
                 @click="selectedCategory = 'Maintenance'"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="selectedCategory === 'Maintenance' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <div :class="selectedCategory === 'Maintenance' ? 'text-orange-300' : 'text-orange-500 bg-orange-50 p-1 rounded-lg'">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </div>
                 Maintenance
               </button>
 
               <button
                 @click="selectedCategory = 'Events'"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="selectedCategory === 'Events' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <div :class="selectedCategory === 'Events' ? 'text-purple-300' : 'text-purple-500 bg-purple-50 p-1 rounded-lg'">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
                 Events
               </button>
 
               <button
                 @click="selectedCategory = 'Urgent'"
-                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="selectedCategory === 'Urgent' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <div :class="selectedCategory === 'Urgent' ? 'text-red-300' : 'text-red-500 bg-red-50 p-1 rounded-lg'">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
                 Urgent
               </button>
