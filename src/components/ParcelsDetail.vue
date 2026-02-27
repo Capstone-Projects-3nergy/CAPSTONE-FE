@@ -383,7 +383,7 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 bg-gray-100">
+      <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
         <div class="flex items-center space-x-2 mb-6">
           <!-- <svg
             width="25"
@@ -422,79 +422,85 @@ function formatDateTime(datetimeStr) {
         </div>
         <div class="flex flex-col mb-4 gap-4"></div>
 
-        <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
+        <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm">
           <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium whitespace-all flex items-center h-[58px]">
                   {{ parcel?.trackingNumber || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.recipientName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.senderName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.parcelType || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Company</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.companyName || '-' }}
                 </p>
               </div>
-
+<!-- 
               <div>
-                <label class="block font-semibold mb-1">Parcel Image</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Image</label>
                 <div v-if="parcel?.imageUrl">
                   <img
                     :src="parcel.imageUrl"
                     alt="Parcel Image"
-                    class="w-48 h-48 object-cover border rounded-md"
+                    class="w-48 h-48 object-cover border border-gray-100 rounded-[2rem] shadow-lg shadow-blue-100/50 transition-transform duration-300 hover:scale-[1.02]"
                   />
                 </div>
                 <div v-else class="text-gray-400">No image available</div>
-              </div>
+              </div> -->
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Resident Info</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.residentName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Room Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.roomNumber || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.email || '-' }}
                 </p>
               </div>
@@ -502,23 +508,26 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Received At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.receivedAt || '-') }}
                 </p>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Updated At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.updatedAt || '-') }}
                 </p>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                 </p>
               </div>
@@ -526,37 +535,41 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Status</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <p
-                  class="w-full p-2 text-white rounded-md"
+                <div
+                  class="w-fit p-2.5 px-8 rounded-full font-extrabold shadow-sm transition-all duration-300 tracking-tight text-xs"
                   :class="{
-                    'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                    'bg-blue-400': parcel?.status === 'RECEIVED',
-                    'bg-green-400': parcel?.status === 'PICKED_UP'
+                    'bg-yellow-50 text-yellow-600 border border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                    'bg-blue-50 text-blue-600 border border-blue-100': parcel?.status === 'RECEIVED',
+                    'bg-green-50 text-green-600 border border-green-100': parcel?.status === 'PICKED_UP'
                   }"
                 >
                   {{ parcel?.status || '-' }}
-                </p>
+                </div>
               </div>
             </div>
           </section>
-          <div class="flex items-center gap-3 ml-auto justify-end">
+
+          <div class="flex items-center gap-3 ml-auto justify-end pt-4">
             <ButtonWeb
               label="Go Back"
               color="gray"
               @click="backToManageParcels"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
+              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all"
             />
             <ButtonWeb
               label="Edit"
               color="blue"
               @click="showEditParacelDetail(parcel.parcelId)"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all shadow-lg shadow-blue-500/20"
             />
           </div>
-        </form>
+        </div>
       </main>
     </div>
   </div>

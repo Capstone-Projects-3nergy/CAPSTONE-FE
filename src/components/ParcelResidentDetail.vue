@@ -404,7 +404,7 @@ const closePopUp = (operate) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 x-full">
+      <main class="flex-1 p-4 md:p-9 x-full bg-[#F8FAFC]">
         <div class="flex flex-col gap-4 mb-6 px-2">
            <div class="flex items-center gap-4">
             <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -447,70 +447,73 @@ const closePopUp = (operate) => {
         </div>
 
         <div
-          class="bg-white border border-gray-300 rounded-[5px] shadow-md p-10"
+          class="bg-white border border-blue-50/50 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] p-6 md:p-10 backdrop-blur-sm"
         >
-          <form class="space-y-10">
+          <form class="space-y-12">
             <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >trackingNumber</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >TrackingNumber</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.trackingNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recipient Name</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Recipient Name</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.recipientName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >roomNumber</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >RoomNumber</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.roomNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1">email</label>
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.email || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >parcel type</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Parcel type</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.parcelType || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >company</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Company</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.companyName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >sender name</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Sender name</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.senderName || '-' }}
                   </p>
                 </div>
@@ -518,64 +521,70 @@ const closePopUp = (operate) => {
             </section>
 
             <section>
-              <h3 class="font-semibold text-lg mb-4">Date</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recieved at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Recieved at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.receivedAt || '-') }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >pick up at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Pick up at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >confirm at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Confirm at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.confirmAt || '-') }}
                   </p>
                 </div>
               </div>
             </section>
             <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Status</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >current status</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Current status</label
                   >
-                  <p
-                    class="w-full p-2 rounded-md text-white"
+                  <div
+                    class="w-fit p-2.5 px-8 rounded-full font-extrabold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center"
                     :class="{
-                      'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-400': parcel?.status === 'RECEIVED',
-                      'bg-green-400': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-50 text-yellow-600 border border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                      'bg-blue-50 text-blue-600 border border-blue-100': parcel?.status === 'RECEIVED',
+                      'bg-green-50 text-green-600 border border-green-100': parcel?.status === 'PICKED_UP'
                     }"
                   >
                     {{ parcel?.status || '-' }}
-                  </p>
+                  </div>
                 </div>
               </div>
             </section>
 
-            <div class="flex justify-end space-x-3 pt-4">
+            <div class="flex justify-end space-x-3 pt-6">
               <ButtonWeb
                 label="Back"
                 color="gray"
-                class="text-[#898989]"
+                class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
                 @click="showHomePageResidentWeb"
               />
               <ButtonWeb
@@ -583,6 +592,7 @@ const closePopUp = (operate) => {
                 type="button"
                 label="Confirm"
                 color="blue"
+                class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
                 @click="confirmParcelPopUp(parcel)"
               />
             </div>

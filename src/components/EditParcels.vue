@@ -785,7 +785,7 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
+      <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
           <div class="flex items-center space-x-2 mb-6">
          <div class="flex items-center gap-4">
                 <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -915,23 +915,26 @@ function formatDateTime(datetimeStr) {
             />
         </div>
         <form
-          class="bg-white p-6 rounded-[5px] shadow space-y-8"
+          class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
           @submit.prevent="saveEditParcel"
         >
           <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
                 <input
                   type="text"
                   :value="form.trackingNumber"
                   @input="handleTrackingInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showTrackingLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -956,16 +959,16 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
                 <input
                   type="text"
                   :value="form.recipientName"
                   @input="handleRecipientInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showRecipientLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -990,16 +993,16 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
                 <input
                   type="text"
                   :value="form.senderName"
                   @input="handleSenderInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showSenderLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -1044,11 +1047,11 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
 
                 <select
                   v-model="form.parcelType"
-                  class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                  class="w-full border border-gray-200 rounded-xl p-3 px-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none cursor-pointer"
                 >
                   <option disabled value="">Select Parcel Type</option>
                   <option value="DOCUMENT">Document</option>
@@ -1057,11 +1060,11 @@ function formatDateTime(datetimeStr) {
                 </select>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Company</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
 
                 <select
                   v-model="form.companyId"
-                  class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  class="w-full border border-gray-200 rounded-xl p-3 px-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none cursor-pointer"
                 >
                   <option disabled value="">Select Company</option>
 
@@ -1078,27 +1081,30 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Resident Info</h3>
+            </div>
             <div v-if="form.status !== 'PICKED_UP'" class="mb-4">
-              <label class="block font-semibold mb-1"
+              <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                 >Search Resident Name</label
               >
               <input
                 type="text"
                 v-model="recipientSearch"
                 placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border rounded-md p-2"
+                class="md:w-[325px] w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white outline-none shadow-sm hover:border-blue-200"
                 :disabled="form.status === 'PICKED_UP'"
               />
 
               <ul
                 v-if="recipientSearch"
-                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                class="absolute z-10 mt-2 w-[310px] md:w-[325px] bg-white border border-gray-50 rounded-2xl max-h-52 overflow-auto text-sm shadow-2xl shadow-blue-900/10 backdrop-blur-md overflow-hidden"
               >
                 <li
                   v-for="r in filteredResidents"
                   :key="r.userId"
-                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
+                  class="px-5 py-4 cursor-pointer hover:bg-blue-50 transition-all border-b last:border-b-0 border-gray-50 flex flex-col gap-0.5"
                   v-if="filteredResidents.length > 0"
                   @click="selectResident(r)"
                 >
@@ -1116,80 +1122,86 @@ function formatDateTime(datetimeStr) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
                 <input
                   type="text"
                   :value="form.residentName"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Room Number</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
                 <input
                   type="text"
                   :value="form.roomNumber"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
               <div>
-                <label class="block font-semibold mb-1">Email</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
                 <input
                   type="text"
                   :value="form.email"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="flex-1">
-                <label class="block font-semibold mb-1">Received At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
                 <input
                   type="text"
                   :value="form.receivedAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Updated At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
                 <input
                   type="text"
                   :value="form.updatedAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div class="flex-1">
-                <label class="block font-semibold mb-1">Picked Up At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
                 <input
                   placeholder="-"
                   type="text"
                   :value="form.pickedUpAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Status</h3>
+            </div>
 
             <div class="flex gap-6 items-start">
               <div class="flex-1">
                 <select
                   v-model="form.status"
-                  class="border rounded-md p-2 w-auto"
+                  class="border border-gray-100 bg-gray-50/30 rounded-2xl p-3 px-6 w-auto outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white cursor-pointer shadow-sm hover:border-blue-200"
                   :disabled="form.status === 'PICKED_UP'"
                 >
                   <option v-for="s in statusOptions" :key="s" :value="s">
@@ -1197,10 +1209,22 @@ function formatDateTime(datetimeStr) {
                   </option>
                 </select>
 
-                <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: Waiting for Staff →
-                  Received → Picked Up
-                </p>
+                <div class="mt-6 p-5 bg-blue-50/40 border border-blue-100/50 rounded-2xl flex items-start gap-4 backdrop-blur-sm transition-all hover:bg-blue-50/60 shadow-sm shadow-blue-900/5">
+                  <div class="p-2 bg-white rounded-xl shadow-sm border border-blue-100 flex-shrink-0">
+                    <svg class="w-5 h-5 text-[#0E4B90]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p class="text-sm text-[#0E4B90]/80 leading-relaxed font-medium">
+                    <span class="block text-xs font-bold text-[#0E4B90] mb-1">Status Update Guide</span>
+                    You can only update the status in order: 
+                    <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
+                    <span class="mx-1 opacity-40">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Received</span> 
+                    <span class="mx-1 opacity-40">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Picked Up</span>
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -1210,12 +1234,13 @@ function formatDateTime(datetimeStr) {
               label="Cancel"
               color="gray"
               @click="cancelEdit"
-              class="text-[#898989]"
+              class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
             />
             <ButtonWeb
               label="Save"
               color="blue"
               @click="saveEditParcel"
+              class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
               :disabled="isUnchanged"
             />
           </div>
