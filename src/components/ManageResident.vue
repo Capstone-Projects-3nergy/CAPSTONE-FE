@@ -878,17 +878,39 @@ const showResidentDetail = async function (id) {
                 </button>
               </div>
 
-              <div
-                class="flex flex-wrap sm:flex-nowrap items-center gap-y-3 gap-x-4 sm:gap-y-0 sm:gap-x-6 text-sm text-gray-500 sm:ml-auto"
-              >
-                <span>
-                  <span class="font-medium text-gray-700">Total users:</span>
-                  {{ totalUsers }}
-                </span>
-                <span>
-                  <span class="font-medium text-gray-700">Current used:</span>
-                  {{ currentUsed }}
-                </span>
+              <!-- Status Stats Cards -->
+              <div class="flex flex-nowrap items-center gap-2 sm:gap-3 sm:ml-auto w-full sm:w-auto">
+                <!-- Total Users Card -->
+                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-gray-400 leading-none mb-1 sm:mb-1.5 truncate">Total Users</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-base sm:text-xl font-black text-[#1D355E]">{{ totalUsers }}</span>
+                      <span class="text-[8px] sm:text-[10px] font-medium text-gray-400">Total</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Currently Active Card -->
+                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-emerald-500/70 leading-none mb-1 sm:mb-1.5 truncate">Active Now</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-base sm:text-xl font-black text-emerald-700">{{ currentUsed }}</span>
+                      <span class="text-[9px] sm:text-[11px] font-bold text-emerald-500/60 ml-0.5">Total</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
