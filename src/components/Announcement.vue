@@ -478,7 +478,7 @@ onMounted(async () => {
           <!-- Content Filter & Search -->
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <!-- Tabs -->
-            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex">
+            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex w-fit">
               <button
                 @click="tab = 'all'"
                 :class="[
@@ -524,7 +524,7 @@ onMounted(async () => {
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search updates..."
+                placeholder="Search ..."
                 class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
               />
             </div>

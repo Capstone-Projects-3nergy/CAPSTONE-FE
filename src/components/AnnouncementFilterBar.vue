@@ -48,7 +48,7 @@ onUnmounted(() => {
         type="text"
         :value="modelSearch"
         @input="$emit('update:search', $event.target.value)"
-        placeholder="Search announcements..."
+        placeholder="Search ..."
         class="block w-full pl-11 pr-4 py-2.5 border border-gray-100/80 rounded-xl leading-5 bg-[#F8FAFC] placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 text-sm font-medium"
       />
     </div>
