@@ -11,6 +11,7 @@ import DashBoard from './DashBoard.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
@@ -81,6 +82,19 @@ const form = ref({
     description: '',
     parcelType: ''
   }]
+})
+
+const parcelTypeOptions = [
+  { label: 'Document', value: 'DOCUMENT' },
+  { label: 'Box', value: 'BOX' },
+  { label: 'Electronic', value: 'ELECTRONIC' }
+]
+
+const companyOptions = computed(() => {
+  return companyList.value.map((comp) => ({
+    label: comp.companyName,
+    value: comp.companyId
+  }))
 })
 
 const isFormValid = computed(() => {
@@ -1051,15 +1065,12 @@ const handleTrackingInput = (event, index) => {
                             <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
                           </svg>
                         </div>
-                        <select
+                        <SelectWeb
                           v-model="item.parcelType"
-                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
-                        >
-                          <option disabled value="">Select Parcel Type</option>
-                          <option value="DOCUMENT">Document</option>
-                          <option value="BOX">Box</option>
-                          <option value="ELECTRONIC">Electronic</option>
-                        </select>
+                          :options="parcelTypeOptions"
+                          placeholder="Select parcel type"
+                          class="pl-10"
+                        />
                       </div>
                     </div>
 
@@ -1076,19 +1087,12 @@ const handleTrackingInput = (event, index) => {
                              <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
                           </svg>
                         </div>
-                        <select
+                        <SelectWeb
                           v-model="item.companyId"
-                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
-                        >
-                          <option value="" disabled>Select Company</option>
-                          <option
-                            v-for="comp in companyList"
-                            :key="comp.companyId"
-                            :value="comp.companyId"
-                          >
-                            {{ comp.companyName }}
-                          </option>
-                        </select>
+                          :options="companyOptions"
+                          placeholder="Select company"
+                          class="pl-10"
+                        />
                       </div>
                     </div>
 

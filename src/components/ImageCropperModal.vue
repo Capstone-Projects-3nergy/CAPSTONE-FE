@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, watch } from 'vue'
+import ButtonWeb from './ButtonWeb.vue'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -8,7 +9,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'crop'])
 
-const canvasRef = ref(null)
 const containerRef = ref(null)
 const imageRef = ref(null)
 
@@ -29,6 +29,7 @@ watch(
 )
 
 const onMouseDown = (e) => {
+  if (!props.isOpen) return
   isDragging.value = true
   startPos.value = {
     x: e.clientX - position.value.x,
@@ -51,6 +52,7 @@ const onMouseUp = () => {
 
 // Touch support
 const onTouchStart = (e) => {
+  if (!props.isOpen) return
   isDragging.value = true
   const touch = e.touches[0]
   startPos.value = {
@@ -74,16 +76,13 @@ const onImageLoad = (e) => {
   const img = e.target
   const aspect = img.naturalWidth / img.naturalHeight
   
-  // Container is square
   if (aspect >= 1) {
-    // Landscape or Square: Fit Height, Width auto
     imageStyle.value = {
       height: '100%',
       width: 'auto',
       maxWidth: 'none'
     }
   } else {
-    // Portrait: Fit Width, Height auto
     imageStyle.value = {
       width: '100%',
       height: 'auto',
@@ -101,27 +100,22 @@ const cropImage = () => {
   if (!img || !container) return
   if (img.naturalWidth === 0 || img.naturalHeight === 0) return
 
-  // Output size (e.g., 500x500 for profile)
   const size = 500
   canvas.width = size
   canvas.height = size
 
-  // Get bounding rects (visual position)
   const containerRect = container.getBoundingClientRect()
   const imgRect = img.getBoundingClientRect()
   const pixelRatio = size / containerRect.width
 
-  // Calculate position relative to container
   const relativeLeft = (imgRect.left - containerRect.left) * pixelRatio
   const relativeTop = (imgRect.top - containerRect.top) * pixelRatio
   const scaledWidth = imgRect.width * pixelRatio
   const scaledHeight = imgRect.height * pixelRatio
 
-  // Clear background
   ctx.fillStyle = '#FFFFFF'
   ctx.fillRect(0, 0, size, size)
 
-  // Draw image
   ctx.drawImage(
     img, 
     0, 0, img.naturalWidth, img.naturalHeight,
@@ -134,83 +128,161 @@ const cropImage = () => {
   canvas.toBlob((blob) => {
     if (blob) {
       emit('crop', blob)
-    } else {
-      console.error('Canvas to Blob failed')
     }
   }, 'image/jpeg', 0.9)
 }
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md flex flex-col items-center gap-4 animate-scale-in">
-      <h3 class="text-xl font-semibold text-gray-800">Adjust Image</h3>
-      
-      <!-- Viewport (Crop Area) -->
+  <Transition name="fade">
+    <div v-if="isOpen" class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      <!-- Backdrop -->
       <div 
-        ref="containerRef"
-        class="relative w-64 h-64 rounded-full overflow-hidden border-4 border-blue-500 shadow-inner bg-gray-100 cursor-move touch-none"
-        @mousedown="onMouseDown"
-        @mousemove="onMouseMove"
-        @mouseup="onMouseUp"
-        @mouseleave="onMouseUp"
-        @touchstart="onTouchStart"
-        @touchmove="onTouchMove"
-        @touchend="onMouseUp"
-      >
-        <img 
-          ref="imageRef"
-          :src="imageSrc" 
-          @load="onImageLoad"
-          class="absolute origin-center pointer-events-none select-none"
-          :style="[
-            imageStyle,
-            { 
-              transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${scale})`,
-              left: '50%',
-              top: '50%'
-            }
-          ]"
-        />
-      </div>
+        class="absolute inset-0 bg-[#07192F]/80 backdrop-blur-md" 
+        @click="$emit('close')"
+      ></div>
+      
+      <!-- Modal Content -->
+      <div class="relative bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(7,25,47,0.3)] w-full max-w-md overflow-hidden animate-premium-in">
+        <!-- Header -->
+        <div class="px-8 pt-8 pb-4 flex flex-col items-center text-center">
+          <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-[#0E4B90]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-black text-[#07192F] tracking-tight">Adjust Image</h3>
+          <p class="text-gray-400 text-sm mt-1">Drag and scale to fit the frame</p>
+        </div>
 
-      <!-- Controls -->
-      <div class="w-full px-4">
-        <label class="text-xs text-gray-500 mb-1 block">Zoom</label>
-        <input 
-          type="range" 
-          min="1" 
-          max="3" 
-          step="0.01" 
-          v-model.number="scale"
-          class="w-full accent-blue-600 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-        />
-      </div>
+        <!-- Viewport -->
+        <div class="flex justify-center py-6 bg-gray-50/50">
+          <div 
+            ref="containerRef"
+            class="relative w-64 h-64 rounded-full overflow-hidden border-[6px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.15)] bg-gray-200 cursor-move touch-none"
+            @mousedown="onMouseDown"
+            @mousemove="onMouseMove"
+            @mouseup="onMouseUp"
+            @mouseleave="onMouseUp"
+            @touchstart="onTouchStart"
+            @touchmove="onTouchMove"
+            @touchend="onMouseUp"
+          >
+            <img 
+              ref="imageRef"
+              :src="imageSrc" 
+              @load="onImageLoad"
+              class="absolute origin-center pointer-events-none select-none max-w-none"
+              :style="[
+                imageStyle,
+                { 
+                  transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${scale})`,
+                  left: '50%',
+                  top: '50%'
+                }
+              ]"
+            />
+            <!-- Overlay Guide -->
+            <div class="absolute inset-0 pointer-events-none border-[1px] border-white/20 rounded-full shadow-[inset_0_0_40px_rgba(0,0,0,0.1)]"></div>
+          </div>
+        </div>
 
-      <div class="flex gap-3 w-full mt-2">
-        <button 
-          @click="$emit('close')"
-          class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition cursor-pointer"
-        >
-          Cancel
-        </button>
-        <button 
-          @click="cropImage"
-          class="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition shadow-md cursor-pointer"
-        >
-          Save
-        </button>
+        <!-- Controls -->
+        <div class="px-8 py-6 space-y-6">
+          <div class="space-y-3">
+            <div class="flex justify-between items-center px-1">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Zoom Level</label>
+              <span class="text-xs font-bold text-[#0E4B90]">{{ Math.round(scale * 100) }}%</span>
+            </div>
+            <div class="relative flex items-center group">
+              <input 
+                type="range" 
+                min="1" 
+                max="3" 
+                step="0.01" 
+                v-model.number="scale"
+                class="premium-slider"
+              />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex gap-4 pt-2">
+            <ButtonWeb 
+              label="Cancel"
+              color="white-outline"
+              @click="$emit('close')"
+              class="flex-1 !py-4"
+            />
+            <ButtonWeb 
+              label="Save Change"
+              color="navy"
+              @click="cropImage"
+              class="flex-1 !py-4"
+            />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style scoped>
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
+.animate-premium-in {
+  animation: premiumIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+
+@keyframes premiumIn {
+  from { transform: translateY(20px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.premium-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.premium-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  border: 2px solid #0E4B90;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(14, 75, 144, 0.15);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #0E4B90;
+  border-color: #ffffff;
+}
+
+.premium-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  border: 2px solid #0E4B90;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(14, 75, 144, 0.15);
+  transition: all 0.2s;
 }
 </style>

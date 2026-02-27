@@ -104,17 +104,18 @@ const hasProfileImageUrl = computed(
 )
 const menuClass = (tab) => {
   return [
-    'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
+    'w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 flex items-center gap-3',
     activeTab.value === tab
-      ? 'bg-[#D9D9D9] text-[#60a5fa]'
-      : 'text-gray-500 hover:bg-gray-100'
+      ? 'bg-blue-50 text-[#185DC0] shadow-sm shadow-blue-100/50 scale-[1.02]'
+      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:translate-x-1'
   ]
 }
 
 // แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
-  if (!value || value.trim() === '') return 'ERROR'
-  return value.toUpperCase()
+  if (!value || value.trim() === '') return 'Error'
+  const s = value.toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 // กำหนดสีตามสถานะ
@@ -122,9 +123,9 @@ const statusClass = (value) => {
   const status = displayStatus(value)
 
   return {
-    'bg-green-400': status === 'ACTIVE',
-    'bg-gray-400': status === 'INACTIVE',
-    'bg-red-400': status === 'ERROR'
+    'bg-gradient-to-r from-emerald-400 to-green-500 shadow-sm shadow-green-200': status === 'Active',
+    'bg-gradient-to-r from-gray-400 to-gray-500 shadow-sm shadow-gray-200': status === 'Inactive',
+    'bg-gradient-to-r from-red-400 to-rose-500 shadow-sm shadow-red-200': status === 'Error'
   }
 }
 onMounted(async () => {
@@ -345,7 +346,7 @@ const userRoleLabel = computed(() => {
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
@@ -364,7 +365,7 @@ const userRoleLabel = computed(() => {
               {{ userInitial }}
             </div>
           </div>
-          <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+          <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
             {{ userRoleLabel }}
           </p>
           <p class="mt-4 text-black font-semibold text-lg text-gray-500">
@@ -377,7 +378,7 @@ const userRoleLabel = computed(() => {
           <button
             @click="activeTab = 'profile'"
             :class="menuClass('profile')"
-            class="relative flex items-center gap-3 w-full cursor-pointer"
+            class="relative w-full cursor-pointer"
           >
             <svg
               width="24"
@@ -410,17 +411,18 @@ const userRoleLabel = computed(() => {
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Header -->
-        <div class="flex items-center gap-3 mb-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-            {{ title }}
-          </h2>
-          <div class="relative group">
-            <svg
-              class="cursor-pointer font-semibold hover:text-[#8C8F91] transition"
-              @click="$emit('edit')"
+        <div class="flex items-center justify-between mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+          <div class="flex items-center gap-3">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+              {{ title }}
+            </h2>
+            <div class="relative group ml-2">
+              <svg
+                class="cursor-pointer text-[#8C8F91] hover:text-[#0E4B90] transition-colors duration-300"
+                @click="$emit('edit')"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -449,42 +451,43 @@ const userRoleLabel = computed(() => {
             </div>
           </div>
         </div>
+      </div>
 
         <!-- Info Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 truncate">
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ firstName }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ lastName }}
             </p>
           </div>
 
           <div>
             <label
-              class="flex items-center gap-2 text-sm text-black font-semibold mb-1"
+              class="flex items-center gap-2 text-sm font-bold text-gray-500 mb-2 ml-1"
             >
               <span>Email</span>
 
-              <span class="flex items-center gap-1 text-green-600 font-medium">
+              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="12"
+                  height="12"
                   viewBox="0 0 24 24"
                   class="shrink-0"
                 >
-                  <g fill="none" stroke="currentColor" stroke-width="1.5">
+                  <g fill="none" stroke="currentColor" stroke-width="2">
                     <path
                       d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
                     />
@@ -496,63 +499,63 @@ const userRoleLabel = computed(() => {
                   </g>
                 </svg>
 
-                <span class="text-xs leading-none"> verified </span>
+                <span> Verified </span>
               </span>
             </label>
 
-            <div class="flex items-center gap-2">
-              <p class="font-medium break-all text-[#8C8F91]">
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">
                 {{ email }}
               </p>
             </div>
           </div>
 
           <div v-if="loginManager.user.role === 'STAFF'">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
-            <p class="text-[#8C8F91] font-medium break-all">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ position }}
             </p>
           </div>
           <div v-if="roomNumber !== null">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ roomNumber }}
             </p>
           </div>
           <div
             v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ dormName }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Line ID
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ display(lineId) }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ display(phoneNumber) }}
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-sm text-black font-semibold"> Status: </label>
+          <!-- <div class="flex items-center gap-2 mt-2">
+            <label class="text-sm font-bold text-gray-500"> Status: </label>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
@@ -560,17 +563,18 @@ const userRoleLabel = computed(() => {
             >
               {{ displayStatus(safeStatus) }}
             </span>
-          </div>
+          </div> -->
         </div>
       </div>
       <div
         v-if="activeTab === 'notify'"
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
-        <!-- Header -->
-        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-          Notifications
-        </h2>
+        <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            Notifications
+          </h2>
+        </div>
         <!-- Tabs -->
         <div class="flex gap-2 mb-6">
           <button
@@ -603,12 +607,12 @@ const userRoleLabel = computed(() => {
           <div
             v-for="(item, index) in filteredNotifications"
             :key="index"
-            class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
+            class="flex items-start gap-4 bg-white border border-gray-50 rounded-2xl px-5 py-4 cursor-pointer hover:shadow-md hover:border-blue-100 transition-all duration-300 group shadow-sm"
           >
             <!-- LEFT ICON -->
             <div class="mt-1">
               <span
-                class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
+                class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110"
                 :class="badgeClass(item.type)"
                 v-html="badgeIcon(item.type)"
               />
@@ -616,22 +620,25 @@ const userRoleLabel = computed(() => {
 
             <!-- CONTENT -->
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-800">
-                {{ item.label }}
-              </p>
+              <div class="flex items-center justify-between mb-0.5">
+                <p class="text-sm font-bold text-gray-800">
+                  {{ item.label }}
+                </p>
+                <span class="text-[10px] text-gray-400 font-medium">
+                  {{ item.time }}
+                </span>
+              </div>
 
-              <p class="text-sm text-gray-500 mt-0.5">
+              <p class="text-sm text-gray-500 line-clamp-2">
                 {{ item.title }}
               </p>
 
-              <p class="text-xs text-red-500 mt-1">
-                {{ item.user }}
-              </p>
-            </div>
-
-            <!-- TIME -->
-            <div class="text-xs text-gray-400 whitespace-nowrap">
-              {{ item.time }}
+              <div class="flex items-center gap-2 mt-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-tight">
+                  {{ item.user }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -640,10 +647,10 @@ const userRoleLabel = computed(() => {
     <div v-if="residentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <p class=" hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-2">
+          <p class=" hidden md:block text-sm font-extrabold text-[#0E4B90] pt-2">
             {{ userRoleLabel }}
           </p>
           <h2 class="hidden md:block text-xl font-semibold text-gray-500">
@@ -671,7 +678,7 @@ const userRoleLabel = computed(() => {
                 {{ userInitial }}
               </div>
             </div>
-              <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+              <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
           {{ userRoleLabel }}
         </p>
             <p
@@ -683,72 +690,78 @@ const userRoleLabel = computed(() => {
 
           <!-- ================= RIGHT : Personal Information ================= -->
           <div class="md:w-2/3">
-            <div class="flex items-center gap-3 mb-8">
-              <h2
-                class="md:block text-xl sm:text-2xl font-semibold text-gray-800"
-              >
+            <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+              <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
                 User Information
               </h2>
             </div>
 
-            <!-- Info Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >First Name</label
                 >
-                <p class="text-[#8C8F91] font-medium">{{ firstName }}</p>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ firstName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Last Name</label>
-                <p class="text-[#8C8F91] font-medium">{{ lastName }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Last Name</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ lastName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Email</label>
-                <p class="text-[#8C8F91] font-medium break-all">{{ email }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ email }}</p>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Room Number</label
                 >
-                <p class="text-[#8C8F91] font-medium">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                   {{ display(roomNumber) }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Dormitory</label
                 >
-                <p class="text-[#8C8F91] font-medium">{{ dormName }}</p>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ dormName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Line ID</label>
-                <p class="text-[#8C8F91] font-medium">{{ display(lineId) }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Line ID</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ display(lineId) }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Phone Number</label
                 >
-                <p class="text-[#8C8F91] font-medium">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                   {{ display(phoneNumber) }}
                 </p>
               </div>
-              <!-- Buttons -->
-              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">
+              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end pt-4">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
+                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:bg-gray-50 rounded-2xl transition-all"
                   label="Cancel"
                   color="gray"
                   @click="$emit('cancel')"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
+                  class="text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg shadow-blue-500/10 transition-all"
                   label="Edit"
                   color="blue"
                   @click="$emit('edit')"

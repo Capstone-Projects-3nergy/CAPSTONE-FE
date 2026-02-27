@@ -11,6 +11,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
@@ -62,6 +63,19 @@ const trackingNumberFormatError = ref(false)
 const trackingNumberRequired = ref(false)
 const recipientNameRequired = ref(false)
 const showLogoutConfirm = ref(false)
+
+const parcelTypeOptions = [
+  { label: 'Document', value: 'DOCUMENT' },
+  { label: 'Box', value: 'BOX' },
+  { label: 'Electronic', value: 'ELECTRONIC' }
+]
+
+const companyOptions = computed(() => {
+  return companyList.value.map((c) => ({
+    label: c.companyName,
+    value: c.companyId
+  }))
+})
 
 const showTrackingLengthError = ref(false)
 const showRecipientLengthError = ref(false)
@@ -1049,33 +1063,20 @@ function formatDateTime(datetimeStr) {
               <div>
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
 
-                <select
+                <SelectWeb
                   v-model="form.parcelType"
-                  class="w-full border border-gray-200 rounded-xl p-3 px-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none cursor-pointer"
-                >
-                  <option disabled value="">Select Parcel Type</option>
-                  <option value="DOCUMENT">Document</option>
-                  <option value="BOX">Box</option>
-                  <option value="ELECTRONIC">Electronic</option>
-                </select>
+                  :options="parcelTypeOptions"
+                  placeholder="Select parcel type"
+                />
               </div>
               <div>
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
 
-                <select
+                <SelectWeb
                   v-model="form.companyId"
-                  class="w-full border border-gray-200 rounded-xl p-3 px-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none cursor-pointer"
-                >
-                  <option disabled value="">Select Company</option>
-
-                  <option
-                    v-for="company in companyList"
-                    :key="company.companyId"
-                    :value="company.companyId"
-                  >
-                    {{ company.companyName }}
-                  </option>
-                </select>
+                  :options="companyOptions"
+                  placeholder="Select company"
+                />
               </div>
             </div>
           </section>
@@ -1085,7 +1086,7 @@ function formatDateTime(datetimeStr) {
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
               <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Resident Info</h3>
             </div>
-            <div v-if="form.status !== 'PICKED_UP'" class="mb-4">
+            <div v-if="form.status !== 'PICKED_UP'" class="mb-4 relative">
               <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                 >Search Resident Name</label
               >
@@ -1099,24 +1100,23 @@ function formatDateTime(datetimeStr) {
 
               <ul
                 v-if="recipientSearch"
-                class="absolute z-10 mt-2 w-[310px] md:w-[325px] bg-white border border-gray-50 rounded-2xl max-h-52 overflow-auto text-sm shadow-2xl shadow-blue-900/10 backdrop-blur-md overflow-hidden"
+                class="absolute z-[60] mt-2 md:w-[325px] w-full bg-white border border-gray-100 rounded-2xl max-h-60 overflow-y-auto overflow-x-hidden text-sm shadow-2xl py-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent"
               >
                 <li
                   v-for="r in filteredResidents"
                   :key="r.userId"
-                  class="px-5 py-4 cursor-pointer hover:bg-blue-50 transition-all border-b last:border-b-0 border-gray-50 flex flex-col gap-0.5"
-                  v-if="filteredResidents.length > 0"
                   @click="selectResident(r)"
+                  class="px-4 py-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-0.5"
                 >
-                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
-                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                  <span class="font-bold text-gray-800">{{ r.fullName || r.firstName + ' ' + r.lastName }}</span>
+                  <span class="text-xs text-gray-500">Room {{ r.roomNumber || '-' }} • {{ r.email || '-' }}</span>
                 </li>
 
                 <li
                   v-if="filteredResidents.length === 0"
-                  class="px-3 py-1 text-gray-400"
+                  class="px-4 py-3 text-gray-400 italic text-center"
                 >
-                  No residents found matching your search terms.
+                  No residents found matching your search.
                 </li>
               </ul>
             </div>

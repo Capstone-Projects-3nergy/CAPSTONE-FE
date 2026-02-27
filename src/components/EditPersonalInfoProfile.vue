@@ -3,6 +3,7 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 import ImageCropperModal from './ImageCropperModal.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -213,6 +214,12 @@ const emit = defineEmits([
 
 const isEdit = ref(false)
 const dormList = ref([])
+const dormOptions = computed(() => {
+  return dormList.value.map((dorm) => ({
+    label: dorm.dormName,
+    value: dorm.dormId
+  }))
+})
 const form = ref({
   userId: null,
   firstName: '',
@@ -1190,11 +1197,13 @@ const userRoleLabel = computed(() => {
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8 flex flex-col items-center text-center"
       >
-        <div class="relative inline-block">
+        <div class="relative inline-block group mb-6">
           <!-- Avatar -->
-          <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
+          <div
+            class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+          >
             <!-- มีรูป (add หรือ edit ก็แสดง) -->
             <img
               v-if="profileImageUrlPreview"
@@ -1206,15 +1215,15 @@ const userRoleLabel = computed(() => {
             <!-- ADD MODE + ยังไม่เลือกรูป -->
             <div
               v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center font-semibold bg-gray-400 text-white text-xl"
+              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"
             >
-            <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
             </div>
 
             <!-- EDIT MODE + ไม่มีรูป -->
             <div
               v-else
-              class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-4xl"
+              class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
             >
               {{ userInitial }}
             </div>
@@ -1258,30 +1267,26 @@ const userRoleLabel = computed(() => {
 
           <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
           <div
-            class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+            class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
             @click="$refs.imageInput.click()"
           >
             <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+              class="bg-[#185DC0] rounded-full p-2 shadow-xl border-4 border-white hover:bg-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-10 h-10 text-white"
             >
               <svg
-                class="transition text-[#8C8F91]"
                 width="20"
                 height="20"
-                viewBox="0 0 48 48"
+                viewBox="0 0 24 24"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g
-                  fill="none"
+                <path
+                  d="M15.2322 5.23223L18.7678 8.76777M16.7322 3.73223C17.7085 2.75592 19.2915 2.75592 20.2678 3.73223C21.2441 4.70854 21.2441 6.29146 20.2678 7.26777L6.5 21H3V17.5L16.7322 3.73223Z"
                   stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="3"
-                >
-                  <path
-                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
-                  />
-                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
-                </g>
+                />
               </svg>
             </div>
             <!-- Tooltip -->
@@ -1305,21 +1310,23 @@ const userRoleLabel = computed(() => {
           ref="imageInput"
           @change="onImageChange"
         />
-        <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-          {{ userRoleLabel }}
-        </p>
-        <p class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
-          {{ displayFullName }}
-        </p>
+        <div class="mt-4">
+          <p class="text-sm font-extrabold text-[#0E4B90]">
+            {{ userRoleLabel }}
+          </p>
+          <p class="text-xl sm:text-2xl font-bold text-gray-700 pt-2 truncate max-w-[200px] mx-auto">
+            {{ displayFullName }}
+          </p>
+        </div>
       </div>
 
       <!-- RIGHT : Edit Information Card -->
       <div
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Header -->
-        <div class="mb-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+        <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
             {{ title }}
           </h2>
         </div>
@@ -1327,7 +1334,7 @@ const userRoleLabel = computed(() => {
         <!-- Form Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -1335,11 +1342,11 @@ const userRoleLabel = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showNameLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1385,18 +1392,18 @@ const userRoleLabel = computed(() => {
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showNameLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1442,7 +1449,7 @@ const userRoleLabel = computed(() => {
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Email <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
@@ -1451,11 +1458,11 @@ const userRoleLabel = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showEmailLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1484,7 +1491,7 @@ const userRoleLabel = computed(() => {
             class="flex flex-col"
             v-if="roomNumber !== null || mode == 'add'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -1494,11 +1501,11 @@ const userRoleLabel = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white',
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showRoomLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1530,15 +1537,15 @@ const userRoleLabel = computed(() => {
               loginManager.user.role === 'RESIDENT'
             "
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
             <input
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
               ]"
             />
           </div>
@@ -1546,40 +1553,32 @@ const userRoleLabel = computed(() => {
             class="flex flex-col"
             v-if="mode == 'add' && loginManager.user.role === 'STAFF'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
               <span class="text-red-500">*</span>
             </label>
-            <select
+            <SelectWeb
               v-model="form.dormId"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
-            >
-              <option disabled :value="null">Select Dormitory</option>
-              <option
-                v-for="dorm in dormList"
-                :key="dorm.dormId"
-                :value="dorm.dormId"
-              >
-                {{ dorm.dormName }}
-              </option>
-            </select>
+              :options="dormOptions"
+              placeholder="Select dormitory"
+            />
           </div>
           <div
             class="flex flex-col"
             v-if="loginManager.user.role === 'STAFF' && mode !== 'add'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
             <input
               :value="form.position"
               @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showPositionLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1625,18 +1624,18 @@ const userRoleLabel = computed(() => {
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Line ID
             </label>
             <input
               :value="form.lineId"
               @input="handleLineIdInput"
               placeholder="Enter Line ID"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showLineIdLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1662,18 +1661,18 @@ const userRoleLabel = computed(() => {
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
             <input
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showPhoneLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1699,15 +1698,15 @@ const userRoleLabel = computed(() => {
           </div>
 
           <!-- Actions -->
-          <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end">
+          <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
               label="Cancel Changes"
               color="gray"
               @click="cancel"
             />
             <ButtonWeb
-              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
@@ -1720,10 +1719,10 @@ const userRoleLabel = computed(() => {
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <p class="hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-6">
+          <p class="hidden md:block text-sm font-extrabold text-[#0E4B90] pt-6">
           {{ userRoleLabel }}
         </p>
           <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
@@ -1736,11 +1735,10 @@ const userRoleLabel = computed(() => {
           <div
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
-            <div class="relative inline-block">
+            <div class="relative inline-block group mb-6">
               <!-- Avatar -->
-
               <div
-                class="w-32 h-32 rounded-full overflow-hidden border shadow-sm"
+                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
               >
                 <img
                   v-if="profileImageUrlPreview"
@@ -1750,11 +1748,7 @@ const userRoleLabel = computed(() => {
                 />
                 <div
                   v-else
-                  class="w-full h-full flex items-center justify-center font-semibold"
-                  :class="{
-                    'bg-[#185DC0] text-white text-4xl': props.mode !== 'add',
-                    'bg-white text-black text-xl': props.mode === 'add'
-                  }"
+                  class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
                 >
                   {{ userInitial }}
                 </div>
@@ -1796,32 +1790,28 @@ const userRoleLabel = computed(() => {
           </div> -->
               <!-- ✏️ Edit icon -->
               <div
-                class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+                class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
                 @click="$refs.imageInput.click()"
               >
-               <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
-            >
-              <svg
-                class="transition text-[#8C8F91]"
-                width="20"
-                height="20"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linejoin="round"
-                  stroke-width="3"
+                <div
+                  class="bg-[#185DC0] rounded-full p-2 shadow-xl border-4 border-white hover:bg-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-10 h-10 text-white"
                 >
-                  <path
-                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
-                  />
-                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
-                </g>
-              </svg>
-            </div>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M15.2322 5.23223L18.7678 8.76777M16.7322 3.73223C17.7085 2.75592 19.2915 2.75592 20.2678 3.73223C21.2441 4.70854 21.2441 6.29146 20.2678 7.26777L6.5 21H3V17.5L16.7322 3.73223Z"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
 
                 <!-- Tooltip -->
                 <div
@@ -1845,11 +1835,11 @@ const userRoleLabel = computed(() => {
               @change="onImageChange"
             />
       
-            <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+            <p class="text-sm font-extrabold text-[#0E4B90]">
               {{ userRoleLabel }}
             </p>
             <h2
-              class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]"
+              class="text-xl sm:text-2xl font-bold text-gray-700 pt-2 truncate max-w-[200px] mx-auto"
             >
               {{ displayFullName }}
             </h2>
@@ -1858,8 +1848,8 @@ const userRoleLabel = computed(() => {
           <!-- ================= RIGHT : Edit Information ================= -->
           <div class="md:w-2/3">
             <!-- Header -->
-            <div class="md:block mb-8">
-              <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+            <div class="flex items-center gap-3 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+              <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
                 User Information
               </h2>
             </div>
@@ -1867,31 +1857,31 @@ const userRoleLabel = computed(() => {
             <!-- Form Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   First Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.firstName"
                   placeholder="Enter First Name"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Last Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.lastName"
                   placeholder="Enter Last Name"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Email
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
@@ -1900,14 +1890,14 @@ const userRoleLabel = computed(() => {
                   v-model="form.email"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Room Number
                 </label>
                 <input
@@ -1915,20 +1905,20 @@ const userRoleLabel = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'
+                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
               </div>
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Dormitory
                 </label>
                 <select
                   v-model="form.dormId"
                   :disabled="loginManager.user?.role === 'RESIDENT'"
-                  class="w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
-                  :class="loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'"
+                  class="w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 appearance-none cursor-pointer"
+                  :class="loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'"
                 >
                   <option disabled value="">Select Dormitory</option>
                   <option
@@ -1941,37 +1931,37 @@ const userRoleLabel = computed(() => {
                 </select>
               </div>
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Line ID
                 </label>
                 <input
                   v-model="form.lineId"
                   placeholder="Enter Line ID"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Phone Number
                 </label>
                 <input
                   v-model="form.phoneNumber"
                   placeholder="Enter Phone Number"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <!-- Actions -->
-              <div class="md:col-span-2 flex gap-3 mt-6 justify-end">
+              <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
+                  class="text-[#898989] text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
                   label="Cancel Changes"
                   color="gray"
                   @click="cancel"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
+                  class="text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
                   :disabled="isSaveDisabled"
