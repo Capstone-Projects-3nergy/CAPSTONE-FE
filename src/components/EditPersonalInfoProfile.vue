@@ -1914,21 +1914,13 @@ const userRoleLabel = computed(() => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Dormitory
                 </label>
-                <select
+                <SelectWeb
                   v-model="form.dormId"
+                  :options="dormOptions"
                   :disabled="loginManager.user?.role === 'RESIDENT'"
-                  class="w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 appearance-none cursor-pointer"
-                  :class="loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'"
-                >
-                  <option disabled value="">Select Dormitory</option>
-                  <option
-                    v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
-                  >
-                    {{ dorm.dormName }}
-                  </option>
-                </select>
+                  placeholder="Select Dormitory"
+                  class="max-w-md"
+                />
               </div>
               <div class="flex flex-col">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
