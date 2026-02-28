@@ -43,6 +43,7 @@ const subtitleThaiNumError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
+const fileSizeError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
@@ -99,6 +100,7 @@ const closePopUp = (operate) => {
   if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
   if (operate === 'categoryError') { categoryError.value = false }
   if (operate === 'contentError') { contentError.value = false }
+  if (operate === 'fileSizeError') { fileSizeError.value = false }
   if (operate === 'errorMessage') { error.value = false }
 }
 
@@ -175,6 +177,16 @@ const handleContentInput = (event) => {
 const onFileChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    fileSizeError.value = true
+    imageFile.value = null
+    imagePreview.value = ''
+    setTimeout(() => {
+      fileSizeError.value = false
+    }, 5000)
+    return
+  }
   
   // Basic validation for image type
   if (!file.type.startsWith('image/')) {
@@ -297,11 +309,21 @@ const submitAnnouncement = async () => {
 }
 
 const saveDraft = async () => {
-  if (!isFormValid.value) {
-    error.value = true
+  titleError.value = false
+  categoryError.value = false
+  contentError.value = false
+  
+  let hasError = false
+  if (!title.value.trim()) { titleError.value = true; hasError = true }
+  if (!category.value) { categoryError.value = true; hasError = true }
+  if (!content.value.trim()) { contentError.value = true; hasError = true }
+  
+  if (hasError) {
     setTimeout(() => {
-      error.value = false
-    }, 10000)
+      titleError.value = false
+      categoryError.value = false
+      contentError.value = false
+    }, 5000)
     return
   }
 
@@ -635,6 +657,7 @@ const returnLoginPage = async () => {
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"

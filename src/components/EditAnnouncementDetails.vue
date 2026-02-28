@@ -29,6 +29,7 @@ const titleError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const dateError = ref(false)
+const fileSizeError = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -89,6 +90,17 @@ const formatText = (style) => {
 const handleImageUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      fileSizeError.value = true
+      coverImage.value = null
+      imagePreview.value = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      announcementForm.coverImage = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      setTimeout(() => {
+        fileSizeError.value = false
+      }, 5000)
+      return
+    }
+
     coverImage.value = file
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -188,6 +200,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'dateError') {
     dateError.value = false
+  }
+  if (operate === 'fileSizeError') {
+    fileSizeError.value = false
   }
 }
 
@@ -766,6 +781,7 @@ const showProfileStaffPage = async function () {
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"

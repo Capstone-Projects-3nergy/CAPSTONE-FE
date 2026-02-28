@@ -22,6 +22,7 @@ const emailError = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
 const emailRequire = ref(false)
+const fileSizeError = ref(false)
 const dormList = ref([])
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
@@ -204,6 +205,9 @@ const closePopUp = (operate) => {
     case 'emailInvalidChars':
       emailInvalidCharsError.value = false
       break
+    case 'fileSizeError':
+      fileSizeError.value = false
+      break
   }
 }
 
@@ -234,6 +238,10 @@ const showEmailError = () => {
 const showEmailFormError = () => {
   emailFormError.value = true
   setTimeout(() => (emailFormError.value = false), 10000)
+}
+const showFileSizeError = () => {
+  fileSizeError.value = true
+  setTimeout(() => (fileSizeError.value = false), 10000)
 }
 </script>
 
@@ -547,6 +555,14 @@ const showEmailFormError = () => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileSizeError"
+            titles="The file size of the profile image must not exceed 5MB."
+            message="Error!!"
+            styleType="red"
+            operate="fileSizeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="add"
@@ -565,6 +581,7 @@ const showEmailFormError = () => {
           @room-number-error="roomNumberErrorFn"
           @line-id-error="lineIdErrorFn"
           @email-invalid-chars="showEmailInvalidCharsError"
+          @file-size-error="showFileSizeError"
         />
       </main>
     </div>

@@ -40,6 +40,7 @@ const roomNumberError = ref(false)
 const positionError = ref(false)
 const positionRequired = ref(false)
 const phoneError = ref(false)
+const fileSizeError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -267,6 +268,10 @@ const showPhoneError = () => {
   phoneError.value = true
   setTimeout(() => (phoneError.value = false), 10000)
 }
+const showFileSizeError = () => {
+  fileSizeError.value = true
+  setTimeout(() => (fileSizeError.value = false), 10000)
+}
 const showProfileSuccess = () => {
   editSuccess.value = true
   setTimeout(() => (editSuccess.value = false), 10000)
@@ -339,6 +344,9 @@ const closePopUp = (operate) => {
       break
     case 'lineId':
       lineIdError.value = false
+      break
+    case 'fileSizeError':
+      fileSizeError.value = false
       break
 
     default:
@@ -837,6 +845,14 @@ const closePopUp = (operate) => {
             operate="roomNumber"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileSizeError"
+            :titles="'The file size of the profile image must not exceed 5MB.'"
+            message="Error!!"
+            styleType="red"
+            operate="fileSizeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           v-if="loginManager.user"
@@ -869,6 +885,7 @@ const closePopUp = (operate) => {
           @dorm-id-required="showDormRequired"
           @room-number-required="showRoomNumberRequired"
           @line-id-error="lineIdErrorFn"
+          @file-size-error="showFileSizeError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

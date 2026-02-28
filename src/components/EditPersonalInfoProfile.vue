@@ -521,7 +521,7 @@ const profileImageUrlPreview = computed(() => {
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       emit('file-size-error', true)
       e.target.value = null
       return

@@ -68,6 +68,7 @@ const lastNameError = ref(false)
 const firstNameRequired = ref(false)
 const lastNameRequired = ref(false)
 const roomNumberRequired = ref(false)
+const fileSizeError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -661,6 +662,7 @@ const closePopUp = (operate) => {
   if (operate === 'firstNameRequired') firstNameRequired.value = false
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
+  if (operate === 'fileSizeError') fileSizeError.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -706,6 +708,10 @@ const showLastNameRequired = () => {
 const showRoomNumberRequired = () => {
   roomNumberRequired.value = true
   setTimeout(() => (roomNumberRequired.value = false), 10000)
+}
+const showFileSizeError = () => {
+  fileSizeError.value = true
+  setTimeout(() => (fileSizeError.value = false), 5000)
 }
 </script>
 
@@ -1022,6 +1028,14 @@ const showRoomNumberRequired = () => {
             operate="roomNumberRequired"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileSizeError"
+            :titles="'The file size of the profile image must not exceed 5MB.'"
+            message="Error!!"
+            styleType="red"
+            operate="fileSizeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1051,6 +1065,7 @@ const showRoomNumberRequired = () => {
           @first-name-required="showFirstNameRequired"
           @last-name-required="showLastNameRequired"
           @room-number-required="showRoomNumberRequired"
+          @file-size-error="showFileSizeError"
         />
       </main>
     </div>
