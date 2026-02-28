@@ -9,6 +9,7 @@ import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { getAnnouncementById, editAnnouncementWithFile } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+import LoadingPopUp from './LoadingPopUp.vue'
 // No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
@@ -23,6 +24,11 @@ const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
+
+const titleError = ref(false)
+const categoryError = ref(false)
+const contentError = ref(false)
+const dateError = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -169,7 +175,19 @@ const closePopUp = (operate) => {
     editSuccess.value = false
   }
   if (operate === 'errorMessage') {
-    error.value = ''
+    error.value = false
+  }
+  if (operate === 'titleError') {
+    titleError.value = false
+  }
+  if (operate === 'categoryError') {
+    categoryError.value = false
+  }
+  if (operate === 'contentError') {
+    contentError.value = false
+  }
+  if (operate === 'dateError') {
+    dateError.value = false
   }
 }
 
@@ -311,11 +329,14 @@ const fetchAnnouncementDetail = async () => {
       const mapped = {
         id: data.id || data.announcementId,
         title: data.title || '',
-        subTitle: data.subTitle || data.subtitle || '',
+        subtitle: data.subTitle || data.subtitle || '',
         content: data.content || '',
-        tag: data.tag || data.category || 'General',
+        category: data.category || data.tag || 'General',
         isPinned: data.isPinned || data.pinned || false,
-        status: data.status || 'Published'
+        status: data.status || 'Published',
+        datePosted: data.datePosted || '',
+        targetAudience: data.targetAudience || 'All',
+        notifyEmail: data.notifyEmail || false
       }
       Object.assign(announcementForm, mapped)
       if (data.coverImage) {
@@ -341,6 +362,7 @@ const fetchAnnouncementDetail = async () => {
 
   // Save initial state after data is loaded
   initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+  initialForm.value.coverImage = imagePreview.value || null
 }
 
 onMounted(() => {
@@ -368,11 +390,25 @@ const navigateTo = (name) => {
 }
 
 const handleSave = async () => {
-  if (!announcementForm.title.trim() || !announcementForm.datePosted || !announcementForm.category || !announcementForm.content.trim()) {
-    error.value = true
+  // Validate Required Fields
+  titleError.value = false
+  categoryError.value = false
+  contentError.value = false
+  dateError.value = false
+  
+  let hasError = false
+  if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
+  if (!announcementForm.category) { categoryError.value = true; hasError = true }
+  if (!announcementForm.datePosted) { dateError.value = true; hasError = true }
+  if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
+  
+  if (hasError) {
     setTimeout(() => {
-      error.value = false
-    }, 10000)
+      titleError.value = false
+      categoryError.value = false
+      contentError.value = false
+      dateError.value = false
+    }, 5000)
     return
   }
   
@@ -723,6 +759,24 @@ const showProfileStaffPage = async function () {
                 </h2>
           </div>
           </div>
+          
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp v-if="editSuccess" titles="Announcement Updated Successfully." message="Success!!" styleType="green" operate="editSuccessMessage" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
+              <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="errorMessage"
+              @closePopUp="closePopUp"
+            />
+          </div>
+
+          <LoadingPopUp v-if="isSubmitting" />
 
           <!-- Edit Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -798,8 +852,8 @@ const showProfileStaffPage = async function () {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category </label>
-                      <div class="relative" @click="isCategoryOpen = !isCategoryOpen" @mouseleave="isCategoryOpen = false">
-                        <div class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
+                      <div class="relative">
+                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
                             <span v-if="!announcementForm.category" class="text-gray-500">Select category...</span>
                             <template v-else>
                               <!-- General -->
@@ -818,19 +872,19 @@ const showProfileStaffPage = async function () {
                         </div>
                         <!-- Dropdown Options -->
                         <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="announcementForm.category = 'General'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                              General
                           </div>
-                          <div @click="announcementForm.category = 'Maintenance'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                              Maintenance
                           </div>
-                          <div @click="announcementForm.category = 'Events'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                              Activity/Events
                           </div>
-                          <div @click="announcementForm.category = 'Urgent'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                              Urgent
                           </div>
@@ -1003,7 +1057,7 @@ const showProfileStaffPage = async function () {
                   label="Update Announcement" 
                   color="navy" 
                   @click="handleSave" 
-                  :disabled="!hasChanges || !isFormValid"
+                  :disabled="!hasChanges"
                   :loading="isSubmitting"
                   class="w-full md:w-auto"
                 >

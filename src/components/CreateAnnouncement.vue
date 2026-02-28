@@ -5,6 +5,7 @@ import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
+import LoadingPopUp from './LoadingPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
@@ -33,6 +34,7 @@ const notifyEmail = ref(false)
 const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 
 const addSuccess = ref(false)
+const isLoading = ref(false)
 const titleError = ref(false)
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -231,6 +233,7 @@ const submitAnnouncement = async () => {
   }
 
   try {
+    isLoading.value = true
     // -----------------------
     // payload
     // -----------------------
@@ -260,6 +263,7 @@ const submitAnnouncement = async () => {
     )
 
     if (!savedAnnouncement) {
+      isLoading.value = false
       error.value = true
       setTimeout(() => {
         error.value = false
@@ -276,6 +280,7 @@ const submitAnnouncement = async () => {
       console.error('Notification failed:', lineError)
     }
 
+    isLoading.value = false
     addSuccess.value = true
     setTimeout(() => {
       addSuccess.value = false
@@ -283,6 +288,7 @@ const submitAnnouncement = async () => {
     }, 10000)
   } catch (err) {
     console.error('Submission failed:', err)
+    isLoading.value = false
     error.value = true
     setTimeout(() => {
       error.value = false
@@ -300,6 +306,7 @@ const saveDraft = async () => {
   }
 
   try {
+    isLoading.value = true
     // -----------------------
     // payload
     // -----------------------
@@ -329,6 +336,7 @@ const saveDraft = async () => {
     )
 
     if (!savedAnnouncement) {
+      isLoading.value = false
       error.value = true
       setTimeout(() => {
         error.value = false
@@ -338,6 +346,7 @@ const saveDraft = async () => {
 
     announcementManager.addAnnouncement(savedAnnouncement)
     
+    isLoading.value = false
     addSuccess.value = true
     setTimeout(() => {
       addSuccess.value = false
@@ -345,6 +354,7 @@ const saveDraft = async () => {
     }, 10000)
   } catch (err) {
     console.error('Save draft failed:', err)
+    isLoading.value = false
     error.value = true
     setTimeout(() => {
       error.value = false
@@ -635,6 +645,8 @@ const returnLoginPage = async () => {
             />
           </div>
 
+          <LoadingPopUp v-if="isLoading" />
+
           <!-- Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
@@ -693,8 +705,8 @@ const returnLoginPage = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
-                      <div class="relative" @click="isCategoryOpen = !isCategoryOpen" @mouseleave="isCategoryOpen = false">
-                        <div class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
+                      <div class="relative">
+                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
                             <span v-if="!category" class="text-gray-500">Select category...</span>
                             <template v-else>
                               <!-- General -->
@@ -713,19 +725,19 @@ const returnLoginPage = async () => {
                         </div>
                         <!-- Dropdown Options -->
                         <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="category = 'General'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                              General
                           </div>
-                          <div @click="category = 'Maintenance'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                              Maintenance
                           </div>
-                          <div @click="category = 'Events'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                              Activity/Events
                           </div>
-                          <div @click="category = 'Urgent'" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                              Urgent
                           </div>
