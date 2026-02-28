@@ -13,7 +13,11 @@ const props = defineProps({
   },
   label: String,
   error: Boolean,
-  disabled: Boolean
+  disabled: Boolean,
+  direction: {
+    type: String,
+    default: 'down'
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -92,7 +96,8 @@ onUnmounted(() => {
     >
       <ul
         v-if="isOpen"
-        class="absolute z-[100] mt-2 w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl max-h-60 overflow-auto py-2 scrollbar-thin scrollbar-thumb-gray-200"
+        class="absolute z-[100] w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl max-h-60 overflow-auto py-2 scrollbar-thin scrollbar-thumb-gray-200"
+        :class="direction === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'"
       >
         <li
           v-for="option in options"

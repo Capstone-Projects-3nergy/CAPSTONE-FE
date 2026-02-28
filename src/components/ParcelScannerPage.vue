@@ -1467,6 +1467,7 @@ onMounted(async () => {
                     v-model="form.companyId"
                     :options="companyOptions"
                     placeholder="Select company"
+                    direction="up"
                   />
                 </div>
               </div>

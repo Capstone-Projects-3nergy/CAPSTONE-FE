@@ -1085,6 +1085,7 @@ const closePopUp = (operate) => {
                     v-model="form.companyId"
                     :options="companyOptions"
                     placeholder="Select company"
+                    direction="up"
                   />
                 </div>
               </div>
