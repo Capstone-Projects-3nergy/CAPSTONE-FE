@@ -552,7 +552,7 @@ const handleImageUpload = (event) => {
 
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    alert('File size should be less than 5MB.')
+    showFileSizeError()
     return
   }
 
