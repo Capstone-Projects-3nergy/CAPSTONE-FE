@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch} from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed} from 'vue'
 import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto'
 import SidebarItem from './SidebarItem.vue'
@@ -7,6 +7,7 @@ import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useParcelManager } from '@/stores/ParcelsManager'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
@@ -17,11 +18,70 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { storeToRefs } from 'pinia'
+import { getItems } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
+const parcelManager = useParcelManager()
+const { parcel: parcels } = storeToRefs(parcelManager)
 
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
+
+const recentParcels = computed(() => {
+  if (!parcels.value) return []
+  return [...parcels.value]
+    .sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+    .slice(0, 5)
+})
+
+const getStatusClass = (status) => {
+  switch (status) {
+    case 'Received': return 'text-yellow-600 bg-yellow-50 border-yellow-100'
+    case 'Notified': return 'text-blue-600 bg-blue-50 border-blue-100'
+    case 'Picked Up': return 'text-emerald-600 bg-emerald-50 border-emerald-100'
+    case 'Overdue': return 'text-red-600 bg-red-50 border-red-100'
+    default: return 'text-gray-600 bg-gray-50 border-gray-100'
+  }
+}
+
+const getStatusIconPath = (status) => {
+  switch (status) {
+    case 'Received': return 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'
+    case 'Notified': return 'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z'
+    case 'Picked Up': return 'M5 13l4 4L19 7'
+    case 'Overdue': return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+    default: return ''
+  }
+}
+const showRegistrationDetail = (id) => {
+  // id = user.id (จาก mapped)
+  router.push({
+    name: 'detailregistration',
+    params: {
+      tid: id
+    }
+  })
+}
+const showParcelDetail = (id) => {
+  router.push({
+    name: 'detailparcels',
+    params: {
+      tid: id
+    }
+  })
+}
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF':
+      return 'Waiting for Staff'
+    case 'PICKED_UP':
+      return 'Picked Up'
+    case 'RECEIVED':
+      return 'Received'
+    default:
+      return status
+  }
+}
 
 // const loginStore = useLoginManager()
 const router = useRouter()
@@ -151,6 +211,26 @@ onMounted(async () => {
   checkScreen()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
+
+  const data = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
+
+  if (data) {
+    const mapped = data.map((p) => ({
+      id: p.parcelId,
+      trackingNumber: p.trackingNumber,
+      residentName: p.ownerName,
+      roomNumber: p.roomNumber,
+      status: mapStatus(p.status),
+      updateAt: p.updatedAt || null
+    }))
+
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+
+    parcelManager.setParcels(mapped)
+  }
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
@@ -957,70 +1037,16 @@ const handlePrintSummary = () => {
 
               <!-- List -->
               <div class="space-y-4">
-                <!-- Item 1 -->
-                <div class="grid grid-cols-4 items-center px-2 py-1">
-                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH12322223</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
-                  <span class="text-xs text-gray-600 text-center">13</span>
+                <div v-for="parcel in recentParcels" :key="parcel.id" class="grid grid-cols-4 items-center px-2 py-1">
+                  <span @click="showParcelDetail(parcel.id)" class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">{{ parcel.trackingNumber }}</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">{{ parcel.residentName }}</span>
+                  <span class="text-xs text-gray-600 text-center">{{ parcel.roomNumber }}</span>
                   <div class="flex items-center justify-between ml-2">
-                    <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                      Picked Up
-                    </span>
-                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                       <button class="p-1 rounded bg-gray-50 border border-gray-200 text-gray-400"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Item 2 -->
-                <div class="grid grid-cols-4 items-center px-2 py-1">
-                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH123654789</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">Suklita Mook</span>
-                  <span class="text-xs text-gray-600 text-center">1</span>
-                  <div class="flex items-center justify-between ml-2">
-                    <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                      Picked Up
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Item 3 -->
-                <div class="grid grid-cols-4 items-center px-2 py-1">
-                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH001928374</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">testkub</span>
-                  <span class="text-xs text-gray-600 text-center">532</span>
-                  <div class="flex items-center justify-between ml-2">
-                    <span class="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-yellow-100">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-                      Waiting
-                    </span>
-                  </div>
-                </div>
-                
-                 <!-- Item 4 -->
-                <div class="grid grid-cols-4 items-center px-2 py-1">
-                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH009182736</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">testkubza</span>
-                  <span class="text-xs text-gray-600 text-center">532</span>
-                  <div class="flex items-center justify-between ml-2">
-                    <span class="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-blue-100">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg>
-                      Notified
-                    </span>
-                  </div>
-                </div>
-
-                 <!-- Item 5 -->
-                <div class="grid grid-cols-4 items-center px-2 py-1">
-                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH198273645</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
-                  <span class="text-xs text-gray-600 text-center">13</span>
-                  <div class="flex items-center justify-between ml-2">
-                    <span class="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-red-100">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                      Overdue
+                    <span :class="['flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap border', getStatusClass(parcel.status)]">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path :d="getStatusIconPath(parcel.status)" />
+                      </svg>
+                      {{ parcel.status }}
                     </span>
                   </div>
                 </div>
