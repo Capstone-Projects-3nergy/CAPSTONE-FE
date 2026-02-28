@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
-import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
@@ -22,15 +21,19 @@ import { getItems } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const { parcel: parcels } = storeToRefs(parcelManager)
-
+const showHomePage = ref(false)
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
 
 const recentParcels = computed(() => {
-  if (!parcels.value) return []
+  if (!parcels || !parcels.value) return []
   return [...parcels.value]
-    .sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+    .sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.date || a.createdAt || 0)
+      const dateB = new Date(b.updatedAt || b.date || b.createdAt || 0)
+      return dateB - dateA
+    })
     .slice(0, 5)
 })
 

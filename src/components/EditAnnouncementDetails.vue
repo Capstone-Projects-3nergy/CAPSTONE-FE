@@ -8,6 +8,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { getAnnouncementById } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
+import ConfirmLogout from './ConfirmLogout.vue'
 // No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
@@ -278,15 +279,21 @@ const fallbackAnnouncements = [
 ]
 
 const fetchAnnouncementDetail = async () => {
-  const aid = Number(route.params.aid)
-  if (!aid) return
+  const aidParam = route.params.aid
+  const aid = aidParam ? Number(aidParam) : null
+  
+  console.log('Fetching details for aid:', aid)
+  if (!aid || isNaN(aid)) {
+    console.warn('Invalid or missing announcement ID')
+    return
+  }
 
   // 1) Find in Pinia first to show immediately
   const existingAnnouncements = [
-    ...announcementStore.announcements,
-    ...announcementStore.trash
+    ...(announcementStore.announcements || []),
+    ...(announcementStore.trash || [])
   ]
-  const found = existingAnnouncements.find((a) => a.id === aid)
+  const found = existingAnnouncements.find((a) => (a.id === aid || a.announcementId === aid))
 
   if (found) {
     Object.assign(announcementForm, found)
@@ -300,11 +307,22 @@ const fetchAnnouncementDetail = async () => {
     )
 
     if (data) {
-      Object.assign(announcementForm, data)
+      // Map API response to our form structure if needed
+      const mapped = {
+        id: data.id || data.announcementId,
+        title: data.title || '',
+        subTitle: data.subTitle || data.subtitle || '',
+        content: data.content || '',
+        tag: data.tag || data.category || 'General',
+        isPinned: data.isPinned || data.pinned || false,
+        status: data.status || 'Published'
+      }
+      Object.assign(announcementForm, mapped)
       if (data.coverImage) {
         imagePreview.value = data.coverImage
       }
     } else {
+      console.log('Using fallback data for aid:', aid)
       const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
       if (fallbackFound) {
         Object.assign(announcementForm, fallbackFound)
@@ -385,6 +403,12 @@ const handleSave = async () => {
   }
 }
 
+const returnLoginPage = () => {
+  showLogoutConfirm.value = true
+}
+const handleCancelLogout = () => {
+  showLogoutConfirm.value = false
+}
 const handleCancel = () => {
   router.back()
 }
@@ -968,8 +992,7 @@ const showProfileStaffPage = async function () {
 
     <ConfirmLogout
       v-if="showLogoutConfirm"
-      @confirm="returnLoginPage"
-      @cancel="showLogoutConfirm = false"
+      @cancelLogout="handleCancelLogout"
     />
   </div>
 </template>
