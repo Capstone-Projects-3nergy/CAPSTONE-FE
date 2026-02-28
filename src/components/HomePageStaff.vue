@@ -14,6 +14,7 @@ import WebHeader from './WebHeader.vue'
 import AlertPopUp from './../components/AlertPopUp.vue'
 import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
+import ButtonWeb from './ButtonWeb.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { storeToRefs } from 'pinia'
 const loginManager = useAuthManager()
@@ -941,9 +942,9 @@ const handlePrintSummary = () => {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
-                <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
-                  + Add
-                </button>
+                <ButtonWeb color="blue" label="Add" size="sm" @click="showParcelScannerPage">
+                  <template #icon>+</template>
+                </ButtonWeb>
               </div>
 
               <!-- Table Header -->
@@ -1026,7 +1027,7 @@ const handlePrintSummary = () => {
               </div>
 
               <div class="mt-6 border-t border-gray-100 pt-4 text-center">
-                <button class="text-xs font-medium text-blue-500 hover:text-blue-700">View all parcels →</button>
+                <button @click="showManageParcelPage" class="text-xs font-medium text-blue-500 hover:text-blue-700 cursor-pointer">View all parcels →</button>
               </div>
             </div>
 
@@ -1429,11 +1430,11 @@ const handlePrintSummary = () => {
                     </div>
                     <p class="text-[10px] text-gray-400 mb-3">Registered: 2026-02-18 00:39:51</p>
                     <div class="grid grid-cols-2 gap-2">
-                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1">
+                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Approve
                       </button>
-                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1">
+                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1 cursor-pointer">
                          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         Reject
                       </button>

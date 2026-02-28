@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     default: 'green'
   },
+  size: {
+    type: String,
+    default: 'md'
+  },
   disabled: {
     type: Boolean,
     default: false
@@ -45,6 +49,11 @@ const textClass = computed(() => {
   if (props.color === 'light-gray' || props.color === 'white-outline') return ''
   return 'text-white'
 })
+
+const sizeClass = computed(() => {
+  if (props.size === 'sm') return 'px-3 py-1.5 text-xs rounded-lg'
+  return 'px-5 py-2.5 rounded-xl'
+})
 </script>
 
 <template>
@@ -54,7 +63,8 @@ const textClass = computed(() => {
     :class="[
       bgClass,
       textClass,
-      'px-5 py-2.5 rounded-xl cursor-pointer flex items-center justify-center gap-2 transition-all duration-200 font-medium disabled:cursor-not-allowed'
+      sizeClass,
+      'cursor-pointer flex items-center justify-center gap-2 transition-all duration-200 font-medium disabled:cursor-not-allowed'
     ]"
   >
     <slot v-if="!loading" name="icon"></slot>
