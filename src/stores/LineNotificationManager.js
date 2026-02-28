@@ -41,7 +41,7 @@ class LineNotificationManager {
       })
       return response.data
     } catch (error) {
-      console.error(error.response?.data || error.message)
+      console.error('[LineNotification] sendToGroup Error:', error.response?.data?.message || error.message)
       throw error
     }
   }
@@ -63,7 +63,7 @@ class LineNotificationManager {
       })
       return response.data
     } catch (error) {
-      console.error(error.response?.data || error.message)
+      console.error('[LineNotification] notifyAdmin Error:', error.response?.data?.message || error.message)
       throw error
     }
   }
