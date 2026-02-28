@@ -6,10 +6,13 @@ import WebHeader from './WebHeader.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
+const announcementManager = useAnnouncementManager()
 const router = useRouter()
 const route = useRoute()
 const error = ref(false)
@@ -228,21 +231,47 @@ const submitAnnouncement = async () => {
   }
 
   try {
-    const announcementData = {
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
       title: title.value,
       subtitle: subtitle.value,
       category: category.value,
       content: content.value,
-      date: date.value,
-      image: imageFile.value ? imageFile.value.name : 'No image'
+      datePosted: date.value || new Date().toISOString(),
+      targetAudience: targetAudience.value,
+      isPinned: isPinned.value,
+      notifyEmail: notifyEmail.value,
+      status: 'Published'
     }
 
-    // Mock submission
-    console.log('Submitting announcement:', announcementData)
+    if (imageFile.value) {
+      body.coverImage = imageFile.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const savedAnnouncement = await addAnnouncementWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      body,
+      router
+    )
+
+    if (!savedAnnouncement) {
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 10000)
+      return
+    }
+
+    announcementManager.addAnnouncement(savedAnnouncement)
 
     // Send Line notification and fetch updated data
     try {
-      await notificationManager.notifyAnnouncementCreated(announcementData)
+      await notificationManager.notifyAnnouncementCreated(body)
     } catch (lineError) {
       console.error('Notification failed:', lineError)
     }
@@ -261,7 +290,7 @@ const submitAnnouncement = async () => {
   }
 }
 
-const saveDraft = () => {
+const saveDraft = async () => {
   if (!isFormValid.value) {
     error.value = true
     setTimeout(() => {
@@ -271,11 +300,43 @@ const saveDraft = () => {
   }
 
   try {
-    // Mock draft saving
-    console.log('Saving draft:', {
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
       title: title.value,
+      subtitle: subtitle.value,
+      category: category.value,
+      content: content.value,
+      datePosted: date.value || new Date().toISOString(),
+      targetAudience: targetAudience.value,
+      isPinned: isPinned.value,
+      notifyEmail: notifyEmail.value,
       status: 'Draft'
-    })
+    }
+
+    if (imageFile.value) {
+      body.coverImage = imageFile.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const savedAnnouncement = await addAnnouncementWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      body,
+      router
+    )
+
+    if (!savedAnnouncement) {
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 10000)
+      return
+    }
+
+    announcementManager.addAnnouncement(savedAnnouncement)
     
     addSuccess.value = true
     setTimeout(() => {

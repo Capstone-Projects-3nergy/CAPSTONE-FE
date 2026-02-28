@@ -660,6 +660,76 @@ async function deleteAnnouncement(url, id, router) {
   return await deleteItemById(url, id, router)
 }
 
+async function addAnnouncementWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  const { coverImage, ...announcementData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(announcementData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (coverImage instanceof File || coverImage instanceof Blob) {
+    formData.append('coverImage', coverImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'POST',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('addAnnouncementWithFile error:', err)
+    return null
+  }
+}
+
+async function editAnnouncementWithFile(url, id, payload, router) {
+  const formData = new FormData()
+
+  const { coverImage, ...announcementData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(announcementData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (coverImage instanceof File || coverImage instanceof Blob) {
+    formData.append('coverImage', coverImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      `${url}/${id}`,
+      () => ({
+        method: 'PUT',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('editAnnouncementWithFile error:', err)
+    return null
+  }
+}
+
 // Dashboard
 async function getDashboardData(url, router) {
   return await getItems(url, router)
@@ -712,6 +782,8 @@ export {
   addAnnouncement,
   editAnnouncement,
   deleteAnnouncement,
+  addAnnouncementWithFile,
+  editAnnouncementWithFile,
   getDashboardData
 }
 

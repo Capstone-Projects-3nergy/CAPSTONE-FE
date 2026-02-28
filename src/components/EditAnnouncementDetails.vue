@@ -6,7 +6,7 @@ import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { getAnnouncementById } from '@/utils/fetchUtils.js'
+import { getAnnouncementById, editAnnouncementWithFile } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 // No external icon library available, using inline SVGs
@@ -378,15 +378,64 @@ const handleSave = async () => {
   
   try {
     isSubmitting.value = true
-    // Simulate API call
-    await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Mock 10% chance of failure for testing
-        // if (Math.random() < 0.1) reject(new Error('API Failure'))
-        resolve()
-      }, 10000)
-    })
     
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      title: announcementForm.title,
+      subtitle: announcementForm.subtitle,
+      category: announcementForm.category,
+      content: announcementForm.content,
+      datePosted: announcementForm.datePosted,
+      targetAudience: announcementForm.targetAudience,
+      isPinned: announcementForm.isPinned,
+      notifyEmail: announcementForm.notifyEmail,
+      status: announcementForm.status
+    }
+
+    if (coverImage.value) {
+      body.coverImage = coverImage.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const aidParam = route.params.aid
+    const aid = aidParam ? Number(aidParam) : null
+    
+    if (!aid || isNaN(aid)) {
+      isSubmitting.value = false
+      error.value = true
+      return
+    }
+
+    const updated = await editAnnouncementWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      aid,
+      body,
+      router
+    )
+
+    if (!updated) {
+      isSubmitting.value = false
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 10000)
+      return
+    }
+
+    // Update the store with the new data
+    announcementStore.editAnnouncement(aid, updated)
+
+    // Save initial state after update
+    initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+    if (updated.coverImage) {
+        initialForm.value.coverImage = updated.coverImage
+        imagePreview.value = updated.coverImage
+    }
+
     isSubmitting.value = false
     editSuccess.value = true
     setTimeout(() => {
