@@ -153,10 +153,10 @@ const updateParcelChart = (interval) => {
   parcelChartInstance.data.datasets[2].data = data.overdue;
   
   // Update bar thickness based on interval
-  let thickness = 40;
-  if (interval === 'monthly') thickness = 8;
-  else if (interval === 'daily') thickness = 15;
-  else thickness = 25;
+  let thickness = 28;
+  if (interval === 'monthly') thickness = 10;
+  else if (interval === 'daily') thickness = 18;
+  else thickness = 24;
 
   parcelChartInstance.data.datasets.forEach(ds => {
     ds.barThickness = thickness;
@@ -242,49 +242,78 @@ onMounted(async () => {
         {
           label: 'Received',
           data: chartData.value.weekly.received,
-          backgroundColor: 'rgba(59, 130, 246, 0.9)', // blue-500
-          borderRadius: 4,
-          barThickness: 25
+          backgroundColor: 'rgba(59, 130, 246, 0.85)', // blue-500
+          hoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+          borderRadius: 0,
+          borderSkipped: false,
+          barThickness: 24
         },
         {
           label: 'Picked Up',
           data: chartData.value.weekly.pickedUp,
-          backgroundColor: 'rgba(16, 185, 129, 0.9)', // emerald-500
-          borderRadius: 4,
-          barThickness: 25
+          backgroundColor: 'rgba(16, 185, 129, 0.85)', // emerald-500
+          hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+          borderRadius: 0,
+          borderSkipped: false,
+          barThickness: 24
         },
         {
           label: 'Overdue',
           data: chartData.value.weekly.overdue,
-          backgroundColor: 'rgba(239, 68, 68, 0.9)', // red-500
-          borderRadius: 4,
-          barThickness: 25
+          backgroundColor: 'rgba(239, 68, 68, 0.85)', // red-500
+          hoverBackgroundColor: 'rgba(239, 68, 68, 1)',
+          borderRadius: 0,
+          borderSkipped: false,
+          barThickness: 24
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
-          mode: 'index',
-          intersect: false,
+          enabled: true,
+          backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+          titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
+          bodyFont: { family: "'Inter', sans-serif", size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          boxPadding: 6,
+          usePointStyle: true,
           callbacks: {
-            label: (context) => ` ${context.dataset.label}: ${context.parsed.y} parcels`
+            title: (tooltipItems) => {
+              const item = tooltipItems[0];
+              const intervalText = activityInterval.value === 'daily' ? 'Day' 
+                                 : activityInterval.value === 'weekly' ? 'Week' 
+                                 : 'Month';
+              return `${intervalText}: ${item.label}`;
+            },
+            label: (context) => ` ${context.dataset.label}: ${context.parsed.y || 0} parcels`
           }
         }
       },
       scales: {
         x: { 
           stacked: false,
-          grid: { display: false } 
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' }
         },
         y: {
           stacked: false,
           beginAtZero: true,
-          grid: { borderDash: [4, 4] },
-          ticks: { stepSize: 20 }
+          grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
+          ticks: { 
+            font: { family: "'Inter', sans-serif", size: 11 }, 
+            color: '#9CA3AF', 
+            padding: 10,
+            stepSize: 20 
+          }
         }
       }
     }
@@ -304,31 +333,62 @@ onMounted(async () => {
               const data = context.dataset.data;
               const max = Math.max(...data);
               return context.parsed.y === max
-                ? 'rgba(99, 102, 241, 0.9)' // Indigo peak
+                ? 'rgba(99, 102, 241, 0.85)' // Indigo peak
                 : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
             },
-            borderRadius: 6,
-            barThickness: 40
+            hoverBackgroundColor: (context) => {
+              const data = context.dataset.data;
+              const max = Math.max(...data);
+              return context.parsed.y === max
+                ? 'rgba(99, 102, 241, 1)' 
+                : 'rgba(129, 140, 248, 0.6)' 
+            },
+            borderRadius: 0,
+            borderSkipped: false,
+            barThickness: 36
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+            titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
+            bodyFont: { family: "'Inter', sans-serif", size: 12 },
+            padding: 12,
+            cornerRadius: 8,
+            boxPadding: 6,
+            usePointStyle: true,
             callbacks: {
-              label: (context) => `${context.parsed.y} residents`
+              title: (tooltipItems) => {
+                 return `Month: ${tooltipItems[0].label}`;
+              },
+              label: (context) => ` ${context.parsed.y || 0} New Residents`
             }
           }
         },
         scales: {
-          x: { grid: { display: false } },
+          x: { 
+            grid: { display: false, drawBorder: false },
+            ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' }
+          },
           y: {
             beginAtZero: true,
-            grid: { borderDash: [4, 4] },
-            ticks: { stepSize: 5 }
+            grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
+            ticks: { 
+              font: { family: "'Inter', sans-serif", size: 11 }, 
+              color: '#9CA3AF',
+              padding: 10,
+              stepSize: 5 
+            }
           }
         }
       }
