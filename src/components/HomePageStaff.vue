@@ -18,8 +18,12 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { storeToRefs } from 'pinia'
 import { getItems } from '@/utils/fetchUtils'
+import { useDashboardManager } from '@/stores/DashboardManager'
+
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const dashboardStore = useDashboardManager()
+const { chartData, stats } = storeToRefs(dashboardStore)
 const { parcel: parcels } = storeToRefs(parcelManager)
 const showHomePage = ref(false)
 const notificationStore = useNotificationManager()
@@ -138,32 +142,11 @@ onUnmounted(() => {
 const activityInterval = ref('daily');
 let parcelChartInstance = null;
 
-const chartData = {
-  daily: {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    received: [12, 19, 15, 8, 22, 14, 10],
-    pickedUp: [10, 15, 12, 6, 18, 11, 8],
-    overdue: [2, 4, 3, 2, 4, 3, 2]
-  },
-  weekly: {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    received: [45, 52, 38, 65],
-    pickedUp: [40, 48, 32, 58],
-    overdue: [5, 4, 6, 7]
-  },
-  monthly: {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    received: [120, 150, 180, 140, 210, 190, 230, 210, 250, 220, 280, 310],
-    pickedUp: [110, 140, 170, 130, 190, 180, 210, 195, 230, 210, 260, 290],
-    overdue: [10, 10, 10, 10, 20, 10, 20, 15, 20, 10, 20, 20]
-  }
-};
-
 const updateParcelChart = (interval) => {
   activityInterval.value = interval;
   if (!parcelChartInstance) return;
 
-  const data = chartData[interval];
+  const data = chartData.value[interval];
   parcelChartInstance.data.labels = data.labels;
   parcelChartInstance.data.datasets[0].data = data.received;
   parcelChartInstance.data.datasets[1].data = data.pickedUp;
@@ -220,6 +203,17 @@ onMounted(async () => {
     router
   )
 
+  const dataUser = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+    router
+  )
+
+  const dataAnnouncement = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    router
+  ).catch(() => [])
+
+  let parcelDataList = []
   if (data) {
     const mapped = data.map((p) => ({
       id: p.parcelId,
@@ -231,34 +225,37 @@ onMounted(async () => {
     }))
 
     mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
-
     parcelManager.setParcels(mapped)
+    parcelDataList = mapped
   }
+
+  // NOTE: Temporarily disabled real-data fetch to pull raw/mock data as requested
+  // dashboardStore.calculateDashboardData(parcelDataList, dataUser || [], dataAnnouncement || [])
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: chartData.weekly.labels,
+      labels: chartData.value.weekly.labels,
       datasets: [
         {
           label: 'Received',
-          data: chartData.weekly.received,
+          data: chartData.value.weekly.received,
           backgroundColor: 'rgba(59, 130, 246, 0.9)', // blue-500
           borderRadius: 4,
           barThickness: 25
         },
         {
           label: 'Picked Up',
-          data: chartData.weekly.pickedUp,
+          data: chartData.value.weekly.pickedUp,
           backgroundColor: 'rgba(16, 185, 129, 0.9)', // emerald-500
           borderRadius: 4,
           barThickness: 25
         },
         {
           label: 'Overdue',
-          data: chartData.weekly.overdue,
+          data: chartData.value.weekly.overdue,
           backgroundColor: 'rgba(239, 68, 68, 0.9)', // red-500
           borderRadius: 4,
           barThickness: 25
@@ -733,8 +730,8 @@ const handlePrintSummary = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">124</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels (Month)</p>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels</p>
               </div>
             </div>
 
@@ -755,7 +752,7 @@ const handlePrintSummary = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">38</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Awaiting Pickup</p>
               </div>
             </div>
@@ -777,7 +774,7 @@ const handlePrintSummary = () => {
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">5</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Overdue (>7 days)</p>
               </div>
             </div>
@@ -789,11 +786,11 @@ const handlePrintSummary = () => {
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-500 text-xs font-bold">
-                  69% rate
+                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% rate
                 </span>
               </div>
               <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">86</h3>
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
                 <p class="text-gray-500 text-sm font-medium mt-1">Picked Up</p>
               </div>
             </div>
@@ -958,7 +955,7 @@ const handlePrintSummary = () => {
               <div class="flex justify-center mb-8 relative">
                 <!-- Placeholder for Donut Chart -->
                 <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-l-red-500 flex items-center justify-center flex-col">
-                  <span class="text-3xl font-black text-gray-900 leading-none">124</span>
+                  <span class="text-3xl font-black text-gray-900 leading-none">{{ stats.totalParcels }}</span>
                   <span class="text-xs text-gray-500">Total</span>
                 </div>
               </div>
@@ -970,8 +967,8 @@ const handlePrintSummary = () => {
                     <span class="text-sm text-gray-600">Picked Up</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">86</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">69%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ stats.pickedUpParcels }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}%</span>
                   </div>
                 </div>
                 <div class="flex items-center justify-between">
@@ -980,8 +977,8 @@ const handlePrintSummary = () => {
                     <span class="text-sm text-gray-600">Awaiting</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">38</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">27%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ stats.awaitingParcels }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
                   </div>
                 </div>
                 <div class="flex items-center justify-between">
@@ -990,8 +987,8 @@ const handlePrintSummary = () => {
                     <span class="text-sm text-gray-600">Overdue</span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">5</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">4%</span>
+                    <span class="text-sm font-bold text-gray-900">{{ stats.overdueParcels }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.overdueParcels / stats.totalParcels) * 100) : 0 }}%</span>
                   </div>
                 </div>
               </div>
@@ -1157,7 +1154,7 @@ const handlePrintSummary = () => {
                   <span class="text-emerald-500 text-xs font-bold">Verified</span>
                 </div>
                 <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">1</h3>
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.activeResidents }}</h3>
                   <p class="text-gray-500 text-sm font-medium mt-1">Active Residents</p>
                 </div>
               </div>
@@ -1171,7 +1168,7 @@ const handlePrintSummary = () => {
                   <span class="text-orange-400 text-xs font-bold">Action needed</span>
                 </div>
                 <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">2</h3>
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.pendingResidents }}</h3>
                   <p class="text-gray-500 text-sm font-medium mt-1">Pending Approval</p>
                 </div>
               </div>
@@ -1184,7 +1181,7 @@ const handlePrintSummary = () => {
                   </div>
                 </div>
                 <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">1</h3>
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.inactiveResidents }}</h3>
                   <p class="text-gray-500 text-sm font-medium mt-1">Inactive Residents</p>
                 </div>
               </div>
@@ -1198,7 +1195,7 @@ const handlePrintSummary = () => {
                   <span class="text-gray-400 text-xs font-bold">of 20 rooms</span>
                 </div>
                 <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">4</h3>
+                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalResidents }}</h3>
                   <p class="text-gray-500 text-sm font-medium mt-1">Total Registered</p>
                 </div>
               </div>
@@ -1243,7 +1240,7 @@ const handlePrintSummary = () => {
                 
                 <div class="flex justify-center mb-8 relative">
                   <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-r-orange-500 flex items-center justify-center flex-col">
-                    <span class="text-3xl font-black text-gray-900 leading-none">4</span>
+                    <span class="text-3xl font-black text-gray-900 leading-none">{{ stats.totalResidents }}</span>
                     <span class="text-xs text-gray-500">Residents</span>
                   </div>
                 </div>
@@ -1255,8 +1252,8 @@ const handlePrintSummary = () => {
                       <span class="text-sm text-gray-600">Active</span>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">1</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">25%</span>
+                      <span class="text-sm font-bold text-gray-900">{{ stats.activeResidents }}</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.activeResidents / stats.totalResidents) * 100) : 0 }}%</span>
                     </div>
                   </div>
                   <div class="flex items-center justify-between">
@@ -1265,8 +1262,8 @@ const handlePrintSummary = () => {
                       <span class="text-sm text-gray-600">Pending</span>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">2</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">50%</span>
+                      <span class="text-sm font-bold text-gray-900">{{ stats.pendingResidents }}</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.pendingResidents / stats.totalResidents) * 100) : 0 }}%</span>
                     </div>
                   </div>
                   <div class="flex items-center justify-between">
@@ -1275,8 +1272,8 @@ const handlePrintSummary = () => {
                       <span class="text-sm text-gray-600">Inactive</span>
                     </div>
                     <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">1</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">25%</span>
+                      <span class="text-sm font-bold text-gray-900">{{ stats.inactiveResidents }}</span>
+                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.inactiveResidents / stats.totalResidents) * 100) : 0 }}%</span>
                     </div>
                   </div>
                 </div>
