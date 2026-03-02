@@ -29,7 +29,7 @@ const date = ref('')
 
 const targetAudience = ref('All')
 const isPinned = ref(false)
-const notifyEmail = ref(false)
+const notify = ref(true)
 
 const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 
@@ -257,7 +257,7 @@ const submitAnnouncement = async () => {
       datePosted: date.value || new Date().toISOString(),
       targetAudience: targetAudience.value,
       isPinned: isPinned.value,
-      notifyEmail: notifyEmail.value,
+      notify: notify.value,
       status: 'Published'
     }
 
@@ -340,7 +340,7 @@ const saveDraft = async () => {
       datePosted: date.value || new Date().toISOString(),
       targetAudience: targetAudience.value,
       isPinned: isPinned.value,
-      notifyEmail: notifyEmail.value,
+      notify: notify.value,
       status: 'Draft'
     }
 
@@ -908,15 +908,15 @@ const returnLoginPage = async () => {
                   <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
                      <div class="flex items-center gap-4">
                        <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                        </div>
                        <div>
-                         <h4 class="font-semibold text-gray-900 text-sm">Email Notification</h4>
-                         <p class="text-xs text-gray-500 mt-0.5">Send email to notify residents immediately</p>
+                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
                        </div>
                      </div>
-                     <button @click="notifyEmail = !notifyEmail" :class="notifyEmail ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="notifyEmail ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="notify = !notify" :class="notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>

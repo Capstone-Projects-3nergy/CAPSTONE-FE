@@ -216,7 +216,7 @@ const announcementForm = reactive({
   content: '',
   targetAudience: 'All',
   isPinned: false,
-  notifyEmail: false,
+  notify: true,
   coverImage: null
 })
 
@@ -351,7 +351,7 @@ const fetchAnnouncementDetail = async () => {
         status: data.status || 'Published',
         datePosted: data.datePosted || '',
         targetAudience: data.targetAudience || 'All',
-        notifyEmail: data.notifyEmail || false
+        notify: data.notify || false
       }
       Object.assign(announcementForm, mapped)
       if (data.coverImage) {
@@ -441,7 +441,7 @@ const handleSave = async () => {
       datePosted: announcementForm.datePosted,
       targetAudience: announcementForm.targetAudience,
       isPinned: announcementForm.isPinned,
-      notifyEmail: announcementForm.notifyEmail,
+      notify: announcementForm.notify,
       status: announcementForm.status
     }
 
@@ -1039,7 +1039,7 @@ const showProfileStaffPage = async function () {
                       </div>
                     </label> -->
                   </div>
-                </div>
+                  </div>
 
                 <!-- Toggles -->
                 <div class="space-y-3 pt-2">
@@ -1055,6 +1055,21 @@ const showProfileStaffPage = async function () {
                      </div>
                      <button @click="announcementForm.isPinned = !announcementForm.isPinned" :class="announcementForm.isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
                        <span :class="announcementForm.isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
+
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
+                       </div>
+                     </div>
+                     <button @click="announcementForm.notify = !announcementForm.notify" :class="announcementForm.notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="announcementForm.notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>
