@@ -1054,7 +1054,7 @@ const showFileSizeError = () => {
           :phoneNumber="form.phoneNumber"
           :editResidentDetail="true"
           :editProfile="false"
-          :showLineId="false"
+          :showLineId="true"
           @cancel="cancelEdit"
           @success="showProfileSuccess"
           @error="showProfileError"
