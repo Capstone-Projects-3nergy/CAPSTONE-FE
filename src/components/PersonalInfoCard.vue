@@ -6,6 +6,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { getItems } from '@/utils/fetchUtils'
+import { LINE_CONFIG } from '@/lineApi/line.config.js'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -361,11 +362,19 @@ const handleLineAction = () => {
 }
 
 const reconnectLine = () => {
-  const baseURL = import.meta.env.VITE_BASE_URL
-  const userId = loginManager.user?.id
+  const clientId = LINE_CONFIG.CHANNEL_ID
+  const redirectUri = LINE_CONFIG.REDIRECT_URI || `${window.location.origin}/callback`
+  const state = Math.random().toString(36).substring(7)
 
-  // ส่ง userId ไปด้วยเพื่อให้ Backend รู้ว่าต้องผูกบัญชี LINE นี้เข้ากับ User คนไหน
-  window.location.href = `${baseURL}/api/auth/line?userId=${userId}`
+  const url =
+    `https://access.line.me/oauth2/v2.1/authorize` +
+    `?response_type=code` +
+    `&client_id=${clientId}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&state=${state}` +
+    `&scope=profile%20openid`
+
+  window.location.href = url
 }
 </script>
 <template>
