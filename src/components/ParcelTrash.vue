@@ -998,9 +998,9 @@ const closePopUp = (operate) => {
               height="24"
               viewBox="0 0 24 24"
             >
-              <g fill="#185DC0">
+              <g fill="currentColor">
                 <path
-                  fill="#185DC0"
+                  fill="currentColor"
                   d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                 />
                 <path
@@ -1019,9 +1019,9 @@ const closePopUp = (operate) => {
               height="24"
               viewBox="0 0 24 24"
             >
-              <g fill="#185DC0">
+              <g fill="currentColor">
                 <path
-                  fill="#185DC0"
+                  fill="currentColor"
                   d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                 />
                 <path
