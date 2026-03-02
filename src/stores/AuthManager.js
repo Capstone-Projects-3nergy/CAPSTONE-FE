@@ -52,6 +52,7 @@ export const useAuthManager = defineStore('authManager', () => {
         email: data.email,
         fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
         role: data.role,
+        lineId: data.lineId || null,
         accessToken: idToken,
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
@@ -256,6 +257,7 @@ export const useAuthManager = defineStore('authManager', () => {
         email: data.email,
         fullName,
         role: data.role,
+        lineId: data.lineId || null,
         accessToken: idToken,
         ...(data.role === 'STAFF' ? { position: data.position ?? null } : {}),
         ...(data.role === 'RESIDENT'
@@ -478,6 +480,11 @@ export const useAuthManager = defineStore('authManager', () => {
     // avatar (ถ้ามี)
     if (updatedProfile.avatar) {
       user.value.avatar = updatedProfile.avatar
+    }
+
+    // lineId (ถ้ามี)
+    if ('lineId' in updatedProfile) {
+      user.value.lineId = updatedProfile.lineId
     }
   }
 

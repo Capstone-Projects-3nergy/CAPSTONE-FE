@@ -340,6 +340,33 @@ const userRoleLabel = computed(() => {
   if (props.residentDetail) return 'Resident Name'
   return loginManager.user?.role === 'STAFF' ? 'Staff Name' : 'Resident Name'
 })
+
+const effectiveLineId = computed(() => {
+  if (props.useCurrentProfile) {
+    // ใช้จาก Store ถ้าเป็นโปรไฟล์ตัวเอง
+    return loginManager.user?.lineId || profileManager.currentProfile?.lineId || null
+  }
+  // ใช้จาก Props หรือ Route User
+  return props.lineId || routeUser.value?.lineId || null
+})
+
+const handleLineAction = () => {
+  if (effectiveLineId.value) {
+    // กรณีที่เชื่อมต่อแล้ว: เปิดโปรไฟล์ LINE หรือแอดเพื่อน
+    window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
+  } else {
+    // กรณีที่ยังไม่ได้เชื่อมต่อ: ไปยังหน้า LINE Login ของ Backend เพื่อผูกบัญชี
+    reconnectLine()
+  }
+}
+
+const reconnectLine = () => {
+  const baseURL = import.meta.env.VITE_BASE_URL
+  const userId = loginManager.user?.id
+
+  // ส่ง userId ไปด้วยเพื่อให้ Backend รู้ว่าต้องผูกบัญชี LINE นี้เข้ากับ User คนไหน
+  window.location.href = `${baseURL}/api/auth/line?userId=${userId}`
+}
 </script>
 <template>
   <div class="w-full mx-auto px-4">
@@ -621,31 +648,48 @@ const userRoleLabel = computed(() => {
                   <div class="relative">
                     <div :class="[
                       'w-4 h-4 rounded-full',
-                      lineId ? 'bg-green-500' : 'bg-gray-300'
+                      effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
                     ]"></div>
-                    <div v-if="lineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
+                    <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
                   </div>
                   <div>
                     <span class="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
                     <span :class="[
                       'text-xl font-black transition-colors duration-300',
-                      lineId ? 'text-green-600' : 'text-gray-500'
+                      effectiveLineId ? 'text-green-600' : 'text-gray-500'
                     ]">
-                      {{ lineId ? 'Connected' : 'Not Connected' }}
+                      {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
                     </span>
                   </div>
                 </div>
 
-                <!-- Action Button -->
-                <button
-                  @click="window.open(`https://line.me/ti/p/~${lineId || ''}`, '_blank')"
-                  class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
-                >
-                  <span class="text-base cursor-pointer">{{ lineId ? 'Access Account' : 'Connect Now' }}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:translate-x-1.5 transition-transform duration-300">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
+                <!-- Action Buttons Area -->
+                <div class="flex flex-col items-center gap-3">
+                  <button
+                    @click="handleLineAction"
+                    class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
+                  >
+                    <span class="text-base cursor-pointer">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:translate-x-1.5 transition-transform duration-300">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                  
+                  <!-- Secondary Action: Switch Account -->
+                  <button 
+                    v-if="effectiveLineId"
+                    @click="reconnectLine"
+                    class="text-xs font-bold text-gray-400 hover:text-[#00b900] transition-colors duration-300 flex items-center gap-1.5 group/switch cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover/switch:rotate-180 transition-transform duration-500">
+                      <path d="M21 2v6h-6"></path>
+                      <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                      <path d="M3 22v-6h6"></path>
+                      <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
+                    </svg>
+                    Switch Account
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -846,7 +890,7 @@ const userRoleLabel = computed(() => {
 
               <div>
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Line </label>
-                <div v-if="lineId" class="flex items-center h-[58px]">
+                <div v-if="effectiveLineId" class="flex items-center h-[58px]">
                   <div
                     class="flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 bg-green-50 text-green-700 hover:bg-green-100 border border-green-100 font-bold max-w-fit"
                   >
