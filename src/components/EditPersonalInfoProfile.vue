@@ -58,7 +58,8 @@ const props = defineProps({
   editProfile: { type: Boolean, default: true },
   editResidentDetail: { type: Boolean, required: false },
   useCurrentProfile: { type: Boolean, default: true },
-  status: { type: String, default: '' }
+  status: { type: String, default: '' },
+  showLineId: { type: Boolean, default: true }
 })
 const newAvatar = ref(null)
 const loading = ref(false)
@@ -1923,7 +1924,7 @@ const userRoleLabel = computed(() => {
                   class="max-w-md"
                 />
               </div>
-              <div class="flex flex-col">
+              <div class="flex flex-col" v-if="showLineId">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Line ID
                 </label>
