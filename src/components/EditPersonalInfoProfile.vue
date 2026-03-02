@@ -1924,14 +1924,18 @@ const userRoleLabel = computed(() => {
                   class="max-w-md"
                 />
               </div>
-              <div class="flex flex-col" v-if="showLineId">
+              <div class="flex flex-col">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Line ID
                 </label>
                 <input
+                  :disabled="!showLineId"
                   v-model="form.lineId"
                   placeholder="Enter Line ID"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  :class="[
+                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    !showLineId ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
+                  ]"
                 />
               </div>
 
