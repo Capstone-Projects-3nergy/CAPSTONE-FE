@@ -1,47 +1,22 @@
 // src/stores/LineNotificationManager.js
-import axios from 'axios'
+import { sendLineNotification } from '@/utils/fetchUtils.js'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
-import { useAuthManager } from '@/stores/AuthManager.js'
 
 class LineNotificationManager {
-  /**
-   * Helper to get headers with Auth token
-   */
-  _getHeaders() {
-    const authManager = useAuthManager()
-    const token = authManager.user?.accessToken
-    return {
-      Authorization: token ? `Bearer ${token}` : '',
-      'Content-Type': 'application/json'
-    }
-  }
-
-  /**
-   * Helper to get base URL
-   */
-  _getBaseURL() {
-    return import.meta.env.VITE_BASE_URL || ''
-  }
-
   /**
    * ขอให้ backend ส่งข้อความเข้า LINE Group
    * @param {string} groupId
    * @param {string} message
    */
   async sendToGroup(groupId, message) {
-    const baseURL = this._getBaseURL()
-    const url = `${baseURL}${LINE_CONFIG.API_URL}`
-    
     try {
-      const response = await axios.post(url, {
-        groupId,
-        message
-      }, {
-        headers: this._getHeaders()
-      })
-      return response.data
+      const payload = { groupId, message }
+      // ใช้ API_URL จาก config หรือ default
+      const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.API_URL}`
+      const response = await sendLineNotification(payload, null, url)
+      return response
     } catch (error) {
-      console.error('[LineNotification] sendToGroup Error:', error.response?.data?.message || error.message)
+      console.error('[LineNotification] sendToGroup Error:', error.message)
       throw error
     }
   }
@@ -51,19 +26,13 @@ class LineNotificationManager {
    * @param {string} message 
    */
   async notifyAdmin(message) {
-    const baseURL = this._getBaseURL()
-    const url = `${baseURL}/api/notify-line`
-    
     try {
-      // ให้ Frontend ส่ง event เพื่อไปเรียกใช้ Backend API
-      const response = await axios.post(url, {
-        message
-      }, {
-        headers: this._getHeaders()
-      })
-      return response.data
+      const payload = { message }
+      const url = `${import.meta.env.VITE_BASE_URL}/api/notify-line`
+      const response = await sendLineNotification(payload, null, url)
+      return response
     } catch (error) {
-      console.error('[LineNotification] notifyAdmin Error:', error.response?.data?.message || error.message)
+      console.error('[LineNotification] notifyAdmin Error:', error.message)
       throw error
     }
   }
@@ -86,6 +55,12 @@ class LineNotificationManager {
     return this.notifyAdmin(message)
   }
 
+  /**
+   * Notify through generic event (handled by backend)
+   */
+  async notifyAnnouncementCreated(announcement) {
+    return this.notifyNewAnnouncement(announcement)
+  }
 }
 
 export default new LineNotificationManager()

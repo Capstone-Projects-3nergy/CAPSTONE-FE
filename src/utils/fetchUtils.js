@@ -735,6 +735,83 @@ async function getDashboardData(url, router) {
   return await getItems(url, router)
 }
 
+// LINE API Helpers
+async function sendLineNotification(payload, router, customUrl = null) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    const url = customUrl || `${import.meta.env.VITE_BASE_URL}/api/line/send`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('sendLineNotification error:', error)
+    return null
+  }
+}
+
+async function unlinkLineAccount(router) {
+  try {
+    const options = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(
+      `${import.meta.env.VITE_BASE_URL}/api/line/unlink`,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('unlinkLineAccount error:', error)
+    return false
+  }
+}
+
+async function linkLineAccount(code, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ code })
+    }
+
+    const res = await fetchWithAuth(
+      `${import.meta.env.VITE_BASE_URL}/api/line/link`,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('linkLineAccount error:', error)
+    return null
+  }
+}
+
 // ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
 // const members = await getMembers('/api/members', router)
 // userStore.setMembers(members)
@@ -784,6 +861,9 @@ export {
   deleteAnnouncement,
   addAnnouncementWithFile,
   editAnnouncementWithFile,
-  getDashboardData
+  getDashboardData,
+  sendLineNotification,
+  unlinkLineAccount,
+  linkLineAccount
 }
 

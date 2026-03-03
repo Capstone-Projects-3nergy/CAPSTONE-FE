@@ -30,6 +30,8 @@ import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 import AddMember from '@/components/AddMember.vue'
 import NotificationPage from '@/components/NotificationPage.vue'
 import ParcelResidentVerification from '@/components/ParcelResidentVerification.vue'
+import LineCallback from '@/components/LineCallback.vue'
+
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -38,6 +40,11 @@ const routes = [
   {
     path: '/',
     redirect: '/loginpage'
+  },
+  {
+    path: '/callback',
+    name: 'linecallback',
+    component: LineCallback
   },
   {
     path: '/loginpage',

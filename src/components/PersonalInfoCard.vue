@@ -5,7 +5,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 const emit = defineEmits([
   'confirmAccount',
@@ -376,6 +376,20 @@ const reconnectLine = () => {
 
   window.location.href = url
 }
+
+/* 
+const handleUnlink = async () => {
+  if (confirm('Are you sure you want to disconnect your LINE account?')) {
+    const success = await unlinkLineAccount(router)
+    if (success) {
+      // Refresh user profile or redirect
+      window.location.reload()
+    } else {
+      alert('Failed to disconnect LINE account. Please try again.')
+    }
+  }
+}
+*/
 </script>
 <template>
   <div class="w-full mx-auto px-4">
@@ -688,20 +702,34 @@ const reconnectLine = () => {
                     </svg>
                   </button>
                   
-                  <!-- Secondary Action: Switch Account -->
-                  <button 
-                    v-if="effectiveLineId"
-                    @click="reconnectLine"
-                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100 mt-1"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
-                      <path d="M21 2v6h-6"></path>
-                      <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                      <path d="M3 22v-6h6"></path>
-                      <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
-                    </svg>
-                    <span>Switch Account</span>
-                  </button>
+                  <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
+                    <!-- Secondary Action: Switch Account -->
+                    <button 
+                      @click="reconnectLine"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
+                        <path d="M21 2v6h-6"></path>
+                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                        <path d="M3 22v-6h6"></path>
+                        <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
+                      </svg>
+                      <span>Switch Account</span>
+                    </button>
+
+                    <!-- Unlink Action (Commented out for future use)
+                    <button 
+                      @click="handleUnlink"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/unlink:scale-110 transition-transform duration-300">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                      </svg>
+                      <span>Disconnect</span>
+                    </button>
+                    -->
+                  </div>
                 </div>
               </div>
             </div>
