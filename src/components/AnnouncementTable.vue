@@ -108,7 +108,7 @@ const getCategoryIcon = (category) => {
           <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#0E4B90] transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
-          <p class="text-sm text-gray-600 mb-6 line-clamp-3 leading-relaxed flex-grow">
+          <p class="text-sm text-gray-600 mb-6 leading-relaxed flex-grow">
             {{ item.subtitle ? item.subtitle.replace(/^Draft\s*-\s*/i, '') : '' }}
           </p>
 
@@ -216,18 +216,22 @@ const getCategoryIcon = (category) => {
                     <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#0E4B90] rounded-full flex items-center justify-center font-bold text-sm">
                       SP
                     </div>
-                    <div>
-                      <span class="md:hidden font-semibold text-[#0E4B90] block mb-1 text-xs">Title:</span>
-                      <div class="flex items-center gap-2 mb-1">
-                        <div class="text-sm font-bold text-gray-900 line-clamp-1">{{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}</div>
+                    <div class="flex-grow">
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="md:hidden font-semibold text-[#0E4B90] text-xs shrink-0">Title:</span>
+                        <div class="text-sm font-bold text-gray-900 md:line-clamp-1 flex-grow">
+                          {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
+                        </div>
                         <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                           </svg>
                         </span>
                       </div>
-                      <div class="text-xs text-gray-500 line-clamp-1">
-                        {{ item.subtitle ? item.subtitle.replace(/^Draft\s*-\s*/i, '') : '' }}
+                      <div class="mt-1 md:mt-0">
+                        <div class="text-xs text-gray-500 leading-relaxed min-w-0 break-words">
+                          {{ item.subtitle ? item.subtitle.replace(/^Draft\s*-\s*/i, '') : '' }}
+                        </div>
                       </div>
                     </div>
                   </div>

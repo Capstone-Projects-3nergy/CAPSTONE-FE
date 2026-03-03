@@ -208,9 +208,15 @@ const removeImage = () => {
 }
 
 // Sidebar Logic
+const windowWidth = ref(window.innerWidth)
 const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
+  windowWidth.value = window.innerWidth
+  isCollapsed.value = windowWidth.value < 768
 }
+
+const buttonSize = computed(() => {
+  return windowWidth.value < 640 ? 'xs' : 'md'
+})
 
 onMounted(() => {
   checkScreen()
@@ -637,15 +643,15 @@ const returnLoginPage = async () => {
          <div class="max-w-4xl mx-auto space-y-6">
           
           <!-- Header -->
-          <div class="flex items-center gap-4">
-              <div class="flex items-center gap-4">
-                <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          <div class="flex items-center gap-2 md:gap-4">
+              <div class="flex items-center gap-2 md:gap-4">
+                <button @click="handleCancel" class="p-1.5 md:p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
              </button>
-                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                <div class="p-2 md:p-3 bg-blue-100 rounded-lg md:rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
               </div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <h2 class="text-xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
                    Create New Announcement </span>
                 </h2>
@@ -924,30 +930,30 @@ const returnLoginPage = async () => {
              </div>
 
              <!-- Footer Actions -->
-             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-wrap-reverse md:flex-nowrap items-center justify-end gap-3 border-t border-gray-200">
+             <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
                   color="white-outline" 
+                   :size="buttonSize"
                   @click="goBack" 
-                  class="w-full md:w-auto"
                 />
                 <ButtonWeb 
-                  label="Save Draft" 
+                  :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
                   color="light-gray" 
+                  :size="buttonSize"
                   @click="saveDraft" 
                   :disabled="!isFormValid"
-                  class="w-full md:w-auto"
                 >
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                   </template>
                 </ButtonWeb>
                 <ButtonWeb 
-                  label="Publish Announcement" 
+                  :label="windowWidth < 640 ? 'Publish' : 'Publish Announcement'" 
                   color="blue" 
+                  :size="buttonSize"
                   @click="submitAnnouncement" 
                   :disabled="!isFormValid"
-                  class="w-full md:w-auto"
                 >
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>

@@ -391,9 +391,15 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
 
+const windowWidth = ref(window.innerWidth)
 const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
+  windowWidth.value = window.innerWidth
+  isCollapsed.value = windowWidth.value < 768
 }
+
+const buttonSize = computed(() => {
+  return windowWidth.value < 640 ? 'xs' : 'md'
+})
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
@@ -1077,20 +1083,20 @@ const showProfileStaffPage = async function () {
              </div>
 
              <!-- Actions -->
-             <div class="bg-gray-50 px-6 sm:px-8 py-5 flex flex-wrap-reverse md:flex-nowrap items-center justify-end gap-3 border-t border-gray-200">
+             <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
                   color="white-outline" 
+                  :size="buttonSize"
                   @click="handleCancel" 
-                  class="w-full md:w-auto"
                 />
                 <ButtonWeb 
-                  label="Update Announcement" 
+                  :label="windowWidth < 640 ? 'Update' : 'Update Announcement'" 
                   color="navy" 
+                  :size="buttonSize"
                   @click="handleSave" 
                   :disabled="!hasChanges"
                   :loading="isSubmitting"
-                  class="w-full md:w-auto"
                 >
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400">

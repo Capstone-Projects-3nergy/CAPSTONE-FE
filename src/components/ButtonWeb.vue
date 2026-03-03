@@ -51,6 +51,7 @@ const textClass = computed(() => {
 })
 
 const sizeClass = computed(() => {
+  if (props.size === 'xs') return 'px-2 py-1 text-[10px] rounded-lg shadow-none'
   if (props.size === 'sm') return 'px-3 py-1.5 text-xs rounded-lg'
   return 'px-5 py-2.5 rounded-xl'
 })

@@ -1,4 +1,7 @@
 <script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import ButtonWeb from './ButtonWeb.vue'
+
 defineProps({
   modelSearch: String,
   modelCategory: String,
@@ -12,8 +15,30 @@ defineProps({
   }
 })
 
-import { ref, onMounted, onUnmounted } from 'vue'
-import ButtonWeb from './ButtonWeb.vue'
+const windowWidth = ref(window.innerWidth)
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  updateDate()
+  dateInterval = setInterval(updateDate, 60000)
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  if (dateInterval) clearInterval(dateInterval)
+  window.removeEventListener('resize', handleResize)
+})
+
+const buttonSize = computed(() => {
+  return windowWidth.value < 640 ? 'xs' : 'md'
+})
+
+const iconSize = computed(() => {
+  return windowWidth.value < 640 ? '16' : '20'
+})
+
 const currentDate = ref('')
 const updateDate = () => {
   const date = new Date()
@@ -24,15 +49,6 @@ const updateDate = () => {
   currentDate.value = `${weekday}, ${day} ${month} ${year}`
 }
 let dateInterval
-
-onMounted(() => {
-  updateDate()
-  dateInterval = setInterval(updateDate, 60000)
-})
-
-onUnmounted(() => {
-  if (dateInterval) clearInterval(dateInterval)
-})
 </script>
 
 <template>
@@ -55,23 +71,24 @@ onUnmounted(() => {
 
     <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 w-full xl:w-auto mt-1 sm:mt-0">
       <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 overflow-x-auto hide-scrollbar">
-        <div class="flex items-center gap-2 bg-blue-50/50 text-[#0E4B90] px-3 sm:px-4 py-2.5 rounded-xl font-semibold shadow-sm border border-gray-100 whitespace-nowrap">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-center gap-2 bg-blue-50/50 text-[#0E4B90] px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-semibold shadow-sm border border-gray-100 whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span class="text-sm">{{ currentDate }}</span>
+          <span class="text-[11px] sm:text-sm">{{ currentDate }}</span>
         </div>
         <ButtonWeb
-  @click="$emit('new-announcement')"
-  label="New Announcement"
-  color="blue"
-  class="whitespace-nowrap"
->
+          @click="$emit('new-announcement')"
+          label="Add New"
+          color="blue"
+          :size="buttonSize"
+          class="whitespace-nowrap sm:px-5 sm:py-2.5"
+        >
   <template #icon>
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      :width="iconSize"
+      :height="iconSize"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
