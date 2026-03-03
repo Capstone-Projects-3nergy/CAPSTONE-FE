@@ -365,6 +365,7 @@ const reconnectLine = () => {
   const clientId = LINE_CONFIG.CHANNEL_ID
   const redirectUri = LINE_CONFIG.REDIRECT_URI || `${window.location.origin}/callback`
   const state = Math.random().toString(36).substring(7)
+  sessionStorage.setItem('line_auth_state', state)
 
   const url =
     `https://access.line.me/oauth2/v2.1/authorize` +
