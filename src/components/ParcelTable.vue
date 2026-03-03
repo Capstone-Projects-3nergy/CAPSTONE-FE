@@ -371,7 +371,7 @@ const authStore = useAuthManager()
 
             <div class="relative group inline-block">
               <span
-                class="px-3 py-1 rounded-full text-xs font-bold"
+                class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
                 :class="[
                   {
                     'bg-yellow-50 text-yellow-600': p.status === 'Waiting for Staff' || p.status === 'Pending',
@@ -424,7 +424,7 @@ const authStore = useAuthManager()
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
             <span
-              class="px-3 py-1 rounded-full text-xs font-bold"
+              class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
               :class="[
                 {
                   'bg-green-50 text-green-600': p.status === 'ACTIVE',
