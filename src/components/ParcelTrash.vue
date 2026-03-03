@@ -1041,15 +1041,15 @@ const closePopUp = (operate) => {
           </div>
         </div>
         </div>
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 w-full overflow-hidden gap-4">
-          <div class="flex items-center space-x-4 overflow-x-auto w-full pb-2 md:pb-0">
-           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 flex whitespace-nowrap overflow-x-auto w-full lg:w-auto">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 w-full gap-4">
+          <div class="flex items-center w-full pb-2 md:pb-0">
+           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 flex w-full md:w-auto">
               <button
                 v-for="tab in tabs"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
-                     'px-4 md:px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0',
+                     'flex-1 text-center px-4 md:px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap',
                   activeTab === tab
                     ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'

@@ -447,7 +447,7 @@ watch(
             />
           </svg>
               </div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <h2 class="text-xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
                     Manages Resident &gt; Details  </span>
                 </h2>
