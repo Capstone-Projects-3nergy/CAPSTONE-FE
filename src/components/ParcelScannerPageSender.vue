@@ -639,7 +639,7 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-    notificationManager.notifyParcelAdded(savedParcel)
+    notificationManager.notifyParcelAdded(savedParcel, router)
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
 

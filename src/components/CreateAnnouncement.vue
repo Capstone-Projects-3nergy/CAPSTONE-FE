@@ -293,7 +293,7 @@ const submitAnnouncement = async () => {
 
     // Send Line notification and fetch updated data
     try {
-      await notificationManager.notifyAnnouncementCreated(body)
+      await notificationManager.notifyAnnouncementCreated(body, router)
     } catch (lineError) {
       console.error('Notification failed:', lineError)
     }

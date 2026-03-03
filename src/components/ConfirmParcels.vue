@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useRouter } from 'vue-router'
+import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { confirmParcelReceived } from '@/utils/fetchUtils'
 
@@ -14,6 +15,7 @@ const emit = defineEmits([
 const props = defineProps(['parcelConfirmData'])
 const router = useRouter()
 const parcelManager = useParcelManager()
+const notificationManager = useNotificationManager()
 const parcelEditDetail = ref(null)
 const parcelIdDetail = ref(null)
 const deletedParcel = ref(null)
@@ -43,6 +45,7 @@ const confirmParcelFn = async () => {
 
   if (res?.parcelId || res?.status === 'RECEIVED') {
     parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
+    await notificationManager.notifyParcelPickup(parcel.value, router)
     emit('confirmParcel', true)
     return
   }

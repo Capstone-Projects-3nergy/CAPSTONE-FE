@@ -694,7 +694,7 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-    notificationManager.notifyParcelSaved(savedParcel)
+    notificationManager.notifyParcelSaved(savedParcel, router)
 
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)

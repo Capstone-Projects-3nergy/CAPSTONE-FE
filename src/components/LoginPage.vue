@@ -146,7 +146,8 @@ const loginHomePageWeb = async () => {
           try {
             await LineNotificationManager.sendToGroup(
               'GROUP_ID', 
-              `Users ${currentUser.fullName || currentUser.email} (${currentUser.role}) has logged in.`
+              `Users ${currentUser.fullName || currentUser.email} (${currentUser.role}) has logged in.`,
+              router
             )
           } catch (e) {
             console.error('Failed to send LINE notification', e)

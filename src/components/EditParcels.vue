@@ -475,7 +475,7 @@ const saveEditParcel = async () => {
     }
 
     parcelStore.editParcel(form.value.parcelId, updatedParcel)
-    notificationManager.notifyParcelUpdate(updatedParcel)
+    notificationManager.notifyParcelUpdate(updatedParcel, router)
 
     form.value = {
       ...form.value,

@@ -7,13 +7,13 @@ class LineNotificationManager {
    * ขอให้ backend ส่งข้อความเข้า LINE Group
    * @param {string} groupId
    * @param {string} message
+   * @param {Object} router - Vue Router object for session management
    */
-  async sendToGroup(groupId, message) {
+  async sendToGroup(groupId, message, router = null) {
     try {
       const payload = { groupId, message }
-      // ใช้ API_URL จาก config หรือ default
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.API_URL}`
-      const response = await sendLineNotification(payload, null, url)
+      const response = await sendLineNotification(payload, router, url)
       return response
     } catch (error) {
       console.error('[LineNotification] sendToGroup Error:', error.message)
@@ -24,12 +24,13 @@ class LineNotificationManager {
   /**
    * ส่ง Event ให้ Backend ทำหน้าที่แจ้งเตือน Admin ผ่าน LINE 
    * @param {string} message 
+   * @param {Object} router - Vue Router object for session management
    */
-  async notifyAdmin(message) {
+  async notifyAdmin(message, router = null) {
     try {
       const payload = { message }
-      const url = `${import.meta.env.VITE_BASE_URL}/api/notify-line`
-      const response = await sendLineNotification(payload, null, url)
+      const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.NOTIFY_ADMIN_URL}`
+      const response = await sendLineNotification(payload, router, url)
       return response
     } catch (error) {
       console.error('[LineNotification] notifyAdmin Error:', error.message)
@@ -39,27 +40,25 @@ class LineNotificationManager {
 
   /**
    * Notify Admin about new parcel
-   * @param {Object} parcel 
    */
-  async notifyNewParcel(parcel) {
+  async notifyNewParcel(parcel, router = null) {
     const message = `📦 New Parcel Arrived!\n📌 Tracking: ${parcel.trackingNumber}\n👤 Recipient: ${parcel.receiverName || 'N/A'}\n🏠 Room: ${parcel.roomNumber || 'N/A'}\n🚚 Courier: ${parcel.courier || 'N/A'}`
-    return this.notifyAdmin(message)
+    return this.notifyAdmin(message, router)
   }
 
   /**
    * Notify Admin about new announcement
-   * @param {Object} announcement 
    */
-  async notifyNewAnnouncement(announcement) {
+  async notifyNewAnnouncement(announcement, router = null) {
     const message = `📢 New Announcement!\n📌 Title: ${announcement.title}\n📂 Category: ${announcement.category}${announcement.subtitle ? `\n📝 Subtitle: ${announcement.subtitle}` : ''}`
-    return this.notifyAdmin(message)
+    return this.notifyAdmin(message, router)
   }
 
   /**
-   * Notify through generic event (handled by backend)
+   * Notify through generic event
    */
-  async notifyAnnouncementCreated(announcement) {
-    return this.notifyNewAnnouncement(announcement)
+  async notifyAnnouncementCreated(announcement, router = null) {
+    return this.notifyNewAnnouncement(announcement, router)
   }
 }
 
