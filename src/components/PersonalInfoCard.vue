@@ -382,7 +382,7 @@ const reconnectLine = () => {
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
@@ -456,7 +456,7 @@ const reconnectLine = () => {
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -502,7 +502,7 @@ const reconnectLine = () => {
       </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 truncate">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
           <div>
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
@@ -609,7 +609,7 @@ const reconnectLine = () => {
       </div>
       <div
         v-if="activeTab === 'line'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
       >
         <div class="flex items-center gap-4 mb-8">
           <div class="w-2 h-8 bg-gradient-to-b from-[#00b900] to-green-400 rounded-full"></div>
@@ -637,7 +637,7 @@ const reconnectLine = () => {
         </div>
 
         <div class="space-y-6">
-          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] group">
+          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] group">
             <!-- Header section -->
             <div class="flex items-center gap-5 mb-8 relative z-10">
               <div class="w-14 h-14 rounded-2xl bg-[#00b900] flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
@@ -647,14 +647,14 @@ const reconnectLine = () => {
                   </svg>
                 </div>
               </div>
-              <div class="flex-1">
-                <h3 class="font-extrabold text-xl text-gray-800 tracking-tight leading-none mb-2">LINE Notification</h3>
-                <p class="text-sm text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Smart alerts for parcels & announcements</p>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none mb-2">LINE Notification</h3>
+                <p class="text-xs sm:text-sm text-gray-500 font-medium break-words">Smart alerts for parcels & announcements</p>
               </div>
             </div>
 
             <!-- Main Connection Status -->
-            <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-6 backdrop-blur-sm">
+            <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
               <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <!-- Status -->
                 <div class="flex items-center gap-4">
@@ -666,9 +666,9 @@ const reconnectLine = () => {
                     <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
                   </div>
                   <div>
-                    <span class="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
+                    <span class="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
                     <span :class="[
-                      'text-xl font-black transition-colors duration-300',
+                      'text-lg sm:text-xl font-black transition-colors duration-300',
                       effectiveLineId ? 'text-green-600' : 'text-gray-500'
                     ]">
                       {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
@@ -680,10 +680,10 @@ const reconnectLine = () => {
                 <div class="flex flex-col items-center gap-3">
                   <button
                     @click="handleLineAction"
-                    class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
+                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
                   >
-                    <span class="text-base cursor-pointer">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:translate-x-1.5 transition-transform duration-300">
+                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
@@ -692,15 +692,15 @@ const reconnectLine = () => {
                   <button 
                     v-if="effectiveLineId"
                     @click="reconnectLine"
-                    class="text-xs font-bold text-gray-400 hover:text-[#00b900] transition-colors duration-300 flex items-center gap-1.5 group/switch cursor-pointer"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100 mt-1"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover/switch:rotate-180 transition-transform duration-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
                       <path d="M21 2v6h-6"></path>
                       <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
                       <path d="M3 22v-6h6"></path>
                       <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
                     </svg>
-                    Switch Account
+                    <span>Switch Account</span>
                   </button>
                 </div>
               </div>

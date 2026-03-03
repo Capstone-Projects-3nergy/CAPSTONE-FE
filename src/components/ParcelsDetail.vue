@@ -128,7 +128,7 @@ const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async () => {
+const showManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -317,7 +317,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
