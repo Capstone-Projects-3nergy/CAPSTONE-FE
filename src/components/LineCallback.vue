@@ -42,6 +42,13 @@ onMounted(async () => {
       // Refresh user data to get updated lineId
       await authManager.loadUserFromBackend();
       
+      // Also update ProfileManager to ensure consistency across the app
+      const profileManager = (await import('@/stores/ProfileManager')).useProfileManager();
+      const baseURL = import.meta.env.VITE_BASE_URL;
+      const { getProfile } = await import('@/utils/fetchUtils');
+      const profile = await getProfile(`${baseURL}/api/profile`, router);
+      if (profile) profileManager.setCurrentProfile(profile);
+      
       // Redirect back to profile or home
       const userId = authManager.user?.id;
       if (authManager.user?.role === 'RESIDENT') {

@@ -373,7 +373,8 @@ const reconnectLine = () => {
     `&client_id=${clientId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&state=${state}` +
-    `&scope=profile%20openid`
+    `&scope=profile%20openid` +
+    `&prompt=consent`
 
   window.location.href = url
 }

@@ -55,6 +55,32 @@ class LineNotificationManager {
   }
 
   /**
+   * ส่งข้อความหา User รายบุคคลผ่าน LINE
+   * @param {string} userId - ID ของผู้รับในระบบ
+   * @param {string} message 
+   * @param {Object} router - Vue Router object for session management
+   */
+  async sendToUser(userId, message, router = null) {
+    try {
+      const payload = { userId, message }
+      const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.SEND_PRIVATE_URL}`
+      const response = await sendLineNotification(payload, router, url)
+      return response
+    } catch (error) {
+      console.error('[LineNotification] sendToUser Error:', error.message)
+      throw error
+    }
+  }
+
+  /**
+   * แจ้งเตือนลูกบ้านเมื่อพัสดุมาถึง
+   */
+  async notifyParcelRecipient(userId, parcel, router = null) {
+    const message = `📦 Your parcel has arrived!\n📌 Tracking: ${parcel.trackingNumber}\n🚚 Courier: ${parcel.courier || 'N/A'}\n📍 You can pick it up at the juristic office.`
+    return this.sendToUser(userId, message, router)
+  }
+
+  /**
    * Notify through generic event
    */
   async notifyAnnouncementCreated(announcement, router = null) {
