@@ -89,6 +89,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return Math.floor((date.getDate() + (firstDay === 0 ? 6 : firstDay - 1) - 1) / 7)
   }
 
+  
   const calculateDashboardData = (parcelsRaw = [], residentsRaw = [], announcementsRaw = []) => {
     // Ensure we are working with arrays
     const parcelsData = Array.isArray(parcelsRaw) ? parcelsRaw : []
