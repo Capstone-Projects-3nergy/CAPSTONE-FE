@@ -1284,14 +1284,14 @@ onMounted(async () => {
                 <ButtonWeb
                   label="Scan QR code"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />

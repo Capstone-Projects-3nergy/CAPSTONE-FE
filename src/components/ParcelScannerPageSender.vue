@@ -916,16 +916,16 @@ const closePopUp = (operate) => {
 
               <div class="flex flex-row flex-nowrap gap-3 px-2 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan"
+                  label="Scan QR Code"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
