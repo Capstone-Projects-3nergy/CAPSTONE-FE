@@ -127,7 +127,7 @@ const getCategoryIcon = (category) => {
                 </div>
                 <div class="flex items-center gap-0.5 min-w-0">
                   <div class="h-2.5 w-2.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[5px] font-black flex-shrink-0">P</div>
-                  <span class="truncate max-w-[35px] sm:max-w-[45px]">{{ item.author || 'Staff' }}</span>
+                  <span class="truncate max-w-[60px] sm:max-w-[70px]">{{ item.author || 'Staff Portal' }}</span>
                 </div>
                 <div class="flex items-center gap-0.5 flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -286,9 +286,9 @@ const getCategoryIcon = (category) => {
                       </svg>
                       <span>{{ item.datePosted.split(' - ')[0] }}</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                      <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold">P</div>
-                      <span class="truncate max-w-[80px]">{{ item.author || 'Staff Portal' }}</span>
+                    <div class="flex items-center gap-1 min-w-0">
+                      <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold flex-shrink-0">P</div>
+                      <span class="truncate max-w-[100px]">{{ item.author || 'Staff Portal' }}</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
