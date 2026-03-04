@@ -193,25 +193,22 @@ const updateResidentChart = (year) => {
   residentChartInstance.update();
 };
 
+const fetchDashboardData = async () => {
+  await dashboardStore.fetchDashboardData(router)
+}
+
 onMounted(async () => {
   checkScreen()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
+  // Fetch all dashboard stats and charts using the store action
+  await fetchDashboardData()
+
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
   )
-
-  const dataUser = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
-    router
-  )
-
-  const dataAnnouncement = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-    router
-  ).catch(() => [])
 
   let parcelDataList = []
   if (data) {
@@ -227,46 +224,31 @@ onMounted(async () => {
     mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
     parcelManager.setParcels(mapped)
     parcelDataList = mapped
+    
+    // Sync total count if store fetched 0 but we have local data
+    if (dashboardStore.stats.totalParcels === 0 && mapped.length > 0) {
+      dashboardStore.stats.totalParcels = mapped.length
+    }
   }
-
-  // NOTE: Temporarily disabled real-data fetch to pull raw/mock data as requested
-  // dashboardStore.calculateDashboardData(parcelDataList, dataUser || [], dataAnnouncement || [])
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: chartData.value.weekly.labels,
-      datasets: [
-        {
-          label: 'Received',
-          data: chartData.value.weekly.received,
-          backgroundColor: 'rgba(59, 130, 246, 0.85)', // blue-500
-          hoverBackgroundColor: 'rgba(59, 130, 246, 1)',
-          borderRadius: 0,
-          borderSkipped: false,
-          barThickness: 24
-        },
-        {
-          label: 'Picked Up',
-          data: chartData.value.weekly.pickedUp,
-          backgroundColor: 'rgba(16, 185, 129, 0.85)', // emerald-500
-          hoverBackgroundColor: 'rgba(16, 185, 129, 1)',
-          borderRadius: 0,
-          borderSkipped: false,
-          barThickness: 24
-        },
-        {
-          label: 'Overdue',
-          data: chartData.value.weekly.overdue,
-          backgroundColor: 'rgba(239, 68, 68, 0.85)', // red-500
-          hoverBackgroundColor: 'rgba(239, 68, 68, 1)',
-          borderRadius: 0,
-          borderSkipped: false,
-          barThickness: 24
-        }
-      ]
+      labels: chartData.value.labels,
+      datasets: chartData.value.datasets.map(ds => ({
+        ...ds,
+        backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' :
+                        ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' :
+                        'rgba(239, 68, 68, 0.85)',
+        hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' :
+                             ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' :
+                             'rgba(239, 68, 68, 1)',
+        borderRadius: 0,
+        borderSkipped: false,
+        barThickness: activityInterval.value === 'daily' ? 18 : 24
+      }))
     },
     options: {
       responsive: true,
@@ -318,6 +300,9 @@ onMounted(async () => {
       }
     }
   })
+
+  // Ensure chart reflects current interval data
+  updateParcelChart(activityInterval.value)
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {

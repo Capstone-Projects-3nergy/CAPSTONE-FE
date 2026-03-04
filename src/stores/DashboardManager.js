@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { getItems, getDashboardData } from '@/utils/fetchUtils'
 
@@ -89,82 +89,89 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return Math.floor((date.getDate() + (firstDay === 0 ? 6 : firstDay - 1) - 1) / 7)
   }
 
-  const calculateDashboardData = (parcelsData = [], residentsData = [], announcementsData = []) => {
+  const calculateDashboardData = (parcelsRaw = [], residentsRaw = [], announcementsRaw = []) => {
+    // Ensure we are working with arrays
+    const parcelsData = Array.isArray(parcelsRaw) ? parcelsRaw : []
+    const residentsData = Array.isArray(residentsRaw) ? residentsRaw : []
+    const announcementsData = Array.isArray(announcementsRaw) ? announcementsRaw : []
+
     // If no data is available yet, don't overwrite the mock data
-    if (!parcelsData.length && !residentsData.length && !announcementsData.length) {
+    if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
       return;
     }
 
-    // Reset parcel stats
-    stats.totalParcels = parcelsData.length
-    stats.pickedUpParcels = 0
-    stats.awaitingParcels = 0
-    stats.overdueParcels = 0
-    
-    // Reset charts
-    chartData.daily.received.fill(0)
-    chartData.daily.pickedUp.fill(0)
-    chartData.daily.overdue.fill(0)
-    
-    chartData.weekly.received.fill(0)
-    chartData.weekly.pickedUp.fill(0)
-    chartData.weekly.overdue.fill(0)
+    // Populate Chart Data if we have parcels
+    if (parcelsData.length > 0) {
+      // Reset parcel stats
+      stats.pickedUpParcels = 0
+      stats.awaitingParcels = 0
+      stats.overdueParcels = 0
 
-    chartData.monthly.received.fill(0)
-    chartData.monthly.pickedUp.fill(0)
-    chartData.monthly.overdue.fill(0)
-
-    const today = new Date()
-    const currentMonth = today.getMonth()
-    const currentYear = today.getFullYear()
-    const currentWeekIdx = getWeekIndex(today)
-
-    parcelsData.forEach(p => {
-      // Calculate Stats
-      const pStatus = p.status?.toUpperCase() || ''
-      if (pStatus === 'PICKED UP' || pStatus === 'PICKED_UP') {
-        stats.pickedUpParcels++
-      } else if (pStatus === 'OVERDUE') {
-        stats.overdueParcels++
-      } else {
-        stats.awaitingParcels++
-      }
-
-      // Populate Chart Data
-      const date = new Date(p.createdAt || p.date || p.updateAt || p.updatedAt)
-      if (isNaN(date.getTime())) return // skip invalid dates
-
-      const isCurrentMonth = date.getMonth() === currentMonth && date.getFullYear() === currentYear
-      const isCurrentWeek = isCurrentMonth && getWeekIndex(date) === currentWeekIdx
+      // Reset charts
+      chartData.daily.received.fill(0)
+      chartData.daily.pickedUp.fill(0)
+      chartData.daily.overdue.fill(0)
       
-      const monthIdx = date.getMonth()
-      const weekIdx = getWeekIndex(date)
-      const dayIdx = getDayIndex(date)
+      chartData.weekly.received.fill(0)
+      chartData.weekly.pickedUp.fill(0)
+      chartData.weekly.overdue.fill(0)
 
-      // Ensure week index bounds
-      const safeWeekIdx = weekIdx >= 0 && weekIdx <= 4 ? weekIdx : 4
+      chartData.monthly.received.fill(0)
+      chartData.monthly.pickedUp.fill(0)
+      chartData.monthly.overdue.fill(0)
 
-      // Monthly
-      if (date.getFullYear() === currentYear) {
-         if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.monthly.received[monthIdx]++
-         else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.monthly.pickedUp[monthIdx]++
-         else if (pStatus === 'OVERDUE') chartData.monthly.overdue[monthIdx]++
-      }
-      
-      // Weekly
-      if (isCurrentMonth) {
-         if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.weekly.received[safeWeekIdx]++
-         else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.weekly.pickedUp[safeWeekIdx]++
-         else if (pStatus === 'OVERDUE') chartData.weekly.overdue[safeWeekIdx]++
-      }
+      const today = new Date()
+      const currentMonth = today.getMonth()
+      const currentYear = today.getFullYear()
+      const currentWeekIdx = getWeekIndex(today)
 
-      // Daily
-      if (isCurrentWeek) {
-         if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.daily.received[dayIdx]++
-         else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.daily.pickedUp[dayIdx]++
-         else if (pStatus === 'OVERDUE') chartData.daily.overdue[dayIdx]++
-      }
-    })
+      parcelsData.forEach(p => {
+        // Calculate Stats
+        const pStatus = p.status?.toUpperCase() || ''
+        if (pStatus === 'PICKED UP' || pStatus === 'PICKED_UP') {
+          stats.pickedUpParcels++
+        } else if (pStatus === 'OVERDUE') {
+          stats.overdueParcels++
+        } else {
+          stats.awaitingParcels++
+        }
+
+        // Populate Chart Data
+        const date = new Date(p.createdAt || p.date || p.updateAt || p.updatedAt)
+        if (isNaN(date.getTime())) return // skip invalid dates
+
+        const isCurrentMonth = date.getMonth() === currentMonth && date.getFullYear() === currentYear
+        const isCurrentWeek = isCurrentMonth && getWeekIndex(date) === currentWeekIdx
+        
+        const monthIdx = date.getMonth()
+        const weekIdx = getWeekIndex(date)
+        const dayIdx = getDayIndex(date)
+
+        // Ensure week index bounds
+        const safeWeekIdx = weekIdx >= 0 && weekIdx <= 4 ? weekIdx : 4
+
+        // Monthly
+        if (date.getFullYear() === currentYear) {
+           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.monthly.received[monthIdx]++
+           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.monthly.pickedUp[monthIdx]++
+           else if (pStatus === 'OVERDUE') chartData.monthly.overdue[monthIdx]++
+        }
+        
+        // Weekly
+        if (isCurrentMonth) {
+           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.weekly.received[safeWeekIdx]++
+           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.weekly.pickedUp[safeWeekIdx]++
+           else if (pStatus === 'OVERDUE') chartData.weekly.overdue[safeWeekIdx]++
+        }
+
+        // Daily
+        if (isCurrentWeek) {
+           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.daily.received[dayIdx]++
+           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.daily.pickedUp[dayIdx]++
+           else if (pStatus === 'OVERDUE') chartData.daily.overdue[dayIdx]++
+        }
+      })
+    }
 
     // Calculate Resident Stats
     stats.totalResidents = residentsData.length
