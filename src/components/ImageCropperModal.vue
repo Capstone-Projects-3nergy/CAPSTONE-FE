@@ -157,10 +157,10 @@ const cropImage = () => {
         </div>
 
         <!-- Viewport -->
-        <div class="flex justify-center py-6 bg-gray-50/50">
+        <div class="flex justify-center p-0 bg-[#07192F] overflow-hidden">
+          <!-- Main Controller Container -->
           <div 
-            ref="containerRef"
-            class="relative w-64 h-64 rounded-full overflow-hidden border-[6px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.15)] bg-gray-200 cursor-move touch-none"
+            class="relative w-full aspect-square max-w-[360px] flex items-center justify-center cursor-move touch-none p-8"
             @mousedown="onMouseDown"
             @mousemove="onMouseMove"
             @mouseup="onMouseUp"
@@ -169,6 +169,7 @@ const cropImage = () => {
             @touchmove="onTouchMove"
             @touchend="onMouseUp"
           >
+            <!-- The Only Image (Underneath the mask) -->
             <img 
               ref="imageRef"
               :src="imageSrc" 
@@ -183,8 +184,15 @@ const cropImage = () => {
                 }
               ]"
             />
-            <!-- Overlay Guide -->
-            <div class="absolute inset-0 pointer-events-none border-[1px] border-white/20 rounded-full shadow-[inset_0_0_40px_rgba(0,0,0,0.1)]"></div>
+
+            <!-- Mask Layer (The "Hole" in the shadow) -->
+            <div 
+              ref="containerRef"
+              class="relative w-64 h-64 rounded-full border-[4px] border-white/90 shadow-[0_0_0_999px_rgba(7,25,47,0.7)] z-10 pointer-events-none"
+            >
+              <!-- Subtle Inner Gloss -->
+              <div class="absolute inset-0 rounded-full shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]"></div>
+            </div>
           </div>
         </div>
 
