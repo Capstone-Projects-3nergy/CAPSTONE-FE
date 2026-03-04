@@ -7,10 +7,10 @@ defineEmits(['closePopUp'])
 </script>
 
 <template>
-  <Transition name="fade-scale" appear>
-    <div
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md transition-all duration-300"
-    >
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md"
+  >
+    <Transition name="fade-scale" appear>
       <div
         class="bg-white/95 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 flex flex-col items-center gap-6 min-w-[280px] border border-white/20"
       >
@@ -43,8 +43,8 @@ defineEmits(['closePopUp'])
           </p>
         </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </div>
 </template>
 
 <style scoped>
