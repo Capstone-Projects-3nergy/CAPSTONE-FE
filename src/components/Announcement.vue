@@ -542,16 +542,26 @@ onMounted(async () => {
                     <p class="text-xs font-medium text-gray-500 mt-0.5">Stay updated with community activities</p>
                   </div>
                 </div>
-                <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-4 py-2.5 font-bold text-sm shadow-inner whitespace-nowrap">
-                  <div class="mr-3 p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <!-- Date Box (Auto-hide symbol on mobile to save space) -->
+                  <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
+                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                    <span class="tracking-wide">{{ currentDate }}</span>
                   </div>
-                  <span class="tracking-wide">{{ currentDate }}</span>
+                  <!-- Archive Button (Always Visible) -->
+                  <button 
+                    @click="isArchiveOpen = true" 
+                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
+                  >
+                    Archive History →
+                  </button>
                 </div>
               </div>
               
@@ -633,9 +643,39 @@ onMounted(async () => {
 
             <!-- News List -->
             <div v-if="tab === 'news' || tab === 'all'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-800">Latest News</h3>
-                <span @click="isArchiveOpen = true" class="text-sm font-medium text-[#0E4B90] cursor-pointer hover:underline">Archive →</span>
+              <!-- Modern News Header -->
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
+                <div class="flex items-center gap-4">
+                  <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+                  <div>
+                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Latest News</h3>
+                    <p class="text-xs font-medium text-gray-500 mt-0.5">Important updates and official notices</p>
+                  </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <!-- Date Box (Visible on mobile when tab is 'news') -->
+                  <div v-if="tab !== 'all'" class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
+                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                    <span class="tracking-wide">{{ currentDate }}</span>
+                  </div>
+
+                  <!-- Archive Button -->
+                  <button 
+                    v-if="tab !== 'all'"
+                    @click="isArchiveOpen = true" 
+                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
+                  >
+                    Archive History →
+                  </button>
+                </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
