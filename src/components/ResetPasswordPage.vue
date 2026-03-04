@@ -183,7 +183,7 @@ const returnLoginPage = () => {
             Enter your email below to reset your password.
           </span>
         </p>
-
+     <div class="fixed top-30">
         <AlertPopUp
           v-if="error"
           :titles="'Failed to send reset password email.'"
@@ -227,6 +227,7 @@ const returnLoginPage = () => {
             operate="emailInvalidChars"
             @closePopUp="closePopUp"
           />
+          </div>
 
         <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
           <div class="relative">
