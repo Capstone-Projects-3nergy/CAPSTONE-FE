@@ -39,29 +39,20 @@ onUnmounted(() => {
 })
 
 const fetchDashboardData = async () => {
-  try {
-    const data = await getDashboardData(`${import.meta.env.VITE_BASE_URL}/api/dashboard`, router)
-    if (data) {
-      if (data.stats) {
-        dashboardStore.setStats(data.stats)
-      }
-      if (data.chartData && data.chartData.labels && data.chartData.datasets) {
-        dashboardStore.chartData.labels = data.chartData.labels
-        dashboardStore.chartData.datasets[0].data = data.chartData.datasets[0].data
-        if (data.chartData.datasets[0].label) {
-          dashboardStore.chartData.datasets[0].label = data.chartData.datasets[0].label
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error)
-  }
+  await dashboardStore.fetchDashboardData(router)
 }
+
+let chartInstance = null
 
 const renderChart = () => {
   const ctx = document.getElementById('parcelChart')
   if (!ctx) return
-  new Chart(ctx, {
+  
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+  
+  chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: dashboardStore.chartData.labels,
@@ -69,11 +60,12 @@ const renderChart = () => {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (context) => `${context.parsed.y} พัสดุ`
+            label: (context) => `${context.dataset.label}: ${context.parsed.y} พัสดุ`
           }
         }
       },
@@ -89,6 +81,12 @@ const renderChart = () => {
   })
 }
 
+// Re-render when data or view changes
+import { watch } from 'vue'
+watch(() => dashboardStore.chartData.labels, () => {
+  renderChart()
+}, { deep: true })
+
 onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
@@ -96,6 +94,11 @@ onMounted(async () => {
   await fetchDashboardData()
   renderChart()
 })
+
+const changeView = (view) => {
+  dashboardStore.setChartView(view)
+  renderChart()
+}
 
 const showHomePageStaffWeb = async function () {
   router.replace({ name: 'homestaff' })
@@ -541,9 +544,27 @@ const toggleSidebar = () => {
                   <p class="text-xs text-gray-500">Received · Picked Up · Overdue</p>
                 </div>
                 <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Daily</button>
-                  <button class="px-4 py-1.5 text-xs font-bold text-gray-900 bg-white rounded-md shadow-sm">Weekly</button>
-                  <button class="px-4 py-1.5 text-xs font-medium text-gray-500 rounded-md">Monthly</button>
+                  <button 
+                    @click="changeView('daily')"
+                    :class="[dashboardStore.currentView === 'daily' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Daily
+                  </button>
+                  <button 
+                    @click="changeView('weekly')"
+                    :class="[dashboardStore.currentView === 'weekly' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Weekly
+                  </button>
+                  <button 
+                    @click="changeView('monthly')"
+                    :class="[dashboardStore.currentView === 'monthly' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Monthly
+                  </button>
                 </div>
               </div>
               <div class="h-[250px] w-full relative">

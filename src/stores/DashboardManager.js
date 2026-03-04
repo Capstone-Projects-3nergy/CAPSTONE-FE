@@ -1,5 +1,6 @@
 import { reactive, computed } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { getItems, getDashboardData } from '@/utils/fetchUtils'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
   const monthsTH = [
@@ -39,8 +40,35 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       received: [120, 150, 180, 140, 210, 190, 230, 210, 250, 220, 280, 310],
       pickedUp: [110, 140, 170, 130, 190, 180, 210, 195, 230, 210, 260, 290],
       overdue: [10, 10, 10, 10, 20, 10, 20, 15, 20, 10, 20, 20]
-    }
+    },
+    // ข้อมูลสำหรับ Chart.js (จะถูกอัปเดตตาม View ที่เลือก)
+    labels: [],
+    datasets: [
+      { 
+        label: 'Received', 
+        data: [], 
+        backgroundColor: '#4e73df',
+        borderColor: '#4e73df',
+        borderWidth: 1 
+      },
+      { 
+        label: 'Picked Up', 
+        data: [], 
+        backgroundColor: '#1cc88a',
+        borderColor: '#1cc88a',
+        borderWidth: 1 
+      },
+      { 
+        label: 'Overdue', 
+        data: [], 
+        backgroundColor: '#e74a3b',
+        borderColor: '#e74a3b',
+        borderWidth: 1 
+      }
+    ]
   })
+  
+  const currentView = ref('monthly') // 'daily', 'weekly', 'monthly'
   
   const stats = reactive({
     totalParcels: 124,
@@ -146,6 +174,51 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     
     // Calculate Announcement Stats
     stats.totalAnnouncements = announcementsData.length
+
+    // Update the active chart view after calculation
+    setChartView(currentView.value)
+  }
+
+  const setChartView = (view) => {
+    if (!chartData[view]) return
+    currentView.value = view
+    
+    chartData.labels = chartData[view].labels
+    chartData.datasets[0].data = chartData[view].received
+    chartData.datasets[1].data = chartData[view].pickedUp
+    chartData.datasets[2].data = chartData[view].overdue
+  }
+
+  /* ---------- actions ---------- */
+  const fetchDashboardData = async (router) => {
+    try {
+      const baseURL = import.meta.env.VITE_BASE_URL
+      
+      // 1. ลองดึงข้อมูลจาก Dashboard API โดยตรงก่อน
+      const directData = await getDashboardData(`${baseURL}/api/dashboard`, router)
+      
+      if (directData) {
+        if (directData.stats) setStats(directData.stats)
+        if (directData.chartData) {
+          if (directData.chartData.labels) chartData.labels = directData.chartData.labels
+          if (directData.chartData.datasets) chartData.datasets = directData.chartData.datasets
+        }
+      }
+
+      // 2. ดึงข้อมูลดิบมาคำนวณเองเสริม
+      const [parcels, residents, announcements] = await Promise.all([
+        getItems(`${baseURL}/api/staff/parcels`, router),
+        getItems(`${baseURL}/api/staff/users`, router),
+        getItems(`${baseURL}/api/announcements`, router)
+      ])
+
+      calculateDashboardData(parcels || [], residents || [], announcements || [])
+      
+      return true
+    } catch (error) {
+      console.error('[DashboardManager] Fetch Error:', error)
+      return false
+    }
   }
 
   /* ---------- getters ---------- */
@@ -186,7 +259,10 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     setStats,
     
     updateStat,
-    calculateDashboardData
+    calculateDashboardData,
+    fetchDashboardData,
+    currentView,
+    setChartView
   }
 })
 
