@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
@@ -13,6 +13,19 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
+const route = useRoute()
+import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
+import AnnouncementTable from './AnnouncementTable.vue'
+import DeleteAnnouncement from './DeleteAnnouncement.vue'
+import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
+import AlertPopUp from './AlertPopUp.vue'
+import { computed } from 'vue'
+
+import { getAnnouncements } from '@/utils/fetchUtils.js'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+
+const announcementManager = useAnnouncementManager()
+
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
@@ -23,6 +36,315 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
+const isCollapsed = ref(false)
+const showDeleteModal = ref(false)
+const showViewModal = ref(false)
+const selectedAnnouncement = ref(null)
+const deleteSuccess = ref(false)
+const error = ref('')
+
+const closePopUp = (operate) => {
+  if (operate === 'deleteSuccessMessage') {
+    deleteSuccess.value = false
+  }
+}
+
+// Announcement Data & Logic
+const announcements = ref([
+  {
+    id: 1,
+    title: 'Temporary Water Shutoff — Plumbing Repair',
+    subtitle: 'Water will be shut off from 08:00–14:00 on February 20, 2026, for main plumbing repairs. Please reserve water in advance. We apologize for the inconvenience. If you have any questions, please contact the staff at the counter.',
+    category: 'Urgent',
+    pinned: true,
+    datePosted: '19 Feb 2026 - 10:30',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 82
+  },
+  {
+    id: 2,
+    title: 'Temporary Elevator Shutdown for Annual Inspection',
+    subtitle: 'The elevator will be closed for service on February 21-22, 2026, for annual inspection and maintenance by specialized technicians. Residents may use the stairs on the left side of the building.',
+    category: 'Maintenance',
+    pinned: true,
+    datePosted: '18 Feb 2026 - 15:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 54
+  },
+  {
+    id: 3,
+    title: 'New Regulations for Parcel Collection',
+    subtitle: 'Starting from March 1, 2026, residents must collect their parcels within 7 days of notification. A storage fee may apply if overdue.',
+    category: 'General',
+    pinned: false,
+    datePosted: '17 Feb 2026 - 09:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 61
+  },
+  {
+    id: 4,
+    title: 'New Resident Welcome Party — March 2026',
+    subtitle: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area. There will be food, snacks, and many fun activities.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '15 Feb 2026 - 14:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 29
+  },
+  {
+    id: 5,
+    title: 'Notice of Office Hours Change',
+    subtitle: 'Starting in March, the office will be open from 08:30–18:30, Monday–Friday, and 09:00–14:00 on Saturday (closed on Sundays and public holidays).',
+    category: 'General',
+    pinned: false,
+    datePosted: '12 Feb 2026 - 11:00',
+    status: 'Published',
+    author: 'Staff Portal',
+    views: 17
+  },
+  {
+    id: 6,
+    title: 'Notice of Common Area Renovation',
+    subtitle: 'Not yet published — content under revision. The renovation schedule for the ground floor hall and lounge area is expected to be completed by March 2026.',
+    category: 'General',
+    pinned: false,
+    datePosted: '10 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 7,
+    title: 'Survey of Facilities Improvement',
+    subtitle: 'Draft - seeking feedback from management. This survey aims to gather resident opinions on potential upgrades to the gym and swimming pool facilities.',
+    category: 'General',
+    pinned: false,
+    datePosted: '08 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 8,
+    title: 'Upcoming Fire Drill Exercise',
+    subtitle: 'Draft - awaiting final schedule confirmation. Annual fire safety drill is tentatively planned for mid-March. All systems will be tested.',
+    category: 'Urgent',
+    pinned: false,
+    datePosted: '05 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 9,
+    title: 'Waste Management Workshop',
+    subtitle: 'Draft - coordinating with city waste department. A session to educate residents on new recycling guidelines and sustainable waste disposal practices.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '02 Feb 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 10,
+    title: 'Parking Lot Striping Project',
+    subtitle: 'Draft - reviewing contractor bids. Sections of the parking garage will be repainted. Resident notification letters will be sent once the schedule is fixed.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '28 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 11,
+    title: 'Water Quality Report Update',
+    subtitle: 'Draft - finalizing laboratory results. The annual water quality assessment is almost complete. Results will be shared with the community next week.',
+    category: 'General',
+    pinned: false,
+    datePosted: '25 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 12,
+    title: 'Gym Equipment Maintenance',
+    subtitle: 'Draft - scheduling with technician. Several cardio machines are due for service. A temporary partial closure of the fitness center may be required.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '20 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 13,
+    title: 'Roof Inspection Notice',
+    subtitle: 'Draft - awaiting weather forecast. Periodic roof maintenance and gutter cleaning are scheduled for the coming weeks to prevent leaks.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '15 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 14,
+    title: 'Community Garden Meeting',
+    subtitle: 'Draft - proposing agenda items. Join the discussion on how to improve our shared green spaces and prepare for the spring planting season.',
+    category: 'Events',
+    pinned: false,
+    datePosted: '10 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  },
+  {
+    id: 15,
+    title: 'Elevator Modernization Project',
+    subtitle: 'Draft - reviewing long-term project plan. We are in the early stages of planning a full elevator system upgrade over the next twelve months.',
+    category: 'Maintenance',
+    pinned: false,
+    datePosted: '05 Jan 2026 - Draft',
+    status: 'Draft',
+    author: 'Staff Portal',
+    views: 0
+  }
+])
+
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const currentPage = ref(1)
+const viewMode = ref('grid')
+const itemsPerPage = 6
+
+const filteredAnnouncements = computed(() => {
+  const filtered = announcements.value.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
+    // Filter to show only non-published items in the management view
+    const isNotPublished = item.status !== 'Published'
+    
+    return matchesSearch && matchesCategory && isNotPublished
+  })
+
+  // Sort: Pinned items first, then ordered originally
+  return filtered.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    return 0
+  })
+})
+
+const totalPages = computed(() => Math.ceil(filteredAnnouncements.value.length / itemsPerPage))
+
+const paginatedAnnouncements = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredAnnouncements.value.slice(start, end)
+})
+
+const pages = computed(() => {
+  const p = []
+  for (let i = 1; i <= totalPages.value; i++) {
+    p.push(i)
+  }
+  return p
+})
+
+const canGoNext = computed(() => currentPage.value < totalPages.value)
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (canGoNext.value) currentPage.value++
+}
+
+const goToPage = (p) => {
+  currentPage.value = p
+}
+
+const handleEdit = (item) => {
+  router.push({ name: 'editannouncement', params: { id: route.params.id, aid: item.id } })
+}
+
+const handleView = (item) => {
+  selectedAnnouncement.value = item
+  showViewModal.value = true
+}
+
+const handlePin = (item) => {
+  // Toggle pinned status temporarily
+  item.pinned = !item.pinned
+}
+
+const handleDelete = (item) => {
+  selectedAnnouncement.value = item
+  showDeleteModal.value = true
+}
+
+const onDeleteConfirm = () => {
+  if (selectedAnnouncement.value) {
+    announcements.value = announcements.value.filter(a => a.id !== selectedAnnouncement.value.id)
+    deleteSuccess.value = true
+  }
+  showDeleteModal.value = false
+  selectedAnnouncement.value = null
+}
+
+const fetchAnnouncementData = async () => {
+  console.log('Fetching announcements disabled to avoid 500 error')
+  /*
+  const data = await getAnnouncements(
+    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    router
+  )
+
+  if (data && data.length > 0) {
+    announcementManager.setAnnouncements(data)
+
+    const mapped = []
+
+    data.forEach((item) => {
+      const type = (item.type || item.category || 'General').toLowerCase()
+      // capitalize first letter of type
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      
+      mapped.push({
+        id: item.id || item.announcementId,
+        title: item.title || item.header || '',
+        subtitle: item.content || item.description || '',
+        category: item.tag || capitalizedType,
+        pinned: item.pinned || false,
+        datePosted: item.createdAt || item.date || 'Just now',
+        status: item.status || 'Published',
+        author: item.author || 'Staff Portal',
+        views: item.views || 0,
+        originalData: item
+      })
+    })
+
+    // For testing with mock data, we comment out the overwrite
+    // Or you can merge them: announcements.value = [...mapped, ...announcements.value]
+    
+    if (mapped.length > 0) {
+      announcements.value = mapped
+    }
+    
+    console.log('API data fetched:', mapped.length, 'items')
+  }
+  */
+}
+
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
@@ -33,125 +355,38 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
+  
+  await fetchAnnouncementData()
 })
-const parcels = ref([
-  {
-    id: 1,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 101,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 2,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH223456789X',
-    room: 102,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 3,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH323456789X',
-    room: 103,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 4,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH423456789X',
-    room: 104,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 5,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 105,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 6,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 106,
-    contact: '097-230-XXXX',
-    status: 'Picked Up',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 7,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 107,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 8,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 108,
-    contact: '097-230-XXXX',
-    status: 'Pending',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 9,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 109,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  },
-  {
-    id: 10,
-    recipient: 'Pimpajee SetXXXXXX',
-    tracking: 'TH123456789X',
-    room: 110,
-    contact: '097-230-XXXX',
-    status: 'Unclaimed',
-    date: '05 Oct 2025'
-  }
-])
-const isCollapsed = ref(false)
+
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 const showParcelScannerPage = async function () {
-  router.replace({ name: 'parcelscanner' })
+  router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
   showParcelScanner.value = true
 }
 const showManageParcelPage = async function () {
-  router.replace({ name: 'staffparcels' })
+  router.replace({ name: 'staffparcels', params: { id: route.params.id } })
   showStaffParcels.value = true
 }
 const ShowManageAnnouncementPage = async function () {
-  router.replace({ name: 'manageannouncement' })
+  router.replace({ name: 'manageannouncement', params: { id: route.params.id } })
   showManageAnnouncement.value = true
 }
+const showNewAnnouncementPage = async function () {
+  router.push({ name: 'addannouncement', params: { id: route.params.id } })
+}
 const ShowManageResidentPage = async function () {
-  router.replace({ name: 'manageresident' })
+  router.replace({ name: 'manageresident', params: { id: route.params.id } })
   showManageResident.value = true
 }
 const showParcelTrashPage = async function () {
-  router.replace({ name: 'trashparcels' })
+  router.replace({ name: 'trashparcels', params: { id: route.params.id } })
 }
 
 const showHomePageStaffWeb = async () => {
-  router.replace({ name: 'homestaff' })
+  router.replace({ name: 'homestaff', params: { id: route.params.id } })
   showHomePageStaff.value = true
 }
 
@@ -164,31 +399,49 @@ const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
 const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
+  router.replace({ name: 'dashboard', params: { id: route.params.id } })
   showDashBoard.value = true
 }
 const showProfileStaffPage = async function () {
-  router.replace({ name: 'profilestaff' })
+  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
   showProfileStaff.value = true
 }
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
+    <DeleteAnnouncement 
+      v-if="showDeleteModal"
+      :announcement-data="selectedAnnouncement"
+      :is-permanent="false"
+      @confirm-detail="onDeleteConfirm"
+      @cancel-detail="showDeleteModal = false"
+    />
+
+    <div class="fixed top-5 left-5 z-50">
+      <AlertPopUp
+        v-if="deleteSuccess"
+        :titles="'Delete Announcement to Trash is Successful.'"
+        message="Success!!"
+        styleType="green"
+        operate="deleteSuccessMessage"
+        @closePopUp="closePopUp"
+      />
+    </div>
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -223,7 +476,26 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -254,9 +526,9 @@ const showProfileStaffPage = async function () {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
-            <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
+            <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
                   width="25"
@@ -311,24 +583,28 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                     <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -363,33 +639,192 @@ const showProfileStaffPage = async function () {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
-           <div class="flex items-center space-x-2 mb-6">
-              <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"
-                      fill="#185DC0"
-                  />
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
+        <div class="max-w-7xl mx-auto">
+          <!-- Header & Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                 </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Announcement </h2>
+              </div>
+              <div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Manage Announcements
+                  </span>
+                </h2>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">6</div>
+                  <div class="text-sm font-semibold text-gray-500">Total Published</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">2</div>
+                  <div class="text-sm font-semibold text-gray-500">Pinned</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#F97316] bg-[#FFF7ED] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">1</div>
+                  <div class="text-sm font-semibold text-gray-500">Drafts</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
+              <div class="flex items-center gap-4">
+                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-[#1D355E]">248</div>
+                  <div class="text-sm font-semibold text-gray-500">Total Views</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Announcement Filters -->
+          <AnnouncementFilterBar
+            :modelSearch="searchQuery"
+            :modelCategory="selectedCategory"
+            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :viewMode="viewMode"
+            @update:search="searchQuery = $event"
+            @update:category="selectedCategory = $event"
+            @update:viewMode="viewMode = $event"
+            @new-announcement="showNewAnnouncementPage"
+          />
+
+          <!-- Category Filter -->
+          <div class="mb-6 w-full">
+            <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
+              
+              <button
+                @click="selectedCategory = ''"
+                class="order-last sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="!selectedCategory ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                All
+              </button>
+              
+              <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
+
+              <button
+                @click="selectedCategory = 'General'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'General' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'General' ? 'text-blue-300' : 'text-blue-500 bg-blue-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                General
+              </button>
+
+              <button
+                @click="selectedCategory = 'Maintenance'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Maintenance' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Maintenance' ? 'text-orange-300' : 'text-orange-500 bg-orange-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                Maintenance
+              </button>
+
+              <button
+                @click="selectedCategory = 'Events'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Events' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Events' ? 'text-purple-300' : 'text-purple-500 bg-purple-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                Events
+              </button>
+
+              <button
+                @click="selectedCategory = 'Urgent'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Urgent' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Urgent' ? 'text-red-300' : 'text-red-500 bg-red-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                Urgent
+              </button>
+            </div>
+          </div>
+
+          <!-- Announcement Table -->
+          <AnnouncementTable
+            :items="paginatedAnnouncements"
+            :pages="pages"
+            :page="currentPage"
+            :total="filteredAnnouncements.length"
+            :can-next="canGoNext"
+            :viewMode="viewMode"
+            @prev="prevPage"
+            @next="nextPage"
+            @go="goToPage"
+            @edit="handleEdit"
+            @delete="handleDelete"
+            @view="handleView"
+            @pin="handlePin"
+          />
         </div>
-
-        <div class="flex space-x-2 mb-4"></div>
-
-        <div class="overflow-x-auto bg-white rounded-[5px] shadow"></div>
-
-        <div class="flex justify-end space-x-2 mt-4 text-gray-700"></div>
       </main>
     </div>
   </div>
 
-  <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
+  <AnnouncementDetailModal
+    :isOpen="showViewModal"
+    :title="selectedAnnouncement?.title || ''"
+    :subtitle="''"
+    :content="selectedAnnouncement?.subtitle || ''"
+    :tag="selectedAnnouncement?.category || ''"
+    :status="selectedAnnouncement?.status || 'Published'"
+    :date="selectedAnnouncement?.datePosted || ''"
+    :author="selectedAnnouncement?.author || 'Staff Portal'"
+    :views="selectedAnnouncement?.views || 0"
+    :pinned="selectedAnnouncement?.pinned || false"
+    @close="showViewModal = false; selectedAnnouncement = null"
+  />
+
+  <Teleport to="body" v-if="showProfileStaff">
+    <UserInfo> </UserInfo>
+  </Teleport>
+  <Teleport to="body" v-if="showHomePageStaff"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>

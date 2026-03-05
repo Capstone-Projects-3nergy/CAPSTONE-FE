@@ -67,6 +67,11 @@ const mapParcelData = (data) => ({
   residentName: data.residentName || '',
   imageUrl: data.imageUrl || ''
 })
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -123,7 +128,7 @@ const showManageParcelPage = async () => {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async () => {
+const showManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -172,7 +177,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -180,12 +185,12 @@ function formatDateTime(datetimeStr) {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -220,7 +225,26 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -251,7 +275,7 @@ function formatDateTime(datetimeStr) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem
               title=" Manage Parcel"
@@ -293,7 +317,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -311,22 +335,25 @@ function formatDateTime(datetimeStr) {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                    <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -361,9 +388,9 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 bg-gray-100">
+      <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
         <div class="flex items-center space-x-2 mb-6">
-          <svg
+          <!-- <svg
             width="25"
             height="25"
             viewBox="0 0 25 25"
@@ -372,87 +399,113 @@ function formatDateTime(datetimeStr) {
           >
             <path
               d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
+              fill="currentColor"
             />
           </svg>
           <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Details</h2>
+          <h2 class="text-2xl font-bold text-[#185dc0]">Details</h2> -->
+           <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-black shadow-sm text-[#0E4B90]">
+           <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+              fill="#0E4B90"
+            />
+          </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                     Manage Parcel &gt; Details </span>
+                </h2>
+              </div>
         </div>
         <div class="flex flex-col mb-4 gap-4"></div>
 
-        <form class="bg-white p-6 rounded-[5px] shadow space-y-8">
+        <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm">
           <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium whitespace-all flex items-center h-[58px]">
                   {{ parcel?.trackingNumber || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.recipientName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.senderName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.parcelType || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Company</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.companyName || '-' }}
                 </p>
               </div>
-
+<!-- 
               <div>
-                <label class="block font-semibold mb-1">Parcel Image</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Image</label>
                 <div v-if="parcel?.imageUrl">
                   <img
                     :src="parcel.imageUrl"
                     alt="Parcel Image"
-                    class="w-48 h-48 object-cover border rounded-md"
+                    class="w-48 h-48 object-cover border border-gray-100 rounded-[2rem] shadow-lg shadow-blue-100/50 transition-transform duration-300 hover:scale-[1.02]"
                   />
                 </div>
                 <div v-else class="text-gray-400">No image available</div>
-              </div>
+              </div> -->
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.residentName || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Room Number</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.roomNumber || '-' }}
                 </p>
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Email</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ parcel?.email || '-' }}
                 </p>
               </div>
@@ -460,23 +513,26 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label class="block font-semibold mb-1">Received At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.receivedAt || '-') }}
                 </p>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Updated At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.updatedAt || '-') }}
                 </p>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Picked Up At</label>
-                <p class="w-full p-2 text-gray-700 bg-gray-50 rounded-md">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
+                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
                   {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                 </p>
               </div>
@@ -484,37 +540,41 @@ function formatDateTime(datetimeStr) {
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Status</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <p
-                  class="w-full p-2 text-white rounded-md"
+                <div
+                  class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs border"
                   :class="{
-                    'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                    'bg-blue-400': parcel?.status === 'RECEIVED',
-                    'bg-green-400': parcel?.status === 'PICKED_UP'
+                    'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                    'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
+                    'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
                   }"
                 >
-                  {{ parcel?.status || '-' }}
-                </p>
+                  {{ formatStatus(parcel?.status) }}
+                </div>
               </div>
             </div>
           </section>
-          <div class="flex items-center gap-3 ml-auto justify-end">
+
+          <div class="flex items-center gap-3 ml-auto justify-end pt-4">
             <ButtonWeb
               label="Go Back"
               color="gray"
               @click="backToManageParcels"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28 text-[#898989]"
+              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all"
             />
             <ButtonWeb
               label="Edit"
               color="blue"
               @click="showEditParacelDetail(parcel.parcelId)"
-              class="px-2 py-1 text-xs md:text-sm w-auto md:w-28"
+              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all shadow-lg shadow-blue-500/20"
             />
           </div>
-        </form>
+        </div>
       </main>
     </div>
   </div>

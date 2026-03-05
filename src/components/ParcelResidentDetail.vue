@@ -75,6 +75,11 @@ const mapParcelData = (data) => ({
   lastName: data.lastName || '',
   imageUrl: data.imageUrl || ''
 })
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
@@ -90,7 +95,9 @@ const showResidentParcelPage = async function () {
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
-
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const getParcelDetail = async (tid) => {
   if (!tid) return
 
@@ -241,20 +248,20 @@ const closePopUp = (operate) => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
+   <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -329,10 +336,10 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-                    <SidebarItem
+             <SidebarItem
               title="Parcel Verification"
               class="cursor-default"
-              @click="showParcelResidentVerificationPage "
+              @click="showParcelResidentVerificationPage"
             >
               <template #icon>
                  <svg
@@ -349,7 +356,11 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem
+              title="Announcements"
+              @click="showAnnouncementPage"
+              :collapsed="isCollapsed"
+            >
               <template #icon>
                 <svg
                   width="24"
@@ -366,8 +377,10 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
           </nav>
+
           <SidebarItem
             title="Log Out"
+            :collapsed="isCollapsed"
             class="flex justify-center mt-auto"
             @click="returnLoginPage"
           >
@@ -396,13 +409,29 @@ const closePopUp = (operate) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 bg-[#f8f9fb]">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-[#185dc0]">
-            Manage Parcel &gt; Details
+      <main class="flex-1 p-4 md:p-9 x-full bg-[#F8FAFC]">
+        <div class="flex flex-col gap-4 mb-6 px-2">
+           <div class="flex items-center gap-4">
+            <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+           <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+              fill="currentColor"
+            />
+          </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                  Manage Parcel &gt; Details </span>
           </h2>
         </div>
-
+      </div>
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="confirmSuccess"
@@ -423,70 +452,73 @@ const closePopUp = (operate) => {
         </div>
 
         <div
-          class="bg-white border border-gray-300 rounded-[5px] shadow-md p-10"
+          class="bg-white border border-blue-50/50 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] p-6 md:p-10 backdrop-blur-sm"
         >
-          <form class="space-y-10">
+          <form class="space-y-12">
             <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Information</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Information</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >trackingNumber</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >TrackingNumber</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.trackingNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recipient Name</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Recipient Name</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.recipientName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >roomNumber</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >RoomNumber</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.roomNumber || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1">email</label>
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.email || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >parcel type</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Parcel type</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.parcelType || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >company</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Company</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.companyName || '-' }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >sender name</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Sender name</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ parcel?.senderName || '-' }}
                   </p>
                 </div>
@@ -494,64 +526,70 @@ const closePopUp = (operate) => {
             </section>
 
             <section>
-              <h3 class="font-semibold text-lg mb-4">Date</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Date</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >recieved at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Recieved at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.receivedAt || '-') }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >pick up at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Pick up at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.pickedUpAt || '-') }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >confirm at</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Confirm at</label
                   >
-                  <p class="w-full p-2 bg-gray-50 rounded-md text-gray-700">
+                  <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                     {{ formatDateTime(parcel?.confirmAt || '-') }}
                   </p>
                 </div>
               </div>
             </section>
             <section>
-              <h3 class="font-semibold text-lg mb-4">Parcel Status</h3>
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-[#0E4B90] tracking-tight">Parcel Status</h3>
+              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label class="block text-sm text-gray-500 mb-1"
-                    >current status</label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Current status</label
                   >
-                  <p
-                    class="w-full p-2 rounded-md text-white"
+                  <div
+                    class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs flex items-center border"
                     :class="{
-                      'bg-yellow-400': parcel?.status === 'WAITING_FOR_STAFF',
-                      'bg-blue-400': parcel?.status === 'RECEIVED',
-                      'bg-green-400': parcel?.status === 'PICKED_UP'
+                      'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
+                      'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
+                      'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
                     }"
                   >
-                    {{ parcel?.status || '-' }}
-                  </p>
+                    {{ formatStatus(parcel?.status) }}
+                  </div>
                 </div>
               </div>
             </section>
 
-            <div class="flex justify-end space-x-3 pt-4">
+            <div class="flex justify-end space-x-3 pt-6">
               <ButtonWeb
                 label="Back"
                 color="gray"
-                class="text-[#898989]"
+                class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
                 @click="showHomePageResidentWeb"
               />
               <ButtonWeb
@@ -559,6 +597,7 @@ const closePopUp = (operate) => {
                 type="button"
                 label="Confirm"
                 color="blue"
+                class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
                 @click="confirmParcelPopUp(parcel)"
               />
             </div>

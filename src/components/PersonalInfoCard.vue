@@ -5,7 +5,8 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
+import { LINE_CONFIG } from '@/lineApi/line.config.js'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -22,6 +23,7 @@ const loginManager = useAuthManager()
 const activeTab = ref('profile')
 const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
+const showLineSuccessPopup = ref(false)
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -104,17 +106,18 @@ const hasProfileImageUrl = computed(
 )
 const menuClass = (tab) => {
   return [
-    'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
+    'w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 flex items-center gap-3',
     activeTab.value === tab
-      ? 'bg-[#D9D9D9] text-[#60a5fa]'
-      : 'text-gray-500 hover:bg-gray-100'
+      ? 'bg-blue-50 text-[#185DC0] shadow-sm shadow-blue-100/50 scale-[1.02]'
+      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:translate-x-1'
   ]
 }
 
 // แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
-  if (!value || value.trim() === '') return 'ERROR'
-  return value.toUpperCase()
+  if (!value || value.trim() === '') return 'Error'
+  const s = value.toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 // กำหนดสีตามสถานะ
@@ -122,9 +125,9 @@ const statusClass = (value) => {
   const status = displayStatus(value)
 
   return {
-    'bg-green-400': status === 'ACTIVE',
-    'bg-gray-400': status === 'INACTIVE',
-    'bg-red-400': status === 'ERROR'
+    'bg-gradient-to-r from-emerald-400 to-green-500 shadow-sm shadow-green-200': status === 'Active',
+    'bg-gradient-to-r from-gray-400 to-gray-500 shadow-sm shadow-gray-200': status === 'Inactive',
+    'bg-gradient-to-r from-red-400 to-rose-500 shadow-sm shadow-red-200': status === 'Error'
   }
 }
 onMounted(async () => {
@@ -161,6 +164,28 @@ onMounted(async () => {
     userManager.setStaffs(mapped.filter((u) => u.role === 'STAFF'))
   }
 })
+
+// ✅ ย้ายออกมานอก onMounted เพื่อให้ทำงานได้ทุกเคส (รวมถึง Resident)
+watch(
+  () => route.query.line,
+  (status) => {
+    console.log('Detected LINE status in URL:', status)
+    if (status === 'success') {
+      showLineSuccessPopup.value = true
+      // ล้าง query string ออกหลังจากแสดง popup แล้ว
+      setTimeout(() => {
+        router.replace({ query: { ...route.query, line: undefined } })
+      }, 1000)
+    }
+  },
+  { immediate: true }
+)
+
+const addLineOA = () => {
+  // 👈 ไอดีบอทจริง @788eafre
+  window.open('https://lin.ee/kCqc35o/@446subfw', '_blank')
+  showLineSuccessPopup.value = false
+}
 
 const notifications = [
   {
@@ -339,13 +364,67 @@ const userRoleLabel = computed(() => {
   if (props.residentDetail) return 'Resident Name'
   return loginManager.user?.role === 'STAFF' ? 'Staff Name' : 'Resident Name'
 })
+
+const effectiveLineId = computed(() => {
+  // ✅ ตรวจสอบจาก AuthStore ก่อนเสมอ เพื่อให้สถานะเปลี่ยนทันทีหลัง Connect สำเร็จ
+  if (props.useCurrentProfile && loginManager.user?.lineId) {
+    return loginManager.user.lineId
+  }
+  
+  if (props.useCurrentProfile) {
+    // Priority: Store > Current Profile > Props
+    return loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId || null
+  }
+  // สำหรับการดูโปรไฟล์คนอื่น
+  return props.lineId || routeUser.value?.lineId || null
+})
+
+const handleLineAction = () => {
+  if (effectiveLineId.value) {
+    // กรณีที่เชื่อมต่อแล้ว: เปิดโปรไฟล์ LINE หรือแอดเพื่อน
+    window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
+  } else {
+    // กรณีที่ยังไม่ได้เชื่อมต่อ: ไปยังหน้า LINE Login ของ Backend เพื่อผูกบัญชี
+    reconnectLine()
+  }
+}
+
+const reconnectLine = async () => {
+  const token = loginManager.user?.accessToken
+  if (!token) {
+    console.error('No firebase token available')
+    return
+  }
+
+  const url = await getLineConnectUrl(token, router)
+  if (url) {
+    // Backend returns the full authorize URL
+    window.location.href = url
+  } else {
+    console.error('Failed to get LINE login URL from backend')
+  }
+}
+
+/* 
+const handleUnlink = async () => {
+  if (confirm('Are you sure you want to disconnect your LINE account?')) {
+    const success = await unlinkLineAccount(router)
+    if (success) {
+      // Refresh user profile or redirect
+      window.location.reload()
+    } else {
+      alert('Failed to disconnect LINE account. Please try again.')
+    }
+  }
+}
+*/
 </script>
 <template>
   <div class="w-full mx-auto px-4">
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
@@ -364,7 +443,7 @@ const userRoleLabel = computed(() => {
               {{ userInitial }}
             </div>
           </div>
-          <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+          <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
             {{ userRoleLabel }}
           </p>
           <p class="mt-4 text-black font-semibold text-lg text-gray-500">
@@ -377,7 +456,7 @@ const userRoleLabel = computed(() => {
           <button
             @click="activeTab = 'profile'"
             :class="menuClass('profile')"
-            class="relative flex items-center gap-3 w-full cursor-pointer"
+            class="relative w-full cursor-pointer"
           >
             <svg
               width="24"
@@ -405,33 +484,46 @@ const userRoleLabel = computed(() => {
             </svg>
             <span>Personal Information</span>
           </button>
+          
+          <button
+            @click="activeTab = 'line'"
+            :class="menuClass('line')"
+            class="relative w-full cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+            <span>Line Account</span>
+          </button>
         </div>
       </div>
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
       >
         <!-- Header -->
-        <div class="flex items-center gap-3 mb-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
-            {{ title }}
-          </h2>
-          <div class="relative group">
-            <svg
-              class="cursor-pointer font-semibold hover:text-[#8C8F91] transition"
-              @click="$emit('edit')"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="currentcolor"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                fill="#8C8F91"
-              />
-            </svg>
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-4">
+            <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+            <h3 class="font-extrabold text-xl text-black tracking-tight">
+              {{ title }}
+            </h3>
+            <div class="relative group">
+              <div 
+                class="p-2 cursor-pointer text-[#8C8F91] hover:text-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center rounded-full hover:bg-blue-50"
+                @click="$emit('edit')"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentcolor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+                  />
+                </svg>
+              </div>
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
             >
@@ -449,42 +541,43 @@ const userRoleLabel = computed(() => {
             </div>
           </div>
         </div>
+      </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7 truncate">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ firstName }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ lastName }}
             </p>
           </div>
 
           <div>
             <label
-              class="flex items-center gap-2 text-sm text-black font-semibold mb-1"
+              class="flex items-center gap-2 text-sm font-bold text-gray-500 mb-2 ml-1"
             >
               <span>Email</span>
 
-              <span class="flex items-center gap-1 text-green-600 font-medium">
+              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="12"
+                  height="12"
                   viewBox="0 0 24 24"
                   class="shrink-0"
                 >
-                  <g fill="none" stroke="currentColor" stroke-width="1.5">
+                  <g fill="none" stroke="currentColor" stroke-width="2">
                     <path
                       d="M14.049 5.54a1 1 0 0 1 1.071.443l.994 1.587a1 1 0 0 0 .316.316l1.587.994a1 1 0 0 1 .444 1.072l-.42 1.824a1 1 0 0 0 0 .448l.42 1.825a1 1 0 0 1-.444 1.07l-1.587.995a1 1 0 0 0-.316.316l-.994 1.587a1 1 0 0 1-1.071.444l-1.825-.42a1 1 0 0 0-.447 0l-1.825.42a1 1 0 0 1-1.071-.444l-.994-1.587a1 1 0 0 0-.317-.316l-1.586-.994a1 1 0 0 1-.444-1.071l.419-1.825a1 1 0 0 0 0-.448l-.42-1.824a1 1 0 0 1 .445-1.072l1.586-.994a1 1 0 0 0 .317-.316l.994-1.587a1 1 0 0 1 1.07-.443l1.826.419a1 1 0 0 0 .447 0z"
                     />
@@ -496,63 +589,56 @@ const userRoleLabel = computed(() => {
                   </g>
                 </svg>
 
-                <span class="text-xs leading-none"> verified </span>
+                <span> Verified </span>
               </span>
             </label>
 
-            <div class="flex items-center gap-2">
-              <p class="font-medium break-all text-[#8C8F91]">
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">
                 {{ email }}
               </p>
             </div>
           </div>
 
           <div v-if="loginManager.user.role === 'STAFF'">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
-            <p class="text-[#8C8F91] font-medium break-all">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ position }}
             </p>
           </div>
           <div v-if="roomNumber !== null">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ roomNumber }}
             </p>
           </div>
           <div
             v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ dormName }}
             </p>
           </div>
 
-          <div>
-            <label class="block text-sm text-black font-semibold mb-1">
-              Line ID
-            </label>
-            <p class="text-[#8C8F91] font-medium">
-              {{ display(lineId) }}
-            </p>
-          </div>
+          <!-- line removed from here and moved to a new tab -->
 
           <div>
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
-            <p class="text-[#8C8F91] font-medium">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
               {{ display(phoneNumber) }}
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-sm text-black font-semibold"> Status: </label>
+          <!-- <div class="flex items-center gap-2 mt-2">
+            <label class="text-sm font-bold text-gray-500"> Status: </label>
 
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
@@ -560,17 +646,153 @@ const userRoleLabel = computed(() => {
             >
               {{ displayStatus(safeStatus) }}
             </span>
+          </div> -->
+        </div>
+      </div>
+      <div
+        v-if="activeTab === 'line'"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
+      >
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-2 h-8 bg-gradient-to-b from-[#00b900] to-green-400 rounded-full"></div>
+          <h3 class="font-extrabold text-xl text-black tracking-tight">
+            Line Account
+          </h3>
+          <div class="relative group ml-auto">
+            <!-- <div 
+              class="p-2 cursor-pointer text-[#8C8F91] hover:text-[#00b900] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center rounded-full hover:bg-green-50"
+              @click="$emit('edit')"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentcolor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
+                />
+              </svg>
+            </div> -->
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] group">
+            <!-- Header section -->
+            <div class="flex items-center gap-5 mb-8 relative z-10">
+              <div class="w-14 h-14 rounded-2xl bg-[#00b900] flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
+                    <path d="M40 176v-96h18v80h24v16H40zm48-96h18v96H88V80zm32 0h20l24 40V80h18v96h-18l-26-44v44h-18V80zm64 0h40v16h-22v24h20v16h-20v24h24v16h-42V80z" fill="#00b900"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none mb-2">LINE Notification</h3>
+                <p class="text-xs sm:text-sm text-gray-500 font-medium break-words">Smart alerts for parcels & announcements</p>
+              </div>
+            </div>
+
+            <!-- Main Connection Status -->
+            <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <!-- Status -->
+                <div class="flex items-center gap-4">
+                  <div class="relative">
+                    <div :class="[
+                      'w-4 h-4 rounded-full',
+                      effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
+                    ]"></div>
+                    <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
+                  </div>
+                  <div>
+                    <span class="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
+                    <span :class="[
+                      'text-lg sm:text-xl font-black transition-colors duration-300',
+                      effectiveLineId ? 'text-green-600' : 'text-gray-500'
+                    ]">
+                      {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons Area -->
+                <div class="flex flex-col items-center gap-3">
+                  <button
+                    @click="handleLineAction"
+                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
+                  >
+                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                  
+                  <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
+                    <!-- Secondary Action: Switch Account -->
+                    <button 
+                      @click="reconnectLine"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
+                        <path d="M21 2v6h-6"></path>
+                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                        <path d="M3 22v-6h6"></path>
+                        <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
+                      </svg>
+                      <span>Switch Account</span>
+                    </button>
+
+                    <!-- Unlink Action (Commented out for future use)
+                    <button 
+                      @click="handleUnlink"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/unlink:scale-110 transition-transform duration-300">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                      </svg>
+                      <span>Disconnect</span>
+                    </button>
+                    -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Background Decoration -->
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl group-hover:bg-green-100/80 transition-colors duration-700 pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/50 transition-colors duration-700 pointer-events-none"></div>
+          </div>
+
+          <!-- Helper Banner -->
+          <div class="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-2xl border border-blue-100/50 relative overflow-hidden group/tip">
+            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-500 shadow-sm shadow-blue-200/50 shrink-0">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <div class="relative z-10">
+              <h4 class="text-sm font-bold text-blue-900 mb-1">Instant Notifications</h4>
+              <p class="text-[11px] text-blue-700/70 leading-relaxed font-medium">
+                Receive automated updates for parcel arrivals and new announcements, right on your LINE app.
+              </p>
+            </div>
           </div>
         </div>
       </div>
       <div
         v-if="activeTab === 'notify'"
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
-        <!-- Header -->
-        <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-          Notifications
-        </h2>
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+          <h3 class="font-extrabold text-xl text-black tracking-tight">
+            Notifications
+          </h3>
+        </div>
         <!-- Tabs -->
         <div class="flex gap-2 mb-6">
           <button
@@ -603,12 +825,12 @@ const userRoleLabel = computed(() => {
           <div
             v-for="(item, index) in filteredNotifications"
             :key="index"
-            class="flex items-start gap-4 bg-[#F4F6F8] rounded-md px-5 py-4 cursor-pointer"
+            class="flex items-start gap-4 bg-white border border-gray-50 rounded-2xl px-5 py-4 cursor-pointer hover:shadow-md hover:border-blue-100 transition-all duration-300 group shadow-sm"
           >
             <!-- LEFT ICON -->
             <div class="mt-1">
               <span
-                class="inline-flex items-center justify-center w-9 h-9 rounded text-white"
+                class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110"
                 :class="badgeClass(item.type)"
                 v-html="badgeIcon(item.type)"
               />
@@ -616,22 +838,25 @@ const userRoleLabel = computed(() => {
 
             <!-- CONTENT -->
             <div class="flex-1">
-              <p class="text-sm font-semibold text-gray-800">
-                {{ item.label }}
-              </p>
+              <div class="flex items-center justify-between mb-0.5">
+                <p class="text-sm font-bold text-gray-800">
+                  {{ item.label }}
+                </p>
+                <span class="text-[10px] text-gray-400 font-medium">
+                  {{ item.time }}
+                </span>
+              </div>
 
-              <p class="text-sm text-gray-500 mt-0.5">
+              <p class="text-sm text-gray-500 line-clamp-2">
                 {{ item.title }}
               </p>
 
-              <p class="text-xs text-red-500 mt-1">
-                {{ item.user }}
-              </p>
-            </div>
-
-            <!-- TIME -->
-            <div class="text-xs text-gray-400 whitespace-nowrap">
-              {{ item.time }}
+              <div class="flex items-center gap-2 mt-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-tight">
+                  {{ item.user }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -640,10 +865,10 @@ const userRoleLabel = computed(() => {
     <div v-if="residentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <p class=" hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-2">
+          <p class=" hidden md:block text-sm font-extrabold text-[#0E4B90] pt-2">
             {{ userRoleLabel }}
           </p>
           <h2 class="hidden md:block text-xl font-semibold text-gray-500">
@@ -671,7 +896,7 @@ const userRoleLabel = computed(() => {
                 {{ userInitial }}
               </div>
             </div>
-              <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+              <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
           {{ userRoleLabel }}
         </p>
             <p
@@ -683,72 +908,92 @@ const userRoleLabel = computed(() => {
 
           <!-- ================= RIGHT : Personal Information ================= -->
           <div class="md:w-2/3">
-            <div class="flex items-center gap-3 mb-8">
-              <h2
-                class="md:block text-xl sm:text-2xl font-semibold text-gray-800"
-              >
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">
                 User Information
-              </h2>
+              </h3>
             </div>
 
-            <!-- Info Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >First Name</label
                 >
-                <p class="text-[#8C8F91] font-medium">{{ firstName }}</p>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ firstName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Last Name</label>
-                <p class="text-[#8C8F91] font-medium">{{ lastName }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Last Name</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ lastName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Email</label>
-                <p class="text-[#8C8F91] font-medium break-all">{{ email }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ email }}</p>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Room Number</label
                 >
-                <p class="text-[#8C8F91] font-medium">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                   {{ display(roomNumber) }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Dormitory</label
                 >
-                <p class="text-[#8C8F91] font-medium">{{ dormName }}</p>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                  {{ dormName }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1">Line ID</label>
-                <p class="text-[#8C8F91] font-medium">{{ display(lineId) }}</p>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Line </label>
+                <div v-if="effectiveLineId" class="flex items-center h-[58px]">
+                  <div
+                    class="flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 bg-green-50 text-green-700 hover:bg-green-100 border border-green-100 font-bold max-w-fit"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#00b900"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#00b900"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                    <span>Linked</span>
+                  </div>
+                </div>
+                <div v-else class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div
+                    class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 text-gray-400 cursor-default border border-transparent font-medium max-w-fit shadow-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#9CA3AF"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#9CA3AF"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                    <span>Not Linked</span>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-1"
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Phone Number</label
                 >
-                <p class="text-[#8C8F91] font-medium">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
                   {{ display(phoneNumber) }}
                 </p>
               </div>
-              <!-- Buttons -->
-              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end">
+              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end pt-4">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
+                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:bg-gray-50 rounded-2xl transition-all"
                   label="Cancel"
                   color="gray"
                   @click="$emit('cancel')"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
+                  class="text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg shadow-blue-500/10 transition-all"
                   label="Edit"
                   color="blue"
                   @click="$emit('edit')"
@@ -760,4 +1005,49 @@ const userRoleLabel = computed(() => {
       </div>
     </div>
   </div>
+
+  <!-- ✅ Popup แจ้งเตือนเชื่อมต่อสำเร็จและให้ Add OA -->
+  <Transition
+    enter-active-class="transition duration-300 ease-out"
+    enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100"
+    leave-active-class="transition duration-200 ease-in"
+    leave-from-class="opacity-100 scale-100"
+    leave-to-class="opacity-0 scale-95"
+  >
+    <div v-if="showLineSuccessPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showLineSuccessPopup = false"></div>
+      
+      <!-- Modal Content -->
+      <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] border border-white/20">
+        <!-- Success Icon -->
+        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h3 class="text-3xl font-[900] text-gray-900 mb-3 tracking-tight">LINE Connected!</h3>
+        <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive notifications.</p>
+        
+        <div class="space-y-4">
+          <button 
+            @click="addLineOA"
+            class="w-full py-5 bg-[#00b900] hover:bg-[#00a300] text-white font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
+            Add Tractify OA
+          </button>
+          
+          <button 
+            @click="showLineSuccessPopup = false"
+            class="w-full py-4 text-gray-400 hover:text-gray-600 font-bold transition-colors cursor-pointer"
+          >
+            Remind me later
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>

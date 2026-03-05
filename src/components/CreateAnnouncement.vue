@@ -1,243 +1,428 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import LoginPage from './LoginPage.vue'
-import UserInfo from '@/components/UserInfo.vue'
-import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
-import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
-import { getAnnouncements } from '@/utils/fetchUtils.js'
+import { useAuthManager } from '@/stores/AuthManager.js'
+import AlertPopUp from './AlertPopUp.vue'
+import LoadingPopUp from './LoadingPopUp.vue'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-
-const getCategoryBadgeClass = (category) => {
-  switch (category) {
-    case 'Urgent': return 'bg-[#FEF2F2] text-[#EF4444]'
-    case 'Maintenance': return 'bg-[#FFFBEB] text-[#F59E0B]'
-    case 'Events': return 'bg-[#EFF6FF] text-[#3B82F6]'
-    case 'General': return 'bg-[#F0FDF4] text-[#10B981]'
-    default: return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getCategoryIcon = (category) => {
-  switch (category) {
-    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`
-    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>`
-    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>`
-    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>`
-    default: return ''
-  }
-}
+import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
+import ButtonWeb from './ButtonWeb.vue'
 
 const loginManager = useAuthManager()
+const notificationManager = useNotificationManager()
 const announcementManager = useAnnouncementManager()
-const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
-const showHomePageResident = ref(false)
-const tab = ref(route.query.tab || 'all')
+const error = ref(false)
+const isCollapsed = ref(false)
+const isCategoryOpen = ref(false)
 
-watch(
-  () => route.query.tab,
-  (newTab) => {
-    if (newTab) {
-      tab.value = newTab
-    }
-  }
-)
-const currentSlide = ref(1)
-const bannerAnnouncements = computed(() => {
-  return allPublishedAnnouncements.value.slice(0, 4)
-})
+// Form Data
+const title = ref('')
+const subtitle = ref('')
+const category = ref('')
+const content = ref('')
+const date = ref('')
 
-// Modal State
-const isModalOpen = ref(false)
-const selectedAnnouncement = ref(null)
+const targetAudience = ref('All')
+const isPinned = ref(false)
+const notify = ref(true)
 
-// Calendar Modal State
-const isCalendarOpen = ref(false)
+const categories = ['General', 'Maintenance', 'Events', 'Urgent']
 
-// Archive Modal State
-const isArchiveOpen = ref(false)
+const addSuccess = ref(false)
+const isLoading = ref(false)
+const titleError = ref(false)
+const titleLengthError = ref(false)
+const titleThaiNumError = ref(false)
+const subtitleLengthError = ref(false)
+const subtitleThaiNumError = ref(false)
+const categoryError = ref(false)
+const contentError = ref(false)
+const contentLengthError = ref(false)
+const fileSizeError = ref(false)
+const imageFile = ref(null)
+const imagePreview = ref('')
+const contentArea = ref(null)
 
-const searchQuery = ref('')
-
-const currentDate = ref('')
-const currentMonthName = ref('')
-const currentDay = ref(1)
-const calendarDays = ref([])
-
-const generateCalendar = () => {
-  const date = new Date()
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
+const formatText = (style) => {
+  if (!contentArea.value) return
   
-  const days = []
-  for (let i = 0; i < firstDay; i++) {
-    days.push(null)
+  const textarea = contentArea.value
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const selectedText = content.value.substring(start, end)
+  let before = content.value.substring(0, start)
+  let after = content.value.substring(end)
+  let newText = ""
+
+  switch(style) {
+    case 'bold': newText = `**${selectedText || 'ข้อความหนา'}**`; break;
+    case 'italic': newText = `*${selectedText || 'ข้อความเอียง'}*`; break;
+    case 'underline': newText = `<u>${selectedText || 'ข้อความขีดเส้นใต้'}</u>`; break;
+    case 'list': newText = `\n- ${selectedText || 'Item 1'}\n- Item 2`; break;
+    case 'ordered': newText = `\n1. ${selectedText || 'Step 1'}\n2. Step 2`; break;
+    case 'link': 
+       const url = prompt("Enter URL:", "https://")
+       if (url) {
+         newText = `[${selectedText || 'คลิกที่นี่'}](${url})`; 
+       } else {
+         return;
+       }
+       break;
+    case 'emoji': 
+       const emojis = ['😊', '📦', '🚀', '📢', '✨'];
+       newText = emojis[Math.floor(Math.random() * emojis.length)];
+       break;
   }
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i)
-  }
-  calendarDays.value = days
-  currentDay.value = date.getDate()
-  currentMonthName.value = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-}
 
-const formatDate = (dateString) => {
-  if (!dateString || dateString === 'Just now') return 'Just now'
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) return dateString
-  const d = date.getDate()
-  const m = date.toLocaleDateString('en-US', { month: 'short' })
-  const y = date.getFullYear()
-  return `${d} ${m} ${y}`
-}
-
-const updateDate = () => {
-  const date = new Date()
-  const day = date.getDate()
-  const month = date.toLocaleDateString('en-US', { month: 'short' })
-  const year = date.getFullYear()
-  currentDate.value = `${day} ${month} ${year}`
-}
-let dateInterval
-
-const allPublishedAnnouncements = computed(() => {
-  return announcementManager.announcements
-    .filter(item => item.status === 'Published')
-    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .map(item => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = item.createdAt || item.date || 'Just now'
-      
-      return {
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.subtitle || item.description || '',
-        content: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        date: formatDate(rawDate),
-        views: item.views || 0,
-        author: item.author || 'Staff Portal',
-        type: type.includes('event') ? 'event' : 'news'
-      }
-    })
-})
-
-const filteredAnnouncements = computed(() => {
-  const query = searchQuery.value.toLowerCase()
-  return allPublishedAnnouncements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(query) || 
-                          item.subtitle.toLowerCase().includes(query)
-    const matchesTab = tab.value === 'all' || 
-                      (tab.value === 'event' && item.type === 'event') ||
-                      (tab.value === 'news' && item.type === 'news')
-    return matchesSearch && matchesTab
-  })
-})
-
-const filteredEvents = computed(() => {
-  return filteredAnnouncements.value.filter(e => e.type === 'event')
-})
-
-const filteredNews = computed(() => {
-  return filteredAnnouncements.value.filter(n => n.type === 'news')
-})
-
-const openModal = (item) => {
-  selectedAnnouncement.value = {
-    title: item.title,
-    subtitle: item.subtitle,
-    content: item.content,
-    tag: item.category,
-    date: item.date
-  }
-  isModalOpen.value = true
-}
-
-const closeModal = () => {
-  isModalOpen.value = false
+  content.value = before + newText + after
+  
+  // Set cursor position after formatting
   setTimeout(() => {
-    selectedAnnouncement.value = null
-  }, 300)
+    textarea.focus()
+    const newPos = start + newText.length
+    textarea.setSelectionRange(newPos, newPos)
+  }, 0)
 }
 
-const showResidentParcels = ref(false)
-const returnLogin = ref(false)
-const showProfileResident = ref(false)
-const showHomePageResidentWeb = async function () {
-  router.replace({ name: 'home' })
-  showHomePageResident.value = true
+const isFormValid = computed(() => {
+  return title.value.trim() !== '' && category.value !== '' && date.value !== '' && content.value.trim() !== ''
+})
+
+const closePopUp = (operate) => {
+  if (operate === 'successMessage') { addSuccess.value = false }
+  if (operate === 'titleError') { titleError.value = false }
+  if (operate === 'titleLengthError') { titleLengthError.value = false }
+  if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
+  if (operate === 'categoryError') { categoryError.value = false }
+  if (operate === 'contentError') { contentError.value = false }
+  if (operate === 'fileSizeError') { fileSizeError.value = false }
+  if (operate === 'errorMessage') { error.value = false }
 }
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
+
+const MAX_TITLE_LENGTH = 100
+const MAX_CONTENT_LENGTH = 2000
+
+const handleTitleInput = (event) => {
+  let val = event.target.value
+  
+  if (/[๐-๙]/.test(val)) {
+    titleThaiNumError.value = true
+    val = val.replace(/[๐-๙]/g, '')
+    setTimeout(() => {
+      titleThaiNumError.value = false
+    }, 5000)
+  }
+
+  if (val.length > MAX_TITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_TITLE_LENGTH)
+    title.value = sliced
+    event.target.value = sliced
+    titleLengthError.value = true
+    setTimeout(() => {
+      titleLengthError.value = false
+    }, 5000)
+  } else {
+    title.value = val
+    event.target.value = val
+  }
 }
-const showNotificationPage = async () => {
-  router.replace({ name: 'notification' })
+
+const MAX_SUBTITLE_LENGTH = 150
+
+const handleSubtitleInput = (event) => {
+  let val = event.target.value
+  
+  // if (/[๐-๙]/.test(val)) {
+  //   subtitleThaiNumError.value = true
+  //   val = val.replace(/[๐-๙]/g, '')
+  //   setTimeout(() => {
+  //     subtitleThaiNumError.value = false
+  //   }, 5000)
+  // }
+
+  if (val.length > MAX_SUBTITLE_LENGTH) {
+    const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
+    subtitle.value = sliced
+    event.target.value = sliced
+    subtitleLengthError.value = true
+    setTimeout(() => {
+      subtitleLengthError.value = false
+    }, 5000)
+  } else {
+    subtitle.value = val
+    event.target.value = val
+  }
 }
-const showParcelResidentVerificationPage = async () => {
-  router.replace({ name: 'parcelresidentverification' })
+
+const handleContentInput = (event) => {
+  const val = event.target.value
+  if (val.length > MAX_CONTENT_LENGTH) {
+    const sliced = val.slice(0, MAX_CONTENT_LENGTH)
+    content.value = sliced
+    event.target.value = sliced
+    contentLengthError.value = true
+    setTimeout(() => {
+      contentLengthError.value = false
+    }, 5000)
+  } else {
+    content.value = val
+  }
+}
+
+const onFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    fileSizeError.value = true
+    imageFile.value = null
+    imagePreview.value = ''
+    setTimeout(() => {
+      fileSizeError.value = false
+    }, 5000)
+    return
+  }
+  
+  // Basic validation for image type
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file.')
+    return
+  }
+
+  imageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    imagePreview.value = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeImage = () => {
+  imageFile.value = null
+  imagePreview.value = ''
+}
+
+// Sidebar Logic
+const windowWidth = ref(window.innerWidth)
+const checkScreen = () => {
+  windowWidth.value = window.innerWidth
+  isCollapsed.value = windowWidth.value < 768
+}
+
+const buttonSize = computed(() => {
+  return windowWidth.value < 640 ? 'xs' : 'md'
+})
+
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen)
+})
+
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+
+// Navigation
+const goBack = () => {
+  router.back()
+}
+
+const submitAnnouncement = async () => {
+  if (!title.value.trim()) {
+    titleError.value = true
+    return
+  }
+  if (!category.value) {
+    categoryError.value = true
+    return
+  }
+  if (!content.value.trim()) {
+    contentError.value = true
+    return
+  }
+
+  try {
+    isLoading.value = true
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      title: title.value,
+      subtitle: subtitle.value,
+      category: category.value,
+      content: content.value,
+      datePosted: date.value || new Date().toISOString(),
+      targetAudience: targetAudience.value,
+      isPinned: isPinned.value,
+      notify: notify.value,
+      status: 'Published'
+    }
+
+    if (imageFile.value) {
+      body.coverImage = imageFile.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const savedAnnouncement = await addAnnouncementWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      body,
+      router
+    )
+
+    if (!savedAnnouncement) {
+      isLoading.value = false
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 10000)
+      return
+    }
+
+    announcementManager.addAnnouncement(savedAnnouncement)
+
+    // Send Line notification and fetch updated data
+    try {
+      await notificationManager.notifyAnnouncementCreated(body, router)
+    } catch (lineError) {
+      console.error('Notification failed:', lineError)
+    }
+
+    isLoading.value = false
+    addSuccess.value = true
+    setTimeout(() => {
+      addSuccess.value = false
+      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+    }, 10000)
+  } catch (err) {
+    console.error('Submission failed:', err)
+    isLoading.value = false
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+  }
+}
+
+const saveDraft = async () => {
+  titleError.value = false
+  categoryError.value = false
+  contentError.value = false
+  
+  let hasError = false
+  if (!title.value.trim()) { titleError.value = true; hasError = true }
+  if (!category.value) { categoryError.value = true; hasError = true }
+  if (!content.value.trim()) { contentError.value = true; hasError = true }
+  
+  if (hasError) {
+    setTimeout(() => {
+      titleError.value = false
+      categoryError.value = false
+      contentError.value = false
+    }, 5000)
+    return
+  }
+
+  try {
+    isLoading.value = true
+    // -----------------------
+    // payload
+    // -----------------------
+    const body = {
+      title: title.value,
+      subtitle: subtitle.value,
+      category: category.value,
+      content: content.value,
+      datePosted: date.value || new Date().toISOString(),
+      targetAudience: targetAudience.value,
+      isPinned: isPinned.value,
+      notify: notify.value,
+      status: 'Draft'
+    }
+
+    if (imageFile.value) {
+      body.coverImage = imageFile.value
+    }
+
+    // -----------------------
+    // API call
+    // -----------------------
+    const savedAnnouncement = await addAnnouncementWithFile(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      body,
+      router
+    )
+
+    if (!savedAnnouncement) {
+      isLoading.value = false
+      error.value = true
+      setTimeout(() => {
+        error.value = false
+      }, 10000)
+      return
+    }
+
+    announcementManager.addAnnouncement(savedAnnouncement)
+    
+    isLoading.value = false
+    addSuccess.value = true
+    setTimeout(() => {
+      addSuccess.value = false
+      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
+    }, 10000)
+  } catch (err) {
+    console.error('Save draft failed:', err)
+    isLoading.value = false
+    error.value = true
+    setTimeout(() => {
+      error.value = false
+    }, 10000)
+  }
+}
+const handleCancel = () => {
+  router.back()
+}
+// Sidebar Navigation (copied from ManageAnnouncement for consistency)
+const showParcelScannerPage = async function () {
+  router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
+}
+const showManageParcelPage = async function () {
+  router.replace({ name: 'staffparcels', params: { id: route.params.id } })
+}
+const ShowManageAnnouncementPage = async function () {
+  router.replace({ name: 'manageannouncement', params: { id: route.params.id } })
+}
+const ShowManageResidentPage = async function () {
+  router.replace({ name: 'manageresident', params: { id: route.params.id } })
+}
+const showParcelTrashPage = async function () {
+  router.replace({ name: 'trashparcels', params: { id: route.params.id } })
+}
+const showHomePageStaffWeb = async () => {
+  router.replace({ name: 'homestaff', params: { id: route.params.id } })
+}
+const showDashBoardPage = async function () {
+  router.replace({ name: 'dashboard', params: { id: route.params.id } })
+}
+const showProfileStaffPage = async function () {
+  router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showProfileResidentPage = async function () {
-  router.replace({
-    name: 'profileresident'
-  })
-  showProfileResident.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-  if (dateInterval) clearInterval(dateInterval)
-})
-const fetchAnnouncementData = async () => {
-  console.log('Fetching announcements disabled to avoid 500 error')
-  /*
-  const data = await getAnnouncements(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-    router
-  )
 
-  if (data && data.length > 0) {
-    announcementManager.setAnnouncements(data)
-  }
-  */
-}
-
-onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
-  generateCalendar()
-  updateDate()
-  dateInterval = setInterval(updateDate, 60000)
-
-  await fetchAnnouncementData()
-})
 </script>
 
 <template>
@@ -245,7 +430,7 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+      <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
@@ -290,7 +475,26 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageResidentWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -306,37 +510,26 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem
-              title="Notifications "
-              class="cursor-default"
-              @click="showNotificationPage"
-            >
+            <SidebarItem title="Dashboard" @click="showDashBoardPage">
               <template #icon>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g fill="none">
-                    <path
-                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
-                    />
-                  </g>
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
                 </svg>
               </template>
-            </SidebarItem>
-              <SidebarItem
-              title="Parcel Verification"
-              class="cursor-default"
-              @click="showParcelResidentVerificationPage "
-            >
+            </SidebarItem> -->
+
+            <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
-                 <svg
+                <svg
                   width="25"
                   height="25"
                   viewBox="0 0 25 25"
@@ -350,9 +543,29 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
+
             <SidebarItem
-              title="Announcements"
-              class="bg-blue-400 cursor-default"
+              title="Manage Residents"
+              @click="ShowManageResidentPage"
+            >
+              <template #icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="white"
+                    d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+
+            <SidebarItem
+              title="Manage Announcements"
+              class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>
                 <svg
@@ -367,6 +580,30 @@ onMounted(async () => {
                     fill="white"
                   />
                 </svg>
+              </template>
+            </SidebarItem>
+
+            <SidebarItem title="Trash" @click="showParcelTrashPage">
+              <template #icon>
+                      <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
+                  <path
+                    fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
+                  />
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -401,501 +638,332 @@ onMounted(async () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-50/50">
-        <section class="max-w-7xl mx-auto">
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
+         <div class="max-w-4xl mx-auto space-y-6">
+          
           <!-- Header -->
-          <div class="flex items-center justify-between mb-8">
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-              <div class="p-2 bg-blue-100 rounded-lg text-[#0E4B90]">
-                 <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"/>
-                </svg>
+          <div class="flex items-center gap-2 md:gap-4">
+              <div class="flex items-center gap-2 md:gap-4">
+                <button @click="handleCancel" class="p-1.5 md:p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+             </button>
+                <div class="p-2 md:p-3 bg-blue-100 rounded-lg md:rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
               </div>
-              <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                Announcements
-              </span>
-            </h2>
+                <h2 class="text-xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Create New Announcement </span>
+                </h2>
+          </div>
           </div>
 
-          <!-- Featured Banner -->
-          <div class="relative overflow-hidden rounded-2xl shadow-lg mb-10 group">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90"></div>
-            <!-- Decorative circles -->
-            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
-            
-            <div v-if="bannerAnnouncements.length > 0" class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
-              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
-                {{ bannerAnnouncements[currentSlide - 1]?.category || 'Featured' }}
-              </span>
-              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.title }}
-              </h3>
-              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px] line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.subtitle }}
-              </p>
-              
-              <!-- Navigation Arrows -->
-              <button 
-                @click="currentSlide = currentSlide === 1 ? 4 : currentSlide - 1" 
-                class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              
-              <button 
-                @click="currentSlide = currentSlide === 4 ? 1 : currentSlide + 1" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-
-              <!-- Carousel Indicators -->
-              <div class="flex justify-center gap-3">
-                <button
-                  v-for="n in bannerAnnouncements.length"
-                  :key="n"
-                  @click="currentSlide = n"
-                  class="transition-all duration-300 rounded-full h-2 cursor-pointer"
-                  :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
-                ></button>
-              </div>
-            </div>
-            
-            <!-- Fallback when no banners -->
-            <div v-else class="relative z-10 p-16 flex flex-col items-center text-center text-white">
-              <h3 class="text-2xl font-bold mb-2">No Active Announcements</h3>
-              <p class="text-blue-100">Check back later for community updates.</p>
-            </div>
+          <div class="fixed top-5 left-5 z-50">
+            <AlertPopUp v-if="addSuccess" titles="Announcement Created Successfully." message="Success!!" styleType="green" operate="successMessage" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+              <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="errorMessage"
+              @closePopUp="closePopUp"
+            />
           </div>
 
-          <!-- Content Filter & Search -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <!-- Tabs -->
-            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex w-fit">
-              <button
-                @click="tab = 'all'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  (tab === 'all' || !tab)
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                All
-              </button>
-              <button
-                @click="tab = 'event'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  tab === 'event'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                Events
-              </button>
-              <button
-                @click="tab = 'news'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                  tab === 'news'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                News
-              </button>
-            </div>
+          <LoadingPopUp v-if="isLoading" />
 
-            <!-- Search -->
-            <div class="relative w-full md:w-80 group">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search ..."
-                class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
-              />
-            </div>
-          </div>
-
-          <!-- Content Grid -->
-          <div class="min-h-[400px]">
-            <!-- Events Grid -->
-            <div v-if="tab === 'event' || tab === 'all' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': tab === 'all'}">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
-                <div class="flex items-center gap-4">
-                  <div class="w-1.5 h-8 bg-[#0E4B90] rounded-full"></div>
-                  <div>
-                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Upcoming Events</h3>
-                    <p class="text-xs font-medium text-gray-500 mt-0.5">Stay updated with community activities</p>
-                  </div>
+          <!-- Form Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+             <div class="p-6 md:p-8 space-y-6">
+                
+                <!-- Title Input -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
+                   <input 
+                      type="text" 
+                      :value="title"
+                      @input="handleTitleInput"
+                      placeholder="Enter announcement title..."
+                      class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
+                      :class="[
+                        titleLengthError || titleThaiNumError
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
+                      ]"
+                   />
+                   <div v-if="titleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Announcement Title must be at most {{ MAX_TITLE_LENGTH }} characters</div>
+                   </div>
+                   <div v-if="titleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Announcement Title cannot contain Thai numerals</div>
+                   </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Auto-hide symbol on mobile to save space) -->
-                  <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
-                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                    </div>
-                    <span class="tracking-wide">{{ currentDate }}</span>
-                  </div>
-                  <!-- Archive Button (Always Visible) -->
-                  <button 
-                    @click="isArchiveOpen = true" 
-                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
-                  >
-                    Archive History →
-                  </button>
+
+                <!-- Subtitle Input -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Subtitle</label>
+                   <input 
+                      type="text" 
+                      :value="subtitle"
+                      @input="handleSubtitleInput"
+                      placeholder="Enter brief description..."
+                      class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
+                      :class="[
+                        subtitleLengthError 
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
+                      ]"
+                   />
+                   <div v-if="subtitleLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Subtitle must be at most {{ MAX_SUBTITLE_LENGTH }} characters</div>
+                   </div>
+                   <div v-if="subtitleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Subtitle cannot contain Thai numerals</div>
+                   </div>
                 </div>
-              </div>
-              
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div
-                  v-for="item in filteredEvents"
-                  :key="item.id"
-                  @click="openModal(item)"
-                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
-                >
-                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                     <!-- Placeholder for Image -->
-                     <div class="absolute inset-0 flex items-center justify-center text-gray-400">
-                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                     </div>
-                  </div>
-                  
-                  <div class="p-6 flex-grow flex flex-col">
-                    <div class="flex justify-between items-start mb-4">
-                      <div class="flex items-center gap-2 flex-wrap">
 
-                        <!-- Category Badge -->
-                        <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
-                          <span v-html="getCategoryIcon(item.category)"></span>
-                          {{ item.category }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight line-clamp-2">
-                      {{ item.title }}
-                    </h4>
-                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-grow">
-                      {{ item.subtitle || item.content }}
-                    </p>
-
-                    <!-- Divider -->
-                    <div class="h-px bg-gray-100 w-full mb-4"></div>
-
-                    <div class="flex items-center justify-between gap-2 mt-auto">
-                      <div class="flex flex-col gap-1.5 min-w-0">
-                        <!-- Row 1: Date -->
-                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                          </svg>
-                          <span class="truncate">{{ item.date }}</span>
+                <!-- Category & Date Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
+                            <span v-if="!category" class="text-gray-500">Select category...</span>
+                            <template v-else>
+                              <!-- General -->
+                              <svg v-if="category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              <!-- Maintenance -->
+                              <svg v-else-if="category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                              <!-- Events -->
+                              <svg v-else-if="category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              <!-- Urgent -->
+                              <svg v-else-if="category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                              <span class="text-gray-800">{{ category }}</span>
+                            </template>
                         </div>
-                        
-                        <!-- Row 2: Author and Views -->
-                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
-                          <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
-                          <div class="flex items-center gap-1.5 truncate">
-                            <span class="truncate">{{ item.author }}</span>
-                            <span class="text-gray-300 flex-shrink-0">·</span>
-                            <div class="flex items-center gap-1 text-gray-400 flex-shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                              <span>{{ item.views }}</span>
-                            </div>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <!-- Dropdown Options -->
+                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
+                          <div @click="category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                             General
+                          </div>
+                          <div @click="category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                             Maintenance
+                          </div>
+                          <div @click="category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                             Activity/Events
+                          </div>
+                          <div @click="category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                             Urgent
                           </div>
                         </div>
                       </div>
-                      <span class="text-sm font-semibold text-[#0E4B90] flex items-center gap-1">
-                        View
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
+                   </div>
+                   <div class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Publish Date  <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                        <input 
+                           type="datetime-local" 
+                           v-model="date"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
+                        />
+                      </div>
+                   </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- News List -->
-            <div v-if="tab === 'news' || tab === 'all'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <!-- Modern News Header -->
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
-                <div class="flex items-center gap-4">
-                  <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
-                  <div>
-                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Latest News</h3>
-                    <p class="text-xs font-medium text-gray-500 mt-0.5">Important updates and official notices</p>
-                  </div>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Visible on mobile when tab is 'news') -->
-                  <div v-if="tab !== 'all'" class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
-                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
+                <!-- Content -->
+                <div class="space-y-2">
+                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <!-- Mock Rich Text Toolbar -->
+                    <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
+                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                      <!-- <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
+                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
+                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
+                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </button>
+                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
+                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </button>
+                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                        </button>
+                      </div> -->
+                      <textarea 
+                         ref="contentArea"
+                         :value="content"
+                         @input="handleContentInput"
+                         rows="6"
+                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         placeholder="Enter announcement content... Supports text formatting."
+                      ></textarea>
                     </div>
-                    <span class="tracking-wide">{{ currentDate }}</span>
-                  </div>
+                    <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Content must be at most {{ MAX_CONTENT_LENGTH }} characters</div>
+                    </div>
+                </div>
 
-                  <!-- Archive Button -->
-                  <button 
-                    v-if="tab !== 'all'"
-                    @click="isArchiveOpen = true" 
-                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
+                <!-- Cover Image Upload -->
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
+                  <div 
+                    class="relative w-full h-48 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:bg-gray-100"
+                    :class="{ 'border-blue-400 bg-blue-50': imagePreview }"
                   >
-                    Archive History →
-                  </button>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div
-                  v-for="item in filteredNews"
-                  :key="'news-' + item.id"
-                  @click="openModal(item)"
-                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
-                >
-                  <div class="w-full md:w-40 h-28 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden flex items-center justify-center text-gray-300 border border-gray-50">
-                    <svg class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div class="flex-1 flex flex-col">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="px-2 py-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
-                        <span v-html="getCategoryIcon(item.category)"></span>
-                        {{ item.category }}
-                      </span>
-                      <span class="text-[10px] font-bold text-gray-400 ml-auto">{{ item.date }}</span>
-                    </div>
-                    <h4 class="text-base font-bold text-gray-900 mb-1 group-hover:text-[#0E4B90] transition-colors line-clamp-1">
-                      {{ item.title }}
-                    </h4>
-                    <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 flex-grow">
-                      {{ item.subtitle || item.content }}
-                    </p>
-                    <div class="mt-3 flex items-center justify-between">
-                       <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
-                          <span class="flex items-center gap-1">
-                             <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px]">P</div>
-                             {{ item.author }}
-                          </span>
-                          <span class="flex items-center gap-1">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                             </svg>
-                             {{ item.views }}
-                          </span>
-                       </div>
-                       <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
-                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    <template v-if="!imagePreview">
+                      <div class="flex flex-col items-center justify-center p-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        class="absolute inset-0 opacity-0 cursor-pointer" 
+                        @change="onFileChange"
+                      />
+                    </template>
+                    <template v-else>
+                      <img :src="imagePreview" class="w-full h-full object-cover" />
+                      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <button @click="removeImage" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                       </div>
-                    </div>
+                        </button>
+                      </div>
+                    </template>
                   </div>
                 </div>
-              </div>
-            </div>
+
+                <!-- Target Audience -->
+                <div class="space-y-3 pt-2">
+                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="All" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
+                      </div>
+                    </label>
+
+                    <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="Active" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
+                      </div>
+                    </label>
+
+                    <!-- <label class="relative cursor-pointer h-full">
+                      <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
+                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+                        </div>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
+                      </div>
+                    </label> -->
+                  </div>
+                </div>
+
+                <!-- Toggles -->
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-rose-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Pin Announcement</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
+                       </div>
+                     </div>
+                     <button @click="isPinned = !isPinned" :class="isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
+
+                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                     <div class="flex items-center gap-4">
+                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                       </div>
+                       <div>
+                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
+                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
+                       </div>
+                     </div>
+                     <button @click="notify = !notify" :class="notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     </button>
+                  </div>
+                </div>
+
+             </div>
+
+             <!-- Footer Actions -->
+             <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
+                <ButtonWeb 
+                  label="Cancel" 
+                  color="white-outline" 
+                   :size="buttonSize"
+                  @click="goBack" 
+                />
+                <ButtonWeb 
+                  :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
+                  color="light-gray" 
+                  :size="buttonSize"
+                  @click="saveDraft" 
+                  :disabled="!isFormValid"
+                >
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  </template>
+                </ButtonWeb>
+                <ButtonWeb 
+                  :label="windowWidth < 640 ? 'Publish' : 'Publish Announcement'" 
+                  color="blue" 
+                  :size="buttonSize"
+                  @click="submitAnnouncement" 
+                  :disabled="!isFormValid"
+                >
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                  </template>
+                </ButtonWeb>
+             </div>
           </div>
-        </section>
+
+        </div>
       </main>
     </div>
   </div>
-
-  <Teleport to="body" v-if="showHomePageResident"
-    ><HomePageResident
-  /></Teleport>
-  <Teleport to="body" v-if="returnLogin">
-    <LoginPage> </LoginPage>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
-
-  <AnnouncementDetailModal 
-    :is-open="isModalOpen"
-    :title="selectedAnnouncement?.title || ''"
-    :subtitle="selectedAnnouncement?.subtitle || ''"
-    :content="selectedAnnouncement?.content || ''"
-    :tag="selectedAnnouncement?.tag || ''"
-    :date="selectedAnnouncement?.date || ''"
-    @close="closeModal"
-  />
-
-  <!-- Calendar Pop-up -->
-  <Teleport to="body">
-    <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Calendar Header -->
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="relative z-10 flex justify-between items-start">
-            <div>
-              <p class="text-blue-200 text-sm font-medium mb-1">Current Date & Time</p>
-              <h2 class="text-2xl font-bold mb-2">{{ currentDate }}</h2>
-            </div>
-            <button @click="isCalendarOpen = false" class="p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Calendar Body -->
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">{{ currentMonthName }}</h3>
-            <div class="flex gap-2">
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            <span v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']" :key="day" class="text-xs font-semibold text-gray-400">
-              {{ day }}
-            </span>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 text-center">
-            <div 
-              v-for="(day, index) in calendarDays" 
-              :key="index"
-              class="aspect-square flex items-center justify-center text-sm rounded-full transition-colors"
-              :class="[
-                !day ? '' : 'cursor-pointer',
-                day === currentDay ? 'bg-[#0E4B90] text-white font-bold shadow-md' : 'text-gray-700 hover:bg-blue-50',
-              ]"
-            >
-              {{ day || '' }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isCalendarOpen = false" class="px-5 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
-
-  <!-- Archive Pop-up -->
-  <Teleport to="body">
-    <div v-if="isArchiveOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Archive Header -->
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden flex items-center gap-4">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="2"></rect><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2V9"></path><path d="M10 13h4"></path></svg>
-          </div>
-          <div class="relative z-10 flex-1">
-            <h2 class="text-2xl font-bold tracking-tight">News Archive</h2>
-            <p class="text-blue-200 text-sm font-medium mt-1">Browse past announcements</p>
-          </div>
-          <button @click="isArchiveOpen = false" class="relative z-10 p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        
-        <!-- Archive Body -->
-        <div class="p-6">
-          <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-            <!-- Simulated Past Events -->
-            <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
-              <div class="flex items-center gap-4 mb-3">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ month }} 2026</h3>
-                <div class="h-px bg-gray-100 flex-1"></div>
-              </div>
-              
-              <div class="space-y-3 pl-2 border-l-2 border-blue-100 ml-2">
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-[#0E4B90] rounded-full group-hover:scale-125 transition-transform"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-100 px-2 py-0.5 rounded-md">General</span>
-                    <span class="text-xs text-gray-400">12 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Quarterly Community Meeting Notes</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">Review the discussed topics and action items from our last gathering.</p>
-                </div>
-                
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2 py-0.5 rounded-md">Maintenance</span>
-                    <span class="text-xs text-gray-400">05 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Completed: Elevator Service</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">The scheduled maintenance for Building A elevators is now complete.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isArchiveOpen = false" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm cursor-pointer">
-            Close Archive
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
 </template>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-</style>

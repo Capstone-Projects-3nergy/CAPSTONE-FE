@@ -3,6 +3,7 @@ import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 import ImageCropperModal from './ImageCropperModal.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -22,6 +23,13 @@ const userManager = useUserManager()
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const selectedResidentId = ref(null)
+
+const MAX_NAME_LENGTH = 100
+const MAX_STAFFPOSITION_LENGTH = 50
+const MAX_ROOMNUMBER_LENGTH = 20
+const MAX_EMAIL_LENGTH = 100
+const MAX_PHONE_LENGTH = 15
+const MAX_LINE_ID_LENGTH = 20
 
 const router = useRouter()
 const auth = useAuthManager()
@@ -50,7 +58,8 @@ const props = defineProps({
   editProfile: { type: Boolean, default: true },
   editResidentDetail: { type: Boolean, required: false },
   useCurrentProfile: { type: Boolean, default: true },
-  status: { type: String, default: '' }
+  status: { type: String, default: '' },
+  showLineId: { type: Boolean, default: true }
 })
 const newAvatar = ref(null)
 const loading = ref(false)
@@ -61,12 +70,15 @@ const showEmailLengthError = ref(false)
 const showRoomLengthError = ref(false)
 const showPhoneLengthError = ref(false)
 const showLineIdLengthError = ref(false)
+const showPositionLengthError = ref(false)
+const showPositionMinLengthError = ref(false)
 const showNameLengthError = ref(false)
+const showNameMinLengthError = ref(false)
 
 const handleEmailInput = (event) => {
   const val = event.target.value
-  if (val.length > 100) {
-    const sliced = val.slice(0, 100)
+  if (val.length > MAX_EMAIL_LENGTH) {
+    const sliced = val.slice(0, MAX_EMAIL_LENGTH)
     form.value.email = sliced
     event.target.value = sliced
     showEmailLengthError.value = true
@@ -80,8 +92,8 @@ const handleEmailInput = (event) => {
 
 const handleRoomInput = (event) => {
   const val = event.target.value
-  if (val.length > 10) {
-    const sliced = val.slice(0, 10)
+  if (val.length > MAX_ROOMNUMBER_LENGTH) {
+    const sliced = val.slice(0, MAX_ROOMNUMBER_LENGTH)
     form.value.roomNumber = sliced
     event.target.value = sliced
     showRoomLengthError.value = true
@@ -96,8 +108,8 @@ const handleRoomInput = (event) => {
 const handlePhoneInput = (event) => {
   let val = event.target.value
   const digits = val.replace(/-/g, '')
-  if (digits.length > 15) {
-    while (val.replace(/-/g, '').length > 15 && val.length > 0) {
+  if (digits.length > MAX_PHONE_LENGTH) {
+    while (val.replace(/-/g, '').length > MAX_PHONE_LENGTH && val.length > 0) {
       val = val.slice(0, -1)
     }
     form.value.phoneNumber = val
@@ -113,8 +125,8 @@ const handlePhoneInput = (event) => {
 
 const handleLineIdInput = (event) => {
   const val = event.target.value
-  if (val.length > 20) {
-    const sliced = val.slice(0, 20)
+  if (val.length > MAX_LINE_ID_LENGTH) {
+    const sliced = val.slice(0, MAX_LINE_ID_LENGTH)
     form.value.lineId = sliced
     event.target.value = sliced
     showLineIdLengthError.value = true
@@ -126,11 +138,26 @@ const handleLineIdInput = (event) => {
   }
 }
 
+const handlePositionInput = (event) => {
+  const val = event.target.value
+  if (val.length > MAX_STAFFPOSITION_LENGTH) {
+    const sliced = val.slice(0, MAX_STAFFPOSITION_LENGTH)
+    form.value.position = sliced
+    event.target.value = sliced
+    showPositionLengthError.value = true
+    setTimeout(() => {
+      showPositionLengthError.value = false
+    }, 5000)
+  } else {
+    form.value.position = val
+  }
+}
+
 const handleFirstNameInput = (event) => {
   const val = event.target.value
   const lastNameLen = form.value.lastName ? form.value.lastName.length : 0
-  if (val.length + lastNameLen > 50) {
-    const allowed = 50 - lastNameLen
+  if (val.length + lastNameLen > MAX_NAME_LENGTH) {
+    const allowed = MAX_NAME_LENGTH - lastNameLen
     const sliced = val.slice(0, Math.max(0, allowed))
     form.value.firstName = sliced
     event.target.value = sliced
@@ -146,8 +173,8 @@ const handleFirstNameInput = (event) => {
 const handleLastNameInput = (event) => {
   const val = event.target.value
   const firstNameLen = form.value.firstName ? form.value.firstName.length : 0
-  if (val.length + firstNameLen > 50) {
-    const allowed = 50 - firstNameLen
+  if (val.length + firstNameLen > MAX_NAME_LENGTH) {
+    const allowed = MAX_NAME_LENGTH - firstNameLen
     const sliced = val.slice(0, Math.max(0, allowed))
     form.value.lastName = sliced
     event.target.value = sliced
@@ -188,6 +215,12 @@ const emit = defineEmits([
 
 const isEdit = ref(false)
 const dormList = ref([])
+const dormOptions = computed(() => {
+  return dormList.value.map((dorm) => ({
+    label: dorm.dormName,
+    value: dorm.dormId
+  }))
+})
 const form = ref({
   userId: null,
   firstName: '',
@@ -344,6 +377,28 @@ onMounted(async () => {
     console.error(err)
   }
 })
+
+// ✅ Sync form with store when profile is updated (e.g. after LINE linking)
+watch(
+  () => profileManager.currentProfile,
+  (newProfile) => {
+    if (newProfile && props.editProfile) {
+      if (newProfile.lineId) form.value.lineId = newProfile.lineId
+    }
+  },
+  { deep: true, immediate: true }
+)
+
+// ✅ เพิ่ม watch ที่ loginManager ด้วยเพื่อความชัวร์
+watch(
+  () => loginManager.user?.lineId,
+  (newLineId) => {
+    if (newLineId && props.editProfile) {
+      form.value.lineId = newLineId
+    }
+  },
+  { immediate: true }
+)
 watch(
   () => [props.mode, props.dormName, dormList.value],
   ([mode, dormName]) => {
@@ -489,7 +544,7 @@ const profileImageUrlPreview = computed(() => {
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       emit('file-size-error', true)
       e.target.value = null
       return
@@ -577,14 +632,14 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
-  if (form.value.email && form.value.email.length > 100) {
+  if (form.value.email && form.value.email.length > MAX_EMAIL_LENGTH) {
     showEmailLengthError.value = true
     setTimeout(() => {
       showEmailLengthError.value = false
     }, 5000)
     return
   }
-  if (form.value.roomNumber && form.value.roomNumber.length > 10) {
+  if (form.value.roomNumber && form.value.roomNumber.length > MAX_ROOMNUMBER_LENGTH) {
     showRoomLengthError.value = true
     setTimeout(() => {
       showRoomLengthError.value = false
@@ -593,7 +648,7 @@ const submit = async () => {
   }
   if (form.value.phoneNumber) {
     const digits = form.value.phoneNumber.replace(/-/g, '')
-    if (digits.length > 15) {
+    if (digits.length > MAX_PHONE_LENGTH) {
       showPhoneLengthError.value = true
       setTimeout(() => {
         showPhoneLengthError.value = false
@@ -601,7 +656,7 @@ const submit = async () => {
       return
     }
   }
-  if (form.value.lineId && form.value.lineId.length > 20) {
+  if (form.value.lineId && form.value.lineId.length > MAX_LINE_ID_LENGTH) {
     showLineIdLengthError.value = true
     setTimeout(() => {
       showLineIdLengthError.value = false
@@ -610,10 +665,17 @@ const submit = async () => {
   }
   const fName = form.value.firstName || ''
   const lName = form.value.lastName || ''
-  if (fName.length + lName.length > 50) {
+  if (fName.length + lName.length > MAX_NAME_LENGTH) {
     showNameLengthError.value = true
     setTimeout(() => {
       showNameLengthError.value = false
+    }, 5000)
+    return
+  }
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
     }, 5000)
     return
   }
@@ -681,6 +743,15 @@ const addResidents = async () => {
 
   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
     return
   }
 
@@ -825,6 +896,15 @@ const saveEditProfile = async () => {
     emit('last-name-error', true)
     return
   }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
+    return
+  }
 
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
     emit('line-id-error', true)
@@ -858,8 +938,19 @@ const saveEditProfile = async () => {
       emit('position-required', true)
       return
     }
+    if (form.value.position && form.value.position.length > MAX_STAFFPOSITION_LENGTH) {
+      emit('position-error', true)
+      return
+    }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
       emit('position-error', true)
+      return
+    }
+    if (form.value.position && form.value.position.length < 2) {
+      showPositionMinLengthError.value = true
+      setTimeout(() => {
+        showPositionMinLengthError.value = false
+      }, 5000)
       return
     }
   }
@@ -939,6 +1030,15 @@ const saveEditDetail = async () => {
   }
   if (!nameRegex.test(form.value.lastName)) {
     emit('last-name-error', true)
+    return
+  }
+  const fName = form.value.firstName || ''
+  const lName = form.value.lastName || ''
+  if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
+    showNameMinLengthError.value = true
+    setTimeout(() => {
+      showNameMinLengthError.value = false
+    }, 5000)
     return
   }
 
@@ -1120,11 +1220,13 @@ const userRoleLabel = computed(() => {
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8 flex flex-col items-center text-center"
       >
-        <div class="relative inline-block">
+        <div class="relative inline-block group mb-6">
           <!-- Avatar -->
-          <div class="w-32 h-32 rounded-full overflow-hidden border shadow-sm">
+          <div
+            class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+          >
             <!-- มีรูป (add หรือ edit ก็แสดง) -->
             <img
               v-if="profileImageUrlPreview"
@@ -1136,15 +1238,15 @@ const userRoleLabel = computed(() => {
             <!-- ADD MODE + ยังไม่เลือกรูป -->
             <div
               v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center font-semibold bg-gray-400 text-white text-xl"
+              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"
             >
-            <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
             </div>
 
             <!-- EDIT MODE + ไม่มีรูป -->
             <div
               v-else
-              class="w-full h-full flex items-center justify-center font-semibold bg-[#185DC0] text-white text-4xl"
+              class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
             >
               {{ userInitial }}
             </div>
@@ -1188,30 +1290,26 @@ const userRoleLabel = computed(() => {
 
           <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
           <div
-            class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+            class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
             @click="$refs.imageInput.click()"
           >
             <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
+              class="bg-[#185DC0] rounded-full p-2 shadow-xl border-4 border-white hover:bg-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-10 h-10 text-white"
             >
               <svg
-                class="transition text-[#8C8F91]"
                 width="20"
                 height="20"
-                viewBox="0 0 48 48"
+                viewBox="0 0 24 24"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g
-                  fill="none"
+                <path
+                  d="M15.2322 5.23223L18.7678 8.76777M16.7322 3.73223C17.7085 2.75592 19.2915 2.75592 20.2678 3.73223C21.2441 4.70854 21.2441 6.29146 20.2678 7.26777L6.5 21H3V17.5L16.7322 3.73223Z"
                   stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="3"
-                >
-                  <path
-                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
-                  />
-                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
-                </g>
+                />
               </svg>
             </div>
             <!-- Tooltip -->
@@ -1235,29 +1333,32 @@ const userRoleLabel = computed(() => {
           ref="imageInput"
           @change="onImageChange"
         />
-        <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
-          {{ userRoleLabel }}
-        </p>
-        <p class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
-          {{ displayFullName }}
-        </p>
+        <div class="mt-4">
+          <p class="text-sm font-extrabold text-[#0E4B90]">
+            {{ userRoleLabel }}
+          </p>
+          <p class="text-xl sm:text-2xl font-bold text-gray-700 pt-2 truncate max-w-[200px] mx-auto">
+            {{ displayFullName }}
+          </p>
+        </div>
       </div>
 
       <!-- RIGHT : Edit Information Card -->
       <div
-        class="w-full md:w-2/3 bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
       >
         <!-- Header -->
-        <div class="mb-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+          <h3 class="font-extrabold text-xl text-black tracking-tight">
             {{ title }}
-          </h2>
+          </h3>
         </div>
 
         <!-- Form Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -1265,11 +1366,11 @@ const userRoleLabel = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showNameLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1289,24 +1390,44 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined First Name and Last Name must be at most 50 characters
+                Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
+              </div>
+            </div>
+            <div
+              v-if="showNameMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined First Name and Last Name must be at least 6 characters
               </div>
             </div>
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showNameLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1326,13 +1447,33 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Combined First Name and Last Name must be at most 50 characters
+                Combined First Name and Last Name must be at most {{ MAX_NAME_LENGTH }} characters
+              </div>
+            </div>
+            <div
+              v-if="showNameMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Combined First Name and Last Name must be at least 6 characters
               </div>
             </div>
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Email <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
             <input
@@ -1341,11 +1482,11 @@ const userRoleLabel = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
-                mode === 'edit' ? 'bg-gray-100' : 'bg-white',
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showEmailLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1365,7 +1506,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Email must be at most 100 characters
+                Email must be at most {{ MAX_EMAIL_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1374,7 +1515,7 @@ const userRoleLabel = computed(() => {
             class="flex flex-col"
             v-if="roomNumber !== null || mode == 'add'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
               <span v-if="mode === 'add'" class="text-red-500">*</span>
             </label>
@@ -1384,11 +1525,11 @@ const userRoleLabel = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white',
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showRoomLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1408,7 +1549,7 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Room Number must be at most 10 characters
+                Room Number must be at most {{ MAX_ROOMNUMBER_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1420,15 +1561,15 @@ const userRoleLabel = computed(() => {
               loginManager.user.role === 'RESIDENT'
             "
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
             <input
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
-                'w-full border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100' : 'bg-white'
+                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
               ]"
             />
           </div>
@@ -1436,55 +1577,36 @@ const userRoleLabel = computed(() => {
             class="flex flex-col"
             v-if="mode == 'add' && loginManager.user.role === 'STAFF'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
               <span class="text-red-500">*</span>
             </label>
-            <select
+            <SelectWeb
               v-model="form.dormId"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
-            >
-              <option disabled :value="null">Select Dormitory</option>
-              <option
-                v-for="dorm in dormList"
-                :key="dorm.dormId"
-                :value="dorm.dormId"
-              >
-                {{ dorm.dormName }}
-              </option>
-            </select>
+              :options="dormOptions"
+              placeholder="Select dormitory"
+            />
           </div>
           <div
             class="flex flex-col"
             v-if="loginManager.user.role === 'STAFF' && mode !== 'add'"
           >
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
             <input
-              v-model="form.position"
+              :value="form.position"
+              @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
-            />
-          </div>
-
-          <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
-              Line ID
-            </label>
-            <input
-              :value="form.lineId"
-              @input="handleLineIdInput"
-              placeholder="Enter Line ID"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
-                showLineIdLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                showPositionLengthError
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
-              v-if="showLineIdLengthError"
+              v-if="showPositionLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
             >
               <svg
@@ -1500,24 +1622,71 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Line ID must be at most 20 characters
+                Position must be at most {{ MAX_STAFFPOSITION_LENGTH }} characters
+              </div>
+            </div>
+            <div
+              v-if="showPositionMinLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Position must be at least 2 characters
               </div>
             </div>
           </div>
 
+          <!-- <div v-if="mode !== 'add'" class="flex flex-col">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+              Line 
+            </label>
+            <div v-if="form.lineId" class="flex items-center gap-3">
+              <div
+                @click="showLineId ? window.open(`https://line.me/ti/p/~${form.lineId}`, '_blank') : null"
+                :class="[
+                  'flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300',
+                  !showLineId ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent font-medium' : 'bg-green-50 text-green-700 cursor-pointer hover:bg-green-100 border border-green-100 font-bold'
+                ]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" :fill="!showLineId ? '#9CA3AF' : '#00b900'"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g :fill="!showLineId ? '#9CA3AF' : '#00b900'"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                <span>Linked</span>
+              </div>
+            </div>
+            <div v-else class="flex items-center">
+              <div
+                @click="window.open(`https://line.me/ti/p/~${form.lineId}`, '_blank')"
+                class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white cursor-pointer hover:bg-[#009900] transition-all duration-300 font-bold shadow-md hover:shadow-lg"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                <span>Link Line Account</span>
+              </div>
+            </div>
+          </div> -->
+
           <div class="flex flex-col">
-            <label class="block text-sm text-black font-semibold mb-1">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
             <input
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2"
+              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
               :class="[
                 showPhoneLengthError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-[#185DC0]'
+                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                  : ''
               ]"
             />
             <div
@@ -1537,21 +1706,21 @@ const userRoleLabel = computed(() => {
                 />
               </svg>
               <div class="text-sm text-red-600">
-                Phone Number must be at most 15 digits
+                Phone Number must be at most {{ MAX_PHONE_LENGTH }} digits
               </div>
             </div>
           </div>
 
           <!-- Actions -->
-          <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end">
+          <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
               label="Cancel Changes"
               color="gray"
               @click="cancel"
             />
             <ButtonWeb
-              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-2.5"
+              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
@@ -1564,10 +1733,10 @@ const userRoleLabel = computed(() => {
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-[5px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
       >
         <div class="mb-6 text-center md:hidden">
-          <p class="hidden md:block text-sm font-bold text-black tracking-widest uppercase pt-6">
+          <p class="hidden md:block text-sm font-extrabold text-[#0E4B90] pt-6">
           {{ userRoleLabel }}
         </p>
           <h2 class="hidden md:block text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]">
@@ -1580,11 +1749,10 @@ const userRoleLabel = computed(() => {
           <div
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
-            <div class="relative inline-block">
+            <div class="relative inline-block group mb-6">
               <!-- Avatar -->
-
               <div
-                class="w-32 h-32 rounded-full overflow-hidden border shadow-sm"
+                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
               >
                 <img
                   v-if="profileImageUrlPreview"
@@ -1594,11 +1762,7 @@ const userRoleLabel = computed(() => {
                 />
                 <div
                   v-else
-                  class="w-full h-full flex items-center justify-center font-semibold"
-                  :class="{
-                    'bg-[#185DC0] text-white text-4xl': props.mode !== 'add',
-                    'bg-white text-black text-xl': props.mode === 'add'
-                  }"
+                  class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
                 >
                   {{ userInitial }}
                 </div>
@@ -1640,32 +1804,28 @@ const userRoleLabel = computed(() => {
           </div> -->
               <!-- ✏️ Edit icon -->
               <div
-                class="absolute -bottom-2 -right-2 p-1.5 cursor-pointer group"
+                class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
                 @click="$refs.imageInput.click()"
               >
-               <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
-            >
-              <svg
-                class="transition text-[#8C8F91]"
-                width="20"
-                height="20"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linejoin="round"
-                  stroke-width="3"
+                <div
+                  class="bg-[#185DC0] rounded-full p-2 shadow-xl border-4 border-white hover:bg-[#0E4B90] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-10 h-10 text-white"
                 >
-                  <path
-                    d="M14.07 10.794c-2.181.073-4.008.163-5.48.252c-2.713.164-4.856 2.235-5.097 4.943A125 125 0 0 0 3 26.864c0 4.257.246 8.09.493 10.874c.241 2.708 2.384 4.78 5.098 4.943c3.323.2 8.455.41 15.409.41s12.086-.21 15.41-.41c2.713-.164 4.856-2.235 5.097-4.943c.247-2.783.493-6.617.493-10.874s-.246-8.091-.493-10.875c-.241-2.708-2.384-4.779-5.098-4.943c-1.471-.089-3.298-.18-5.48-.252l-1.46-3.011c-.712-1.466-2.094-2.49-3.718-2.613A64 64 0 0 0 24 5c-1.932 0-3.539.079-4.75.17c-1.625.123-3.007 1.147-3.718 2.613l-1.461 3.01Z"
-                  />
-                  <path d="M15 26a9 9 0 1 0 18 0a9 9 0 1 0-18 0" />
-                </g>
-              </svg>
-            </div>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M15.2322 5.23223L18.7678 8.76777M16.7322 3.73223C17.7085 2.75592 19.2915 2.75592 20.2678 3.73223C21.2441 4.70854 21.2441 6.29146 20.2678 7.26777L6.5 21H3V17.5L16.7322 3.73223Z"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
 
                 <!-- Tooltip -->
                 <div
@@ -1689,53 +1849,53 @@ const userRoleLabel = computed(() => {
               @change="onImageChange"
             />
       
-            <p class="text-sm font-bold text-black tracking-widest uppercase pt-6">
+            <p class="text-sm font-extrabold text-[#0E4B90]">
               {{ userRoleLabel }}
             </p>
             <h2
-              class="text-xl sm:text-2xl font-semibold text-gray-500 pt-5 truncate max-w-[200px]"
+              class="text-xl sm:text-2xl font-bold text-gray-700 pt-2 truncate max-w-[200px] mx-auto"
             >
               {{ displayFullName }}
             </h2>
           </div>
 
-          <!-- ================= RIGHT : Edit Information ================= -->
           <div class="md:w-2/3">
             <!-- Header -->
-            <div class="md:block mb-8">
-              <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">
                 User Information
-              </h2>
+              </h3>
             </div>
 
             <!-- Form Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   First Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.firstName"
                   placeholder="Enter First Name"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Last Name
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="form.lastName"
                   placeholder="Enter Last Name"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Email
                   <span v-if="mode === 'add'" class="text-red-500">*</span>
                 </label>
@@ -1744,14 +1904,14 @@ const userRoleLabel = computed(() => {
                   v-model="form.email"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    mode === 'edit' ? 'bg-gray-100' : 'bg-white'
+                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
               </div>
 
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Room Number
                 </label>
                 <input
@@ -1759,63 +1919,65 @@ const userRoleLabel = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]',
-                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'
+                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
               </div>
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Dormitory
                 </label>
-                <select
+                <SelectWeb
                   v-model="form.dormId"
+                  :options="dormOptions"
                   :disabled="loginManager.user?.role === 'RESIDENT'"
-                  class="w-full max-w-md border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
-                  :class="loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100' : 'bg-white'"
-                >
-                  <option disabled value="">Select Dormitory</option>
-                  <option
-                    v-for="dorm in dormList"
-                    :key="dorm.dormId"
-                    :value="dorm.dormId"
-                  >
-                    {{ dorm.dormName }}
-                  </option>
-                </select>
-              </div>
-              <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
-                  Line ID
-                </label>
-                <input
-                  v-model="form.lineId"
-                  placeholder="Enter Line ID"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  placeholder="Select Dormitory"
+                  class="max-w-md"
                 />
               </div>
-
               <div class="flex flex-col">
-                <label class="block text-sm text-black font-semibold mb-1">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+                  Line 
+                </label>
+                <div v-if="form.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId" class="flex items-center h-[58px]">
+                  <div
+                    class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white transition-all duration-300 font-bold shadow-md max-w-fit"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                    <span>Linked</span>
+                  </div>
+                </div>
+                <div v-else class="flex items-center h-[58px]">
+                  <div
+                    class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent font-medium max-w-fit"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                    <span>Not Linked</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Phone Number
                 </label>
                 <input
                   v-model="form.phoneNumber"
                   placeholder="Enter Phone Number"
-                  class="w-full max-w-md bg-white border rounded-xl px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#185DC0]"
+                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
                 />
               </div>
 
               <!-- Actions -->
-              <div class="md:col-span-2 flex gap-3 mt-6 justify-end">
+              <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5"
+                  class="text-[#898989] text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
                   label="Cancel Changes"
                   color="gray"
                   @click="cancel"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5"
+                  class="text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
                   :disabled="isSaveDisabled"

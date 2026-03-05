@@ -6,7 +6,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  fetchSignInMethodsForEmail
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 import { useNotificationManager } from './NotificationManager'
@@ -51,6 +52,7 @@ export const useAuthManager = defineStore('authManager', () => {
         email: data.email,
         fullName: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),
         role: data.role,
+        lineId: data.lineId || null,
         accessToken: idToken,
         ...(data.role === 'STAFF'
           ? { position: data.position || '' }
@@ -74,6 +76,19 @@ export const useAuthManager = defineStore('authManager', () => {
       const userData = await fetchUserFromBackend()
       return !!userData
     } catch (err) {
+      return false
+    }
+  }
+
+  const checkEmailInFirebase = async (email) => {
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email)
+      return methods.length > 0
+    } catch (error) {
+      if (error.code === 'auth/invalid-email') return false
+      // If email enumeration protection is on, this might basically result in empty array or similar behavior,
+      // but for standard projects it works.
+      console.error('Check email failed:', error)
       return false
     }
   }
@@ -242,6 +257,7 @@ export const useAuthManager = defineStore('authManager', () => {
         email: data.email,
         fullName,
         role: data.role,
+        lineId: data.lineId || null,
         accessToken: idToken,
         ...(data.role === 'STAFF' ? { position: data.position ?? null } : {}),
         ...(data.role === 'RESIDENT'
@@ -384,6 +400,23 @@ export const useAuthManager = defineStore('authManager', () => {
     }
   }
   const useAuthGuard = (router) => {
+    // 🔹 Listen for auth state changes (e.g. login from another tab)
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // If user is already logged in but firebaseUser changed (switched account in another tab)
+        if (user.value && user.value.uid !== firebaseUser.uid) {
+           await loadUserFromBackend() // reload new user role
+           router.replace({ name: 'login' }) // force re-login/check
+        }
+      } else {
+        // Logged out in another tab
+        if (user.value) {
+           user.value = null
+           router.replace({ name: 'login' })
+        }
+      }
+    })
+
     router.beforeEach(async (to, from, next) => {
       const publicPages = [
         'login',
@@ -404,10 +437,13 @@ export const useAuthManager = defineStore('authManager', () => {
         if (!newToken) return next({ name: 'login' })
       }
 
-      if (
-        (to.name === 'home' && user.value.role !== 'RESIDENT') ||
-        (to.name === 'homestaff' && user.value.role !== 'STAFF')
-      ) {
+      // Protect Resident Routes
+      if (to.path.startsWith('/homepage/resident') && user.value.role !== 'RESIDENT') {
+        return next({ name: 'login' })
+      }
+
+      // Protect Staff Routes
+      if (to.path.startsWith('/homepage/staff') && user.value.role !== 'STAFF') {
         return next({ name: 'login' })
       }
 
@@ -445,6 +481,11 @@ export const useAuthManager = defineStore('authManager', () => {
     if (updatedProfile.avatar) {
       user.value.avatar = updatedProfile.avatar
     }
+
+    // lineId (ถ้ามี)
+    if ('lineId' in updatedProfile) {
+      user.value.lineId = updatedProfile.lineId
+    }
   }
 
   return {
@@ -461,6 +502,7 @@ export const useAuthManager = defineStore('authManager', () => {
     apiRequest,
     useAuthGuard,
     fetchUserFromBackend,
-    loadUserFromBackend
+    loadUserFromBackend,
+    checkEmailInFirebase
   }
 })

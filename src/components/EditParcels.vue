@@ -11,6 +11,7 @@ import { useAuthManager } from '@/stores/AuthManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
@@ -58,18 +59,33 @@ const recipientNameError = ref(false)
 const selectName = ref(false)
 const parcelTypeError = ref(false)
 const trackingNumberError = ref(false)
+const trackingNumberFormatError = ref(false)
 const trackingNumberRequired = ref(false)
 const recipientNameRequired = ref(false)
 const showLogoutConfirm = ref(false)
 
+const parcelTypeOptions = [
+  { label: 'Document', value: 'DOCUMENT' },
+  { label: 'Box', value: 'BOX' },
+  { label: 'Electronic', value: 'ELECTRONIC' }
+]
+
+const companyOptions = computed(() => {
+  return companyList.value.map((c) => ({
+    label: c.companyName,
+    value: c.companyId
+  }))
+})
+
 const showTrackingLengthError = ref(false)
 const showRecipientLengthError = ref(false)
 const showSenderLengthError = ref(false)
+const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
-  if (val.length > 60) {
-    const sliced = val.slice(0, 60)
+  if (val.length > 22) {
+    const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
     event.target.value = sliced
     showTrackingLengthError.value = true
@@ -98,8 +114,8 @@ const handleRecipientInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
-  if (val.length > 50) {
-    const sliced = val.slice(0, 50)
+  if (val.length > 100) {
+    const sliced = val.slice(0, 100)
     form.value.senderName = sliced
     event.target.value = sliced
     showSenderLengthError.value = true
@@ -137,17 +153,27 @@ const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
 const statusOptions = computed(() => {
+  let options = []
   if (form.value.status === 'WAITING_FOR_STAFF') {
-    return ['WAITING_FOR_STAFF', 'RECEIVED']
+    options = ['WAITING_FOR_STAFF', 'RECEIVED']
+  } else if (form.value.status === 'RECEIVED') {
+    options = ['RECEIVED', 'PICKED_UP']
+  } else if (form.value.status === 'PICKED_UP') {
+    options = ['PICKED_UP']
+  } else {
+    options = ['RECEIVED', 'PICKED_UP']
   }
-  if (form.value.status === 'RECEIVED') {
-    return ['RECEIVED', 'PICKED_UP']
-  }
-  if (form.value.status === 'PICKED_UP') {
-    return ['PICKED_UP']
-  }
-  return ['RECEIVED', 'PICKED_UP']
+  return options.map((s) => ({
+    label: formatStatus(s),
+    value: s
+  }))
 })
+
+const formatStatus = (status) => {
+  if (!status) return '-'
+  const s = status.replace(/_/g, ' ').toLowerCase()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 const originalForm = ref({ ...form.value })
 const isUnchanged = computed(
@@ -354,9 +380,16 @@ const saveEditParcel = async () => {
     setTimeout(() => (recipientNameError.value = false), 10000)
     return
   }
-  if (form.value.senderName && form.value.senderName.length > 50) {
+  if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
+    return
+  }
+  if (form.value.senderName && form.value.senderName.length < 2) {
+    showSenderMinLengthError.value = true
+    setTimeout(() => {
+      showSenderMinLengthError.value = false
+    }, 10000)
     return
   }
    try {
@@ -379,6 +412,42 @@ const saveEditParcel = async () => {
     }
   } catch (err) {
     console.error(err)
+  }
+
+  const selectedCompany = companyList.value.find(
+    (c) => c.companyId === Number(form.value.companyId)
+  )
+  if (selectedCompany) {
+    const name = selectedCompany.companyName.toLowerCase()
+    const tracking = form.value.trackingNumber
+    let isValid = true
+    if (
+      (name.includes('thailand post') || name.includes('thailandpost')) &&
+      !/^[A-Z]{2}\d{9}TH$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('kerry') &&
+      !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('flash') &&
+      !/^TH\d{11}[A-Z]$/.test(tracking)
+    )
+      isValid = false
+    else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking))
+      isValid = false
+    else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
+      isValid = false
+    else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking))
+      isValid = false
+
+    if (!isValid) {
+      trackingNumberFormatError.value = true
+      setTimeout(() => (trackingNumberFormatError.value = false), 10000)
+      return
+    }
   }
   try {
     const body = {
@@ -406,7 +475,7 @@ const saveEditParcel = async () => {
     }
 
     parcelStore.editParcel(form.value.parcelId, updatedParcel)
-    notificationManager.notifyParcelUpdate(updatedParcel)
+    notificationManager.notifyParcelUpdate(updatedParcel, router)
 
     form.value = {
       ...form.value,
@@ -460,7 +529,7 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const showManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -512,11 +581,14 @@ const closePopUp = (operate) => {
   if (operate === 'SenderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'trackingNumberFormat') trackingNumberFormatError.value = false
   if (operate === 'RecipientName') recipientNameError.value = false
   if (operate === 'selectName') selectName.value = false
   if (operate === 'trackingNumberRequired') trackingNumberRequired.value = false
   if (operate === 'recipientNameRequired') recipientNameRequired.value = false
+  if (operate === 'recipientNameRequired') recipientNameRequired.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
+  if (operate === 'senderNameMin') showSenderMinLengthError.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -526,7 +598,7 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -534,12 +606,12 @@ function formatDateTime(datetimeStr) {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -574,7 +646,26 @@ function formatDateTime(datetimeStr) {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -605,7 +696,7 @@ function formatDateTime(datetimeStr) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem
               title=" Manage Parcel"
@@ -647,7 +738,7 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -665,22 +756,25 @@ function formatDateTime(datetimeStr) {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                     <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -715,9 +809,11 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-9">
-        <div class="flex items-center space-x-2 mb-6">
-          <svg
+      <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
+          <div class="flex items-center space-x-2 mb-6">
+         <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+           <svg
             width="25"
             height="25"
             viewBox="0 0 25 25"
@@ -726,11 +822,15 @@ function formatDateTime(datetimeStr) {
           >
             <path
               d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
+              fill="currentColor"
             />
           </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Edit</h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                     Manage Parcel &gt; Edit </span>
+                </h2>
+              </div>
         </div>
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
@@ -771,6 +871,14 @@ function formatDateTime(datetimeStr) {
             message="Error!!"
             styleType="red"
             operate="SenderName"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="showSenderMinLengthError"
+            :titles="'Sender Name must be at least 6 characters.'"
+            message="Error!!"
+            styleType="red"
+            operate="senderNameMin"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -820,26 +928,37 @@ function formatDateTime(datetimeStr) {
             styleType="red"
             operate="duplicateParcel"
             @closePopUp="closePopUp"
-          />
+          /> 
+          <AlertPopUp
+            v-if="trackingNumberFormatError"
+            :titles="'Tracking Number format is incorrect for the selected company.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumberFormat"
+            @closePopUp="closePopUp"
+            />
         </div>
         <form
-          class="bg-white p-6 rounded-[5px] shadow space-y-8"
+          class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
           @submit.prevent="saveEditParcel"
         >
           <section>
-            <h3 class="font-semibold text-lg mb-2">Parcel Information:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Tracking Number</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
                 <input
                   type="text"
                   :value="form.trackingNumber"
                   @input="handleTrackingInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showTrackingLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -859,21 +978,21 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Tracking number must be at most 60 characters
+                    Tracking number must be at most 22 characters
                   </div>
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Recipient Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
                 <input
                   type="text"
                   :value="form.recipientName"
                   @input="handleRecipientInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showRecipientLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -898,16 +1017,16 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Sender Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
                 <input
                   type="text"
                   :value="form.senderName"
                   @input="handleSenderInput"
-                  class="w-full border rounded-md p-2 transition-colors duration-200"
+                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showSenderLengthError
-                      ? 'border-red-500 focus:outline-red-500'
-                      : 'focus:outline-blue-500'
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                      : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
@@ -927,168 +1046,193 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Sender name must be at most 50 characters
+                    Sender name must be at most 100 characters
+                  </div>
+                </div>
+                <div
+                  v-if="showSenderMinLengthError"
+                  class="flex items-center text-sm text-red-600 mt-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="red"
+                    class="w-[15px] mr-1"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div class="text-sm text-red-600">
+                    Sender name must be at least 2 characters
                   </div>
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1">Parcel Type</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
 
-                <select
+                <SelectWeb
                   v-model="form.parcelType"
-                  class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-                >
-                  <option disabled value="">Select Parcel Type</option>
-                  <option value="DOCUMENT">Document</option>
-                  <option value="BOX">Box</option>
-                  <option value="ELECTRONIC">Electronic</option>
-                </select>
+                  :options="parcelTypeOptions"
+                  placeholder="Select parcel type"
+                  class="w-[240px]"
+                />
               </div>
               <div>
-                <label class="block font-semibold mb-1">Company</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
 
-                <select
+                <SelectWeb
                   v-model="form.companyId"
-                  class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  <option disabled value="">Select Company</option>
-
-                  <option
-                    v-for="company in companyList"
-                    :key="company.companyId"
-                    :value="company.companyId"
-                  >
-                    {{ company.companyName }}
-                  </option>
-                </select>
+                  :options="companyOptions"
+                  placeholder="Select company"
+                />
               </div>
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Resident Info:</h3>
-            <div v-if="form.status !== 'PICKED_UP'" class="mb-4">
-              <label class="block font-semibold mb-1"
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
+            </div>
+            <div v-if="form.status !== 'PICKED_UP'" class="mb-4 relative">
+              <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                 >Search Resident Name</label
               >
               <input
                 type="text"
                 v-model="recipientSearch"
                 placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border rounded-md p-2"
+                class="md:w-[325px] w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white outline-none shadow-sm hover:border-blue-200"
                 :disabled="form.status === 'PICKED_UP'"
               />
 
               <ul
                 v-if="recipientSearch"
-                class="absolute z-10 mt-1 w-[310px] md:w-[325px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                class="absolute z-[60] mt-2 md:w-[325px] w-full bg-white border border-gray-100 rounded-2xl max-h-60 overflow-y-auto overflow-x-hidden text-sm shadow-2xl py-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent"
               >
                 <li
                   v-for="r in filteredResidents"
                   :key="r.userId"
-                  class="px-2 py-1 cursor-pointer hover:bg-blue-100"
-                  v-if="filteredResidents.length > 0"
                   @click="selectResident(r)"
+                  class="px-4 py-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-0.5"
                 >
-                  {{ r.fullName || r.firstName + ' ' + r.lastName }}
-                  (Room {{ r.roomNumber || '-' }}) - {{ r.email || '-' }}
+                  <span class="font-bold text-gray-800">{{ r.fullName || r.firstName + ' ' + r.lastName }}</span>
+                  <span class="text-xs text-gray-500">Room {{ r.roomNumber || '-' }} • {{ r.email || '-' }}</span>
                 </li>
 
                 <li
                   v-if="filteredResidents.length === 0"
-                  class="px-3 py-1 text-gray-400"
+                  class="px-4 py-3 text-gray-400 italic text-center"
                 >
-                  No residents found matching your search terms.
+                  No residents found matching your search.
                 </li>
               </ul>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label class="block font-semibold mb-1">Resident Name</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
                 <input
                   type="text"
                   :value="form.residentName"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Room Number</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
                 <input
                   type="text"
                   :value="form.roomNumber"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
               <div>
-                <label class="block font-semibold mb-1">Email</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
                 <input
                   type="text"
                   :value="form.email"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Date:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="flex-1">
-                <label class="block font-semibold mb-1">Received At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
                 <input
                   type="text"
                   :value="form.receivedAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div>
-                <label class="block font-semibold mb-1">Updated At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
                 <input
                   type="text"
                   :value="form.updatedAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
 
               <div class="flex-1">
-                <label class="block font-semibold mb-1">Picked Up At</label>
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
                 <input
                   placeholder="-"
                   type="text"
                   :value="form.pickedUpAt"
                   readonly
-                  class="w-full border rounded-md p-2 bg-gray-100"
+                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
                 />
               </div>
             </div>
           </section>
 
           <section>
-            <h3 class="font-semibold text-lg mb-2">Status:</h3>
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Status</h3>
+            </div>
 
             <div class="flex gap-6 items-start">
-              <div class="flex-1">
-                <select
+              <div>
+                <SelectWeb
                   v-model="form.status"
-                  class="border rounded-md p-2 w-auto"
+                  :options="statusOptions"
                   :disabled="form.status === 'PICKED_UP'"
-                >
-                  <option v-for="s in statusOptions" :key="s" :value="s">
-                    {{ s }}
-                  </option>
-                </select>
+                  class="w-[240px]"
+                />
 
-                <p class="text-xs text-red-500 mt-1">
-                  * You can only update the status in order: Waiting for Staff →
-                  Received → Picked Up
-                </p>
+                <div class="mt-6 p-5 bg-blue-50/40 border border-blue-100/50 rounded-2xl flex items-start gap-4 backdrop-blur-sm transition-all hover:bg-blue-50/60 shadow-sm shadow-blue-900/5">
+                  <div class="p-2 bg-white rounded-xl shadow-sm border border-blue-100 flex-shrink-0">
+                    <svg class="w-5 h-5 text-[#0E4B90]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p class="text-sm text-[#0E4B90]/80 leading-relaxed font-medium">
+                    <span class="block text-xs font-bold text-[#0E4B90] mb-1">Status Update Guide</span>
+                    You can only update the status in order: 
+                    <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
+                    <span class="mx-1 opacity-40">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Received</span> 
+                    <span class="mx-1 opacity-40">→</span> 
+                    <span class="text-[#0E4B90] font-bold">Picked Up</span>
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -1098,12 +1242,13 @@ function formatDateTime(datetimeStr) {
               label="Cancel"
               color="gray"
               @click="cancelEdit"
-              class="text-[#898989]"
+              class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
             />
             <ButtonWeb
               label="Save"
               color="blue"
               @click="saveEditParcel"
+              class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
               :disabled="isUnchanged"
             />
           </div>

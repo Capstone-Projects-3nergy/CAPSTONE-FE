@@ -11,6 +11,8 @@ import HomePageStaff from '@/components/HomePageStaff.vue'
 import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
 import ProfileResident from '@/components/ProfileResident.vue'
+import CreateAnnouncement from '@/components/CreateAnnouncement.vue'
+import EditAnnouncementDetails from '@/components/EditAnnouncementDetails.vue'
 import ProfileStaff from '@/components/ProfileStaff.vue'
 import EditParcels from '@/components/EditParcels.vue'
 import ParcelsDetail from '@/components/ParcelsDetail.vue'
@@ -28,6 +30,8 @@ import EditRegistrationDetail from '@/components/EditRegistrationDetail.vue'
 import AddMember from '@/components/AddMember.vue'
 import NotificationPage from '@/components/NotificationPage.vue'
 import ParcelResidentVerification from '@/components/ParcelResidentVerification.vue'
+import LineCallback from '@/components/LineCallback.vue'
+
 const history = createWebHistory(import.meta.env.BASE_URL)
 const routes = [
   /* =======================
@@ -36,6 +40,38 @@ const routes = [
   {
     path: '/',
     redirect: '/loginpage'
+  },
+  {
+    path: '/callback',
+    name: 'linecallback',
+    component: LineCallback
+  },
+  {
+    path: '/profile',
+    name: 'profile-redirect',
+    beforeEnter: async (to, from, next) => {
+      // ใช้ dynamic import เพื่อเลี่ยงปัญหากับ Circular Dependency
+      const { useAuthManager } = await import('@/stores/AuthManager');
+      const authStore = useAuthManager();
+      
+      // 1. รอให้ Firebase เช็คสถานะการ Login ให้เสร็จ (สำคัญมากตอน Refresh หน้า)
+      if (!authStore.user) {
+        console.log('Router: Waiting for Firebase to initialize...');
+        await authStore.initUser();
+      }
+      
+      // 2. ตรวจสอบอีกครั้งหลังจากรอแล้ว
+      if (authStore.user) {
+        const userId = authStore.user.id || authStore.user.userId;
+        const targetRoute = authStore.user.role === 'STAFF' ? 'profilestaff' : 'profileresident';
+        
+        console.log('Router: Successfully recognized user:', userId);
+        next({ name: targetRoute, params: { id: userId }, query: to.query });
+      } else {
+        console.log('Router: No user found, redirecting to login');
+        next({ name: 'login' });
+      }
+    }
   },
   {
     path: '/loginpage',
@@ -96,7 +132,11 @@ const routes = [
     name: 'editprofileresident',
     component: EditProfilePage
   },
-
+  {
+    path: '/homepage/resident/:id/parcelresidentverification',
+    name: 'parcelresidentverification',
+    component: ParcelResidentVerification
+  },
   /* =======================
    * Staff
    * ======================= */
@@ -166,6 +206,16 @@ const routes = [
     component: ManageAnnouncement
   },
   {
+    path: '/homepage/staff/:id/manageannouncement/add',
+    name: 'addannouncement',
+    component: CreateAnnouncement
+  },
+  {
+    path: '/homepage/staff/:id/manageannouncement/:aid/edit',
+    name: 'editannouncement',
+    component: EditAnnouncementDetails
+  },
+  {
     path: '/homepage/staff/:id/parcelscannerpage',
     name: 'parcelscanner',
     component: ParcelScannerPage
@@ -174,11 +224,6 @@ const routes = [
     path: '/homepage/staff/:id/profile',
     name: 'profilestaff',
     component: ProfileStaff
-  },
-  {
-    path: '/homepage/staff/:id/parcelresidentverification',
-    name: 'parcelresidentverification',
-    component: ParcelResidentVerification
   },
   {
     path: '/homepage/staff/:id/profile/editprofile',

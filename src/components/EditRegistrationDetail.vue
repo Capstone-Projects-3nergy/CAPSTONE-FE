@@ -68,6 +68,7 @@ const lastNameError = ref(false)
 const firstNameRequired = ref(false)
 const lastNameRequired = ref(false)
 const roomNumberRequired = ref(false)
+const fileSizeError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -551,7 +552,7 @@ const handleImageUpload = (event) => {
 
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    alert('File size should be less than 5MB.')
+    showFileSizeError()
     return
   }
 
@@ -576,7 +577,7 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const showManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -661,6 +662,7 @@ const closePopUp = (operate) => {
   if (operate === 'firstNameRequired') firstNameRequired.value = false
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
+  if (operate === 'fileSizeError') fileSizeError.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -707,11 +709,15 @@ const showRoomNumberRequired = () => {
   roomNumberRequired.value = true
   setTimeout(() => (roomNumberRequired.value = false), 10000)
 }
+const showFileSizeError = () => {
+  fileSizeError.value = true
+  setTimeout(() => (fileSizeError.value = false), 5000)
+}
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -719,12 +725,12 @@ const showRoomNumberRequired = () => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -759,7 +765,26 @@ const showRoomNumberRequired = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -790,7 +815,7 @@ const showRoomNumberRequired = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
@@ -829,7 +854,7 @@ const showRoomNumberRequired = () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -847,22 +872,25 @@ const showRoomNumberRequired = () => {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                     <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -899,21 +927,26 @@ const showRoomNumberRequired = () => {
 
       <main class="flex-1 p-9">
         <div class="flex items-center space-x-2 mb-6">
-          <svg
+               <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+            <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
             viewBox="0 0 24 24"
           >
             <path
-              fill="#185DC0"
+              fill="#0E4B90"
               d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
             />
           </svg>
-          <h2 class="text-xl sm:text-xl md:text-2xl font-bold text-[#185dc0]">
-            Manages Resident &gt; Edit
-          </h2>
-        </div>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                     Manages Resident &gt; Edit </span>
+                </h2>
+              </div>
+            </div>
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
             v-if="editSuccess"
@@ -995,6 +1028,14 @@ const showRoomNumberRequired = () => {
             operate="roomNumberRequired"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileSizeError"
+            :titles="'The file size of the profile image must not exceed 5MB.'"
+            message="Error!!"
+            styleType="red"
+            operate="fileSizeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1013,6 +1054,7 @@ const showRoomNumberRequired = () => {
           :phoneNumber="form.phoneNumber"
           :editResidentDetail="true"
           :editProfile="false"
+          :showLineId="true"
           @cancel="cancelEdit"
           @success="showProfileSuccess"
           @error="showProfileError"
@@ -1024,6 +1066,7 @@ const showRoomNumberRequired = () => {
           @first-name-required="showFirstNameRequired"
           @last-name-required="showLastNameRequired"
           @room-number-required="showRoomNumberRequired"
+          @file-size-error="showFileSizeError"
         />
       </main>
     </div>

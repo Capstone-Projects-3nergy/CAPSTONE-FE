@@ -7,14 +7,18 @@ import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
+import { useDashboardManager } from '@/stores/DashboardManager.js'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { getDashboardData } from '@/utils/fetchUtils.js'
+
 const loginManager = useAuthManager()
-const loginStore = useLoginManager()
+const dashboardStore = useDashboardManager()
 const router = useRouter()
+
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 const showParcelScanner = ref(false)
@@ -25,61 +29,43 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
-const monthsTH = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.'
-]
 
-const packagesPerMonth = [
-  120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
-]
 const checkScreen = () => {
   isCollapsed.value = window.innerWidth < 768
 }
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
 })
-onMounted(async () => {
-  checkScreen()
 
-  window.addEventListener('resize', checkScreen)
+const fetchDashboardData = async () => {
+  await dashboardStore.fetchDashboardData(router)
+}
+
+let chartInstance = null
+
+const renderChart = () => {
   const ctx = document.getElementById('parcelChart')
-  new Chart(ctx, {
+  if (!ctx) return
+  
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+  
+  chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      datasets: [
-        {
-          label: 'Parcel Volume',
-          data: [24, 15, 31, 40, 23, 15, 33],
-          backgroundColor: (context) => {
-            const index = context.dataIndex
-            return index === 3
-              ? 'rgba(37, 99, 235, 0.9)'
-              : 'rgba(59, 130, 246, 0.3)'
-          },
-          borderRadius: 8,
-          barThickness: 30
-        }
-      ]
+      labels: dashboardStore.chartData.labels,
+      datasets: dashboardStore.chartData.datasets
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (context) => `${context.parsed.y} พัสดุ`
+            label: (context) => `${context.dataset.label}: ${context.parsed.y} พัสดุ`
           }
         }
       },
@@ -93,7 +79,26 @@ onMounted(async () => {
       }
     }
   })
+}
+
+// Re-render when data or view changes
+import { watch } from 'vue'
+watch(() => dashboardStore.chartData.labels, () => {
+  renderChart()
+}, { deep: true })
+
+onMounted(async () => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+  
+  await fetchDashboardData()
+  renderChart()
 })
+
+const changeView = (view) => {
+  dashboardStore.setChartView(view)
+  renderChart()
+}
 
 const showHomePageStaffWeb = async function () {
   router.replace({ name: 'homestaff' })
@@ -143,7 +148,7 @@ const toggleSidebar = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -151,12 +156,12 @@ const toggleSidebar = () => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -191,7 +196,26 @@ const toggleSidebar = () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -226,7 +250,7 @@ const toggleSidebar = () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
@@ -285,22 +309,25 @@ const toggleSidebar = () => {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                      <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -335,151 +362,380 @@ const toggleSidebar = () => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 bg-gray-50 min-h-screen">
-        <div class="flex items-center space-x-2 mb-6">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 3V23C5.9 22.5 2 18.2 2 13C2 7.8 5.9 3.5 11 3ZM13 3V12H22C21.5 7.2 17.8 3.5 13 3ZM13 14V23C17.7 22.5 21.5 18.8 22 14H13Z"
-              fill="#185DC0"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Dashboard</h2>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-[#185dc0]/10 p-3 rounded-xl text-[#185dc0] flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+      <main class="flex-1 p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans">
+        <div class="max-w-7xl mx-auto space-y-6">
+           <!-- Header & Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                  <svg
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3.75 6.75l7.5-3 7.5 3M3.75 6.75v10.5l7.5 3m-7.5-13.5l7.5 3m0 10.5v-10.5m0 10.5l7.5-3V6.75m0 0l-7.5 3"
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
                   />
                 </svg>
               </div>
               <div>
-                <p class="text-gray-600 text-sm">Total Parcel</p>
-                <p class="text-2xl font-bold">247</p>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                  <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   DashBoard
+                  </span>
+                </h2>
+              </div>
+            </div>
+          </div>
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Parcels -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">📦</span>
+                <span class="flex items-center text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
+                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                  12%
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.totalParcels || 124 }}</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels (Month)</p>
+              </div>
+            </div>
+
+            <!-- Awaiting Pickup -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">⏳</span>
+                <span class="text-orange-400 text-xs font-bold bg-orange-50 px-2 py-1 rounded">
+                  → 3 days avg
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.awaitingPickup || 38 }}</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Awaiting Pickup</p>
+              </div>
+            </div>
+
+            <!-- Overdue -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <span class="text-2xl">🚨</span>
+                <span class="flex items-center text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">
+                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  Action needed
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.overdue || 5 }}</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Overdue (>7 days)</p>
+              </div>
+            </div>
+
+            <!-- Picked Up -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-emerald-500 text-xs font-bold">
+                  {{ dashboardStore.stats.pickedUpRate || '69%' }} rate
+                </span>
+              </div>
+              <div class="mt-4">
+                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ dashboardStore.stats.pickedUp || 86 }}</h3>
+                <p class="text-gray-500 text-sm font-medium mt-1">Picked Up</p>
               </div>
             </div>
           </div>
 
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-green-100 p-3 rounded-xl text-green-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+          <!-- Overdue Alert Box -->
+          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-2xl">🚨</span>
+              <h3 class="text-red-600 font-bold text-lg">{{ dashboardStore.stats.overdue || 5 }} Parcels Overdue - ยังไม่ถูกรับเกิน 7 วัน</h3>
+            </div>
+            <p class="text-red-500 text-sm mb-4">Please contact the resident to collect the parcel as soon as possible.</p>
+            
+            <div class="space-y-3">
+              <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">10 days</span>
+                  <span class="font-bold text-gray-800">kong zeed</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 13</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH198273645</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
               </div>
-              <div>
-                <p class="text-gray-600 text-sm">Unreceived Parcel</p>
-                <p class="text-2xl font-bold">89</p>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">9 days</span>
+                  <span class="font-bold text-gray-800">Suklita Mook</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 1</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH291837465</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
               </div>
+
+               <!-- Overdue Item -->
+              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
+                <div class="flex items-center gap-4">
+                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">7 days</span>
+                  <span class="font-bold text-gray-800">testkub</span>
+                </div>
+                <div class="flex items-center gap-6">
+                  <span class="text-gray-500 text-sm">Room 532</span>
+                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH001328374</span>
+                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Notify
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-pink-100 p-3 rounded-xl text-pink-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6v6h4.5M3 12a9 9 0 1118 0 9 9 0 01-18 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-gray-600 text-sm">Received Parcel</p>
-                <p class="text-2xl font-bold">158</p>
-              </div>
+          <!-- Export Actions -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-500">Export:</span>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-green-600">📊</span> Export Excel (.xlsx)
+              </button>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-red-500">📄</span> Export PDF Report
+              </button>
+              <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <span class="text-orange-500">📑</span> Export CSV
+              </button>
             </div>
-          </div>
-
-          <div
-            class="bg-white flex flex-col items-center justify-center p-4 rounded-2xl shadow"
-          >
-            <div class="flex items-center space-x-3">
-              <div
-                class="bg-purple-100 p-3 rounded-xl text-purple-600 flex items-center justify-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17 20h5v-2a2 2 0 00-2-2h-3m0 0H7m10 0a2 2 0 00-2-2H9a2 2 0 00-2 2m0 0H4a2 2 0 00-2 2v2h5m10 0v-2a2 2 0 00-2-2h-6a2 2 0 00-2 2v2m10 0H7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-gray-600 text-sm">All Resident</p>
-                <p class="text-2xl font-bold">342</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-gray-700 font-semibold">Parcel Volume</h3>
-            <button
-              class="border rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
-            >
-              This Week ▾
+            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Print Summary
             </button>
           </div>
-          <canvas id="parcelChart" height="120"></canvas>
+
+          <!-- Charts Grid 1 -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Parcel Activity Chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-8">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">Parcel Activity</h3>
+                  <p class="text-xs text-gray-500">Received · Picked Up · Overdue</p>
+                </div>
+                <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
+                  <button 
+                    @click="changeView('daily')"
+                    :class="[dashboardStore.currentView === 'daily' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Daily
+                  </button>
+                  <button 
+                    @click="changeView('weekly')"
+                    :class="[dashboardStore.currentView === 'weekly' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Weekly
+                  </button>
+                  <button 
+                    @click="changeView('monthly')"
+                    :class="[dashboardStore.currentView === 'monthly' ? 'text-gray-900 bg-white shadow-sm font-bold' : 'text-gray-500 font-medium']"
+                    class="px-4 py-1.5 text-xs rounded-md transition-all"
+                  >
+                    Monthly
+                  </button>
+                </div>
+              </div>
+              <div class="h-[250px] w-full relative">
+                 <canvas id="parcelChart"></canvas>
+              </div>
+              <div class="flex items-center gap-6 mt-6">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-blue-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Received</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-emerald-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Picked Up</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded bg-red-500"></div>
+                  <span class="text-xs text-gray-600 font-medium">Overdue</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Distribution -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 class="text-lg font-bold text-gray-900">Status Distribution</h3>
+              <p class="text-xs text-gray-500 mb-8">Current month</p>
+              
+              <div class="flex justify-center mb-8 relative">
+                <!-- Placeholder for Donut Chart -->
+                <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-l-red-500 flex items-center justify-center flex-col">
+                  <span class="text-3xl font-black text-gray-900 leading-none">{{ dashboardStore.stats.totalParcels || 124 }}</span>
+                  <span class="text-xs text-gray-500">Total</span>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div>
+                    <span class="text-sm text-gray-600">Picked Up</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.pickedUp || 86 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.pickedUpRate || '69%' }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></div>
+                    <span class="text-sm text-gray-600">Awaiting</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.awaitingPickup || 38 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.awaitingRate || '27%' }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-sm bg-red-500"></div>
+                    <span class="text-sm text-gray-600">Overdue</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-gray-900">{{ dashboardStore.stats.overdue || 5 }}</span>
+                    <span class="text-xs text-gray-400 w-8 text-right">{{ dashboardStore.stats.overdueRate || '4%' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+
+          <!-- Charts Grid 2 -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+            
+            <!-- Parcel by Room -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+              <div class="flex items-center justify-between mb-8">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">Parcel by Room</h3>
+                  <p class="text-xs text-gray-500">Heat map - darker = more parcels pending</p>
+                </div>
+                <div class="flex items-center gap-4">
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-gray-100"></div><span class="text-xs text-gray-400">0</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-100"></div><span class="text-xs text-gray-400">1-2</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-300"></div><span class="text-xs text-gray-400">3-4</span></div>
+                   <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-blue-600"></div><span class="text-xs text-gray-400">5+</span></div>
+                </div>
+              </div>
+              <div class="w-full h-[280px] bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center text-gray-400">
+                Heat Map Container
+              </div>
+            </div>
+
+            <!-- Recent Parcels -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
+                <button class="bg-[#1D355E] text-white text-xs font-medium px-4 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-900 transition-colors">
+                  + Add
+                </button>
+              </div>
+
+              <!-- Table Header -->
+              <div class="grid grid-cols-4 px-2 mb-4">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tracking</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Resident</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Room</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2">Status</span>
+              </div>
+
+              <!-- List -->
+              <div class="space-y-4">
+                <!-- Item 1 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH12322223</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
+                  <span class="text-xs text-gray-600 text-center">13</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                       <button class="p-1 rounded bg-gray-50 border border-gray-200 text-gray-400"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH123654789</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">Suklita Mook</span>
+                  <span class="text-xs text-gray-600 text-center">1</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-emerald-100">✓ Picked Up</span>
+                  </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH001928374</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">testkub</span>
+                  <span class="text-xs text-gray-600 text-center">532</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-yellow-100">⏳ Waiting</span>
+                  </div>
+                </div>
+                
+                 <!-- Item 4 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH009182736</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">testkubza</span>
+                  <span class="text-xs text-gray-600 text-center">532</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-blue-100">✉ Notified</span>
+                  </div>
+                </div>
+
+                 <!-- Item 5 -->
+                <div class="grid grid-cols-4 items-center px-2 py-1">
+                  <span class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">TH198273645</span>
+                  <span class="text-xs text-gray-600 truncate mr-2">kong zeed</span>
+                  <span class="text-xs text-gray-600 text-center">13</span>
+                  <div class="flex items-center justify-between ml-2">
+                    <span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md whitespace-nowrap border border-red-100">⚠️ Overdue</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 border-t border-gray-100 pt-4 text-center">
+                <button class="text-xs font-medium text-blue-500 hover:text-blue-700">View all parcels →</button>
+              </div>
+            </div>
+
+          </div>
         </div>
       </main>
     </div>

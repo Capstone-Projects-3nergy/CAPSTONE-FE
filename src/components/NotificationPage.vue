@@ -67,7 +67,9 @@ const showError = () => {
 const closeNotification = () => {
   notification.value.show = false
 }
-
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const router = useRouter()
 const editSuccess = ref(false)
 const error = ref(false)
@@ -359,7 +361,7 @@ const goToPage = (page) => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -371,12 +373,12 @@ const goToPage = (page) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -471,7 +473,9 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem 
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -525,12 +529,12 @@ const goToPage = (page) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -605,7 +609,7 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
+            <!-- <SidebarItem title="Dashboard (Next Release)">
               <template #icon>
                 <svg
                   width="24"
@@ -620,7 +624,7 @@ const goToPage = (page) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -704,7 +708,7 @@ const goToPage = (page) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-8 bg-gray-50 relative">
+      <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-50 relative overflow-x-hidden font-sans">
         <!-- LINE Notification -->
         <!-- <div class="fixed top-5 right-5 z-50 space-y-3">
           <LineNotification
@@ -744,26 +748,56 @@ const goToPage = (page) => {
 
         <!-- Content Card -->
         <div
-          class="w-full bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white/50 p-8 overflow-hidden relative"
+          class="w-full rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
         >
           <!-- Decor -->
           <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50/50 to-transparent rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
 
           <!-- Header -->
           <div class="relative z-10 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
-              Notifications
-            </h2>
-            <p class="text-sm text-gray-500 mt-1">
-              Stay updated with your latest parcels and announcements
-            </p>
+              <div class="flex items-center gap-5">
+            <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="currentColor">
+                    <path
+                      d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 2a7 7 0 0 0-7 7v3.528a1 1 0 0 1-.105.447l-1.717 3.433A1.1 1.1 0 0 0 4.162 18h15.676a1.1 1.1 0 0 0 .984-1.592l-1.716-3.433a1 1 0 0 1-.106-.447V9a7 7 0 0 0-7-7m0 19a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 12 21"
+                    />
+                  </g>
+                </svg>
+              <!-- <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#185DC0"
+                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
+              />
+            </svg> -->
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                    Notifications </span>
+          </h2>
+        </div>
           </div>
 
-          <div class="bg-gray-100 p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
+          <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex p-1.5 rounded-2xl flex flex-nowrap gap-1 mb-8 relative z-10 w-full md:w-fit overflow-x-auto">
             <button
               @click="activeNotifyTab = 'all'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'all' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'all'? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               All
             </button>
@@ -771,7 +805,8 @@ const goToPage = (page) => {
             <button
               @click="activeNotifyTab = 'parcel'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'parcel' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'parcel' ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               Parcels
             </button>
@@ -779,7 +814,8 @@ const goToPage = (page) => {
             <button
               @click="activeNotifyTab = 'announcement'"
               class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out relative z-10 cursor-pointer"
-              :class="activeNotifyTab === 'announcement' ? 'bg-white text-[#0E4B90] shadow-md ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'"
+              :class="activeNotifyTab === 'announcement'? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
             >
               Announcements
             </button>
@@ -857,32 +893,38 @@ const goToPage = (page) => {
             </div>
           </div>
 
-          <div class="flex justify-end space-x-2 mt-4 text-gray-700 relative z-10">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              &lt; Previous
-            </button>
+          <div class="flex flex-col sm:flex-row items-center justify-between sm:justify-end gap-3 mt-4 relative z-10" v-if="filteredNotifications.length > 0">
+            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
+              <button
+                @click="prevPage"
+                :disabled="currentPage === 1"
+                class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+              >
+                Previous
+              </button>
 
-            <button
-              v-for="pg in pages"
-              :key="pg"
-              @click="goToPage(pg)"
-              class="cursor-pointer px-3 py-1 rounded transition-colors"
-              :class="currentPage === pg ? 'bg-blue-700 text-white shadow-md' : 'hover:bg-gray-200'"
-            >
-              {{ pg }}
-            </button>
+              <button
+                v-for="pg in pages"
+                :key="pg"
+                @click="goToPage(pg)"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                  currentPage === pg 
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                {{ pg }}
+              </button>
 
-            <button
-              @click="nextPage"
-              :disabled="currentPage >= totalPages"
-              class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              Next &gt;
-            </button>
+              <button
+                @click="nextPage"
+                :disabled="currentPage >= totalPages"
+                class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </main>

@@ -40,6 +40,7 @@ const roomNumberError = ref(false)
 const positionError = ref(false)
 const positionRequired = ref(false)
 const phoneError = ref(false)
+const fileSizeError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -98,6 +99,9 @@ const showProfileResidentPage = async function () {
     name: 'profileresident'
   })
   showProfileResident.value = true
+}
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
 }
 const goBackProfilePage = async function () {
   if (loginManager.user.role === 'RESIDENT') {
@@ -188,7 +192,7 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const showManageAnnouncementPage = async function () {
   router.replace({
     name: 'manageannouncement'
   })
@@ -264,6 +268,10 @@ const showPhoneError = () => {
   phoneError.value = true
   setTimeout(() => (phoneError.value = false), 10000)
 }
+const showFileSizeError = () => {
+  fileSizeError.value = true
+  setTimeout(() => (fileSizeError.value = false), 10000)
+}
 const showProfileSuccess = () => {
   editSuccess.value = true
   setTimeout(() => (editSuccess.value = false), 10000)
@@ -337,6 +345,9 @@ const closePopUp = (operate) => {
     case 'lineId':
       lineIdError.value = false
       break
+    case 'fileSizeError':
+      fileSizeError.value = false
+      break
 
     default:
       break
@@ -347,7 +358,7 @@ const closePopUp = (operate) => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -359,12 +370,12 @@ const closePopUp = (operate) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -459,7 +470,9 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem   
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -513,12 +526,12 @@ const closePopUp = (operate) => {
       >
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -553,7 +566,26 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -584,7 +616,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -620,7 +652,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -638,22 +670,25 @@ const closePopUp = (operate) => {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                      <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -810,6 +845,14 @@ const closePopUp = (operate) => {
             operate="roomNumber"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileSizeError"
+            :titles="'The file size of the profile image must not exceed 5MB.'"
+            message="Error!!"
+            styleType="red"
+            operate="fileSizeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           v-if="loginManager.user"
@@ -842,6 +885,7 @@ const closePopUp = (operate) => {
           @dorm-id-required="showDormRequired"
           @room-number-required="showRoomNumberRequired"
           @line-id-error="lineIdErrorFn"
+          @file-size-error="showFileSizeError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

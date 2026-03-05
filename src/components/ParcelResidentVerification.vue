@@ -11,6 +11,7 @@ import DashBoard from './DashBoard.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
@@ -69,8 +70,10 @@ const companyList = ref([])
 const isResidentNameWrong = ref(false)
 const trackingNumberError = ref(false)
 const showResidentNameLengthError = ref(false)
+const showResidentNameMinLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const isLoading = ref(false)
+const trackingNumberFormatError = ref(false)
 const form = ref({
   residentName: authStore.user?.fullName ,
   items: [{
@@ -79,6 +82,19 @@ const form = ref({
     description: '',
     parcelType: ''
   }]
+})
+
+const parcelTypeOptions = [
+  { label: 'Document', value: 'DOCUMENT' },
+  { label: 'Box', value: 'BOX' },
+  { label: 'Electronic', value: 'ELECTRONIC' }
+]
+
+const companyOptions = computed(() => {
+  return companyList.value.map((comp) => ({
+    label: comp.companyName,
+    value: comp.companyId
+  }))
 })
 
 const isFormValid = computed(() => {
@@ -94,6 +110,9 @@ const addParcelItem = () => {
   })
 }
 
+const showAnnouncementPage = async () => {
+  router.replace({ name: 'announcement' })
+}
 const removeParcelItem = (index) => {
   if (form.value.items.length > 1) {
     form.value.items.splice(index, 1)
@@ -236,11 +255,20 @@ const submitVerification = async () => {
       showResidentNameLengthError.value = true
       setTimeout(() => {
         showResidentNameLengthError.value = false
+      showResidentNameLengthError.value = false
       }, 10000)
       return
     }
 
-    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 60) {
+    if (form.value.residentName && form.value.residentName.length < 6) {
+      showResidentNameMinLengthError.value = true
+      setTimeout(() => {
+        showResidentNameMinLengthError.value = false
+      }, 10000)
+      return
+    }
+
+    if (form.value.items[0].trackingNumber && form.value.items[0].trackingNumber.length > 22) {
       showTrackingLengthError.value = true
       setTimeout(() => {
         showTrackingLengthError.value = false
@@ -275,6 +303,26 @@ const submitVerification = async () => {
             errorMessage.value = `Tracking number "${item.trackingNumber}" cannot contain Thai characters.`
             return
         }
+        
+        // Company Format Validation
+        const selectedCompany = companyList.value.find(c => c.companyId === item.companyId)
+        if (selectedCompany) {
+            const name = selectedCompany.companyName.toLowerCase()
+            const tracking = item.trackingNumber
+            let isValid = true
+            if ((name.includes('thailand post') || name.includes('thailandpost')) && !/^[A-Z]{2}\d{9}TH$/.test(tracking)) isValid = false
+            else if (name.includes('kerry') && !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)) isValid = false
+            else if (name.includes('flash') && !/^TH\d{11}[A-Z]$/.test(tracking)) isValid = false
+            else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking)) isValid = false
+            else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking)) isValid = false
+            else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking)) isValid = false
+
+            if (!isValid) {
+                trackingNumberFormatError.value = true
+                setTimeout(() => (trackingNumberFormatError.value = false), 10000)
+                return
+            }
+        }
     }
     
     isLoading.value = true
@@ -295,7 +343,9 @@ const submitVerification = async () => {
             // -----------------------
             const body = {
                 trackingNumber: item.trackingNumber,
-                residentName: form.value.residentName
+                residentName: form.value.residentName,
+                companyId: item.companyId,
+                parcelType: item.parcelType
             }
 
             // -----------------------
@@ -512,6 +562,12 @@ const closePopUp = (operate) => {
     case 'nameMismatch':
       isNameMismatch.value = false
       break
+    case 'residentNameMin':
+      showResidentNameMinLengthError.value = false
+      break
+    case 'trackingNumberFormat':
+      trackingNumberFormatError.value = false
+      break
   }
 }
 
@@ -536,7 +592,7 @@ const handleResidentNameInput = (event) => {
 
 const handleTrackingInput = (event, index) => {
   const val = event.target.value
-  const maxLength = 60
+  const maxLength = 22
   if (val.length > maxLength) {
     const sliced = val.slice(0, maxLength)
     if (index !== undefined) {
@@ -564,7 +620,7 @@ const handleTrackingInput = (event, index) => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -626,12 +682,12 @@ const handleTrackingInput = (event, index) => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -766,7 +822,9 @@ const handleTrackingInput = (event, index) => {
               </template>
             </SidebarItem> -->
 
-            <SidebarItem title="Announcements (Next Release)">
+            <SidebarItem  
+              title="Announcements"
+              @click="showAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -814,11 +872,28 @@ const handleTrackingInput = (event, index) => {
       </button>
 
       <main class="flex-1 p-9 bg-[#f8f9fb]">
-        <!-- <div class="mb-6">
-          <h2 class="text-2xl font-bold text-[#185dc0]">
-            Parcel Verification
-          </h2>
-        </div> -->
+           <div class="max-w-4xl mx-auto flex flex-col gap-4 mb-6 px-2">
+          <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                         <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 25 25"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13.9676 2.61776C13.0264 2.23614 11.9735 2.23614 11.0322 2.61776L8.75096 3.54276L18.7426 7.42818L22.2572 6.07089C22.1127 5.95203 21.9512 5.85547 21.778 5.78443L13.9676 2.61776ZM22.9166 7.49068L13.2812 11.2136V22.5917C13.5145 22.5445 13.7433 22.4754 13.9676 22.3844L21.778 19.2178C22.1145 19.0815 22.4026 18.8479 22.6054 18.5469C22.8082 18.2459 22.9166 17.8912 22.9166 17.5282V7.49068ZM11.7187 22.5917V11.2136L2.08325 7.49068V17.5292C2.08346 17.892 2.19191 18.2465 2.39474 18.5473C2.59756 18.8481 2.88553 19.0816 3.22179 19.2178L11.0322 22.3844C11.2565 22.4747 11.4853 22.5431 11.7187 22.5917ZM2.74263 6.07089L12.4999 9.84068L16.5801 8.2636L6.6395 4.39901L3.22179 5.78443C3.04402 5.85665 2.88429 5.95214 2.74263 6.07089Z"
+                   fill="currentColor"
+                  />
+                </svg>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Parcel Verification  </span>
+                </h2>
+          </div>
+        </div>
 
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
@@ -870,12 +945,19 @@ const handleTrackingInput = (event, index) => {
       operate="nameMismatch"
       @closePopUp="closePopUp"
     />
-
+    <AlertPopUp
+      v-if="trackingNumberFormatError"
+      :titles="'Tracking Number format is incorrect for the selected company.'"
+      message="Error!!"
+      styleType="red"
+      operate="trackingNumberFormat"
+      @closePopUp="closePopUp"
+    />
         <div class="max-w-4xl mx-auto mt-6">
           <div
             class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
           >
-            <div class="bg-[#0E4B90] px-8 py-6">
+            <div class="bg-[#1D355E] px-8 py-6">
               <h3 class="text-2xl font-bold text-white flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -901,7 +983,7 @@ const handleTrackingInput = (event, index) => {
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
               <div class="space-y-6">
                 <!-- Resident Name (Common) -->
-                <div>
+                <!-- <div>
                   <div class="flex items-center ml-1">
                     <label class="block text-sm font-semibold text-gray-700 ml-1 mb-1">Resident Name</label>
                     <span class="text-red-500 ml-1">*</span>
@@ -930,7 +1012,7 @@ const handleTrackingInput = (event, index) => {
                   <p class="text-xs text-gray-400 mt-1 ml-1" v-else>
                     *Enter resident name to assign all parcels below.
                   </p>
-                </div>
+                </div> -->
 
                 <!-- Dynamic Parcel List -->
                 <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
@@ -961,13 +1043,13 @@ const handleTrackingInput = (event, index) => {
                           type="text"
                           class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
                           :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
-                          placeholder="Ex. TH12345678"
+                          placeholder="Enter tracking number"
                         />
                          <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
-                          Tracking number max 60 characters
+                          Tracking number max 22 characters
                         </p>
                       </div>
                     </div>
@@ -983,15 +1065,12 @@ const handleTrackingInput = (event, index) => {
                             <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
                           </svg>
                         </div>
-                        <select
+                        <SelectWeb
                           v-model="item.parcelType"
-                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
-                        >
-                          <option disabled value="">Select Parcel Type</option>
-                          <option value="DOCUMENT">Document</option>
-                          <option value="BOX">Box</option>
-                          <option value="ELECTRONIC">Electronic</option>
-                        </select>
+                          :options="parcelTypeOptions"
+                          placeholder="Select parcel type"
+                          class="pl-10"
+                        />
                       </div>
                     </div>
 
@@ -1008,19 +1087,12 @@ const handleTrackingInput = (event, index) => {
                              <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
                           </svg>
                         </div>
-                        <select
+                        <SelectWeb
                           v-model="item.companyId"
-                          class="pl-10 w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#0E4B90] focus:border-[#0E4B90] block p-3 transition-all duration-200"
-                        >
-                          <option value="" disabled>Select Company</option>
-                          <option
-                            v-for="comp in companyList"
-                            :key="comp.companyId"
-                            :value="comp.companyId"
-                          >
-                            {{ comp.companyName }}
-                          </option>
-                        </select>
+                          :options="companyOptions"
+                          placeholder="Select company"
+                          class="pl-10"
+                        />
                       </div>
                     </div>
 
@@ -1055,7 +1127,7 @@ const handleTrackingInput = (event, index) => {
                   label="Add"
                   :loading="isLoading"
                   :disabled="!isFormValid"
-                  class="px-8 py-2.5 rounded-xl bg-[#0E4B90] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
+                  class="px-8 py-2.5 rounded-xl bg-[#1D355E] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
                   @click="submitVerification"
                 />

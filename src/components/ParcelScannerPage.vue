@@ -7,6 +7,7 @@ import Quagga from '@ericblade/quagga2'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import SidebarItem from './SidebarItem.vue'
 import DashBoard from './DashBoard.vue'
@@ -46,15 +47,17 @@ const senderNameError = ref(false)
 const companyIdError = ref(false)
 const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
+const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
+const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
-  if (val.length > 60) {
-    const sliced = val.slice(0, 60)
+  if (val.length > 22) {
+    const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
     event.target.value = sliced
     showTrackingLengthError.value = true
@@ -68,8 +71,8 @@ const handleTrackingInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
-  if (val.length > 50) {
-    const sliced = val.slice(0, 50)
+  if (val.length > 100) {
+    const sliced = val.slice(0, 100)
     form.value.senderName = sliced
     event.target.value = sliced
     showSenderLengthError.value = true
@@ -102,6 +105,19 @@ const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
+
+const parcelTypeOptions = [
+  { label: 'Document', value: 'DOCUMENT' },
+  { label: 'Box', value: 'BOX' },
+  { label: 'Electronic', value: 'ELECTRONIC' }
+]
+
+const companyOptions = computed(() => {
+  return companyList.value.map((c) => ({
+    label: c.companyName,
+    value: c.companyId
+  }))
+})
 
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
@@ -193,6 +209,7 @@ watch(recipientSearch, (val) => {
 const savedParcels = ref([])
 
 const scanningMode = ref('')
+const isSuccessScan = ref(false)
 let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
@@ -390,9 +407,13 @@ function startQuagga() {
           'ean_reader',
           'ean_8_reader',
           'code_39_reader',
+          'code_39_vin_reader',
+          'codabar_reader',
           'upc_reader',
           'upc_e_reader',
-          'i2of5_reader'
+          'i2of5_reader',
+          '2of5_reader',
+          'code_93_reader'
         ]
       },
       locate: true
@@ -411,16 +432,32 @@ function startQuagga() {
     if (result?.codeResult?.code) {
       const detectedCode = result.codeResult.code.trim()
       
-      processScanResult(detectedCode)
-      
-      // Additional barcode specific logic
-      if (!form.value.parcelType) {
-          if (detectedCode.startsWith('B')) form.value.parcelType = 'BOX'
-          else if (detectedCode.startsWith('D')) form.value.parcelType = 'DOCUMENT'
-          else form.value.parcelType = 'ELECTRONIC'
+      if (detectedCode === lastCode) {
+        count++
+      } else {
+        lastCode = detectedCode
+        count = 1
       }
 
-      stopScan()
+      if (count >= 5) {
+        isSuccessScan.value = true
+        setTimeout(() => {
+          isSuccessScan.value = false
+        }, 1000)
+
+        processScanResult(detectedCode)
+        
+        // Additional barcode specific logic
+        if (!form.value.parcelType) {
+            if (detectedCode.startsWith('B')) form.value.parcelType = 'BOX'
+            else if (detectedCode.startsWith('D')) form.value.parcelType = 'DOCUMENT'
+            else form.value.parcelType = 'ELECTRONIC'
+        }
+
+        // Require another 5 matches to process again
+        lastCode = ''
+        count = 0
+      }
     }
   })
 }
@@ -456,7 +493,23 @@ async function startScan(mode) {
       {
         highlightScanRegion: true,
         highlightCodeOutline: true,
-        returnDetailedScanResult: true 
+        returnDetailedScanResult: true,
+        calculateScanRegion: (video) => {
+          const width = window.innerWidth
+          let size = 400 // default desktop
+          if (width < 640) size = 250 // small mobile
+          else if (width < 768) size = 300 // mobile/tablet
+          
+          const smallestDimension = Math.min(video.videoWidth, video.videoHeight)
+          const scanRegionSize = Math.min(size, smallestDimension * 0.9)
+          
+          return {
+            x: Math.round((video.videoWidth - scanRegionSize) / 2),
+            y: Math.round((video.videoHeight - scanRegionSize) / 2),
+            width: scanRegionSize,
+            height: scanRegionSize
+          }
+        }
       }
     )
     
@@ -527,6 +580,42 @@ const saveParcel = async () => {
     return
   }
 
+  const selectedCompany = companyList.value.find(
+    (c) => c.companyId === Number(form.value.companyId)
+  )
+  if (selectedCompany) {
+    const name = selectedCompany.companyName.toLowerCase()
+    const tracking = form.value.trackingNumber
+    let isValid = true
+    if (
+      (name.includes('thailand post') || name.includes('thailandpost')) &&
+      !/^[A-Z]{2}\d{9}TH$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('kerry') &&
+      !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)
+    )
+      isValid = false
+    else if (
+      name.includes('flash') &&
+      !/^TH\d{11}[A-Z]$/.test(tracking)
+    )
+      isValid = false
+    else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking))
+      isValid = false
+    else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
+      isValid = false
+    else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking))
+      isValid = false
+
+    if (!isValid) {
+      trackingNumberFormatError.value = true
+      setTimeout(() => (trackingNumberFormatError.value = false), 10000)
+      return
+    }
+  }
+
   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.parcelType)) {
     parcelTypeError.value = true
     setTimeout(() => (parcelTypeError.value = false), 10000)
@@ -547,12 +636,18 @@ const saveParcel = async () => {
   //   setTimeout(() => (trackingNumberError.value = false), 10000)
   //   return
   // }
-  if (form.value.senderName && form.value.senderName.length > 50) {
+  if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
-
+  if (form.value.senderName && form.value.senderName.length < 2) {
+    showSenderMinLengthError.value = true
+    setTimeout(() => {
+      showSenderMinLengthError.value = false
+    }, 10000)
+    return
+  }
   try {
     const existingParcels = await getItems(
       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -599,7 +694,7 @@ const saveParcel = async () => {
     }
 
     parcelManager.addParcel(savedParcel)
-    notificationManager.notifyParcelSaved(savedParcel)
+    notificationManager.notifyParcelSaved(savedParcel, router)
 
     addSuccess.value = true
     setTimeout(() => (addSuccess.value = false), 10000)
@@ -664,8 +759,10 @@ const closePopUp = (operate) => {
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'recipientNameLetter') recipientNameLetterError.value = false
   if (operate === 'trackingNumber') trackingNumberError.value = false
+  if (operate === 'trackingNumberFormat') trackingNumberFormatError.value = false
   if (operate === 'companyId') companyIdError.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
+  if (operate === 'senderNameMin') showSenderMinLengthError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -688,7 +785,7 @@ const showManageParcelPage = async () => {
   showStaffParcels.value = true
 }
 
-const ShowManageAnnouncementPage = async () => {
+const showManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -773,7 +870,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -781,12 +878,12 @@ onMounted(async () => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -821,7 +918,26 @@ onMounted(async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -852,7 +968,7 @@ onMounted(async () => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem
               title=" Manage Parcel"
@@ -894,7 +1010,7 @@ onMounted(async () => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -912,22 +1028,25 @@ onMounted(async () => {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                      <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -963,25 +1082,31 @@ onMounted(async () => {
       </button>
 
       <main class="flex-1 p-9">
-    <div class="flex items-center space-x-2 mb-6">
-          <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#185DC0"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Add</h2>
+    <div class="flex items-center space-x-2 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-blue-50 rounded-2xl text-[#0E4B90] shadow-sm">
+        <svg
+              width="24"
+              height="24"
+              viewBox="0 0 25 25"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+                fill="currentColor"
+              />
+            </svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                     Manage parcel &gt; Add </span>
+                </h2>
+              </div>
         </div>
 
         <div
-          class="max-w-full mx-auto bg-white rounded-[5px] shadow-lg overflow-hidden"
+          class="max-w-full mx-auto bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 overflow-hidden"
         >
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
@@ -1030,6 +1155,14 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="trackingNumber"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
               @closePopUp="closePopUp"
             />
             <AlertPopUp
@@ -1089,9 +1222,9 @@ onMounted(async () => {
             <div class="space-y-6">
               <div
                 id="scanner"
-                class="w-full h-58 sm:h-64 border-2 border-dashed border-blue-300 rounded-lg bg-black flex items-center justify-center relative overflow-hidden"
+                class="w-full h-58 sm:h-64 border-2 border-dashed border-blue-200 rounded-3xl bg-gray-900 flex items-center justify-center relative overflow-hidden shadow-inner"
               >
-                <span v-if="!scanningMode && !videoStream" class="text-white">
+                <span v-if="!scanningMode && !videoStream" class="text-gray-400 font-medium tracking-wide">
                   Scan QR/Barcode or Take Picture
                 </span>
 
@@ -1101,20 +1234,31 @@ onMounted(async () => {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full"></div>
+                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative"></div>
                   <video id="qr-video" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
                   >
-                    <div
-                      class="w-64 h-32 border-2 border-green-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
-                    ></div>
+                    <!-- Shadow overlay -->
+                    <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"></div>
+                    
+                    <!-- Scanner Frame -->
+                    <div class="relative w-64 h-32 md:w-80 md:h-40 z-20">
+                      <!-- Corners -->
+                      <div class="absolute top-0 left-0 w-10 h-10 border-t-[4px] border-l-[4px] transition-colors duration-300 rounded-tl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
+                      <div class="absolute top-0 right-0 w-10 h-10 border-t-[4px] border-r-[4px] transition-colors duration-300 rounded-tr-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
+                      <div class="absolute bottom-0 left-0 w-10 h-10 border-b-[4px] border-l-[4px] transition-colors duration-300 rounded-bl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
+                      <div class="absolute bottom-0 right-0 w-10 h-10 border-b-[4px] border-r-[4px] transition-colors duration-300 rounded-br-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
+                      
+                      <!-- Scan Line animation -->
+                      <div class="absolute left-0 top-0 w-full h-[3px] animate-scan-line" :class="isSuccessScan ? 'bg-green-400 shadow-[0_0_20px_5px_rgba(74,222,128,0.5)]' : 'bg-[#185DC0] shadow-[0_0_15px_3px_rgba(24,93,192,0.6)]'"></div>
+                    </div>
                   </div>
                   <ButtonWeb
                     label="Cancel"
                     color="red"
-                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600 z-20"
+                    class="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 z-20 cursor-pointer transition-all duration-300"
                     @click="stopScan"
                   />
                 </div>
@@ -1123,72 +1267,61 @@ onMounted(async () => {
                   ref="videoRef"
                   :class="
                     videoStream
-                      ? 'w-full h-full object-cover rounded-lg'
+                      ? 'w-full h-full object-cover rounded-3xl'
                       : 'hidden'
                   "
                 ></video>
                 <ButtonWeb
                   label="Close Camera"
                   color="red"
-                  class="absolute bottom-2 right-2 bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                  class="absolute bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 cursor-pointer transition-all duration-300"
                   v-if="videoStream"
                   @click="stopCameraOnly"
                 />
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-3 px-7 overflow-x-auto items-center">
+              <div class="flex flex-row flex-nowrap gap-3 px-2 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan"
+                  label="Scan QR code"
                   color="blue"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <ButtonWeb
+                <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
-                /> -->
-                <!-- <ButtonWeb
-                  label="Open Camera"
-                  color="blue"
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream"
                 />
-
-                <ButtonWeb
-                  label="Take Photo"
-                  color="green"
-                  @click="capturePhoto"
-                  :disabled="!isCameraReady"
-                /> -->
               </div>
 
-              <div class="space-y-3">
+              <div class="space-y-5">
                 <div>
-                  <label class="block font-semibold mb-1">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                     Tracking number <span class="text-red-500">*</span>
                   </label>
                   <input
                     :value="form.trackingNumber"
                     @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
                       showTrackingLengthError
-                        ? 'border-red-500 focus:outline-red-500'
-                        : 'focus:outline-blue-500'
+                        ? 'border-red-400 ring-4 ring-red-50'
+                        : ''
                     ]"
                   />
                   <div
                     v-if="showTrackingLengthError"
-                    class="flex items-center text-sm text-red-600 mt-1"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
-                      fill="red"
-                      class="w-[15px] mr-1"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
                     >
                       <path
                         fill-rule="evenodd"
@@ -1196,106 +1329,103 @@ onMounted(async () => {
                         clip-rule="evenodd"
                       />
                     </svg>
-                    <div class="text-sm text-red-600">
-                      Tracking number must be at most 60 characters
+                    <div class="text-xs font-medium">
+                      Tracking number must be at most 22 characters
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <label class="block font-semibold mb-1">
+                <div class="relative">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                     Recipient <span class="text-red-500">*</span>
                   </label>
                   <input
                     v-model="recipientSearch"
                     type="text"
-                    placeholder="Enter Resident Name/ Email / Room Number"
-                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
+                    placeholder="Enter resident name/ email / room number"
+                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                   />
 
                   <ul
                     v-if="showSuggestions"
-                    class="absolute z-10 mt-1 w-[310px] md:w-[440px] bg-white border rounded-md max-h-40 overflow-auto text-sm shadow"
+                    class="absolute z-[60] mt-2 w-full bg-white border border-gray-100 rounded-2xl max-h-60 overflow-y-auto overflow-x-hidden text-sm shadow-2xl py-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent"
                   >
                     <li
                       v-for="r in filteredResidents"
                       :key="r.userId"
                       @click="selectResident(r)"
-                      class="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                      class="px-4 py-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-0.5"
                     >
-                      {{ r.fullName }} (Room {{ r.roomNumber }}) — {{ r.email }}
+                      <span class="font-bold text-gray-800">{{ r.fullName }}</span>
+                      <span class="text-xs text-gray-500">Room {{ r.roomNumber }} • {{ r.email }}</span>
                     </li>
                     <li
                       v-if="filteredResidents.length === 0"
-                      class="px-3 py-1 text-gray-400"
+                      class="px-4 py-3 text-gray-400 italic text-center"
                     >
-                      No residents found matching your search terms.
+                      No residents found matching your search.
                     </li>
                   </ul>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1"
-                    >Room Number <span class="text-red-500">*</span></label
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
+                    >Room number <span class="text-red-500">*</span></label
                   >
                   <input
                     placeholder="Select recipient first"
                     type="text"
                     :value="selectedResident ? selectedResident.roomNumber : ''"
-                    class="w-full border rounded-md p-2 bg-gray-100 text-gray-500"
+                    class="w-full bg-gray-100/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-500 cursor-not-allowed"
                     disabled
                   />
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">
-                    Parcel Type <span class="text-red-500">*</span>
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+                    Parcel type <span class="text-red-500">*</span>
                   </label>
 
-                  <select
+                  <SelectWeb
                     v-model="form.parcelType"
-                    class="w-full border rounded-md p-2 focus:ring focus:ring-blue-200"
-                  >
-                    <option disabled value="">Select Parcel Type</option>
-                    <option value="DOCUMENT">Document</option>
-                    <option value="BOX">Box</option>
-                    <option value="ELECTRONIC">Electronic</option>
-                  </select>
+                    :options="parcelTypeOptions"
+                    placeholder="Select parcel type"
+                  />
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                     Status <span class="text-red-500">*</span>
                   </label>
                   <input
                     v-model="form.status"
-                    class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
+                    class="w-full bg-gray-100/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-500 cursor-not-allowed"
                     disabled
                   />
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">Sender Name</label>
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender name</label>
                   <input
                     :value="form.senderName"
                     @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full border rounded px-3 py-2 transition-colors duration-200"
+                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
-                      showSenderLengthError
-                        ? 'border-red-500 focus:outline-red-500'
-                        : 'focus:outline-blue-500'
+                      showSenderLengthError || showSenderMinLengthError
+                        ? 'border-red-400 ring-4 ring-red-50'
+                        : ''
                     ]"
                   />
                   <div
                     v-if="showSenderLengthError"
-                    class="flex items-center text-sm text-red-600 mt-1"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
-                      fill="red"
-                      class="w-[15px] mr-1"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
                     >
                       <path
                         fill-rule="evenodd"
@@ -1303,46 +1433,59 @@ onMounted(async () => {
                         clip-rule="evenodd"
                       />
                     </svg>
-                    <div class="text-sm text-red-600">
-                      Sender name must be at most 50 characters
+                    <div class="text-xs font-medium">
+                      Sender name must be at most 100 characters
+                    </div>
+                  </div>
+                  <div
+                    v-if="showSenderMinLengthError"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-xs font-medium">
+                      Sender name must be at least 2 characters
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label class="block font-semibold mb-1">
+                  <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                     Company <span class="text-red-500">*</span>
                   </label>
-                  <select
+                  <SelectWeb
                     v-model="form.companyId"
-                    class="w-full border rounded px-3 py-2 focus:outline-blue-500"
-                  >
-                    <option disabled value="">Select Company</option>
-                    <option
-                      v-for="company in companyList"
-                      :key="company.companyId"
-                      :value="company.companyId"
-                    >
-                      {{ company.companyName }}
-                    </option>
-                  </select>
+                    :options="companyOptions"
+                    placeholder="Select company"
+                    direction="up"
+                  />
                 </div>
               </div>
 
-              <div class="flex justify-end space-x-3 mt-3">
+              <div class="flex justify-end space-x-3 mt-8">
                 <div class="flex-1 flex justify-start md:justify-end">
                   <ButtonWeb
                     label="Reset"
                     color="red"
+                    class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
                     @click="cancelParcel"
-                    class="w-auto"
                   />
                 </div>
                 <ButtonWeb
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] block md:hidden"
+                  class="text-[#898989] block md:hidden cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1350,71 +1493,91 @@ onMounted(async () => {
                   @click="saveParcel"
                   :loading="isLoading"
                   :class="{
-                    'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
-                    'bg-black hover:bg-gray-600 text-white': !isAllFilled
+                    'bg-gray-300 text-gray-100 cursor-not-allowed shadow-none': isAllFilled,
+                    'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden"
+                  class="block md:hidden cursor-pointer transition-all rounded-xl"
                 />
               </div>
             </div>
 
             <div
-              class="hidden sm:block bg-gray-50 border-l border-gray-200 p-6 rounded-[5px]"
+              class="hidden sm:flex flex-col bg-gray-50/50 border-l border-gray-100 p-8 rounded-tr-3xl rounded-br-3xl"
             >
-              <div class="flex items-center justify-start mb-4"></div>
+              <div class="flex items-center gap-3 mb-8 border-l-4 border-[#185DC0] pl-6 py-1">
+                <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+                  Parcel information
+                </h2>
+              </div>
 
-              <h2 class="text-xl font-semibold text-[#185DC0] mb-4">
-                Parcel Information
-              </h2>
+              <div class="space-y-4 flex-1">
+                <div class="bg-white p-5 rounded-2xl border border-gray-100/50 shadow-sm transition-all hover:shadow-md">
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Tracking:</span>
+                    <span class="font-bold text-[#185DC0] truncate max-w-[200px]">{{ form.trackingNumber || '-' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Recipient:</span>
+                    <span class="font-bold text-gray-800 truncate max-w-[200px]">{{
+                      selectedResident
+                        ? selectedResident.fullName
+                        : (form.recipientName || '-')
+                    }}</span>
+                  </div>
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Room:</span>
+                    <span class="font-bold text-gray-800">{{
+                      selectedResident ? selectedResident.roomNumber : '-'
+                    }}</span>
+                  </div>
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Type:</span>
+                    <span class="font-bold text-gray-800">{{ form.parcelType || '-' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Status:</span>
+                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ form.status }}</span>
+                  </div>
+                  <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <span class="text-sm font-bold text-gray-400">Company:</span>
+                    <span class="font-bold text-gray-800 truncate max-w-[200px]">
+                      {{
+                        companyList.find((c) => c.companyId === form.companyId)
+                          ?.companyName || '-'
+                      }}
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-2">
+                    <span class="text-sm font-bold text-gray-400">Sender:</span>
+                    <span class="font-bold text-gray-800 truncate max-w-[200px]">{{ form.senderName || '-' }}</span>
+                  </div>
+                </div>
 
-              <div class="space-y-2 text-[#185DC0] font-medium">
-                <div class="flex justify-between border-b py-2">
-                  <span>Tracking:</span>
-                  <span class="truncate max-w-[320px] text-right">{{ form.trackingNumber }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Recipient:</span>
-                  <span class="truncate max-w-[320px] text-right">{{
-                    selectedResident
-                      ? selectedResident.fullName
-                      : form.recipientName
-                  }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Room:</span>
-                  <span class="truncate max-w-[320px] text-right">{{
-                    selectedResident ? selectedResident.roomNumber : ''
-                  }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Type:</span>
-                  <span class="truncate max-w-[320px] text-right">{{ form.parcelType }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Status:</span>
-                  <span class="truncate max-w-[320px] text-right">{{ form.status }}</span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Company:</span>
-                  <span class="truncate max-w-[320px] text-right">
-                    {{
-                      companyList.find((c) => c.companyId === form.companyId)
-                        ?.companyName || ''
-                    }}
-                  </span>
-                </div>
-                <div class="flex justify-between border-b py-2">
-                  <span>Sender:</span>
-                  <span class="truncate max-w-[320px] text-right">{{ form.senderName }}</span>
+                <div v-if="previewUrl" class="mt-6">
+                  <span class="block text-sm font-bold text-gray-500 mb-3 ml-1">Parcel picture</span>
+                  <div class="relative group">
+                    <img
+                      :src="previewUrl"
+                      class="w-full rounded-2xl shadow-xl border-4 border-white max-h-64 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                    <button
+                      @click="deletePreview"
+                      class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full shadow-lg w-8 h-8 flex items-center justify-center hover:bg-red-600 cursor-pointer transition-all duration-300 border-2 border-white"
+                      title="Clear photo"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="flex justify-end space-x-3 mt-3 flex-nowrap">
+
+              <div class="flex justify-end space-x-3 mt-8 flex-nowrap border-t border-gray-100 pt-8">
                 <ButtonWeb
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] w-auto"
+                  class="text-[#898989] w-auto cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1422,55 +1585,41 @@ onMounted(async () => {
                   @click="saveParcel"
                   :loading="isLoading"
                   :class="{
-                    'bg-gray-400 text-gray-200 cursor-default': isAllFilled,
-                    'bg-black hover:bg-gray-600 text-white': !isAllFilled
+                    'bg-gray-300 text-gray-100 cursor-not-allowed shadow-none': isAllFilled,
+                    'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto"
+                  class="w-auto cursor-pointer transition-all rounded-xl px-8"
                 />
               </div>
 
-              <div v-if="previewUrl" class="mt-4 relative">
-                <h3 class="font-semibold text-[#185DC0] mb-2">
-                  Parcel Picture
-                </h3>
-                <img
-                  :src="previewUrl"
-                  class="w-full rounded shadow max-h-64 object-cover"
-                />
-                <button
-                  @click="deletePreview"
-                  class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100 cursor-pointer"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div class="mt-6">
-                <ul class="space-y-2">
+              <div class="mt-8">
+                <!-- <span class="block text-sm font-bold text-gray-400 mb-4 ml-1">Saved parcels</span> -->
+                <ul class="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                   <li
                     v-for="(p, i) in savedParcels"
                     :key="i"
-                    class="border p-3 rounded relative flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0"
+                    class="bg-white border border-gray-50 rounded-2xl p-4 relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all hover:shadow-md hover:border-blue-100 group"
                   >
-                    <div>
-                      <div>Recipient: {{ p.recipientName }}</div>
-                      <div>Tracking: {{ p.trackingNumber }}</div>
-                      <div>Sender: {{ p.senderName }}</div>
-                      <div>Type: {{ p.parcelType }}</div>
-                      <div>Status: {{ p.status }}</div>
+                    <div class="flex-1 space-y-1">
+                      <div class="text-sm font-bold text-gray-800">{{ p.recipientName }}</div>
+                      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                        {{ p.trackingNumber }}
+                      </div>
+                      <div class="text-xs text-gray-500 bg-gray-50 inline-block px-2 py-0.5 rounded-lg">{{ p.parcelType }}</div>
                     </div>
-                    <div v-if="p.imageUrl" class="md:ml-4">
+                    <div v-if="p.imageUrl" class="shrink-0">
                       <img
                         :src="p.imageUrl"
-                        class="w-28 h-28 object-cover rounded"
+                        class="w-16 h-16 object-cover rounded-xl shadow-sm border border-gray-100"
                       />
                     </div>
                     <button
                       @click="deleteSaveInformation(i)"
-                      class="absolute top-2 right-2 bg-white text-red-600 rounded-full shadow w-7 h-7 flex items-center justify-center hover:bg-red-100"
+                      class="absolute -top-2 -right-2 bg-white text-red-500 rounded-full shadow-lg w-7 h-7 flex items-center justify-center hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-300 border border-red-50 cursor-pointer"
                     >
-                      ×
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                   </li>
                 </ul>
@@ -1509,5 +1658,28 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#barcode-scanner-container :deep(video) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+#barcode-scanner-container :deep(canvas.drawingBuffer) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+@keyframes scan-line {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-scan-line {
+  animation: scan-line 2s linear infinite;
 }
 </style>

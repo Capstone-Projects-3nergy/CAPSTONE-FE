@@ -101,7 +101,8 @@ const saveStatusChange = async () => {
     )
 
     parcelStore.updateParcel(updatedParcel)
-    notificationManager.notifyParcelUpdate(updatedParcel)
+    notificationManager.notifyParcelUpdate(updatedParcel, router)
+    
     form.value = { ...form.value, ...updatedParcel }
     currentStatus.value = newStatus.value
     statusChangedSuccessfuly.value = true

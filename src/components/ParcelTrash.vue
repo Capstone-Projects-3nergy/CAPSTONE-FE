@@ -21,6 +21,7 @@ import ParcelFilterBar from './ParcelFilterBar.vue'
 import RestoreParcels from './RestoreParcels.vue'
 import DeleteMemberStaff from './DeleteMemberStaff.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -69,12 +70,15 @@ const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const userManager = useUserManager()
+const announcementManager = useAnnouncementManager()
+
 const emit = defineEmits(['add-success'])
 const showLogoutConfirm = ref(null)
 const parcelStore = useParcelManager()
-// const trashList = ref([])
+
 const trashList = computed(() => parcelManager.getTrash?.() || [])
 const trashMemberList = computed(() => userManager.getTrash?.() || [])
+const trashAnnouncementList = computed(() => announcementManager.getTrash?.() || [])
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -220,11 +224,12 @@ autoClose(error)
 
 const searchKeyword = ref('')
 const activeTab = ref('Parcels')
-const tabs = ['Parcels', 'Residents']
+const tabs = ['Parcels', 'Residents', 'Announcement']
 const usersByTab = computed(() => {
   if (activeTab.value === 'Parcels') return trashList.value
   if (activeTab.value === 'Residents') return trashMemberList.value
-  return [...trashList.value, ...trashMemberList.value]
+  if (activeTab.value === 'Announcement') return trashAnnouncementList.value
+  return [...trashList.value, ...trashMemberList.value, ...trashAnnouncementList.value]
 })
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
@@ -371,6 +376,32 @@ const filteredMembers = computed(() => {
 
   return result
 })
+
+const filteredAnnouncements = computed(() => {
+  let result = trashAnnouncementList.value.map((a) => ({
+    ...a,
+    parsedDate: parseDate(a.deletedAt)
+  }))
+
+  if (searchKeyword.value) {
+    result = result.filter(item => {
+      const kw = searchKeyword.value.toLowerCase()
+      return (item.title && item.title.toLowerCase().includes(kw)) ||
+             (item.subtitle && item.subtitle.toLowerCase().includes(kw)) ||
+             (item.category && item.category.toLowerCase().includes(kw))
+    })
+  }
+
+  if (selectedDate.value) {
+    result = result.filter((a) => {
+      if (!a.parsedDate) return false
+      const parcelDate = a.parsedDate.toLocaleDateString('en-CA')
+      return parcelDate === selectedDate.value
+    })
+  }
+
+  return result
+})
 function formatDateByTab(rawDate) {
   if (!rawDate) return rawDate
 
@@ -403,7 +434,7 @@ const showAddParcelPage = async function () {
   router.replace({ name: 'addparcels' })
   showAddParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const showManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -444,6 +475,8 @@ const totalPages = computed(() => {
     return Math.ceil(filteredParcels.value.length / perPage.value)
   } else if (activeTab.value === 'Residents') {
     return Math.ceil(filteredMembers.value.length / perPage.value)
+  } else if (activeTab.value === 'Announcement') {
+    return Math.ceil(filteredAnnouncements.value.length / perPage.value)
   }
   return 0
 })
@@ -464,6 +497,15 @@ const paginatedMembers = computed(() => {
 })
 const canGoNextMember = computed(() => {
   return paginatedMembers.value.length === perPage.value
+})
+
+const paginatedAnnouncements = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  const end = start + perPage.value
+  return filteredAnnouncements.value.slice(start, end)
+})
+const canGoNextAnnouncement = computed(() => {
+  return paginatedAnnouncements.value.length === perPage.value
 })
 
 const goToPage = (page) => {
@@ -685,8 +727,42 @@ const fetchTrashMembers = async () => {
   }
 }
 
+const fetchTrashAnnouncements = async () => {
+  try {
+    const dataAnnouncement = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/trash/announcements`,
+      router
+    )
+
+    const list = Array.isArray(dataAnnouncement) ? dataAnnouncement : []
+
+    const mapped = list.map((a) => {
+      const type = (a.type || a.category || 'General').toLowerCase()
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      return {
+        id: a.id || a.announcementId,
+        title: a.title || a.header || '',
+        subtitle: a.content || a.description || '',
+        category: a.tag || capitalizedType,
+        pinned: a.pinned || false,
+        datePosted: a.createdAt || a.date || 'Just now',
+        status: a.status || 'Published',
+        author: a.author || 'Staff Portal',
+        views: a.views || 0,
+        originalData: a,
+        deletedAt: a.deletedAt || null
+      }
+    })
+
+    announcementManager.setTrash(mapped)
+  } catch (e) {
+    console.warn('Fetch trash announcements failed', e)
+  }
+}
+
 onMounted(fetchTrashMembers)
 onMounted(fetchTrash)
+onMounted(fetchTrashAnnouncements)
 const cancelPage = () => {
   router.replace({ name: 'staffparcels' })
 }
@@ -695,12 +771,13 @@ const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') deleteSuccess.value = false
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
   if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
+  if (operate === 'deleteMemberSuccessMessage') deleteMemberSuccess.value = false
 }
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -708,12 +785,12 @@ const closePopUp = (operate) => {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -748,7 +825,26 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -779,7 +875,7 @@ const closePopUp = (operate) => {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
 
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
@@ -817,7 +913,7 @@ const closePopUp = (operate) => {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -840,21 +936,24 @@ const closePopUp = (operate) => {
             >
               <template #icon>
                 <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -889,18 +988,40 @@ const closePopUp = (operate) => {
         </aside>
       </button>
 
-      <main class="flex-1 p-9 w-full">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-1">
+      <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-100 min-h-screen font-sans overflow-x-hidden">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
+          <div class="flex items-center space-x-1 w-full md:w-auto">
+               <div class="flex items-center gap-4">
+            <!-- <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g fill="currentColor">
+                <path
+                  fill="currentColor"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
+                />
+                <path
+                  stroke="#185DC0"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                />
+              </g>
+            </svg> -->
+           <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
               viewBox="0 0 24 24"
             >
-              <g fill="#185DC0">
+              <g fill="currentColor">
                 <path
-                  fill="#185DC0"
+                  fill="currentColor"
                   d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                 />
                 <path
@@ -912,25 +1033,26 @@ const closePopUp = (operate) => {
                 />
               </g>
             </svg>
-            <h2
-              class="text-sm md:text-2xl font-bold text-[#185dc0] whitespace-nowrap"
-            >
-              Trash
-            </h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                  Trash  </span>
+          </h2>
           </div>
         </div>
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-4">
-            <div class="flex bg-white rounded-lg overflow-hidden">
+        </div>
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 w-full gap-4">
+          <div class="flex items-center w-full pb-2 md:pb-0">
+           <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 flex w-full md:w-auto">
               <button
                 v-for="tab in tabs"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
-                  'px-4 py-1 font-medium transition  cursor-pointer',
+                     'flex-1 text-center px-4 md:px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap',
                   activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-500 hover:bg-gray-200'
+                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                 ]"
               >
                 {{ tab }}
@@ -964,7 +1086,7 @@ const closePopUp = (operate) => {
             :titles="'Delete Resident is Successful.'"
             message="Success!!"
             styleType="green"
-            operate="deleteSuccessMessage"
+            operate="deleteMemberSuccessMessage"
             @closePopUp="closePopUp"
           />
           <AlertPopUp
@@ -1022,11 +1144,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1046,11 +1168,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1070,11 +1192,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1084,8 +1206,8 @@ const closePopUp = (operate) => {
           <template #icon-delete-permanent>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
             >
               <path
@@ -1097,8 +1219,8 @@ const closePopUp = (operate) => {
           <template #restore-trash>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
             >
               <g
@@ -1131,7 +1253,7 @@ const closePopUp = (operate) => {
           :showTracking="false"
           :showRoom="true"
           :showMobile="false"
-          :showDelete="true"
+          :showDeleteResident="true"
           :hideTrash="true"
           :showPhoto="true"
           :showActionStatus="true"
@@ -1164,11 +1286,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1188,11 +1310,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1212,11 +1334,11 @@ const closePopUp = (operate) => {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1226,8 +1348,8 @@ const closePopUp = (operate) => {
           <template #icon-delete-permanent>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
             >
               <path
@@ -1239,8 +1361,145 @@ const closePopUp = (operate) => {
           <template #restore-trash>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+            >
+              <g
+                class="text-yellow-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="1.5"
+              >
+                <path
+                  d="m19.5 5.5l-.5 6m-14.5-6l.605 10.037c.154 2.57.232 3.855.874 4.78a4 4 0 0 0 1.2 1.132c.582.356 1.284.496 2.321.551"
+                />
+                <path
+                  stroke-linejoin="round"
+                  d="m11 15.5l1.136 1.466a4 4 0 0 1 7.364-.901M21 20.5l-1.136-1.464a4 4 0 0 1-7.328.965"
+                />
+                <path
+                  d="M3 5.5h18m-4.944 0l-.683-1.408c-.453-.936-.68-1.403-1.071-1.695a2 2 0 0 0-.275-.172C13.594 2 13.074 2 12.035 2c-1.066 0-1.599 0-2.04.234a2 2 0 0 0-.278.18c-.395.303-.616.788-1.058 1.757L8.053 5.5"
+                />
+              </g>
+            </svg>
+          </template>
+        </ParcelTable>
+          <ParcelTable
+          v-if="activeTab === 'Announcement'"
+          :items="paginatedAnnouncements"
+          :pages="visiblePages"
+          :page="currentPage"
+          :total="totalPages"
+          :showDelete="true"
+          :hideTrash="true"
+          :clickableStatus="false"
+          :showUpdateAt="false"
+          :showDeletedAt="true"
+          :showTracking="false"
+          :showName="false"
+          :showRoom="false"
+          :showEmail="false"
+          :showTitle="true"
+          :showCategory="true"
+          :showDatePosted="true"
+          :can-next="canGoNextAnnouncement"
+          @prev="prevPage"
+          @next="nextPage"
+          @go="goToPage"
+          @delete="deleteParcelPopUp"
+          @restore="restoreParcelPopUp"
+        >
+          <template #sort-room>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortRoom"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#0E4B90"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#0E4B90"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-status>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortStatus"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#0E4B90"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#0E4B90"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+
+          <template #sort-date>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortDate"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#0E4B90"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#0E4B90"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+          <template #icon-delete-permanent>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="red"
+                d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
+              />
+            </svg>
+          </template>
+          <template #restore-trash>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
               viewBox="0 0 24 24"
             >
               <g

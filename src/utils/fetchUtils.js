@@ -643,12 +643,188 @@ async function markNotificationAsRead(url, id, router) {
 // }
 
 
-// ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
-// const members = await getMembers('/api/members', router)
-// userStore.setMembers(members)
+// Announcement
+async function getAnnouncements(url, router) {
+  return await getItems(url, router)
+}
+async function getAnnouncementById(url, id, router) {
+  return await getItemById(url, id, router)
+}
+async function addAnnouncement(url, announcement, router) {
+  return await addItem(url, announcement, router)
+}
+async function editAnnouncement(url, id, editedAnnouncement, router) {
+  return await editItem(url, id, editedAnnouncement, router)
+}
+async function deleteAnnouncement(url, id, router) {
+  return await deleteItemById(url, id, router)
+}
 
-// const staffs = await getStaffs('/api/staffs', router)
-// userStore.setStaffs(staffs)
+async function addAnnouncementWithFile(url, payload, router) {
+  const formData = new FormData()
+
+  const { coverImage, ...announcementData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(announcementData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (coverImage instanceof File || coverImage instanceof Blob) {
+    formData.append('coverImage', coverImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      url,
+      () => ({
+        method: 'POST',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('addAnnouncementWithFile error:', err)
+    return null
+  }
+}
+
+async function editAnnouncementWithFile(url, id, payload, router) {
+  const formData = new FormData()
+
+  const { coverImage, ...announcementData } = payload
+
+  formData.append(
+    'data',
+    new Blob([JSON.stringify(announcementData)], {
+      type: 'application/json'
+    })
+  )
+
+  if (coverImage instanceof File || coverImage instanceof Blob) {
+    formData.append('coverImage', coverImage)
+  }
+
+  try {
+    const res = await fetchWithAuth(
+      `${url}/${id}`,
+      () => ({
+        method: 'PUT',
+        body: formData // ✅ ต้องส่ง
+        // ❌ ห้ามตั้ง Content-Type เอง
+      }),
+      router
+    )
+
+    if (!res || !res.ok) return null
+    return await res.json()
+  } catch (err) {
+    console.error('editAnnouncementWithFile error:', err)
+    return null
+  }
+}
+
+// Dashboard
+async function getDashboardData(url, router) {
+  return await getItems(url, router)
+}
+
+// LINE API Helpers
+async function sendLineNotification(payload, router, customUrl = null) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    const url = customUrl || `${import.meta.env.VITE_BASE_URL}/api/line/send`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('sendLineNotification error:', error)
+    return null
+  }
+}
+
+async function unlinkLineAccount(router) {
+  try {
+    const options = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(
+      `${import.meta.env.VITE_BASE_URL}/api/line/unlink`,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('unlinkLineAccount error:', error)
+    return false
+  }
+}
+
+async function linkLineAccount(code, state, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    // ตามโค้ด Java Backend ของคุณที่ใช้ @GetMapping("/callback") และรับ code, state
+    const url = `${baseURL}/api/line/callback?code=${code}&state=${encodeURIComponent(state)}`
+
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
+    if (res && res.ok) {
+      // ตรวจสอบว่า Backend คืนค่าเป็น JSON หรือไม่
+      const contentType = res.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        return await res.json()
+      }
+      return { success: true }
+    }
+    return null
+  } catch (error) {
+    console.error('linkLineAccount error:', error)
+    return null
+  }
+}
+
+async function getLineConnectUrl(firebaseToken, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}`
+
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
+    if (res && res.ok) {
+      return await res.text()
+    }
+    return null
+  } catch (error) {
+    console.error('getLineConnectUrl error:', error)
+    return null
+  }
+}
+
 export {
   getItemById,
   deleteItemById,
@@ -684,5 +860,18 @@ export {
   updateDetailWithFile,
   getNotifications,
   verifyParcelItem,
-  markNotificationAsRead
+  markNotificationAsRead,
+  getAnnouncements,
+  getAnnouncementById,
+  addAnnouncement,
+  editAnnouncement,
+  deleteAnnouncement,
+  addAnnouncementWithFile,
+  editAnnouncementWithFile,
+  getDashboardData,
+  sendLineNotification,
+  unlinkLineAccount,
+  linkLineAccount,
+  getLineConnectUrl
 }
+

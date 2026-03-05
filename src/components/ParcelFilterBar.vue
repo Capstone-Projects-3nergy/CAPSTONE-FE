@@ -1,4 +1,5 @@
 <script setup>
+import ButtonWeb from './ButtonWeb.vue'
 defineProps({
   modelDate: String,
   modelSearch: String,
@@ -36,18 +37,31 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
     class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
   >
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div v-if="showDate" class="flex items-center gap-2 flex-wrap">
-        <h3 class="text-lg font-semibold text-[#185dc0]">Date:</h3>
+      <div v-if="showDate" class="relative flex items-center group">
+        <!-- Premium Icon Overlay -->
+        <div class="absolute left-3 pointer-events-none z-10 transition-transform duration-200 group-hover:scale-105">
+          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- Styled Date Input -->
         <input
           type="date"
           :value="modelDate"
           @input="$emit('update:date', $event.target.value)"
-          class="border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer transition-all hover:bg-gray-100/50 w-full sm:w-auto [::-webkit-calendar-picker-indicator]:opacity-0"
         />
       </div>
 
       <div class="flex flex-wrap items-center gap-2 w-full md:w-auto ml-auto">
-        <div class="relative flex-1 min-w-[120px]">
+        <!-- Search Input -->
+        <div class="relative flex-1 min-w-[120px] w-full">
           <svg
             class="absolute left-2 top-1/2 -translate-y-1/2"
             width="18"
@@ -66,63 +80,78 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             :value="modelSearch"
             @input="$emit('update:search', $event.target.value)"
             placeholder="Search ..."
-            class="pl-9 pr-4 py-2 w-full bg-gray-100 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm"
           />
         </div>
 
-        <select
-          class="bg-gray-100 text-gray-600 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer flex-shrink-0"
-          :value="modelSort"
-          @change="$emit('update:sort', $event.target.value)"
-        >
-          <option value="" disabled>Sort by:</option>
-          <option>Newest</option>
-          <option>Oldest</option>
+        <!-- Group: Sort Select + Add Button (Keep together on mobile) -->
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial">
+          <select
+            class="bg-white text-gray-600 text-sm border border-gray-200 rounded-xl px-2 sm:px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm cursor-pointer flex-1 sm:flex-none min-w-[100px]"
+            :value="modelSort"
+            @change="$emit('update:sort', $event.target.value)"
+          >
+            <option value="" disabled>Sort by:</option>
+            <option>Newest</option>
+            <option>Oldest</option>
 
-          <option v-if="!hideNameSort">Name (A→Z)</option>
-          <option v-if="!hideNameSort">Name (Z→A)</option>
-        </select>
+            <option v-if="!hideNameSort">Name (A→Z)</option>
+            <option v-if="!hideNameSort">Name (Z→A)</option>
+          </select>
 
-        <button
-          v-if="showAddButton"
-          @click="$emit('add')"
-          class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-              fill="white"
-            />
-          </svg>
-          <span>Add parcel</span>
-        </button>
-        <button
-          v-if="showAddMemberButton"
-          @click="$emit('addMember')"
-          class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-              fill="white"
-            />
-          </svg>
-          <span>Add New</span>
-        </button>
-        <button
-          v-if="showAddStaffButton"
-          @click="$emit('addMember')"
-          class="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition cursor-pointer flex-shrink-0"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
-              fill="white"
-            />
-          </svg>
-          <span>Add New Staff</span>
-        </button>
+          <ButtonWeb 
+            v-if="showAddButton"
+            @click="$emit('add')"
+            label="Add parcel"
+            color="blue"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+          >
+            <template #icon>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
+                <path
+                  d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </template>
+          </ButtonWeb>
+
+          <ButtonWeb 
+            v-if="showAddMemberButton"
+            @click="$emit('addMember')"
+            label="Add New"
+            color="blue"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+          >
+            <template #icon>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
+                <path
+                  d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </template>
+          </ButtonWeb>
+
+          <ButtonWeb 
+            v-if="showAddStaffButton"
+            @click="$emit('addMember')"
+            label="Add New Staff"
+            color="blue"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+          >
+            <template #icon>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
+                <path
+                  d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </template>
+          </ButtonWeb>
+        </div>
       </div>
+
     </div>
   </div>
 </template>

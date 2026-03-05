@@ -25,12 +25,32 @@ const showNotification = computed(
 )
 
 // Watch for role changes to fetch notifications when user is identified as RESIDENT
-import { watch } from 'vue'
+import { watch, onMounted, onUnmounted } from 'vue'
+
+const syncNotifications = async () => {
+  if (role.value === 'RESIDENT') {
+    await notificationStore.fetchNotifications(router)
+  }
+}
+
+let pollInterval = null
+
+onMounted(() => {
+  window.addEventListener('focus', syncNotifications)
+  // Poll fallback once a minute
+  pollInterval = setInterval(syncNotifications, 60000)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('focus', syncNotifications)
+  if (pollInterval) clearInterval(pollInterval)
+})
+
 watch(
   role,
   async (newRole) => {
     if (newRole === 'RESIDENT') {
-      await notificationStore.fetchNotifications(router)
+      await syncNotifications()
     }
   },
   { immediate: true }
@@ -38,7 +58,7 @@ watch(
 </script>
 
 <template>
-  <header class="flex items-center w-full h-16 bg-white">
+ <header class="fixed top-0 left-0 w-full h-16 bg-white z-40 shadow">
     <div
       class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
     >

@@ -57,11 +57,19 @@ const props = defineProps({
   hideTrash: { type: Boolean, default: false },
   showMember: { type: Boolean, default: false },
   showParcel: { type: Boolean, default: false },
+  showEmail: { type: Boolean, default: true },
+  showTitle: { type: Boolean, default: false },
+  showCategory: { type: Boolean, default: false },
+  showDatePosted: { type: Boolean, default: false },
 })
 
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
+}
+const formatStatus = (status) => {
+  if (!status) return ''
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
 }
 const getInitial = (name) => {
   if (!name) return ''
@@ -72,58 +80,59 @@ const authStore = useAuthManager()
 
 </script>
 <template>
-  <div class="sm:bg-white sm:rounded-lg sm:shadow w-full overflow-hidden">
-    <table class="min-w-full text-left border-collapse">
+  <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
       <thead
-        class="hidden md:table-header-group bg-white border-t border-b border-[#185DC0] my-4"
+        class="hidden md:table-header-group bg-gray-50/50"
       >
         <tr>
           <th
             v-if="showPhoto"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Photo
           </th>
           <th
             v-if="showTracking"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Tracking
           </th>
 
           <th
             v-if="showName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Name
           </th>
           <th
             v-if="showMemberName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Resident name
           </th>
           <th
             v-if="showMemberTrashName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Resident name
           </th>
           <th
             v-if="showStaffName"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Staff name
           </th>
           <th
             v-if="showMobile"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             Mobile
           </th>
           <th
             v-if="showRoom"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Room
@@ -133,11 +142,32 @@ const authStore = useAuthManager()
             </div>
           </th>
 
-          <th class="px-4 py-3 text-sm font-semibold text-[#185DC0]">Email</th>
+          <th v-if="showEmail" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Email</th>
+
+          <th
+            v-if="showTitle"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+          >
+            Title
+          </th>
+
+          <th
+            v-if="showCategory"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+          >
+            Category
+          </th>
+
+          <th
+            v-if="showDatePosted"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+          >
+            Date Posted
+          </th>
 
           <th
             v-if="showStatus"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Status
@@ -149,7 +179,7 @@ const authStore = useAuthManager()
 
           <th
             v-if="showUpdateAt"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Updated At
@@ -160,7 +190,7 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showActionStatus"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Status
@@ -171,7 +201,7 @@ const authStore = useAuthManager()
           </th>
            <th
             v-if="showDeletedAt"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
             <div class="flex items-center gap-2">
               Deleted At
@@ -182,14 +212,14 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showAction"
-            class="px-4 py-3 text-sm font-semibold text-[#185DC0]"
+            class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider"
           >
             Action
           </th>
         </tr>
       </thead>
 
-      <tbody class="divide-y">
+      <tbody class="bg-transparent md:bg-white divide-y divide-gray-100">
         <tr v-if="items.length === 0">
           <td colspan="15" class="text-center py-12 text-gray-500 text-sm">
             <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -203,14 +233,14 @@ const authStore = useAuthManager()
         <tr
           v-for="p in items"
           :key="p.id"
-          class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none"
+          class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative"
         >
           <td
             v-if="showPhoto"
-            class="px-4 py-2 md:py-3 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none"
           >
             <div class="flex items-center gap-2">
-              <span class="md:hidden font-semibold text-[#185DC0]">Photo:</span>
+              <span class="md:hidden font-semibold text-[#0E4B90]">Photo:</span>
 
               <div
                 class="w-10 h-10 inline-flex flex-shrink-0 rounded-full overflow-hidden border border-gray-200 shadow-sm items-center justify-center"
@@ -223,7 +253,7 @@ const authStore = useAuthManager()
 
                 <div
                   v-else
-                  class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-sm font-semibold"
+                  class="w-full h-full bg-[#0E4B90] flex items-center justify-center text-white text-sm font-semibold"
                 >
                   {{ getInitial(p.fullName) || getInitial(p.firstName) }}
                 </div>
@@ -232,9 +262,9 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showTracking"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Tracking:
             </span>
             {{ p.trackingNumber }}
@@ -242,78 +272,112 @@ const authStore = useAuthManager()
 
           <td
             v-if="showName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Name:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Name:</span>
             {{ p.recipientName }}
           </td>
 
           <td
             v-if="showMemberTrashName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
             </span>
             {{ p.firstName }} {{ p.lastName }}
           </td>
           <td
             v-if="showMemberName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
             </span>
             {{ p.fullName }}
           </td>
           <td
             v-if="showStaffName"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">
+            <span class="md:hidden font-semibold text-[#0E4B90]">
               Staff name:
             </span>
             {{ p.fullName }}
           </td>
           <td
             v-if="showMobile"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Mobile:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Mobile:</span>
             {{ p.mobile }}
           </td>
 
           <td
             v-if="showRoom"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Room: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
             {{ p.roomNumber }}
           </td>
 
           <td
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            v-if="showEmail"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Email: </span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Email: </span>
             {{ p.email }}
           </td>
 
           <td
-            v-if="showStatus"
-            class="px-4 py-2 md:py-3 border-b md:border-none"
+            v-if="showTitle"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90]">Title: </span>
+            <span class="font-medium">{{ p.title }}</span>
+          </td>
+
+          <td
+            v-if="showCategory"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none flex items-center md:table-cell md:align-middle"
+          >
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Category: </span>
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+              :class="{
+                'bg-blue-50 text-blue-600': p.category === 'Updates',
+                'bg-emerald-50 text-emerald-600': p.category === 'Events',
+                'bg-purple-50 text-purple-600': p.category === 'Maintenance',
+                'bg-gray-100 text-gray-600': !['Updates', 'Events', 'Maintenance'].includes(p.category)
+              }"
+            >
+              {{ p.category || 'General' }}
+            </span>
+          </td>
+
+          <td
+            v-if="showDatePosted"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+          >
+            <span class="md:hidden font-semibold text-[#0E4B90]">Date Posted: </span>
+            {{ p.datePosted }}
+          </td>
+
+          <td
+            v-if="showStatus"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle"
+          >
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
             <div class="relative group inline-block">
               <span
-                class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
                 :class="[
                   {
-                    'bg-yellow-400': p.status === 'Waiting for Staff',
-                    'bg-yellow-400': p.status === 'Pending',
-                    'bg-green-400': p.status === 'Picked Up',
-                    'bg-blue-400': p.status === 'Received',
-                    'bg-red-400': p.status === 'TRASH'
+                    'bg-yellow-50 text-yellow-600': p.status === 'Waiting for Staff' || p.status === 'Pending',
+                    'bg-green-50 text-green-600': p.status === 'Picked Up',
+                    'bg-blue-50 text-blue-600': p.status === 'Received',
+                    'bg-red-50 text-red-600': p.status === 'TRASH'
                   },
                   clickableStatus ? 'cursor-pointer ' : 'cursor-default '
                 ]"
@@ -346,46 +410,46 @@ const authStore = useAuthManager()
 
           <td
             v-if="showUpdateAt"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Updated At:</span
             >
             {{ formatDateTime(p.updateAt) }}
           </td>
             <td
             v-if="showActionStatus"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0] mr-2">Status:</span>
+            <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
             <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
+              class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
               :class="[
                 {
-                  'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE',
-                  'bg-red-400': p.status === 'DELETED',
-                  'bg-yellow-400': p.status === 'PENDING'
+                  'bg-green-50 text-green-600': p.status === 'ACTIVE',
+                  'bg-gray-100/80 text-gray-600': p.status === 'INACTIVE',
+                  'bg-red-50 text-red-600': p.status === 'DELETED',
+                  'bg-yellow-50 text-yellow-600': p.status === 'PENDING'
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
             >
-              {{ p.status }}
+              {{ formatStatus(p.status) }}
             </span>
           </td>
           <td
             v-if="showDeletedAt"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]"
+            <span class="md:hidden font-semibold text-[#0E4B90]"
               >Deleted At:</span
             >
             {{ formatDateTime(p.deletedAt) }}
           </td>
           <!-- <td
             v-if="showActionStatus"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 border-b md:border-none"
+            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
           >
             <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
 
@@ -406,20 +470,22 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-3 text-sm text-gray-700 flex items-center gap-1 md:table-cell md:gap-1 md:align-middle"
+            class="px-4 py-2 md:py-4 md:px-6 text-sm text-gray-700 flex items-center md:table-cell md:align-middle text-right"
           >
-            <span class="md:hidden font-semibold text-[#185DC0]">Action:</span>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4">
+              <span class="md:hidden font-semibold text-[#0E4B90]">Action:</span>
+              <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
             <button
+              v-if="!!$slots['icon-view']"
               @click="$emit('view-detail', p.id)"
-              class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100  text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-view"></slot>
               </div>
 
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -435,15 +501,16 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
+              v-if="!!$slots['icon-view-member']"
               @click="$emit('view-detail', p.id)"
-              class="relative group text-blue-600 hover:text-blue-800 cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100  text-gray-400 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-view-member"></slot>
               </div>
 
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[150px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -459,15 +526,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDelete && p.status !== 'Picked Up'"
+              v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -483,15 +550,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteResident"
+              v-if="showDeleteResident && !!$slots['icon-delete']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -508,15 +575,15 @@ const authStore = useAuthManager()
             </button>
 
             <button
-              v-if="showDelete && p.status !== 'Picked Up'"
+              v-if="showDelete && p.status !== 'Picked Up' && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -531,15 +598,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteResident"
+              v-if="showDeleteResident && !!$slots['icon-delete-permanent']"
               @click="$emit('delete', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -554,15 +621,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showRestore"
+              v-if="showRestore && !!$slots['restore-trash']"
               @click="$emit('restore', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="restore-trash"> </slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -578,15 +645,15 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showDeleteMember && p.role === 'RESIDENT'"
+              v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete']"
               @click="$emit('deleteMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
@@ -603,20 +670,20 @@ const authStore = useAuthManager()
             </button>
 
             <button
-              v-if="showDeleteMember && p.role === 'RESIDENT'"
+              v-if="showDeleteMember && p.role === 'RESIDENT' && !!$slots['icon-delete-permanent']"
               @click="$emit('deleteMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="icon-delete-permanent"></slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
-                  Delete Member
+                  Delete Resident
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
                       class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
@@ -626,20 +693,20 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
-              v-if="showRestoreMember"
+              v-if="showRestoreMember && !!$slots['restore-trash']"
               @click="$emit('restoreMember', p)"
-              class="relative group cursor-pointer"
+              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
             >
-              <div class="transition-transform duration-200 ease-out group-hover:scale-110">
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
                 <slot name="restore-trash"> </slot>
               </div>
               <div
-                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
               >
                 <div
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
-                  Restore Members
+                  Restore Resident
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
@@ -650,38 +717,42 @@ const authStore = useAuthManager()
               </div>
             </button>
             </div>
-          </td>
+          </div>
+        </td>
         </tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="flex justify-end space-x-2 mt-4 text-gray-700">
-    <button
-      @click="$emit('prev')"
-      :disabled="page === 1"
-      class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-    >
-      &lt; Previous
-    </button>
+    <!-- Pagination -->
+    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
+        <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
+            <button 
+              @click="$emit('prev')" 
+              :disabled="page === 1"
+              class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+            >Previous</button>
+            
+            <button
+              v-for="pg in pages"
+              :key="pg"
+              @click="$emit('go', pg)"
+              :class="[
+                'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                page === pg 
+                  ? 'bg-[#0E4B90] text-white shadow-md transform scale-105' 
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+              ]"
+            >
+              {{ pg }}
+            </button>
 
-
-    <button
-      v-for="pg in pages"
-      :key="pg"
-      @click="$emit('go', pg)"
-      class="cursor-pointer px-3 py-1 rounded"
-      :class="page === pg ? 'bg-blue-700 text-white' : 'hover:bg-gray-200'"
-    >
-      {{ pg }}
-    </button>
-
-    <button
-      @click="$emit('next')"
-      :disabled="page >= total"
-      class="cursor-pointer px-3 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
-    >
-      Next &gt;
-    </button>
+            <button 
+              @click="$emit('next')" 
+              :disabled="!canNext"
+              class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
+            >Next</button>
+        </div>
+    </div>
   </div>
 </template>

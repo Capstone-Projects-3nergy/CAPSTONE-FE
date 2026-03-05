@@ -106,7 +106,7 @@ const showManageParcelPage = async function () {
   router.replace({ name: 'staffparcels' })
   showStaffParcels.value = true
 }
-const ShowManageAnnouncementPage = async function () {
+const showManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
 }
@@ -631,7 +631,7 @@ const showResidentDetail = async function (id) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
@@ -639,12 +639,12 @@ const showResidentDetail = async function (id) {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -679,7 +679,26 @@ const showResidentDetail = async function (id) {
                 </svg>
               </template>
             </SidebarItem>
-            <SidebarItem title="Home" @click="showHomePageStaffWeb">
+              <SidebarItem
+              title="Dashboard"
+              @click="showHomePageStaffWeb"
+            >
+              <template #icon>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
+                    fill="white"
+                  />
+                </svg>
+              </template>
+            </SidebarItem>
+            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
               <template #icon>
                 <svg
                   width="24"
@@ -710,7 +729,7 @@ const showResidentDetail = async function (id) {
                   />
                 </svg>
               </template>
-            </SidebarItem>
+            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -746,7 +765,7 @@ const showResidentDetail = async function (id) {
               </template>
             </SidebarItem>
 
-            <SidebarItem title="Manage Announcements (Next Release)">
+            <SidebarItem title="Manage Announcements" @click="showManageAnnouncementPage">
               <template #icon>
                 <svg
                   width="24"
@@ -764,22 +783,25 @@ const showResidentDetail = async function (id) {
             </SidebarItem>
             <SidebarItem title="Trash" @click="showParcelTrashPage">
               <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                 <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="white">
                   <path
-                    d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-        1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-        V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-        21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-        V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
                     fill="white"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
                   />
-                </svg>
+                  <path
+                    stroke="white"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
+                  />
+                </g>
+              </svg>
               </template>
             </SidebarItem>
           </nav>
@@ -816,52 +838,79 @@ const showResidentDetail = async function (id) {
 
       <main class="flex-1 p-9 x-full">
         <div class="flex flex-col gap-4 mb-6 px-2">
-          <div class="flex items-center gap-2">
-            <svg
+          <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+              <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
               viewBox="0 0 24 24"
             >
               <path
-                fill="#185DC0"
+                fill="#0E4B90"
                 d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
               />
             </svg>
-            <h2 class="text-2xl font-bold text-[#185dc0]">Manage Residents</h2>
+              </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   Manage Resident  </span>
+                </h2>
           </div>
 
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between w-full">
             <div
-              class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8"
+              class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 w-full"
             >
-              <div class="flex bg-white rounded-lg overflow-hidden w-fit">
+              <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 flex w-full sm:w-auto">
                 <button
                   v-for="tab in tabs"
                   :key="tab"
                   @click="activeTab = tab"
                   :class="[
-                    'px-4 py-1 font-medium transition cursor-pointer',
+                    'flex-1 sm:flex-none px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-center',
                     activeTab === tab
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-500 hover:bg-gray-200'
+                      ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   ]"
                 >
                   {{ tab }}
                 </button>
               </div>
 
-              <div
-                class="flex flex-wrap sm:flex-nowrap items-center gap-y-3 gap-x-4 sm:gap-y-0 sm:gap-x-6 text-sm text-gray-500 sm:ml-auto"
-              >
-                <span>
-                  <span class="font-medium text-gray-700">Total users:</span>
-                  {{ totalUsers }}
-                </span>
-                <span>
-                  <span class="font-medium text-gray-700">Current used:</span>
-                  {{ currentUsed }}
-                </span>
+              <!-- Status Stats Cards -->
+              <div class="flex flex-nowrap items-center gap-2 sm:gap-3 sm:ml-auto w-full sm:w-auto">
+                <!-- Total Users Card -->
+                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-gray-400 leading-none mb-1 sm:mb-1.5 truncate">Total Users</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-base sm:text-xl font-black text-[#1D355E]">{{ totalUsers }}</span>
+                      <span class="text-[8px] sm:text-[10px] font-medium text-gray-400">Total</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Currently Active Card -->
+                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-emerald-500/70 leading-none mb-1 sm:mb-1.5 truncate">Active Now</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-base sm:text-xl font-black text-emerald-700">{{ currentUsed }}</span>
+                      <span class="text-[9px] sm:text-[11px] font-bold text-emerald-500/60 ml-0.5">Total</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -970,11 +1019,11 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -994,11 +1043,11 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1018,11 +1067,11 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1031,23 +1080,7 @@ const showResidentDetail = async function (id) {
           </template>
 
           <template #icon-view-member>
-            <svg
-              class="cursor-pointer"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                fill="#107EFF"
-              />
-              <path
-                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                fill="#107EFF"
-              />
-            </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </template>
 
           <template #icon-delete>
@@ -1108,11 +1141,11 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1132,11 +1165,11 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -1156,36 +1189,19 @@ const showResidentDetail = async function (id) {
             >
               <path
                 d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#185DC0"
+                fill="#0E4B90"
               />
               <path
                 d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#5C9BEB"
+                stroke="#0E4B90"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
             </svg>
           </template>
-
-          <template #icon-view-member>
-            <svg
-              class="cursor-pointer"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                fill="#107EFF"
-              />
-              <path
-                d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                fill="#107EFF"
-              />
-            </svg>
+   <template #icon-view>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </template>
 
           <template #icon-delete>

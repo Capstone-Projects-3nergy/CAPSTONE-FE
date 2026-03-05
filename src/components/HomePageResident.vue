@@ -130,9 +130,7 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
-    setTimeout(() => {
-      closeWelcomePopup()
-    }, 10000)
+
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -189,15 +187,6 @@ autoClose(error)
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
-
-// Auto-close welcome popup
-watch(welcomePopupVisible, (val) => {
-  if (val) {
-    setTimeout(() => {
-      closeWelcomePopup()
-    }, 10000)
-  }
-})
 
 const searchKeyword = ref('')
 const activeTab = ref('Day')
@@ -529,9 +518,12 @@ const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
-const showAnnouncementPage = async function () {
-  // router.replace({ name: 'announcement' })
-  // showAnnouncement.value = true
+const showAnnouncementPage = async function (selectedTab) {
+  if (typeof selectedTab !== 'string') {
+    selectedTab = 'all'
+  }
+  router.replace({ name: 'announcement', query: { tab: selectedTab } })
+  showAnnouncement.value = true
 }
 const ShowManageAnnouncementPage = async function () {
   router.replace({ name: 'manageannouncement' })
@@ -623,11 +615,11 @@ function formatDateTime(datetimeStr) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="px-6 mt-4">
+    <div class="fixed top-20 px-6 mt-4 z-[9999]">
       <AlertPopUp
         v-if="welcomePopupVisible"
         :message="'Hi'"
@@ -640,12 +632,12 @@ function formatDateTime(datetimeStr) {
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#0E4B90] text-white',
+            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-[#0e4b90] space-y-1">
+          <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -741,7 +733,8 @@ function formatDateTime(datetimeStr) {
               </template>
             </SidebarItem>
             <SidebarItem
-              title="Announcements (Next Release)"
+              title="Announcements"
+              @click="showAnnouncementPage"
               :collapsed="isCollapsed"
             >
               <template #icon>
@@ -792,11 +785,188 @@ function formatDateTime(datetimeStr) {
         </aside>
       </button>
 
-      <main class="flex-1 p-6 md:p-10 w-full font-sans">
+      <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
+            <div class="pt-0">
+          <div class="flex items-center space-x-3 mb-6 pb-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
+                  <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 12L12 17L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+             </div>
+             <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                   My Parcels </span>
+                </h2>
+          </div>
+          
+          <div class="mb-6">
+             <ParcelFilterBar
+              :modelDate="filterDate"
+              :modelSearch="filterSearch"
+              :modelSort="filterSort"
+              :show-add-button="false"
+              :hideNameSort="true"
+              :hideTrash="false"
+              @update:date="handleDateUpdate"
+              @update:search="handleSearchUpdate"
+              @update:sort="handleSortUpdate"
+              @add="showAddParcelPage"
+            />
+          </div>
+
+            <div class="fixed top-5 left-5 z-50">
+              <AlertPopUp
+                v-if="deleteSuccess"
+                :titles="'Delete Parcel is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="deleteSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="addSuccess"
+                :titles="'Add New Parcel is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="addSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="editSuccess"
+                :titles="'Edit Parcel  is Successful.'"
+                message="Success!!"
+                styleType="green"
+                operate="editSuccessMessage"
+                @closePopUp="closePopUp"
+              />
+              <AlertPopUp
+                v-if="error"
+                :titles="'There is a problem. Please try again later.'"
+                message="Error!!"
+                styleType="red"
+                operate="problem"
+                @closePopUp="closePopUp"
+              />
+            </div>
+            
+            <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+                <ParcelTable
+                :items="paginatedParcels"
+                :pages="visiblePages"
+                :page="currentPage"
+                :total="totalPages"
+                :clickableStatus="false"
+                :showDelete="false"
+                :can-next="canGoNext"
+                @prev="prevPage"
+                @next="nextPage"
+                @go="goToPage"
+                @status-click="openStatusPopup"
+                @view-detail="showParcelDetail"
+                >
+                <template #sort-room>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortRoom"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#0E4B90"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
+
+                <template #sort-status>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortStatus"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#0E4B90"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
+
+                <template #sort-date>
+                    <svg
+                    class="cursor-pointer"
+                    @click="toggleSortDate"
+                    width="17"
+                    height="12"
+                    viewBox="0 0 17 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                        fill="#185DC0"
+                    />
+                    <path
+                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                        stroke="#0E4B90"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    </svg>
+                </template>
+
+                <template #icon-view-member>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+          </template>
+                <template #icon-delete>
+                    <svg
+                    class="cursor-pointer text-red-500"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 21"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
+            1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
+            V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
+            21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
+            V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
+                        fill="currentColor"
+                    />
+                    </svg>
+                </template>
+                </ParcelTable>
+            </div>
+          </div>
         <!-- Hero / Carousel Section -->
-        <div class="bg-white p-6 shadow-sm rounded-2xl mb-8">
-          <section class="relative rounded-xl overflow-hidden shadow-md group">
-            <div class="relative h-[350px] md:h-[450px] w-full">
+        <div class="px-6 pb-6 mb-12">
+          <section class="relative group">
+            <div class="relative h-[380px] md:h-[500px] w-full rounded-[2.5rem] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] transition-all duration-700">
               <div
                 v-for="(slide, index) in slides"
                 :key="index"
@@ -809,168 +979,212 @@ function formatDateTime(datetimeStr) {
                 <img
                   :src="slide"
                   alt="Carousel Image"
-                  class="w-full h-full object-cover transform transition-transform duration-10000 group-hover:scale-105"
+                  class="w-full h-full object-cover transform transition-transform duration-[10000ms] group-hover:scale-110"
                 />
               </div>
               
-              <!-- Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12">
-                  <h1 class="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg tracking-tight">
-                    Welcome to Tractify
+              <!-- Premium Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-10 md:p-16">
+                  <span class="inline-block px-4 py-1.5 mb-4 text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-blue-600/30 backdrop-blur-md rounded-full w-fit">
+                    Community Hub
+                  </span>
+                  <h1 class="text-5xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl tracking-tighter leading-tight">
+                    Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Tractify</span>
                   </h1>
-                  <p class="text-white/90 text-lg md:text-2xl font-light tracking-wide max-w-2xl">
-                    Experience seamless community management and effortless parcel tracking.
+                  <p class="text-white/80 text-lg md:text-xl font-medium tracking-wide max-w-2xl leading-relaxed">
+                    Experience seamless community management and effortless parcel tracking in one place.
                   </p>
               </div>
 
-              <!-- Navigation Buttons -->
+              <!-- Sleek Navigation Buttons (No Border) -->
               <button
                 @click="prevSlide"
-                class="absolute left-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
+                class="absolute left-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/90 text-white hover:text-slate-900 p-5 rounded-2xl backdrop-blur-lg transition-all focus:outline-none opacity-0 group-hover:opacity-100 shadow-xl scale-95 hover:scale-105 cursor-pointer z-20"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 19.5L8.25 12l7.5-7.5"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
               </button>
               <button
                 @click="nextSlide"
-                class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-4 rounded-full backdrop-blur-md transition-all focus:outline-none opacity-0 group-hover:opacity-100 border border-white/20 hover:scale-110 cursor-pointer"
+                class="absolute right-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/90 text-white hover:text-slate-900 p-5 rounded-2xl backdrop-blur-lg transition-all focus:outline-none opacity-0 group-hover:opacity-100 shadow-xl scale-95 hover:scale-105 cursor-pointer z-20"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </button>
               
-              <!-- Dots Indicator -->
-               <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+              <!-- Premium Pill Indicators -->
+               <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-2">
                 <span
                   v-for="(slide, index) in slides"
                   :key="index"
                   @click="currentIndex = index"
-                  class="h-2.5 rounded-full cursor-pointer transition-all duration-500 border border-white/30 shadow-sm"
-                  :class="index === currentIndex ? 'bg-white w-10' : 'bg-white/40 w-2.5 hover:bg-white/70'"
+                  class="h-1.5 rounded-full cursor-pointer transition-all duration-700 shadow-lg"
+                  :class="index === currentIndex ? 'bg-white w-12' : 'bg-white/30 w-3 hover:bg-white/60'"
                 ></span>
               </div>
             </div>
           </section>
 
-          <!-- Cards Section -->
-          <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+          <!-- Explore Categories Header -->
+          <div class="flex items-end justify-between mb-10 mt-20">
+             <div class="space-y-1">
+                <div class="h-1.5 w-12 bg-gradient-to-r from-[#1D355E] to-blue-400 rounded-full mb-4"></div>
+                <h2 class="text-3xl md:text-4xl font-black text-[#07192F] tracking-tight">Explore Community</h2>
+                <p class="text-slate-400 font-medium">Get involved and stay informed with your neighborhood</p>
+             </div>
+             <div class="hidden md:block">
+                <button @click="showAnnouncementPage('all')" class="text-[#0E4B90] font-bold text-sm tracking-widest uppercase hover:underline cursor-pointer">View All Activities</button>
+             </div>
+          </div>
+
+          <!-- Categorized Cards (Border-less Modern Design) -->
+          <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
             <!-- News Card -->
             <div
-              @click="showAnnouncementPage()"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              @click="showAnnouncementPage('news')"
+              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                 <div class="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-[220px] shrink-0 overflow-hidden relative">
+                 <div class="absolute inset-0 bg-gradient-to-t from-blue-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="newsImg"
                   alt="News"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-[#0E4B90] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    LATEST
-                </div>
+                 <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-blue-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
+                      Community News
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">NEWS</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                  Stay informed with the latest updates, official announcements, and important notices from the management.
+              <div class="p-8 pt-4 flex flex-col flex-1 relative">
+                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                 </div>
+                <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors">Latest Updates</h3>
+                <p class="text-slate-500 font-medium leading-relaxed">
+                  Real-time official notices, maintenance schedules, and essential updates directly from management.
                 </p>
-                <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    Read Articles <span class="ml-2">→</span>
+                <div class="mt-auto pt-8 flex items-center gap-3 text-blue-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
+                    Discover More <span class="text-lg">→</span>
                 </div>
               </div>
             </div>
 
             <!-- Event Card -->
             <div
-              @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              @click="showAnnouncementPage('event')"
+              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                  <div class="absolute inset-0 bg-purple-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-[220px] shrink-0 overflow-hidden relative">
+                  <div class="absolute inset-0 bg-gradient-to-t from-purple-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="eventImg"
                   alt="Event"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-purple-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    UPCOMING
-                </div>
+                 <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-purple-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
+                      Events
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                 <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">EVENT</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                  Discover upcoming community gatherings, workshops, and social activities designed for you.
+              <div class="p-8 pt-4 flex flex-col flex-1 relative">
+                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                 </div>
+                 <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-purple-600 transition-colors">Local Events</h3>
+                <p class="text-slate-500 font-medium leading-relaxed">
+                  Join upcoming workshops, social gatherings, and community activities designed for you.
                 </p>
-                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    See Calendar <span class="ml-2">→</span>
+                 <div class="mt-auto pt-8 flex items-center gap-3 text-purple-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
+                    See Calendar <span class="text-lg">→</span>
                 </div>
               </div>
             </div>
 
-             <!-- Community Card -->
+            <!-- All Announcements Card -->
             <div
-              @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#0E4B90]/20 flex flex-col h-full"
+              @click="showAnnouncementPage('all')"
+              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
             >
-              <div class="h-56 overflow-hidden relative">
-                   <div class="absolute inset-0 bg-green-900/10 group-hover:bg-transparent transition-all duration-500 z-10"></div>
+              <div class="h-[220px] shrink-0 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <img
                   :src="communityImg"
-                  alt="Community"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                  alt="All Announcements"
+                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                 <div class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-green-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    SOCIAL
-                </div>
+                 <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-emerald-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
+                     Archive
+                    </span>
+                 </div>
               </div>
-              <div class="p-7 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-3">
-                     <h2 class="text-2xl font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors tracking-tight">COMMUNITY</h2>
-                </div>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
-                   Join the conversation, share your thoughts, and connect with neighbors to build a vibrant community.
+             <div class="p-8 pt-4 flex flex-col flex-1 relative">
+                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-emerald-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                 </div>
+                   <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-emerald-700 transition-colors">Historical Log</h3>
+                 <p class="text-slate-500 font-medium leading-relaxed">
+                   Comprehensive access to all past notices and permanent community records.
                 </p>
-                 <div class="flex items-center text-[#0E4B90] font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
-                    Get Involved <span class="ml-2">→</span>
+                 <div class="mt-auto pt-8 flex items-center gap-3 text-emerald-800 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
+                    Full History <span class="text-lg">→</span>
                 </div>
               </div>
             </div>
+
+            <!-- All Announcements Card -->
+            <!-- <div
+              @click="showAnnouncementPage"
+              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
+            >
+              <div class="h-1/2 overflow-hidden relative">
+                   <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-yellow-100 z-0"></div>
+                <img
+                  :src="newsImg"
+                  alt="All Announcements"
+                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out yellowscale group-hover:yellowscale-0 relative z-10 opacity-80"
+                />
+                 <div class="absolute top-4 left-4 z-20">
+                    <span class="bg-yellow-800/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                      History
+                    </span>
+                 </div>
+              </div>
+              <div class="p-8 flex flex-col flex-1 relative bg-white">
+                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-yellow-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                 </div>
+                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-yellow-700 transition-colors">All Announcements</h3>
+                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
+                   View the complete archive of all past and current notices, schedules, and official updates here.
+                </p>
+                 <div class="mt-auto pt-6 flex items-center text-yellow-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
+                    View Archive <span>→</span>
+                </div>
+              </div>
+            </div> -->
+
           </section>
         </div>
 
         <!-- My Parcel Section -->
-        <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
+        <!-- <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
           <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
-             <div class="bg-[#0E4B90]/10 p-2 rounded-lg">
+             <div class="bg-[#1D355E]/10 p-2 rounded-lg">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
                   <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1061,7 +1275,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1085,7 +1299,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1109,7 +1323,7 @@ function formatDateTime(datetimeStr) {
                     />
                     <path
                         d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#5C9BEB"
+                        stroke="#0E4B90"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -1157,7 +1371,7 @@ function formatDateTime(datetimeStr) {
                 </template>
                 </ParcelTable>
             </div>
-          </div>
+          </div> -->
       </main>
     </div>
   </div>
