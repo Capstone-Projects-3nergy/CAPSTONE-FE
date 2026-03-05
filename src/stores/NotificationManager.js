@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref ,  computed } from 'vue'
+import { ref, computed } from 'vue'
 import { getNotifications, markNotificationAsRead } from '@/utils/fetchUtils'
 import { useAuthManager } from '@/stores/AuthManager'
 import LineNotificationManager from '@/stores/LineNotificationManager'
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
 
 export const useNotificationManager = defineStore('notificationManager', () => {
   const defaultNotifications = [
@@ -107,6 +109,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   const welcomePopupMessage = ref('')
   const hasShownWelcome = ref(false)
 
+  // ✅ New WebSocket State
+  const stompClient = ref(null)
+  const connected = ref(false)
+  const authManager = useAuthManager()
+
   const closeWelcomePopup = () => {
     welcomePopupVisible.value = false
     setTimeout(() => {
@@ -119,6 +126,114 @@ export const useNotificationManager = defineStore('notificationManager', () => {
   // Helper to save to localStorage
   const saveToLocalStorage = () => {
     localStorage.setItem('notifications', JSON.stringify(notifications.value))
+  }
+
+  // ✅ WebSocket logic
+  const connectWebSocket = async () => {
+    if (connected.value || stompClient.value) return
+
+    const token = authManager.user?.accessToken
+    if (!token) {
+      console.warn('Cannot connect WebSocket: No access token')
+      return
+    }
+
+    try {
+      const socket = new SockJS(`${import.meta.env.VITE_BASE_URL}/ws`)
+      stompClient.value = Stomp.over(socket)
+      stompClient.value.debug = null // (Optional) Hide logs
+
+      stompClient.value.connect(
+        { Authorization: `Bearer ${token}` },
+        (frame) => {
+          connected.value = true
+          console.log('✅ WebSocket Connected')
+          
+          // Subscribe to private notifications
+          stompClient.value.subscribe('/user/queue/notifications', (sdkEvent) => {
+            console.log('📬 WebSocket Message Received on /user/queue/notifications')
+            try {
+              const data = JSON.parse(sdkEvent.body)
+              handleNewIncomingNotification(data)
+            } catch (e) {
+              console.error('❌ Error parsing WebSocket message:', e)
+            }
+          })
+        },
+        (error) => {
+          console.error('❌ WebSocket Connect Error:', error)
+          connected.value = false
+          stompClient.value = null
+          // Retry after 5 seconds
+          setTimeout(connectWebSocket, 5000)
+        }
+      )
+    } catch (err) {
+      console.error('WebSocket Exception:', err)
+    }
+  }
+
+  const disconnectWebSocket = () => {
+    if (stompClient.value) {
+      stompClient.value.disconnect(() => {
+        console.log('WebSocket Disconnected')
+      })
+      stompClient.value = null
+      connected.value = false
+    }
+  }
+
+  // Helper to standardizing notification object (same as mapping in fetch)
+  const mapBackendToModel = (n) => {
+    // Backend อาจจะส่งมาในรูปแบบ notificationId หรือ id
+    const id = n.notificationId || n.id || Date.now()
+    const backendTitle = n.title || n.notiTitle || n.label || 'Notification'
+    const backendMessage = n.message || n.notiMessage || n.title || ''
+    const backendType = n.type || n.notificationType || 'message'
+    const backendParcelId = n.parcelId || (n.parcel ? n.parcel.parcelId : null)
+
+    let derivedType = 'message'
+    const titleLower = backendTitle.toLowerCase()
+    if (backendType === 'LINE' || backendType === 'EMAIL') {
+      derivedType = 'message'
+    } else {
+      if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
+      else if (titleLower.includes('picked up') || titleLower.includes('collected')) derivedType = 'connect'
+      else if (titleLower.includes('updated')) derivedType = 'comment'
+      else if (backendParcelId) derivedType = 'new' // ถ้ามี parcelId ให้เดาว่าเป็นเรื่องพัสดุ
+    }
+
+    const timeValue = n.sentAt || n.createdAt || new Date();
+    // รองรับทั้ง boolean, 1/0, หรือ string 'true'/'false'
+    const isReadVal = (n.isRead === true || n.isRead === 1 || n.isRead === 'true' || n.is_read === 1) ? 1 : 0;
+
+    return {
+      id: id,
+      type: derivedType,
+      label: backendTitle,
+      title: backendMessage,
+      message: backendMessage,
+      user: 'Dormitory Office',
+      time: timeValue ? new Date(timeValue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
+      sentAt: n.sentAt || timeValue,
+      createdAt: n.createdAt || timeValue,
+      isRead: isReadVal,
+      parcelId: backendParcelId,
+      isLocal: false
+    }
+  }
+
+  const handleNewIncomingNotification = (newNoti) => {
+    console.log('📩 RAW WebSocket message received:', newNoti)
+    const mapped = mapBackendToModel(newNoti)
+    
+    // ตรวจสอบว่ามีอยู่แล้วหรือยังเพื่อป้องกันซ้ำ
+    const exists = notifications.value.some(n => n.id === mapped.id)
+    if (!exists) {
+      notifications.value.unshift(mapped)
+      saveToLocalStorage()
+      console.log('✅ Notification added to store:', mapped)
+    }
   }
 
   const markAsRead = async (id, router) => {
@@ -305,6 +420,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     announcementNotifications: computed(() => {
         const ACCOUNT_TYPES = ['message']
         return notifications.value.filter(n => ACCOUNT_TYPES.includes(n.type))
-    })
+    }),
+
+    // ✅ Expose WebSocket actions
+    connected,
+    connectWebSocket,
+    disconnectWebSocket
   }
 })
