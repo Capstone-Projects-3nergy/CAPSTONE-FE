@@ -42,6 +42,11 @@ onMounted(async () => {
       // Refresh ข้อมูล user เพื่อให้ได้ lineId ล่าสุด
       await authManager.loadUserFromBackend();
       
+      // ✅ อัปเดตข้อมูล Profile ด้วยเพื่อให้ UI ทุกที่เปลี่ยนตาม
+      const { useProfileManager } = await import('@/stores/ProfileManager');
+      const profileStore = useProfileManager();
+      await profileStore.fetchProfile();
+      
       // Redirect กลับหน้าโปรไฟล์พร้อมแนบ query เพื่อแสดงแจ้งเตือนความสำเร็จ
       const userId = authManager.user?.id;
       const targetRoute = authManager.user?.role === 'RESIDENT' ? 'profileresident' : 'profilestaff';

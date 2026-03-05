@@ -377,6 +377,28 @@ onMounted(async () => {
     console.error(err)
   }
 })
+
+// ✅ Sync form with store when profile is updated (e.g. after LINE linking)
+watch(
+  () => profileManager.currentProfile,
+  (newProfile) => {
+    if (newProfile && props.editProfile) {
+      if (newProfile.lineId) form.value.lineId = newProfile.lineId
+    }
+  },
+  { deep: true, immediate: true }
+)
+
+// ✅ เพิ่ม watch ที่ loginManager ด้วยเพื่อความชัวร์
+watch(
+  () => loginManager.user?.lineId,
+  (newLineId) => {
+    if (newLineId && props.editProfile) {
+      form.value.lineId = newLineId
+    }
+  },
+  { immediate: true }
+)
 watch(
   () => [props.mode, props.dormName, dormList.value],
   ([mode, dormName]) => {
@@ -1918,7 +1940,7 @@ const userRoleLabel = computed(() => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Line 
                 </label>
-                <div v-if="form.lineId" class="flex items-center h-[58px]">
+                <div v-if="form.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId" class="flex items-center h-[58px]">
                   <div
                     class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white transition-all duration-300 font-bold shadow-md max-w-fit"
                   >

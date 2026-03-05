@@ -101,6 +101,23 @@ export const useProfileManager = defineStore('profileManager', () => {
     currentProfile.value = profile
   }
 
+  const fetchProfile = async () => {
+    loading.value = true
+    try {
+      const { getProfile } = await import('@/utils/fetchUtils')
+      const profile = await getProfile(`${import.meta.env.VITE_BASE_URL}/api/profile`)
+      if (profile) {
+        setCurrentProfile(profile)
+      }
+      return profile
+    } catch (err) {
+      error.value = true
+      console.error('Fetch profile error:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const updateCurrentProfile = (updated) => {
     if (!currentProfile.value) return
     currentProfile.value = {

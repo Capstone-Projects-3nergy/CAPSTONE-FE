@@ -183,7 +183,7 @@ watch(
 
 const addLineOA = () => {
   // 👈 ไอดีบอทจริง @788eafre
-  window.open('https://line.me/R/ti/p/@788eafre', '_blank')
+  window.open('https://lin.ee/kCqc35o/@446subfw', '_blank')
   showLineSuccessPopup.value = false
 }
 
@@ -366,11 +366,16 @@ const userRoleLabel = computed(() => {
 })
 
 const effectiveLineId = computed(() => {
-  if (props.useCurrentProfile) {
-    // ใช้จาก Store ถ้าเป็นโปรไฟล์ตัวเอง
-    return loginManager.user?.lineId || profileManager.currentProfile?.lineId || null
+  // ✅ ตรวจสอบจาก AuthStore ก่อนเสมอ เพื่อให้สถานะเปลี่ยนทันทีหลัง Connect สำเร็จ
+  if (props.useCurrentProfile && loginManager.user?.lineId) {
+    return loginManager.user.lineId
   }
-  // ใช้จาก Props หรือ Route User
+  
+  if (props.useCurrentProfile) {
+    // Priority: Store > Current Profile > Props
+    return loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId || null
+  }
+  // สำหรับการดูโปรไฟล์คนอื่น
   return props.lineId || routeUser.value?.lineId || null
 })
 
