@@ -1024,7 +1024,7 @@ const handleUnlink = async () => {
         </div>
 
         <h3 class="text-3xl font-[900] text-gray-900 mb-3 tracking-tight">LINE Connected!</h3>
-        <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive parcel notifications.</p>
+        <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive notifications.</p>
         
         <div class="space-y-4">
           <button 
