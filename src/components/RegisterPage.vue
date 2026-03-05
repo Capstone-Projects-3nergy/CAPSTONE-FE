@@ -815,11 +815,12 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
               </div>
                 <div class="mb-2">
-                <SelectWeb
+                 <SelectWeb
                   v-model="form.dormId"
                   :options="dormOptions"
                   placeholder="Select Dormitory"
                   :error="isNoDorm"
+                  customClass="pl-10 w-full px-4 py-2 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 bg-white"
                 >
                   <template #icon>
                     <svg

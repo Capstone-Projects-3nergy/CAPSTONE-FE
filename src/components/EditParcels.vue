@@ -385,7 +385,7 @@ const saveEditParcel = async () => {
     setTimeout(() => (SenderNameError.value = false), 10000)
     return
   }
-  if (form.value.senderName && form.value.senderName.length < 6) {
+  if (form.value.senderName && form.value.senderName.length < 2) {
     showSenderMinLengthError.value = true
     setTimeout(() => {
       showSenderMinLengthError.value = false
@@ -1066,7 +1066,7 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Sender name must be at least 6 characters
+                    Sender name must be at least 2 characters
                   </div>
                 </div>
               </div>

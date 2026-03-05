@@ -17,6 +17,10 @@ const props = defineProps({
   direction: {
     type: String,
     default: 'down'
+  },
+  customClass: {
+    type: String,
+    default: ''
   }
 })
 
@@ -61,9 +65,10 @@ onUnmounted(() => {
     <div
       @click="toggleDropdown"
       :class="[
-        'w-full bg-gray-50/50 border rounded-xl px-4 py-3 text-gray-800 transition-all duration-300 flex items-center justify-between cursor-pointer',
-        $slots.icon ? 'pl-10' : '',
-        isOpen ? 'bg-white border-[#0E4B90] ring-4 ring-blue-100 shadow-sm' : 'border-gray-200 hover:border-gray-300',
+        'w-full text-gray-800 transition-all duration-300 flex items-center justify-between cursor-pointer',
+        !customClass ? 'bg-gray-50/50 border border-gray-200 rounded-xl px-4 py-3 hover:border-gray-300' : customClass,
+        $slots.icon && !customClass.includes('pl-') ? 'pl-10' : '',
+        isOpen ? 'bg-white border-[#0E4B90] ring-4 ring-blue-100 shadow-sm' : '',
         error ? 'border-red-400 ring-4 ring-red-50' : '',
         disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
       ]"
