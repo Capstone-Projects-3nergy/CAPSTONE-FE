@@ -5,7 +5,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems, unlinkLineAccount } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 const emit = defineEmits([
   'confirmAccount',
@@ -361,22 +361,20 @@ const handleLineAction = () => {
   }
 }
 
-const reconnectLine = () => {
-  const clientId = LINE_CONFIG.CHANNEL_ID
-  const redirectUri = LINE_CONFIG.REDIRECT_URI || `${window.location.origin}/callback`
-  const state = Math.random().toString(36).substring(7)
-  sessionStorage.setItem('line_auth_state', state)
+const reconnectLine = async () => {
+  const token = loginManager.user?.accessToken
+  if (!token) {
+    console.error('No firebase token available')
+    return
+  }
 
-  const url =
-    `https://access.line.me/oauth2/v2.1/authorize` +
-    `?response_type=code` +
-    `&client_id=${clientId}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&state=${state}` +
-    `&scope=profile%20openid` +
-    `&prompt=consent`
-
-  window.location.href = url
+  const url = await getLineConnectUrl(token, router)
+  if (url) {
+    // Backend returns the full authorize URL
+    window.location.href = url
+  } else {
+    console.error('Failed to get LINE login URL from backend')
+  }
 }
 
 /* 

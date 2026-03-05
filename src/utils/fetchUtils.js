@@ -812,12 +812,22 @@ async function linkLineAccount(code, router) {
   }
 }
 
-// ใช้ร่วมกับ Pinia (ตัวอย่างจริง)
-// const members = await getMembers('/api/members', router)
-// userStore.setMembers(members)
+async function getLineConnectUrl(firebaseToken, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}`
 
-// const staffs = await getStaffs('/api/staffs', router)
-// userStore.setStaffs(staffs)
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
+    if (res && res.ok) {
+      return await res.text()
+    }
+    return null
+  } catch (error) {
+    console.error('getLineConnectUrl error:', error)
+    return null
+  }
+}
+
 export {
   getItemById,
   deleteItemById,
@@ -864,6 +874,7 @@ export {
   getDashboardData,
   sendLineNotification,
   unlinkLineAccount,
-  linkLineAccount
+  linkLineAccount,
+  getLineConnectUrl
 }
 
