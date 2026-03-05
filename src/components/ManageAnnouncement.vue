@@ -302,6 +302,8 @@ const onDeleteConfirm = () => {
 }
 
 const fetchAnnouncementData = async () => {
+  console.log('Fetching announcements disabled to avoid 500 error')
+  /*
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements`,
     router
@@ -333,13 +335,14 @@ const fetchAnnouncementData = async () => {
 
     // For testing with mock data, we comment out the overwrite
     // Or you can merge them: announcements.value = [...mapped, ...announcements.value]
-    /*
+    
     if (mapped.length > 0) {
       announcements.value = mapped
     }
-    */
+    
     console.log('API data fetched:', mapped.length, 'items')
   }
+  */
 }
 
 const checkScreen = () => {

@@ -144,7 +144,8 @@ onMounted(async () => {
   checkScreen()
 
   window.addEventListener('resize', checkScreen)
-
+  console.log('Fetching parcels/residents disabled to avoid 500 error')
+  /*
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
@@ -175,6 +176,7 @@ onMounted(async () => {
     )
     residents.value = res || []
   } catch (e) {}
+  */
 })
 
 const parcels = computed(() => parcelManager.getParcels())

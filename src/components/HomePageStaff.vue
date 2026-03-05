@@ -205,10 +205,13 @@ onMounted(async () => {
   // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
 
+  /*
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
   )
+  */
+  const data = null
 
   let parcelDataList = []
   if (data) {

@@ -13,8 +13,10 @@ class LineNotificationManager {
     try {
       const payload = { groupId, message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.API_URL}`
-      const response = await sendLineNotification(payload, router, url)
-      return response
+      console.log('[LineNotification] sendToGroup (Mock):', payload, url)
+      // const response = await sendLineNotification(payload, router, url)
+      // return response
+      return { success: true, mock: true }
     } catch (error) {
       console.error('[LineNotification] sendToGroup Error:', error.message)
       throw error
@@ -30,8 +32,10 @@ class LineNotificationManager {
     try {
       const payload = { message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.NOTIFY_ADMIN_URL}`
-      const response = await sendLineNotification(payload, router, url)
-      return response
+      console.log('[LineNotification] notifyAdmin (Mock):', payload, url)
+      // const response = await sendLineNotification(payload, router, url)
+      // return response
+      return { success: true, mock: true }
     } catch (error) {
       console.error('[LineNotification] notifyAdmin Error:', error.message)
       throw error
@@ -64,8 +68,10 @@ class LineNotificationManager {
     try {
       const payload = { userId, message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.SEND_PRIVATE_URL}`
-      const response = await sendLineNotification(payload, router, url)
-      return response
+      console.log('[LineNotification] sendToUser (Mock):', payload, url)
+      // const response = await sendLineNotification(payload, router, url)
+      // return response
+      return { success: true, mock: true }
     } catch (error) {
       console.error('[LineNotification] sendToUser Error:', error.message)
       throw error

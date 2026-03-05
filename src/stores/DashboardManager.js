@@ -203,24 +203,24 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const baseURL = import.meta.env.VITE_BASE_URL
       
       // 1. ลองดึงข้อมูลจาก Dashboard API โดยตรงก่อน
-      const directData = await getDashboardData(`${baseURL}/api/dashboard`, router)
+      // const directData = await getDashboardData(`${baseURL}/api/dashboard`, router)
       
-      if (directData) {
-        if (directData.stats) setStats(directData.stats)
-        if (directData.chartData) {
-          if (directData.chartData.labels) chartData.labels = directData.chartData.labels
-          if (directData.chartData.datasets) chartData.datasets = directData.chartData.datasets
-        }
-      }
+      // if (directData) {
+      //   if (directData.stats) setStats(directData.stats)
+      //   if (directData.chartData) {
+      //     if (directData.chartData.labels) chartData.labels = directData.chartData.labels
+      //     if (directData.chartData.datasets) chartData.datasets = directData.chartData.datasets
+      //   }
+      // }
 
       // 2. ดึงข้อมูลดิบมาคำนวณเองเสริม
-      const [parcels, residents, announcements] = await Promise.all([
-        getItems(`${baseURL}/api/staff/parcels`, router),
-        getItems(`${baseURL}/api/staff/users`, router),
-        getItems(`${baseURL}/api/announcements`, router)
-      ])
+      // const [parcels, residents, announcements] = await Promise.all([
+      //   getItems(`${baseURL}/api/staff/parcels`, router),
+      //   getItems(`${baseURL}/api/staff/users`, router),
+      //   getItems(`${baseURL}/api/announcements`, router)
+      // ])
 
-      calculateDashboardData(parcels || [], residents || [], announcements || [])
+      // calculateDashboardData(parcels || [], residents || [], announcements || [])
       
       return true
     } catch (error) {

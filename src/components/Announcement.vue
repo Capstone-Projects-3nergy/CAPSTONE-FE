@@ -215,6 +215,8 @@ onUnmounted(() => {
   if (dateInterval) clearInterval(dateInterval)
 })
 const fetchAnnouncementData = async () => {
+  console.log('Fetching announcements disabled to avoid 500 error')
+  /*
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements`,
     router
@@ -223,6 +225,7 @@ const fetchAnnouncementData = async () => {
   if (data && data.length > 0) {
     announcementManager.setAnnouncements(data)
   }
+  */
 }
 
 onMounted(async () => {
