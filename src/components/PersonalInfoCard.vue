@@ -23,6 +23,7 @@ const loginManager = useAuthManager()
 const activeTab = ref('profile')
 const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
+const showLineSuccessPopup = ref(false)
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -163,6 +164,28 @@ onMounted(async () => {
     userManager.setStaffs(mapped.filter((u) => u.role === 'STAFF'))
   }
 })
+
+// ✅ ย้ายออกมานอก onMounted เพื่อให้ทำงานได้ทุกเคส (รวมถึง Resident)
+watch(
+  () => route.query.line,
+  (status) => {
+    console.log('Detected LINE status in URL:', status)
+    if (status === 'success') {
+      showLineSuccessPopup.value = true
+      // ล้าง query string ออกหลังจากแสดง popup แล้ว
+      setTimeout(() => {
+        router.replace({ query: { ...route.query, line: undefined } })
+      }, 1000)
+    }
+  },
+  { immediate: true }
+)
+
+const addLineOA = () => {
+  // 👈 ไอดีบอทจริง @788eafre
+  window.open('https://line.me/R/ti/p/@788eafre', '_blank')
+  showLineSuccessPopup.value = false
+}
 
 const notifications = [
   {
@@ -977,4 +1000,49 @@ const handleUnlink = async () => {
       </div>
     </div>
   </div>
+
+  <!-- ✅ Popup แจ้งเตือนเชื่อมต่อสำเร็จและให้ Add OA -->
+  <Transition
+    enter-active-class="transition duration-300 ease-out"
+    enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100"
+    leave-active-class="transition duration-200 ease-in"
+    leave-from-class="opacity-100 scale-100"
+    leave-to-class="opacity-0 scale-95"
+  >
+    <div v-if="showLineSuccessPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showLineSuccessPopup = false"></div>
+      
+      <!-- Modal Content -->
+      <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] border border-white/20">
+        <!-- Success Icon -->
+        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h3 class="text-3xl font-[900] text-gray-900 mb-3 tracking-tight">LINE Connected!</h3>
+        <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive parcel notifications.</p>
+        
+        <div class="space-y-4">
+          <button 
+            @click="addLineOA"
+            class="w-full py-5 bg-[#00b900] hover:bg-[#00a300] text-white font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
+            Add Tractify OA
+          </button>
+          
+          <button 
+            @click="showLineSuccessPopup = false"
+            class="w-full py-4 text-gray-400 hover:text-gray-600 font-bold transition-colors cursor-pointer"
+          >
+            Remind me later
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>

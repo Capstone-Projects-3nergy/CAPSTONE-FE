@@ -34,27 +34,23 @@ onMounted(async () => {
   }
 
   try {
-    const result = await linkLineAccount(code, router);
+    // ส่งทั้ง code และ state (ซึ่งเป็น Firebase Token) ไปให้ Backend
+    const result = await linkLineAccount(code, state, router);
     if (result) {
       console.log('LINE account linked successfully:', result);
       
-      // Refresh user data to get updated lineId
+      // Refresh ข้อมูล user เพื่อให้ได้ lineId ล่าสุด
       await authManager.loadUserFromBackend();
       
-      // Also update ProfileManager to ensure consistency across the app
-      const profileManager = (await import('@/stores/ProfileManager')).useProfileManager();
-      const baseURL = import.meta.env.VITE_BASE_URL;
-      const { getProfile } = await import('@/utils/fetchUtils');
-      const profile = await getProfile(`${baseURL}/api/profile`, router);
-      if (profile) profileManager.setCurrentProfile(profile);
-      
-      // Redirect back to profile or home
+      // Redirect กลับหน้าโปรไฟล์พร้อมแนบ query เพื่อแสดงแจ้งเตือนความสำเร็จ
       const userId = authManager.user?.id;
-      if (authManager.user?.role === 'RESIDENT') {
-        router.push({ name: 'profileresident', params: { id: userId } });
-      } else {
-        router.push({ name: 'profilestaff', params: { id: userId } });
-      }
+      const targetRoute = authManager.user?.role === 'RESIDENT' ? 'profileresident' : 'profilestaff';
+      
+      router.push({ 
+        name: targetRoute, 
+        params: { id: userId },
+        query: { line: 'success' } 
+      });
     } else {
       errorMessage.value = 'Failed to link LINE account. Please try again.';
       showError.value = true;

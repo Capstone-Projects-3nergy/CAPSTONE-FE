@@ -47,6 +47,33 @@ const routes = [
     component: LineCallback
   },
   {
+    path: '/profile',
+    name: 'profile-redirect',
+    beforeEnter: async (to, from, next) => {
+      // ใช้ dynamic import เพื่อเลี่ยงปัญหากับ Circular Dependency
+      const { useAuthManager } = await import('@/stores/AuthManager');
+      const authStore = useAuthManager();
+      
+      // 1. รอให้ Firebase เช็คสถานะการ Login ให้เสร็จ (สำคัญมากตอน Refresh หน้า)
+      if (!authStore.user) {
+        console.log('Router: Waiting for Firebase to initialize...');
+        await authStore.initUser();
+      }
+      
+      // 2. ตรวจสอบอีกครั้งหลังจากรอแล้ว
+      if (authStore.user) {
+        const userId = authStore.user.id || authStore.user.userId;
+        const targetRoute = authStore.user.role === 'STAFF' ? 'profilestaff' : 'profileresident';
+        
+        console.log('Router: Successfully recognized user:', userId);
+        next({ name: targetRoute, params: { id: userId }, query: to.query });
+      } else {
+        console.log('Router: No user found, redirecting to login');
+        next({ name: 'login' });
+      }
+    }
+  },
+  {
     path: '/loginpage',
     name: 'login',
     component: LoginPage

@@ -787,23 +787,20 @@ async function unlinkLineAccount(router) {
   }
 }
 
-async function linkLineAccount(code, router) {
+async function linkLineAccount(code, state, router) {
   try {
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ code })
-    }
+    const baseURL = import.meta.env.VITE_BASE_URL
+    // ตามโค้ด Java Backend ของคุณที่ใช้ @GetMapping("/callback") และรับ code, state
+    const url = `${baseURL}/api/line/callback?code=${code}&state=${encodeURIComponent(state)}`
 
-    const res = await fetchWithAuth(
-      `${import.meta.env.VITE_BASE_URL}/api/line/link`,
-      options,
-      router
-    )
+    const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {
-      return await res.json()
+      // ตรวจสอบว่า Backend คืนค่าเป็น JSON หรือไม่
+      const contentType = res.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        return await res.json()
+      }
+      return { success: true }
     }
     return null
   } catch (error) {
