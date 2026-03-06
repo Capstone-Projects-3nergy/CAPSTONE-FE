@@ -23,19 +23,18 @@ import { useDashboardManager } from '@/stores/DashboardManager'
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const dashboardStore = useDashboardManager()
-const { chartData, stats } = storeToRefs(dashboardStore)
-const { parcel: parcels } = storeToRefs(parcelManager)
+const { chartData, stats, getMappedParcels } = storeToRefs(dashboardStore)
 const showHomePage = ref(false)
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
 const { closeWelcomePopup } = notificationStore
 
 const recentParcels = computed(() => {
-  if (!parcels || !parcels.value) return []
-  return [...parcels.value]
+  if (!getMappedParcels.value) return []
+  return [...getMappedParcels.value]
     .sort((a, b) => {
-      const dateA = new Date(a.updatedAt || a.date || a.createdAt || 0)
-      const dateB = new Date(b.updatedAt || b.date || b.createdAt || 0)
+      const dateA = new Date(a.updatedAt || 0)
+      const dateB = new Date(b.updatedAt || 0)
       return dateB - dateA
     })
     .slice(0, 5)
@@ -203,20 +202,13 @@ const fetchDashboardData = async () => {
     const members = Array.isArray(rawMembers) ? rawMembers : []
     const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
 
-    // Update parcel manager if needed
-    if (parcels.length > 0) {
-      const mappedParcels = parcels.map(p => ({
-        id: p.parcelId,
-        trackingNumber: p.trackingNumber,
-        residentName: p.ownerName,
-        roomNumber: p.roomNumber,
-        status: mapStatus(p.status),
-        updateAt: p.updatedAt || null
-      }))
-      parcelManager.setParcels(mappedParcels)
-    }
-
+    // Update stores
     dashboardStore.calculateDashboardData(parcels, members, announcements)
+    
+    // Also update parcels store for other pages
+    if (parcels.length > 0) {
+      parcelManager.setParcels(getMappedParcels.value)
+    }
   } catch (err) {
     console.warn('Fetch dashboard data failed', err)
   }
@@ -1063,7 +1055,7 @@ const handlePrintSummary = () => {
             </div> -->
 
             <!-- Recent Parcels -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px]">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
                 <ButtonWeb color="blue" label="Add" size="sm" @click="showParcelScannerPage">
@@ -1096,7 +1088,7 @@ const handlePrintSummary = () => {
                 </div>
               </div>
 
-              <div class="mt-6 border-t border-gray-100 pt-4 text-center">
+              <div class="mt-auto border-t border-gray-100 pt-4 text-center">
                 <button @click="showManageParcelPage" class="text-xs font-medium text-blue-500 hover:text-blue-700 cursor-pointer">View all parcels →</button>
               </div>
             </div>
