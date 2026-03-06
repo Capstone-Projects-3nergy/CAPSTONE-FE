@@ -729,7 +729,7 @@ const handleUnlink = async () => {
                     @click="handleLineAction"
                     class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
                   >
-                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
+                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access / Switch Account' : 'Connect Now' }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
