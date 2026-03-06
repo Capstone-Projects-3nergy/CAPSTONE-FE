@@ -1213,6 +1213,16 @@ const userRoleLabel = computed(() => {
   }
   return 'Resident Name'
 })
+const isLineLinked = computed(() => {
+  // ✅ ตรวจสอบค่าจากทุแหล่งที่อาจเก็บ lineId
+  const id = form.value.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId
+  
+  // ✅ ถ้าค่าเป็น null, unlinked, หรือข้อความ "null" ให้ถือว่ายังไม่ได้เชื่อมต่อ
+  if (!id || id === 'null' || id === 'unlinked' || id === '') {
+    return false
+  }
+  return true
+})
 </script>
 
 <template>
@@ -1940,7 +1950,7 @@ const userRoleLabel = computed(() => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Line 
                 </label>
-                <div v-if="form.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId" class="flex items-center h-[58px]">
+                <div v-if="isLineLinked" class="flex items-center h-[58px]">
                   <div
                     class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white transition-all duration-300 font-bold shadow-md max-w-fit"
                   >
