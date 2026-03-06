@@ -68,17 +68,19 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     ]
   })
   
-  const currentView = ref('monthly') // 'daily', 'weekly', 'monthly'
-  
+  const parcels = reactive([])
+  const members = reactive([])
+  const announcements = reactive([])
+
   const stats = reactive({
-    totalParcels: 124,
-    pickedUpParcels: 86,
-    awaitingParcels: 38,
-    overdueParcels: 5,
-    totalResidents: 4,
-    activeResidents: 1,
-    pendingResidents: 2,
-    inactiveResidents: 1,
+    totalParcels: 0,
+    pickedUpParcels: 0,
+    awaitingParcels: 0,
+    overdueParcels: 0,
+    totalResidents: 0,
+    activeResidents: 0,
+    pendingResidents: 0,
+    inactiveResidents: 0,
     totalAnnouncements: 0
   })
 
@@ -89,21 +91,44 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return Math.floor((date.getDate() + (firstDay === 0 ? 6 : firstDay - 1) - 1) / 7)
   }
 
-  
-  const calculateDashboardData = (parcelsRaw = [], residentsRaw = [], announcementsRaw = []) => {
-    // Ensure we are working with arrays
-    const parcelsData = Array.isArray(parcelsRaw) ? parcelsRaw : []
-    const residentsData = Array.isArray(residentsRaw) ? residentsRaw : []
-    const announcementsData = Array.isArray(announcementsRaw) ? announcementsRaw : []
+  const setParcels = (list = []) => {
+    parcels.length = 0
+    const items = Array.isArray(list) ? list : [list]
+    items.forEach((p) => parcels.push(p))
+  }
 
-    // If no data is available yet, don't overwrite the mock data
+  const setMembers = (list = []) => {
+    members.length = 0
+    const items = Array.isArray(list) ? list : [list]
+    items.forEach((m) => members.push(m))
+  }
+
+  const setAnnouncements = (list = []) => {
+    announcements.length = 0
+    const items = Array.isArray(list) ? list : [list]
+    items.forEach((a) => announcements.push(a))
+  }
+
+  const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null) => {
+    // 1. Update internal state if new data is provided
+    if (parcelsRaw && parcelsRaw.length > 0) setParcels(parcelsRaw)
+    if (residentsRaw && residentsRaw.length > 0) setMembers(residentsRaw)
+    if (announcementsRaw && announcementsRaw.length > 0) setAnnouncements(announcementsRaw)
+
+    // 2. Decide which data to use (internal state or mock fallback)
+    const parcelsData = parcels.length > 0 ? parcels : []
+    const residentsData = members.length > 0 ? members : []
+    const announcementsData = announcements.length > 0 ? announcements : []
+
+    // If NO data at all (not even in store), don't overwrite the initial view
     if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
-      return;
+      return
     }
 
     // Populate Chart Data if we have parcels
     if (parcelsData.length > 0) {
       // Reset parcel stats
+      stats.totalParcels = parcelsData.length
       stats.pickedUpParcels = 0
       stats.awaitingParcels = 0
       stats.overdueParcels = 0
@@ -198,79 +223,58 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   }
 
   /* ---------- actions ---------- */
-  const fetchDashboardData = async (router) => {
-    try {
-      const baseURL = import.meta.env.VITE_BASE_URL
-      
-      // 1. ลองดึงข้อมูลจาก Dashboard API โดยตรงก่อน
-      // const directData = await getDashboardData(`${baseURL}/api/dashboard`, router)
-      
-      // if (directData) {
-      //   if (directData.stats) setStats(directData.stats)
-      //   if (directData.chartData) {
-      //     if (directData.chartData.labels) chartData.labels = directData.chartData.labels
-      //     if (directData.chartData.datasets) chartData.datasets = directData.chartData.datasets
-      //   }
-      // }
-
-      // 2. ดึงข้อมูลดิบมาคำนวณเองเสริม
-      // const [parcels, residents, announcements] = await Promise.all([
-      //   getItems(`${baseURL}/api/staff/parcels`, router),
-      //   getItems(`${baseURL}/api/staff/users`, router),
-      //   getItems(`${baseURL}/api/announcements`, router)
-      // ])
-
-      // calculateDashboardData(parcels || [], residents || [], announcements || [])
-      
-      return true
-    } catch (error) {
-      console.error('[DashboardManager] Fetch Error:', error)
-      return false
+  // Initial Hydration with mock data if necessary
+  const initMockData = () => {
+    // Generate some mock parcels to fill the initial stats
+    const mockParcels = []
+    const today = new Date()
+    
+    // 86 Picked up
+    for (let i = 0; i < 86; i++) {
+      mockParcels.push({ status: 'PICKED_UP', createdAt: today.toISOString() })
     }
-  }
-
-  /* ---------- getters ---------- */
-  const getMonthsTH = () => monthsTH
-  const getPackagesPerMonth = () => packagesPerMonth
-  const getChartData = () => chartData
-  const getStats = () => stats
-
-  /* ---------- setters ---------- */
-  const setChartData = (labels, datasets) => {
-    chartData.labels = labels
-    chartData.datasets = datasets
-  }
-
-  const setStats = (newStats) => {
-    Object.assign(stats, newStats)
-  }
-
-  /* ---------- updates ---------- */
-  const updateStat = (key, value) => {
-    if (stats.hasOwnProperty(key)) {
-      stats[key] = value
+    // 38 Awaiting
+    for (let i = 0; i < 38; i++) {
+      mockParcels.push({ status: 'RECEIVED', createdAt: today.toISOString() })
     }
+    // 5 Overdue
+    for (let i = 0; i < 5; i++) {
+      mockParcels.push({ status: 'OVERDUE', createdAt: today.toISOString() })
+    }
+    
+    setParcels(mockParcels)
+    
+    setMembers([
+      { status: 'ACTIVE' },
+      { status: 'PENDING' },
+      { status: 'PENDING' },
+      { status: 'INACTIVE' }
+    ])
+    
+    calculateDashboardData()
   }
+
+  // Auto-init with mock data
+  initMockData()
 
   return {
-    monthsTH,
-    packagesPerMonth,
+    parcels,
+    members,
+    announcements,
     chartData,
     stats,
-    
-    getMonthsTH,
-    getPackagesPerMonth,
-    getChartData,
-    getStats,
-    
-    setChartData,
-    setStats,
-    
-    updateStat,
-    calculateDashboardData,
-    fetchDashboardData,
     currentView,
-    setChartView
+
+    setParcels,
+    setMembers,
+    setAnnouncements,
+    setChartView,
+    calculateDashboardData,
+
+    // Keep legacy getters/setters for compatibility if needed
+    getStats: () => stats,
+    getChartData: () => chartData,
+    updateStat: (key, value) => { if (stats.hasOwnProperty(key)) stats[key] = value }
   }
 })
 

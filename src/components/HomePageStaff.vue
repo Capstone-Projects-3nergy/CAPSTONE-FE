@@ -194,7 +194,32 @@ const updateResidentChart = (year) => {
 };
 
 const fetchDashboardData = async () => {
-  await dashboardStore.fetchDashboardData(router)
+  try {
+    const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
+    const rawMembers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/members`, router)
+    const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
+
+    const parcels = Array.isArray(rawParcels) ? rawParcels : []
+    const members = Array.isArray(rawMembers) ? rawMembers : []
+    const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
+
+    // Update parcel manager if needed
+    if (parcels.length > 0) {
+      const mappedParcels = parcels.map(p => ({
+        id: p.parcelId,
+        trackingNumber: p.trackingNumber,
+        residentName: p.ownerName,
+        roomNumber: p.roomNumber,
+        status: mapStatus(p.status),
+        updateAt: p.updatedAt || null
+      }))
+      parcelManager.setParcels(mappedParcels)
+    }
+
+    dashboardStore.calculateDashboardData(parcels, members, announcements)
+  } catch (err) {
+    console.warn('Fetch dashboard data failed', err)
+  }
 }
 
 onMounted(async () => {
@@ -204,35 +229,6 @@ onMounted(async () => {
 
   // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
-
-  /*
-  const data = await getItems(
-    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-    router
-  )
-  */
-  const data = null
-
-  let parcelDataList = []
-  if (data) {
-    const mapped = data.map((p) => ({
-      id: p.parcelId,
-      trackingNumber: p.trackingNumber,
-      residentName: p.ownerName,
-      roomNumber: p.roomNumber,
-      status: mapStatus(p.status),
-      updateAt: p.updatedAt || null
-    }))
-
-    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
-    parcelManager.setParcels(mapped)
-    parcelDataList = mapped
-    
-    // Sync total count if store fetched 0 but we have local data
-    if (dashboardStore.stats.totalParcels === 0 && mapped.length > 0) {
-      dashboardStore.stats.totalParcels = mapped.length
-    }
-  }
 
   window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')

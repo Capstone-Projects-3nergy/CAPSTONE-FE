@@ -110,26 +110,24 @@ let dateInterval
 
 const allPublishedAnnouncements = computed(() => {
   return announcementManager.announcements
-    .filter(item => item.status === 'Published')
-    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .map(item => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = item.createdAt || item.date || 'Just now'
-      
+    .filter((item) => item.status === 'Published')
+    .map((item) => {
+      // Normalize data (handle both mock store data and API mapped data)
+      const rawDate = item.date || item.createdAt || 'Just now'
+      const rawType = (item.type || item.category || 'General').toLowerCase()
+      const normalizedType = rawType.includes('event') ? 'event' : 'news'
+
       return {
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.subtitle || item.description || '',
-        content: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        date: formatDate(rawDate),
-        views: item.views || 0,
-        author: item.author || 'Staff Portal',
-        type: type.includes('event') ? 'event' : 'news'
+        ...item,
+        date: rawDate,
+        type: normalizedType
       }
     })
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .map((item) => ({
+      ...item,
+      date: formatDate(item.date)
+    }))
 })
 
 const filteredAnnouncements = computed(() => {
@@ -215,17 +213,40 @@ onUnmounted(() => {
   if (dateInterval) clearInterval(dateInterval)
 })
 const fetchAnnouncementData = async () => {
-  console.log('Fetching announcements disabled to avoid 500 error')
-  /*
-  const data = await getAnnouncements(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-    router
-  )
+  try {
+    const data = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      router
+    )
 
-  if (data && data.length > 0) {
-    announcementManager.setAnnouncements(data)
+    const list = Array.isArray(data) ? data : []
+
+    const mapped = list.map((item) => {
+      const type = (item.type || item.category || 'General').toLowerCase()
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      const rawDate = item.createdAt || item.date || 'Just now'
+
+      return {
+        id: item.id || item.announcementId,
+        title: item.title || item.header || '',
+        subtitle: item.subtitle || item.description || '',
+        content: item.content || item.description || '',
+        category: item.tag || capitalizedType,
+        pinned: item.pinned || false,
+        date: rawDate,
+        views: item.views || 0,
+        author: item.author || 'Staff Portal',
+        status: item.status || 'Published',
+        type: type.includes('event') ? 'event' : 'news'
+      }
+    })
+
+    if (mapped.length > 0) {
+      announcementManager.setAnnouncements(mapped)
+    }
+  } catch (e) {
+    console.warn('Fetch announcements failed', e)
   }
-  */
 }
 
 onMounted(async () => {
@@ -575,13 +596,21 @@ onMounted(async () => {
                   @click="openModal(item)"
                   class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
                 >
-                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                     <!-- Placeholder for Image -->
-                     <div class="absolute inset-0 flex items-center justify-center text-gray-400">
-                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                     </div>
+                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden group/img">
+                    <!-- Placeholder for Image -->
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                      <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    
+                    <!-- Hover Overlay -->
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                      <div class="bg-white/20 border border-white/40 px-4 py-2 rounded-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
+                        <span class="text-white text-xs font-bold uppercase tracking-wider">View Events</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                      </div>
+                    </div>
                   </div>
                   
                   <div class="p-6 flex-grow flex flex-col">
@@ -632,12 +661,11 @@ onMounted(async () => {
                           </div>
                         </div>
                       </div>
-                      <span class="text-sm font-semibold text-[#0E4B90] flex items-center gap-1">
-                        View
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
+                       <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
+                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -692,6 +720,14 @@ onMounted(async () => {
                     <svg class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
                     </svg>
+                    
+                    <!-- Hover Overlay -->
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                      <div class="bg-white/20 border border-white/40 px-4 py-2 rounded-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
+                        <span class="text-white text-xs font-bold uppercase tracking-wider">View New</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                      </div>
+                    </div>
                   </div>
                   <div class="flex-1 flex flex-col">
                     <div class="flex items-center gap-2 mb-2">
