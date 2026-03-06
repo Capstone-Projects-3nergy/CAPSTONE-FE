@@ -40,6 +40,50 @@ const recentParcels = computed(() => {
     .slice(0, 5)
 })
 
+const topResidents = computed(() => {
+  if (!getMappedParcels.value || getMappedParcels.value.length === 0) return []
+  
+  const counts = {}
+  getMappedParcels.value.forEach(p => {
+    const name = p.residentName || 'Unknown'
+    if (!counts[name]) {
+      // Find resident from store members
+      const resident = dashboardStore.members.find(m => 
+        m.fullName === name || m.residentName === name || `${m.firstName} ${m.lastName}` === name
+      )
+      
+      counts[name] = {
+        name,
+        room: p.roomNumber || 'N/A',
+        count: 0,
+        status: resident?.status || 'Active'
+      }
+    }
+    counts[name].count++
+  })
+
+  return Object.values(counts)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4)
+})
+
+const getResidentStatusClass = (status) => {
+  const s = status?.toUpperCase() || ''
+  if (s === 'ACTIVE' || s === 'VERIFIED') return 'text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] font-medium border border-emerald-100'
+  if (s === 'INACTIVE') return 'text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded text-[10px] font-medium border border-gray-200'
+  if (s === 'PENDING') return 'text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] font-medium border border-amber-100'
+  return 'text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] font-medium border border-blue-100'
+}
+
+const formatResidentStatus = (status) => {
+  const s = status?.toUpperCase() || ''
+  if (s === 'ACTIVE') return 'Active'
+  if (s === 'INACTIVE') return 'Inactive'
+  if (s === 'VERIFIED') return 'Verified'
+  if (s === 'PENDING') return 'Pending'
+  return status || 'Active'
+}
+
 const getStatusClass = (status) => {
   switch (status) {
     case 'Received': return 'text-yellow-600 bg-yellow-50 border-yellow-100'
@@ -195,15 +239,26 @@ const updateResidentChart = (year) => {
 const fetchDashboardData = async () => {
   try {
     const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
-    const rawMembers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/members`, router)
+    // Using staff users API to get detailed resident/member status as in ManageResident.vue
+    const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
     const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
 
     const parcels = Array.isArray(rawParcels) ? rawParcels : []
-    const members = Array.isArray(rawMembers) ? rawMembers : []
+    const users = Array.isArray(rawUsers) ? rawUsers : []
     const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
 
-    // Update stores
-    dashboardStore.calculateDashboardData(parcels, members, announcements)
+    // Map users to maintain compatibility with dashboard stats calculation
+    // Separate roles as in ManageResident.vue
+    const residentList = users.filter(u => u.role === 'RESIDENT').map(u => ({
+      id: u.userId,
+      fullName: u.fullName,
+      status: u.status,
+      role: u.role,
+      roomNumber: u.roomNumber
+    }))
+
+    // Update stores - only pass residents for status overview stats
+    dashboardStore.calculateDashboardData(parcels, residentList, announcements)
     
     // Also update parcels store for other pages
     if (parcels.length > 0) {
@@ -1332,68 +1387,47 @@ const handlePrintSummary = () => {
                 </div>
 
                 <div class="space-y-4 flex-1">
-                  <!-- Item 1 -->
-                  <div class="flex items-center justify-between">
+                  <div v-for="(resident, index) in topResidents" :key="resident.name" class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                      <div class="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs font-bold">1</div>
-                      <div class="w-10 h-10 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold">K</div>
+                      <div :class="[
+                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold',
+                        index === 0 ? 'bg-yellow-100 text-yellow-600' : 
+                        index === 1 ? 'bg-gray-100 text-gray-600' : 
+                        index === 2 ? 'bg-orange-100 text-orange-600' : 
+                        'bg-gray-100 text-gray-400'
+                      ]">
+                        {{ index + 1 }}
+                      </div>
+                      <div :class="[
+                        'w-10 h-10 rounded-full text-white flex items-center justify-center font-bold',
+                        index === 0 ? 'bg-yellow-400' : 
+                        index === 1 ? 'bg-blue-500' : 
+                        'bg-emerald-500'
+                      ]">
+                        {{ resident.name.charAt(0) }}
+                      </div>
                       <div>
-                        <p class="text-sm font-bold text-gray-900">kong zeed</p>
-                        <p class="text-xs text-gray-500">Room 13 - Active</p>
+                        <p class="text-sm font-bold text-gray-900">{{ resident.name }}</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <p class="text-[11px] text-gray-500">Room {{ resident.room }}</p>
+                          <span :class="getResidentStatusClass(resident.status)">
+                            {{ formatResidentStatus(resident.status) }}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">47</p>
+                      <p class="text-lg font-bold text-gray-900">{{ resident.count }}</p>
                       <p class="text-[10px] text-gray-400 uppercase">parcels</p>
                     </div>
                   </div>
 
-                  <!-- Item 2 -->
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">2</div>
-                      <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">S</div>
-                      <div>
-                        <p class="text-sm font-bold text-gray-900">Suklita Mook</p>
-                        <p class="text-xs text-gray-500">Room 1 - Inactive</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">31</p>
-                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
-                    </div>
-                  </div>
-
-                  <!-- Item 3 -->
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">3</div>
-                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
-                      <div>
-                        <p class="text-sm font-bold text-gray-900">testkub</p>
-                        <p class="text-xs text-gray-500">Room 532 - Pending</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">18</p>
-                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
-                    </div>
-                  </div>
-
-                  <!-- Item 4 -->
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-bold">4</div>
-                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
-                      <div>
-                        <p class="text-sm font-bold text-gray-900">testkubza</p>
-                        <p class="text-xs text-gray-500">Room 532 - Pending</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">9</p>
-                      <p class="text-[10px] text-gray-400 uppercase">parcels</p>
-                    </div>
+                  <!-- Empty State -->
+                  <div v-if="topResidents.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 py-8">
+                    <svg class="w-12 h-12 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <p class="text-xs">No parcel data available</p>
                   </div>
                 </div>
               </div>
