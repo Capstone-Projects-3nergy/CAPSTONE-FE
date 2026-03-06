@@ -726,44 +726,43 @@ const handleUnlink = async () => {
                 <!-- Action Buttons Area -->
                 <div class="flex flex-col items-center gap-3">
                   <button
-                    v-if="!effectiveLineId"
                     @click="handleLineAction"
                     class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
                   >
-                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">Connect Now</span>
+                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
                   
-                  <template v-else>
-                    <button
+                  <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
+                    <!-- Secondary Action: Switch Account -->
+                    <!-- <button 
                       @click="reconnectLine"
-                      class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-white border-2 border-[#00b900] text-[#00b900] font-black shadow-lg hover:bg-green-50 hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
                         <path d="M21 2v6h-6"></path>
                         <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
                         <path d="M3 22v-6h6"></path>
                         <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
                       </svg>
-                      <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">Switch Account</span>
-                    </button>
+                      <span>Switch Account</span>
+                    </button> -->
 
-                    <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
-                      <button 
-                        @click="handleLineAction"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/access cursor-pointer border border-transparent hover:border-green-100"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/access:translate-x-1 transition-transform duration-300">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                          <polyline points="15 3 21 3 21 9"></polyline>
-                          <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
-                        <span>Access LINE Profile</span>
-                      </button>
-                    </div>
-                  </template>
+                    <!-- Unlink Action (Commented out for future use)
+                    <button 
+                      @click="handleUnlink"
+                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/unlink:scale-110 transition-transform duration-300">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                      </svg>
+                      <span>Disconnect</span>
+                    </button>
+                    -->
+                  </div>
                 </div>
               </div>
             </div>
