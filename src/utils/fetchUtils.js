@@ -812,7 +812,8 @@ async function linkLineAccount(code, state, router) {
 async function getLineConnectUrl(firebaseToken, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}`
+    const currentPath = window.location.pathname
+    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}&returnUrl=${encodeURIComponent(currentPath)}`
 
     const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {

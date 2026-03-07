@@ -20,7 +20,10 @@ import { storeToRefs } from 'pinia'
 import { getItems } from '@/utils/fetchUtils'
 import { useDashboardManager } from '@/stores/DashboardManager'
 
+import { useUserManager } from '@/stores/MemberAndStaffManager'
+
 const loginManager = useAuthManager()
+const userManager = useUserManager()
 const parcelManager = useParcelManager()
 const dashboardStore = useDashboardManager()
 const { chartData, stats, getMappedParcels } = storeToRefs(dashboardStore)
@@ -236,6 +239,14 @@ const updateResidentChart = (year) => {
   residentChartInstance.update();
 };
 
+const pendingResidentsList = computed(() => {
+  if (!dashboardStore.members) return []
+  return dashboardStore.members
+    .filter(m => m.status?.toUpperCase() === 'PENDING')
+    .sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+    .slice(0, 5)
+})
+
 const fetchDashboardData = async () => {
   try {
     const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
@@ -247,17 +258,31 @@ const fetchDashboardData = async () => {
     const users = Array.isArray(rawUsers) ? rawUsers : []
     const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
 
-    // Map users to maintain compatibility with dashboard stats calculation
-    // Separate roles as in ManageResident.vue
-    const residentList = users.filter(u => u.role === 'RESIDENT').map(u => ({
+    // Map users as in ManageResident.vue
+    const mappedUsers = users.map((u) => ({
       id: u.userId,
-      fullName: u.fullName,
+      fullName: u.fullName || '-',
+      email: u.email || '-',
+      dormName: u.dormName || '-',
+      roomNumber: u.roomNumber || '-',
+      role: u.role, // "RESIDENT" | "STAFF"
       status: u.status,
-      role: u.role,
-      roomNumber: u.roomNumber
+      updateAt: u.updatedAt || new Date().toISOString(),
+      photo: u.profileImageUrl
     }))
 
-    // Update stores - only pass residents for status overview stats
+    // Separate roles as in ManageResident.vue
+    const residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
+    const staffList = mappedUsers.filter((u) => u.role === 'STAFF')
+    
+    // Sort by latest update as in ManageResident.vue
+    residentList.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
+
+    // Sync with User Manager store
+    userManager.setMembers(residentList)
+    userManager.setStaffs(staffList)
+
+    // Update Dashboard store for status overview stats
     dashboardStore.calculateDashboardData(parcels, residentList, announcements)
     
     // Also update parcels store for other pages
@@ -1511,55 +1536,42 @@ const handlePrintSummary = () => {
                       </div>
                       Pending Approval
                     </h3>
-                    <p class="text-xs text-yellow-600/80 mt-1">2 residents awaiting verification</p>
+                    <p class="text-xs text-yellow-600/80 mt-1">{{ stats.pendingResidents }} residents awaiting verification</p>
                   </div>
                 </div>
 
                 <div class="space-y-3 flex-1 overflow-y-auto">
-                  <!-- Item 1 -->
-                  <div class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative">
+                  <!-- Dynamic Items -->
+                  <div v-for="resident in pendingResidentsList" :key="resident.id" class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative group hover:border-yellow-300 transition-colors">
                     <span class="absolute top-4 right-4 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Pending</span>
                     <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
+                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg">
+                        {{ resident?.fullName?.charAt(0) || '?' }}
+                      </div>
                       <div>
-                        <p class="text-sm font-bold text-gray-900 leading-tight">testkub</p>
-                        <p class="text-xs text-gray-500">Room 532 • testkub@gmail.com</p>
+                        <p class="text-sm font-bold text-gray-900 leading-tight">{{ resident?.fullName || '-' }}</p>
+                        <p class="text-xs text-gray-500">Room {{ resident?.roomNumber || '-' }} • {{ resident?.email || '-' }}</p>
                       </div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mb-3">Registered: 2026-02-18 00:39:51</p>
+                    <p class="text-[10px] text-gray-400 mb-3">Updated: {{ resident?.updateAt ? new Date(resident.updateAt).toLocaleString() : '-' }}</p>
                     <div class="grid grid-cols-2 gap-2">
-                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                      <button @click="ShowManageResidentPage" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Approve
+                        Review
                       </button>
-                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1 cursor-pointer">
+                      <button @click="ShowManageResidentPage" class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1 cursor-pointer">
                          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Reject
+                        View Profile
                       </button>
                     </div>
                   </div>
 
-                  <!-- Item 2 -->
-                   <div class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative">
-                    <span class="absolute top-4 right-4 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Pending</span>
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">T</div>
-                      <div>
-                        <p class="text-sm font-bold text-gray-900 leading-tight">testkubza</p>
-                        <p class="text-xs text-gray-500">Room 532 • testkub@gmail.com</p>
-                      </div>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mb-3">Registered: 2026-02-18 00:41:23</p>
-                    <div class="grid grid-cols-2 gap-2">
-                      <button class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Approve
-                      </button>
-                      <button class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1">
-                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Reject
-                      </button>
-                    </div>
+                  <!-- Empty State -->
+                  <div v-if="pendingResidentsList.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 py-8">
+                    <svg class="w-12 h-12 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm">No pending approvals</p>
                   </div>
 
                 </div>

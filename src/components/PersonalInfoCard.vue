@@ -7,6 +7,7 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { getItems, unlinkLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
+import AlertPopUp from './AlertPopUp.vue'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -24,6 +25,12 @@ const activeTab = ref('profile')
 const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
 const showLineSuccessPopup = ref(false)
+
+// LINE Connection alert state
+const lineAlertVisible = ref(false)
+const lineAlertMessage = ref('')
+const lineAlertTitle = ref('')
+const lineAlertStyle = ref('blue')
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -165,18 +172,36 @@ onMounted(async () => {
   }
 })
 
-// ✅ ย้ายออกมานอก onMounted เพื่อให้ทำงานได้ทุกเคส (รวมถึง Resident)
+// ✅ Detect LINE Connection results from URL redirect
 watch(
   () => route.query.line,
   (status) => {
+    if (!status) return
+
     console.log('Detected LINE status in URL:', status)
+    const errorMsg = route.query.msg
+
     if (status === 'success') {
       showLineSuccessPopup.value = true
-      // ล้าง query string ออกหลังจากแสดง popup แล้ว
+    } else if (status === 'error') {
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'red'
+      lineAlertMessage.value = 'LINE Connection Failed'
+      lineAlertTitle.value = errorMsg || 'Please try again or contact support'
+      
+      // Auto-hide alert after 8 seconds
       setTimeout(() => {
-        router.replace({ query: { ...route.query, line: undefined } })
-      }, 1000)
+        lineAlertVisible.value = false
+      }, 8000)
     }
+
+    // Clean up query string after processing
+    setTimeout(() => {
+      const newQuery = { ...route.query }
+      delete newQuery.line
+      delete newQuery.msg
+      router.replace({ query: newQuery })
+    }, 1500)
   },
   { immediate: true }
 )
@@ -425,7 +450,17 @@ const handleUnlink = async () => {
 */
 </script>
 <template>
-  <div class="w-full mx-auto px-4">
+  <div class="w-full mx-auto px-4 relative">
+    <!-- Beautiful LINE Feedback Alert -->
+    <div v-if="lineAlertVisible" class="fixed top-24 right-6 z-[110] w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
+      <AlertPopUp
+        :message="lineAlertMessage"
+        :titles="lineAlertTitle"
+        :styleType="lineAlertStyle"
+        @closePopUp="lineAlertVisible = false"
+      />
+    </div>
+
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
