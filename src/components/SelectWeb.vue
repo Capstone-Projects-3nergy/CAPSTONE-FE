@@ -76,7 +76,7 @@ onUnmounted(() => {
       <div v-if="$slots.icon" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center">
         <slot name="icon" />
       </div>
-      <span :class="{ 'text-gray-400': !selectedOption }" class="flex-1 truncate text-left">
+      <span :class="{ 'text-gray-400': !selectedOption }" class="flex-1 text-left">
         {{ selectedOption ? selectedOption.label : placeholder }}
       </span>
       <svg
@@ -111,7 +111,7 @@ onUnmounted(() => {
           class="px-5 py-3 cursor-pointer hover:bg-blue-50 transition-all text-sm flex items-center justify-between group"
           :class="{ 'bg-blue-50/50 text-[#0E4B90] font-bold border-l-4 border-[#0E4B90]': modelValue === option.value }"
         >
-          <span class="truncate">{{ option.label }}</span>
+          <span>{{ option.label }}</span>
           <svg
             v-if="modelValue === option.value"
             class="w-4 h-4 text-[#0E4B90]"

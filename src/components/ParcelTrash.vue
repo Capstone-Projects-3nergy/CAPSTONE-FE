@@ -1077,6 +1077,7 @@ const closePopUp = (operate) => {
           :show-add-button="false"
           :hideNameSort="false"
           :hideTrash="false"
+          :nameSortLabel="activeTab === 'Residents' ? 'Resident Name' : activeTab === 'Announcement' ? 'Title' : 'Name'"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"

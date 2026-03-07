@@ -89,50 +89,50 @@ const authStore = useAuthManager()
         <tr>
           <th
             v-if="showPhoto"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Photo
           </th>
           <th
             v-if="showTracking"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Tracking
           </th>
 
           <th
             v-if="showName"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Name
           </th>
           <th
             v-if="showMemberName"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Resident name
           </th>
           <th
             v-if="showMemberTrashName"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Resident name
           </th>
           <th
             v-if="showStaffName"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Staff name
           </th>
           <th
             v-if="showMobile"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Mobile
           </th>
           <th
             v-if="showRoom"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Room
@@ -142,18 +142,18 @@ const authStore = useAuthManager()
             </div>
           </th>
 
-          <th v-if="showEmail" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Email</th>
+          <th v-if="showEmail" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap">Email</th>
 
           <th
             v-if="showTitle"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Title
           </th>
 
           <th
             v-if="showCategory"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Category
@@ -165,14 +165,14 @@ const authStore = useAuthManager()
 
           <th
             v-if="showDatePosted"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Date Posted
           </th>
 
           <th
             v-if="showStatus"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Status
@@ -184,7 +184,7 @@ const authStore = useAuthManager()
 
           <th
             v-if="showUpdateAt"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Updated At
@@ -195,7 +195,7 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showActionStatus"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Status
@@ -206,7 +206,7 @@ const authStore = useAuthManager()
           </th>
            <th
             v-if="showDeletedAt"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             <div class="flex items-center gap-2">
               Deleted At
@@ -217,7 +217,7 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showAction"
-            class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider"
+            class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Action
           </th>
@@ -242,7 +242,7 @@ const authStore = useAuthManager()
         >
           <td
             v-if="showPhoto"
-            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle"
           >
             <div class="flex items-center gap-2">
               <span class="md:hidden font-semibold text-[#0E4B90]">Photo:</span>
@@ -267,7 +267,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showTracking"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Tracking:
@@ -277,7 +277,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showName"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Name:</span>
             {{ p.recipientName }}
@@ -285,7 +285,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showMemberTrashName"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
@@ -294,7 +294,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showMemberName"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">
               Resident name:
@@ -303,7 +303,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showStaffName"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">
               Staff name:
@@ -312,7 +312,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showMobile"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Mobile:</span>
             {{ p.mobile }}
@@ -320,7 +320,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showRoom"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
             {{ p.roomNumber }}
@@ -328,7 +328,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showEmail"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Email: </span>
             {{ p.email }}
@@ -336,7 +336,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showTitle"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Title: </span>
             <span class="font-medium">{{ p.title }}</span>
@@ -344,11 +344,11 @@ const authStore = useAuthManager()
 
           <td
             v-if="showCategory"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none flex items-center md:table-cell md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:table-cell md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Category: </span>
             <span
-              class="px-3 py-1 rounded-full text-xs font-semibold"
+              class="px-3 py-1 rounded-full text-[10px] font-semibold"
               :class="{
                 'bg-blue-50 text-blue-600': p.category === 'Updates',
                 'bg-emerald-50 text-emerald-600': p.category === 'Events',
@@ -362,7 +362,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showDatePosted"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Date Posted: </span>
             {{ p.datePosted }}
@@ -370,7 +370,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showStatus"
-            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
@@ -415,7 +415,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showUpdateAt"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Updated At:</span
@@ -424,7 +424,7 @@ const authStore = useAuthManager()
           </td>
             <td
             v-if="showActionStatus"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
@@ -445,7 +445,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showDeletedAt"
-            class="px-4 py-3 md:py-4 md:px-6 text-sm text-gray-700 border-b md:border-none md:align-middle"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Deleted At:</span
@@ -475,7 +475,7 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-4 md:px-6 text-sm text-gray-700 flex items-center md:table-cell md:align-middle text-right"
+            class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-right whitespace-nowrap"
           >
             <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4">
               <span class="md:hidden font-semibold text-[#0E4B90]">Action:</span>

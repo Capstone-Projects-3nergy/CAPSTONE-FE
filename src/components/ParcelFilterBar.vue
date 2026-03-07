@@ -1,6 +1,8 @@
 <script setup>
+import { computed } from 'vue'
 import ButtonWeb from './ButtonWeb.vue'
-defineProps({
+import SelectWeb from './SelectWeb.vue'
+const props = defineProps({
   modelDate: String,
   modelSearch: String,
   modelSort: String,
@@ -27,7 +29,23 @@ defineProps({
   showDate: {
     type: Boolean,
     default: true
+  },
+  nameSortLabel: {
+    type: String,
+    default: 'Name'
   }
+})
+
+const sortOptions = computed(() => {
+  const options = [
+    { label: 'Newest', value: 'Newest' },
+    { label: 'Oldest', value: 'Oldest' }
+  ]
+  if (!props.hideNameSort) {
+    options.push({ label: `${props.nameSortLabel} (A→Z)`, value: `${props.nameSortLabel} (A→Z)` })
+    options.push({ label: `${props.nameSortLabel} (Z→A)`, value: `${props.nameSortLabel} (Z→A)` })
+  }
+  return options
 })
 
 defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'addMember'])
@@ -37,7 +55,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
     class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
   >
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div v-if="showDate" class="relative flex items-center group">
+      <div v-if="props.showDate" class="relative flex items-center group">
         <!-- Premium Icon Overlay -->
         <div class="absolute left-3 pointer-events-none z-10 transition-transform duration-200 group-hover:scale-105">
           <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
@@ -53,7 +71,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
         <!-- Styled Date Input -->
         <input
           type="date"
-          :value="modelDate"
+          :value="props.modelDate"
           @input="$emit('update:date', $event.target.value)"
           class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer transition-all hover:bg-gray-100/50 w-full sm:w-auto [::-webkit-calendar-picker-indicator]:opacity-0"
         />
@@ -77,7 +95,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
 
           <input
             type="text"
-            :value="modelSearch"
+            :value="props.modelSearch"
             @input="$emit('update:search', $event.target.value)"
             placeholder="Search ..."
             class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm"
@@ -86,21 +104,16 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
 
         <!-- Group: Sort Select + Add Button (Keep together on mobile) -->
         <div class="flex items-center gap-2 flex-1 sm:flex-initial">
-          <select
-            class="bg-white text-gray-600 text-sm border border-gray-200 rounded-xl px-2 sm:px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm cursor-pointer flex-1 sm:flex-none min-w-[100px]"
-            :value="modelSort"
-            @change="$emit('update:sort', $event.target.value)"
-          >
-            <option value="" disabled>Sort by:</option>
-            <option>Newest</option>
-            <option>Oldest</option>
-
-            <option v-if="!hideNameSort">Name (A→Z)</option>
-            <option v-if="!hideNameSort">Name (Z→A)</option>
-          </select>
+          <SelectWeb
+            :modelValue="props.modelSort"
+            @update:modelValue="$emit('update:sort', $event)"
+            :options="sortOptions"
+            placeholder="Sort by:"
+            customClass="bg-white text-gray-600 text-sm border border-gray-200 rounded-xl px-2 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm cursor-pointer flex-1 sm:flex-none min-w-[200px]"
+          />
 
           <ButtonWeb 
-            v-if="showAddButton"
+            v-if="props.showAddButton"
             @click="$emit('add')"
             label="Add parcel"
             color="blue"
@@ -117,7 +130,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           </ButtonWeb>
 
           <ButtonWeb 
-            v-if="showAddMemberButton"
+            v-if="props.showAddMemberButton"
             @click="$emit('addMember')"
             label="Add New"
             color="blue"
@@ -134,7 +147,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           </ButtonWeb>
 
           <ButtonWeb 
-            v-if="showAddStaffButton"
+            v-if="props.showAddStaffButton"
             @click="$emit('addMember')"
             label="Add New Staff"
             color="blue"
