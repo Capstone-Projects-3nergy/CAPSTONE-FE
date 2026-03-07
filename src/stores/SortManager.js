@@ -80,6 +80,22 @@ function sortByContactReverse(parcels) {
     })
   )
 }
+function sortByCategory(items) {
+  items.sort((a, b) =>
+    (a.category || '').localeCompare(b.category || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByCategoryReverse(items) {
+  items.sort((a, b) =>
+    (b.category || '').localeCompare(a.category || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
 function normalize(value) {
   return value?.toString().toLowerCase().trim() || ''
 }
@@ -464,5 +480,7 @@ export {
   sortByDeleteDateReverse,
   sortByUserStatusReverse,
   sortByUserDate,
-  sortByUserDateReverse
+  sortByUserDateReverse,
+  sortByCategory,
+  sortByCategoryReverse
 }

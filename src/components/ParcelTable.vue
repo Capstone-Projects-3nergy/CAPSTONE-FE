@@ -155,7 +155,12 @@ const authStore = useAuthManager()
             v-if="showCategory"
             class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider"
           >
-            Category
+            <div class="flex items-center gap-2">
+              Category
+              <div class="transition-transform duration-200 ease-out hover:scale-110">
+                <slot name="sort-category"></slot>
+              </div>
+            </div>
           </th>
 
           <th

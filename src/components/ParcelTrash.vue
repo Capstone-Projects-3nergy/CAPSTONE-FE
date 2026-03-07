@@ -44,7 +44,9 @@ import {
   sortByDeleteDate,
   filterByDay,
   filterByMonth,
-  filterByYear
+  filterByYear,
+  sortByCategory,
+  sortByCategoryReverse
 } from '@/stores/SortManager'
 import {
   getItems,
@@ -234,6 +236,7 @@ const usersByTab = computed(() => {
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
+const isCategoryAsc = ref(true)
 
 const sortRoomAsc = () => sortByRoomNumber(usersByTab.value)
 const sortRoomDesc = () => sortByRoomNumberReverse(usersByTab.value)
@@ -263,6 +266,13 @@ const toggleSortDate = () => {
     ? sortByDeleteDate(usersByTab.value)
     : sortByDeleteDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
+}
+
+const toggleSortCategory = () => {
+  isCategoryAsc.value
+    ? sortByCategory(usersByTab.value)
+    : sortByCategoryReverse(usersByTab.value)
+  isCategoryAsc.value = !isCategoryAsc.value
 }
 const selectedSort = ref('Sort by:')
 
@@ -1411,6 +1421,29 @@ const closePopUp = (operate) => {
           @delete="deleteParcelPopUp"
           @restore="restoreParcelPopUp"
         >
+          <template #sort-category>
+            <svg
+              class="cursor-pointer"
+              @click="toggleSortCategory"
+              width="17"
+              height="12"
+              viewBox="0 0 17 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                fill="#0E4B90"
+              />
+              <path
+                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                stroke="#0E4B90"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
           <template #sort-room>
             <svg
               class="cursor-pointer"
