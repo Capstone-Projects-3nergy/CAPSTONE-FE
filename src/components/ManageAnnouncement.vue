@@ -23,6 +23,7 @@ import { computed } from 'vue'
 
 import { getAnnouncements } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { searchAnnouncements } from '@/stores/SortManager.js'
 
 const announcementManager = useAnnouncementManager()
 
@@ -226,17 +227,17 @@ const itemsPerPage = 6
 
 const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
     // Filter to show only non-published items in the management view
     const isNotPublished = item.status !== 'Published'
     
-    return matchesSearch && matchesCategory && isNotPublished
+    return matchesCategory && isNotPublished
   })
 
+  const searched = searchAnnouncements(filtered, searchQuery.value)
+
   // Sort: Pinned items first, then ordered originally
-  return filtered.sort((a, b) => {
+  return searched.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
     return 0

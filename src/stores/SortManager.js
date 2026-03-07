@@ -147,6 +147,68 @@ function searchParcels(parcels, keyword) {
   return exactMatches.length > 0 ? exactMatches : partialMatches
 }
 
+function searchAnnouncements(announcements, keyword) {
+  if (!keyword) return announcements
+
+  const key = normalize(keyword)
+
+  const exactMatches = []
+  const partialMatches = []
+
+  announcements.forEach((a) => {
+    const fields = [
+      normalize(a.title),
+      normalize(a.subtitle),
+      normalize(a.content),
+      normalize(a.category),
+      normalize(a.author),
+      normalize(a.status),
+      normalize(a.type)
+    ]
+
+    // วันที่
+    let displayDate = ''
+    let isoDate = ''
+
+    const rawDate = a.date || a.createdAt || a.datePosted
+    if (rawDate) {
+      const date = new Date(rawDate)
+
+      if (!isNaN(date.getTime())) {
+        const dd = String(date.getDate()).padStart(2, '0')
+        const mm = String(date.getMonth() + 1).padStart(2, '0')
+        const yyyy = date.getFullYear()
+        const hh = String(date.getHours()).padStart(2, '0')
+        const min = String(date.getMinutes()).padStart(2, '0')
+        const ss = String(date.getSeconds()).padStart(2, '0')
+
+        displayDate = `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`
+        isoDate = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+
+        fields.push(normalize(displayDate))
+        fields.push(normalize(isoDate))
+      } else {
+        fields.push(normalize(rawDate))
+      }
+    }
+
+    // ✅ exact match
+    const isExact = fields.some((f) => f === key)
+
+    // ✅ partial match
+    const isPartial = fields.some((f) => f.includes(key))
+
+    if (isExact) {
+      exactMatches.push(a)
+    } else if (isPartial) {
+      partialMatches.push(a)
+    }
+  })
+
+  // 🔥 ถ้ามี exact → เอาเฉพาะ exact
+  return exactMatches.length > 0 ? exactMatches : partialMatches
+}
+
 function parseDate(dateStr) {
   return new Date(dateStr)
 }
@@ -371,6 +433,7 @@ export {
   sortByFirstNameReverse,
   sortByLastNameReverse,
   searchParcels,
+  searchAnnouncements,
   filterByDay,
   filterByMonth,
   filterByYear,

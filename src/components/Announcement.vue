@@ -11,6 +11,7 @@ import WebHeader from './WebHeader.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import { getAnnouncements } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { searchAnnouncements } from '@/stores/SortManager.js'
 
 const getCategoryBadgeClass = (category) => {
   switch (category) {
@@ -131,15 +132,13 @@ const allPublishedAnnouncements = computed(() => {
 })
 
 const filteredAnnouncements = computed(() => {
-  const query = searchQuery.value.toLowerCase()
-  return allPublishedAnnouncements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(query) || 
-                          item.subtitle.toLowerCase().includes(query)
-    const matchesTab = tab.value === 'all' || 
-                      (tab.value === 'event' && item.type === 'event') ||
-                      (tab.value === 'news' && item.type === 'news')
-    return matchesSearch && matchesTab
+  const announcementsByTab = allPublishedAnnouncements.value.filter(item => {
+    return tab.value === 'all' || 
+          (tab.value === 'event' && item.type === 'event') ||
+          (tab.value === 'news' && item.type === 'news')
   })
+  
+  return searchAnnouncements(announcementsByTab, searchQuery.value)
 })
 
 const filteredEvents = computed(() => {
