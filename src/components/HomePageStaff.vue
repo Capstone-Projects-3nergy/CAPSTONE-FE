@@ -803,9 +803,9 @@ const handlePrintSummary = () => {
             <!-- Stats Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Parcels -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center">
+                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
@@ -815,21 +815,20 @@ const handlePrintSummary = () => {
                     <path d="M16 5.25l-8 4.5" />
                   </svg>
                 </div>
-                <span class="flex items-center text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
-                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                  12%
+                <span class="flex items-center text-emerald-500 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
+                   Active System
                 </span>
               </div>
               <div class="mt-4">
                 <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1">Total Parcels</p>
+                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Total Parcels</p>
               </div>
             </div>
 
             <!-- Awaiting Pickup -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-yellow-100 rounded-xl text-yellow-600 shadow-sm flex items-center justify-center">
+                <div class="p-2.5 bg-yellow-100 rounded-xl text-yellow-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M6.5 7h11" />
@@ -838,20 +837,20 @@ const handlePrintSummary = () => {
                     <path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" />
                   </svg>
                 </div>
-                <span class="text-orange-400 text-xs font-bold bg-orange-50 px-2 py-1 rounded">
-                  → 3 days avg
+                <span class="text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
+                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}% of total
                 </span>
               </div>
               <div class="mt-4">
                 <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1">Awaiting Pickup</p>
+                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Awaiting Pickup</p>
               </div>
             </div>
 
             <!-- Overdue -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                <div class="p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
@@ -859,30 +858,33 @@ const handlePrintSummary = () => {
                     <path d="M12 16l.01 0" />
                   </svg>
                 </div>
-                <span class="flex items-center text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">
+                <span v-if="stats.overdueParcels > 0" class="flex items-center text-red-600 text-[10px] font-bold bg-red-50 px-2 py-1 rounded animate-pulse">
                   <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                   Action needed
+                </span>
+                <span v-else class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
+                  All clear
                 </span>
               </div>
               <div class="mt-4">
                 <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1">Overdue (>7 days)</p>
+                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Overdue (>7 days)</p>
               </div>
             </div>
 
             <!-- Picked Up -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-4">
-                <div class="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="p-2.5 bg-emerald-100 rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
-                <span class="text-emerald-500 text-xs font-bold">
-                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% rate
+                <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
+                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% success rate
                 </span>
               </div>
               <div class="mt-4">
                 <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1">Picked Up</p>
+                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Picked Up</p>
               </div>
             </div>
           </div>

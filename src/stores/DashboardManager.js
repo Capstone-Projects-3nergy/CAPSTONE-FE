@@ -170,20 +170,28 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const currentMonth = today.getMonth()
       const currentYear = today.getFullYear()
       const currentWeekIdx = getWeekIndex(today)
+      const sevenDaysAgo = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000))
 
       parcelsData.forEach(p => {
         // Calculate Stats
         const pStatus = p.status?.toUpperCase() || ''
-        if (pStatus.includes('PICKED') || pStatus.includes('TAKEN')) {
+        const receivedDate = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
+        const rDate = receivedDate ? new Date(receivedDate) : null
+        
+        const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
+        const isExplicitOverdue = pStatus.includes('OVERDUE')
+        const isOld = rDate && rDate < sevenDaysAgo && !isPickedUp
+
+        if (isPickedUp) {
           stats.pickedUpParcels++
-        } else if (pStatus.includes('OVERDUE')) {
+        } else if (isExplicitOverdue || isOld) {
           stats.overdueParcels++
         } else {
           stats.awaitingParcels++
         }
 
         // Populate Chart Data
-        const dateStr = p.createdAt || p.date || p.updateAt || p.updatedAt
+        const dateStr = receivedDate
         const date = dateStr ? new Date(dateStr) : new Date()
         if (isNaN(date.getTime())) return // skip invalid dates
 

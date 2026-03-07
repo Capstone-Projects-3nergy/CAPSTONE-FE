@@ -142,10 +142,9 @@ onUnmounted(() => {
 })
 onMounted(async () => {
   checkScreen()
-
   window.addEventListener('resize', checkScreen)
-  console.log('Fetching parcels/residents disabled to avoid 500 error')
   
+  // Fetch parcels data
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
