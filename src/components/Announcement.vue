@@ -624,10 +624,10 @@ onMounted(async () => {
                       </div>
                     </div>
 
-                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight line-clamp-2">
+                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight break-words whitespace-normal">
                       {{ item.title }}
                     </h4>
-                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-grow">
+                    <p class="text-gray-500 text-sm break-words whitespace-normal leading-relaxed mb-6 flex-grow">
                       {{ item.subtitle || item.content }}
                     </p>
 
@@ -729,19 +729,26 @@ onMounted(async () => {
                     </div>
                   </div>
                   <div class="flex-1 flex flex-col">
-                    <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-start gap-2 mb-2">
                       <span class="px-2 py-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
                         <span v-html="getCategoryIcon(item.category)"></span>
                         {{ item.category }}
                       </span>
                       <span class="text-[10px] font-bold text-gray-400 ml-auto">{{ item.date }}</span>
                     </div>
-                    <h4 class="text-base font-bold text-gray-900 mb-1 group-hover:text-[#0E4B90] transition-colors line-clamp-1">
-                      {{ item.title }}
-                    </h4>
-                    <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 flex-grow">
-                      {{ item.subtitle || item.content }}
-                    </p>
+                    <div class="flex items-start gap-4">
+                      <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0 mt-1">
+                        SP
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-base font-bold text-gray-900 break-words whitespace-normal group-hover:text-[#0E4B90] transition-colors">
+                          {{ item.title }}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1 break-words whitespace-normal">
+                          {{ item.subtitle || item.content }}
+                        </div>
+                      </div>
+                    </div>
                     <div class="mt-3 flex items-center justify-between">
                        <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
                           <span class="flex items-center gap-1">
@@ -891,7 +898,7 @@ onMounted(async () => {
                     <span class="text-xs text-gray-400">12 {{ month.slice(0,3) }}</span>
                   </div>
                   <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Quarterly Community Meeting Notes</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">Review the discussed topics and action items from our last gathering.</p>
+                  <p class="text-sm text-gray-500 break-words">Review the discussed topics and action items from our last gathering.</p>
                 </div>
                 
                 <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
@@ -901,7 +908,7 @@ onMounted(async () => {
                     <span class="text-xs text-gray-400">05 {{ month.slice(0,3) }}</span>
                   </div>
                   <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Completed: Elevator Service</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">The scheduled maintenance for Building A elevators is now complete.</p>
+                  <p class="text-sm text-gray-500 break-words">The scheduled maintenance for Building A elevators is now complete.</p>
                 </div>
               </div>
             </div>

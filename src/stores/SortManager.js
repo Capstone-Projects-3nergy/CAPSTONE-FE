@@ -158,19 +158,25 @@ function searchAnnouncements(announcements, keyword) {
   announcements.forEach((a) => {
     const fields = [
       normalize(a.title),
+      normalize(a.header),
+      normalize(a.subject),
       normalize(a.subtitle),
       normalize(a.content),
+      normalize(a.description),
       normalize(a.category),
+      normalize(a.tag),
       normalize(a.author),
       normalize(a.status),
-      normalize(a.type)
+      normalize(a.type),
+      normalize(a.views),
+      normalize(a.viewCount)
     ]
 
     // วันที่
     let displayDate = ''
     let isoDate = ''
 
-    const rawDate = a.date || a.createdAt || a.datePosted
+    const rawDate = a.date || a.createdAt || a.datePosted || a.announcementDate || a.updatedAt || a.postedAt
     if (rawDate) {
       const date = new Date(rawDate)
 

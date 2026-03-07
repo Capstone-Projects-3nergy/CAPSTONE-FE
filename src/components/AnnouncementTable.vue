@@ -105,7 +105,7 @@ const getCategoryIcon = (category) => {
           </div>
           
           <!-- Card Body -->
-          <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 leading-tight group-hover:text-[#0E4B90] transition-colors">
+          <h3 class="font-bold text-gray-900 text-base mb-2 break-words whitespace-normal leading-tight group-hover:text-[#0E4B90] transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
           <p class="text-sm text-gray-600 mb-6 leading-relaxed flex-grow">
@@ -217,9 +217,9 @@ const getCategoryIcon = (category) => {
                       SP
                     </div>
                     <div class="flex-grow">
-                      <div class="flex items-center gap-2 mb-2">
+                       <div class="flex items-start gap-2 mb-2">
                         <span class="md:hidden font-semibold text-[#0E4B90] text-xs shrink-0">Title:</span>
-                        <div class="text-sm font-bold text-gray-900 md:line-clamp-1 flex-grow">
+                        <div class="text-sm font-bold text-gray-900 flex-grow break-words whitespace-normal">
                           {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
                         </div>
                         <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
