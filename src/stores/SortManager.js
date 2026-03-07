@@ -65,6 +65,22 @@ function sortByNameReverse(parcels) {
   )
 }
 
+function sortByTitle(items) {
+  items.sort((a, b) =>
+    (a.title || '').localeCompare(b.title || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
+function sortByTitleReverse(items) {
+  items.sort((a, b) =>
+    (b.title || '').localeCompare(a.title || '', 'th', {
+      sensitivity: 'base'
+    })
+  )
+}
+
 function sortByContact(parcels) {
   parcels.sort((a, b) =>
     (a.contact || '').localeCompare(b.contact || '', 'th', {
@@ -482,5 +498,7 @@ export {
   sortByUserDate,
   sortByUserDateReverse,
   sortByCategory,
-  sortByCategoryReverse
+  sortByCategoryReverse,
+  sortByTitle,
+  sortByTitleReverse
 }

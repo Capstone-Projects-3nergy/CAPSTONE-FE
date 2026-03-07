@@ -46,7 +46,11 @@ import {
   filterByMonth,
   filterByYear,
   sortByCategory,
-  sortByCategoryReverse
+  sortByCategoryReverse,
+  sortByTitle,
+  sortByTitleReverse,
+  sortByFullName,
+  sortByFullNameReverse
 } from '@/stores/SortManager'
 import {
   getItems,
@@ -244,8 +248,25 @@ const sortStatusAsc = () => sortByStatus(usersByTab.value)
 const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
 const sortDateAsc = () => sortByDeleteDate(usersByTab.value)
 const sortDateDesc = () => sortByDeleteDateReverse(usersByTab.value)
-const sortByNameAsc = () => sortByName(usersByTab.value)
-const sortByNameDesc = () => sortByNameReverse(usersByTab.value)
+const sortByNameAsc = () => {
+  if (activeTab.value === 'Parcels') {
+    sortByName(usersByTab.value)
+  } else if (activeTab.value === 'Residents') {
+    sortByFullName(usersByTab.value)
+  } else if (activeTab.value === 'Announcement') {
+    sortByTitle(usersByTab.value)
+  }
+}
+
+const sortByNameDesc = () => {
+  if (activeTab.value === 'Parcels') {
+    sortByNameReverse(usersByTab.value)
+  } else if (activeTab.value === 'Residents') {
+    sortByFullNameReverse(usersByTab.value)
+  } else if (activeTab.value === 'Announcement') {
+    sortByTitleReverse(usersByTab.value)
+  }
+}
 
 const toggleSortRoom = () => {
   isRoomAsc.value
@@ -295,6 +316,12 @@ const handleSort = () => {
       break
     case 'Status (Z→A)':
       sortStatusDesc()
+      break
+    case 'Category (A→Z)':
+      sortByCategory(usersByTab.value)
+      break
+    case 'Category (Z→A)':
+      sortByCategoryReverse(usersByTab.value)
       break
     case 'Name (A→Z)':
       sortByNameAsc()
@@ -722,6 +749,7 @@ const fetchTrashMembers = async () => {
       id: u.userId,
       firstName: u.firstName,
       lastName: u.lastName,
+      fullName: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
       phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,
@@ -1078,6 +1106,8 @@ const closePopUp = (operate) => {
           :hideNameSort="false"
           :hideTrash="false"
           :nameSortLabel="activeTab === 'Residents' ? 'Resident Name' : activeTab === 'Announcement' ? 'Title' : 'Name'"
+          :showStatusSort="activeTab !== 'Residents'"
+          :showCategorySort="activeTab === 'Announcement'"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"

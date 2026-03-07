@@ -33,6 +33,14 @@ const props = defineProps({
   nameSortLabel: {
     type: String,
     default: 'Name'
+  },
+  showCategorySort: {
+    type: Boolean,
+    default: false
+  },
+  showStatusSort: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -42,8 +50,16 @@ const sortOptions = computed(() => {
     { label: 'Oldest', value: 'Oldest' }
   ]
   if (!props.hideNameSort) {
-    options.push({ label: `${props.nameSortLabel} (A→Z)`, value: `${props.nameSortLabel} (A→Z)` })
-    options.push({ label: `${props.nameSortLabel} (Z→A)`, value: `${props.nameSortLabel} (Z→A)` })
+    options.push({ label: `${props.nameSortLabel} (A→Z)`, value: 'Name (A→Z)' })
+    options.push({ label: `${props.nameSortLabel} (Z→A)`, value: 'Name (Z→A)' })
+  }
+  if (props.showStatusSort) {
+    options.push({ label: 'Status (A→Z)', value: 'Status (A→Z)' })
+    options.push({ label: 'Status (Z→A)', value: 'Status (Z→A)' })
+  }
+  if (props.showCategorySort) {
+    options.push({ label: 'Category (A→Z)', value: 'Category (A→Z)' })
+    options.push({ label: 'Category (Z→A)', value: 'Category (Z→A)' })
   }
   return options
 })
