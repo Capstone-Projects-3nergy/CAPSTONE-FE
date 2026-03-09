@@ -221,6 +221,7 @@ const announcements = ref([
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
+const selectedDate = ref(new Date().toISOString().split('T')[0])
 const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
@@ -228,10 +229,28 @@ const itemsPerPage = 6
 const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
+    
+    // Date Filtering Logic
+    let matchesDate = true
+    if (selectedDate.value) {
+      // แปลงวันที่จาก picker (YYYY-MM-DD) และจาก data ('19 Feb 2026 - 10:30') มาเปรียบเทียบกัน
+      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const itemDateStr = item.datePosted.split(' - ')[0] // ดึงเฉพาะส่วนวันที่ออกมา
+      
+      const d = new Date(itemDateStr)
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear()
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const formattedItemDate = `${year}-${month}-${day}`
+        matchesDate = formattedItemDate === targetDate
+      }
+    }
+    
     // Filter to show only non-published items in the management view
     const isNotPublished = item.status !== 'Published'
     
-    return matchesCategory && isNotPublished
+    return matchesCategory && matchesDate && isNotPublished
   })
 
   const searched = searchAnnouncements(filtered, searchQuery.value)
@@ -714,13 +733,11 @@ const showProfileStaffPage = async function () {
 
           <!-- Announcement Filters -->
           <AnnouncementFilterBar
-            :modelSearch="searchQuery"
-            :modelCategory="selectedCategory"
+            v-model:search="searchQuery"
+            v-model:category="selectedCategory"
             :categories="['General', 'Maintenance', 'Events', 'Urgent']"
-            :viewMode="viewMode"
-            @update:search="searchQuery = $event"
-            @update:category="selectedCategory = $event"
-            @update:viewMode="viewMode = $event"
+            v-model:date="selectedDate"
+            v-model:viewMode="viewMode"
             @new-announcement="showNewAnnouncementPage"
           />
 
