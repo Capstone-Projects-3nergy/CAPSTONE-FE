@@ -41,7 +41,7 @@ const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
 const showHomePageResident = ref(false)
-const selectedCategory = ref(route.query.tab || '')
+const selectedCategory = ref(route.query.tab || 'all')
 const viewMode = ref('grid')
 const tab = ref('') // Added for compatibility if needed, but we'll use selectedCategory
 
@@ -49,7 +49,7 @@ watch(
   () => route.query.tab,
   (newTab) => {
     if (newTab) {
-      selectedCategory.value = newTab === 'all' ? '' : newTab
+      selectedCategory.value = newTab
     }
   }
 )
@@ -518,9 +518,9 @@ onMounted(async () => {
           <div class="mb-6 w-full">
             <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               <button
-                @click="selectedCategory = ''"
+                @click="selectedCategory = 'all'"
                 class="order-last sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
-                :class="!selectedCategory ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+                :class="(selectedCategory === 'all' || !selectedCategory) ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -696,7 +696,7 @@ onMounted(async () => {
 
             <!-- News List -->
             <div v-if="!selectedCategory || selectedCategory !== 'Events'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
+              <!-- <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
                 <div class="flex items-center gap-4">
                   <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
                   <div>
@@ -727,63 +727,79 @@ onMounted(async () => {
                     Archive History →
                   </button>
                 </div>
-              </div>
+              </div> -->
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div
                   v-for="item in filteredNews"
                   :key="'news-' + item.id"
                   @click="openModal(item)"
-                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
+                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
                 >
-                  <div class="w-full md:w-40 h-28 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden flex items-center justify-center text-gray-300 border border-gray-50">
-                    <svg class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
-                    </svg>
+                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden group/img">
+                    <!-- Placeholder for Image -->
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                      <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
                     
                     <!-- Hover Overlay -->
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                       <div class="bg-white/20 border border-white/40 px-4 py-2 rounded-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
-                        <span class="text-white text-xs font-bold uppercase tracking-wider">View New</span>
+                        <span class="text-white text-xs font-bold uppercase tracking-wider">View News</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                       </div>
                     </div>
                   </div>
-                  <div class="flex-1 flex flex-col">
-                    <div class="flex items-start gap-2 mb-2">
-                      <span class="px-2 py-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
-                        <span v-html="getCategoryIcon(item.category)"></span>
-                        {{ item.category }}
-                      </span>
-                      <span class="text-[10px] font-bold text-gray-400 ml-auto">{{ item.date }}</span>
-                    </div>
-                    <div class="flex items-start gap-4">
-                      <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0 mt-1">
-                        SP
-                      </div>
-                      <div class="min-w-0">
-                        <div class="text-base font-bold text-gray-900 break-words whitespace-normal group-hover:text-[#0E4B90] transition-colors">
-                          {{ item.title }}
-                        </div>
-                        <div class="text-xs text-gray-500 mt-1 break-words whitespace-normal">
-                          {{ item.subtitle || item.content }}
-                        </div>
+                  
+                  <div class="p-6 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Category Badge -->
+                        <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
+                          <span v-html="getCategoryIcon(item.category)"></span>
+                          {{ item.category }}
+                        </span>
                       </div>
                     </div>
-                    <div class="mt-3 flex items-center justify-between">
-                       <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
-                          <span class="flex items-center gap-1">
-                             <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px]">P</div>
-                             {{ item.author }}
-                          </span>
-                          <span class="flex items-center gap-1">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                             </svg>
-                             {{ item.views }}
-                          </span>
-                       </div>
+
+                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight break-words whitespace-normal">
+                      {{ item.title }}
+                    </h4>
+                    <p class="text-gray-500 text-sm break-words whitespace-normal leading-relaxed mb-6 flex-grow">
+                      {{ item.subtitle || item.content }}
+                    </p>
+
+                    <!-- Divider -->
+                    <div class="h-px bg-gray-100 w-full mb-4"></div>
+
+                    <div class="flex items-center justify-between gap-2 mt-auto">
+                      <div class="flex flex-col gap-1.5 min-w-0">
+                        <!-- Row 1: Date -->
+                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                          </svg>
+                          <span class="truncate">{{ item.date }}</span>
+                        </div>
+                        
+                        <!-- Row 2: Author and Views -->
+                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
+                          <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
+                          <div class="flex items-center gap-1.5 truncate">
+                            <span class="truncate">{{ item.author }}</span>
+                            <span class="text-gray-300 flex-shrink-0">·</span>
+                            <div class="flex items-center gap-1 text-gray-400 flex-shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              <span>{{ item.views }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
                           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
