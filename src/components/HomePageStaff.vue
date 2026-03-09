@@ -812,10 +812,8 @@ const handlePrintSummary = () => {
             <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-4 py-2.5 font-bold text-sm shadow-inner whitespace-nowrap">
               <div class="mr-3 p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </div>
               <span class="tracking-wide">{{ currentDate }}</span>
