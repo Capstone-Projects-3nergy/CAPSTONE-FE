@@ -719,16 +719,16 @@ const handleUnlink = async () => {
         </div>
 
         <div class="space-y-6">
-          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] group">
+          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] group">
             <!-- Header section -->
             <div class="flex items-center gap-5 mb-8 relative z-10">
-              <div class="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#06C755] via-[#05B34B] to-[#05A344] flex items-center justify-center shadow-[0_12px_30px_rgba(6,199,85,0.3)] group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative overflow-hidden">
+              <div class="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#06C755] via-[#05B34B] to-[#05A344] flex items-center justify-center shadow-[0_12px_30px_rgba(6,199,85,0.3)] relative overflow-hidden">
                 <!-- Glossy overlay -->
-                <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 pointer-events-none"></div>
                 <!-- Inner Glow -->
                 <div class="absolute inset-px rounded-[21px] border border-white/20 pointer-events-none"></div>
                 
-                <div class="w-11 h-11 flex items-center justify-center relative z-10 transition-transform duration-500 group-hover:scale-105">
+                <div class="w-11 h-11 flex items-center justify-center relative z-10">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                     <!-- Chat Bubble (White) -->
                     <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/>
@@ -814,8 +814,8 @@ const handleUnlink = async () => {
             </div>
 
             <!-- Background Decoration -->
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl group-hover:bg-green-100/80 transition-colors duration-700 pointer-events-none"></div>
-            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/50 transition-colors duration-700 pointer-events-none"></div>
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl pointer-events-none"></div>
           </div>
 
           <!-- Helper Banner -->
