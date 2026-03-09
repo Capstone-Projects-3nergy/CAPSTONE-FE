@@ -12,6 +12,8 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import { getAnnouncements } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { searchAnnouncements } from '@/stores/SortManager.js'
+import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
+import { getItems } from '@/utils/fetchUtils.js'
 
 const getCategoryBadgeClass = (category) => {
   switch (category) {
@@ -39,13 +41,15 @@ const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
 const showHomePageResident = ref(false)
-const tab = ref(route.query.tab || 'all')
+const selectedCategory = ref(route.query.tab || '')
+const viewMode = ref('grid')
+const tab = ref('') // Added for compatibility if needed, but we'll use selectedCategory
 
 watch(
   () => route.query.tab,
   (newTab) => {
     if (newTab) {
-      tab.value = newTab
+      selectedCategory.value = newTab === 'all' ? '' : newTab
     }
   }
 )
@@ -133,9 +137,8 @@ const allPublishedAnnouncements = computed(() => {
 
 const filteredAnnouncements = computed(() => {
   const announcementsByTab = allPublishedAnnouncements.value.filter(item => {
-    return tab.value === 'all' || 
-          (tab.value === 'event' && item.type === 'event') ||
-          (tab.value === 'news' && item.type === 'news')
+    if (!selectedCategory.value || selectedCategory.value === 'all') return true
+    return item.category === selectedCategory.value
   })
   
   return searchAnnouncements(announcementsByTab, searchQuery.value)
@@ -498,66 +501,86 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Content Filter & Search -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <!-- Tabs -->
-            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex w-fit">
+          <!-- Announcement Filters (Like ManageAnnouncement) -->
+          <AnnouncementFilterBar
+            :modelSearch="searchQuery"
+            :modelCategory="selectedCategory"
+            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :viewMode="viewMode"
+            :showNewButton="false"
+            :showViewToggles="false"
+            @update:search="searchQuery = $event"
+            @update:category="selectedCategory = $event"
+            @update:viewMode="viewMode = $event"
+          />
+
+          <!-- Category Filter (Tags like ManageAnnouncement) -->
+          <div class="mb-6 w-full">
+            <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               <button
-                @click="tab = 'all'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  (tab === 'all' || !tab)
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
+                @click="selectedCategory = ''"
+                class="order-last sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="!selectedCategory ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
                 All
               </button>
+              
+              <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
+
               <button
-                @click="tab = 'event'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  tab === 'event'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
+                @click="selectedCategory = 'General'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'General' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
+                <div :class="selectedCategory === 'General' ? 'text-blue-300' : 'text-blue-500 bg-blue-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                General
+              </button>
+
+              <button
+                @click="selectedCategory = 'Maintenance'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Maintenance' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Maintenance' ? 'text-orange-300' : 'text-orange-500 bg-orange-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                Maintenance
+              </button>
+
+              <button
+                @click="selectedCategory = 'Events'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Events' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Events' ? 'text-purple-300' : 'text-purple-500 bg-purple-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
                 Events
               </button>
-              <button
-                @click="tab = 'news'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                  tab === 'news'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                News
-              </button>
-            </div>
 
-            <!-- Search -->
-            <div class="relative w-full md:w-80 group">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search ..."
-                class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
-              />
+              <button
+                @click="selectedCategory = 'Urgent'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Urgent' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Urgent' ? 'text-red-300' : 'text-red-500 bg-red-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                Urgent
+              </button>
             </div>
           </div>
 
           <!-- Content Grid -->
           <div class="min-h-[400px]">
             <!-- Events Grid -->
-            <div v-if="tab === 'event' || tab === 'all' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': tab === 'all'}">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
+            <div v-if="!selectedCategory || selectedCategory === 'Events'" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': !selectedCategory}">
+              <!-- <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
                 <div class="flex items-center gap-4">
                   <div class="w-1.5 h-8 bg-[#0E4B90] rounded-full"></div>
                   <div>
@@ -566,7 +589,7 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Auto-hide symbol on mobile to save space) -->
+              
                   <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
                     <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
@@ -578,7 +601,7 @@ onMounted(async () => {
                     </div>
                     <span class="tracking-wide">{{ currentDate }}</span>
                   </div>
-                  <!-- Archive Button (Always Visible) -->
+             
                   <button 
                     @click="isArchiveOpen = true" 
                     class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
@@ -587,7 +610,7 @@ onMounted(async () => {
                   </button>
                 </div>
               </div>
-              
+               -->
                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div
                   v-for="item in filteredEvents"
@@ -672,8 +695,7 @@ onMounted(async () => {
             </div>
 
             <!-- News List -->
-            <div v-if="tab === 'news' || tab === 'all'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <!-- Modern News Header -->
+            <div v-if="!selectedCategory || selectedCategory !== 'Events'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
                 <div class="flex items-center gap-4">
                   <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
@@ -684,8 +706,7 @@ onMounted(async () => {
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Visible on mobile when tab is 'news') -->
-                  <div v-if="tab !== 'all'" class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
+                  <div v-if="selectedCategory" class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
                     <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -697,9 +718,9 @@ onMounted(async () => {
                     <span class="tracking-wide">{{ currentDate }}</span>
                   </div>
 
-                  <!-- Archive Button -->
+               
                   <button 
-                    v-if="tab !== 'all'"
+                    v-if="selectedCategory"
                     @click="isArchiveOpen = true" 
                     class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
                   >

@@ -12,6 +12,14 @@ defineProps({
   viewMode: {
     type: String,
     default: 'grid'
+  },
+  showNewButton: {
+    type: Boolean,
+    default: true
+  },
+  showViewToggles: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -84,6 +92,7 @@ let dateInterval
                     <span class="tracking-wide">{{ currentDate }}</span>
                   </div>
         <ButtonWeb
+          v-if="showNewButton"
           @click="$emit('new-announcement')"
           label="Add New"
           color="blue"
@@ -123,10 +132,10 @@ let dateInterval
       </div>
 
       <!-- Divider -->
-      <div class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
+      <div v-if="showViewToggles" class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
 
       <!-- View Toggles -->
-      <div class="flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-fit flex-shrink-0">
+      <div v-if="showViewToggles" class="flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-fit flex-shrink-0">
         <button 
           @click="$emit('update:viewMode', 'grid')"
           class="p-2 rounded-lg transition-all duration-200 cursor-pointer"
