@@ -371,7 +371,7 @@ const getCategoryIcon = (category) => {
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
                 p === page 
-                  ? 'bg-[#0E4B90] text-white shadow-md transform scale-105' 
+                  ? 'bg-[#0E2856] text-white shadow-md transform scale-105' 
                   : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
               ]"
             >

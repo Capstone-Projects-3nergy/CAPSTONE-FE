@@ -178,7 +178,7 @@ const getCategoryIcon = (category) => {
     </div>
 
     <!-- Pagination (Reusable style) -->
-    <div v-if="total > 0" class="mt-8 flex justify-center">
+    <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
       <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1">
         <button 
           @click="$emit('prev')" 
