@@ -60,8 +60,16 @@ const getCategoryIcon = (category) => {
   <div>
     <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100 shadow-sm">
-        No announcements found.
+      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-16 px-4 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+        <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 text-gray-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 mb-1">No Announcements Yet</h3>
+        <p class="text-gray-400 text-sm max-w-xs mx-auto">There are no announcements to display right now. Check back later for updates.</p>
       </div>
       
       <template v-for="item in items" :key="item.id">
@@ -207,7 +215,19 @@ const getCategoryIcon = (category) => {
           </thead>
           <tbody class="bg-transparent md:bg-white divide-y divide-gray-100">
             <tr v-if="items.length === 0">
-              <td colspan="6" class="text-center py-8 text-gray-500">No announcements found.</td>
+              <td colspan="6" class="text-center py-16">
+                <div class="flex flex-col items-center justify-center">
+                  <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3 text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                      <polyline points="14.5 2 14.5 8 20 8"></polyline>
+                      <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                  </div>
+                  <span class="text-gray-500 font-bold">No announcements found</span>
+                  <span class="text-gray-400 text-xs mt-1">Try adjusting your filters to find what you're looking for.</span>
+                </div>
+              </td>
             </tr>
             <template v-for="item in items" :key="item.id">
               <tr class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">

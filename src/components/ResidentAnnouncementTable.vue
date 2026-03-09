@@ -53,8 +53,15 @@ const getCategoryIcon = (category) => {
   <div class="min-h-[400px]">
     <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
-        No announcements found.
+      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-20 px-4 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+        <div class="w-20 h-20 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-5 text-[#0E4B90]/20 border border-[#0E4B90]/5 shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-[#1D355E] mb-2">No New Updates</h3>
+        <p class="text-gray-400 text-sm max-w-sm leading-relaxed">Everything is up to date! There are no new announcements from the property management office at this time.</p>
       </div>
       
       <div
