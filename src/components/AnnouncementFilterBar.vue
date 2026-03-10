@@ -59,13 +59,19 @@ const openDatePicker = () => {
     dateInput.value?.click();
   }
 }
+
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
 </script>
 
 <template>
   <div class="bg-white p-3 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col xl:flex-row gap-4 justify-between items-center transition-all duration-300">
     <!-- Search -->
     <div class="relative w-full xl:w-[400px]">
-      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-20">
         <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
         </svg>
@@ -75,7 +81,7 @@ const openDatePicker = () => {
         :value="modelSearch"
         @input="$emit('update:search', $event.target.value)"
         placeholder="Search ..."
-        class="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm hover:bg-gray-50"
+        class="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm hover:bg-gray-50 relative z-0"
       />
     </div>
 
@@ -85,7 +91,7 @@ const openDatePicker = () => {
         <div class="relative flex items-center group">
           <!-- Icon Overlay -->
           <div 
-            class="absolute left-3 z-10 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+            class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
             @click="openDatePicker"
           >
             <div class="mr-0 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
@@ -98,13 +104,22 @@ const openDatePicker = () => {
             </div>
           </div>
           
-          <!-- Styled Date Input -->
+          <!-- Display Input (Text) with English Placeholder -->
+          <input
+            type="text"
+            readonly
+            :value="date ? formatDateDisplay(date) : ''"
+            placeholder="DD/MM/YYYY"
+            @click="openDatePicker"
+            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-[140px] sm:w-[165px]"
+          />
+          <!-- Hidden Native Date Input for Picker functionality -->
           <input
             ref="dateInput"
             type="date"
             :value="date"
             @input="$emit('update:date', $event.target.value)"
-            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap [&::-webkit-calendar-picker-indicator]:hidden"
+            class="absolute opacity-0 w-0 h-0 pointer-events-none"
           />
         </div>
         <ButtonWeb

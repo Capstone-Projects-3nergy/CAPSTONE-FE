@@ -74,6 +74,12 @@ const openDatePicker = () => {
   }
 }
 
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'addMember'])
 </script>
 <template>
@@ -84,7 +90,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
       <div v-if="props.showDate" class="relative flex items-center group">
         <!-- Premium Icon Overlay -->
         <div 
-          class="absolute left-3 z-10 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+          class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
           @click="openDatePicker"
         >
           <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
@@ -97,13 +103,22 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           </div>
         </div>
         
-        <!-- Styled Date Input -->
+        <!-- Display Input (Text) with English Placeholder -->
+        <input
+          type="text"
+          readonly
+          :value="props.modelDate ? formatDateDisplay(props.modelDate) : ''"
+          placeholder="DD/MM/YYYY"
+          @click="openDatePicker"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 w-full sm:w-[170px] cursor-pointer relative z-0"
+        />
+        <!-- Hidden Native Date Input for Picker functionality -->
         <input
           ref="dateInput"
           type="date"
           :value="props.modelDate"
           @input="$emit('update:date', $event.target.value)"
-          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 w-full sm:w-auto [&::-webkit-calendar-picker-indicator]:hidden"
+          class="absolute opacity-0 w-0 h-0 pointer-events-none"
         />
       </div>
 
@@ -111,7 +126,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
         <!-- Search Input -->
         <div class="relative flex-1 min-w-[120px] w-full">
           <svg
-            class="absolute left-2 top-1/2 -translate-y-1/2"
+            class="absolute left-2 top-1/2 -translate-y-1/2 z-20"
             width="18"
             height="18"
             viewBox="0 0 18 18"
@@ -128,7 +143,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             :value="props.modelSearch"
             @input="$emit('update:search', $event.target.value)"
             placeholder="Search ..."
-            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm hover:bg-gray-50"
+            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm hover:bg-gray-50 relative z-0"
           />
         </div>
 
