@@ -1235,30 +1235,31 @@ const isLineLinked = computed(() => {
         <div class="relative inline-block group mb-6">
           <!-- Avatar -->
           <div
-            class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+            class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/avatar"
           >
-            <!-- มีรูป (add หรือ edit ก็แสดง) -->
-            <img
-              v-if="profileImageUrlPreview"
-              :src="profileImageUrlPreview"
-              alt="Profile"
-              class="w-full h-full object-cover"
-            />
+            <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90] flex items-center justify-center">
+              <img
+                v-if="profileImageUrlPreview"
+                :src="profileImageUrlPreview"
+                alt="Profile"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              />
 
-            <!-- ADD MODE + ยังไม่เลือกรูป -->
-            <div
-              v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
-            </div>
+              <!-- ADD MODE + ยังไม่เลือกรูป -->
+              <div
+                v-else-if="props.mode === 'add'"
+                class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
+              </div>
 
-            <!-- EDIT MODE + ไม่มีรูป -->
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
-            >
-              {{ userInitial }}
+              <!-- EDIT MODE + ไม่มีรูป -->
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#1D355E] to-[#0E4B90] text-white text-5xl"
+              >
+                {{ userInitial }}
+              </div>
             </div>
           </div>
 
@@ -1762,19 +1763,21 @@ const isLineLinked = computed(() => {
             <div class="relative inline-block group mb-6">
               <!-- Avatar -->
               <div
-                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+                class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/preview"
               >
-                <img
-                  v-if="profileImageUrlPreview"
-                  :src="profileImageUrlPreview"
-                  alt="Profile"
-                  class="w-full h-full object-cover"
-                />
-                <div
-                  v-else
-                  class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
-                >
-                  {{ userInitial }}
+                <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+                  <img
+                    v-if="profileImageUrlPreview"
+                    :src="profileImageUrlPreview"
+                    alt="Profile"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center font-bold text-white text-5xl"
+                  >
+                    {{ userInitial }}
+                  </div>
                 </div>
               </div>
   <!-- ❌ Remove icon (only show when new image is selected) -->

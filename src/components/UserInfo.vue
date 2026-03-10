@@ -179,7 +179,7 @@ const handleProfile = async () => {
           <!-- Avatar in Dropdown -->
           <div class="relative mb-4 group/avatar">
             <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white">
-              <div class="w-full h-full rounded-full overflow-hidden bg-[#1D355E] relative">
+              <div class="w-full h-full rounded-full overflow-hidden from-[#1D355E] to-[#0E4B90] relative">
                 <img
                   v-if="profileImageUrlPreview"
                   :src="profileImageUrlPreview"

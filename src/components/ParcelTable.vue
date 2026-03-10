@@ -248,17 +248,17 @@ const authStore = useAuthManager()
               <span class="md:hidden font-semibold text-[#0E4B90]">Photo:</span>
 
               <div
-                class="w-10 h-10 inline-flex flex-shrink-0 rounded-full overflow-hidden border border-gray-200 shadow-sm items-center justify-center"
+                class="w-10 h-10 inline-flex flex-shrink-0 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-white shadow-sm items-center justify-center relative group/avatar"
               >
                 <img
                   v-if="p.photo"
                   :src="p.photo"
-                  class="w-full h-full object-cover"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-110"
                 />
 
                 <div
                   v-else
-                  class="w-full h-full bg-[#0E4B90] flex items-center justify-center text-white text-sm font-semibold"
+                  class="w-full h-full flex items-center justify-center text-white text-xs font-bold"
                 >
                   {{ getInitial(p.fullName) || getInitial(p.firstName) }}
                 </div>

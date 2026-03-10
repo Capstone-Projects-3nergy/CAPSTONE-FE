@@ -469,18 +469,20 @@ const handleUnlink = async () => {
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
           <div
-            class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
+            class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar"
           >
-            <img
-              v-if="profileImageUrlPreview"
-              :src="profileImageUrlPreview"
-              class="w-full h-full object-cover"
-            />
-            <div
-              v-else
-              class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
-            >
-              {{ userInitial }}
+            <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+              <img
+                v-if="profileImageUrlPreview"
+                :src="profileImageUrlPreview"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              />
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-white text-4xl font-bold"
+              >
+                {{ userInitial }}
+              </div>
             </div>
           </div>
           <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
@@ -538,7 +540,7 @@ const handleUnlink = async () => {
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -933,18 +935,20 @@ const handleUnlink = async () => {
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
             <div
-              class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
+              class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar"
             >
-              <img
-                v-if="profileImageUrlPreview"
-                :src="profileImageUrlPreview"
-                class="w-full h-full object-cover"
-              />
-              <div
-                v-else-if="fullName"
-                class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
-              >
-                {{ userInitial }}
+              <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+                <img
+                  v-if="profileImageUrlPreview"
+                  :src="profileImageUrlPreview"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+                />
+                <div
+                  v-else-if="fullName"
+                  class="w-full h-full flex items-center justify-center text-white text-4xl font-bold"
+                >
+                  {{ userInitial }}
+                </div>
               </div>
             </div>
               <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
