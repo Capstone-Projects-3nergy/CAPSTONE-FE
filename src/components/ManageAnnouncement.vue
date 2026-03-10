@@ -221,8 +221,7 @@ const announcements = ref([
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
-const getToday = () => new Date().toLocaleDateString('en-CA')
-const selectedDate = ref(getToday())
+const selectedDate = ref('')
 const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
@@ -367,33 +366,22 @@ const fetchAnnouncementData = async () => {
 }
 
 const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
+  if (typeof window !== 'undefined') {
+    isCollapsed.value = window.innerWidth < 768
+  }
 }
-const dateCheckInterval = ref(null)
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-  if (dateCheckInterval.value) {
-    clearInterval(dateCheckInterval.value)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', checkScreen)
   }
 })
 onMounted(async () => {
   checkScreen()
 
-  window.addEventListener('resize', checkScreen)
-
-  // Track the current day to see when it changes
-  let currentDay = getToday()
-  dateCheckInterval.value = setInterval(() => {
-    const freshToday = getToday()
-    if (freshToday !== currentDay) {
-      // If the current search matched the OLD today, update it to NEW today
-      if (selectedDate.value === currentDay) {
-        selectedDate.value = freshToday
-      }
-      currentDay = freshToday
-    }
-  }, 60000) // Check every minute
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', checkScreen)
+  }
   
   await fetchAnnouncementData()
 })

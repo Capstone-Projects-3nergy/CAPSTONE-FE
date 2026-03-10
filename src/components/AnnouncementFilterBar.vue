@@ -23,7 +23,7 @@ defineProps({
   },
   date: {
     type: String,
-    default: () => new Date().toLocaleDateString('en-CA')
+    default: ''
   }
 })
 
