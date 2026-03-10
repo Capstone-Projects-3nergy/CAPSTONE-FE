@@ -98,14 +98,15 @@ const handleProfile = async () => {
 </script>
 <template>
   <div class="relative">
+    <!-- Main Avatar Circle -->
     <div
-      class="flex items-center cursor-pointer"
+      class="flex items-center cursor-pointer group"
       @click="toggleDropdown"
       @mouseenter="showHoverInfo = true"
       @mouseleave="showHoverInfo = false"
     >
       <div
-        class="w-10 h-10 rounded-full overflow-hidden bg-[#1D355E] ring-2 ring-transparent hover:ring-[#0E4B90]/40 transition-all duration-300 hover:scale-110 active:scale-95"
+        class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-[#0E4B90]/10 group-hover:ring-[#0E4B90]/40 transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-110 active:scale-95 relative"
       >
         <img
           v-if="profileImageUrlPreview"
@@ -114,145 +115,183 @@ const handleProfile = async () => {
         />
         <div
           v-else
-          class="w-full h-full flex items-center justify-center text-white font-semibold"
+          class="w-full h-full flex items-center justify-center text-white font-bold text-sm"
         >
           {{ userInitial }}
         </div>
       </div>
     </div>
 
+    <!-- Quick Info Hover Tooltip -->
     <transition
-      enter-active-class="transition ease-out duration-150"
-      enter-from-class="opacity-0 translate-y-1"
-      enter-to-class="opacity-100"
-      leave-active-class="transition ease-in duration-100"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0 translate-y-1"
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 translate-y-2 scale-95"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 translate-y-2 scale-95"
     >
       <div
         v-if="showHoverInfo && !showDropdown"
-        class="absolute right-0 top-12 w-max max-w-xs bg-gray-400/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-400 z-40 pointer-events-none"
+        class="absolute right-0 top-14 w-max bg-[#1D355E]/95 backdrop-blur-md px-5 py-2.5 rounded-xl shadow-xl border border-white/10 z-40 pointer-events-none flex flex-col items-end text-right"
       >
-        <p class="font-medium text-sm text-white">{{ userName }}</p>
-        <p class="text-xs text-white">{{ userEmail }}</p>
+        <p class="font-bold text-sm text-white leading-none mb-1">{{ userName }}</p>
+        <p class="text-[10px] text-blue-200 font-medium tracking-wide uppercase opacity-80">{{ userEmail }}</p>
       </div>
     </transition>
 
+    <!-- Detailed Dropdown Menu -->
     <transition
-      enter-active-class="transition ease-out duration-150"
-      enter-from-class="opacity-0 translate-y-1 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-100"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 translate-y-1 scale-95"
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0 translate-y-4 scale-95"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 translate-y-4 scale-95"
     >
       <div
         v-if="showDropdown"
-        class="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
+        class="absolute right-0 mt-4 w-72 bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 z-50 overflow-hidden"
       >
- 
-        <div class="relative px-6 py-5 flex flex-col items-center gap-2">
+        <!-- Dropdown Header -->
+        <div class="relative px-6 py-8 flex flex-col items-center text-center bg-gradient-to-b from-gray-50/50 to-white">
           <button
-            class="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 cursor-pointer"
+            class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 text-gray-400 hover:text-gray-600 cursor-pointer group"
             @click="closeDropdown"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
+              class="group-hover:rotate-90 transition-transform duration-300"
             >
               <path d="M18 6L6 18" />
               <path d="M6 6l12 12" />
             </svg>
           </button>
-          <div class="w-16 h-16 rounded-full overflow-hidden bg-[#1D355E]">
-            <img
-              v-if="profileImageUrlPreview"
-              :src="profileImageUrlPreview"
-              class="w-full h-full object-cover"
-            />
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center text-white text-xl font-semibold"
-            >
-              {{ userInitial }}
+
+          <!-- Avatar in Dropdown -->
+          <div class="relative mb-4 group/avatar">
+            <div class="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white">
+              <div class="w-full h-full rounded-full overflow-hidden bg-[#1D355E] relative">
+                <img
+                  v-if="profileImageUrlPreview"
+                  :src="profileImageUrlPreview"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+                />
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center text-white text-2xl font-bold"
+                >
+                  {{ userInitial }}
+                </div>
+              </div>
             </div>
           </div>
 
-          <p class="font-semibold text-gray-900">
-            {{ userName }}
-          </p>
-          <p class="text-sm text-gray-500">
+          <h3 class="font-bold text-gray-900 text-lg leading-tight">{{ userName }}</h3>
+          <p class="text-sm text-[#0E4B90] font-semibold mt-1 px-3 py-1 bg-blue-50 rounded-full">
             {{ userRole }}
           </p>
+          <p class="text-xs text-gray-400 mt-2 font-medium">{{ userEmail }}</p>
         </div>
 
-        <div class="border-t" />
-
-
-        <button
-          class="w-full flex items-center gap-3 px-6 py-3 hover:bg-gray-50 transition text-sm cursor-pointer"
-          @click="handleProfile"
-        >
- 
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        <!-- Menu Actions -->
+        <div class="p-2 bg-white">
+          <button
+            class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
+            @click="handleProfile"
           >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M8 7C8 5.9 8.42 4.92 9.17 4.17C9.92 3.42 10.94 3 12 3C13.06 3 14.08 3.42 14.83 4.17C15.58 4.92 16 5.94 16 7C16 8.06 15.58 9.08 14.83 9.83C14.08 10.58 13.06 11 12 11C10.94 11 9.92 10.58 9.17 9.83C8.42 9.08 8 8.06 8 7ZM8 13C6.67 13 5.4 13.53 4.46 14.46C3.53 15.4 3 16.67 3 18C3 18.8 3.32 19.56 3.88 20.12C4.44 20.68 5.2 21 6 21H18C18.8 21 19.56 20.68 20.12 20.12C20.68 19.56 21 18.8 21 18C21 16.67 20.47 15.4 19.54 14.46C18.6 13.53 17.33 13 16 13H8Z"
-              fill="#0E4B90"
-            />
-          </svg>
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="text-[#0E4B90]"
+                >
+                  <path
+                    d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 4C13.657 4 15 5.343 15 7C15 8.657 13.657 10 12 10C10.343 10 9 8.657 9 7C9 5.343 10.343 4 12 4ZM12 20C9.394 20 6.99 18.913 5.39 17.158C6.315 15.26 8.528 14 11 14H13C15.472 14 17.685 15.26 18.61 17.158C17.01 18.913 14.606 20 12 20Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+              <span class="text-gray-700 font-bold text-sm">Personal Information</span>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-gray-300 group-hover:text-[#0E4B90] transition-all transform group-hover:translate-x-1"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
 
-          <span class="text-[#0E4B90]">Personal Information</span>
-        </button>
+          <div class="h-px bg-gray-100 my-1 mx-4" />
 
-     
-        <button
-          class="w-full flex items-center gap-3 px-6 py-3 hover:bg-red-50 transition text-sm text-red-600 cursor-pointer"
-          @click="handleLogout"
-        >
-       
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          <button
+            class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-red-50 transition-all duration-200 cursor-pointer group"
+            @click="handleLogout"
           >
-            <path stroke="none" d="M0 0h24v24H0z" />
-            <path
-              d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
-            />
-            <path d="M9 12h12l-3 -3" />
-            <path d="M18 15l3 -3" />
-          </svg>
-
-          <span>Logout</span>
-        </button>
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-red-50 rounded-lg group-hover:bg-red-100 transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="text-red-500"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </div>
+              <span class="text-red-600 font-bold text-sm">Logout</span>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-red-200 group-hover:text-red-500 transition-all transform group-hover:translate-x-1"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        </div>
       </div>
     </transition>
 
-
+    <!-- Overlay Close Background -->
     <div
       v-if="showDropdown"
-      class="fixed inset-0 z-40"
+      class="fixed inset-0 z-40 bg-black/5"
       @click="closeDropdown"
     />
   </div>
