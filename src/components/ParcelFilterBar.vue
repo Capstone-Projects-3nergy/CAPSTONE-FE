@@ -110,7 +110,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           :value="props.modelDate ? formatDateDisplay(props.modelDate) : ''"
           placeholder="DD/MM/YYYY"
           @click="openDatePicker"
-          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 w-full sm:w-[190px] cursor-pointer relative z-0"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 w-full sm:w-[170px] cursor-pointer relative z-0"
         />
         <!-- Hidden Native Date Input for Picker functionality -->
         <input
