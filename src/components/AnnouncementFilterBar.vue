@@ -111,7 +111,7 @@ const formatDateDisplay = (dateStr) => {
             :value="date ? formatDateDisplay(date) : ''"
             placeholder="DD/MM/YYYY"
             @click="openDatePicker"
-            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-[140px] sm:w-[165px]"
+            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-[155px] sm:w-[185px]"
           />
           <!-- Hidden Native Date Input for Picker functionality -->
           <input
