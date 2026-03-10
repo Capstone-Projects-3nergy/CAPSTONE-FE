@@ -49,6 +49,16 @@ const buttonSize = computed(() => {
 const iconSize = computed(() => {
   return windowWidth.value < 640 ? '16' : '20'
 })
+
+const dateInput = ref(null)
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
 </script>
 
 <template>
@@ -74,7 +84,10 @@ const iconSize = computed(() => {
         <!-- Date Picker (Styled like ParcelFilterBar) -->
         <div class="relative flex items-center group">
           <!-- Icon Overlay -->
-          <div class="absolute left-3 pointer-events-none z-10 transition-transform duration-200 group-hover:scale-105">
+          <div 
+            class="absolute left-3 z-10 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+            @click="openDatePicker"
+          >
             <div class="mr-0 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4 text-[#0E4B90]">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -87,10 +100,11 @@ const iconSize = computed(() => {
           
           <!-- Styled Date Input -->
           <input
+            ref="dateInput"
             type="date"
             :value="date"
             @input="$emit('update:date', $event.target.value)"
-            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 cursor-pointer transition-all hover:bg-gray-100/50 whitespace-nowrap [::-webkit-calendar-picker-indicator]:opacity-0"
+            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap [&::-webkit-calendar-picker-indicator]:hidden"
           />
         </div>
         <ButtonWeb

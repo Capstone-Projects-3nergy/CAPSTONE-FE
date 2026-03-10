@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 const props = defineProps({
@@ -64,6 +64,16 @@ const sortOptions = computed(() => {
   return options
 })
 
+const dateInput = ref(null)
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
+
 defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'addMember'])
 </script>
 <template>
@@ -73,7 +83,10 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div v-if="props.showDate" class="relative flex items-center group">
         <!-- Premium Icon Overlay -->
-        <div class="absolute left-3 pointer-events-none z-10 transition-transform duration-200 group-hover:scale-105">
+        <div 
+          class="absolute left-3 z-10 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+          @click="openDatePicker"
+        >
           <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -86,10 +99,11 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
         
         <!-- Styled Date Input -->
         <input
+          ref="dateInput"
           type="date"
           :value="props.modelDate"
           @input="$emit('update:date', $event.target.value)"
-          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer transition-all hover:bg-gray-100/50 w-full sm:w-auto [::-webkit-calendar-picker-indicator]:opacity-0"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:bg-gray-100/50 w-full sm:w-auto [&::-webkit-calendar-picker-indicator]:hidden"
         />
       </div>
 
