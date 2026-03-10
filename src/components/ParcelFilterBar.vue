@@ -103,7 +103,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           type="date"
           :value="props.modelDate"
           @input="$emit('update:date', $event.target.value)"
-          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:bg-gray-100/50 w-full sm:w-auto [&::-webkit-calendar-picker-indicator]:hidden"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 w-full sm:w-auto [&::-webkit-calendar-picker-indicator]:hidden"
         />
       </div>
 
@@ -128,7 +128,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             :value="props.modelSearch"
             @input="$emit('update:search', $event.target.value)"
             placeholder="Search ..."
-            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm"
+            class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm hover:bg-gray-50"
           />
         </div>
 

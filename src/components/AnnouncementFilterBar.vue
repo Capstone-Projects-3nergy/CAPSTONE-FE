@@ -75,7 +75,7 @@ const openDatePicker = () => {
         :value="modelSearch"
         @input="$emit('update:search', $event.target.value)"
         placeholder="Search ..."
-        class="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
+        class="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm hover:bg-gray-50"
       />
     </div>
 
