@@ -465,7 +465,7 @@ const showResetPasswordPageWeb = async function () {
                 v-model="email"
                 type="email"
                 placeholder="Email"
-                class="pl-10 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
                 :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit }"
               />
@@ -511,7 +511,7 @@ const showResetPasswordPageWeb = async function () {
               :type="isPasswordVisible ? 'text' : 'password'"
               v-model="password"
               placeholder="Password"
-              class="pl-10 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+              class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
             />
             <button
