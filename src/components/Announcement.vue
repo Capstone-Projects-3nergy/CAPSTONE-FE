@@ -531,8 +531,8 @@ onMounted(async () => {
 
           <!-- Announcement Filters (Like ManageAnnouncement) -->
           <AnnouncementFilterBar
-            :modelSearch="searchQuery"
-            :modelCategory="selectedCategory"
+            :search="searchQuery"
+            :category="selectedCategory"
             :categories="['General', 'Maintenance', 'Events', 'Urgent']"
             :viewMode="viewMode"
             :showNewButton="false"
