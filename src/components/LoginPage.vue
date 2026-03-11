@@ -461,9 +461,9 @@ const showResetPasswordPageWeb = async function () {
                 v-model="email"
                 type="email"
                 placeholder="Email"
-                class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="pl-10 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
-                :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
+                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit }"
               />
             </div>
           </div>
@@ -506,9 +506,8 @@ const showResetPasswordPageWeb = async function () {
             <input
               :type="isPasswordVisible ? 'text' : 'password'"
               v-model="password"
-              type="password"
               placeholder="Password"
-              class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="pl-10 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
             />
             <button
@@ -551,13 +550,13 @@ const showResetPasswordPageWeb = async function () {
           <ButtonWeb
             label="Sign In"
             type="submit"
-            color="black"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+              'disabled opacity-50 cursor-not-allowed':
                 isEmailOverLimit,
-              'bg-black hover:bg-gray-600 text-white':
-                trimmedEmail && trimmedPassword
+              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]':
+                trimmedEmail && trimmedPassword,
+              'opacity-70': !(trimmedEmail && trimmedPassword)
             }"
             :disabled="isEmailOverLimit"
           />

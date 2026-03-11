@@ -762,7 +762,7 @@ const toggleComfirmPasswordVisibility = () => {
 
         <form @submit.prevent="submitForm" class="space-y-4" novalidate>
           <transition name="fade" mode="out-in">
-            <div v-if="role === 'resident'" key="resident">
+            <div v-if="role === 'resident'" key="resident" class="space-y-4">
               <div class="mb-1">
                 <div class="relative">
                   <svg
@@ -771,7 +771,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
                   >
                     <path
                       fill-rule="evenodd"
@@ -785,7 +785,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -798,7 +798,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 22 22"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
                   >
                     <path
                       d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
@@ -809,7 +809,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model.trim="form.email"
                     type="email"
                     placeholder="Email"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('email')"
                   />
                 </div>
@@ -820,7 +820,7 @@ const toggleComfirmPasswordVisibility = () => {
                   :options="dormOptions"
                   placeholder="Select Dormitory"
                   :error="isNoDorm"
-                  customClass="pl-10 w-full px-4 py-2 border border-black rounded-lg focus:ring-2 focus:ring-blue-400 bg-white"
+                  customClass="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 >
                   <template #icon>
                     <svg
@@ -842,7 +842,7 @@ const toggleComfirmPasswordVisibility = () => {
             <div class="mb-1">
               <div class="relative">
                 <svg
-                  class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
                   aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -858,7 +858,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.roomNumber"
                     type="text"
                     placeholder="Room Number"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('roomNumber')"
                   />
                 </div>
@@ -871,7 +871,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
                     :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
@@ -885,7 +885,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -894,7 +894,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="togglePasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1 cursor-pointer"
+                    class="absolute inset-y-0 right-3 flex items-center cursor-pointer"
                   >
                     <svg
                       v-if="isPasswordVisible"
@@ -953,7 +953,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
                     :class="isConfirmPasswordTooShort ? 'text-red-600' : 'text-[#918c8c]'"
                   >
                     <path
@@ -966,7 +966,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -975,7 +975,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="toggleComfirmPasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
+                    class="absolute inset-y-0 right-3 flex items-center"
                   >
                     <svg
                       v-if="isComfirmPasswordVisible"
@@ -1028,7 +1028,7 @@ const toggleComfirmPasswordVisibility = () => {
               </div>
             </div>
 
-            <div v-else key="staff">
+            <div v-else key="staff" class="space-y-4">
               <div class="mb-1">
                 <div class="relative">
                   <svg
@@ -1037,7 +1037,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
                   >
                     <path
                       fill-rule="evenodd"
@@ -1051,33 +1051,33 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
-                <div class="mb-1">
-                  <div class="relative">
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 22 22"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
-                    >
-                      <path
-                        d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
-                        fill="#8C8F91"
-                      />
-                    </svg>
-                    <input
-                      v-model="form.email"
-                      type="email"
-                      placeholder="Staff Email"
-                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
-                      @input="checkInputLength('email')"
+              </div>
+              <div class="mb-1">
+                <div class="relative">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
+                  >
+                    <path
+                      d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                      fill="#8C8F91"
                     />
-                  </div>
+                  </svg>
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    placeholder="Staff Email"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    @input="checkInputLength('email')"
+                  />
                 </div>
               </div>
                <div class="mb-1">
@@ -1088,7 +1088,7 @@ const toggleComfirmPasswordVisibility = () => {
                       viewBox="0 0 20 17"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
-                      class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5 text-[#8C8F91]"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
                     >
                       <path
                         d="M14.6176 2.85294V7.08823C13.9568 7.08761 13.3033 7.22645 12.6999 7.49567C12.0964 7.7649 11.5565 8.15844 11.1155 8.65058C10.3389 9.51322 9.90993 10.6334 9.91176 11.7941C9.91239 12.0671 9.93498 12.3334 9.97953 12.5932C10.0981 13.2802 10.3677 13.9324 10.7689 14.5026C11.1701 15.0729 11.6929 15.5469 12.2995 15.8906C11.0468 16.2694 9.38376 16.5 7.55882 16.5C3.66047 16.5 0.5 15.4463 0.5 14.1471V2.85294"
@@ -1122,7 +1122,7 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.position"
                       type="text"
                       placeholder="Position"
-                      class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                      class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                       @input="checkInputLength('position')"
                       :class="{
                         'border-red-600 text-red-600': isStaffPositionTooShort
@@ -1156,7 +1156,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
                     :class="isPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
@@ -1170,7 +1170,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -1179,7 +1179,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="togglePasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1 cursor-pointer"
+                    class="absolute inset-y-0 right-3 flex items-center cursor-pointer"
                   >
                     <svg
                       v-if="isPasswordVisible"
@@ -1238,7 +1238,7 @@ const toggleComfirmPasswordVisibility = () => {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/3 -translate-y-1/4 w-5 h-5"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
                     :class="isConfirmPasswordTooShort ? 'text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
@@ -1252,7 +1252,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 mb-2"
+                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -1261,7 +1261,7 @@ const toggleComfirmPasswordVisibility = () => {
                   <button
                     type="button"
                     @click="toggleComfirmPasswordVisibility"
-                    class="absolute inset-y-0 right-3 flex items-center -translate-y-1"
+                    class="absolute inset-y-0 right-3 flex items-center"
                   >
                     <svg
                       v-if="isComfirmPasswordVisible"
@@ -1319,22 +1319,26 @@ const toggleComfirmPasswordVisibility = () => {
             label="Sign Up"
             :loading="loading"
             type="submit"
-            color="black"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             @click="submitForm('RESIDENT')"
             :class="{
-              'disabled bg-gray-400 text-gray-200  cursor-default':
+              'disabled opacity-50 cursor-not-allowed':
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedConfirmPassword.length === 0 ||
                 trimmedRoomNumber.length === 0,
-              'bg-black hover:bg-gray-600 text-white':
+              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedRoomNumber.length > 0
+                trimmedRoomNumber.length > 0,
+              'opacity-70': !(trimmedFullName.length > 0 &&
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0 &&
+                trimmedRoomNumber.length > 0)
             }"
             :disabled="
               trimmedFullName.length === 0 ||
@@ -1350,20 +1354,23 @@ const toggleComfirmPasswordVisibility = () => {
             label="Sign Up"
             :loading="loading"
             type="submit"
-            color="black"
-            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             @click="submitForm('STAFF')"
             :class="{
-              'disabled bg-gray-400 text-gray-200 cursor-default':
+              'disabled opacity-50 cursor-not-allowed':
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
                 trimmedConfirmPassword.length === 0,
-              'bg-black hover:bg-gray-600 text-white':
+              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]':
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
-                trimmedConfirmPassword.length > 0
+                trimmedConfirmPassword.length > 0,
+              'opacity-70': !(trimmedFullName.length > 0 &&
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0)
             }"
             :disabled="
               trimmedFullName.length === 0 ||

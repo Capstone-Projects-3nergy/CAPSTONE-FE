@@ -235,7 +235,7 @@ const returnLoginPage = () => {
               v-model="form.email"
               type="email"
               placeholder="Enter Your Email Account"
-              class="w-full pl-4 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
             />
           </div>
 
@@ -247,8 +247,8 @@ const returnLoginPage = () => {
             label="Reset Password"
             :loading="loading"
             type="submit"
-            color="black"
-            class="w-full"
+            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
+            :class="{ 'opacity-50 cursor-not-allowed hover:-translate-y-0': isEmailOverLimit, 'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit }"
             :disabled="isEmailOverLimit"
             @click="sendResetEmail"
           />
