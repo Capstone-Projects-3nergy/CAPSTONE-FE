@@ -86,16 +86,20 @@ const returnLoginPage = () => {
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <div
-      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4"
+      class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 relative overflow-hidden"
     >
-      <div class="max-w-md text-center md:text-center">
-        <h2 class="text-3xl font-bold mb-4 md:text-center">
+      <!-- Subtle Decorative Blobs -->
+      <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-md text-center relative z-10 flex flex-col items-center">
+        <h2 class="text-3xl font-extrabold tracking-tight mb-2 drop-shadow-md">
           Welcome to Tractify!
         </h2>
-        <p class="text-sm text-white mb-8 md:text-left">
+        <p class="text-sm text-blue-50 mb-6 drop-shadow px-4">
           Forgot your password? Reset it here.
         </p>
-        <div class="flex md:justify-center">
+        <div class="flex justify-center drop-shadow-xl hover:scale-[1.02] transition-transform duration-500 ease-out">
           <svg
             class="hidden md:block w-[400px] h-[450px]"
             viewBox="0 0 490 569"
