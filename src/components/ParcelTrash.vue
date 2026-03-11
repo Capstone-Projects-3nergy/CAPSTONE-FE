@@ -1442,6 +1442,8 @@ const closePopUp = (operate) => {
           :showTitle="true"
           :showCategory="true"
           :showDatePosted="true"
+          :showStatus="false"
+          :showActionStatus="true"
           :can-next="canGoNextAnnouncement"
           @prev="prevPage"
           @next="nextPage"
@@ -1472,30 +1474,6 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
-          <template #sort-room>
-            <svg
-              class="cursor-pointer"
-              @click="toggleSortRoom"
-              width="17"
-              height="12"
-              viewBox="0 0 17 12"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                fill="#0E4B90"
-              />
-              <path
-                d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                stroke="#0E4B90"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </template>
-
           <template #sort-status>
             <svg
               class="cursor-pointer"
