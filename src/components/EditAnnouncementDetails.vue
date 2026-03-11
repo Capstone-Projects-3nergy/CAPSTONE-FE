@@ -6,6 +6,7 @@ import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { getAnnouncementById, editAnnouncementWithFile } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
@@ -14,6 +15,7 @@ import LoadingPopUp from './LoadingPopUp.vue'
 
 const loginManager = useAuthManager()
 const announcementStore = useAnnouncementManager()
+const notificationManager = useNotificationManager()
 const router = useRouter()
 const route = useRoute()
 
@@ -485,6 +487,15 @@ const handleSave = async () => {
 
     // Update the store with the new data
     announcementStore.editAnnouncement(aid, updated)
+
+    // Send Line notification and fetch updated data
+    try {
+      if (announcementForm.notify) {
+        await notificationManager.notifyAnnouncementCreated(body, router)
+      }
+    } catch (lineError) {
+      console.error('Notification failed:', lineError)
+    }
 
     // Save initial state after update
     initialForm.value = JSON.parse(JSON.stringify(announcementForm))

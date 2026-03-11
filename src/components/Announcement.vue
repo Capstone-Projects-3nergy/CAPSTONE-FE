@@ -109,7 +109,13 @@ const allPublishedAnnouncements = computed(() => {
         type: normalizedType
       }
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .sort((a, b) => {
+      const aPinned = a.isPinned || a.pinned
+      const bPinned = b.isPinned || b.pinned
+      if (aPinned && !bPinned) return -1
+      if (!aPinned && bPinned) return 1
+      return new Date(b.date) - new Date(a.date)
+    })
     .map((item) => ({
       ...item,
       date: formatDate(item.date)

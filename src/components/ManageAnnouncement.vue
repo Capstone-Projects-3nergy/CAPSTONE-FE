@@ -257,8 +257,10 @@ const filteredAnnouncements = computed(() => {
 
   // Sort: Pinned items first, then ordered originally
   return searched.sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1
-    if (!a.pinned && b.pinned) return 1
+    const aPinned = a.isPinned || a.pinned
+    const bPinned = b.isPinned || b.pinned
+    if (aPinned && !bPinned) return -1
+    if (!aPinned && bPinned) return 1
     return 0
   })
 })
