@@ -32,7 +32,9 @@ function extractDisplayDates(item) {
   
   return {
     displayDate: `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`,
-    isoDate: `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+    isoDate: `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`,
+    originalDate: rawDate.toString(),
+    originalDateClean: cleanDateStr
   };
 }
 
@@ -358,9 +360,11 @@ function searchParcels(parcels, keyword) {
       normalize(p.status)
     ]
 
-    const { displayDate, isoDate } = extractDisplayDates(p);
+    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(p);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(originalDate) fields.push(normalize(originalDate));
+    if(originalDateClean) fields.push(normalize(originalDateClean));
 
     // Full name fallback
     const fullNameSplice = normalize(`${p.firstName ?? ''} ${p.lastName ?? ''}`)
@@ -408,9 +412,11 @@ function searchAnnouncements(announcements, keyword) {
       normalize(a.viewCount)
     ]
 
-    const { displayDate, isoDate } = extractDisplayDates(a);
+    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(a);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(originalDate) fields.push(normalize(originalDate));
+    if(originalDateClean) fields.push(normalize(originalDateClean));
 
     // exact match
     const isExact = fields.some((f) => f === key)
@@ -451,9 +457,11 @@ function searchUsers(users, keyword) {
       normalize(u.lineId)
     ]
 
-    const { displayDate, isoDate } = extractDisplayDates(u);
+    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(u);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(originalDate) fields.push(normalize(originalDate));
+    if(originalDateClean) fields.push(normalize(originalDateClean));
 
     const fullNameSplice = normalize(`${u.firstName ?? ''} ${u.lastName ?? ''}`)
     fields.push(fullNameSplice)
