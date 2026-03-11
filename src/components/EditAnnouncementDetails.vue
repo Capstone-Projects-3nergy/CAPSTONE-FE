@@ -939,7 +939,7 @@ const showProfileStaffPage = async function () {
 
                 <!-- Content -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <label class="text-sm font-semibold text-gray-700">Content</label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
