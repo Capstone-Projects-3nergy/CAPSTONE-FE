@@ -40,6 +40,8 @@ import {
   sortByFirstNameReverse,
   sortByLastNameReverse,
   searchParcels,
+  searchAnnouncements,
+  searchUsers,
   sortByDeleteDateReverse,
   sortByDeleteDate,
   filterByDay,
@@ -400,7 +402,7 @@ const filteredMembers = computed(() => {
   }))
 
   if (searchKeyword.value) {
-    result = searchParcels(result, searchKeyword.value)
+    result = searchUsers(result, searchKeyword.value)
   }
 
   if (selectedDate.value) {
@@ -421,12 +423,7 @@ const filteredAnnouncements = computed(() => {
   }))
 
   if (searchKeyword.value) {
-    result = result.filter(item => {
-      const kw = searchKeyword.value.toLowerCase()
-      return (item.title && item.title.toLowerCase().includes(kw)) ||
-             (item.subtitle && item.subtitle.toLowerCase().includes(kw)) ||
-             (item.category && item.category.toLowerCase().includes(kw))
-    })
+    result = searchAnnouncements(result, searchKeyword.value)
   }
 
   if (selectedDate.value) {
