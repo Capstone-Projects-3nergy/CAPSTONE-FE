@@ -514,7 +514,7 @@ const toggleComfirmPasswordVisibility = () => {
           </svg>
         </div>
 
-        <h2 class="text-xl font-bold mb-1">Create your account</h2>
+        <h2 class="text-xl font-bold mb-2">Create your account</h2>
         <p class="text-[#8C8F91] text-sm mb-4">
           Welcome to Tractify — Create your account below
         </p>
@@ -764,10 +764,10 @@ const toggleComfirmPasswordVisibility = () => {
           </button>
         </div>
 
-        <form @submit.prevent="submitForm" class="space-y-5" novalidate>
+        <form @submit.prevent="submitForm" class="space-y-3" novalidate>
           <transition name="fade" mode="out-in">
-            <div v-if="role === 'resident'" key="resident" class="space-y-5">
-              <div class="mb-1">
+            <div v-if="role === 'resident'" key="resident" class="space-y-6">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -794,7 +794,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </div>
               </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="22"
@@ -843,7 +843,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </template>
                 </SelectWeb>
               </div>
-            <div class="mb-1">
+            <div class="mb-2">
               <div class="relative">
                 <svg
                   class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8C8F91]"
@@ -867,7 +867,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </div>
               </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -889,7 +889,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
                     :class="{
                       'border-red-600 text-red-600': isPasswordTooShort
@@ -949,7 +949,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </div>
                 </div>
               </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -970,7 +970,7 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
                       'border-red-600 text-red-600': isConfirmPasswordTooShort
@@ -1032,8 +1032,8 @@ const toggleComfirmPasswordVisibility = () => {
               </div>
             </div>
 
-            <div v-else key="staff" class="space-y-5">
-              <div class="mb-1">
+            <div v-else key="staff" class="space-y-6">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -1060,7 +1060,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </div>
               </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="22"
@@ -1084,7 +1084,7 @@ const toggleComfirmPasswordVisibility = () => {
                   />
                 </div>
               </div>
-               <div class="mb-1">
+               <div class="mb-2">
                   <div class="relative">
                     <svg
                       width="20"
@@ -1135,7 +1135,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </div>
                   <div
                     v-if="isStaffPositionTooShort"
-                    class="flex items-center text-sm text-red-600 mb-1"
+                    class="flex items-center text-sm text-red-600 mb-2"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1152,7 +1152,7 @@ const toggleComfirmPasswordVisibility = () => {
                     Position must be at least 2 characters.
                   </div>
                 </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -1234,7 +1234,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </div>
                 </div>
               </div>
-              <div class="mb-1">
+              <div class="mb-2">
                 <div class="relative">
                   <svg
                     width="24"
@@ -1323,7 +1323,7 @@ const toggleComfirmPasswordVisibility = () => {
             label="Sign Up"
             :loading="loading"
             type="submit"
-            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
+            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-2.5 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             @click="submitForm('RESIDENT')"
             :class="{
               'disabled opacity-50 cursor-not-allowed':

@@ -286,7 +286,7 @@ const showResetPasswordPageWeb = async function () {
       <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="max-w-md text-center relative z-10 flex flex-col items-center">
-        <h1 class="text-3xl font-extrabold tracking-tight mb-2 drop-shadow-md">Welcome back!</h1>
+        <h1 class="text-3xl font-extrabold tracking-tight mb-3 drop-shadow-md">Welcome back!</h1>
         <p class="text-sm text-blue-50 mb-6 drop-shadow px-4">
           dormitory parcel management system — manage, check status, and stay
           updated anytime with Tractify.
@@ -372,7 +372,7 @@ const showResetPasswordPageWeb = async function () {
           </svg>
         </div>
 
-        <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
+        <h2 class="text-4xl font-bold mb-3 text-center md:text-left">
           Get Started
         </h2>
         <p class="font-medium text-[#8C8F91] mb-6 text-center md:text-left">
@@ -444,8 +444,8 @@ const showResetPasswordPageWeb = async function () {
           />
         </div>
 
-        <form @submit.prevent="loginHomePageWeb" class="space-y-5">
-          <div class="mb-1">
+        <form @submit.prevent="loginHomePageWeb" class="space-y-6">
+          <div class="mb-3">
             <div class="relative">
               <svg
                 width="22"
@@ -473,6 +473,7 @@ const showResetPasswordPageWeb = async function () {
           </div>
           <div
             style="display: flex; align-items: center"
+            class="-mt-4 mb-3"
             v-if="isEmailOverLimit"
           >
             <svg
@@ -544,7 +545,7 @@ const showResetPasswordPageWeb = async function () {
             </button>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex justify-end -mt-4 mb-3">
             <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
@@ -566,7 +567,7 @@ const showResetPasswordPageWeb = async function () {
           />
         </form>
 
-        <p class="text-sm text-center text-[#8C8F91] mt-6">
+        <p class="text-sm text-center text-[#8C8F91] mt-8">
           Don’t have an account?
           <a
             class="text-[#107EFF] font-medium hover:underline cursor-pointer"
