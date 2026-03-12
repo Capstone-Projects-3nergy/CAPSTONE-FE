@@ -537,15 +537,19 @@ const toggleSidebar = () => {
 const activeTab = ref('parcel')
 
 const handleExportExcel = () => {
-  const stats = dashboardStore.stats
-  
-  // Prepare data for Excel
-  const data = [
-    ['Dormitory Management System - Summary Report'],
+  const stats = dashboardStore.stats;
+  const pending = pendingResidentsList.value;
+  const topRes = topResidents.value;
+  const announcements = dashboardStore.announcements.slice(0, 5);
+  const parcels = getMappedParcels.value.slice(0, 10);
+
+  const statsData = [
+    ['Dormitory Management System - Full Summary Report'],
     ['Generated Date', new Date().toLocaleString()],
     [],
-    ['Category', 'Statistic', 'Value'],
-    ['Parcels', 'Total Parcels', stats.totalParcels],
+    ['1. STATISTIC OVERVIEW'],
+    ['Category', 'Status Item', 'Count / Value'],
+    ['Parcels', 'Total Received', stats.totalParcels],
     ['Parcels', 'Picked Up', stats.pickedUpParcels],
     ['Parcels', 'Awaiting Pickup', stats.awaitingParcels],
     ['Parcels', 'Overdue', stats.overdueParcels],
@@ -553,112 +557,144 @@ const handleExportExcel = () => {
     ['Residents', 'Active', stats.activeResidents],
     ['Residents', 'Pending Approval', stats.pendingResidents],
     ['Residents', 'Inactive', stats.inactiveResidents],
-    ['Communications', 'Total Announcements', stats.totalAnnouncements]
-  ]
+    ['Communications', 'Total Announcements', stats.totalAnnouncements],
+    []
+  ];
 
-  // Create worksheet and workbook
-  const ws = XLSX.utils.aoa_to_sheet(data)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, "Summary Report")
-  
-  // Set column widths for better readability
-  const wscols = [
-    { wch: 20 }, // Category
-    { wch: 25 }, // Statistic
-    { wch: 15 }  // Value
-  ]
-  ws['!cols'] = wscols
+  const pendingData = [
+    ['2. PENDING APPROVALS'],
+    ['Name', 'Room No.', 'Email', 'Updated At'],
+    ...pending.map(r => [r.fullName, r.roomNumber, r.email, r.updateAt ? new Date(r.updateAt).toLocaleString() : '-']),
+    []
+  ];
 
-  // Save the file
-  XLSX.writeFile(wb, `Dormitory_Summary_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  const topResData = [
+    ['3. TOP RESIDENTS (Active Activity)'],
+    ['Rank', 'Name', 'Room No.', 'Parcel Count'],
+    ...topRes.map((r, i) => [i + 1, r.fullName || r.name, r.roomNumber || r.room, r.count || r.parcelCount]),
+    []
+  ];
+
+  const annData = [
+    ['4. RECENT ANNOUNCEMENTS'],
+    ['Title', 'Type', 'Date'],
+    ...announcements.map(a => [a.title, a.type, new Date(a.createdAt || a.date).toLocaleDateString()]),
+    []
+  ];
+
+  const parcelData = [
+    ['5. RECENT PARCELS (Latest Activity)'],
+    ['Date', 'Resident', 'Tracking No.', 'Status'],
+    ...parcels.map(p => [new Date(p.updatedAt).toLocaleDateString(), p.residentName, p.trackingNumber, p.status.toUpperCase()])
+  ];
+
+  const finalData = [...statsData, ...pendingData, ...topResData, ...annData, ...parcelData];
+  const ws = XLSX.utils.aoa_to_sheet(finalData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Full Report");
+
+  ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
+  XLSX.writeFile(wb, `Dormitory_Full_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
 };
 
 const handleExportPDF = () => {
-  const doc = new jsPDF()
-  const stats = dashboardStore.stats
-  
-  // PDF Styling & Header
-  doc.setFont("helvetica", "bold")
-  doc.setFontSize(22)
-  doc.setTextColor(29, 53, 94) // Professional blue
-  doc.text("Dormitory Summary Report", 105, 20, { align: 'center' })
-  
-  doc.setFont("helvetica", "normal")
-  doc.setFontSize(10)
-  doc.setTextColor(100, 100, 100)
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 28, { align: 'center' })
-  
-  // Draw Line
-  doc.setDrawColor(200, 200, 200)
-  doc.line(20, 35, 190, 35)
-  
-  let y = 50
-  
-  // Section 1: Parcels
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(0, 0, 0)
-  doc.text("1. Parcel Statistics", 20, y)
-  y += 10
-  
-  const parcelRows = [
-    ["Total Received", stats.totalParcels],
-    ["Picked Up", stats.pickedUpParcels],
-    ["Awaiting Pickup", stats.awaitingParcels],
-    ["Overdue", stats.overdueParcels]
-  ]
-  
-  doc.setFont("helvetica", "normal")
-  doc.setFontSize(11)
-  parcelRows.forEach(row => {
-    doc.text(row[0], 30, y)
-    doc.text(row[1].toString(), 150, y, { align: 'right' })
-    y += 8
-  })
-  
-  y += 10
-  
-  // Section 2: Residents
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.text("2. Resident Statistics", 20, y)
-  y += 10
-  
-  const residentRows = [
-    ["Total Registered", stats.totalResidents],
-    ["Active Residents", stats.activeResidents],
-    ["Pending Approval", stats.pendingResidents],
-    ["Inactive", stats.inactiveResidents]
-  ]
-  
-  doc.setFont("helvetica", "normal")
-  doc.setFontSize(11)
-  residentRows.forEach(row => {
-    doc.text(row[0], 30, y)
-    doc.text(row[1].toString(), 150, y, { align: 'right' })
-    y += 8
-  })
-  
-  y += 10
-  
-  // Section 3: Announcements
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.text("3. Announcements", 20, y)
-  y += 10
-  
-  doc.setFont("helvetica", "normal")
-  doc.setFontSize(11)
-  doc.text("Total Announcements", 30, y)
-  doc.text(stats.totalAnnouncements.toString(), 150, y, { align: 'right' })
-  
-  // Footer
-  doc.setFontSize(9)
-  doc.setTextColor(150, 150, 150)
-  doc.text("Tractify Management System - Authorized Staff Report", 105, 285, { align: 'center' })
+  const doc = new jsPDF();
+  const stats = dashboardStore.stats;
+  const topRes = topResidents.value;
+  const parcels = getMappedParcels.value.slice(0, 10);
+  const brandColor = [29, 53, 94]; // Navy Blue
 
-  // Save PDF
-  doc.save(`Dormitory_Report_${new Date().toISOString().slice(0, 10)}.pdf`)
+  let y = 20;
+
+  const drawSectionHeader = (title) => {
+    doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
+    doc.rect(15, y - 5, 3, 7, 'F'); // Vertical Blue Bar
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(29, 53, 94);
+    doc.text(title, 22, y);
+    y += 10;
+  };
+
+  // Header Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(29, 53, 94);
+  doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
+  y += 8;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
+  y += 6;
+  doc.setDrawColor(29, 53, 94);
+  doc.setLineWidth(1);
+  doc.line(15, y, 195, y);
+  y += 15;
+
+  // 1. Statistic Overview
+  drawSectionHeader("1. Statistic Overview");
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  const statsRows = [
+    ['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE'],
+    ['Parcels', 'Total Received', stats.totalParcels],
+    ['', 'Picked Up', stats.pickedUpParcels],
+    ['', 'Awaiting Pickup', stats.awaitingParcels],
+    [' Residents', 'Total Registered', stats.totalResidents],
+    ['', 'Active Residents', stats.activeResidents],
+    ['', 'Pending Approval', stats.pendingResidents],
+    ['Communications', 'Total Announcements', stats.totalAnnouncements]
+  ];
+
+  statsRows.forEach((row, idx) => {
+    if (idx === 0) doc.setFont("helvetica", "bold");
+    else doc.setFont("helvetica", "normal");
+    
+    doc.text(row[0].toString(), 18, y);
+    doc.text(row[1].toString(), 70, y);
+    doc.text(row[2].toString(), 160, y, { align: 'center' });
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.1);
+    doc.line(15, y + 2, 195, y + 2);
+    y += 8;
+  });
+  y += 10;
+
+  // 3. Top Residents
+  drawSectionHeader("3. Top Residents (Active Activity)");
+  const topRows = [['RANK', 'NAME', 'ROOM NO.', 'PARCEL COUNT']];
+  topRes.forEach((r, i) => topRows.push([i+1, r.fullName || r.name, r.roomNumber || r.room, r.count || r.parcelCount]));
+  
+  topRows.forEach((row, idx) => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    doc.setFont("helvetica", idx === 0 ? "bold" : "normal");
+    doc.text(row[0].toString(), 18, y);
+    doc.text(row[1].substring(0, 25), 45, y);
+    doc.text(row[2].toString(), 110, y);
+    doc.text(row[3].toString(), 160, y, { align: 'center' });
+    doc.line(15, y + 2, 195, y + 2);
+    y += 8;
+  });
+  y += 10;
+
+  // 5. Recent Parcels
+  drawSectionHeader("5. Recent Parcels (Latest activity)");
+  const pRows = [['DATE', 'RESIDENT', 'TRACKING NO.', 'STATUS']];
+  parcels.forEach(p => pRows.push([new Date(p.updatedAt).toLocaleDateString(), p.residentName, p.trackingNumber, p.status.toUpperCase()]));
+
+  pRows.forEach((row, idx) => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    doc.setFont("helvetica", idx === 0 ? "bold" : "normal");
+    doc.text(row[0].toString(), 18, y);
+    doc.text(row[1].substring(0, 20), 50, y);
+    doc.text(row[2].substring(0, 20), 105, y);
+    doc.text(row[3].toString(), 160, y);
+    doc.line(15, y + 2, 195, y + 2);
+    y += 8;
+  });
+
+  doc.save(`Tractify_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
 
 const handlePrintSummary = () => {
