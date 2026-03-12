@@ -566,6 +566,24 @@ const handlePrintSummary = () => {
         styleType="blue"
         @closePopUp="closeWelcomePopup"
       />
+      
+      <!-- Approval Alerts -->
+      <AlertPopUp
+        v-if="approveSuccess"
+        :titles="'The resident is now an active member of the dormitory.'"
+        message="Approved Successfully"
+        styleType="green"
+        operate="success"
+        @closePopUp="approveSuccess = false"
+      />
+      <AlertPopUp
+        v-if="approveError"
+        :titles="'There was an error approving the resident. Please try again.'"
+        message="Approval Failed"
+        styleType="red"
+        operate="error"
+        @closePopUp="approveError = false"
+      />
     </div>
     <div class="flex flex-1">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
@@ -1601,11 +1619,14 @@ const handlePrintSummary = () => {
                   </div>
 
                   <!-- Empty State -->
-                  <div v-if="pendingResidentsList.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 py-8">
-                    <svg class="w-12 h-12 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-sm">No pending approvals</p>
+                  <div v-if="pendingResidentsList.length === 0" class="flex flex-col items-center justify-center h-full text-yellow-600/50 py-10">
+                    <div class="w-16 h-16 mb-3 opacity-20">
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-medium">All residents verified</p>
+                    <p class="text-[10px] opacity-70">No pending approvals at this time</p>
                   </div>
 
                 </div>
