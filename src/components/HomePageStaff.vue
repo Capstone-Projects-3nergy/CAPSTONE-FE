@@ -21,6 +21,8 @@ import { getItems, editItem } from '@/utils/fetchUtils'
 import { useDashboardManager } from '@/stores/DashboardManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import * as XLSX from 'xlsx'
+import { jsPDF } from 'jspdf'
 
 const loginManager = useAuthManager()
 const userManager = useUserManager()
@@ -535,38 +537,128 @@ const toggleSidebar = () => {
 const activeTab = ref('parcel')
 
 const handleExportExcel = () => {
-  // Creating CSV content for Excel compatibility
   const stats = dashboardStore.stats
-  const rows = [
-    ['Dashboard Summary Report'],
+  
+  // Prepare data for Excel
+  const data = [
+    ['Dormitory Management System - Summary Report'],
     ['Generated Date', new Date().toLocaleString()],
-    [''],
-    ['Statistic', 'Value'],
-    ['Total Parcels', stats.totalParcels],
-    ['Picked Up Parcels', stats.pickedUpParcels],
-    ['Awaiting Parcels', stats.awaitingParcels],
-    ['Overdue Parcels', stats.overdueParcels],
-    ['Total Residents', stats.totalResidents],
-    ['Active Residents', stats.activeResidents],
-    ['Pending Approval', stats.pendingResidents],
-    ['Inactive Residents', stats.inactiveResidents],
-    ['Total Announcements', stats.totalAnnouncements]
+    [],
+    ['Category', 'Statistic', 'Value'],
+    ['Parcels', 'Total Parcels', stats.totalParcels],
+    ['Parcels', 'Picked Up', stats.pickedUpParcels],
+    ['Parcels', 'Awaiting Pickup', stats.awaitingParcels],
+    ['Parcels', 'Overdue', stats.overdueParcels],
+    ['Residents', 'Total Registered', stats.totalResidents],
+    ['Residents', 'Active', stats.activeResidents],
+    ['Residents', 'Pending Approval', stats.pendingResidents],
+    ['Residents', 'Inactive', stats.inactiveResidents],
+    ['Communications', 'Total Announcements', stats.totalAnnouncements]
   ]
 
-  const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n")
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.setAttribute('download', `Dormitory_Summary_${new Date().toISOString().slice(0, 10)}.csv`)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  // Create worksheet and workbook
+  const ws = XLSX.utils.aoa_to_sheet(data)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Summary Report")
+  
+  // Set column widths for better readability
+  const wscols = [
+    { wch: 20 }, // Category
+    { wch: 25 }, // Statistic
+    { wch: 15 }  // Value
+  ]
+  ws['!cols'] = wscols
+
+  // Save the file
+  XLSX.writeFile(wb, `Dormitory_Summary_${new Date().toISOString().slice(0, 10)}.xlsx`)
 };
 
 const handleExportPDF = () => {
-  // Using native print to PDF with specialized report mode
-  window.print();
+  const doc = new jsPDF()
+  const stats = dashboardStore.stats
+  
+  // PDF Styling & Header
+  doc.setFont("helvetica", "bold")
+  doc.setFontSize(22)
+  doc.setTextColor(29, 53, 94) // Professional blue
+  doc.text("Dormitory Summary Report", 105, 20, { align: 'center' })
+  
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(10)
+  doc.setTextColor(100, 100, 100)
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 28, { align: 'center' })
+  
+  // Draw Line
+  doc.setDrawColor(200, 200, 200)
+  doc.line(20, 35, 190, 35)
+  
+  let y = 50
+  
+  // Section 1: Parcels
+  doc.setFontSize(14)
+  doc.setFont("helvetica", "bold")
+  doc.setTextColor(0, 0, 0)
+  doc.text("1. Parcel Statistics", 20, y)
+  y += 10
+  
+  const parcelRows = [
+    ["Total Received", stats.totalParcels],
+    ["Picked Up", stats.pickedUpParcels],
+    ["Awaiting Pickup", stats.awaitingParcels],
+    ["Overdue", stats.overdueParcels]
+  ]
+  
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(11)
+  parcelRows.forEach(row => {
+    doc.text(row[0], 30, y)
+    doc.text(row[1].toString(), 150, y, { align: 'right' })
+    y += 8
+  })
+  
+  y += 10
+  
+  // Section 2: Residents
+  doc.setFontSize(14)
+  doc.setFont("helvetica", "bold")
+  doc.text("2. Resident Statistics", 20, y)
+  y += 10
+  
+  const residentRows = [
+    ["Total Registered", stats.totalResidents],
+    ["Active Residents", stats.activeResidents],
+    ["Pending Approval", stats.pendingResidents],
+    ["Inactive", stats.inactiveResidents]
+  ]
+  
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(11)
+  residentRows.forEach(row => {
+    doc.text(row[0], 30, y)
+    doc.text(row[1].toString(), 150, y, { align: 'right' })
+    y += 8
+  })
+  
+  y += 10
+  
+  // Section 3: Announcements
+  doc.setFontSize(14)
+  doc.setFont("helvetica", "bold")
+  doc.text("3. Announcements", 20, y)
+  y += 10
+  
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(11)
+  doc.text("Total Announcements", 30, y)
+  doc.text(stats.totalAnnouncements.toString(), 150, y, { align: 'right' })
+  
+  // Footer
+  doc.setFontSize(9)
+  doc.setTextColor(150, 150, 150)
+  doc.text("Tractify Management System - Authorized Staff Report", 105, 285, { align: 'center' })
+
+  // Save PDF
+  doc.save(`Dormitory_Report_${new Date().toISOString().slice(0, 10)}.pdf`)
 };
 
 const handlePrintSummary = () => {
