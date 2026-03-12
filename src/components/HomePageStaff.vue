@@ -17,7 +17,7 @@ import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { storeToRefs } from 'pinia'
-import { getItems } from '@/utils/fetchUtils'
+import { getItems, editItem } from '@/utils/fetchUtils'
 import { useDashboardManager } from '@/stores/DashboardManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
@@ -238,6 +238,42 @@ const updateResidentChart = (year) => {
   residentChartInstance.data.datasets[0].data = data.data;
   residentChartInstance.update();
 };
+
+const approveSuccess = ref(false)
+const approveError = ref(false)
+
+const approveResident = async (resident) => {
+  try {
+    // Calling API to approve resident by updating status to ACTIVE
+    // We use /api/members as found in other components for member updates
+    const body = {
+      userId: resident.id,
+      status: 'ACTIVE'
+    }
+    
+    const updatedMember = await editItem(
+      `${import.meta.env.VITE_BASE_URL}/api/members`,
+      resident.id,
+      body,
+      router
+    )
+
+    if (updatedMember) {
+      // Update local stores and refresh dashboard data
+      userManager.updateMember(updatedMember)
+      await fetchDashboardData()
+      
+      approveSuccess.value = true
+      setTimeout(() => (approveSuccess.value = false), 5000)
+    } else {
+      throw new Error('Update failed')
+    }
+  } catch (err) {
+    console.error('Approval failed', err)
+    approveError.value = true
+    setTimeout(() => (approveError.value = false), 5000)
+  }
+}
 
 const pendingResidentsList = computed(() => {
   if (!dashboardStore.members) return []
@@ -1553,12 +1589,12 @@ const handlePrintSummary = () => {
                     </div>
                     <p class="text-[10px] text-gray-400 mb-3">Updated: {{ resident?.updateAt ? new Date(resident.updateAt).toLocaleString() : '-' }}</p>
                     <div class="grid grid-cols-2 gap-2">
-                      <button @click="ShowManageResidentPage" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                      <button @click="approveResident(resident)" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Review
+                        Approve
                       </button>
                       <button @click="ShowManageResidentPage" class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1 cursor-pointer">
-                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         View Profile
                       </button>
                     </div>
