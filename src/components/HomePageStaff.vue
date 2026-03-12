@@ -711,7 +711,7 @@ const handlePrintSummary = () => {
         </table>
       </div>
       <!-- Recent Parcels -->
-      <div class="print-section" v-if="parcelsWithDetails.length > 0">
+      <div class="print-section" v-if="getMappedParcels && getMappedParcels.length > 0">
         <h2 class="print-section-title">5. Recent Parcels (Latest activity)</h2>
         <table class="print-table">
           <thead>
@@ -723,8 +723,8 @@ const handlePrintSummary = () => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="parcel in parcelsWithDetails.slice(0, 10)" :key="parcel.id">
-              <td>{{ parcel.formattedDate }}</td>
+            <tr v-for="parcel in getMappedParcels.slice(0, 10)" :key="parcel.id">
+              <td>{{ new Date(parcel.updatedAt).toLocaleDateString() }}</td>
               <td>{{ parcel.residentName }}</td>
               <td>{{ parcel.trackingNumber }}</td>
               <td>{{ parcel.status.toUpperCase() }}</td>
@@ -1053,12 +1053,12 @@ const handlePrintSummary = () => {
           <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
           
             <!-- Stats Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             <!-- Total Parcels -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
-              <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
                     <path d="M12 12l8 -4.5" />
@@ -1067,21 +1067,21 @@ const handlePrintSummary = () => {
                     <path d="M16 5.25l-8 4.5" />
                   </svg>
                 </div>
-                <span class="flex items-center text-emerald-500 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                   Active System
+                <span class="hidden md:flex items-center text-emerald-500 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
+                   Active
                 </span>
               </div>
-              <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Total Parcels</p>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Total Parcels</p>
               </div>
             </div>
 
             <!-- Awaiting Pickup -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
-              <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-yellow-100 rounded-xl text-yellow-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-yellow-100 rounded-lg md:rounded-xl text-yellow-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M6.5 7h11" />
                     <path d="M6.5 17h11" />
@@ -1089,21 +1089,21 @@ const handlePrintSummary = () => {
                     <path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" />
                   </svg>
                 </div>
-                <span class="text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
-                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}% of total
+                <span class="hidden md:block text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
+                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%
                 </span>
               </div>
-              <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Awaiting Pickup</p>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Awaiting</p>
               </div>
             </div>
 
             <!-- Overdue -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
-              <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-red-100 rounded-lg md:rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
                     <path d="M12 8l0 4" />
@@ -1118,25 +1118,25 @@ const handlePrintSummary = () => {
                   All clear
                 </span>
               </div>
-              <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Overdue (>7 days)</p>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Overdue</p>
               </div>
             </div>
 
             <!-- Picked Up -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
-              <div class="flex items-start justify-between mb-4">
-                <div class="p-2.5 bg-emerald-100 rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-emerald-100 rounded-lg md:rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
                   {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% success rate
                 </span>
               </div>
-              <div class="mt-4">
-                <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
-                <p class="text-gray-500 text-sm font-medium mt-1 uppercase tracking-wider text-[11px]">Picked Up</p>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
               </div>
             </div>
           </div>
@@ -1489,59 +1489,57 @@ const handlePrintSummary = () => {
           <div v-show="activeTab === 'resident'" class="space-y-6 mt-8">
             
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
               <!-- Active Residents -->
-              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 border border-emerald-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-2 md:mb-4">
+                  <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 border border-emerald-100">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                   </div>
-                  <span class="text-emerald-500 text-xs font-bold">Verified</span>
+                  <span class="hidden md:block text-emerald-500 text-xs font-bold">Verified</span>
                 </div>
-                <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.activeResidents }}</h3>
-                  <p class="text-gray-500 text-sm font-medium mt-1">Active Residents</p>
+                <div class="mt-2 md:mt-4">
+                  <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.activeResidents }}</h3>
+                  <p class="text-gray-500 font-medium mt-1 text-[10px] md:text-sm">Active</p>
                 </div>
               </div>
 
               <!-- Pending Approval -->
-              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-2 md:mb-4">
+                  <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                   </div>
-                  <span class="text-orange-400 text-xs font-bold">Action needed</span>
                 </div>
-                <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.pendingResidents }}</h3>
-                  <p class="text-gray-500 text-sm font-medium mt-1">Pending Approval</p>
+                <div class="mt-2 md:mt-4">
+                  <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pendingResidents }}</h3>
+                  <p class="text-gray-500 font-medium mt-1 text-[10px] md:text-sm">Pending</p>
                 </div>
               </div>
 
               <!-- Inactive Residents -->
-              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h3" /><path d="M16 22l5 -5" /><path d="M21 21.5v-4.5h-4.5" /></svg>
+              <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-2 md:mb-4">
+                  <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h3" /><path d="M16 22l5 -5" /><path d="M21 21.5v-4.5h-4.5" /></svg>
                   </div>
                 </div>
-                <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.inactiveResidents }}</h3>
-                  <p class="text-gray-500 text-sm font-medium mt-1">Inactive Residents</p>
+                <div class="mt-2 md:mt-4">
+                  <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.inactiveResidents }}</h3>
+                  <p class="text-gray-500 font-medium mt-1 text-[10px] md:text-sm">Inactive</p>
                 </div>
               </div>
 
               <!-- Total Registered -->
-              <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+                <div class="flex items-start justify-between mb-2 md:mb-4">
+                  <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                   </div>
-                  <span class="text-gray-400 text-xs font-bold">of 20 rooms</span>
                 </div>
-                <div class="mt-4">
-                  <h3 class="text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalResidents }}</h3>
-                  <p class="text-gray-500 text-sm font-medium mt-1">Total Registered</p>
+                <div class="mt-2 md:mt-4">
+                  <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalResidents }}</h3>
+                  <p class="text-gray-500 font-medium mt-1 text-[10px] md:text-sm">Registered</p>
                 </div>
               </div>
             </div>
