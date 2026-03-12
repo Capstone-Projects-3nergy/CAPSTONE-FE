@@ -535,19 +535,42 @@ const toggleSidebar = () => {
 const activeTab = ref('parcel')
 
 const handleExportExcel = () => {
-  // Mock export functionality
-  console.log('Exporting to Excel...');
-  alert('Exporting data to Excel (.xlsx)...');
+  // Creating CSV content for Excel compatibility
+  const stats = dashboardStore.stats
+  const rows = [
+    ['Dashboard Summary Report'],
+    ['Generated Date', new Date().toLocaleString()],
+    [''],
+    ['Statistic', 'Value'],
+    ['Total Parcels', stats.totalParcels],
+    ['Picked Up Parcels', stats.pickedUpParcels],
+    ['Awaiting Parcels', stats.awaitingParcels],
+    ['Overdue Parcels', stats.overdueParcels],
+    ['Total Residents', stats.totalResidents],
+    ['Active Residents', stats.activeResidents],
+    ['Pending Approval', stats.pendingResidents],
+    ['Inactive Residents', stats.inactiveResidents],
+    ['Total Announcements', stats.totalAnnouncements]
+  ]
+
+  const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n")
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `Dormitory_Summary_${new Date().toISOString().slice(0, 10)}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 };
 
 const handleExportPDF = () => {
-  // Mock export functionality
-  console.log('Exporting to PDF...');
-  alert('Generating PDF Report...');
+  // Using native print to PDF with specialized report mode
+  window.print();
 };
 
 const handlePrintSummary = () => {
-  // Trigger browser print
+  // Trigger standard browser print which uses @media print styles
   window.print();
 };
 </script>
@@ -558,7 +581,159 @@ const handlePrintSummary = () => {
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-     <div class="fixed top-20 px-6 mt-4 z-[9999]">
+    
+    <!-- Professional Print Report Section (Visible only when printing) -->
+    <div class="print-report">
+      <div class="print-header">
+        <h1>Dormitory Management System - Summary Report</h1>
+        <p class="text-gray-600">Generated on: {{ new Date().toLocaleString() }}</p>
+      </div>
+
+      <!-- Quick Stats Table -->
+      <div class="print-section">
+        <h2 class="print-section-title">1. Statistic Overview</h2>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Status Item</th>
+              <th>Count / Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="4" class="font-bold">Parcels</td>
+              <td>Total Received</td>
+              <td>{{ dashboardStore.stats.totalParcels }}</td>
+            </tr>
+            <tr>
+              <td>Picked Up</td>
+              <td>{{ dashboardStore.stats.pickedUpParcels }}</td>
+            </tr>
+            <tr>
+              <td>Awaiting Pickup</td>
+              <td>{{ dashboardStore.stats.awaitingParcels }}</td>
+            </tr>
+            <tr>
+              <td>Overdue</td>
+              <td>{{ dashboardStore.stats.overdueParcels }}</td>
+            </tr>
+            <tr>
+              <td rowspan="4" class="font-bold">Residents</td>
+              <td>Total Registered</td>
+              <td>{{ dashboardStore.stats.totalResidents }}</td>
+            </tr>
+            <tr>
+              <td>Active Residents</td>
+              <td>{{ dashboardStore.stats.activeResidents }}</td>
+            </tr>
+            <tr>
+              <td>Pending Approval</td>
+              <td>{{ dashboardStore.stats.pendingResidents }}</td>
+            </tr>
+            <tr>
+              <td>Inactive</td>
+              <td>{{ dashboardStore.stats.inactiveResidents }}</td>
+            </tr>
+            <tr>
+              <td class="font-bold">Communications</td>
+              <td>Total Announcements</td>
+              <td>{{ dashboardStore.stats.totalAnnouncements }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pending Approvals Table -->
+      <div class="print-section" v-if="pendingResidentsList.length > 0">
+        <h2 class="print-section-title">2. Pending Approvals</h2>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Room No.</th>
+              <th>Email</th>
+              <th>Updated At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="res in pendingResidentsList" :key="res.id">
+              <td>{{ res.fullName }}</td>
+              <td>{{ res.roomNumber }}</td>
+              <td>{{ res.email }}</td>
+              <td>{{ res.updateAt ? new Date(res.updateAt).toLocaleString() : '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Top Residents (Parcel counts) -->
+      <div class="print-section" v-if="topResidents.length > 0">
+        <h2 class="print-section-title">3. Top Residents (Active Activity)</h2>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Room No.</th>
+              <th>Parcel Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(res, idx) in topResidents" :key="res.id">
+              <td>{{ idx + 1 }}</td>
+              <td>{{ res.fullName }}</td>
+              <td>{{ res.roomNumber }}</td>
+              <td>{{ res.parcelCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent Announcements -->
+      <div class="print-section" v-if="dashboardStore.announcements.length > 0">
+        <h2 class="print-section-title">4. Recent Announcements</h2>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="ann in dashboardStore.announcements.slice(0, 5)" :key="ann.id">
+              <td>{{ ann.title }}</td>
+              <td>{{ ann.type }}</td>
+              <td>{{ new Date(ann.createdAt || ann.date).toLocaleDateString() }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Recent Parcels -->
+      <div class="print-section" v-if="parcelsWithDetails.length > 0">
+        <h2 class="print-section-title">5. Recent Parcels (Latest activity)</h2>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Resident</th>
+              <th>Tracking No.</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="parcel in parcelsWithDetails.slice(0, 10)" :key="parcel.id">
+              <td>{{ parcel.formattedDate }}</td>
+              <td>{{ parcel.residentName }}</td>
+              <td>{{ parcel.trackingNumber }}</td>
+              <td>{{ parcel.status.toUpperCase() }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+     <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
         v-if="welcomePopupVisible"
         :message="'Hi'"
@@ -585,7 +760,7 @@ const handlePrintSummary = () => {
         @closePopUp="approveError = false"
       />
     </div>
-    <div class="flex flex-1">
+    <div class="flex flex-1 no-print">
       <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
@@ -2368,3 +2543,158 @@ const toggleSortDate = () => {
 </template>
 
 <style scoped></style> -->
+<style>
+@media print {
+  /* Critical cleanup for professional report */
+  .no-print,
+  aside, 
+  header, 
+  nav,
+  button,
+  .fixed,
+  .activity-filters {
+    display: none !important;
+  }
+
+  /* Reset layout for full page printable area */
+  .min-h-screen {
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Professional Summary Report Container */
+  .print-report {
+    display: block !important;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    color: #111827 !important;
+  }
+
+  .print-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid #1D355E;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .print-header h1 {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #1D355E !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .print-header p {
+    font-size: 14px;
+    color: #4b5563;
+  }
+
+  .print-section {
+    margin-bottom: 3.5rem;
+    page-break-inside: avoid;
+  }
+
+  .print-section-title {
+    display: block !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #1D355E !important;
+    margin-bottom: 1.25rem;
+    border-left: 5px solid #1D355E;
+    padding-left: 1rem;
+  }
+
+  /* Beautiful Summary Table */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse !important;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .print-table th {
+    background-color: #f9fafb !important;
+    color: #374151 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid #e5e7eb;
+    padding: 12px 16px !important;
+    text-align: left;
+  }
+
+  .print-table td {
+    border: 1px solid #e5e7eb;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    color: #1f2937;
+    vertical-align: middle;
+  }
+
+  .print-table tr:nth-child(even) {
+    background-color: #fbfcfd;
+  }
+
+  .font-bold {
+    font-weight: 700 !important;
+    color: #111827 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+.print-report {
+  display: none;
+}
+
+/* Old print styles below to be cleaned up or overridden */
+@media print_disabled {
+  /* Hide UI elements not needed in report */
+  aside, 
+  header, 
+  .fixed, 
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset layout for full width printing */
+  .min-h-screen {
+    padding-top: 0 !important;
+    margin-left: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Ensure charts and cards are visible */
+  .bg-white {
+    background-color: white !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+  }
+
+  /* Custom report header only for print */
+  .print-header {
+    display: block !important;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #1D355E;
+    padding-bottom: 1rem;
+  }
+
+  .print-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1D355E;
+  }
+}
+
+.print-header {
+  display: none;
+}
+</style>
