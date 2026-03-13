@@ -64,6 +64,10 @@ const sortOptions = computed(() => {
   return options
 })
 
+const anyAddButtonVisible = computed(() => {
+  return props.showAddButton || props.showAddMemberButton || props.showAddStaffButton
+})
+
 const dateInput = ref(null)
 
 const openDatePicker = () => {
@@ -110,7 +114,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           :value="props.modelDate ? formatDateDisplay(props.modelDate) : ''"
           placeholder="DD/MM/YYYY"
           @click="openDatePicker"
-          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-full sm:w-[190px] cursor-pointer relative z-0"
+          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[165px] sm:w-[190px] cursor-pointer relative z-0"
         />
         <!-- Hidden Native Date Input for Picker functionality -->
         <input
@@ -124,7 +128,10 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
 
       <div class="flex flex-wrap items-center gap-2 w-full md:w-auto ml-auto">
         <!-- Search Input -->
-        <div class="relative flex-1 min-w-[120px] w-full">
+        <div 
+          class="relative flex-1 min-w-[140px] w-full"
+          :class="[anyAddButtonVisible ? 'md:w-[240px]' : 'sm:w-[300px]']"
+        >
           <svg
             class="absolute left-2 top-1/2 -translate-y-1/2 z-20"
             width="18"
@@ -148,13 +155,16 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
         </div>
 
         <!-- Group: Sort Select + Add Button (Keep together on mobile) -->
-        <div class="flex items-center gap-2 flex-1 sm:flex-initial">
+        <div 
+          class="flex items-center gap-3 sm:gap-4 sm:flex-initial"
+          :class="anyAddButtonVisible ? 'flex-1' : 'flex-none'"
+        >
           <SelectWeb
             :modelValue="props.modelSort"
             @update:modelValue="$emit('update:sort', $event)"
             :options="sortOptions"
             placeholder="Sort by :"
-            customClass="bg-white text-gray-600 text-sm border border-gray-200 rounded-xl px-2 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm cursor-pointer flex-1 sm:flex-none min-w-[200px]"
+            :customClass="`bg-white text-gray-600 text-sm border border-gray-200 rounded-xl px-2 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm cursor-pointer flex-1 sm:flex-none ${anyAddButtonVisible ? 'min-w-[140px] sm:min-w-[200px]' : 'min-w-[120px] sm:min-w-[140px]'}`"
           />
 
           <ButtonWeb 
@@ -162,7 +172,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             @click="$emit('add')"
             label="Add parcel"
             color="blue"
-            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-4 sm:!px-6 !text-[14px] sm:!text-sm"
           >
             <template #icon>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
@@ -179,7 +189,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             @click="$emit('addMember')"
             label="Add New"
             color="blue"
-            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-4 sm:!px-6 !text-[14px] sm:!text-sm"
           >
             <template #icon>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
@@ -196,7 +206,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
             @click="$emit('addMember')"
             label="Add New Staff"
             color="blue"
-            class="whitespace-nowrap flex-1 sm:flex-none !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+            class="whitespace-nowrap flex-1 sm:flex-none !px-4 sm:!px-6 !text-[14px] sm:!text-sm"
           >
             <template #icon>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="sm:w-6 sm:h-6">
