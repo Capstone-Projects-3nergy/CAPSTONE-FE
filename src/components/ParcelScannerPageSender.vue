@@ -924,19 +924,41 @@ const closePopUp = (operate) => {
                       : 'hidden'
                   "
                 ></video>
-                <div v-if="videoStream" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 z-20">
-                  <ButtonWeb
+
+                <!-- OCR Scanner Focus Frame -->
+                <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
+                  <!-- Darkened Overlay -->
+                  <div class="absolute inset-0 bg-black/40"></div>
+                  
+                  <!-- Focus Frame (Clear Center) -->
+                  <div class="relative w-[85%] h-[60%] border-2 border-white/50 rounded-2xl shadow-[0_0_0_1000px_rgba(0,0,0,0.3)]">
+                    <!-- Corner Brackets -->
+                    <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                    <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                    <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                    <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                    
+                    <!-- Helper Text -->
+                    <div class="absolute -top-10 left-0 right-0 text-center">
+                      <span class="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">Align text within frame</span>
+                    </div>
+                  </div>
+                </div>
+                <ButtonWeb
+                  v-if="videoStream"
+                  label="Cancel"
+                  color="red"
+                  class="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 z-20 cursor-pointer transition-all duration-300"
+                  @click="stopCameraOnly"
+                />
+
+                <div v-if="videoStream" class="absolute bottom-4 left-0 right-0 flex justify-center px-4 z-20">
+                   <ButtonWeb
                     label="Capture & OCR"
                     color="green"
-                    class="bg-green-500 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-green-600 cursor-pointer transition-all duration-300"
+                    class="bg-green-500 text-white px-8 py-2.5 rounded-xl shadow-lg hover:bg-green-600 cursor-pointer transition-all duration-300 font-bold"
                     @click="capturePhoto"
                     :loading="isOcrLoading"
-                  />
-                  <ButtonWeb
-                    label="Close"
-                    color="red"
-                    class="bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 cursor-pointer transition-all duration-300"
-                    @click="stopCameraOnly"
                   />
                 </div>
                 <div v-if="isOcrLoading" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-30">
