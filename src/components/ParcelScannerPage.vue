@@ -1311,12 +1311,12 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-1.5 sm:gap-3 px-2 overflow-x-auto items-center">
+              <div class="flex flex-row flex-nowrap gap-2 sm:gap-3 px-2 overflow-x-auto items-center py-2">
                 <ButtonWeb
                   label="Scan QR Code"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
@@ -1324,7 +1324,7 @@ onMounted(async () => {
                   label="Scan Barcode"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
@@ -1332,7 +1332,7 @@ onMounted(async () => {
                   label="OCR Scan"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
                   @click="startCamera"
                   :disabled="scanningMode || videoStream || isOcrLoading"
                 />
