@@ -210,6 +210,7 @@ const savedParcels = ref([])
 
 const scanningMode = ref('')
 const isSuccessScan = ref(false)
+const isOcrLoading = ref(false) 
 let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
@@ -358,27 +359,44 @@ async function capturePhoto() {
     return
   }
 
-  const canvas = document.createElement('canvas')
-  canvas.width = videoRef.value.videoWidth
-  canvas.height = videoRef.value.videoHeight
+  isOcrLoading.value = true
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = videoRef.value.videoWidth
+    canvas.height = videoRef.value.videoHeight
 
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(videoRef.value, 0, 0)
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(videoRef.value, 0, 0)
 
-  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
-  previewUrl.value = imageDataUrl
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+    previewUrl.value = imageDataUrl
 
-  const info = await extractParcelInfo(imageDataUrl)
-  if (!info) return
-
-  // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
-  if (info.recipientName) {
-    form.value.recipientName = info.recipientName
-    recipientSearch.value = info.recipientName
+    const info = await extractParcelInfo(imageDataUrl)
+    if (info) {
+      if (info.recipientName) {
+        form.value.recipientName = info.recipientName
+        recipientSearch.value = info.recipientName
+        
+        // Try to find resident by name if available
+        const resident = residents.value.find(r => {
+           const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
+           return fullName.includes(info.recipientName.toLowerCase()) || 
+                  info.recipientName.toLowerCase().includes(fullName)
+        })
+        if (resident) {
+          selectedResidentId.value = resident.userId
+        }
+      }
+      if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
+      if (info.senderName) form.value.senderName = info.senderName
+      if (info.parcelType) form.value.parcelType = info.parcelType
+    }
+  } catch (err) {
+    console.error("OCR Error:", err)
+  } finally {
+    isOcrLoading.value = false
+    stopCameraOnly()
   }
-  if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
-  if (info.senderName) form.value.senderName = info.senderName
-  if (info.parcelType) form.value.parcelType = info.parcelType
 }
 
 function startQuagga() {
@@ -1271,29 +1289,52 @@ onMounted(async () => {
                       : 'hidden'
                   "
                 ></video>
-                <ButtonWeb
-                  label="Close Camera"
-                  color="red"
-                  class="absolute bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 cursor-pointer transition-all duration-300"
-                  v-if="videoStream"
-                  @click="stopCameraOnly"
-                />
+                <div v-if="videoStream" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 z-20">
+                  <ButtonWeb
+                    label="Capture & OCR"
+                    color="green"
+                    class="bg-green-500 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-green-600 cursor-pointer transition-all duration-300"
+                    @click="capturePhoto"
+                    :loading="isOcrLoading"
+                  />
+                  <ButtonWeb
+                    label="Close"
+                    color="red"
+                    class="bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 cursor-pointer transition-all duration-300"
+                    @click="stopCameraOnly"
+                  />
+                </div>
+                <!-- OCR Processing State Overlay -->
+                <div v-if="isOcrLoading" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-30">
+                  <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-4"></div>
+                  <p class="text-white font-bold">Extracting text...</p>
+                </div>
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-3 px-2 overflow-x-auto items-center">
+              <div class="flex flex-row flex-nowrap gap-1.5 sm:gap-3 px-2 overflow-x-auto items-center">
                 <ButtonWeb
-                  label="Scan QR code"
+                  label="Scan QR Code"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+                  size="sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+                  size="sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="OCR Scan"
+                  color="blue"
+                  size="sm"
+                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-2 sm:!px-5 !text-[11px] sm:!text-sm"
+                  @click="startCamera"
+                  :disabled="scanningMode || videoStream || isOcrLoading"
                 />
               </div>
 
