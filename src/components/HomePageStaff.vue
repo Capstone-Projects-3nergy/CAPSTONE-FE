@@ -1163,9 +1163,9 @@ const handlePrintSummary = () => {
           </div>
           
           <!-- Welcome Banner & Date -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-4 transition-all duration-300 hover:shadow-md">
-            <div class="flex items-center gap-4">
-              <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105">
+          <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-2 sm:gap-4 transition-all duration-300 hover:shadow-md">
+            <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
+              <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105 flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
@@ -1174,16 +1174,16 @@ const handlePrintSummary = () => {
                   <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
               </div>
-              <div>
+              <div class="min-w-0 flex-1">
                 <h3 class="text-base font-extrabold text-gray-900 tracking-tight" v-if="activeTab === 'parcel'">Parcel Management Overview</h3>
                 <h3 class="text-base font-extrabold text-gray-900 tracking-tight" v-if="activeTab === 'resident'">Resident Management Overview</h3>
                 <p class="text-xs font-medium text-gray-500 mt-0.5">Monitor and manage daily activities</p>
               </div>
             </div>
             
-            <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-4 py-2.5 font-bold text-sm shadow-inner whitespace-nowrap">
-              <div class="mr-3 p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <div class="self-end sm:self-center inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 py-1.5 sm:px-4 sm:py-2.5 font-bold text-[11px] sm:text-sm shadow-inner whitespace-nowrap">
+              <div class="mr-2 sm:mr-3 p-1 sm:p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
