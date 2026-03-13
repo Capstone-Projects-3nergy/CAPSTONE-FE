@@ -81,7 +81,7 @@ const formatDateDisplay = (dateStr) => {
         :value="search"
         @input="$emit('update:search', $event.target.value)"
         placeholder="Search ..."
-        class="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm hover:bg-gray-50 relative z-0"
+        class="block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm text-sm hover:bg-gray-50 relative z-0"
       />
     </div>
 
@@ -94,8 +94,8 @@ const formatDateDisplay = (dateStr) => {
             class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
             @click="openDatePicker"
           >
-            <div class="mr-0 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4 text-[#0E4B90]">
+            <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -111,7 +111,7 @@ const formatDateDisplay = (dateStr) => {
             :value="date ? formatDateDisplay(date) : ''"
             placeholder="DD/MM/YYYY"
             @click="openDatePicker"
-            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-12 sm:pl-14 pr-4 py-1.5 sm:py-2 font-bold text-xs sm:text-base shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-[155px] sm:w-[185px]"
+            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-full sm:w-[190px]"
           />
           <!-- Hidden Native Date Input for Picker functionality -->
           <input
