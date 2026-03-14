@@ -930,7 +930,7 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isPasswordTooShort"
-                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
+                  class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -1011,7 +1011,7 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
               <div
                   v-if="isConfirmPasswordTooShort"
-                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
+                  class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -1215,7 +1215,7 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isPasswordTooShort"
-                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
+                  class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -1297,7 +1297,7 @@ const toggleComfirmPasswordVisibility = () => {
                 </div>
                 <div
                   v-if="isConfirmPasswordTooShort"
-                  class="flex items-center text-xs text-red-600 mt-[-8px] mb-2"
+                  class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
