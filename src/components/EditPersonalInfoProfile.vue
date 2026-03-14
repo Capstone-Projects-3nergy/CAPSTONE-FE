@@ -1377,7 +1377,7 @@ const isLineLinked = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1434,7 +1434,7 @@ const isLineLinked = computed(() => {
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1493,7 +1493,7 @@ const isLineLinked = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showEmailLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1536,7 +1536,7 @@ const isLineLinked = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showRoomLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1579,7 +1579,7 @@ const isLineLinked = computed(() => {
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
               ]"
             />
@@ -1609,7 +1609,7 @@ const isLineLinked = computed(() => {
               :value="form.position"
               @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPositionLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1693,7 +1693,7 @@ const isLineLinked = computed(() => {
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPhoneLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1891,7 +1891,7 @@ const isLineLinked = computed(() => {
                 <input
                   v-model="form.firstName"
                   placeholder="Enter First Name"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 
@@ -1903,7 +1903,7 @@ const isLineLinked = computed(() => {
                 <input
                   v-model="form.lastName"
                   placeholder="Enter Last Name"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 
@@ -1917,7 +1917,7 @@ const isLineLinked = computed(() => {
                   v-model="form.email"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                     mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
@@ -1932,7 +1932,7 @@ const isLineLinked = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                     loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
@@ -1977,7 +1977,7 @@ const isLineLinked = computed(() => {
                 <input
                   v-model="form.phoneNumber"
                   placeholder="Enter Phone Number"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 

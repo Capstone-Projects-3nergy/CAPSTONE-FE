@@ -488,7 +488,7 @@ const handleUnlink = async () => {
           <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
             {{ userRoleLabel }}
           </p>
-          <p class="mt-4 text-black font-semibold text-lg text-gray-500">
+          <p class="mt-4 text-black font-semibold text-lg text-gray-500 truncate max-w-[200px] mx-auto">
             {{ fullName }}
           </p>
         </div>
@@ -591,7 +591,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ firstName }}
             </p>
           </div>
@@ -600,7 +600,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ lastName }}
             </p>
           </div>
@@ -646,7 +646,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ position }}
             </p>
           </div>
@@ -654,7 +654,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ roomNumber }}
             </p>
           </div>
@@ -664,7 +664,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ dormName }}
             </p>
           </div>
@@ -675,7 +675,7 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
               {{ display(phoneNumber) }}
             </p>
           </div>
@@ -924,7 +924,7 @@ const handleUnlink = async () => {
           <p class=" hidden md:block text-sm font-extrabold text-[#0E4B90] pt-2">
             {{ userRoleLabel }}
           </p>
-          <h2 class="hidden md:block text-xl font-semibold text-gray-500">
+          <h2 class="hidden md:block text-xl font-semibold text-gray-500 truncate max-w-[200px] mx-auto">
             {{ fullName }}
           </h2>
         </div>
@@ -955,7 +955,7 @@ const handleUnlink = async () => {
           {{ userRoleLabel }}
         </p>
             <p
-              class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500"
+              class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500 truncate max-w-[200px] mx-auto"
             >
               {{ fullName }}
             </p>
@@ -975,14 +975,14 @@ const handleUnlink = async () => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >First Name</label
                 >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
                   {{ firstName }}
                 </p>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Last Name</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
                   {{ lastName }}
                 </p>
               </div>
@@ -998,7 +998,7 @@ const handleUnlink = async () => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Room Number</label
                 >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(roomNumber) }}
                 </p>
               </div>
@@ -1007,7 +1007,7 @@ const handleUnlink = async () => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Dormitory</label
                 >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
                   {{ dormName }}
                 </p>
               </div>
@@ -1036,7 +1036,7 @@ const handleUnlink = async () => {
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
                   >Phone Number</label
                 >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(phoneNumber) }}
                 </p>
               </div>
