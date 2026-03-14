@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import LoginPage from './LoginPage.vue'
 import { useRouter } from 'vue-router'
@@ -66,8 +66,26 @@ const form = reactive({
 })
 const showPasswordPopup = ref(false)
 const showConfirmPasswordPopup = ref(false)
-
 const dormList = ref([])
+
+watch(role, (newRole) => {
+  if (newRole === 'resident') {
+    form.position = ''
+    isStaffPositionTooShort.value = false
+    isPositionRequired.value = false
+    isStaffPositionOverLimit.value = false
+    isPositionWrong.value = false
+    isEmailStaff.value = false
+  } else {
+    form.dormId = null
+    form.roomNumber = ''
+    isNoDorm.value = false
+    isRoomRequired.value = false
+    roomidnotnumber.value = false
+    isRoomNumberOverLimit.value = false
+    incorrectemailform.value = false
+  }
+})
 
 const dormOptions = computed(() => {
   return dormList.value.map((dorm) => ({
