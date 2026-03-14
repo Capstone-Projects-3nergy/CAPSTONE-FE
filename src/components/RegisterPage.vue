@@ -944,7 +944,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-xs text-red-600">
+                  <div class="text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1025,7 +1025,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-xs text-red-600">
+                  <div class="text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1135,7 +1135,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </div>
                   <div
                     v-if="isStaffPositionTooShort"
-                    class="flex items-center text-sm text-red-600 mb-2"
+                    class="flex items-center text-sm text-red-600 mt-1 mb-2"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1229,7 +1229,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-xs text-red-600">
+                  <div class="text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
@@ -1311,7 +1311,7 @@ const toggleComfirmPasswordVisibility = () => {
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <div class="text-xs text-red-600">
+                  <div class="text-red-600">
                     Password must be at least 8 characters.
                   </div>
                 </div>
