@@ -451,9 +451,9 @@ const showFileSizeError = () => {
           </SidebarItem>
         </aside>
         
-      <main class="flex-1 p-6 md:p-9">
-        <div class="flex items-center space-x-2 mb-6">
-          <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+      <main class="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm shrink-0">
                  <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -465,12 +465,12 @@ const showFileSizeError = () => {
                 d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
               />
             </svg>
-              </div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+          </div>
+          <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap overflow-hidden text-ellipsis py-1">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
               Manage Residents > Add Resident
-              </span>
-            </h2>
+            </span>
+          </h2>
         </div>
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
