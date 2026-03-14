@@ -325,7 +325,7 @@ const onDeleteConfirm = () => {
 
 const fetchAnnouncementData = async () => {
   console.log('Fetching announcements disabled to avoid 500 error')
-  /*
+ 
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements`,
     router
@@ -364,7 +364,6 @@ const fetchAnnouncementData = async () => {
     
     console.log('API data fetched:', mapped.length, 'items')
   }
-  */
 }
 
 const checkScreen = () => {
