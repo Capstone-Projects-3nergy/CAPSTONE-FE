@@ -247,12 +247,12 @@ const showFileSizeError = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col pt-16"
-    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16 transition-all duration-300"
+    :class="isCollapsed ? 'md:ml-16' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar"/>
-    <div class="flex flex-1">
-        <aside
+    <div class="flex flex-1 overflow-x-hidden">
+       <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
@@ -466,7 +466,7 @@ const showFileSizeError = () => {
               />
             </svg>
               </div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
               Manage Residents > Add Resident
               </span>

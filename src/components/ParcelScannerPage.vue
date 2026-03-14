@@ -947,19 +947,19 @@ onMounted(async () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col pt-16"
-    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16 transition-all duration-300"
+    :class="isCollapsed ? 'md:ml-16' : 'md:ml-64'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="flex flex-1">
-        <aside
+    <div class="flex flex-1 overflow-x-hidden">
+     <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-transparent space-y-1">
+        <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -1157,7 +1157,7 @@ onMounted(async () => {
         </aside>
 
 
-      <main class="flex-1 p-9">
+      <main class="flex-1 p-4 md:p-8">
     <div class="flex items-center space-x-2 mb-8 py-1">
         <div class="flex items-center gap-4">
           <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
