@@ -11,6 +11,32 @@ import { getAnnouncementById, editAnnouncementWithFile } from '@/utils/fetchUtil
 import ButtonWeb from './ButtonWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
+
+const dateInput = ref(null)
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
+
+const formatDateTimeDisplay = (dateTimeStr) => {
+  if (!dateTimeStr) return '';
+  // Handle native datetime-local format: YYYY-MM-DDTHH:mm
+  if (dateTimeStr.includes('T')) {
+    const parts = dateTimeStr.split('T');
+    const datePart = parts[0];
+    const timePart = parts[1] || '';
+    const dateParts = datePart.split('-');
+    if (dateParts.length === 3) {
+      const [year, month, day] = dateParts;
+      return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
+    }
+  }
+  return dateTimeStr;
+}
 // No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
@@ -926,12 +952,38 @@ const showProfileStaffPage = async function () {
                    </div>
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date</label>
-                      <div class="relative">
+                      <div class="relative flex items-center group">
+                        <!-- Icon Overlay -->
+                        <div 
+                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                          @click="openDatePicker"
+                        >
+                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                        </div>
+
+                        <!-- Display Input (Text) -->
                         <input 
                            type="text" 
+                           readonly
+                           :value="formatDateTimeDisplay(announcementForm.datePosted)"
+                           placeholder="DD/MM/YYYY - HH:mm"
+                           @click="openDatePicker"
+                           class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                        />
+
+                        <!-- Hidden Native Datetime Input -->
+                        <input
+                           ref="dateInput"
+                           type="datetime-local" 
                            v-model="announcementForm.datePosted"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
-                           placeholder="e.g. 15 Feb 2026 - 14:00"
+                           class="absolute opacity-0 w-0 h-0 pointer-events-none"
                         />
                       </div>
                    </div>
@@ -1103,7 +1155,7 @@ const showProfileStaffPage = async function () {
                 />
                 <ButtonWeb 
                   :label="windowWidth < 640 ? 'Update' : 'Update Announcement'" 
-                  color="navy" 
+                  color="blue" 
                   :size="buttonSize"
                   @click="handleSave" 
                   :disabled="!hasChanges"

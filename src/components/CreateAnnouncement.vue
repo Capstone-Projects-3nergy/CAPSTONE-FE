@@ -11,6 +11,27 @@ import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 
+const dateInput = ref(null)
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
+
+const formatDateTimeDisplay = (dateTimeStr) => {
+  if (!dateTimeStr) return '';
+  // For datetime-local, the format is YYYY-MM-DDTHH:mm
+  const parts = dateTimeStr.split('T');
+  const datePart = parts[0];
+  const timePart = parts[1] || '';
+  
+  const [year, month, day] = datePart.split('-');
+  return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
+}
+
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const announcementManager = useAnnouncementManager()
@@ -776,12 +797,39 @@ const returnLoginPage = async () => {
                       </div>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date  <span class="text-red-500">*</span></label>
-                      <div class="relative">
+                      <label class="text-sm font-semibold text-gray-700">Publish Date <span class="text-red-500">*</span></label>
+                      <div class="relative flex items-center group">
+                        <!-- Icon Overlay -->
+                        <div 
+                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                          @click="openDatePicker"
+                        >
+                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        <!-- Display Input (Text) -->
                         <input 
+                           type="text" 
+                           readonly
+                           :value="formatDateTimeDisplay(date)"
+                           placeholder="DD/MM/YYYY - HH:mm"
+                           @click="openDatePicker"
+                           class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                        />
+
+                        <!-- Hidden Native Datetime Input -->
+                        <input
+                           ref="dateInput"
                            type="datetime-local" 
                            v-model="date"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
+                           class="absolute opacity-0 w-0 h-0 pointer-events-none"
                         />
                       </div>
                    </div>

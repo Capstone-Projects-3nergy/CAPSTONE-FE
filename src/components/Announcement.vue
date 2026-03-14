@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import ButtonWeb from './ButtonWeb.vue'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
@@ -641,7 +642,7 @@ onMounted(async () => {
     @close="closeModal"
   />
 
-  <!-- Calendar Pop-up -->
+  Calendar Pop-up
   <Teleport to="body">
     <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
@@ -695,9 +696,12 @@ onMounted(async () => {
         </div>
         
         <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isCalendarOpen = false" class="px-5 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer">
-            Close
-          </button>
+          <ButtonWeb 
+            label="Close" 
+            color="blue" 
+            size="md" 
+            @click="isCalendarOpen = false" 
+          />
         </div>
       </div>
     </div>
@@ -758,9 +762,12 @@ onMounted(async () => {
         </div>
         
         <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isArchiveOpen = false" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm cursor-pointer">
-            Close Archive
-          </button>
+          <ButtonWeb 
+            label="Close Archive" 
+            color="blue" 
+            size="md" 
+            @click="isArchiveOpen = false" 
+          />
         </div>
       </div>
     </div>

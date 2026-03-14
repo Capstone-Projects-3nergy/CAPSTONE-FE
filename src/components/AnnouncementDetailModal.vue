@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import ButtonWeb from './ButtonWeb.vue'
 
 const props = defineProps({
   isOpen: {
@@ -153,11 +154,13 @@ const getCategoryIcon = (category) => {
         </div>
       </div>
       
-      <!-- Footer -->
       <div class="p-4 sm:p-6 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
-        <button @click="closeModal" class="px-8 py-2.5 bg-[#1D355E] hover:bg-[#185DC0] text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg cursor-pointer">
-          Close
-        </button>
+        <ButtonWeb 
+          label="Close" 
+          color="blue" 
+          size="md" 
+          @click="closeModal" 
+        />
       </div>
     </div>
   </div>
