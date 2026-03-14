@@ -24,11 +24,14 @@ const openDatePicker = () => {
 
 const formatDateTimeDisplay = (dateTimeStr) => {
   if (!dateTimeStr) return '';
+  // Remove "Z" if it exists in the raw data string
+  const sanitized = dateTimeStr.toString().replace(/\s*Z$/i, '');
+  
   // Handle native datetime-local format: YYYY-MM-DDTHH:mm
-  if (dateTimeStr.includes('T')) {
-    const parts = dateTimeStr.split('T');
+  if (sanitized.includes('T')) {
+    const parts = sanitized.split('T');
     const datePart = parts[0];
-    const timePart = parts[1] || '';
+    const timePart = parts[1] ? parts[1].substring(0, 5) : ''; 
     const dateParts = datePart.split('-');
     if (dateParts.length === 3) {
       const [year, month, day] = dateParts;
@@ -36,17 +39,20 @@ const formatDateTimeDisplay = (dateTimeStr) => {
       return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
     }
   }
-  return dateTimeStr;
+  return sanitized;
 }
 
 const ensureDateTimeLocal = (dateStr) => {
   if (!dateStr) return '';
+  // Remove "Z" if it exists in the raw data string
+  const sanitized = dateStr.toString().replace(/\s*Z$/i, '');
+
   // If already in YYYY-MM-DDTHH:mm, return it
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateStr)) return dateStr;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(sanitized)) return sanitized.substring(0, 16);
   
   // Try parsing to Date object
   // Replace " - " with " " to help parsing if needed
-  const d = new Date(dateStr.replace(' - ', ' '));
+  const d = new Date(sanitized.replace(' - ', ' '));
   if (isNaN(d.getTime())) {
     // If it's something like "Just now" or "Draft", return as is (though datetime-local won't show it)
     return dateStr;
