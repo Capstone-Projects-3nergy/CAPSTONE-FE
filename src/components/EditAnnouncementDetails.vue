@@ -602,6 +602,11 @@ const ShowManageAnnouncementPage = async function () {
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident', params: { id: route.params.id } })
 }
+const showManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' , params: { id: route.params.id } })
+  showManageAnnouncement.value = true
+}
+
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels', params: { id: route.params.id } })
 }
@@ -757,6 +762,7 @@ const showProfileStaffPage = async function () {
 
             <SidebarItem
               title="Manage Announcements"
+              @click="showManageAnnouncementPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>

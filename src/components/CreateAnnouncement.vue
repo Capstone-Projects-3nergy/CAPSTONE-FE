@@ -440,6 +440,11 @@ const showDashBoardPage = async function () {
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }
+const showManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' , params: { id: route.params.id } })
+  showManageAnnouncement.value = true
+}
+
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -588,6 +593,7 @@ const returnLoginPage = async () => {
 
             <SidebarItem
               title="Manage Announcements"
+              @click="showManageAnnouncementPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>
