@@ -634,7 +634,7 @@ const showResidentDetail = async function (id) {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader/>
+    <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
         <aside
           :class="[

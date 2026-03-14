@@ -623,7 +623,7 @@ const handleTrackingInput = (event, index) => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader/>
+    <WebHeader @toggle-sidebar="toggleSidebar" />
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"

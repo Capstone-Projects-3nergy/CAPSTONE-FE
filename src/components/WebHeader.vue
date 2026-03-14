@@ -9,13 +9,13 @@ const authStore = useAuthManager()
 const router = useRouter()
 const notificationStore = useNotificationManager()
 
-// const emit = defineEmits(['toggle-sidebar'])
+const emit = defineEmits(['toggle-sidebar'])
 
 const role = computed(() => authStore.user?.role)
 
-// const toggleSidebar = () => {
-//   emit('toggle-sidebar')
-// }
+const toggleSidebar = () => {
+  emit('toggle-sidebar')
+}
 
 const openNotification = () => {
   router.replace({ name: 'notification' })
