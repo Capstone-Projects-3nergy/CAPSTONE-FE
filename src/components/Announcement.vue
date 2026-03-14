@@ -643,10 +643,9 @@ onMounted(async () => {
   />
 
   <!-- Calendar Pop-up -->
-  <Teleport to="body">
+  <!-- <Teleport to="body">
     <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Calendar Header -->
         <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden">
           <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
           <div class="relative z-10 flex justify-between items-start">
@@ -659,8 +658,7 @@ onMounted(async () => {
             </button>
           </div>
         </div>
-        
-        <!-- Calendar Body -->
+      
         <div class="p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-gray-800">{{ currentMonthName }}</h3>
@@ -705,13 +703,12 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-  </Teleport>
+  </Teleport> -->
 
   <!-- Archive Pop-up -->
-  <Teleport to="body">
+  <!-- <Teleport to="body">
     <div v-if="isArchiveOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Archive Header -->
         <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden flex items-center gap-4">
           <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
           <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm z-10">
@@ -726,10 +723,10 @@ onMounted(async () => {
           </button>
         </div>
         
-        <!-- Archive Body -->
+
         <div class="p-6">
           <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-            <!-- Simulated Past Events -->
+         
             <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
               <div class="flex items-center gap-4 mb-3">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ month }} 2026</h3>
@@ -771,7 +768,7 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-  </Teleport>
+  </Teleport> -->
 </template>
 
 <style scoped>
