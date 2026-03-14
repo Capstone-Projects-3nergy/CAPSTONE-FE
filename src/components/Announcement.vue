@@ -642,7 +642,7 @@ onMounted(async () => {
     @close="closeModal"
   />
 
-  Calendar Pop-up
+  <!-- Calendar Pop-up -->
   <Teleport to="body">
     <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
