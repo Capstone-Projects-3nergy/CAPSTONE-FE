@@ -303,18 +303,17 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader/>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
-        <aside
-          :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
-            isCollapsed ? 'w-0 md:w-16' : 'w-60'
-          ]"
-          class="overflow-hidden"
-        >
-          <nav class="flex-1 divide-y divide-transparent space-y-1">
-            <SidebarItem title="Tractify" @click="toggleSidebar">
+      <aside
+        :class="[
+          'fixed flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
+          isCollapsed ? 'w-0 md:w-16' : 'w-60'
+        ]"
+        class="overflow-hidden"
+      >
+        <nav class="flex-1 divide-y divide-transparent space-y-1">
+          <SidebarItem title="Tractify" @click="toggleSidebar" :collapsed="isCollapsed">
               <template #icon>
                 <svg
                   width="45"
@@ -457,8 +456,6 @@ onMounted(async () => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
-
       <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-50/50">
         <section class="max-w-7xl mx-auto">
           <!-- Header -->

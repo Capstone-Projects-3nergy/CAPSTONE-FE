@@ -634,9 +634,8 @@ const showResidentDetail = async function (id) {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader/>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -834,7 +833,7 @@ const showResidentDetail = async function (id) {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 p-9 x-full">
         <div class="flex flex-col gap-4 mb-6 px-2">

@@ -458,9 +458,8 @@ const returnLoginPage = async () => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-      <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader/>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -665,7 +664,7 @@ const returnLoginPage = async () => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+      
 
       <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">

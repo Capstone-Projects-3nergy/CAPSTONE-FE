@@ -3,6 +3,7 @@ defineProps({
   title: String,
   collapsed: Boolean
 })
+defineEmits(['click'])
 </script>
 
 <template>

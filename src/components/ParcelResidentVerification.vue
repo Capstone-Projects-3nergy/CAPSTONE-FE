@@ -623,7 +623,7 @@ const handleTrackingInput = (event, index) => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader/>
     <!-- <header class="flex items-center w-full h-16 bg-white">
       <div
         class="flex-1 bg-white flex justify-end items-center px-4 shadow h-full"
@@ -679,7 +679,6 @@ const handleTrackingInput = (event, index) => {
     </header> -->
 
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -869,7 +868,6 @@ const handleTrackingInput = (event, index) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
 
       <main class="flex-1 p-9 bg-[#f8f9fb]">
            <div class="max-w-4xl mx-auto flex flex-col gap-4 mb-6 px-2">
