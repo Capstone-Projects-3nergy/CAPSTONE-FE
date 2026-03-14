@@ -32,10 +32,32 @@ const formatDateTimeDisplay = (dateTimeStr) => {
     const dateParts = datePart.split('-');
     if (dateParts.length === 3) {
       const [year, month, day] = dateParts;
+      // Convert YYYY-MM-DD to DD/MM/YYYY
       return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
     }
   }
   return dateTimeStr;
+}
+
+const ensureDateTimeLocal = (dateStr) => {
+  if (!dateStr) return '';
+  // If already in YYYY-MM-DDTHH:mm, return it
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateStr)) return dateStr;
+  
+  // Try parsing to Date object
+  // Replace " - " with " " to help parsing if needed
+  const d = new Date(dateStr.replace(' - ', ' '));
+  if (isNaN(d.getTime())) {
+    // If it's something like "Just now" or "Draft", return as is (though datetime-local won't show it)
+    return dateStr;
+  }
+  
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 // No external icon library available, using inline SVGs
 
@@ -357,7 +379,10 @@ const fetchAnnouncementDetail = async () => {
   const found = existingAnnouncements.find((a) => (a.id === aid || a.announcementId === aid))
 
   if (found) {
-    Object.assign(announcementForm, found)
+    Object.assign(announcementForm, {
+      ...found,
+      datePosted: ensureDateTimeLocal(found.datePosted || found.date)
+    })
   }
 
   try {
@@ -377,7 +402,7 @@ const fetchAnnouncementDetail = async () => {
         category: data.category || data.tag || 'General',
         isPinned: data.isPinned || data.pinned || false,
         status: data.status || 'Published',
-        datePosted: data.datePosted || '',
+        datePosted: ensureDateTimeLocal(data.datePosted || data.createdAt),
         targetAudience: data.targetAudience || 'All',
         notify: data.notify || false
       }
@@ -389,7 +414,10 @@ const fetchAnnouncementDetail = async () => {
       console.log('Using fallback data for aid:', aid)
       const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
       if (fallbackFound) {
-        Object.assign(announcementForm, fallbackFound)
+        Object.assign(announcementForm, {
+          ...fallbackFound,
+          datePosted: ensureDateTimeLocal(fallbackFound.datePosted)
+        })
         if (fallbackFound.coverImage) {
           imagePreview.value = fallbackFound.coverImage
         }
@@ -848,7 +876,7 @@ const showProfileStaffPage = async function () {
                       type="text" 
                       :value="announcementForm.title"
                       @input="handleTitleInput"
-                      placeholder="Enter announcement title..."
+                      placeholder="Enter announcement title"
                       :class="[
                         'w-full px-4 py-3 rounded-xl border transition-all outline-none',
                         titleLengthError || titleThaiNumError 
@@ -1018,7 +1046,7 @@ const showProfileStaffPage = async function () {
                          @input="handleContentInput"
                          rows="6"
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                         placeholder="Enter announcement content... Supports text formatting."
+                         placeholder="Enter announcement content"
                       ></textarea>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">

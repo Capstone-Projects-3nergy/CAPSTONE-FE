@@ -710,7 +710,7 @@ const returnLoginPage = async () => {
                       type="text" 
                       :value="title"
                       @input="handleTitleInput"
-                      placeholder="Enter announcement title..."
+                      placeholder="Enter announcement title"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
                         titleLengthError || titleThaiNumError
@@ -735,7 +735,7 @@ const returnLoginPage = async () => {
                       type="text" 
                       :value="subtitle"
                       @input="handleSubtitleInput"
-                      placeholder="Enter brief description..."
+                      placeholder="Enter brief description"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
                         subtitleLengthError 
@@ -864,7 +864,7 @@ const returnLoginPage = async () => {
                          @input="handleContentInput"
                          rows="6"
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                         placeholder="Enter announcement content... Supports text formatting."
+                         placeholder="Enter announcement content"
                       ></textarea>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
