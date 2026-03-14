@@ -239,34 +239,90 @@ async function extractParcelInfo(imageDataUrl) {
       recipientName: '',
       trackingNumber: '',
       senderName: '',
-      parcelType: ''
+      parcelType: '',
+      companyId: null,
+      roomNumber: ''
     }
 
-    // 👤 Recipient
-    const nameMatch = text.match(
-      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
-    )
-    if (nameMatch) info.recipientName = nameMatch[2].trim()
+    // 👤 Recipient Search
+    const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'To', 'Recipient', 'ชือผู้รับ']
+    for (const kw of recipientKeywords) {
+      const regex = new RegExp(`${kw}[:\\s]*([\\u0E00-\\u0E7Fa-zA-Z\\s]{3,})`, 'i')
+      const match = text.match(regex)
+      if (match) {
+        let name = match[1].split('\n')[0].trim()
+        name = name.split(/[\d]/)[0].trim()
+        if (name.length >= 2) {
+          info.recipientName = name
+          break
+        }
+      }
+    }
 
-    // 📦 Tracking (ไม่บังคับ TH)
-    const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
-    if (trackingMatch) info.trackingNumber = trackingMatch[0]
+    // 📤 Sender Search
+    const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'From', 'Sender', 'ชือผู้ส่ง']
+    for (const kw of senderKeywords) {
+      const regex = new RegExp(`${kw}[:\\s]*([\\u0E00-\\u0E7Fa-zA-Z\\s]{3,})`, 'i')
+      const match = text.match(regex)
+      if (match) {
+        let name = match[1].split('\n')[0].trim()
+        name = name.split(/[\d]/)[0].trim()
+        if (name.length >= 2) {
+          info.senderName = name
+          break
+        }
+      }
+    }
 
-    // 📤 Sender
-    const senderMatch = text.match(
-      /(ชื่อผู้ส่ง|ผู้ส่ง|From|Sender)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
-    )
-    if (senderMatch) info.senderName = senderMatch[2].trim()
+    // 📦 Tracking & Company Detection
+    const trackingPatterns = [
+      { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
+      { id: 'Kerry', regex: /KEX[A-Z\d]{9,12}/i },
+      { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
+      { id: 'JT', regex: /JD\d{13}/i },
+      { id: 'DHL', regex: /\d{10,12}/ },
+      { id: 'Generic', regex: /[A-Z0-9\-]{8,22}/ }
+    ]
+
+    for (const pattern of trackingPatterns) {
+      const match = text.match(pattern.regex)
+      if (match) {
+        info.trackingNumber = match[0].toUpperCase()
+        const comp = companyList.value.find(c => {
+          const cName = c.companyName.toLowerCase()
+          if (pattern.id === 'Flash' && cName.includes('flash')) return true
+          if (pattern.id === 'Kerry' && cName.includes('kerry')) return true
+          if (pattern.id === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+          if (pattern.id === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+          return false
+        })
+        if (comp) info.companyId = comp.companyId
+        if (pattern.id !== 'Generic') break 
+      }
+    }
+
+    if (!info.companyId) {
+      for (const comp of companyList.value) {
+        if (text.toLowerCase().includes(comp.companyName.toLowerCase())) {
+          info.companyId = comp.companyId
+          break
+        }
+      }
+    }
+
+    // 🏠 Room Number
+    const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No)[:\s]*(\d+[\/\d]*)/i)
+    if (roomMatch) info.roomNumber = roomMatch[2]
 
     // 📦 Parcel Type
-    if (text.match(/(กล่อง|Box)/i)) info.parcelType = 'BOX'
-    else if (text.match(/(ซอง|Document|Letter|Envelope)/i))
-      info.parcelType = 'DOCUMENT'
-    else if (text.match(/(Electronic|Device)/i))
-      info.parcelType = 'ELECTRONIC'
+    const typeText = text.toLowerCase()
+    if (typeText.match(/(กล่อง|box|package)/)) info.parcelType = 'BOX'
+    else if (typeText.match(/(ซอง|document|letter|envelope|จดหมาย|เอกสาร)/)) info.parcelType = 'DOCUMENT'
+    else if (typeText.match(/(electronic|device|อุปกรณ์|เครื่องใช้ไฟฟ้า)/)) info.parcelType = 'ELECTRONIC'
 
     return info
-  } catch {
+  } catch (err) {
+    console.error("OCR extraction failed:", err)
     return null
   }
 }
@@ -385,11 +441,14 @@ async function capturePhoto() {
         })
         if (resident) {
           selectedResidentId.value = resident.userId
+          if (resident.roomNumber) form.value.roomNumber = resident.roomNumber
         }
       }
       if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
       if (info.senderName) form.value.senderName = info.senderName
       if (info.parcelType) form.value.parcelType = info.parcelType
+      if (info.companyId) form.value.companyId = info.companyId
+      if (info.roomNumber && !form.value.roomNumber) form.value.roomNumber = info.roomNumber
     }
   } catch (err) {
     console.error("OCR Error:", err)
