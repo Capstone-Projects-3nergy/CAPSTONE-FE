@@ -815,12 +815,12 @@ const closePopUp = (operate) => {
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
       <main class="flex-1 p-9">
-    <div class="flex items-center space-x-2 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+    <div class="flex items-center space-x-2 mb-8 py-1">
         <div class="flex items-center gap-4">
-          <div class="p-3 bg-blue-50 rounded-2xl text-[#0E4B90] shadow-sm">
-        <svg
-              width="24"
-              height="24"
+          <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+            <svg
+              width="25"
+              height="25"
               viewBox="0 0 25 25"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -830,12 +830,13 @@ const closePopUp = (operate) => {
                 fill="currentColor"
               />
             </svg>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight whitespace-nowrap">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                     Manage parcel &gt; Add </span>
-                </h2>
-              </div>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+              Manage Parcel &gt; Add
+            </span>
+          </h2>
+        </div>
         </div>
 
         <div
