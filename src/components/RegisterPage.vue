@@ -1326,7 +1326,7 @@ const toggleComfirmPasswordVisibility = () => {
             class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-2.5 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             @click="submitForm('RESIDENT')"
             :class="{
-              'disabled opacity-50 cursor-not-allowed':
+              'disabled opacity-30 cursor-not-allowed':
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
@@ -1337,12 +1337,16 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedRoomNumber.length > 0,
-              'opacity-70': !(trimmedFullName.length > 0 &&
+                trimmedRoomNumber.length > 0 &&
+                !isPasswordTooShort &&
+                !isConfirmPasswordTooShort,
+              'opacity-40':
+                trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
                 trimmedConfirmPassword.length > 0 &&
-                trimmedRoomNumber.length > 0)
+                trimmedRoomNumber.length > 0 &&
+                (isPasswordTooShort || isConfirmPasswordTooShort)
             }"
             :disabled="
               trimmedFullName.length === 0 ||
@@ -1361,7 +1365,7 @@ const toggleComfirmPasswordVisibility = () => {
             class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-2.5 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             @click="submitForm('STAFF')"
             :class="{
-              'disabled opacity-50 cursor-not-allowed':
+              'disabled opacity-30 cursor-not-allowed':
                 trimmedFullName.length === 0 ||
                 trimmedEmail.length === 0 ||
                 trimmedPassword.length === 0 ||
@@ -1370,11 +1374,16 @@ const toggleComfirmPasswordVisibility = () => {
                 trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
-                trimmedConfirmPassword.length > 0,
-              'opacity-70': !(trimmedFullName.length > 0 &&
+                trimmedConfirmPassword.length > 0 &&
+                !isPasswordTooShort &&
+                !isConfirmPasswordTooShort &&
+                !isStaffPositionTooShort,
+              'opacity-40':
+                trimmedFullName.length > 0 &&
                 trimmedEmail.length > 0 &&
                 trimmedPassword.length > 0 &&
-                trimmedConfirmPassword.length > 0)
+                trimmedConfirmPassword.length > 0 &&
+                (isPasswordTooShort || isConfirmPasswordTooShort || isStaffPositionTooShort)
             }"
             :disabled="
               trimmedFullName.length === 0 ||

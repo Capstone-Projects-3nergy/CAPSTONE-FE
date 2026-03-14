@@ -557,11 +557,8 @@ const showResetPasswordPageWeb = async function () {
             type="submit"
             class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
             :class="{
-              'disabled opacity-50 cursor-not-allowed':
-                isEmailOverLimit,
-              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]':
-                trimmedEmail && trimmedPassword,
-              'opacity-70': !(trimmedEmail && trimmedPassword)
+              'opacity-30 cursor-not-allowed': isEmailOverLimit,
+              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit
             }"
             :disabled="isEmailOverLimit"
           />

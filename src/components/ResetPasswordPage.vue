@@ -190,8 +190,8 @@ const returnLoginPage = () => {
      <div class="fixed top-30">
         <AlertPopUp
           v-if="error"
-          :titles="'Failed to send reset password email.'"
-          message="Please try again later."
+          :titles="'Failed to send reset password email. Please try again later.'"
+          message="Error!!"
           styleType="red"
           operate="problem"
           @closePopUp="closePopUp"
@@ -199,8 +199,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="success"
-          :titles="' Reset password link has been sent to your email.'"
-          message="Please check your email to continue."
+          :titles="' Reset password link has been sent to your email. Please check your email to continue.'"
+          message="Success!!"
           styleType="green"
           operate="success"
           @closePopUp="closePopUp"
@@ -208,8 +208,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="incorrectemailform"
-          :titles="'Invalid email format.'"
-          message="Please enter a valid email address."
+          :titles="'Invalid email format. Please enter a valid email address.'"
+          message="Error!!"
           styleType="red"
           operate="emailform"
           @closePopUp="closePopUp"
@@ -217,8 +217,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="emailRequire"
-          :titles="'Email is required.'"
-          message="Please enter your email address."
+          :titles="'Email is required. Please enter your email address.'"
+          message="Error!!"
           styleType="red"
           operate="emailEmpty"
           @closePopUp="closePopUp"
@@ -252,7 +252,10 @@ const returnLoginPage = () => {
             :loading="loading"
             type="submit"
             class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
-            :class="{ 'opacity-50 cursor-not-allowed hover:-translate-y-0': isEmailOverLimit, 'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit }"
+            :class="{
+              'opacity-30 cursor-not-allowed hover:-translate-y-0': isEmailOverLimit,
+              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit
+            }"
             :disabled="isEmailOverLimit"
             @click="sendResetEmail"
           />
