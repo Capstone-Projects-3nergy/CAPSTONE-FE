@@ -215,7 +215,7 @@ defineExpose({
         v-if="showDropdown"
         class="fixed bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 z-[60] overflow-hidden transition-all duration-300"
         :style="align === 'left' ? { 
-          top: `${popoverStyle.rowCenter - (windowWidth < 640 ? 120 : 200)}px`, 
+          top: `${popoverStyle.rowCenter - (windowWidth < 640 ? 120 : 210)}px`, 
           left: `${popoverStyle.left}px` 
         } : {}"
         :class="align === 'right' ? 'absolute right-0 mt-4 w-72' : 'w-[280px] sm:w-[420px] mx-0'"
