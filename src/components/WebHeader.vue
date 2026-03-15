@@ -142,7 +142,7 @@ watch(
             </div>
           </div>
         </div>
-        <UserInfo />
+        <!-- <UserInfo /> -->
       </div>
     </div>
   </header>
