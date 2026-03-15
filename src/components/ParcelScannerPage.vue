@@ -1595,14 +1595,12 @@ onMounted(async () => {
               </div>
 
               <div class="flex justify-end space-x-3 mt-8">
-                <div class="flex-1 flex justify-start md:justify-end">
-                  <ButtonWeb
-                    label="Reset"
-                    color="red"
-                    class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
-                    @click="cancelParcel"
-                  />
-                </div>
+                <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  @click="cancelParcel"
+                />
                 <ButtonWeb
                   label="Back"
                   color="gray"
