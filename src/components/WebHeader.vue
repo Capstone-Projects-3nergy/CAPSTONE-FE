@@ -34,13 +34,24 @@ const syncNotifications = async () => {
 }
 
 const currentTime = ref('')
+const currentDate = ref('')
 const updateTime = () => {
   const now = new Date()
+  
+  // Format: 20:36:31
   currentTime.value = new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     hour12: false
+  }).format(now)
+
+  // Format: Sun, 15 Mar 2026
+  currentDate.value = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
   }).format(now)
 }
 
@@ -159,19 +170,26 @@ watch(
           </div>
         </div>
         
-        <!-- Live Clock Display -->
+        <!-- Live Date & Clock Display -->
         <div class="flex items-center px-3 sm:px-4 py-1.5 bg-gray-50/80 backdrop-blur-sm rounded-full border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-white">
           <div class="flex items-center gap-2">
             <!-- Clock Icon SVG -->
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-[#0E4B90]">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
-            <span class="text-sm sm:text-[15px] font-bold text-gray-700 tracking-tight font-mono">
-              {{ currentTime }}
-            </span>
+            
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="text-[10px] sm:text-sm font-bold text-gray-500 whitespace-nowrap">
+                {{ currentDate }}
+              </span>
+              <div class="w-px h-3 bg-gray-300 hidden sm:block"></div>
+              <span class="text-xs sm:text-[15px] font-bold text-gray-700 tracking-tight font-mono">
+                {{ currentTime }}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      </div> 
     </div>
   </header>
 </template>
