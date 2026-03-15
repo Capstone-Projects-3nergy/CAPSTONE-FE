@@ -1,6 +1,6 @@
 <script setup>
 import UserInfo from '@/components/UserInfo.vue'
-import { computed } from 'vue'
+import { computed ,ref} from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
 import { useRouter } from 'vue-router'
 import { useNotificationManager } from '@/stores/NotificationManager'
@@ -33,17 +33,33 @@ const syncNotifications = async () => {
   }
 }
 
+const currentTime = ref('')
+const updateTime = () => {
+  const now = new Date()
+  currentTime.value = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(now)
+}
+
 let pollInterval = null
+let timeInterval = null
 
 onMounted(() => {
   window.addEventListener('focus', syncNotifications)
   // Poll fallback once a minute
   pollInterval = setInterval(syncNotifications, 60000)
+  
+  updateTime()
+  timeInterval = setInterval(updateTime, 1000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('focus', syncNotifications)
   if (pollInterval) clearInterval(pollInterval)
+  if (timeInterval) clearInterval(timeInterval)
 })
 
 watch(
@@ -142,7 +158,19 @@ watch(
             </div>
           </div>
         </div>
-        <!-- <UserInfo /> -->
+        
+        <!-- Live Clock Display -->
+        <div class="flex items-center px-3 sm:px-4 py-1.5 bg-gray-50/80 backdrop-blur-sm rounded-full border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-white">
+          <div class="flex items-center gap-2">
+            <!-- Clock Icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span class="text-sm sm:text-[15px] font-bold text-gray-700 tracking-tight font-mono">
+              {{ currentTime }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </header>
