@@ -67,7 +67,7 @@ const userRole = computed(() => {
       <div 
         @click="userInfoRef?.toggleDropdown"
         class="group/user flex items-center cursor-pointer transition-all duration-300 hover:bg-white/20 hover:shadow-lg rounded-none w-full py-4 active:bg-white/30"
-        :class="collapsed ? '!justify-start !pl-1' : 'px-4 gap-3'"
+        :class="collapsed ? '!justify-start !pl-2' : 'px-4 gap-3'"
       >
         <div class="flex-shrink-0">
           <UserInfo ref="userInfoRef" align="left" manual-trigger />

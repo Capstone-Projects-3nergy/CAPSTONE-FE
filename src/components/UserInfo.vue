@@ -159,7 +159,7 @@ defineExpose({
       @mouseleave="manualTrigger ? null : handleMouseLeave"
     >
       <div
-        class="rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-[#0E4B90]/10 group-hover:ring-[#0E4B90]/40 transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-110 active:scale-95 relative flex-shrink-0 !w-10 !h-10 flex items-center justify-center"
+        class="rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-[#0E4B90]/10 group-hover:ring-[#0E4B90]/40 transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-110 active:scale-95 relative flex-shrink-0 !w-10 !h-10"
       >
         <img
           v-if="profileImageUrlPreview"
@@ -168,7 +168,7 @@ defineExpose({
         />
         <div
           v-else
-          class="w-full h-full flex items-center justify-center text-white font-bold text-sm"
+          class="absolute inset-0 flex items-center justify-center text-white font-bold text-sm"
         >
           {{ userInitial }}
         </div>
@@ -234,9 +234,9 @@ defineExpose({
             <!-- Avatar -->
             <div class="relative mb-3 sm:mb-4 group/avatar">
               <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white">
-                <div class="w-full h-full rounded-full overflow-hidden relative flex items-center justify-center">
+                <div class="w-full h-full rounded-full overflow-hidden relative">
                   <img v-if="profileImageUrlPreview" :src="profileImageUrlPreview" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover/avatar:scale-110 block" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
+                  <div v-else class="absolute inset-0 flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
                     {{ userInitial }}
                   </div>
                 </div>
