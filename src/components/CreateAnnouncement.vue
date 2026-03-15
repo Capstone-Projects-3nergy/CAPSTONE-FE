@@ -988,14 +988,14 @@ const returnLoginPage = async () => {
              <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
-                  color="white-outline" 
+                  color="gray" 
                    :size="buttonSize"
                   class="sm:w-60"
                   @click="goBack" 
                 />
                 <ButtonWeb 
                   :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
-                  color="light-gray" 
+                  color="gray" 
                   :size="buttonSize"
                   class="sm:w-60"
                   @click="saveDraft" 

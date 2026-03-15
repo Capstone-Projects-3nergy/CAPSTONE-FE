@@ -157,8 +157,9 @@ const getCategoryIcon = (category) => {
       <div class="p-4 sm:p-6 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
         <ButtonWeb 
           label="Close" 
-          color="blue" 
+          color="gray" 
           size="md" 
+          class="hover:opacity-90 hover:bg-gray-100 rounded-2xl shadow-sm transition-all font-bold px-8 text-gray-600"
           @click="closeModal" 
         />
       </div>
