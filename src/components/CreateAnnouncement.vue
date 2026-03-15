@@ -236,7 +236,7 @@ const checkScreen = () => {
 }
 
 const buttonSize = computed(() => {
-  return windowWidth.value < 640 ? 'xs' : 'md'
+  return 'md'
 })
 
 onMounted(() => {
@@ -990,12 +990,14 @@ const returnLoginPage = async () => {
                   label="Cancel" 
                   color="white-outline" 
                    :size="buttonSize"
+                  class="sm:w-60"
                   @click="goBack" 
                 />
                 <ButtonWeb 
                   :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
                   color="light-gray" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="saveDraft" 
                   :disabled="!isFormValid"
                 >
@@ -1007,6 +1009,7 @@ const returnLoginPage = async () => {
                   :label="windowWidth < 640 ? 'Publish' : 'Publish Announcement'" 
                   color="blue" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="submitAnnouncement" 
                   :disabled="!isFormValid"
                 >

@@ -1230,7 +1230,7 @@ const isLineLinked = computed(() => {
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8 flex flex-col items-center text-center"
       >
         <div class="relative inline-block group mb-6">
           <!-- Avatar -->
@@ -1356,7 +1356,7 @@ const isLineLinked = computed(() => {
 
       <!-- RIGHT : Edit Information Card -->
       <div
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8"
       >
         <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
@@ -1725,13 +1725,13 @@ const isLineLinked = computed(() => {
           <!-- Actions -->
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
+              class="text-[#898989] flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"
               label="Cancel Changes"
               color="gray"
               @click="cancel"
             />
             <ButtonWeb
-              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
+              class="flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-3 md:px-10 whitespace-nowrap"
               :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
               color="blue"
               @click="submit"
@@ -1744,7 +1744,7 @@ const isLineLinked = computed(() => {
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-5 md:p-8"
       >
         <div class="mb-6 text-center md:hidden">
           <p class="hidden md:block text-sm font-extrabold text-[#0E4B90] pt-6">
@@ -1984,13 +1984,13 @@ const isLineLinked = computed(() => {
               <!-- Actions -->
               <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
+                  class="flex-1 md:flex-none text-[#898989] text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"
                   label="Cancel Changes"
                   color="gray"
                   @click="cancel"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
+                  class="flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-3 md:px-10 whitespace-nowrap"
                   :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
                   color="blue"
                   :disabled="isSaveDisabled"

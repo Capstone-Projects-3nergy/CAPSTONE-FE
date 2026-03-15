@@ -460,7 +460,7 @@ const checkScreen = () => {
 }
 
 const buttonSize = computed(() => {
-  return windowWidth.value < 640 ? 'xs' : 'md'
+  return 'md'
 })
 
 const toggleSidebar = () => {
@@ -1189,12 +1189,14 @@ const showProfileStaffPage = async function () {
                   label="Cancel" 
                   color="white-outline" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="handleCancel" 
                 />
                 <ButtonWeb 
                   :label="windowWidth < 640 ? 'Update' : 'Update Announcement'" 
                   color="blue" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="handleSave" 
                   :disabled="!hasChanges"
                   :loading="isSubmitting"
