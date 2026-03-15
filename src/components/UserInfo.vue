@@ -247,7 +247,7 @@ defineExpose({
             <p class="text-xs sm:text-sm text-[#0E4B90] font-semibold mt-1 px-3 py-1 bg-blue-50 rounded-full text-center">
               {{ userRole }}
             </p>
-            <p class="text-[9px] sm:text-[10px] text-gray-400 mt-2 font-medium text-center truncate w-full px-2">{{ userEmail }}</p>
+            <p class="text-[9px] sm:text-[10px] text-gray-400 mt-2 font-medium text-center w-full px-2">{{ userEmail }}</p>
           </div>
 
           <!-- Menu Actions Section -->
