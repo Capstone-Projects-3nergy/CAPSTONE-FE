@@ -21,8 +21,9 @@ import { getItems, editItem } from '@/utils/fetchUtils'
 import { useDashboardManager } from '@/stores/DashboardManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import * as XLSX from 'xlsx'
-import { jsPDF } from 'jspdf'
+import ReportExport from './ReportExport.vue'
+
+const reportExportRef = ref(null)
 
 const loginManager = useAuthManager()
 const userManager = useUserManager()
@@ -536,186 +537,9 @@ const toggleSidebar = () => {
 }
 const activeTab = ref('parcel')
 
-const handleExportExcel = () => {
-  const stats = dashboardStore.stats;
-  const pending = pendingResidentsList.value;
-  const topRes = topResidents.value;
-  const announcements = dashboardStore.announcements.slice(0, 5);
-  const parcels = getMappedParcels.value.slice(0, 10);
-
-  // 1. STATISTIC OVERVIEW
-  const statsData = [
-    ['Dormitory Management System - Full Summary Report'],
-    ['Generated Date', new Date().toLocaleString()],
-    [],
-    ['1. STATISTIC OVERVIEW'],
-    ['Category', 'Status Item', 'Count / Value'],
-    ['Parcels', 'Total Received', stats.totalParcels],
-    ['', 'Picked Up', stats.pickedUpParcels],
-    ['', 'Awaiting Pickup', stats.awaitingParcels],
-    ['', 'Overdue', stats.overdueParcels],
-    ['Residents', 'Total Registered', stats.totalResidents],
-    ['', 'Active Residents', stats.activeResidents],
-    ['', 'Pending Approval', stats.pendingResidents],
-    ['', 'Inactive', stats.inactiveResidents],
-    ['Communications', 'Total Announcements', stats.totalAnnouncements],
-    []
-  ];
-
-  // 2. PENDING APPROVALS
-  const pendingData = [
-    ['2. PENDING APPROVALS'],
-    ['Name', 'Room No.', 'Email', 'Updated At'],
-    ...pending.map(r => [r.fullName, r.roomNumber, r.email, r.updateAt ? new Date(r.updateAt).toLocaleString() : '-']),
-    []
-  ];
-
-  // 3. TOP RESIDENTS
-  const topResData = [
-    ['3. TOP RESIDENTS (Active Activity)'],
-    ['Rank', 'Name', 'Room No.', 'Parcel Count'],
-    ...topRes.map((r, i) => [i + 1, r.fullName || r.name, r.roomNumber || r.room, r.count || r.parcelCount]),
-    []
-  ];
-
-  // 4. RECENT ANNOUNCEMENTS
-  const annData = [
-    ['4. RECENT ANNOUNCEMENTS'],
-    ['Title', 'Type', 'Date'],
-    ...announcements.map(a => [a.title, a.type, new Date(a.createdAt || a.date).toLocaleDateString()]),
-    []
-  ];
-
-  // 5. RECENT PARCELS 
-  const parcelData = [
-    ['5. RECENT PARCELS (Latest Activity)'],
-    ['Date', 'Resident', 'Tracking No.', 'Status'],
-    ...parcels.map(p => [new Date(p.updatedAt).toLocaleDateString(), p.residentName, p.trackingNumber, p.status.toUpperCase()])
-  ];
-
-  const finalData = [...statsData, ...pendingData, ...topResData, ...annData, ...parcelData];
-  const ws = XLSX.utils.aoa_to_sheet(finalData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Full Summary Report");
-
-  ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
-  XLSX.writeFile(wb, `Dormitory_Full_Data_${new Date().toISOString().slice(0, 10)}.xlsx`);
-};
-
-const handleExportPDF = () => {
-  const doc = new jsPDF();
-  const stats = dashboardStore.stats;
-  const topRes = topResidents.value;
-  const parcels = getMappedParcels.value.slice(0, 10);
-  const brandColor = [29, 53, 94]; // Navy Blue style
-
-  let y = 20;
-
-  // ฟังก์ชันวาดหัวข้อพร้อมแถบสีน้ำเงิน
-  const drawVerticalBarHeader = (text) => {
-    doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 5, 3, 8, 'F'); // วาดแถบแนวตั้ง
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(29, 53, 94);
-    doc.text(text, 22, y);
-    y += 10;
-  };
-
-  // Main Header
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(29, 53, 94);
-  doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
-  y += 8;
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100, 100, 100);
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
-  y += 6;
-  doc.setDrawColor(29, 53, 94);
-  doc.setLineWidth(1);
-  doc.line(15, y, 195, y);
-  y += 15;
-
-  // 1. STATISTIC OVERVIEW Table
-  drawVerticalBarHeader("1. Statistic Overview");
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  
-  const statsItems = [
-    { cat: 'Parcels', item: 'Total Received', val: stats.totalParcels },
-    { cat: '', item: 'Picked Up', val: stats.pickedUpParcels },
-    { cat: '', item: 'Awaiting Pickup', val: stats.awaitingParcels },
-    { cat: 'Residents', item: 'Total Registered', val: stats.totalResidents },
-    { cat: '', item: 'Active Residents', val: stats.activeResidents },
-    { cat: '', item: 'Pending Approval', val: stats.pendingResidents },
-    { cat: 'Communications', item: 'Total Announcements', val: stats.totalAnnouncements }
-  ];
-
-  // Header Table
-  doc.setFont("helvetica", "bold");
-  doc.text("CATEGORY", 18, y); doc.text("STATUS ITEM", 75, y); doc.text("COUNT / VALUE", 160, y);
-  y += 3;
-  doc.line(15, y, 195, y);
-  y += 7;
-
-  doc.setFont("helvetica", "normal");
-  statsItems.forEach(row => {
-    doc.text(row.cat, 18, y);
-    doc.text(row.item, 75, y);
-    doc.text(row.val.toString(), 175, y, { align: 'right' });
-    doc.setDrawColor(230, 230, 230);
-    doc.line(15, y + 2, 195, y + 2); // เส้นแบ่งแถวอ่อนๆ
-    y += 8;
-  });
-  y += 5;
-
-  // 3. TOP RESIDENTS Table
-  if (y > 240) { doc.addPage(); y = 20; }
-  drawVerticalBarHeader("3. Top Residents (Active Activity)");
-  doc.setFont("helvetica", "bold");
-  doc.text("RANK", 18, y); doc.text("NAME", 40, y); doc.text("ROOM NO.", 110, y); doc.text("PARCEL COUNT", 160, y);
-  y += 3;
-  doc.line(15, y, 195, y);
-  y += 7;
-  doc.setFont("helvetica", "normal");
-  topRes.forEach((res, i) => {
-    doc.text((i + 1).toString(), 18, y);
-    doc.text((res.fullName || res.name).substring(0, 25), 40, y);
-    doc.text(res.roomNumber || res.room || '-', 110, y);
-    doc.text((res.count || res.parcelCount).toString(), 175, y, { align: 'right' });
-    doc.line(15, y + 2, 195, y + 2);
-    y += 8;
-  });
-  y += 5;
-
-  // 5. RECENT PARCELS Table
-  if (y > 220) { doc.addPage(); y = 20; }
-  drawVerticalBarHeader("5. Recent Parcels (Latest activity)");
-  doc.setFont("helvetica", "bold");
-  doc.text("DATE", 18, y); doc.text("RESIDENT", 50, y); doc.text("TRACKING NO.", 100, y); doc.text("STATUS", 165, y);
-  y += 3;
-  doc.line(15, y, 195, y);
-  y += 7;
-  doc.setFont("helvetica", "normal");
-  parcels.forEach(p => {
-    if (y > 280) { doc.addPage(); y = 20; }
-    doc.text(new Date(p.updatedAt).toLocaleDateString(), 18, y);
-    doc.text(p.residentName.substring(0, 18), 50, y);
-    doc.text(p.trackingNumber.substring(0, 20), 100, y);
-    doc.text(p.status.toUpperCase(), 165, y);
-    doc.line(15, y + 2, 195, y + 2);
-    y += 8;
-  });
-
-  doc.save(`Dormitory_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
-};
-
-const handlePrintSummary = () => {
-  // Trigger standard browser print which uses @media print styles
-  window.print();
-};
+const handleExportExcel = () => reportExportRef.value?.handleExportExcel();
+const handleExportPDF = () => reportExportRef.value?.handleExportPDF();
+const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 </script>
 
 <template>
@@ -725,157 +549,14 @@ const handlePrintSummary = () => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     
-    <!-- Professional Print Report Section (Visible only when printing) -->
-    <div class="print-report">
-      <div class="print-header">
-        <h1>Dormitory Management System - Summary Report</h1>
-        <p class="text-gray-600">Generated on: {{ new Date().toLocaleString() }}</p>
-      </div>
-
-      <!-- Quick Stats Table -->
-      <div class="print-section">
-        <h2 class="print-section-title">1. Statistic Overview</h2>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Status Item</th>
-              <th>Count / Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td rowspan="4" class="font-bold">Parcels</td>
-              <td>Total Received</td>
-              <td>{{ dashboardStore.stats.totalParcels }}</td>
-            </tr>
-            <tr>
-              <td>Picked Up</td>
-              <td>{{ dashboardStore.stats.pickedUpParcels }}</td>
-            </tr>
-            <tr>
-              <td>Awaiting Pickup</td>
-              <td>{{ dashboardStore.stats.awaitingParcels }}</td>
-            </tr>
-            <tr>
-              <td>Overdue</td>
-              <td>{{ dashboardStore.stats.overdueParcels }}</td>
-            </tr>
-            <tr>
-              <td rowspan="4" class="font-bold">Residents</td>
-              <td>Total Registered</td>
-              <td>{{ dashboardStore.stats.totalResidents }}</td>
-            </tr>
-            <tr>
-              <td>Active Residents</td>
-              <td>{{ dashboardStore.stats.activeResidents }}</td>
-            </tr>
-            <tr>
-              <td>Pending Approval</td>
-              <td>{{ dashboardStore.stats.pendingResidents }}</td>
-            </tr>
-            <tr>
-              <td>Inactive</td>
-              <td>{{ dashboardStore.stats.inactiveResidents }}</td>
-            </tr>
-            <tr>
-              <td class="font-bold">Communications</td>
-              <td>Total Announcements</td>
-              <td>{{ dashboardStore.stats.totalAnnouncements }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pending Approvals Table -->
-      <div class="print-section" v-if="pendingResidentsList.length > 0">
-        <h2 class="print-section-title">2. Pending Approvals</h2>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Room No.</th>
-              <th>Email</th>
-              <th>Updated At</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="res in pendingResidentsList" :key="res.id">
-              <td>{{ res.fullName }}</td>
-              <td>{{ res.roomNumber }}</td>
-              <td>{{ res.email }}</td>
-              <td>{{ res.updateAt ? new Date(res.updateAt).toLocaleString() : '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Top Residents (Parcel counts) -->
-      <div class="print-section" v-if="topResidents.length > 0">
-        <h2 class="print-section-title">3. Top Residents (Active Activity)</h2>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>Room No.</th>
-              <th>Parcel Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(res, idx) in topResidents" :key="res.id">
-              <td>{{ idx + 1 }}</td>
-              <td>{{ res.fullName }}</td>
-              <td>{{ res.roomNumber }}</td>
-              <td>{{ res.parcelCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Recent Announcements -->
-      <div class="print-section" v-if="dashboardStore.announcements.length > 0">
-        <h2 class="print-section-title">4. Recent Announcements</h2>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Type</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="ann in dashboardStore.announcements.slice(0, 5)" :key="ann.id">
-              <td>{{ ann.title }}</td>
-              <td>{{ ann.type }}</td>
-              <td>{{ new Date(ann.createdAt || ann.date).toLocaleDateString() }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Recent Parcels -->
-      <div class="print-section" v-if="getMappedParcels && getMappedParcels.length > 0">
-        <h2 class="print-section-title">5. Recent Parcels (Latest activity)</h2>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Resident</th>
-              <th>Tracking No.</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="parcel in getMappedParcels.slice(0, 10)" :key="parcel.id">
-              <td>{{ new Date(parcel.updatedAt).toLocaleDateString() }}</td>
-              <td>{{ parcel.residentName }}</td>
-              <td>{{ parcel.trackingNumber }}</td>
-              <td>{{ parcel.status.toUpperCase() }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <ReportExport
+      ref="reportExportRef"
+      :stats="dashboardStore.stats"
+      :pendingResidents="pendingResidentsList"
+      :topResidents="topResidents"
+      :announcements="dashboardStore.announcements"
+      :parcels="getMappedParcels"
+    />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
         v-if="welcomePopupVisible"
@@ -1101,6 +782,31 @@ const handlePrintSummary = () => {
                    DashBoard </span>
                 </h2>
               </div>
+            </div>
+
+            <!-- Export & Print Actions -->
+            <div class="flex items-center gap-3 no-print">
+              <button 
+                @click="handleExportExcel"
+                class="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                Excel
+              </button>
+              <button 
+                @click="handleExportPDF"
+                class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl border border-red-100 hover:bg-red-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                PDF
+              </button>
+              <button 
+                @click="handlePrintSummary"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 hover:bg-blue-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print
+              </button>
             </div>
           </div>
           <!-- Tabs Navigation (Premium Framed Style) -->
@@ -1980,157 +1686,4 @@ const handlePrintSummary = () => {
 </template>
 
 <style scoped>
-@media print {
-  /* Critical cleanup for professional report */
-  .no-print,
-  aside, 
-  header, 
-  nav,
-  button,
-  .fixed,
-  .activity-filters {
-    display: none !important;
-  }
-
-  /* Reset layout for full page printable area */
-  .min-h-screen {
-    padding: 0 !important;
-    margin: 0 !important;
-    background-color: white !important;
-  }
-
-  /* Professional Summary Report Container */
-  .print-report {
-    display: block !important;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-    color: #111827 !important;
-  }
-
-  .print-header {
-    display: block !important;
-    text-align: center;
-    border-bottom: 2px solid #1D355E;
-    padding-bottom: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .print-header h1 {
-    font-size: 28px !important;
-    font-weight: 800 !important;
-    color: #1D355E !important;
-    margin-bottom: 0.5rem;
-  }
-
-  .print-header p {
-    font-size: 14px;
-    color: #4b5563;
-  }
-
-  .print-section {
-    margin-bottom: 3.5rem;
-    page-break-inside: avoid;
-  }
-
-  .print-section-title {
-    display: block !important;
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    color: #1D355E !important;
-    margin-bottom: 1.25rem;
-    border-left: 5px solid #1D355E;
-    padding-left: 1rem;
-  }
-
-  /* Beautiful Summary Table */
-  .print-table {
-    width: 100%;
-    border-collapse: collapse !important;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  }
-
-  .print-table th {
-    background-color: #f9fafb !important;
-    color: #374151 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border: 1px solid #e5e7eb;
-    padding: 12px 16px !important;
-    text-align: left;
-  }
-
-  .print-table td {
-    border: 1px solid #e5e7eb;
-    padding: 12px 16px !important;
-    font-size: 14px !important;
-    color: #1f2937;
-    vertical-align: middle;
-  }
-
-  .print-table tr:nth-child(even) {
-    background-color: #fbfcfd;
-  }
-
-  .font-bold {
-    font-weight: 700 !important;
-    color: #111827 !important;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-.print-report {
-  display: none;
-}
-
-/* Old print styles below to be cleaned up or overridden */
-@media print_disabled {
-  /* Hide UI elements not needed in report */
-  aside, 
-  header, 
-  .fixed, 
-  button,
-  .no-print {
-    display: none !important;
-  }
-
-  /* Reset layout for full width printing */
-  .min-h-screen {
-    padding-top: 0 !important;
-    margin-left: 0 !important;
-    background-color: white !important;
-  }
-
-  /* Ensure charts and cards are visible */
-  .bg-white {
-    background-color: white !important;
-    border: 1px solid #e5e7eb !important;
-    box-shadow: none !important;
-  }
-
-  /* Custom report header only for print */
-  .print-header {
-    display: block !important;
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #1D355E;
-    padding-bottom: 1rem;
-  }
-
-  .print-header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1D355E;
-  }
-}
-
-.print-header {
-  display: none;
-}
 </style>
