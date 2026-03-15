@@ -77,7 +77,7 @@ const userRole = computed(() => {
           v-if="!collapsed" 
           class="flex flex-col min-w-0 transition-all duration-300"
         >
-          <span class="text-[14px] font-bold text-white truncate">
+          <span class="text-[14px] font-bold text-gray-300 truncate">
             {{ userFullName }}
           </span>
           <span class="text-[11px] text-gray-400/80 font-medium truncate tracking-tight">

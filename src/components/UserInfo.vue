@@ -159,7 +159,7 @@ defineExpose({
       @mouseleave="manualTrigger ? null : handleMouseLeave"
     >
       <div
-        class="rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-[#0E4B90]/10 group-hover:ring-[#0E4B90]/40 transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-110 active:scale-95 relative flex-shrink-0 !w-10 !h-10"
+        class="rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] ring-2 ring-[#0E4B90]/10 group-hover:ring-[#0E4B90]/40 transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-110 active:scale-95 relative flex-shrink-0 !w-[34px] !h-[34px]"
       >
         <img
           v-if="profileImageUrlPreview"
