@@ -287,7 +287,7 @@ defineExpose({
                 </div>
                 <span class="text-red-600 font-bold text-xs sm:text-sm">Logout</span>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-red-200 group-hover:red-500 transition-all transform group-hover:translate-x-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300 group-hover:text-red-500 transition-all transform group-hover:translate-x-1">
                 <path d="M9 18l6-6-6-6" />
               </svg>
             </button>
