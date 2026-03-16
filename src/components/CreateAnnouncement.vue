@@ -8,7 +8,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { addAnnouncementWithFile, getAnnouncements } from '@/utils/fetchUtils.js'
+import { addAnnouncementWithFile, getAnnouncements, addAnnouncement } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 
@@ -338,7 +338,8 @@ const submitAnnouncement = async () => {
       sendNotification: sendNotification.value,
       priority: 1,
       publishAt: publishAt.value || null,
-      publishNow: true
+      publishNow: true,
+      coverImageUrl: "" // Backend คาดหวังฟิลด์นี้ (ใส่ว่างไว้ก่อนถ้ายังไม่ได้ upload ภาพแยก)
     }
 
     if (imageFile.value) {
@@ -346,15 +347,16 @@ const submitAnnouncement = async () => {
     }
 
     // -----------------------
-    // API call
+    // API call - เปลื่ยนมาใช้ addAnnouncement เพื่อให้จัดการ Auth อัตโนมัติ
     // -----------------------
-    const savedAnnouncement = await addAnnouncementWithFile(
+    const savedAnnouncement = await addAnnouncement(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
     )
 
-    if (!savedAnnouncement) {
+    // ตรวจสอบว่าเป็น Object หรือไม่ (ถ้าเป็นตัวเลขคือ status code/error)
+    if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false
       error.value = true
       setTimeout(() => {
@@ -432,15 +434,15 @@ const saveDraft = async () => {
     }
 
     // -----------------------
-    // API call
+    // API call - JSON POST
     // -----------------------
-    const savedAnnouncement = await addAnnouncementWithFile(
+    const savedAnnouncement = await addAnnouncement(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
     )
 
-    if (!savedAnnouncement) {
+    if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false
       error.value = true
       setTimeout(() => {
