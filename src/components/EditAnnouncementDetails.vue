@@ -582,7 +582,8 @@ const handleSave = async () => {
       pinned: announcementForm.pinned,
       priority: 1,
       sendNotification: announcementForm.sendNotification,
-      publishAt: announcementForm.publishAt || null
+      publishAt: announcementForm.publishAt || null,
+      status: announcementForm.status
     }
 
     if (coverImage.value) {

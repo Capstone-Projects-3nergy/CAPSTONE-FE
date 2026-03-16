@@ -1031,7 +1031,7 @@ const returnLoginPage = async () => {
                 />
                 <ButtonWeb 
                   :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
-                  color="gray" 
+                  color="yellow" 
                   :size="buttonSize"
                   class="sm:w-60"
                   @click="saveDraft" 
