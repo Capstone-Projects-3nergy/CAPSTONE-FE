@@ -552,7 +552,20 @@ const showResetPasswordPageWeb = async function () {
               >Forgot your password?</a
             >
           </div>
-          <ButtonWeb
+           <ButtonWeb
+            label="Sign In"
+            type="submit"
+            color="black"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-not-allowed':
+                isEmailOverLimit,
+              'bg-black hover:bg-gray-600 text-white':
+                trimmedEmail && trimmedPassword
+            }"
+            :disabled="isEmailOverLimit"
+          />
+          <!-- <ButtonWeb
             label="Sign In"
             type="submit"
             class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
@@ -561,7 +574,7 @@ const showResetPasswordPageWeb = async function () {
               'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit
             }"
             :disabled="isEmailOverLimit"
-          />
+          /> -->
         </form>
 
         <p class="text-sm text-center text-[#8C8F91] mt-8">

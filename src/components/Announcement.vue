@@ -101,11 +101,10 @@ let dateInterval
 
 const allPublishedAnnouncements = computed(() => {
   return announcementManager.announcements
-    .filter((item) => item.status === 'Published')
+    .filter(item => item.status === 'PUBLISHED')
     .map((item) => {
-      // Normalize data (handle both mock store data and API mapped data)
-      const rawDate = item.date || item.createdAt || 'Just now'
-      const rawType = (item.type || item.category || 'General').toLowerCase()
+      const rawDate = item.publishAt || 'Just now'
+      const rawType = (item.category || 'General').toLowerCase()
       const normalizedType = rawType.includes('event') ? 'event' : 'news'
 
       return {
@@ -115,11 +114,14 @@ const allPublishedAnnouncements = computed(() => {
       }
     })
     .sort((a, b) => {
-      const aPinned = a.isPinned || a.pinned
-      const bPinned = b.isPinned || b.pinned
-      if (aPinned && !bPinned) return -1
-      if (!aPinned && bPinned) return 1
-      return new Date(b.date) - new Date(a.date)
+      if (a.pinned && !b.pinned) return -1
+      if (!a.pinned && b.pinned) return 1
+      
+      const dateA = new Date(a.date)
+      const dateB = new Date(b.date)
+      if (isNaN(dateA.getTime())) return 1
+      if (isNaN(dateB.getTime())) return -1
+      return dateB - dateA
     })
     .map((item) => ({
       ...item,
@@ -192,7 +194,6 @@ const filteredNews = computed(() => {
 })
 
 const openModal = async (item) => {
-  // Try to get fresh data from backend to get latest view count
   try {
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
@@ -201,54 +202,33 @@ const openModal = async (item) => {
     )
 
     if (data) {
-      // Record view in background
       recordAnnouncementView(
         `${import.meta.env.VITE_BASE_URL}/api/announcements`,
         item.id,
         router
       )
-
-      const type = (data.type || data.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = data.createdAt || data.date || 'Just now'
-
-      selectedAnnouncement.value = {
-        id: data.id || data.announcementId,
-        title: data.title || data.header || '',
-        subtitle: data.subtitle || data.description || '',
-        content: data.content || data.description || '',
-        category: data.tag || capitalizedType,
-        tag: data.tag || capitalizedType,
-        pinned: data.pinned || false,
-        datePosted: rawDate,
-        date: rawDate,
-        views: (data.views || 0) + 1, // Optimistically show +1 view
-        author: data.author || 'Staff Portal',
-        status: data.status || 'Published',
-        type: type.includes('event') ? 'event' : 'news',
-        coverImage: data.coverImage
+      
+      announcementManager.updateAnnouncement(data)
+      const freshItem = announcementManager.findAnnouncementById(item.id)
+      
+      if (freshItem) {
+        selectedAnnouncement.value = {
+          ...freshItem,
+          tag: freshItem.category,
+          date: freshItem.publishAt,
+          views: freshItem.viewCount,
+          author: 'Staff Portal',
+          type: freshItem.category.toLowerCase().includes('event') ? 'event' : 'news'
+        }
+      } else {
+        selectedAnnouncement.value = item
       }
     } else {
-      // Fallback to item data
-      selectedAnnouncement.value = {
-        title: item.title,
-        subtitle: item.subtitle,
-        content: item.content,
-        tag: item.category,
-        date: item.date,
-        views: item.views,
-        author: item.author
-      }
+      selectedAnnouncement.value = item
     }
   } catch (error) {
     console.error('Error fetching announcement detail:', error)
-    selectedAnnouncement.value = {
-      title: item.title,
-      subtitle: item.subtitle,
-      content: item.content,
-      tag: item.category,
-      date: item.date
-    }
+    selectedAnnouncement.value = item
   }
 
   isModalOpen.value = true
@@ -312,30 +292,9 @@ const fetchAnnouncementData = async () => {
       router
     )
 
-    const list = Array.isArray(data) ? data : []
-
-    const mapped = list.map((item) => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = item.createdAt || item.date || 'Just now'
-
-      return {
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.subtitle || item.description || '',
-        content: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        date: rawDate,
-        views: item.views || 0,
-        author: item.author || 'Staff Portal',
-        status: item.status || 'Published',
-        type: type.includes('event') ? 'event' : 'news'
-      }
-    })
-
-    if (mapped.length > 0) {
-      announcementManager.setAnnouncements(mapped)
+    if (data && Array.isArray(data)) {
+      announcementManager.setAnnouncements(data)
+      console.log('Resident view: API data fetched and stored')
     }
   } catch (e) {
     console.warn('Fetch announcements failed', e)

@@ -40,8 +40,8 @@ const getCategoryBadgeClass = (category) => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'Published': return 'bg-green-50 text-green-600'
-    case 'Draft': return 'bg-orange-50 text-orange-600'
+    case 'PUBLISHED': return 'bg-green-50 text-green-600'
+    case 'DRAFT': return 'bg-orange-50 text-orange-600'
     default: return 'bg-gray-50 text-gray-600'
   }
 }

@@ -44,15 +44,24 @@ const isCategoryOpen = ref(false)
 // Form Data
 const title = ref('')
 const subtitle = ref('')
-const category = ref('')
+const categoryId = ref(null)
 const content = ref('')
-const date = ref('')
+const publishAt = ref('')
 
-const targetAudience = ref('All')
-const isPinned = ref(false)
-const notify = ref(true)
+const targetAudience = ref('ALL_RESIDENTS')
+const pinned = ref(false)
+const sendNotification = ref(true)
 
-const categories = ['General', 'Maintenance', 'Events', 'Urgent']
+const categories = [
+  { id: 1, name: 'General' },
+  { id: 2, name: 'Maintenance' },
+  { id: 3, name: 'Events' },
+  { id: 4, name: 'Urgent' }
+]
+
+const currentCategory = computed(() => {
+  return categories.find(c => c.id === categoryId.value) || null
+})
 
 const addSuccess = ref(false)
 const isLoading = ref(false)
@@ -111,7 +120,7 @@ const formatText = (style) => {
 }
 
 const isFormValid = computed(() => {
-  return title.value.trim() !== '' && category.value !== '' && date.value !== '' && content.value.trim() !== ''
+  return title.value.trim() !== '' && categoryId.value !== null && publishAt.value !== '' && content.value.trim() !== ''
 })
 
 const closePopUp = (operate) => {
@@ -262,7 +271,7 @@ const submitAnnouncement = async () => {
     titleError.value = true
     return
   }
-  if (!category.value) {
+  if (categoryId.value === null) {
     categoryError.value = true
     return
   }
@@ -279,13 +288,14 @@ const submitAnnouncement = async () => {
     const body = {
       title: title.value,
       subtitle: subtitle.value,
-      category: category.value,
       content: content.value,
-      datePosted: date.value || new Date().toISOString(),
-      targetAudience: targetAudience.value,
-      isPinned: isPinned.value,
-      notify: notify.value,
-      status: 'Published'
+      categoryId: categoryId.value,
+      dormId: parseInt(route.params.id),
+      pinned: pinned.value,
+      sendNotification: sendNotification.value,
+      priority: 1,
+      publishAt: publishAt.value || null,
+      publishNow: true
     }
 
     if (imageFile.value) {
@@ -314,7 +324,7 @@ const submitAnnouncement = async () => {
 
     // Send Line notification and fetch updated data
     try {
-      if (notify.value) {
+      if (sendNotification.value) {
         await notificationManager.notifyAnnouncementCreated(body, router)
       }
     } catch (lineError) {
@@ -344,7 +354,7 @@ const saveDraft = async () => {
   
   let hasError = false
   if (!title.value.trim()) { titleError.value = true; hasError = true }
-  if (!category.value) { categoryError.value = true; hasError = true }
+  if (categoryId.value === null) { categoryError.value = true; hasError = true }
   if (!content.value.trim()) { contentError.value = true; hasError = true }
   
   if (hasError) {
@@ -364,13 +374,14 @@ const saveDraft = async () => {
     const body = {
       title: title.value,
       subtitle: subtitle.value,
-      category: category.value,
       content: content.value,
-      datePosted: date.value || new Date().toISOString(),
-      targetAudience: targetAudience.value,
-      isPinned: isPinned.value,
-      notify: notify.value,
-      status: 'Draft'
+      categoryId: categoryId.value,
+      dormId: parseInt(route.params.id),
+      pinned: pinned.value,
+      sendNotification: false,
+      priority: 1,
+      publishAt: publishAt.value || null,
+      publishNow: false
     }
 
     if (imageFile.value) {
@@ -782,19 +793,19 @@ const returnLoginPage = async () => {
                         </div>
                         <!-- Dropdown Options -->
                         <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="categoryId = 1; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                              General
                           </div>
-                          <div @click="category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="categoryId = 2; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                              Maintenance
                           </div>
-                          <div @click="category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="categoryId = 3; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                              Activity/Events
                           </div>
-                          <div @click="category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="categoryId = 4; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                              Urgent
                           </div>
@@ -823,7 +834,7 @@ const returnLoginPage = async () => {
                         <input 
                            type="text" 
                            readonly
-                           :value="formatDateTimeDisplay(date)"
+                           :value="formatDateTimeDisplay(publishAt)"
                            placeholder="DD/MM/YYYY - HH:mm"
                            @click="openDatePicker"
                            class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
@@ -833,7 +844,7 @@ const returnLoginPage = async () => {
                         <input
                            ref="dateInput"
                            type="datetime-local" 
-                           v-model="date"
+                           v-model="publishAt"
                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
                         />
                       </div>
@@ -918,22 +929,22 @@ const returnLoginPage = async () => {
                   <label class="text-sm font-semibold text-gray-700">Target Audience</label>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="targetAudience" value="All" class="peer sr-only" />
+                      <input type="radio" v-model="targetAudience" value="ALL_RESIDENTS" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'ALL_RESIDENTS' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         </div>
-                        <span class="font-medium text-sm text-center" :class="targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'ALL_RESIDENTS' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
                       </div>
                     </label>
 
                     <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="targetAudience" value="Active" class="peer sr-only" />
+                      <input type="radio" v-model="targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
+                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'ACTIVE_ONLY' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
-                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
+                        <span class="font-medium text-sm text-center" :class="targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
                     </label>
 
@@ -961,8 +972,8 @@ const returnLoginPage = async () => {
                          <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
                        </div>
                      </div>
-                     <button @click="isPinned = !isPinned" :class="isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="pinned = !pinned" :class="pinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="pinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
 
@@ -976,8 +987,8 @@ const returnLoginPage = async () => {
                          <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
                        </div>
                      </div>
-                     <button @click="notify = !notify" :class="notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="sendNotification = !sendNotification" :class="sendNotification ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="sendNotification ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>

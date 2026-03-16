@@ -55,173 +55,7 @@ const closePopUp = (operate) => {
 }
 
 // Announcement Data & Logic
-const announcements = ref([
-  {
-    id: 1,
-    title: 'Temporary Water Shutoff — Plumbing Repair',
-    subtitle: 'Water will be shut off from 08:00–14:00 on February 20, 2026, for main plumbing repairs. Please reserve water in advance. We apologize for the inconvenience. If you have any questions, please contact the staff at the counter.',
-    category: 'Urgent',
-    pinned: true,
-    datePosted: '19 Feb 2026 - 10:30',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 82
-  },
-  {
-    id: 2,
-    title: 'Temporary Elevator Shutdown for Annual Inspection',
-    subtitle: 'The elevator will be closed for service on February 21-22, 2026, for annual inspection and maintenance by specialized technicians. Residents may use the stairs on the left side of the building.',
-    category: 'Maintenance',
-    pinned: true,
-    datePosted: '18 Feb 2026 - 15:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 54
-  },
-  {
-    id: 3,
-    title: 'New Regulations for Parcel Collection',
-    subtitle: 'Starting from March 1, 2026, residents must collect their parcels within 7 days of notification. A storage fee may apply if overdue.',
-    category: 'General',
-    pinned: false,
-    datePosted: '17 Feb 2026 - 09:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 61
-  },
-  {
-    id: 4,
-    title: 'New Resident Welcome Party — March 2026',
-    subtitle: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area. There will be food, snacks, and many fun activities.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '15 Feb 2026 - 14:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 29
-  },
-  {
-    id: 5,
-    title: 'Notice of Office Hours Change',
-    subtitle: 'Starting in March, the office will be open from 08:30–18:30, Monday–Friday, and 09:00–14:00 on Saturday (closed on Sundays and public holidays).',
-    category: 'General',
-    pinned: false,
-    datePosted: '12 Feb 2026 - 11:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 17
-  },
-  {
-    id: 6,
-    title: 'Notice of Common Area Renovation',
-    subtitle: 'Not yet published — content under revision. The renovation schedule for the ground floor hall and lounge area is expected to be completed by March 2026.',
-    category: 'General',
-    pinned: false,
-    datePosted: '10 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 7,
-    title: 'Survey of Facilities Improvement',
-    subtitle: 'Draft - seeking feedback from management. This survey aims to gather resident opinions on potential upgrades to the gym and swimming pool facilities.',
-    category: 'General',
-    pinned: false,
-    datePosted: '08 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 8,
-    title: 'Upcoming Fire Drill Exercise',
-    subtitle: 'Draft - awaiting final schedule confirmation. Annual fire safety drill is tentatively planned for mid-March. All systems will be tested.',
-    category: 'Urgent',
-    pinned: false,
-    datePosted: '05 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 9,
-    title: 'Waste Management Workshop',
-    subtitle: 'Draft - coordinating with city waste department. A session to educate residents on new recycling guidelines and sustainable waste disposal practices.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '02 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 10,
-    title: 'Parking Lot Striping Project',
-    subtitle: 'Draft - reviewing contractor bids. Sections of the parking garage will be repainted. Resident notification letters will be sent once the schedule is fixed.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '28 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 11,
-    title: 'Water Quality Report Update',
-    subtitle: 'Draft - finalizing laboratory results. The annual water quality assessment is almost complete. Results will be shared with the community next week.',
-    category: 'General',
-    pinned: false,
-    datePosted: '25 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 12,
-    title: 'Gym Equipment Maintenance',
-    subtitle: 'Draft - scheduling with technician. Several cardio machines are due for service. A temporary partial closure of the fitness center may be required.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '20 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 13,
-    title: 'Roof Inspection Notice',
-    subtitle: 'Draft - awaiting weather forecast. Periodic roof maintenance and gutter cleaning are scheduled for the coming weeks to prevent leaks.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '15 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 14,
-    title: 'Community Garden Meeting',
-    subtitle: 'Draft - proposing agenda items. Join the discussion on how to improve our shared green spaces and prepare for the spring planting season.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '10 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 15,
-    title: 'Elevator Modernization Project',
-    subtitle: 'Draft - reviewing long-term project plan. We are in the early stages of planning a full elevator system upgrade over the next twelve months.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '05 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  }
-])
+const announcements = ref([])
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -237,9 +71,9 @@ const filteredAnnouncements = computed(() => {
     // Date Filtering Logic
     let matchesDate = true
     if (selectedDate.value) {
-      // แปลงวันที่จาก picker (YYYY-MM-DD) และจาก data ('19 Feb 2026 - 10:30') มาเปรียบเทียบกัน
       const targetDate = selectedDate.value // format: YYYY-MM-DD
-      const itemDateStr = item.datePosted.split(' - ')[0] // ดึงเฉพาะส่วนวันที่ออกมา
+      const dateStr = item.publishAt || item.datePosted || ''
+      const itemDateStr = dateStr.split(' - ')[0] 
       
       const d = new Date(itemDateStr)
       if (!isNaN(d.getTime())) {
@@ -251,20 +85,14 @@ const filteredAnnouncements = computed(() => {
       }
     }
     
-    // Filter to show only non-published items in the management view
-    const isNotPublished = item.status !== 'Published'
-    
-    return matchesCategory && matchesDate && isNotPublished
+    return matchesCategory && matchesDate
   })
 
   const searched = searchAnnouncements(filtered, searchQuery.value)
 
-  // Sort: Pinned items first, then ordered originally
   return searched.sort((a, b) => {
-    const aPinned = a.isPinned || a.pinned
-    const bPinned = b.isPinned || b.pinned
-    if (aPinned && !bPinned) return -1
-    if (!aPinned && bPinned) return 1
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
     return 0
   })
 })
@@ -304,7 +132,6 @@ const handleEdit = (item) => {
 }
 
 const handleView = async (item) => {
-  // Try to get fresh data from backend to get latest view count
   try {
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
@@ -313,38 +140,20 @@ const handleView = async (item) => {
     )
 
     if (data) {
-      // Record view in background
       recordAnnouncementView(
         `${import.meta.env.VITE_BASE_URL}/api/announcements`,
         item.id,
         router
       )
-
-      const type = (data.type || data.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = data.createdAt || data.date || 'Just now'
-
-      selectedAnnouncement.value = {
-        id: data.id || data.announcementId,
-        title: data.title || data.header || '',
-        subtitle: data.subtitle || data.description || '',
-        content: data.content || data.description || '',
-        category: data.tag || capitalizedType,
-        pinned: data.pinned || false,
-        datePosted: rawDate,
-        date: rawDate,
-        views: (data.views || 0) + 1, // Optimistically show +1 view
-        author: data.author || 'Staff Portal',
-        status: data.status || 'Published',
-        type: type.includes('event') ? 'event' : 'news',
-        coverImage: data.coverImage
-      }
+      
+      announcementManager.updateAnnouncement(data)
+      selectedAnnouncement.value = announcementManager.findAnnouncementById(item.id)
     } else {
-      selectedAnnouncement.value = { ...item }
+      selectedAnnouncement.value = item
     }
-  } catch (error) {
-    console.error('Error fetching announcement detail:', error)
-    selectedAnnouncement.value = { ...item }
+  } catch (err) {
+    console.error('Error fetching announcement detail:', err)
+    selectedAnnouncement.value = item
   }
 
   showViewModal.value = true
@@ -370,8 +179,6 @@ const onDeleteConfirm = () => {
 }
 
 const fetchAnnouncementData = async () => {
-  console.log('Fetching announcements disabled to avoid 500 error')
- 
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements`,
     router
@@ -379,36 +186,8 @@ const fetchAnnouncementData = async () => {
 
   if (data && data.length > 0) {
     announcementManager.setAnnouncements(data)
-
-    const mapped = []
-
-    data.forEach((item) => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      // capitalize first letter of type
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      
-      mapped.push({
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        datePosted: item.createdAt || item.date || 'Just now',
-        status: item.status || 'Published',
-        author: item.author || 'Staff Portal',
-        views: item.views || 0,
-        originalData: item
-      })
-    })
-
-    // For testing with mock data, we comment out the overwrite
-    // Or you can merge them: announcements.value = [...mapped, ...announcements.value]
-    
-    if (mapped.length > 0) {
-      announcements.value = mapped
-    }
-    
-    console.log('API data fetched:', mapped.length, 'items')
+    announcements.value = announcementManager.announcements
+    console.log('API data fetched and stored:', data.length, 'items')
   }
 }
 

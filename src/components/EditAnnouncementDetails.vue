@@ -97,10 +97,23 @@ const MAX_TITLE_LENGTH = 100
 const MAX_SUBTITLE_LENGTH = 150
 const MAX_CONTENT_LENGTH = 2000
 
+// Categories mapping
+const categories = [
+  { id: 1, name: 'General' },
+  { id: 2, name: 'Maintenance' },
+  { id: 3, name: 'Events' },
+  { id: 4, name: 'Urgent' }
+]
+
 // Image State
 const coverImage = ref(null)
 const imagePreview = ref(null)
 const contentArea = ref(null)
+
+const getCategoryName = (id) => {
+  const category = categories.find(c => c.id === id)
+  return category ? category.name : ''
+}
 
 const formatText = (style) => {
   if (!contentArea.value) return
@@ -266,19 +279,22 @@ const closePopUp = (operate) => {
 const announcementForm = reactive({
   title: '',
   subtitle: '',
-  category: 'General',
-  datePosted: '',
-  status: 'Published',
+  categoryId: null,
+  publishAt: '',
   content: '',
-  targetAudience: 'All',
-  isPinned: false,
-  notify: true,
-  coverImage: null
+  targetAudience: 'ALL_RESIDENTS',
+  pinned: false,
+  sendNotification: true,
+  priority: 1,
+  coverImageUrl: null
 })
 
-// Categories for dropdown
-const categories = ['General', 'Maintenance', 'Events', 'Urgent']
-const statuses = ['Draft', 'Published']
+const currentCategory = computed(() => {
+  return categories.find(c => c.id === announcementForm.categoryId) || null
+})
+
+// Statuses (for legacy support or status updates if needed)
+const statuses = ['DRAFT', 'PUBLISHED']
 
 // Initial Form State
 const initialForm = ref(null)
@@ -293,8 +309,8 @@ const hasChanges = computed(() => {
 
 const isFormValid = computed(() => {
   return announcementForm.title.trim() !== '' && 
-         announcementForm.category !== '' && 
-         announcementForm.datePosted !== '' && 
+         announcementForm.categoryId !== null && 
+         announcementForm.publishAt !== '' && 
          announcementForm.content.trim() !== ''
 })
 
@@ -399,30 +415,38 @@ const fetchAnnouncementDetail = async () => {
     )
 
     if (data) {
-      // Map API response to our form structure if needed
+      // Find category ID by name from backend
+      const catObj = categories.find(c => c.name === data.category)
+      const catId = catObj ? catObj.id : null
+
+      // Map API response to our form structure
       const mapped = {
-        id: data.id || data.announcementId,
+        id: data.id,
         title: data.title || '',
-        subtitle: data.subTitle || data.subtitle || '',
+        subtitle: data.subtitle || '',
         content: data.content || '',
-        category: data.category || data.tag || 'General',
-        isPinned: data.isPinned || data.pinned || false,
-        status: data.status || 'Published',
-        datePosted: ensureDateTimeLocal(data.datePosted || data.createdAt),
-        targetAudience: data.targetAudience || 'All',
-        notify: data.notify || false
+        categoryId: catId,
+        pinned: data.pinned || false,
+        publishAt: ensureDateTimeLocal(data.publishAt),
+        targetAudience: data.targetAudience || 'ALL_RESIDENTS',
+        sendNotification: data.sendNotification !== undefined ? data.sendNotification : false
       }
       Object.assign(announcementForm, mapped)
-      if (data.coverImage) {
-        imagePreview.value = data.coverImage
+      if (data.coverImageUrl) {
+        imagePreview.value = data.coverImageUrl
+        announcementForm.coverImageUrl = data.coverImageUrl
       }
     } else {
       console.log('Using fallback data for aid:', aid)
       const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
       if (fallbackFound) {
+        const fallbackCat = categories.find(c => c.name === fallbackFound.category)
         Object.assign(announcementForm, {
           ...fallbackFound,
-          datePosted: ensureDateTimeLocal(fallbackFound.datePosted)
+          categoryId: fallbackCat ? fallbackCat.id : 1,
+          publishAt: ensureDateTimeLocal(fallbackFound.datePosted),
+          pinned: fallbackFound.isPinned,
+          sendNotification: fallbackFound.notify
         })
         if (fallbackFound.coverImage) {
           imagePreview.value = fallbackFound.coverImage
@@ -481,8 +505,8 @@ const handleSave = async () => {
   
   let hasError = false
   if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
-  if (!announcementForm.category) { categoryError.value = true; hasError = true }
-  if (!announcementForm.datePosted) { dateError.value = true; hasError = true }
+  if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
+  if (!announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
   
   if (hasError) {
@@ -504,13 +528,12 @@ const handleSave = async () => {
     const body = {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
-      category: announcementForm.category,
       content: announcementForm.content,
-      datePosted: announcementForm.datePosted,
-      targetAudience: announcementForm.targetAudience,
-      isPinned: announcementForm.isPinned,
-      notify: announcementForm.notify,
-      status: announcementForm.status
+      categoryId: announcementForm.categoryId,
+      pinned: announcementForm.pinned,
+      priority: 1,
+      sendNotification: announcementForm.sendNotification,
+      publishAt: announcementForm.publishAt || null
     }
 
     if (coverImage.value) {
@@ -951,17 +974,17 @@ const showProfileStaffPage = async function () {
                       <label class="text-sm font-semibold text-gray-700">Category </label>
                       <div class="relative">
                         <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
-                            <span v-if="!announcementForm.category" class="text-gray-500">Select category...</span>
+                            <span v-if="!announcementForm.categoryId" class="text-gray-500">Select category...</span>
                             <template v-else>
                               <!-- General -->
-                              <svg v-if="announcementForm.category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              <svg v-if="announcementForm.categoryId === 1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                               <!-- Maintenance -->
-                              <svg v-else-if="announcementForm.category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                              <svg v-else-if="announcementForm.categoryId === 2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                               <!-- Events -->
-                              <svg v-else-if="announcementForm.category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              <svg v-else-if="announcementForm.categoryId === 3" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                               <!-- Urgent -->
-                              <svg v-else-if="announcementForm.category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                              <span class="text-gray-800">{{ announcementForm.category }}</span>
+                              <svg v-else-if="announcementForm.categoryId === 4" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                              <span class="text-gray-800">{{ getCategoryName(announcementForm.categoryId) }}</span>
                             </template>
                         </div>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
@@ -969,19 +992,19 @@ const showProfileStaffPage = async function () {
                         </div>
                         <!-- Dropdown Options -->
                         <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="announcementForm.category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.categoryId = 1; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                              General
                           </div>
-                          <div @click="announcementForm.category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.categoryId = 2; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                              Maintenance
                           </div>
-                          <div @click="announcementForm.category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.categoryId = 3; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                              Activity/Events
                           </div>
-                          <div @click="announcementForm.category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
+                          <div @click="announcementForm.categoryId = 4; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                              Urgent
                           </div>
@@ -1007,22 +1030,22 @@ const showProfileStaffPage = async function () {
                         </div>
 
                         <!-- Display Input (Text) -->
-                        <input 
-                           type="text" 
-                           readonly
-                           :value="formatDateTimeDisplay(announcementForm.datePosted)"
-                           placeholder="DD/MM/YYYY - HH:mm"
-                           @click="openDatePicker"
-                           class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
-                        />
+                         <input 
+                            type="text" 
+                            readonly
+                            :value="formatDateTimeDisplay(announcementForm.publishAt)"
+                            placeholder="DD/MM/YYYY - HH:mm"
+                            @click="openDatePicker"
+                            class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                         />
 
                         <!-- Hidden Native Datetime Input -->
-                        <input
-                           ref="dateInput"
-                           type="datetime-local" 
-                           v-model="announcementForm.datePosted"
-                           class="absolute opacity-0 w-0 h-0 pointer-events-none"
-                        />
+                         <input
+                            ref="dateInput"
+                            type="datetime-local" 
+                            v-model="announcementForm.publishAt"
+                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                         />
                       </div>
                    </div>
                 </div>
@@ -1117,22 +1140,22 @@ const showProfileStaffPage = async function () {
                   <label class="text-sm font-semibold text-gray-700">Target Audience</label>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="All" class="peer sr-only" />
+                      <input type="radio" v-model="announcementForm.targetAudience" value="ALL_RESIDENTS" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
+                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'ALL_RESIDENTS' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
+                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'ALL_RESIDENTS' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
                       </div>
                     </label>
 
                     <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="Active" class="peer sr-only" />
+                      <input type="radio" v-model="announcementForm.targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
+                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
+                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
                     </label>
 <!-- 
@@ -1160,8 +1183,8 @@ const showProfileStaffPage = async function () {
                          <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
                        </div>
                      </div>
-                     <button @click="announcementForm.isPinned = !announcementForm.isPinned" :class="announcementForm.isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="announcementForm.isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="announcementForm.pinned = !announcementForm.pinned" :class="announcementForm.pinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="announcementForm.pinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
 
@@ -1175,8 +1198,8 @@ const showProfileStaffPage = async function () {
                          <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
                        </div>
                      </div>
-                     <button @click="announcementForm.notify = !announcementForm.notify" :class="announcementForm.notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="announcementForm.notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="announcementForm.sendNotification = !announcementForm.sendNotification" :class="announcementForm.sendNotification ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="announcementForm.sendNotification ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>

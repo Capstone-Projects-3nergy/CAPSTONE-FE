@@ -41,7 +41,7 @@ const props = defineProps({
   status: {
     type: String,
     required: false,
-    default: 'Published'
+    default: 'PUBLISHED'
   },
   pinned: {
     type: Boolean,
@@ -68,7 +68,9 @@ const getCategoryBadgeClass = (category) => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
+    case 'PUBLISHED':
     case 'Published': return 'bg-green-100 text-green-800'
+    case 'DRAFT':
     case 'Draft': return 'bg-orange-100 text-orange-800'
     default: return 'bg-gray-100 text-gray-800'
   }

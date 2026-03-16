@@ -1336,7 +1336,68 @@ const toggleComfirmPasswordVisibility = () => {
               </div>
             </div>
           </transition>
+           <ButtonWeb
+            v-if="role === 'resident'"
+            label="Sign Up"
+            :loading="loading"
+            type="submit"
+            color="black"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            @click="submitForm('RESIDENT')"
+            :class="{
+              'disabled bg-gray-400 text-gray-200  cursor-default':
+                trimmedFullName.length === 0 ||
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedConfirmPassword.length === 0 ||
+                trimmedRoomNumber.length === 0,
+              'bg-black hover:bg-gray-600 text-white':
+                trimmedFullName.length > 0 &&
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0 &&
+                trimmedRoomNumber.length > 0
+            }"
+            :disabled="
+              trimmedFullName.length === 0 ||
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
+              isPasswordTooShort ||
+              isConfirmPasswordTooShort
+            "
+          />
           <ButtonWeb
+            v-if="role === 'staff'"
+            label="Sign Up"
+            :loading="loading"
+            type="submit"
+            color="black"
+            class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+            @click="submitForm('STAFF')"
+            :class="{
+              'disabled bg-gray-400 text-gray-200 cursor-default':
+                trimmedFullName.length === 0 ||
+                trimmedEmail.length === 0 ||
+                trimmedPassword.length === 0 ||
+                trimmedConfirmPassword.length === 0,
+              'bg-black hover:bg-gray-600 text-white':
+                trimmedFullName.length > 0 &&
+                trimmedEmail.length > 0 &&
+                trimmedPassword.length > 0 &&
+                trimmedConfirmPassword.length > 0
+            }"
+            :disabled="
+              trimmedFullName.length === 0 ||
+              trimmedEmail.length === 0 ||
+              trimmedPassword.length === 0 ||
+              trimmedConfirmPassword.length === 0 ||
+              isPasswordTooShort ||
+              isConfirmPasswordTooShort ||
+              isStaffPositionTooShort
+            "
+          />
+          <!-- <ButtonWeb
             v-if="role === 'resident'"
             label="Sign Up"
             :loading="loading"
@@ -1412,7 +1473,7 @@ const toggleComfirmPasswordVisibility = () => {
               isConfirmPasswordTooShort ||
               isStaffPositionTooShort
             "
-          />
+          /> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-4">

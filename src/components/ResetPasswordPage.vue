@@ -246,8 +246,16 @@ const returnLoginPage = () => {
           <!-- <p v-if="isEmailInvalid" class="text-sm text-red-600">
             Please enter a valid email address.
           </p> -->
-
-          <ButtonWeb
+           <ButtonWeb
+            label="Reset Password"
+            :loading="loading"
+            type="submit"
+            color="black"
+            class="w-full"
+            :disabled="isEmailOverLimit"
+            @click="sendResetEmail"
+          />
+          <!-- <ButtonWeb
             label="Reset Password"
             :loading="loading"
             type="submit"
@@ -258,7 +266,7 @@ const returnLoginPage = () => {
             }"
             :disabled="isEmailOverLimit"
             @click="sendResetEmail"
-          />
+          /> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-6">
