@@ -62,23 +62,29 @@ const fetchCategoriesFromAnnouncements = async () => {
       `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
       router
     )
-    console.log(data)
+    console.log('Categories data from API:', data)
     if (data && data.length > 0) {
       const uniqueCategories = []
       const map = new Map()
       
       for (const item of data) {
-        if (item.categoryId && !map.has(item.categoryId)) {
-          map.set(item.categoryId, true)
+        // รองรับทั้ง id และ categoryId
+        const id = item.categoryId || item.id
+        // รองรับชื่อฟิลด์ที่หลากหลาย
+        const name = item.categoryName || item.name || item.category
+        
+        if (id && name && !map.has(id)) {
+          map.set(id, true)
           uniqueCategories.push({
-            id: item.categoryId,
-            name: item.categoryName || item.category || 'Unknown'
+            id: id,
+            name: name
           })
         }
       }
 
       if (uniqueCategories.length > 0) {
         categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
+        console.log('Categories processed:', categories.value)
       }
     }
   } catch (err) {
