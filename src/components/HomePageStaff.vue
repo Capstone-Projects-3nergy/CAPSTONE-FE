@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed} from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
 import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
@@ -62,6 +62,7 @@ const topResidents = computed(() => {
         name,
         room: p.roomNumber || 'N/A',
         count: 0,
+        photo: resident?.photo || resident?.profileImageUrl || '',
         status: resident?.status || 'Active'
       }
     }
@@ -114,6 +115,7 @@ const showRegistrationDetail = (id) => {
   router.push({
     name: 'detailregistration',
     params: {
+      id: route.params.id,
       tid: id
     }
   })
@@ -141,6 +143,7 @@ const mapStatus = (status) => {
 
 // const loginStore = useLoginManager()
 const router = useRouter()
+const route = useRoute()
 const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 const showParcelScanner = ref(false)
@@ -1196,9 +1199,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
-                <ButtonWeb color="blue" label="Add" size="sm" @click="showParcelScannerPage">
+                <!-- <ButtonWeb color="blue" label="Add" size="sm" @click="showParcelScannerPage">
                   <template #icon>+</template>
-                </ButtonWeb>
+                </ButtonWeb> -->
               </div>
 
               <!-- Table Header -->
@@ -1480,12 +1483,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         {{ index + 1 }}
                       </div>
                       <div :class="[
-                        'w-10 h-10 rounded-full text-white flex items-center justify-center font-bold',
+                        'w-10 h-10 rounded-full text-white flex items-center justify-center font-bold overflow-hidden',
                         index === 0 ? 'bg-yellow-400' : 
                         index === 1 ? 'bg-blue-500' : 
                         'bg-emerald-500'
                       ]">
-                        {{ resident.name.charAt(0) }}
+                        <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
+                        <span v-else>{{ resident.name.charAt(0) }}</span>
                       </div>
                       <div>
                         <p class="text-sm font-bold text-gray-900">{{ resident.name }}</p>
@@ -1599,8 +1603,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <div v-for="resident in pendingResidentsList" :key="resident.id" class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm relative group hover:border-yellow-300 transition-colors">
                     <span class="absolute top-4 right-4 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Pending</span>
                     <div class="flex items-center gap-3 mb-3">
-                      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg">
-                        {{ resident?.fullName?.charAt(0) || '?' }}
+                      <div class="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-xl shadow-md ring-4 ring-emerald-50 overflow-hidden">
+                        <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
+                        <span v-else>{{ resident?.fullName?.charAt(0) || '?' }}</span>
                       </div>
                       <div>
                         <p class="text-sm font-bold text-gray-900 leading-tight">{{ resident?.fullName || '-' }}</p>
@@ -1609,11 +1614,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                     <p class="text-[10px] text-gray-400 mb-3">Updated: {{ resident?.updateAt ? new Date(resident.updateAt).toLocaleString() : '-' }}</p>
                     <div class="grid grid-cols-2 gap-2">
-                      <button @click="approveResident(resident)" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                      <!-- <button @click="approveResident(resident)" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Approve
-                      </button>
-                      <button @click="ShowManageResidentPage" class="bg-rose-50 text-rose-600 text-xs font-bold py-2 rounded-lg hover:bg-rose-100 transition-colors border border-rose-100 flex items-center justify-center gap-1 cursor-pointer">
+                      </button> -->
+                      <button @click="showRegistrationDetail(resident.id)" class="bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 cursor-pointer">
                          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         View Profile
                       </button>
@@ -1631,6 +1636,10 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <p class="text-[10px] opacity-70">No pending approvals at this time</p>
                   </div>
 
+                </div>
+
+                <div class="mt-auto border-t border-yellow-100 pt-4 text-center">
+                  <button @click="ShowManageResidentPage" class="text-xs font-medium text-yellow-600 hover:text-yellow-700 cursor-pointer">View all residents →</button>
                 </div>
               </div>
             </div>
