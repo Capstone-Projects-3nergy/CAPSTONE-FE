@@ -623,6 +623,7 @@ onMounted(async () => {
               :total="filteredAnnouncements.length"
               :can-next="canGoNext"
               :viewMode="viewMode"
+              :status="false"
               @prev="prevPage"
               @next="nextPage"
               @go="goToPage"

@@ -180,7 +180,7 @@ const onDeleteConfirm = () => {
 
 const fetchAnnouncementData = async () => {
   const data = await getAnnouncements(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
     router
   )
 

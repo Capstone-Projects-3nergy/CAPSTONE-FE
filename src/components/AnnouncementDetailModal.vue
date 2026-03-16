@@ -41,7 +41,6 @@ const props = defineProps({
   status: {
     type: String,
     required: false,
-    default: 'PUBLISHED'
   },
   pinned: {
     type: Boolean,

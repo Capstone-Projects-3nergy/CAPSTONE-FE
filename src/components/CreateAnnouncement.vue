@@ -823,7 +823,7 @@ const returnLoginPage = async () => {
                         :options="categoryOptions"
                         placeholder="Select category"
                         :error="categoryError"
-                        customClass="w-full px-4 py-3 rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                        customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                       >
                         <template #icon>
                           <!-- Dynamic Icon Mapping for SelectWeb -->

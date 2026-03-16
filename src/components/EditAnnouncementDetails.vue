@@ -325,11 +325,12 @@ const announcementForm = reactive({
   pinned: false,
   sendNotification: true,
   priority: 1,
-  coverImageUrl: null
+  coverImageUrl: null,
+  status: 'PUBLISHED'
 })
 
 const currentCategory = computed(() => {
-  return categories.find(c => c.id === announcementForm.categoryId) || null
+  return categories.value.find(c => c.id === announcementForm.categoryId) || null
 })
 
 // Statuses (for legacy support or status updates if needed)
@@ -455,7 +456,7 @@ const fetchAnnouncementDetail = async () => {
 
     if (data) {
       // Find category ID by name from backend
-      const catObj = categories.find(c => c.name === data.category)
+      const catObj = categories.value.find(c => c.name === data.category)
       const catId = catObj ? catObj.id : null
 
       // Map API response to our form structure
@@ -468,7 +469,8 @@ const fetchAnnouncementDetail = async () => {
         pinned: data.pinned || false,
         publishAt: ensureDateTimeLocal(data.publishAt),
         targetAudience: data.targetAudience || 'ALL_RESIDENTS',
-        sendNotification: data.sendNotification !== undefined ? data.sendNotification : false
+        sendNotification: data.sendNotification !== undefined ? data.sendNotification : false,
+        status: data.status || 'PUBLISHED'
       }
       Object.assign(announcementForm, mapped)
       if (data.coverImageUrl) {
@@ -1017,7 +1019,7 @@ const showProfileStaffPage = async function () {
                         :options="categoryOptions"
                         placeholder="Select category"
                         :error="categoryError"
-                        customClass="w-full px-4 py-3 rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                        customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                       >
                         <template #icon>
                           <!-- Dynamic Icon mapping for SelectWeb -->
