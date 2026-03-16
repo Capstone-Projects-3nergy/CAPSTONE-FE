@@ -357,8 +357,8 @@ const fetchStatusesFromAnnouncements = async () => {
 
 const statusOptions = computed(() => {
   return statuses.value.map(s => ({
-    label: s,
-    value: s
+    label: s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(),
+    value: s.toUpperCase()
   }))
 })
 
@@ -366,11 +366,33 @@ const statusOptions = computed(() => {
 const initialForm = ref(null)
 
 const hasChanges = computed(() => {
-  if (!initialForm.value) return false
-  const formStr = JSON.stringify(announcementForm)
-  const initialStr = JSON.stringify(initialForm.value)
-  const imageChanged = imagePreview.value !== initialForm.value.coverImage
-  return formStr !== initialStr || imageChanged
+  if (!initialForm.value || !announcementForm) return false
+  
+  // Normalization helper for more accurate comparison
+  const normalize = (val) => {
+    if (val === undefined || val === null) return ''
+    if (typeof val === 'boolean') return val
+    if (typeof val === 'number') return val.toString()
+    return val.toString().trim()
+  }
+
+  const fieldsToCompare = [
+    'title', 'subtitle', 'categoryId', 'publishAt', 'content', 
+    'targetAudience', 'pinned', 'sendNotification', 'status'
+  ]
+  
+  const formChanged = fieldsToCompare.some(field => {
+    const current = normalize(announcementForm[field])
+    const initial = normalize(initialForm.value[field])
+    return current !== initial
+  })
+
+  // Compare images - handle both string URLs and empty values
+  const currentImage = imagePreview.value || ''
+  const initialImage = initialForm.value.coverImage || ''
+  const imageChanged = currentImage !== initialImage
+
+  return formChanged || imageChanged
 })
 
 const isFormValid = computed(() => {
@@ -453,26 +475,69 @@ const fetchAnnouncementDetail = async () => {
   const aidParam = route.params.aid
   const aid = aidParam ? Number(aidParam) : null
   
-  console.log('Fetching details for aid:', aid)
   if (!aid || isNaN(aid)) {
     console.warn('Invalid or missing announcement ID')
     return
   }
 
-  // 1) Find in Pinia first to show immediately
+  // Ensure categories are loaded for lookup
+  if (!categories.value.length) {
+    await fetchCategoriesFromAnnouncements()
+  }
+
+  // Helper to map any incoming data to our internal form structure
+  const mapToForm = (item) => {
+    if (!item) return null
+    
+    // Find category ID if only name is present
+    let catId = item.categoryId
+    if (!catId && item.category) {
+      const catObj = categories.value.find(c => 
+        (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+        c.id == item.category
+      )
+      if (catObj) catId = catObj.id
+    }
+    if (!catId && item.categoryName) {
+      const catObj = categories.value.find(c => 
+        c.name && item.categoryName && c.name.toString().toLowerCase() === item.categoryName.toString().toLowerCase()
+      )
+      if (catObj) catId = catObj.id
+    }
+
+    return {
+      title: item.title || '',
+      subtitle: item.subtitle || '',
+      content: item.content || '',
+      categoryId: catId || null,
+      pinned: !!(item.pinned || item.isPinned),
+      publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date),
+      targetAudience: item.targetAudience || 'ALL_RESIDENTS',
+      sendNotification: item.sendNotification ?? item.notify ?? false,
+      status: (item.status || 'PUBLISHED').toUpperCase(),
+      coverImageUrl: item.coverImageUrl || item.coverImage || null
+    }
+  }
+
+  // 1) Load from Pinia store first for perceived speed and persistence
   const existingAnnouncements = [
     ...(announcementStore.announcements || []),
     ...(announcementStore.trash || [])
   ]
-  const found = existingAnnouncements.find((a) => (a.id === aid || a.announcementId === aid))
+  const foundInStore = existingAnnouncements.find(a => Number(a.id) === aid || Number(a.announcementId) === aid)
 
-  if (found) {
-    Object.assign(announcementForm, {
-      ...found,
-      datePosted: ensureDateTimeLocal(found.datePosted || found.date)
-    })
+  if (foundInStore) {
+    const storeMapped = mapToForm(foundInStore)
+    Object.assign(announcementForm, storeMapped)
+    if (storeMapped.coverImageUrl) {
+      imagePreview.value = storeMapped.coverImageUrl
+    }
+    // Set initial state from store immediately
+    initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+    initialForm.value.coverImage = imagePreview.value || null
   }
 
+  // 2) Load from Backend to ensure data is correct/up-to-date
   try {
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
@@ -481,56 +546,30 @@ const fetchAnnouncementDetail = async () => {
     )
 
     if (data) {
-      // Find category ID by name from backend
-      const catObj = categories.value.find(c => c.name === data.category)
-      const catId = catObj ? catObj.id : null
-
-      // Map API response to our form structure
-      const mapped = {
-        id: data.id,
-        title: data.title || '',
-        subtitle: data.subtitle || '',
-        content: data.content || '',
-        categoryId: data.categoryId || catId,
-        pinned: data.pinned || false,
-        publishAt: ensureDateTimeLocal(data.publishAt),
-        targetAudience: data.targetAudience || 'ALL_RESIDENTS',
-        sendNotification: data.sendNotification !== undefined ? data.sendNotification : false,
-        status: data.status ? data.status.toUpperCase() : 'PUBLISHED'
+      const apiMapped = mapToForm(data)
+      Object.assign(announcementForm, apiMapped)
+      if (apiMapped.coverImageUrl) {
+        imagePreview.value = apiMapped.coverImageUrl
       }
-      Object.assign(announcementForm, mapped)
-      if (data.coverImageUrl) {
-        imagePreview.value = data.coverImageUrl
-        announcementForm.coverImageUrl = data.coverImageUrl
-      }
-    } else {
-      console.log('Using fallback data for aid:', aid)
-      const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
-      if (fallbackFound) {
-        const fallbackCat = categories.value.find(c => c.name === fallbackFound.category)
-        Object.assign(announcementForm, {
-          ...fallbackFound,
-          categoryId: fallbackCat ? fallbackCat.id : 1,
-          publishAt: ensureDateTimeLocal(fallbackFound.datePosted),
-          pinned: fallbackFound.isPinned,
-          sendNotification: fallbackFound.notify
-        })
-        if (fallbackFound.coverImage) {
-          imagePreview.value = fallbackFound.coverImage
+      // Re-initialize initial state after API data is loaded (master source)
+      initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+      initialForm.value.coverImage = imagePreview.value || null
+    } else if (!foundInStore) {
+      // Fallback only if both store and API failed
+      const fb = fallbackAnnouncements.find(a => a.id === aid)
+      if (fb) {
+        const fbMapped = mapToForm(fb)
+        Object.assign(announcementForm, fbMapped)
+        if (fbMapped.coverImageUrl) {
+          imagePreview.value = fbMapped.coverImageUrl
         }
+        initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+        initialForm.value.coverImage = imagePreview.value || null
       }
     }
-  } catch (error) {
-    console.error('Error fetching announcement:', error)
-    const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
-    if (fallbackFound) {
-      Object.assign(announcementForm, fallbackFound)
-    }
+  } catch (err) {
+    console.error('Error fetching announcement from API:', err)
   }
-
-  // Save initial state after data is loaded
-  initialForm.value = JSON.parse(JSON.stringify(announcementForm))
-  initialForm.value.coverImage = imagePreview.value || null
 }
 
 onMounted(async () => {
@@ -636,31 +675,52 @@ const handleSave = async () => {
       return
     }
 
-    // Update the store with the new data
+    // Refresh categories in case we need to re-map names to IDs
+    await fetchCategoriesFromAnnouncements()
+    
+    // Mapper for server response
+    const mapToFormServer = (item) => {
+      let catId = item.categoryId
+      if (!catId && item.category) {
+        const catObj = categories.value.find(c => 
+          (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+          c.id == item.category
+        )
+        if (catObj) catId = catObj.id
+      }
+      return {
+        title: item.title || '',
+        subtitle: item.subtitle || '',
+        content: item.content || '',
+        categoryId: catId || null,
+        pinned: !!(item.pinned || item.isPinned),
+        publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date),
+        targetAudience: item.targetAudience || 'ALL_RESIDENTS',
+        sendNotification: item.sendNotification ?? item.notify ?? false,
+        status: (item.status || 'PUBLISHED').toUpperCase(),
+        coverImageUrl: item.coverImageUrl || item.coverImage || null
+      }
+    }
+
+    // Update the store with the raw server data
     announcementStore.editAnnouncement(aid, updated)
 
-    // Send Line notification and fetch updated data
-    try {
-      if (announcementForm.notify) {
-        await notificationManager.notifyAnnouncementCreated(body, router)
-      }
-    } catch (lineError) {
-      console.error('Notification failed:', lineError)
+    // Synchronize form and initial state with mapped server data
+    const serverMappedForm = mapToFormServer(updated)
+    Object.assign(announcementForm, serverMappedForm)
+    if (serverMappedForm.coverImageUrl) {
+      imagePreview.value = serverMappedForm.coverImageUrl
     }
-
-    // Save initial state after update
+    
+    // Reset initial state to match the now-synchronized form
     initialForm.value = JSON.parse(JSON.stringify(announcementForm))
-    if (updated.coverImage) {
-        initialForm.value.coverImage = updated.coverImage
-        imagePreview.value = updated.coverImage
-    }
+    initialForm.value.coverImage = imagePreview.value || null
 
     isSubmitting.value = false
     editSuccess.value = true
     setTimeout(() => {
       editSuccess.value = false
-      // router.push({ name: 'manageannouncement', params: { id: route.params.id } })
-    }, 10000)
+    }, 5000)
   } catch (err) {
     console.error('Update failed:', err)
     isSubmitting.value = false
