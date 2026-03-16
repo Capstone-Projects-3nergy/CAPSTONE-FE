@@ -1363,7 +1363,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
 
               <!-- Total Registered -->
-              <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
+              <!-- <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
                     <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -1373,7 +1373,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalResidents }}</h3>
                   <p class="text-gray-500 font-medium mt-1 text-[10px] md:text-sm">Registered</p>
                 </div>
-              </div>
+              </div> -->
             </div>
 
             <!-- Charts Row -->
