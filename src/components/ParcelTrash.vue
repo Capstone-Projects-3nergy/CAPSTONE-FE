@@ -609,7 +609,20 @@ const restoreMemberPopUp = (id) => {
     lastName: id.lastName
   }
 }
-
+const deleteAnnouncementPopUp = (announcement) => {
+  showDeleteAnnouncement.value = true
+  announcementDetail.value = {
+    id: announcement.id,
+    title: announcement.title
+  }
+}
+const restoreAnnouncementPopUp = (announcement) => {
+  showRestoreAnnouncement.value = true
+  announcementDetail.value = {
+    id: announcement.id,
+    title: announcement.title
+  }
+}
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
@@ -1447,8 +1460,8 @@ const closePopUp = (operate) => {
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
-          @delete="deleteParcelPopUp"
-          @restore="restoreParcelPopUp"
+          @delete="deleteAnnouncementPopUp"
+          @restore="restoreAnnouncementPopUp"
         >
           <template #sort-category>
             <svg

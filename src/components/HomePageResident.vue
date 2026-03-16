@@ -963,47 +963,47 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         <!-- News / Categories Horizontal Section -->
-        <div class="px-6 pb-16">
-          <div class="flex items-end justify-between mb-8">
+        <div class="px-6 pb-12">
+          <div class="flex items-end justify-between mb-5">
             <div>
-              <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-none mb-1.5">News</h2>
-              <p class="text-slate-500 font-medium text-sm">Stay updated with the latest from your community</p>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight leading-none mb-1">News</h2>
+              <p class="text-slate-500 font-medium text-[10px]">Stay updated with the latest from your community</p>
             </div>
-            <button @click="showAnnouncementPage('all')" class="group flex items-center gap-1 text-blue-600 font-bold text-[10px] tracking-widest uppercase hover:text-blue-700 transition-all cursor-pointer">
-              View All <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            <button @click="showAnnouncementPage('all')" class="group flex items-center gap-1 text-blue-600 font-bold text-[8px] tracking-widest uppercase hover:text-blue-700 transition-all cursor-pointer">
+              View All <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </button>
           </div>
 
           <div class="relative group">
             <!-- Horizontal Scroll Container -->
-            <div class="flex overflow-x-auto pb-8 gap-5 no-scrollbar scroll-smooth">
+            <div class="flex overflow-x-auto pb-4 gap-4 no-scrollbar scroll-smooth">
               
               <!-- Slightly Larger Featured Card -->
               <div
                 @click="showAnnouncementPage('news')"
-                class="min-w-[280px] md:min-w-[480px] flex-shrink-0 bg-white rounded-[2rem] shadow-[0_8px_30px_-10px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer overflow-hidden flex flex-col group/card border border-slate-100/50"
+                class="min-w-[280px] md:min-w-[360px] flex-shrink-0 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden flex flex-col group/card border border-slate-100/50"
               >
-                <div class="h-[200px] md:h-[220px] shrink-0 overflow-hidden relative">
+                <div class="h-[140px] md:h-[150px] shrink-0 overflow-hidden relative">
                   <div class="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent z-10"></div>
                   <img
                     :src="newsImg"
                     alt="Latest News"
                     class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                   />
-                  <div class="absolute top-5 left-5 z-20">
-                     <span class="bg-blue-600/95 backdrop-blur-md px-3 py-1.5 text-white text-[8px] font-black uppercase tracking-[0.15em] rounded-lg shadow-md border border-white/10">
+                  <div class="absolute top-3 left-3 z-20">
+                     <span class="bg-blue-600/90 backdrop-blur-md px-2 py-0.5 text-white text-[7px] font-black uppercase tracking-wider rounded shadow-sm">
                        Featured
                      </span>
                   </div>
                 </div>
-                <div class="p-7 flex flex-col flex-1 bg-gradient-to-br from-white to-blue-50/20">
-                  <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2.5 leading-tight group-hover/card:text-blue-600 transition-colors">
-                    Community Portal & New Features
+                <div class="p-4 flex flex-col flex-1 bg-gradient-to-br from-white to-blue-50/5">
+                  <h3 class="text-sm md:text-base font-bold text-slate-900 mb-1 leading-tight group-hover/card:text-blue-600 transition-colors">
+                    Community Portal & Features
                   </h3>
-                  <p class="text-slate-500 text-sm leading-relaxed line-clamp-2">
-                    Enhanced systems for a faster experience. Access real-time tracking and notices in one place.
+                  <p class="text-slate-500 text-[11px] leading-snug line-clamp-2">
+                    Enhanced systems for a faster experience. Access real-time tracking in one place.
                   </p>
-                  <div class="mt-auto pt-6 flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-widest group-hover:gap-4 transition-all">
+                  <div class="mt-auto pt-3 flex items-center gap-1.5 text-blue-600 font-bold text-[8px] uppercase tracking-widest group-hover:gap-2.5 transition-all">
                     Read Story <span>→</span>
                   </div>
                 </div>
@@ -1012,26 +1012,26 @@ function formatDateTime(datetimeStr) {
               <!-- Standard Events Card -->
               <div
                 @click="showAnnouncementPage('event')"
-                class="min-w-[260px] md:min-w-[340px] flex-shrink-0 bg-white rounded-[2rem] shadow-[0_8px_30px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_15px_35px_-10px_rgba(0,0,0,0.08)] transition-all duration-500 cursor-pointer overflow-hidden flex flex-col group/card border border-slate-100/50"
+                class="min-w-[260px] md:min-w-[320px] flex-shrink-0 bg-white rounded-[1.75rem] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.08)] transition-all duration-500 cursor-pointer overflow-hidden flex flex-col group/card border border-slate-100/50"
               >
-                <div class="h-[180px] md:h-[200px] shrink-0 overflow-hidden relative">
+                <div class="h-[150px] md:h-[170px] shrink-0 overflow-hidden relative">
                   <img
                     :src="eventImg"
                     alt="Event"
                     class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                   />
-                  <div class="absolute top-5 left-5 z-20">
-                     <span class="bg-purple-600/90 backdrop-blur-md px-3 py-1.5 text-white text-[8px] font-black uppercase tracking-widest rounded-lg">
+                  <div class="absolute top-4 left-4 z-20">
+                     <span class="bg-purple-600/80 backdrop-blur-md px-2.5 py-1 text-white text-[7px] font-black uppercase tracking-widest rounded-md">
                        Events
                      </span>
                   </div>
                 </div>
-                <div class="p-7 flex flex-col flex-1">
-                  <h3 class="text-lg font-bold text-slate-900 mb-2 group-hover/card:text-purple-600 transition-colors">Upcoming Activities</h3>
-                  <p class="text-slate-500 text-sm leading-relaxed line-clamp-2">
+                <div class="p-6 flex flex-col flex-1">
+                  <h3 class="text-base font-bold text-slate-900 mb-2 group-hover/card:text-purple-600 transition-colors">Activities</h3>
+                  <p class="text-slate-500 text-[13px] leading-snug line-clamp-2">
                     Join workshops and social gatherings designed for you.
                   </p>
-                  <div class="mt-auto pt-6 flex items-center text-purple-600 font-bold text-[9px] uppercase tracking-widest gap-2">
+                  <div class="mt-auto pt-4 flex items-center text-purple-600 font-bold text-[8px] uppercase tracking-widest gap-2">
                     See Calendar <span>→</span>
                   </div>
                 </div>
@@ -1040,34 +1040,34 @@ function formatDateTime(datetimeStr) {
               <!-- Archive Category Item -->
               <div
                 @click="showAnnouncementPage('all')"
-                class="min-w-[320px] md:min-w-[380px] bg-white rounded-[2.5rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.15)] transition-all duration-500 cursor-pointer overflow-hidden flex flex-col group/card"
+                class="min-w-[260px] md:min-w-[320px] flex-shrink-0 bg-white rounded-[1.75rem] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.08)] transition-all duration-500 cursor-pointer overflow-hidden flex flex-col group/card border border-slate-100/50"
               >
-                <div class="h-[240px] overflow-hidden">
+                <div class="h-[150px] md:h-[170px] shrink-0 overflow-hidden relative">
                   <img
                     :src="communityImg"
                     alt="Archive"
                     class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                   />
-                </div>
-                <div class="p-8 pb-10 flex flex-col flex-1">
-                  <div class="flex items-center gap-2 mb-3">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                    <span class="text-[10px] uppercase font-black tracking-widest text-slate-400">Archive</span>
+                  <div class="absolute top-4 left-4 z-20">
+                     <span class="bg-emerald-600/80 backdrop-blur-md px-2.5 py-1 text-white text-[7px] font-black uppercase tracking-widest rounded-md">
+                       Archive
+                     </span>
                   </div>
-                  <h3 class="text-2xl font-black text-slate-900 mb-3 group-hover/card:text-emerald-700 transition-colors">Historical Log</h3>
-                  <p class="text-slate-500 font-medium leading-relaxed line-clamp-2">
-                    Comprehensive access to all past notices and permanent community records.
+                </div>
+                <div class="p-6 flex flex-col flex-1">
+                  <h3 class="text-base font-bold text-slate-900 mb-2 group-hover/card:text-emerald-700 transition-colors">Historical Log</h3>
+                  <p class="text-slate-500 text-[13px] leading-snug line-clamp-2">
+                    Access to all past notices and permanent community records.
                   </p>
-                  <div class="mt-8 flex items-center text-emerald-700 font-black text-xs uppercase tracking-widest gap-2">
-                    Full History <span>→</span>
+                  <div class="mt-auto pt-4 flex items-center text-emerald-700 font-bold text-[8px] uppercase tracking-widest gap-2">
+                    History <span>→</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- My Parcel Section -->
+    <!-- My Parcel Section -->
         <!-- <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
           <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
              <div class="bg-[#1D355E]/10 p-2 rounded-lg">
