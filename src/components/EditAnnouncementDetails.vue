@@ -336,6 +336,13 @@ const currentCategory = computed(() => {
 // Statuses (for legacy support or status updates if needed)
 const statuses = ['DRAFT', 'PUBLISHED']
 
+const statusOptions = computed(() => {
+  return statuses.map(s => ({
+    label: s,
+    value: s
+  }))
+})
+
 // Initial Form State
 const initialForm = ref(null)
 
@@ -449,7 +456,7 @@ const fetchAnnouncementDetail = async () => {
 
   try {
     const data = await getAnnouncementById(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
       aid,
       router
     )
@@ -465,12 +472,12 @@ const fetchAnnouncementDetail = async () => {
         title: data.title || '',
         subtitle: data.subtitle || '',
         content: data.content || '',
-        categoryId: catId,
+        categoryId: data.categoryId || catId,
         pinned: data.pinned || false,
         publishAt: ensureDateTimeLocal(data.publishAt),
         targetAudience: data.targetAudience || 'ALL_RESIDENTS',
         sendNotification: data.sendNotification !== undefined ? data.sendNotification : false,
-        status: data.status || 'PUBLISHED'
+        status: data.status ? data.status.toUpperCase() : 'PUBLISHED'
       }
       Object.assign(announcementForm, mapped)
       if (data.coverImageUrl) {
@@ -481,7 +488,7 @@ const fetchAnnouncementDetail = async () => {
       console.log('Using fallback data for aid:', aid)
       const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
       if (fallbackFound) {
-        const fallbackCat = categories.find(c => c.name === fallbackFound.category)
+        const fallbackCat = categories.value.find(c => c.name === fallbackFound.category)
         Object.assign(announcementForm, {
           ...fallbackFound,
           categoryId: fallbackCat ? fallbackCat.id : 1,
@@ -996,17 +1003,17 @@ const showProfileStaffPage = async function () {
                    </div>
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Status </label>
-                      <div class="relative">
-                        <select 
-                           v-model="announcementForm.status"
-                           class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none bg-white appearance-none"
-                        >
-                           <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                      </div>
+                      <SelectWeb 
+                         v-model="announcementForm.status"
+                         :options="statusOptions"
+                         placeholder="Select status"
+                         customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                       >
+                         <template #icon>
+                            <svg v-if="announcementForm.status === 'DRAFT'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                         </template>
+                       </SelectWeb>
                    </div>
                 </div>
 
