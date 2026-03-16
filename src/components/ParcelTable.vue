@@ -167,7 +167,7 @@ const authStore = useAuthManager()
 
           <th
             v-if="showDatePosted"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Date Posted
           </th>
@@ -208,9 +208,9 @@ const authStore = useAuthManager()
           </th>
            <th
             v-if="showDeletedAt"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center gap-2">
               Deleted At
               <div class="transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-date"></slot>
@@ -364,10 +364,10 @@ const authStore = useAuthManager()
 
           <td
             v-if="showDatePosted"
-            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:table-cell md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Date Posted: </span>
-            {{ p.datePosted }}
+            {{ formatDateTime(p.datePosted) }}
           </td>
 
           <td
@@ -447,7 +447,7 @@ const authStore = useAuthManager()
           </td>
           <td
             v-if="showDeletedAt"
-            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:table-cell md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Deleted At:</span

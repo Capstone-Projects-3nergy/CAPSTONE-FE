@@ -33,6 +33,7 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
       views: item.viewCount || item.views || 0,
       type: category.toLowerCase().includes('event') ? 'event' : 'news',
       coverImage: item.coverImageUrl || item.coverImage || '',
+      deletedAt: item.deletedAt || null,
       _isMapped: true
     }
   }

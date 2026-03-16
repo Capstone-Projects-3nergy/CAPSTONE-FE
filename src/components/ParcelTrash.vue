@@ -818,20 +818,18 @@ const fetchTrashAnnouncements = async () => {
     const list = Array.isArray(dataAnnouncement) ? dataAnnouncement : []
 
     const mapped = list.map((a) => {
-      const type = (a.type || a.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
       return {
-        id: a.id || a.announcementId,
-        title: a.title || a.header || '',
-        subtitle: a.content || a.description || '',
-        category: a.tag || capitalizedType,
-        pinned: a.pinned || false,
-        datePosted: a.createdAt || a.date || 'Just now',
-        status: a.status || 'Published',
-        author: a.author || 'Staff Portal',
-        views: a.views || 0,
-        originalData: a,
-        deletedAt: a.deletedAt || null
+        id: a.announcementId,
+        title: a.title || '',
+        subtitle: a.subtitle || '',
+        category: a.categoryName || 'General',
+        publishAt: a.publishAt || null,
+        datePosted: a.publishAt || '-',
+        deletedAt: a.deletedAt || null,
+        deletedBy: a.deletedBy || '-',
+        author: a.deletedBy || 'Staff Portal',
+        _isMapped: true,
+        originalData: a
       }
     })
 
@@ -1150,8 +1148,7 @@ const closePopUp = (operate) => {
           :hideNameSort="false"
           :hideTrash="false"
           :nameSortLabel="activeTab === 'Residents' ? 'Resident Name' : activeTab === 'Announcement' ? 'Title' : 'Name'"
-          :showStatusSort="activeTab !== 'Residents'"
-          :showCategorySort="activeTab === 'Announcement'"
+          :showStatusSort="activeTab !== 'Residents' && activeTab !== 'Announcement'"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
@@ -1511,7 +1508,7 @@ const closePopUp = (operate) => {
           :showCategory="true"
           :showDatePosted="true"
           :showStatus="false"
-          :showActionStatus="true"
+          :showActionStatus="false"
           :can-next="canGoNextAnnouncement"
           @prev="prevPage"
           @next="nextPage"

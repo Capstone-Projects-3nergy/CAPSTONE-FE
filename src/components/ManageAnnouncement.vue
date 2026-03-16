@@ -200,7 +200,7 @@ const fetchAnnouncementData = async () => {
     `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
     router
   )
-
+console.log(data)
   if (data && data.length > 0) {
     announcementManager.setAnnouncements(data)
     announcements.value = announcementManager.announcements
