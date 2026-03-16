@@ -7,7 +7,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
-import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements } from '@/utils/fetchUtils.js'
+import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements, editItem } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
@@ -594,26 +594,22 @@ const handleSave = async () => {
     isSubmitting.value = true
     
     // -----------------------
-    // payload
+    // payload matches UpdateAnnouncementDto
     // -----------------------
-    const body = {
+    const payload = {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
       content: announcementForm.content,
+      coverImageUrl: imagePreview.value && typeof imagePreview.value === 'string' ? imagePreview.value : (announcementForm.coverImageUrl || null),
       categoryId: announcementForm.categoryId,
       pinned: announcementForm.pinned,
-      priority: 1,
+      priority: announcementForm.priority || 1,
       sendNotification: announcementForm.sendNotification,
-      publishAt: announcementForm.publishAt || null,
-      status: announcementForm.status
-    }
-
-    if (coverImage.value) {
-      body.coverImage = coverImage.value
+      publishAt: announcementForm.publishAt || null
     }
 
     // -----------------------
-    // API call
+    // API call - Use editItem for JSON payload
     // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
@@ -624,12 +620,12 @@ const handleSave = async () => {
       return
     }
 
-    const updated = await editAnnouncementWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-      aid,
-      body,
-      router
-    )
+    // Since the provided backend uses @RequestBody UpdateAnnouncementDto, 
+    // we MUST send a plain JSON body, not multipart/form-data.
+    // editItem (from fetchUtils) sends JSON via PUT.
+    
+    const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
+    const updated = await editItem(url, aid, payload, router)
 
     if (!updated) {
       isSubmitting.value = false
