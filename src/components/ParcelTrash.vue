@@ -74,6 +74,8 @@ import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
+import DeleteAnnouncement from './DeleteAnnouncement.vue'
+import RestoreAnnouncement from './RestoreAnnouncement.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -122,6 +124,11 @@ const deleteMemberSuccess = ref(false)
 const recipientSearch = ref('')
 const restoreMemberSuccess = ref(false)
 const selectedResidentId = ref(null)
+const showDeleteAnnouncement = ref(false)
+const showRestoreAnnouncement = ref(false)
+const announcementDetail = ref(null)
+const deleteAnnouncementSuccess = ref(false)
+const restoreAnnouncementSuccess = ref(false)
 
 const selectedResident = computed(
   () =>
@@ -622,6 +629,26 @@ const restoreAnnouncementPopUp = (announcement) => {
     id: announcement.id,
     title: announcement.title
   }
+}
+const clearDeleteAnnouncementPopUp = () => {
+  showDeleteAnnouncement.value = false
+  announcementDetail.value = null
+}
+const clearRestoreAnnouncementPopUp = () => {
+  showRestoreAnnouncement.value = false
+  announcementDetail.value = null
+}
+const showDeleteAnnouncementComplete = () => {
+  showDeleteAnnouncement.value = false
+  deleteAnnouncementSuccess.value = true
+  setTimeout(() => (deleteAnnouncementSuccess.value = false), 10000)
+  announcementDetail.value = null
+}
+const showRestoreAnnouncementComplete = () => {
+  showRestoreAnnouncement.value = false
+  restoreAnnouncementSuccess.value = true
+  setTimeout(() => (restoreAnnouncementSuccess.value = false), 10000)
+  announcementDetail.value = null
 }
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
@@ -1442,7 +1469,10 @@ const closePopUp = (operate) => {
           :pages="visiblePages"
           :page="currentPage"
           :total="totalPages"
-          :showDelete="true"
+          :showDeleteAnnouncement="true"
+          :showRestoreAnnouncement="true"
+          :showDelete="false"
+          :showRestore="false"
           :hideTrash="true"
           :clickableStatus="false"
           :showUpdateAt="false"
@@ -1611,6 +1641,25 @@ const closePopUp = (operate) => {
       @redAlert="openRedMemPopup"
       :residentData="residentDetail"
       :isPermanent="true"
+    />
+  </teleport>
+
+  <teleport to="body" v-if="showDeleteAnnouncement">
+    <DeleteAnnouncement
+      @cancelDetail="clearDeleteAnnouncementPopUp"
+      @confirmDetail="showDeleteAnnouncementComplete"
+      @redAlert="openRedPopup"
+      :announcementData="announcementDetail"
+      :isPermanent="true"
+    />
+  </teleport>
+
+  <teleport to="body" v-if="showRestoreAnnouncement">
+    <RestoreAnnouncement
+      :announcementData="announcementDetail"
+      @confirmDetail="showRestoreAnnouncementComplete"
+      @cancelDetail="clearRestoreAnnouncementPopUp"
+      @redAlert="openRedRestorePopup"
     />
   </teleport>
 </template>

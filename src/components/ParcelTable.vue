@@ -53,6 +53,7 @@ const props = defineProps({
   showUpdateAt: { type: Boolean, default: true },
   showDeletedAt: { type: Boolean, default: false },
   showDeleteResident: { type: Boolean, default: false },
+  showDeleteAnnouncement: { type: Boolean, default: false },
   showMemberTrashName: { type: Boolean, default: false },
   hideTrash: { type: Boolean, default: false },
   showMember: { type: Boolean, default: false },
@@ -61,6 +62,7 @@ const props = defineProps({
   showTitle: { type: Boolean, default: false },
   showCategory: { type: Boolean, default: false },
   showDatePosted: { type: Boolean, default: false },
+  showRestoreAnnouncement: { type: Boolean, default: false },
 })
 
 function formatDateTime(datetimeStr) {
@@ -626,6 +628,29 @@ const authStore = useAuthManager()
               </div>
             </button>
             <button
+              v-if="showDeleteAnnouncement && !!$slots['icon-delete-permanent']"
+              @click="$emit('delete', p)"
+              class="relative group/btn p-1.5 border border-gray-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
+            >
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
+                <slot name="icon-delete-permanent"></slot>
+              </div>
+              <div
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
+              >
+                <div
+                  class="relative rounded-lg bg-gray-400 min-w-[150px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Delete Announcement
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <button
               v-if="showRestore && !!$slots['restore-trash']"
               @click="$emit('restore', p)"
               class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
@@ -640,6 +665,30 @@ const authStore = useAuthManager()
                   class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
                 >
                   Restore Parcel
+
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <button
+              v-if="showRestoreAnnouncement && !!$slots['restore-trash']"
+              @click="$emit('restore', p)"
+              class="relative group/btn p-1.5 border border-gray-100 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors cursor-pointer bg-transparent md:bg-white flex items-center justify-center shadow-sm"
+            >
+              <div class="flex items-center justify-center w-[18px] h-[18px] transition-transform duration-200 ease-out group-hover/btn:scale-110 [&>svg]:w-[18px] [&>svg]:h-[18px]">
+                <slot name="restore-trash"> </slot>
+              </div>
+              <div
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover/btn:opacity-100 group-hover/btn:translate-y-0"
+              >
+                <div
+                   class="relative rounded-lg bg-gray-400 min-w-[150px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Restore Announcement
 
                   <div class="absolute left-1/2 top-full -translate-x-1/2">
                     <div
