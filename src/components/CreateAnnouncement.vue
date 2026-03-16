@@ -962,7 +962,7 @@ const returnLoginPage = async () => {
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'ALL_RESIDENTS' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
                       </div>
                     </label>
-
+<!-- 
                     <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
@@ -971,7 +971,7 @@ const returnLoginPage = async () => {
                         </div>
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
-                    </label>
+                    </label> -->
 
                     <!-- <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
@@ -1042,7 +1042,7 @@ const returnLoginPage = async () => {
                   </template>
                 </ButtonWeb>
                 <ButtonWeb 
-                  :label="windowWidth < 640 ? 'Publish' : 'Publish Announcement'" 
+                  :label="windowWidth < 640 ? 'Publish' : 'Publish'" 
                   color="blue" 
                   :size="buttonSize"
                   class="sm:w-60"

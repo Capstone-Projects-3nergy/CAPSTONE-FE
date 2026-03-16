@@ -1195,7 +1195,7 @@ const showProfileStaffPage = async function () {
                       </div>
                     </label>
 
-                    <label class="relative cursor-pointer h-full">
+                    <!-- <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="announcementForm.targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
                         <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
@@ -1203,7 +1203,7 @@ const showProfileStaffPage = async function () {
                         </div>
                         <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
-                    </label>
+                    </label> -->
 <!-- 
                     <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="announcementForm.targetAudience" value="Zone" class="peer sr-only" />
@@ -1262,7 +1262,7 @@ const showProfileStaffPage = async function () {
                   @click="handleCancel" 
                 />
                 <ButtonWeb 
-                  :label="windowWidth < 640 ? 'Update' : 'Update Announcement'" 
+                  :label="windowWidth < 640 ? 'Update' : 'Update'" 
                   color="blue" 
                   :size="buttonSize"
                   class="sm:w-60"
