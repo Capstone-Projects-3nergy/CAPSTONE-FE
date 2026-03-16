@@ -59,7 +59,7 @@ const categories = ref([])
 const fetchCategoriesFromAnnouncements = async () => {
   try {
     const data = await getAnnouncements(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
       router
     )
     console.log(data)
