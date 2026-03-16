@@ -643,12 +643,14 @@ const showDeleteAnnouncementComplete = () => {
   deleteAnnouncementSuccess.value = true
   setTimeout(() => (deleteAnnouncementSuccess.value = false), 10000)
   announcementDetail.value = null
+  fetchTrashAnnouncements()
 }
 const showRestoreAnnouncementComplete = () => {
   showRestoreAnnouncement.value = false
   restoreAnnouncementSuccess.value = true
   setTimeout(() => (restoreAnnouncementSuccess.value = false), 10000)
   announcementDetail.value = null
+  fetchTrashAnnouncements()
 }
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
@@ -675,18 +677,21 @@ const showRestoreComplete = () => {
   setTimeout(() => (restoreSuccess.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
+  fetchTrash()
 }
 const showRestoreMemberComplete = () => {
   restoreMemberSuccess.value = true
   setTimeout(() => (restoreMemberSuccess.value = false), 10000)
   showRestoreMember.value = false
   residentDetail.value = null
+  fetchTrashMembers()
 }
 const showDelMemComplete = () => {
   showDeleteMember.value = false
   deleteMemberSuccess.value = true
   setTimeout(() => (deleteMemberSuccess.value = false), 10000)
   residentDetail.value = null
+  fetchTrashMembers()
 }
 
 const showDelComplete = () => {
@@ -694,6 +699,7 @@ const showDelComplete = () => {
   setTimeout(() => (deleteSuccess.value = false), 10000)
   showDeleteParcel.value = false
   parcelDetail.value = null
+  fetchTrash()
 }
 const showStatusComplete = (updatedParcel) => {
   parcelManager.updateParcel(updatedParcel)
@@ -847,6 +853,8 @@ const closePopUp = (operate) => {
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
   if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
   if (operate === 'deleteMemberSuccessMessage') deleteMemberSuccess.value = false
+  if (operate === 'deleteAnnouncementSuccessMessage') deleteAnnouncementSuccess.value = false
+  if (operate === 'restoreAnnouncementSuccessMessage') restoreAnnouncementSuccess.value = false
 }
 </script>
 
@@ -1149,48 +1157,66 @@ const closePopUp = (operate) => {
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
         />
-        <div class="fixed top-5 left-5 z-50">
-          <AlertPopUp
-            v-if="deleteSuccess"
-            :titles="'Delete Parcel is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="deleteSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="deleteMemberSuccess"
-            :titles="'Delete Resident is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="deleteMemberSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="restoreSuccess"
-            :titles="'Restore Parcel is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="restoreSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="restoreMemberSuccess"
-            :titles="'Restore Resident is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="restoreMemberSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          />
-        </div>
+        <teleport to="body">
+          <div class="fixed top-5 left-5 z-[999]">
+            <AlertPopUp
+              v-if="deleteSuccess"
+              :titles="'Delete Parcel is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="deleteMemberSuccess"
+              :titles="'Delete Resident is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteMemberSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreSuccess"
+              :titles="'Restore Parcel is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreMemberSuccess"
+              :titles="'Restore Resident is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreMemberSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="problem"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="deleteAnnouncementSuccess"
+              :titles="'Delete Announcement is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteAnnouncementSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreAnnouncementSuccess"
+              :titles="'Restore Announcement is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreAnnouncementSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+          </div>
+        </teleport>
         <ParcelTable
           v-if="activeTab === 'Parcels'"
           :items="paginatedParcels"

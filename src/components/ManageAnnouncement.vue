@@ -295,16 +295,18 @@ const showProfileStaffPage = async function () {
       @cancel-detail="showDeleteModal = false"
     />
 
-    <div class="fixed top-5 left-5 z-50">
-      <AlertPopUp
-        v-if="deleteSuccess"
-        :titles="'Delete Announcement to Trash is Successful.'"
-        message="Success!!"
-        styleType="green"
-        operate="deleteSuccessMessage"
-        @closePopUp="closePopUp"
-      />
-    </div>
+    <teleport to="body">
+      <div class="fixed top-5 left-5 z-[999]">
+        <AlertPopUp
+          v-if="deleteSuccess"
+          :titles="'Delete Announcement to Trash is Successful.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+      </div>
+    </teleport>
     <div class="flex flex-1">
       <aside
           :class="[
