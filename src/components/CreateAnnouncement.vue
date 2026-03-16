@@ -1002,7 +1002,7 @@ const returnLoginPage = async () => {
                      </button>
                   </div>
 
-                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                  <!-- <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
                      <div class="flex items-center gap-4">
                        <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
@@ -1015,7 +1015,7 @@ const returnLoginPage = async () => {
                      <button @click="sendNotification = !sendNotification" :class="sendNotification ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
                        <span :class="sendNotification ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
-                  </div>
+                  </div> -->
                 </div>
 
              </div>

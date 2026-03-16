@@ -56,6 +56,23 @@ const closePopUp = (operate) => {
 
 // Announcement Data & Logic
 const announcements = ref([])
+const categories = ref([])
+
+const fetchCategoriesFromAnnouncements = async () => {
+  try {
+    const data = await getAnnouncements(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
+      router
+    )
+    if (data && data.length > 0) {
+      const uniqueNames = [...new Set(data.map(item => item.categoryName || item.name || item.category))]
+      categories.value = uniqueNames.filter(name => name).sort()
+      console.log('Categories loaded in ManageAnnouncement:', categories.value)
+    }
+  } catch (err) {
+    console.error('Failed to fetch categories in ManageAnnouncement:', err)
+  }
+}
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -209,7 +226,10 @@ onMounted(async () => {
     window.addEventListener('resize', checkScreen)
   }
   
-  await fetchAnnouncementData()
+  await Promise.all([
+    fetchAnnouncementData(),
+    fetchCategoriesFromAnnouncements()
+  ])
 })
 
 const toggleSidebar = () => {
@@ -567,7 +587,7 @@ const showProfileStaffPage = async function () {
           <AnnouncementFilterBar
             v-model:search="searchQuery"
             v-model:category="selectedCategory"
-            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :categories="categories"
             v-model:date="selectedDate"
             v-model:viewMode="viewMode"
             @new-announcement="showNewAnnouncementPage"
