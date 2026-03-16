@@ -404,12 +404,15 @@ function searchAnnouncements(announcements, keyword) {
       normalize(a.content),
       normalize(a.description),
       normalize(a.category),
+      normalize(a.categoryName),
       normalize(a.tag),
       normalize(a.author),
       normalize(a.status),
       normalize(a.type),
       normalize(a.views),
-      normalize(a.viewCount)
+      normalize(a.viewCount),
+      normalize(a.deletedBy),
+      normalize(a.announcementId)
     ]
 
     const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(a);
@@ -417,6 +420,13 @@ function searchAnnouncements(announcements, keyword) {
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
+
+    // Also extract deletedAt if it exists to make it searchable separately
+    if (a.deletedAt) {
+      const delDates = extractDisplayDates({ deletedAt: a.deletedAt });
+      if (delDates.displayDate) fields.push(normalize(delDates.displayDate));
+      if (delDates.isoDate) fields.push(normalize(delDates.isoDate));
+    }
 
     // exact match
     const isExact = fields.some((f) => f === key)

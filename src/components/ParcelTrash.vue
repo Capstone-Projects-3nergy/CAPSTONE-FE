@@ -826,10 +826,7 @@ const fetchTrashAnnouncements = async () => {
         publishAt: a.publishAt || null,
         datePosted: a.publishAt || '-',
         deletedAt: a.deletedAt || null,
-        deletedBy: a.deletedBy || '-',
-        author: a.deletedBy || 'Staff Portal',
-        _isMapped: true,
-        originalData: a
+        deletedBy: a.deletedBy || '-'
       }
     })
 
