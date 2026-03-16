@@ -660,6 +660,26 @@ async function deleteAnnouncement(url, id, router) {
   return await deleteItemById(url, id, router)
 }
 
+async function recordAnnouncementView(url, id, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/view`, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('recordAnnouncementView error:', error)
+    return false
+  }
+}
+
 async function addAnnouncementWithFile(url, payload, router) {
   const formData = new FormData()
 
@@ -867,6 +887,7 @@ export {
   addAnnouncement,
   editAnnouncement,
   deleteAnnouncement,
+  recordAnnouncementView,
   addAnnouncementWithFile,
   editAnnouncementWithFile,
   getDashboardData,

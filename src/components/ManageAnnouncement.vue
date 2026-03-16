@@ -21,7 +21,11 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { computed } from 'vue'
 
-import { getAnnouncements } from '@/utils/fetchUtils.js'
+import {
+  getAnnouncements,
+  getAnnouncementById,
+  recordAnnouncementView
+} from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { searchAnnouncements } from '@/stores/SortManager.js'
 
@@ -299,8 +303,50 @@ const handleEdit = (item) => {
   router.push({ name: 'editannouncement', params: { id: route.params.id, aid: item.id } })
 }
 
-const handleView = (item) => {
-  selectedAnnouncement.value = item
+const handleView = async (item) => {
+  // Try to get fresh data from backend to get latest view count
+  try {
+    const data = await getAnnouncementById(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    if (data) {
+      // Record view in background
+      recordAnnouncementView(
+        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+        item.id,
+        router
+      )
+
+      const type = (data.type || data.category || 'General').toLowerCase()
+      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
+      const rawDate = data.createdAt || data.date || 'Just now'
+
+      selectedAnnouncement.value = {
+        id: data.id || data.announcementId,
+        title: data.title || data.header || '',
+        subtitle: data.subtitle || data.description || '',
+        content: data.content || data.description || '',
+        category: data.tag || capitalizedType,
+        pinned: data.pinned || false,
+        datePosted: rawDate,
+        date: rawDate,
+        views: (data.views || 0) + 1, // Optimistically show +1 view
+        author: data.author || 'Staff Portal',
+        status: data.status || 'Published',
+        type: type.includes('event') ? 'event' : 'news',
+        coverImage: data.coverImage
+      }
+    } else {
+      selectedAnnouncement.value = { ...item }
+    }
+  } catch (error) {
+    console.error('Error fetching announcement detail:', error)
+    selectedAnnouncement.value = { ...item }
+  }
+
   showViewModal.value = true
 }
 
