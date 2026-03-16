@@ -783,31 +783,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </h2>
               </div>
             </div>
-
-            <!-- Export & Print Actions -->
-            <div class="flex items-center gap-3 no-print">
-              <button 
-                @click="handleExportExcel"
-                class="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                Excel
-              </button>
-              <button 
-                @click="handleExportPDF"
-                class="hidden md:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl border border-red-100 hover:bg-red-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-                PDF
-              </button>
-              <button 
-                @click="handlePrintSummary"
-                class="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 hover:bg-blue-100 transition-all font-bold text-sm shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                Print
-              </button>
-            </div>
           </div>
           <!-- Tabs Navigation (Premium Framed Style) -->
           <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 mt-2">
