@@ -8,8 +8,9 @@ import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
+import { addAnnouncementWithFile, getAnnouncements } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
 
 const dateInput = ref(null)
 
@@ -52,15 +53,48 @@ const targetAudience = ref('ALL_RESIDENTS')
 const pinned = ref(false)
 const sendNotification = ref(true)
 
-const categories = [
-  { id: 1, name: 'General' },
-  { id: 2, name: 'Maintenance' },
-  { id: 3, name: 'Events' },
-  { id: 4, name: 'Urgent' }
-]
+// ให้นำออก เพราะดึงจาก backend แล้ว
+const categories = ref([])
+
+const fetchCategoriesFromAnnouncements = async () => {
+  try {
+    const data = await getAnnouncements(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      router
+    )
+    console.log(data)
+    if (data && data.length > 0) {
+      const uniqueCategories = []
+      const map = new Map()
+      
+      for (const item of data) {
+        if (item.categoryId && !map.has(item.categoryId)) {
+          map.set(item.categoryId, true)
+          uniqueCategories.push({
+            id: item.categoryId,
+            name: item.categoryName || item.category || 'Unknown'
+          })
+        }
+      }
+
+      if (uniqueCategories.length > 0) {
+        categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch categories from announcements:', err)
+  }
+}
 
 const currentCategory = computed(() => {
-  return categories.find(c => c.id === categoryId.value) || null
+  return categories.value.find(c => c.id === categoryId.value) || null
+})
+
+const categoryOptions = computed(() => {
+  return categories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
+  }))
 })
 
 const addSuccess = ref(false)
@@ -248,9 +282,12 @@ const buttonSize = computed(() => {
   return 'md'
 })
 
-onMounted(() => {
+onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
+  
+  // ดึงหมวดหมู่จากประกาศที่มีอยู่จริงจาก /api/announcements
+  await fetchCategoriesFromAnnouncements()
 })
 
 onUnmounted(() => {
@@ -773,44 +810,24 @@ const returnLoginPage = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
-                      <div class="relative">
-                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
-                            <span v-if="!category" class="text-gray-500">Select category...</span>
-                            <template v-else>
-                              <!-- General -->
-                              <svg v-if="category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                              <!-- Maintenance -->
-                              <svg v-else-if="category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                              <!-- Events -->
-                              <svg v-else-if="category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                              <!-- Urgent -->
-                              <svg v-else-if="category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                              <span class="text-gray-800">{{ category }}</span>
-                            </template>
-                        </div>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                        <!-- Dropdown Options -->
-                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="categoryId = 1; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                             General
-                          </div>
-                          <div @click="categoryId = 2; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                             Maintenance
-                          </div>
-                          <div @click="categoryId = 3; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                             Activity/Events
-                          </div>
-                          <div @click="categoryId = 4; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                             Urgent
-                          </div>
-                        </div>
-                      </div>
+                      <SelectWeb 
+                        v-model="categoryId"
+                        :options="categoryOptions"
+                        placeholder="Select category"
+                        :error="categoryError"
+                        customClass="w-full px-4 py-3 rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                      >
+                        <template #icon>
+                          <!-- Dynamic Icon Mapping for SelectWeb -->
+                          <template v-if="currentCategory">
+                            <svg v-if="currentCategory.name.includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <svg v-else-if="currentCategory.name.includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            <svg v-else-if="currentCategory.name.includes('Event') || currentCategory.name.includes('Activity')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <svg v-else-if="currentCategory.name.includes('Urgent')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          </template>
+                        </template>
+                      </SelectWeb>
                    </div>
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date <span class="text-red-500">*</span></label>
