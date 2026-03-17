@@ -118,7 +118,8 @@ watch(
       if (p.status) {
         const caps = p.status.toUpperCase()
         currentStatus.value = caps
-        newStatus.value = caps
+        // Default to ACTIVE if current is PENDING for faster approval
+        newStatus.value = (caps === 'PENDING') ? 'ACTIVE' : caps
       }
       form.value = {
         ...form.value,
@@ -254,36 +255,6 @@ const currentStepIndex = computed(() => {
           </div>
 
           <div class="p-6 sm:p-8">
-            <!-- Modern Segmented Status Flow -->
-            <div v-if="!isLocked" class="mb-10 px-1">
-              <div class="flex gap-2">
-                <div v-for="(step, i) in steps" :key="step" class="flex-1">
-                  <div 
-                    class="flex flex-col items-center p-2 rounded-xl transition-all duration-300"
-                    :class="[
-                      currentStatus.toUpperCase() === step ? 'bg-blue-50 border border-blue-100 shadow-sm' : ''
-                    ]"
-                  >
-                    <div 
-                      class="w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-500"
-                      :class="[
-                        currentStatus.toUpperCase() === step ? 'bg-blue-600 text-white scale-110 shadow-md shadow-blue-200' : 
-                        (i < currentStepIndex ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400')
-                      ]"
-                    >
-                      <svg v-if="i < currentStepIndex" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span v-else class="text-[10px] font-black">{{ i + 1 }}</span>
-                    </div>
-                    <span class="text-[10px] font-black uppercase tracking-tight text-center" 
-                          :class="currentStatus.toUpperCase() === step ? 'text-blue-700' : 'text-slate-400'">
-                      {{ formatStatusDisplay(step) }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <!-- Locking Alert -->
             <div v-if="isLocked" class="mb-8 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3">
@@ -292,7 +263,7 @@ const currentStepIndex = computed(() => {
               </div>
               <div>
                 <h5 class="text-sm font-bold text-emerald-900">Already Approved</h5>
-                <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already {{ formatStatusDisplay(currentStatus) }}. Modifications are restricted to pending registrations for data integrity.</p>
+                <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already approved. Modifications are restricted to pending registrations for data integrity.</p>
               </div>
             </div>
 
