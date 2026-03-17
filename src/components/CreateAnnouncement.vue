@@ -159,6 +159,16 @@ const formatText = (style) => {
   }, 0)
 }
 
+const minDateTime = computed(() => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+})
+
 const isFormValid = computed(() => {
   return title.value.trim() !== '' && categoryId.value !== null && publishAt.value !== '' && content.value.trim() !== ''
 })
@@ -870,6 +880,7 @@ const returnLoginPage = async () => {
                            ref="dateInput"
                            type="datetime-local" 
                            v-model="publishAt"
+                           :min="minDateTime"
                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
                         />
                       </div>
