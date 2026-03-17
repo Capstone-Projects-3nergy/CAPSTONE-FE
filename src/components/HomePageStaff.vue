@@ -71,7 +71,7 @@ const topResidents = computed(() => {
 
   return Object.values(counts)
     .sort((a, b) => b.count - a.count)
-    .slice(0, 4)
+    .slice(0, 5)
 })
 
 const getResidentStatusClass = (status) => {
@@ -286,7 +286,7 @@ const pendingResidentsList = computed(() => {
   return dashboardStore.members
     .filter(m => m.status?.toUpperCase() === 'PENDING')
     .sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
-    .slice(0, 5)
+    .slice(0, 2)
 })
 
 const fetchDashboardData = async () => {
@@ -1467,7 +1467,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                     Most Parcels Received
                   </h3>
-                  <p class="text-xs text-gray-500 mt-1">Residents ranked by total parcels</p>
+                  <p class="text-xs text-gray-500 mt-1">Top 5 Residents by Total Parcels</p>
                 </div>
 
                 <div class="space-y-4 flex-1">
@@ -1623,6 +1623,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         View Profile
                       </button>
                     </div>
+                  </div>
+
+                  <!-- Remaining Count Message -->
+                  <div v-if="stats.pendingResidents > 2" class="text-center py-2">
+                    <p class="text-xs font-semibold text-yellow-600 bg-yellow-50/50 py-2 rounded-lg border border-dashed border-yellow-200">
+                      + {{ stats.pendingResidents - 2 }} more residents awaiting approval
+                    </p>
                   </div>
 
                   <!-- Empty State -->
