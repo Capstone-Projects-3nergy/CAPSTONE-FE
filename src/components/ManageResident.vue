@@ -17,6 +17,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import WebHeader from './WebHeader.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import DeleteMemberStaff from './DeleteMemberStaff.vue'
+import ChangeResidentStatus from './ChangeResidentStatus.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -87,6 +88,8 @@ const deleteSuccess = ref(false)
 const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const showStatusParcel = ref(false)
+const showChangeResidentStatus = ref(false)
+const residentStatusDetail = ref(null)
 const showDeleteMemberSuccess = ref(false)
 const showDeleteMemberError = ref(false)
 
@@ -221,6 +224,21 @@ const openStatusPopup = (parcel) => {
     parcelStatus: parcel.parcelStatus
   }
 }
+
+const openResidentStatusPopup = (user) => {
+  residentStatusDetail.value = {
+    id: user.id,
+    status: user.status
+  }
+  showChangeResidentStatus.value = true
+}
+
+const confirmStatusChange = () => {
+  statusSuccess.value = true 
+  setTimeout(() => (statusSuccess.value = false), 10000)
+  showChangeResidentStatus.value = false
+  refreshUserData()
+}
 const canGoNext = computed(() => {
   return paginatedResidents.value.length === perPage.value
 })
@@ -339,6 +357,10 @@ const totalUsers = computed(() => usersByTab.value.length)
 
 const currentUsed = computed(
   () => usersByTab.value.filter((u) => u.status === 'ACTIVE').length
+)
+
+const currentPending = computed(
+  () => usersByTab.value.filter((u) => u.status === 'PENDING').length
 )
 
 function autoClose(refVar, timeout = 10000) {
@@ -615,6 +637,9 @@ const closePopUp = (operate) => {
       break
     case 'editSuccessMessage':
       editSuccess.value = false
+      break
+    case 'statusSuccessMessage':
+      statusSuccess.value = false
       break
   }
 }
@@ -910,6 +935,22 @@ const showResidentDetail = async function (id) {
                     </div>
                   </div>
                 </div>
+
+                <!-- Pending Approval Card (Only for Residents tab) -->
+                <div v-if="activeTab === 'Residents'" class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-amber-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-200 group">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 transition-colors duration-300 group-hover:bg-amber-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-amber-500/70 leading-none mb-1 sm:mb-1.5 truncate">Pending Approval</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-base sm:text-xl font-black text-amber-700">{{ currentPending }}</span>
+                      <span class="text-[9px] sm:text-[11px] font-bold text-amber-500/60 ml-0.5">Total</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -993,11 +1034,12 @@ const showResidentDetail = async function (id) {
           :showMemberName="true"
           :showTracking="false"
           :showStatus="false"
-          :clickableStatus="false"
+          :clickableStatus="true"
           :showDeleteMember="true"
           :hideTrash="true"
           :showMobile="false"
           :showActionStatus="true"
+          @status-click="openResidentStatusPopup"
           :showDelete="false"
           :showRoom="true"
           :showUpdateAt="true"
@@ -1256,4 +1298,25 @@ const showResidentDetail = async function (id) {
       :isPermanent="false"
     />
   </teleport>
+  <Teleport to="body">
+    <ChangeResidentStatus
+      v-if="showChangeResidentStatus"
+      :residentDataStatus="residentStatusDetail"
+      @cancelStatusDetail="showChangeResidentStatus = false"
+      @confirmStatusDetail="confirmStatusChange"
+      @redStatusAlert="openRedMemPopup"
+    />
+  </Teleport>
+
+  <AlertPopUp
+    v-if="statusSuccess"
+    :message="'Updated resident status successfully'"
+    @close="closePopUp('statusSuccessMessage')"
+  />
+  <AlertPopUp
+    v-if="error"
+    :status="'danger'"
+    :message="'Something went wrong. Please try again.'"
+    @close="closePopUp('problem')"
+  />
 </template>

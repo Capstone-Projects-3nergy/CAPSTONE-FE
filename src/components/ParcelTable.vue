@@ -441,6 +441,7 @@ const authStore = useAuthManager()
                 },
                 clickableStatus ? 'cursor-pointer ' : 'cursor-default '
               ]"
+              @click="clickableStatus && $emit('status-click', p)"
             >
               {{ formatStatus(p.status) }}
             </span>
