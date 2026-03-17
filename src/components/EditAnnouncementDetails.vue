@@ -1371,7 +1371,7 @@ const showProfileStaffPage = async function () {
              </div>
           </div>
 
-          <div class="fixed top-5 left-5 z-50">
+          <!-- <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="editSuccess"
               :titles="'Edit Announcement is Successful.'"
@@ -1388,7 +1388,7 @@ const showProfileStaffPage = async function () {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
-          </div>
+          </div> -->
 
         </div>
       </main>
