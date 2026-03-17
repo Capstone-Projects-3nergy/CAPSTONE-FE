@@ -149,13 +149,18 @@ const showAddParcelPage = () => {
   // router.push({ name: 'addparcel' })
 }
 const mapActiveStatus = (status) => {
-  switch (status) {
+  if (!status) return ''
+  switch (status.toUpperCase()) {
     case 'ACTIVE':
       return 'Active'
     case 'INACTIVE':
       return 'Inactive'
+    case 'PENDING':
+      return 'Pending'
+    case 'DELETED':
+      return 'Deleted'
     default:
-      return status
+      return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
   }
 }
 
@@ -227,10 +232,12 @@ const openStatusPopup = (parcel) => {
 
 const openResidentStatusPopup = (user) => {
   residentStatusDetail.value = {
+    ...user,
     id: user.id,
-    status: user.status
+    status: mapActiveStatus(user.status)
   }
   showChangeResidentStatus.value = true
+  console.log(residentStatusDetail.value)
 }
 
 const confirmStatusChange = () => {

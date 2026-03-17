@@ -73,20 +73,38 @@ const getUserDetail = async (id) => {
       Number(id),
       router
     )
-    form.value = {
-        id: data.userId,
-        fullName: data.fullName,
-        email: data.email,
-        dormName: data.dormName,
-        roomNumber: data.roomNumber,
-        status: data.status,
-        photo: data.profileImageUrl
+    
+    // Smart merge: Only update if the API returns a value for that field
+    // and provide fallbacks for common name field patterns
+    const updatedForm = { ...form.value }
+    
+    if (data.userId) updatedForm.id = data.userId
+    
+    // Handle name mapping (fullName vs firstName/lastName)
+    if (data.fullName) {
+      updatedForm.fullName = data.fullName
+    } else if (data.firstName || data.lastName) {
+      updatedForm.fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim()
     }
-    const status = form.value.status?.toUpperCase() || ''
-    newStatus.value = status
-    currentStatus.value = status
-    originalForm.value = { ...form.value }
-  } catch (err) {}
+
+    if (data.email) updatedForm.email = data.email
+    if (data.dormName) updatedForm.dormName = data.dormName
+    if (data.roomNumber) updatedForm.roomNumber = data.roomNumber
+    if (data.status) updatedForm.status = data.status
+    if (data.profileImageUrl) updatedForm.photo = data.profileImageUrl
+
+    // Update form and reactive status values
+    form.value = updatedForm
+    
+    if (updatedForm.status) {
+      const caps = updatedForm.status.toUpperCase()
+      newStatus.value = caps
+      currentStatus.value = caps
+      originalForm.value = { ...updatedForm }
+    }
+  } catch (err) {
+    console.error('Error fetching user detail:', err)
+  }
 }
 
 watch(
@@ -94,11 +112,23 @@ watch(
   async (userId) => {
     if (!userId) return
     
-    // Pre-populate from props so isLocked is calculated correctly immediately
-    if (props.residentDataStatus.status) {
-      const status = props.residentDataStatus.status.toUpperCase()
-      currentStatus.value = status
-      newStatus.value = status
+    // Pre-populate from props so UI is ready immediately and isLocked is correct
+    if (props.residentDataStatus) {
+      const p = props.residentDataStatus
+      if (p.status) {
+        const caps = p.status.toUpperCase()
+        currentStatus.value = caps
+        newStatus.value = caps
+      }
+      form.value = {
+        ...form.value,
+        id: p.id || '',
+        fullName: p.fullName || '',
+        roomNumber: p.roomNumber || '',
+        dormName: p.dormName || '',
+        photo: p.photo || '',
+        status: p.status || ''
+      }
     }
 
     await getUserDetail(userId)
@@ -151,9 +181,19 @@ const cancel = () => {
   emit('cancelStatusDetail')
 }
 
+const formatStatusDisplay = (status) => {
+  if (!status) return ''
+  const s = String(status).toUpperCase()
+  if (s === 'PENDING') return 'Pending'
+  if (s === 'ACTIVE') return 'Active'
+  if (s === 'INACTIVE') return 'Inactive'
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+}
+
 const steps = ['PENDING', 'ACTIVE', 'INACTIVE']
 const currentStepIndex = computed(() => {
-  const idx = steps.indexOf(currentStatus.value)
+  const current = currentStatus.value ? String(currentStatus.value).toUpperCase() : ''
+  const idx = steps.indexOf(current)
   return idx === -1 ? 0 : idx
 })
 </script>
@@ -195,7 +235,7 @@ const currentStepIndex = computed(() => {
                 <h3 class="text-2xl font-black text-slate-900 tracking-tight">Resident Status</h3>
                 <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">Approval Console</p>
               </div>
-              <button @click="cancel" class="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400 cursor-pointers">
+              <button @click="cancel" class="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400 cursor-pointer">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
 
@@ -214,32 +254,33 @@ const currentStepIndex = computed(() => {
           </div>
 
           <div class="p-6 sm:p-8">
-            <!-- Visual Status Flow -->
-            <div v-if="!isLocked" class="mb-8 px-2 relative">
-              <div class="flex items-center justify-between relative">
-                <div class="absolute top-[11px] left-0 w-full h-[3px] bg-slate-100 z-0"></div>
-                <div 
-                  class="absolute top-[11px] left-0 h-[3px] bg-blue-500 transition-all duration-700 z-0"
-                  :style="{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }"
-                ></div>
-                
-                <div v-for="(step, i) in steps" :key="step" class="relative z-10 flex flex-col items-center gap-2">
+            <!-- Modern Segmented Status Flow -->
+            <div v-if="!isLocked" class="mb-10 px-1">
+              <div class="flex gap-2">
+                <div v-for="(step, i) in steps" :key="step" class="flex-1">
                   <div 
-                    class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
+                    class="flex flex-col items-center p-2 rounded-xl transition-all duration-300"
                     :class="[
-                      currentStatus === step ? 'bg-white border-blue-500 scale-125' : 
-                      (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
+                      currentStatus.toUpperCase() === step ? 'bg-blue-50 border border-blue-100 shadow-sm' : ''
                     ]"
                   >
-                    <svg v-if="i < currentStepIndex" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
-                      <path d="M5 13l4 4L19 7" />
-                    </svg>
-                    <div v-if="currentStatus === step" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div 
+                      class="w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-500"
+                      :class="[
+                        currentStatus.toUpperCase() === step ? 'bg-blue-600 text-white scale-110 shadow-md shadow-blue-200' : 
+                        (i < currentStepIndex ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400')
+                      ]"
+                    >
+                      <svg v-if="i < currentStepIndex" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span v-else class="text-[10px] font-black">{{ i + 1 }}</span>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-tight text-center" 
+                          :class="currentStatus.toUpperCase() === step ? 'text-blue-700' : 'text-slate-400'">
+                      {{ formatStatusDisplay(step) }}
+                    </span>
                   </div>
-                  <span class="text-[9px] font-extrabold uppercase tracking-tight" 
-                        :class="currentStatus === step ? 'text-blue-600' : 'text-slate-400'">
-                    {{ step }}
-                  </span>
                 </div>
               </div>
             </div>
@@ -251,7 +292,7 @@ const currentStepIndex = computed(() => {
               </div>
               <div>
                 <h5 class="text-sm font-bold text-emerald-900">Already Approved</h5>
-                <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already {{ currentStatus }}. Modifications are restricted to pending registrations for data integrity.</p>
+                <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already {{ formatStatusDisplay(currentStatus) }}. Modifications are restricted to pending registrations for data integrity.</p>
               </div>
             </div>
 
