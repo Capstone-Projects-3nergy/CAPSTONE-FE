@@ -81,6 +81,11 @@ const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
 
+const totalPublished = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'published').length)
+const totalPinned = computed(() => announcements.value.filter(a => a.pinned).length)
+const totalDrafts = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'draft').length)
+const totalViews = computed(() => announcements.value.reduce((sum, a) => sum + (a.views || 0), 0))
+
 const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
@@ -542,7 +547,7 @@ const showProfileStaffPage = async function () {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">6</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalPublished }}</div>
                   <div class="text-sm font-semibold text-gray-500">Total Published</div>
                 </div>
               </div>
@@ -550,11 +555,11 @@ const showProfileStaffPage = async function () {
             
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                <div class="text-blue-600 bg-blue-50 p-3 rounded-xl shadow-inner">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">2</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalPinned }}</div>
                   <div class="text-sm font-semibold text-gray-500">Pinned</div>
                 </div>
               </div>
@@ -566,7 +571,7 @@ const showProfileStaffPage = async function () {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">1</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalDrafts }}</div>
                   <div class="text-sm font-semibold text-gray-500">Drafts</div>
                 </div>
               </div>
@@ -574,11 +579,11 @@ const showProfileStaffPage = async function () {
 
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner">
+                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner" title="Total views from all announcements">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">248</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalViews }}</div>
                   <div class="text-sm font-semibold text-gray-500">Total Views</div>
                 </div>
               </div>
