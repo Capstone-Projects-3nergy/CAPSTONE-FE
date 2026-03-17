@@ -430,21 +430,43 @@ const authStore = useAuthManager()
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
-            <span
-              class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
-              :class="[
-                {
-                  'bg-green-50 text-green-600': p.status === 'ACTIVE',
-                  'bg-gray-100/80 text-gray-600': p.status === 'INACTIVE',
-                  'bg-red-50 text-red-600': p.status === 'DELETED',
-                  'bg-yellow-50 text-yellow-600': p.status === 'PENDING'
-                },
-                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
-              ]"
-              @click="clickableStatus && $emit('status-click', p)"
-            >
-              {{ formatStatus(p.status) }}
-            </span>
+            <div class="relative group inline-block">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                :class="[
+                  {
+                    'bg-green-50 text-green-600': p.status === 'ACTIVE',
+                    'bg-gray-100/80 text-gray-600': p.status === 'INACTIVE',
+                    'bg-red-50 text-red-600': p.status === 'DELETED',
+                    'bg-yellow-50 text-yellow-600': p.status === 'PENDING'
+                  },
+                  clickableStatus ? 'cursor-pointer ' : 'cursor-default '
+                ]"
+                @click="clickableStatus && $emit('status-click', p)"
+              >
+                {{ formatStatus(p.status) }}
+              </span>
+
+              <!-- Tooltip -->
+              <div
+                v-if="
+                  authStore.user?.role === 'STAFF' &&
+                  clickableStatus
+                "
+                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0"
+              >
+                <div
+                  class="relative rounded-lg bg-gray-400 min-w-[130px] px-4 py-2 text-xs font-medium text-white text-center shadow-[0_6px_18px_rgba(0,0,0,0.25)]"
+                >
+                  Change Status
+                  <div class="absolute left-1/2 top-full -translate-x-1/2">
+                    <div
+                      class="mx-auto h-0 w-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-gray-400"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </td>
           <td
             v-if="showDeletedAt"
