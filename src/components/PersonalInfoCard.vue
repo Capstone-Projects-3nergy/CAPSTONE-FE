@@ -14,7 +14,8 @@ const emit = defineEmits([
   'incorrectemailform',
   'edit',
   'emailRequire',
-  'cancel'
+  'cancel',
+  'changeStatus'
 ])
 const userManager = useUserManager()
 const profileManager = useProfileManager()
@@ -915,27 +916,16 @@ const handleUnlink = async () => {
         </div>
       </div>
     </div>
-    <div v-if="residentDetail" class="max-w-5xl mx-auto">
-      <!-- 🔹 CARD เดียว -->
-      <div
-        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
-      >
-        <div class="mb-6 text-center md:hidden">
-          <p class=" hidden md:block text-sm font-extrabold text-[#0E4B90] pt-2">
-            {{ userRoleLabel }}
-          </p>
-          <h2 class="hidden md:block text-xl font-semibold text-gray-500 truncate max-w-[200px] mx-auto">
-            {{ fullName }}
-          </h2>
-        </div>
-        <!-- 🔹 WRAPPER ซ้าย-ขวา -->
-        <div class="flex flex-col md:flex-row gap-10">
-          <!-- ================= LEFT : Profile Header ================= -->
-          <div
-            class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
-          >
+    <div v-else-if="residentDetail" class="w-full mx-auto px-4 relative">
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- LEFT : Profile Card -->
+        <div
+          class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
+        >
+          <!-- Avatar Section -->
+          <div class="flex flex-col items-center text-center">
             <div
-              class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar"
+              class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar mx-auto"
             >
               <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
                 <img
@@ -951,108 +941,171 @@ const handleUnlink = async () => {
                 </div>
               </div>
             </div>
-              <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
-          {{ userRoleLabel }}
-        </p>
-            <p
-              class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500 truncate max-w-[200px] mx-auto"
-            >
+            <p class="text-sm font-extrabold text-[#0E4B90] pt-6 uppercase tracking-wider">
+              {{ userRoleLabel }}
+            </p>
+            <p class="mt-4 text-black font-bold text-xl truncate max-w-[200px] mx-auto">
               {{ fullName }}
             </p>
           </div>
 
-          <!-- ================= RIGHT : Personal Information ================= -->
-          <div class="md:w-2/3">
+          <!-- Menu Navigation -->
+          <div class="mt-8 space-y-2 border-t border-gray-100 pt-6">
+            <button
+              @click="activeTab = 'profile'"
+              :class="menuClass('profile')"
+              class="relative w-full cursor-pointer"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 22C4 20.9391 4.42143 19.9217 5.17157 19.1716C5.92172 18.4214 6.93913 18 8 18H16C17.0609 18 18.0783 18.4214 18.8284 19.1716C19.5786 19.9217 20 20.9391 20 22C20 22.5304 19.7893 23.0391 19.4142 23.4142C19.0391 23.7893 18.5304 24 18 24H6C5.46957 24 4.96086 23.7893 4.58579 23.4142C4.21071 23.0391 4 22.5304 4 22Z"
+                  stroke-width="2.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 14C13.6569 14 15 12.6569 15 11C15 9.34315 13.6569 8 12 8C10.3431 8 9 9.34315 9 11C9 12.6569 10.3431 14 12 14Z"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <span>Personal Information</span>
+            </button>
+
+            <button
+              @click="activeTab = 'status'"
+              :class="menuClass('status')"
+              class="relative w-full cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span>Resident Status</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT : Content Area -->
+        <div class="w-full md:w-2/3">
+          <!-- Tab 1: Personal Information -->
+          <div v-if="activeTab === 'profile'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">
-                User Information
+              <h3 class="font-extrabold text-xl text-black tracking-tight uppercase">
+                Resident Details
               </h3>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >First Name</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">First Name</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ firstName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Last Name</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Last Name</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ lastName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
-                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
-                  <p class="truncate">{{ email }}</p>
-                </div>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Email</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
+                  {{ email }}
+                </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Room Number</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Room Number</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(roomNumber) }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Dormitory</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Dormitory</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ dormName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Line </label>
-                <div v-if="effectiveLineId" class="flex items-center h-[58px]">
-                  <div
-                    class="flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 bg-green-50 text-green-700 hover:bg-green-100 border border-green-100 font-bold max-w-fit"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#00b900"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#00b900"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Linked</span>
-                  </div>
-                </div>
-                <div v-else class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div
-                    class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 text-gray-400 cursor-default border border-transparent font-medium max-w-fit shadow-sm"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#9CA3AF"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#9CA3AF"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Not Linked</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Phone Number</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Phone Number</label>
+                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(phoneNumber) }}
                 </p>
               </div>
-              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end pt-4">
-                <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:bg-gray-50 rounded-2xl transition-all"
-                  label="Cancel"
-                  color="gray"
-                  @click="$emit('cancel')"
-                />
-                <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg shadow-blue-500/10 transition-all"
-                  label="Edit"
-                  color="blue"
-                  @click="$emit('edit')"
-                />
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex justify-end gap-x-3 mt-12 pt-6 border-t border-gray-50">
+              <ButtonWeb
+                class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-2xl transition-all active:scale-95 cursor-pointer"
+                label="Back"
+                color="gray"
+                @click="$emit('cancel')"
+              />
+              <ButtonWeb
+                class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 cursor-pointer"
+                label="Edit Profile"
+                color="blue"
+                @click="$emit('edit')"
+              />
+            </div>
+          </div>
+
+          <!-- Tab 2: Resident Status -->
+          <div v-if="activeTab === 'status'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
+            <div class="flex items-center gap-4 mb-10">
+              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+              <h3 class="font-extrabold text-xl text-black tracking-tight uppercase font-black">
+                Account Status
+              </h3>
+            </div>
+
+            <div class="space-y-8">
+              <div class="bg-gray-50 rounded-[32px] p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-8 relative z-10">
+                  <div class="flex items-center gap-5">
+                    <div :style="{ 
+                      background: safeStatus?.toUpperCase() === 'ACTIVE' ? '#10B981' : 
+                                 safeStatus?.toUpperCase() === 'PENDING' ? '#3B82F6' : '#9CA3AF' 
+                    }" class="w-4 h-4 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] animate-pulse"></div>
+                    <div>
+                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5">Current Status</p>
+                      <h4 class="text-3xl font-black text-slate-800 tracking-tight">{{ displayStatus(safeStatus) }}</h4>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    @click="$emit('changeStatus')"
+                    class="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 cursor-pointer group"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-12 transition-transform"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                    Update Status
+                  </button>
+                </div>
+                
+                <!-- Background decoration -->
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
+              </div>
+
+              <div class="flex items-start gap-4 p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </div>
+                <div class="space-y-1.5 pt-0.5">
+                  <h5 class="text-base font-black text-blue-900">About Status Management</h5>
+                  <p class="text-sm text-blue-700/70 leading-relaxed font-medium">Account status determines access privileges for the resident. <span class="font-bold text-blue-800">Pending</span> accounts require approval before they can access the full system features.</p>
+                </div>
               </div>
             </div>
           </div>
