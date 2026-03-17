@@ -110,7 +110,8 @@ const allPublishedAnnouncements = computed(() => {
       return {
         ...item,
         date: rawDate,
-        type: normalizedType
+        type: normalizedType,
+        views: item.viewCount || 0
       }
     })
     .sort((a, b) => {
@@ -652,6 +653,7 @@ onMounted(async () => {
     :content="selectedAnnouncement?.content || ''"
     :tag="selectedAnnouncement?.tag || ''"
     :date="selectedAnnouncement?.date || ''"
+    :views="selectedAnnouncement?.views || 0"
     @close="closeModal"
   />
 

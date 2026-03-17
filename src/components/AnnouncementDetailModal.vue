@@ -110,9 +110,6 @@ const getCategoryIcon = (category) => {
             <span v-html="getCategoryIcon(tag)"></span>
             {{ tag }}
           </span>
-          <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(status)">
-            {{ status }}
-          </span>
           <div v-if="pinned" class="p-1 px-2 bg-red-50 text-red-500 rounded-lg flex items-center gap-1 text-[11px] font-bold">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
@@ -145,12 +142,10 @@ const getCategoryIcon = (category) => {
           </div>
           <div class="flex flex-col">
             <span class="font-bold text-gray-900">{{ author }}</span>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-              </svg>
-              Posted on {{ date.split(' - ')[0] }}
-            </div>
+            <!-- Posted on {{ date.split(' - ')[0] }} -->
+            <span v-if="status && status.toUpperCase() !== 'PUBLISHED'" class="mt-1 px-2 py-0.5 rounded text-[10px] font-bold" :class="getStatusBadgeClass(status)">
+              {{ status }}
+            </span>
           </div>
         </div>
       </div>
