@@ -588,12 +588,7 @@ const showResidentParcelPage = async function () {
 const latestAnnouncements = computed(() => {
   return announcementManager.announcements
     .filter(item => item.status === 'PUBLISHED')
-    .sort((a, b) => {
-      // Sort pinned first, then date descending
-      if (a.pinned && !b.pinned) return -1
-      if (!a.pinned && b.pinned) return 1
-      return new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted)
-    })
+    .sort((a, b) => new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted))
     .slice(0, 4)
 })
 
@@ -1052,7 +1047,7 @@ function formatDateTime(datetimeStr) {
               <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Latest Stories</h2>
               <p class="text-slate-500 font-medium">Stay updated with the latest from your community</p>
             </div>
-            <button @click="showAnnouncementPage('all')" class="group flex items-center gap-2 px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 uppercase tracking-widest cursor-pointer">
+            <button @click="showAnnouncementPage" class="group flex items-center gap-2 px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 uppercase tracking-widest cursor-pointer">
               view all news
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -1079,9 +1074,6 @@ function formatDateTime(datetimeStr) {
                   <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl border border-red-100 flex items-center gap-1.5">
                     <span class="h-1.5 w-1.5 bg-red-600 rounded-full animate-pulse"></span>
                     Urgent
-                  </div>
-                  <div v-if="latestAnnouncements[0].pinned" class="bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl border border-blue-100">
-                    Pinned
                   </div>
                 </div>
               </div>
