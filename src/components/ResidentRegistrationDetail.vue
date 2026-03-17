@@ -14,6 +14,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
+import ChangeResidentStatus from './ChangeResidentStatus.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import {
@@ -51,6 +52,7 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const isCollapsed = ref(false)
 const showLogoutConfirm = ref(false)
+const showStatusPopup = ref(false)
 const parcel = ref(null)
 
 const mapParcelData = (data) => ({
@@ -102,6 +104,7 @@ const getMemberDetail = async (userId) => {
     userId,
     router
   )
+  console.log(data)
 
   if (data) {
     residentDetail.value = {
@@ -148,6 +151,15 @@ onMounted(async () => {
 
   getMemberDetail(tid)
 })
+
+const handleStatusChange = () => {
+  showStatusPopup.value = true
+}
+
+const onStatusUpdated = async () => {
+  showStatusPopup.value = false
+  await getMemberDetail(tid)
+}
 
 const backToManageResident = () => router.replace({ name: 'manageresident' })
 const showParcelScannerPage = async () => {
@@ -473,11 +485,19 @@ watch(
             :residentDetail="true"
             @edit="goToEditResident"
             @cancel="backToManageResident"
+            @changeStatus="handleStatusChange"
           />
         </div>
       </main>
     </div>
   </div>
+
+  <ChangeResidentStatus
+    v-if="showStatusPopup"
+    :residentDataStatus="residentDetail"
+    @cancelStatusDetail="showStatusPopup = false"
+    @confirmStatusDetail="onStatusUpdated"
+  />
 
   <Teleport to="body" v-if="showHomePage"><HomePageStaff /></Teleport>
   <Teleport to="body" v-if="showParcelScanner">

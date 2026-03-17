@@ -1085,7 +1085,18 @@ const handleUnlink = async () => {
                     </div>
                   </div>
                   
+                  <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" class="flex items-center gap-3 px-8 py-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div>
+                      <p class="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest leading-none mb-1.5">Verified Account</p>
+                      <p class="text-lg font-black text-emerald-900 leading-none uppercase">Approved</p>
+                    </div>
+                  </div>
+
                   <button 
+                    v-else
                     @click="$emit('changeStatus')"
                     class="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 cursor-pointer group"
                   >
