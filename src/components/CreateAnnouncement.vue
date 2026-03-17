@@ -388,9 +388,9 @@ const submitAnnouncement = async () => {
 
     isLoading.value = false
     addSuccess.value = true
+    resetForm()
     setTimeout(() => {
       addSuccess.value = false
-      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
     }, 10000)
   } catch (err) {
     console.error('Submission failed:', err)
@@ -400,6 +400,19 @@ const submitAnnouncement = async () => {
       error.value = false
     }, 10000)
   }
+}
+
+const resetForm = () => {
+  title.value = ''
+  subtitle.value = ''
+  categoryId.value = null
+  content.value = ''
+  publishAt.value = ''
+  targetAudience.value = 'ALL_RESIDENTS'
+  pinned.value = false
+  sendNotification.value = true
+  imageFile.value = null
+  imagePreview.value = ''
 }
 
 const saveDraft = async () => {
@@ -465,9 +478,9 @@ const saveDraft = async () => {
     
     isLoading.value = false
     addSuccess.value = true
+    resetForm()
     setTimeout(() => {
       addSuccess.value = false
-      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
     }, 10000)
   } catch (err) {
     console.error('Save draft failed:', err)
