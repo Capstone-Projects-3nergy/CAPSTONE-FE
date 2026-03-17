@@ -45,26 +45,31 @@ const formatDateTimeDisplay = (dateTimeStr) => {
 
 const ensureDateTimeLocal = (dateStr) => {
   if (!dateStr) return '';
-  // Remove "Z" if it exists in the raw data string
-  const sanitized = dateStr.toString().replace(/\s*Z$/i, '');
-
-  // If already in YYYY-MM-DDTHH:mm, return it
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(sanitized)) return sanitized.substring(0, 16);
-  
-  // Try parsing to Date object
-  // Replace " - " with " " to help parsing if needed
-  const d = new Date(sanitized.replace(' - ', ' '));
-  if (isNaN(d.getTime())) {
-    // If it's something like "Just now" or "Draft", return as is (though datetime-local won't show it)
-    return dateStr;
+  try {
+    const str = dateStr.toString()
+    // Remove "Z" and any suffix like " - Staff Portal" or " - Draft"
+    let sanitized = str.replace(/\s*Z$/i, '').split(' - ')[0];
+    
+    // If already in YYYY-MM-DDTHH:mm, return it
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(sanitized)) return sanitized.substring(0, 16);
+    
+    // Try parsing to Date object
+    const d = new Date(sanitized);
+    if (isNaN(d.getTime())) {
+      console.warn('Invalid date string:', dateStr);
+      return '';
+    }
+    
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (e) {
+    console.error('Date parsing error:', e);
+    return '';
   }
-  
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 // No external icon library available, using inline SVGs
 
@@ -326,7 +331,9 @@ const announcementForm = reactive({
   sendNotification: true,
   priority: 1,
   coverImageUrl: null,
-  status: 'PUBLISHED'
+  status: 'PUBLISHED',
+  author: '',
+  views: 0
 })
 
 const currentCategory = computed(() => {
@@ -337,22 +344,9 @@ const currentCategory = computed(() => {
 const statuses = ref([])
 
 const fetchStatusesFromAnnouncements = async () => {
-  try {
-    const data = await getAnnouncements(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements/statuses`,
-      router
-    )
-    if (data && data.length > 0) {
-      statuses.value = data
-      console.log('Statuses loaded:', statuses.value)
-    } else {
-      // Fallback if API returns empty
-      statuses.value = ['DRAFT', 'PUBLISHED']
-    }
-  } catch (err) {
-    console.error('Failed to fetch statuses:', err)
-    statuses.value = ['DRAFT', 'PUBLISHED']
-  }
+  // Backend doesn't have a specific statuses endpoint, so we use common ones
+  statuses.value = ['DRAFT', 'PUBLISHED']
+  console.log('Statuses set (hardcoded):', statuses.value)
 }
 
 const statusOptions = computed(() => {
@@ -488,19 +482,27 @@ const fetchAnnouncementDetail = async () => {
   // Helper to map any incoming data to our internal form structure
   const mapToForm = (item) => {
     if (!item) return null
+    console.log('Mapping from Store/Common:', item)
     
     // Find category ID if only name is present
-    let catId = item.categoryId
+    let catId = item.categoryId || item.category_id
     if (!catId && item.category) {
-      const catObj = categories.value.find(c => 
-        (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
-        c.id == item.category
-      )
-      if (catObj) catId = catObj.id
+      if (typeof item.category === 'object') {
+        catId = item.category.id || item.category.categoryId
+      } else if (typeof item.category === 'string') {
+        const catObj = categories.value.find(c => 
+          (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+          c.id == item.category
+        )
+        if (catObj) catId = catObj.id
+      } else if (typeof item.category === 'number') {
+        catId = item.category
+      }
     }
+    
     if (!catId && item.categoryName) {
       const catObj = categories.value.find(c => 
-        c.name && item.categoryName && c.name.toString().toLowerCase() === item.categoryName.toString().toLowerCase()
+        (c.name && item.categoryName && c.name.toString().toLowerCase() === item.categoryName.toString().toLowerCase())
       )
       if (catObj) catId = catObj.id
     }
@@ -510,12 +512,14 @@ const fetchAnnouncementDetail = async () => {
       subtitle: item.subtitle || '',
       content: item.content || '',
       categoryId: catId || null,
-      pinned: !!(item.pinned || item.isPinned),
-      publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date),
-      targetAudience: item.targetAudience || 'ALL_RESIDENTS',
-      sendNotification: item.sendNotification ?? item.notify ?? false,
+      pinned: !!(item.pinned || item.isPinned || item.is_pinned),
+      publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date || item.created_at),
+      targetAudience: item.targetAudience || item.target_audience || 'ALL_RESIDENTS',
+      sendNotification: item.sendNotification ?? item.notify ?? item.send_notification ?? false,
       status: (item.status || 'PUBLISHED').toUpperCase(),
-      coverImageUrl: item.coverImageUrl || item.coverImage || null
+      coverImageUrl: item.coverImageUrl || item.coverImage || item.cover_image_url || null,
+      author: item.author || (item.user ? item.user.fullName : '') || (item.staff ? item.staff.fullName : '') || 'Staff Portal',
+      views: item.views || item.viewCount || item.view_count || 0
     }
   }
 
@@ -524,9 +528,11 @@ const fetchAnnouncementDetail = async () => {
     ...(announcementStore.announcements || []),
     ...(announcementStore.trash || [])
   ]
+  console.log('Searching in store for ID:', aid, 'Existing count:', existingAnnouncements.length)
   const foundInStore = existingAnnouncements.find(a => Number(a.id) === aid || Number(a.announcementId) === aid)
 
   if (foundInStore) {
+    console.log('Found in store:', foundInStore)
     const storeMapped = mapToForm(foundInStore)
     Object.assign(announcementForm, storeMapped)
     if (storeMapped.coverImageUrl) {
@@ -539,13 +545,16 @@ const fetchAnnouncementDetail = async () => {
 
   // 2) Load from Backend to ensure data is correct/up-to-date
   try {
+    // Note: Detail endpoint is /api/announcements/{id} (not /api/announcements/staff/{id})
+    console.log('Fetching from API:', `${import.meta.env.VITE_BASE_URL}/api/announcements/${aid}`)
     const data = await getAnnouncementById(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       aid,
       router
     )
 
     if (data) {
+      console.log('Received API data:', data)
       const apiMapped = mapToForm(data)
       Object.assign(announcementForm, apiMapped)
       if (apiMapped.coverImageUrl) {
@@ -555,6 +564,7 @@ const fetchAnnouncementDetail = async () => {
       initialForm.value = JSON.parse(JSON.stringify(announcementForm))
       initialForm.value.coverImage = imagePreview.value || null
     } else if (!foundInStore) {
+      console.warn('No data returned from API and not found in store for ID:', aid)
       // Fallback only if both store and API failed
       const fb = fallbackAnnouncements.find(a => a.id === aid)
       if (fb) {
@@ -639,12 +649,14 @@ const handleSave = async () => {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
       content: announcementForm.content,
-      coverImageUrl: imagePreview.value && typeof imagePreview.value === 'string' ? imagePreview.value : (announcementForm.coverImageUrl || null),
+      coverImageUrl: imagePreview.value && typeof imagePreview.value === 'string' && imagePreview.value.startsWith('http') ? imagePreview.value : (announcementForm.coverImageUrl || null),
       categoryId: announcementForm.categoryId,
       pinned: announcementForm.pinned,
       priority: announcementForm.priority || 1,
       sendNotification: announcementForm.sendNotification,
-      publishAt: announcementForm.publishAt || null
+      publishAt: announcementForm.publishAt ? (announcementForm.publishAt.includes('T') && announcementForm.publishAt.length === 16 ? announcementForm.publishAt + ':00' : announcementForm.publishAt) : null,
+      targetAudience: announcementForm.targetAudience,
+      status: announcementForm.status
     }
 
     // -----------------------
@@ -680,25 +692,34 @@ const handleSave = async () => {
     
     // Mapper for server response
     const mapToFormServer = (item) => {
-      let catId = item.categoryId
+      console.log('Mapping server update response:', item)
+      let catId = item.categoryId || item.category_id
       if (!catId && item.category) {
-        const catObj = categories.value.find(c => 
-          (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
-          c.id == item.category
-        )
-        if (catObj) catId = catObj.id
+        if (typeof item.category === 'object') {
+          catId = item.category.id || item.category.categoryId
+        } else if (typeof item.category === 'string') {
+          const catObj = categories.value.find(c => 
+            (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+            c.id == item.category
+          )
+          if (catObj) catId = catObj.id
+        } else if (typeof item.category === 'number') {
+          catId = item.category
+        }
       }
       return {
         title: item.title || '',
         subtitle: item.subtitle || '',
         content: item.content || '',
         categoryId: catId || null,
-        pinned: !!(item.pinned || item.isPinned),
-        publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date),
-        targetAudience: item.targetAudience || 'ALL_RESIDENTS',
-        sendNotification: item.sendNotification ?? item.notify ?? false,
+        pinned: !!(item.pinned || item.isPinned || item.is_pinned),
+        publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date || item.created_at),
+        targetAudience: item.targetAudience || item.target_audience || 'ALL_RESIDENTS',
+        sendNotification: item.sendNotification ?? item.notify ?? item.send_notification ?? false,
         status: (item.status || 'PUBLISHED').toUpperCase(),
-        coverImageUrl: item.coverImageUrl || item.coverImage || null
+        coverImageUrl: item.coverImageUrl || item.coverImage || item.cover_image_url || null,
+        author: item.author || (item.user ? item.user.fullName : '') || (item.staff ? item.staff.fullName : '') || 'Staff Portal',
+        views: item.views || item.viewCount || item.view_count || 0
       }
     }
 
