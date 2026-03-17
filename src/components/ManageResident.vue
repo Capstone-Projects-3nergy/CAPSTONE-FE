@@ -1022,6 +1022,14 @@ const showResidentDetail = async function (id) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="statusSuccess"
+            :titles="'Resident Status Updated Successfully.'"
+            message="Success!!"
+            styleType="green"
+            operate="statusSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="error"
             :titles="'There is a problem. Please try again later.'"
             message="Error!!"
