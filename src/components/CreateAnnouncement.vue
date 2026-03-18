@@ -18,6 +18,11 @@ import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 
 const dateInput = ref(null)
+const windowWidth = ref(window.innerWidth)
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
 
 const openDatePicker = () => {
   if (dateInput.value?.showPicker) {
@@ -298,12 +303,13 @@ const buttonSize = computed(() => {
 })
 
 onMounted(async () => {
-  
+  window.addEventListener('resize', handleResize)
   // ดึงหมวดหมู่จากประกาศที่มีอยู่จริงจาก /api/announcements
   await fetchCategoriesFromAnnouncements()
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 
 

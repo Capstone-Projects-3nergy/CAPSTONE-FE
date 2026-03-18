@@ -19,6 +19,11 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 
 const dateInput = ref(null)
+const windowWidth = ref(window.innerWidth)
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
 
 const openDatePicker = () => {
   if (dateInput.value?.showPicker) {
@@ -597,7 +602,7 @@ const fetchAnnouncementDetail = async () => {
 }
 
 onMounted(async () => {
-
+  window.addEventListener('resize', handleResize)
   await Promise.all([
     fetchCategoriesFromAnnouncements(),
     fetchStatusesFromAnnouncements()
@@ -606,6 +611,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 
 
