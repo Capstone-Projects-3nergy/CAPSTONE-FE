@@ -980,48 +980,40 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
           
             <!-- Stats Grid -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            <!-- Total Parcels -->
+            <!-- Picked Up -->
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-emerald-100 rounded-lg md:rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
+                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% success
+                </span>
+              </div>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
+              </div>
+            </div>
+
+            <!-- Received (Awaiting) -->
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
-                <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-[#0E4B90] shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-blue-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
                     <path d="M12 12l8 -4.5" />
                     <path d="M12 12l0 9" />
                     <path d="M12 12l-8 -4.5" />
-                    <path d="M16 5.25l-8 4.5" />
                   </svg>
                 </div>
-                <span class="hidden md:flex items-center text-emerald-500 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                   Active
-                </span>
-              </div>
-              <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Total Parcels</p>
-              </div>
-            </div>
-
-            <!-- Awaiting Pickup -->
-            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
-              <div class="flex items-start justify-between mb-2 md:mb-4">
-                <div class="p-1.5 md:p-2.5 bg-yellow-100 rounded-lg md:rounded-xl text-yellow-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M6.5 7h11" />
-                    <path d="M6.5 17h11" />
-                    <path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1z" />
-                    <path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" />
-                  </svg>
-                </div>
-                <span class="hidden md:block text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
-                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%
+                <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
+                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}% awaiting
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Awaiting</p>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Received</p>
               </div>
             </div>
 
@@ -1030,14 +1022,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-red-100 rounded-lg md:rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
                     <path d="M12 8l0 4" />
                     <path d="M12 16l.01 0" />
                   </svg>
                 </div>
                 <span v-if="stats.overdueParcels > 0" class="flex items-center text-red-600 text-[10px] font-bold bg-red-50 px-2 py-1 rounded animate-pulse">
-                  <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                   Action needed
                 </span>
                 <span v-else class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
@@ -1050,19 +1040,24 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-            <!-- Picked Up -->
-            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+            <!-- Total Parcels -->
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-indigo-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
-                <div class="p-1.5 md:p-2.5 bg-emerald-100 rounded-lg md:rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="p-1.5 md:p-2.5 bg-indigo-100 rounded-lg md:rounded-xl text-indigo-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                    <path d="M12 12l8-4.5" />
+                    <path d="M12 12v9" />
+                    <path d="M12 12l-8-4.5" />
+                  </svg>
                 </div>
-                <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% success rate
+                <span class="hidden md:flex items-center text-indigo-500 text-[10px] font-bold bg-indigo-50 px-2 py-1 rounded">
+                   Summary
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Total Units</p>
               </div>
             </div>
           </div>
@@ -1216,22 +1211,22 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-50">
+                  <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Picked Up</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
+                    </div>
+                  </div>
                   <div class="bg-blue-50/30 p-4 rounded-2xl border border-blue-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
                       <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received</span>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels + stats.pickedUpParcels }}</span>
-                    </div>
-                  </div>
-                  <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
-                    </div>
-                    <div>
-                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Success</span>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
                   <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
@@ -1239,7 +1234,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Alerts</span>
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Overdue</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>
@@ -1282,15 +1277,15 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         </div>
                       </div>
                       
-                      <!-- Awaiting Detail -->
+                      <!-- Received Detail -->
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
-                          <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
-                          <span class="text-sm font-bold text-gray-700">Awaiting</span>
+                          <div class="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Received</span>
                         </div>
                         <div class="flex items-center gap-4">
                           <span class="text-sm font-black text-gray-900">{{ stats.awaitingParcels }}</span>
-                          <span class="text-xs font-bold text-yellow-600 px-2 py-0.5 bg-yellow-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                       
