@@ -82,9 +82,9 @@ const authStore = useAuthManager()
 
 </script>
 <template>
-  <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+  <div class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-visible shrink-table-wrapper">
+    <div class="w-full overflow-visible">
+      <table class="w-full divide-y divide-gray-200">
       <thead
         class="hidden md:table-header-group bg-gray-50/50"
       >
@@ -833,3 +833,35 @@ const authStore = useAuthManager()
     </div>
   </div>
 </template>
+
+<style scoped>
+@media (min-width: 768px) {
+  .shrink-table-wrapper table th {
+    font-size: 11px !important;
+    padding: 10px 8px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+  .shrink-table-wrapper table td {
+    font-size: 11px !important;
+    padding: 10px 8px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+  .shrink-table-wrapper table td span.text-xs,
+  .shrink-table-wrapper table td span.text-sm,
+  .shrink-table-wrapper table md\:text-sm {
+    font-size: 11px !important;
+  }
+}
+
+/* Tooltip overrides */
+.shrink-table-wrapper table td .pointer-events-none > div.bg-gray-400 {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  min-width: max-content !important;
+  width: max-content !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+}
+</style>
