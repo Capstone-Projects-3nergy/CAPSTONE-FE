@@ -717,8 +717,8 @@ const showProfileStaffPage = async function () {
   <AnnouncementDetailModal
     :isOpen="showViewModal"
     :title="selectedAnnouncement?.title || ''"
-    :subtitle="''"
-    :content="selectedAnnouncement?.subtitle || ''"
+    :subtitle="selectedAnnouncement?.subtitle || ''"
+    :content="selectedAnnouncement?.content || ''"
     :tag="selectedAnnouncement?.category || ''"
     :status="selectedAnnouncement?.status || 'Published'"
     :date="selectedAnnouncement?.datePosted || ''"

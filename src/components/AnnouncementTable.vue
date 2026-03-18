@@ -113,11 +113,11 @@ const getCategoryIcon = (category) => {
           </div>
           
           <!-- Card Body -->
-          <h3 class="font-bold text-gray-900 text-base mb-2 break-words whitespace-normal leading-tight group-hover:text-[#0E4B90] transition-colors">
+          <h3 class="font-bold text-[#0E4B90] text-base mb-2 break-words whitespace-normal leading-tight transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
           <div class="flex-grow mb-6 overflow-hidden">
-            <p v-if="item.subtitle" class="text-sm text-gray-800 font-bold mb-1 leading-relaxed line-clamp-2">
+            <p v-if="item.subtitle" class="text-xs text-gray-800 font-bold mb-1 leading-relaxed line-clamp-2">
               {{ item.subtitle.replace(/^Draft\s*-\s*/i, '') }}
             </p>
             <p v-if="item.content" class="text-[11px] text-gray-500 leading-relaxed line-clamp-3">
@@ -249,7 +249,7 @@ const getCategoryIcon = (category) => {
                     <div class="flex-grow">
                        <div class="flex items-start gap-2 mb-2">
                         <span class="md:hidden font-semibold text-[#0E4B90] text-xs shrink-0">Title:</span>
-                        <div class="text-sm font-bold text-gray-900 flex-grow break-words whitespace-normal">
+                        <div class="text-sm font-bold text-[#0E4B90] flex-grow break-words whitespace-normal transition-colors">
                           {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
                         </div>
                         <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
@@ -259,7 +259,7 @@ const getCategoryIcon = (category) => {
                         </span>
                       </div>
                       <div class="mt-1 md:mt-0 flex flex-col gap-0.5 max-w-sm sm:max-w-md">
-                        <div v-if="item.subtitle" class="text-[11px] text-gray-700 font-bold leading-relaxed min-w-0 break-words line-clamp-1">
+                        <div v-if="item.subtitle" class="text-[10px] text-gray-700 font-bold leading-relaxed min-w-0 break-words line-clamp-1">
                           {{ item.subtitle.replace(/^Draft\s*-\s*/i, '') }}
                         </div>
                         <div v-if="item.content" class="text-[10px] text-gray-400 leading-relaxed min-w-0 break-words line-clamp-1">

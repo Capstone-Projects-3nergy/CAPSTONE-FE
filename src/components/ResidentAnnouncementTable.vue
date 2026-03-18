@@ -103,11 +103,11 @@ const getCategoryIcon = (category) => {
             </div>
           </div>
 
-          <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight break-words whitespace-normal">
+          <h4 class="text-lg font-bold text-[#0E4B90] mb-2 transition-colors leading-tight break-words whitespace-normal">
             {{ item.title }}
           </h4>
           <div class="flex-grow mb-6">
-            <p v-if="item.subtitle" class="text-gray-900 text-sm font-bold mb-1 line-clamp-2">
+            <p v-if="item.subtitle" class="text-gray-900 text-xs font-bold mb-1 line-clamp-2">
               {{ item.subtitle }}
             </p>
             <p v-if="item.content" class="text-gray-500 text-[11px] line-clamp-2">
@@ -167,9 +167,9 @@ const getCategoryIcon = (category) => {
             <tr v-for="item in items" :key="'list-' + item.id" class="hover:bg-gray-50/50 transition-colors cursor-pointer group" @click="$emit('view', item)">
               <td class="px-6 py-4">
                 <div class="flex flex-col">
-                  <div class="text-sm font-bold text-gray-900 group-hover:text-[#0E4B90] transition-colors">{{ item.title }}</div>
+                  <div class="text-sm font-bold text-[#0E4B90] transition-colors">{{ item.title }}</div>
                   <div class="flex flex-col gap-0.5 mt-1 max-w-md">
-                    <div v-if="item.subtitle" class="text-[11px] text-gray-700 font-bold line-clamp-1">{{ item.subtitle }}</div>
+                    <div v-if="item.subtitle" class="text-[10px] text-gray-700 font-bold line-clamp-1">{{ item.subtitle }}</div>
                     <div v-if="item.content" class="text-[10px] text-gray-500 line-clamp-1">{{ item.content }}</div>
                   </div>
                 </div>
