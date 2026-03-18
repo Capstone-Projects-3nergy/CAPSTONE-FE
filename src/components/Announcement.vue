@@ -29,6 +29,7 @@ const route = useRoute()
 const showHomePageResident = ref(false)
 const selectedCategory = ref(route.query.tab || 'all')
 const viewMode = ref('grid')
+const selectedDate = ref('')
 const tab = ref('') // Added for compatibility if needed, but we'll use selectedCategory
 
 watch(
@@ -134,8 +135,20 @@ const allPublishedAnnouncements = computed(() => {
 
 const filteredAnnouncements = computed(() => {
   const announcementsByTab = allPublishedAnnouncements.value.filter(item => {
-    if (!selectedCategory.value || selectedCategory.value === 'all') return true
-    return item.category === selectedCategory.value
+    // Category match
+    const matchesCategory = (!selectedCategory.value || selectedCategory.value === 'all') 
+      ? true 
+      : item.category === selectedCategory.value
+      
+    // Date match
+    let matchesDate = true
+    if (selectedDate.value) {
+      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const itemDate = item.publishAt || ''
+      matchesDate = itemDate.startsWith(targetDate)
+    }
+
+    return matchesCategory && matchesDate
   })
   
   return searchAnnouncements(announcementsByTab, searchQuery.value)
@@ -183,8 +196,8 @@ const goToPage = (p) => {
   currentPage.value = p
 }
 
-// Reset page when category or search changes
-watch([selectedCategory, searchQuery], () => {
+// Reset page when category, search or date changes
+watch([selectedCategory, searchQuery, selectedDate], () => {
   currentPage.value = 1
 })
 
@@ -547,11 +560,13 @@ onMounted(async () => {
             :search="searchQuery"
             :category="selectedCategory"
             :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :date="selectedDate"
             :viewMode="viewMode"
             :showNewButton="false"
             :showViewToggles="false"
             @update:search="searchQuery = $event"
             @update:category="selectedCategory = $event"
+            @update:date="selectedDate = $event"
             @update:viewMode="viewMode = $event"
           />
 
