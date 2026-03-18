@@ -1102,9 +1102,14 @@ function formatDateTime(datetimeStr) {
                 <h3 class="text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
                   {{ latestAnnouncements[0].title }}
                 </h3>
-                <p class="text-slate-500 text-base leading-relaxed line-clamp-2 font-medium">
-                  {{ latestAnnouncements[0].subtitle || latestAnnouncements[0].content }}
-                </p>
+                <div class="space-y-2">
+                  <p v-if="latestAnnouncements[0].subtitle" class="text-slate-700 text-lg font-bold leading-tight line-clamp-2">
+                    {{ latestAnnouncements[0].subtitle }}
+                  </p>
+                  <p v-if="latestAnnouncements[0].content" class="text-slate-500 text-base leading-relaxed line-clamp-3 font-medium">
+                    {{ latestAnnouncements[0].content }}
+                  </p>
+                </div>
                 <div class="pt-6 border-t border-slate-50 flex items-center justify-between">
                   <div class="flex items-center gap-4">
                     <div class="flex items-center gap-1.5 text-slate-400 font-bold text-xs border-l border-slate-100 pl-0">
@@ -1150,10 +1155,17 @@ function formatDateTime(datetimeStr) {
                     <h4 class="font-bold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight text-lg">
                       {{ news.title }}
                     </h4>
+                    <p v-if="news.subtitle" class="text-slate-500 text-xs font-medium line-clamp-2 mt-1">
+                      {{ news.subtitle }}
+                    </p>
                   </div>
                   <div class="flex items-center justify-between mt-4">
-                    <div class="text-slate-400 text-[11px] font-bold tracking-tight">
-                      {{ news.viewCount || 0 }} views
+                    <div class="flex items-center gap-1 text-slate-400 text-[11px] font-bold tracking-tight">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {{ news.viewCount || 0 }}
                     </div>
                     <div class="h-7 w-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
