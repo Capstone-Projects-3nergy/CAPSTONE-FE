@@ -84,10 +84,12 @@ const formatDate = (dateString) => {
   if (!dateString || dateString === 'Just now') return 'Just now'
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
-  const d = date.getDate()
-  const m = date.toLocaleDateString('en-US', { month: 'short' })
-  const y = date.getFullYear()
-  return `${d} ${m} ${y}`
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
 }
 
 const updateDate = () => {
