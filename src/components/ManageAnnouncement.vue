@@ -719,9 +719,9 @@ const showProfileStaffPage = async function () {
     :content="selectedAnnouncement?.content || ''"
     :tag="selectedAnnouncement?.category || ''"
     :status="selectedAnnouncement?.status || 'Published'"
-    :date="selectedAnnouncement?.datePosted || ''"
+    :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || ''"
     :author="selectedAnnouncement?.author || 'Staff Portal'"
-    :views="selectedAnnouncement?.views || 0"
+    :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
     :pinned="selectedAnnouncement?.pinned || false"
     @close="showViewModal = false; selectedAnnouncement = null"
   />

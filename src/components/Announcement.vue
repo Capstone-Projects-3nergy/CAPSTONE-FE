@@ -685,9 +685,12 @@ onMounted(async () => {
     :title="selectedAnnouncement?.title || ''"
     :subtitle="selectedAnnouncement?.subtitle || ''"
     :content="selectedAnnouncement?.content || ''"
-    :tag="selectedAnnouncement?.tag || ''"
-    :date="selectedAnnouncement?.date || ''"
-    :views="selectedAnnouncement?.views || 0"
+    :tag="selectedAnnouncement?.category || selectedAnnouncement?.tag || ''"
+    :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || selectedAnnouncement?.date || ''"
+    :author="selectedAnnouncement?.author || 'Community Admin'"
+    :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
+    :status="selectedAnnouncement?.status || 'Published'"
+    :pinned="selectedAnnouncement?.pinned || false"
     @close="closeModal"
   />
 

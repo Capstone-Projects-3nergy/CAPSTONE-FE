@@ -1117,7 +1117,7 @@ function formatDateTime(datetimeStr) {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      {{ latestAnnouncements[0].viewCount || 0 }}
+                      {{ latestAnnouncements[0].viewCount || latestAnnouncements[0].views || 0 }}
                     </div>
                   </div>
                   <div class="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
@@ -1165,7 +1165,7 @@ function formatDateTime(datetimeStr) {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      {{ news.viewCount || 0 }}
+                      {{ news.viewCount || news.views || 0 }}
                     </div>
                     <div class="h-7 w-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1190,17 +1190,17 @@ function formatDateTime(datetimeStr) {
         </div>
       </main>
       <AnnouncementDetailModal
-        v-if="isModalOpen"
+        v-if="isModalOpen" 
         :isOpen="isModalOpen"
         :title="selectedAnnouncement?.title || ''"
         :subtitle="selectedAnnouncement?.subtitle || ''"
         :content="selectedAnnouncement?.content || ''"
-        :tag="selectedAnnouncement?.tag || 'General'"
-        :date="selectedAnnouncement?.date || 'Just now'"
+        :tag="selectedAnnouncement?.category || selectedAnnouncement?.tag || 'General'"
+        :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || selectedAnnouncement?.date || 'Just now'"
         :author="selectedAnnouncement?.author || 'Staff Portal'"
-        :views="selectedAnnouncement?.views || 0"
+        :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
         :status="selectedAnnouncement?.status"
-        :pinned="false"
+        :pinned="selectedAnnouncement?.pinned || false"
         @close="closeModal"
       />
     </div>

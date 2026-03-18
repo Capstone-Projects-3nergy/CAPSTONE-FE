@@ -135,7 +135,7 @@ const formatDate = (dateString) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
-                <span class="truncate">{{ formatDate(item.date) }}</span>
+                <span class="truncate">{{ formatDate(item.publishAt || item.createdAt || item.datePosted || item.date) }}</span>
               </div>
               <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
                 <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
@@ -147,7 +147,7 @@ const formatDate = (dateString) => {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    <span>{{ item.views || 0 }}</span>
+                    <span>{{ item.viewCount || item.views || 0 }}</span>
                   </div>
                 </div>
               </div>
@@ -193,10 +193,10 @@ const formatDate = (dateString) => {
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500 font-bold">
-                {{ formatDate(item.date) }}
+                {{ formatDate(item.publishAt || item.createdAt || item.datePosted || item.date) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-center text-xs text-gray-500 font-bold">
-                {{ item.views || 0 }}
+                {{ item.viewCount || item.views || 0 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <button class="text-[#0E4B90] hover:text-blue-700 font-bold text-xs">View Details</button>
