@@ -19,10 +19,15 @@ export const useSidebarManager = defineStore('sidebarManager', () => {
     }
   }
 
+  const resetSidebar = () => {
+    localStorage.removeItem('sidebar_collapsed')
+    isCollapsed.value = isMobile()
+  }
+
   // Set up listener for window resizing
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', checkScreenSize)
   }
 
-  return { isCollapsed, toggleSidebar, checkScreenSize }
+  return { isCollapsed, toggleSidebar, checkScreenSize, resetSidebar }
 })
