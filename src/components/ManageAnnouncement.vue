@@ -95,16 +95,28 @@ const filteredAnnouncements = computed(() => {
     let matchesDate = true
     if (selectedDate.value) {
       const targetDate = selectedDate.value // format: YYYY-MM-DD
-      const dateStr = item.publishAt || item.datePosted || ''
-      const itemDateStr = dateStr.split(' - ')[0] 
+      const rawDateStr = item.publishAt || item.datePosted || ''
       
-      const d = new Date(itemDateStr)
-      if (!isNaN(d.getTime())) {
-        const year = d.getFullYear()
-        const month = String(d.getMonth() + 1).padStart(2, '0')
-        const day = String(d.getDate()).padStart(2, '0')
-        const formattedItemDate = `${year}-${month}-${day}`
-        matchesDate = formattedItemDate === targetDate
+      if (rawDateStr && rawDateStr !== 'Just now') {
+        const d = new Date(rawDateStr)
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+          const formattedItemDate = `${year}-${month}-${day}`
+          matchesDate = formattedItemDate === targetDate
+        } else {
+          matchesDate = false
+        }
+      } else if (rawDateStr === 'Just now') {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        const todayStr = `${year}-${month}-${day}`
+        matchesDate = todayStr === targetDate
+      } else {
+        matchesDate = false
       }
     }
     
