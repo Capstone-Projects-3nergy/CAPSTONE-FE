@@ -115,7 +115,7 @@ const allPublishedAnnouncements = computed(() => {
         ...item,
         date: rawDate,
         type: normalizedType,
-        views: item.viewCount || 0
+        views: item.views || item.viewCount || 0
       }
     })
     .sort((a, b) => {
