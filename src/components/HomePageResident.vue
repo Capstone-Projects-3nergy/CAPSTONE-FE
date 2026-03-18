@@ -1057,29 +1057,50 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         <!-- Latest News Section -->
-        <div class="px-6 pb-16">
-          <div class="flex items-end justify-between mb-10">
-            <div>
-              <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Latest News</h2>
-              <p class="text-slate-500 font-medium">Stay updated with the latest from your community</p>
+        <div class="px-3 md:px-6 pb-20 overflow-hidden">
+          <!-- Balanced Header Section -->
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+            <div class="space-y-4">
+              <div class="flex items-center gap-4">
+                 <div class="p-2 md:p-2.5 bg-blue-50 text-[#0E4B90] rounded-xl md:rounded-2xl shadow-sm border border-blue-100/50">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                   </svg>
+                 </div>
+                 <h2 class="text-[20px] sm:text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight whitespace-nowrap">
+                    Latest <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0E4B90] to-blue-600">Dormitory</span> News
+                 </h2>
+              </div>
+              
+              <p class="text-slate-500 font-medium max-w-lg text-[13px] sm:text-sm md:text-base leading-relaxed pl-1">
+                Stay updated with the most recent updates and critical notices from management.
+              </p>
             </div>
-            <button @click="showAnnouncementPage" class="group flex items-center gap-2 px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 uppercase tracking-widest cursor-pointer">
-              view all news
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
+            
+            <div class="flex shrink-0">
+              <button 
+                @click="showAnnouncementPage" 
+                class="group flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-[#0E4B90]/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+              >
+                <span class="text-slate-700 font-bold text-xs uppercase tracking-widest group-hover:text-[#0E4B90] transition-colors">View All Announcements</span>
+                <div class="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center group-hover:bg-[#0E4B90] transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </button>
+            </div>
           </div>
 
           <!-- Dynamic Stories Grid -->
-          <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
             
             <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
-              class="lg:col-span-7 group cursor-pointer bg-white rounded-[2.5rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-500"
+              class="lg:col-span-7 group cursor-pointer bg-white rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 ..."
             >
-              <div class="relative aspect-[16/9] overflow-hidden rounded-[2rem] bg-slate-50 flex items-center justify-center mb-8">
+              <div class="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-slate-50 flex items-center justify-center mb-5 md:mb-8">
                 <!-- Generic Premium Placeholder Icon -->
                 <div class="text-slate-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1099,7 +1120,7 @@ function formatDateTime(datetimeStr) {
                   <span v-html="getCategoryIcon(latestAnnouncements[0].category)"></span>
                   {{ latestAnnouncements[0].category }}
                 </div>
-                <h3 class="text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
+                <h3 class="text-xl md:text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
                   {{ latestAnnouncements[0].title }}
                 </h3>
                 <div class="space-y-2">
@@ -1135,9 +1156,9 @@ function formatDateTime(datetimeStr) {
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
                 :key="news.id"
                 @click="openModal(news)"
-                class="group flex gap-6 bg-white p-5 rounded-[2rem] border border-slate-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <div class="w-32 aspect-square shrink-0 overflow-hidden rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner">
+                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner">
                   <div class="text-slate-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
@@ -1190,7 +1211,7 @@ function formatDateTime(datetimeStr) {
         </div>
       </main>
       <AnnouncementDetailModal
-        v-if="isModalOpen" 
+        v-if="isModalOpen" Latest News
         :isOpen="isModalOpen"
         :title="selectedAnnouncement?.title || ''"
         :subtitle="selectedAnnouncement?.subtitle || ''"
