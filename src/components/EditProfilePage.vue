@@ -14,6 +14,11 @@ import { useProfileManager } from '@/stores/ProfileManager'
 import { getProfile } from '@/utils/fetchUtils'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './AlertPopUp.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const loginManager = useAuthManager()
 const router = useRouter()
 const dormList = ref([])
@@ -205,15 +210,8 @@ const ShowManageResidentPage = async function () {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  // Removed resize listener to allow global state persistence
 })
 onMounted(async () => {
   try {
@@ -245,8 +243,7 @@ onMounted(async () => {
     dormList.value = parsedDorms
   } catch (err) {}
 
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
+  // Sidebar responsive logic is now handled by SidebarManager
 
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,

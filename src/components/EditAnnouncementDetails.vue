@@ -3,6 +3,11 @@ import { ref, onMounted, onUnmounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
@@ -80,7 +85,6 @@ const router = useRouter()
 const route = useRoute()
 
 // State
-const isCollapsed = ref(false)
 const isCategoryOpen = ref(false)
 const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
@@ -593,8 +597,6 @@ const fetchAnnouncementDetail = async () => {
 }
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
 
   await Promise.all([
     fetchCategoriesFromAnnouncements(),
@@ -604,22 +606,13 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 
-const windowWidth = ref(window.innerWidth)
-const checkScreen = () => {
-  windowWidth.value = window.innerWidth
-  isCollapsed.value = windowWidth.value < 768
-}
 
 const buttonSize = computed(() => {
   return 'md'
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
 // Navigation Functions
 const navigateTo = (name) => {

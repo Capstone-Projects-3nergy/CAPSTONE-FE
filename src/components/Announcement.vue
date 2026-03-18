@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -311,15 +312,13 @@ const showProfileResidentPage = async function () {
   })
   showProfileResident.value = true
 }
-const isCollapsed = ref(false)
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
+
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
   if (dateInterval) clearInterval(dateInterval)
 })
 const fetchAnnouncementData = async () => {
@@ -339,9 +338,6 @@ const fetchAnnouncementData = async () => {
 }
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
   generateCalendar()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)

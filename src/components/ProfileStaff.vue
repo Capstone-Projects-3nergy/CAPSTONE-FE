@@ -15,6 +15,11 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import { getProfile } from '@/utils/fetchUtils'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const errorAccount = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
@@ -46,10 +51,6 @@ const lastName = computed(() => {
   return parts.slice(1).join(' ') || ''
 })
 
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
@@ -94,16 +95,10 @@ const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 const originalForm = ref(null)
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,
     router

@@ -3,6 +3,11 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
@@ -39,7 +44,6 @@ const announcementManager = useAnnouncementManager()
 const router = useRouter()
 const route = useRoute()
 const error = ref(false)
-const isCollapsed = ref(false)
 const isCategoryOpen = ref(false)
 
 // Form Data
@@ -288,31 +292,20 @@ const removeImage = () => {
 }
 
 // Sidebar Logic
-const windowWidth = ref(window.innerWidth)
-const checkScreen = () => {
-  windowWidth.value = window.innerWidth
-  isCollapsed.value = windowWidth.value < 768
-}
 
 const buttonSize = computed(() => {
   return 'md'
 })
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   
   // ดึงหมวดหมู่จากประกาศที่มีอยู่จริงจาก /api/announcements
   await fetchCategoriesFromAnnouncements()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
 // Navigation
 const goBack = () => {

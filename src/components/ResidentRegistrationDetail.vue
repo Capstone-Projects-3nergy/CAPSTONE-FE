@@ -17,6 +17,11 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ChangeResidentStatus from './ChangeResidentStatus.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import {
   getItems,
   getItemById,
@@ -50,7 +55,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const isCollapsed = ref(false)
 const showLogoutConfirm = ref(false)
 const showStatusPopup = ref(false)
 const parcel = ref(null)
@@ -135,20 +139,14 @@ const lastName = computed(() => {
   return parcel.value.recipientName.split(' ').slice(1).join(' ')
 })
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  // Removed resize listener to allow global state persistence
 })
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
   getMemberDetail(tid)
 })
 
@@ -198,9 +196,6 @@ const showDashBoardPage = async () => {
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 const showEditRegistrationDetail = async function (parcelId) {
   router.push({

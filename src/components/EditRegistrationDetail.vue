@@ -16,6 +16,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import {
   getItems,
@@ -369,15 +370,8 @@ const lastName = computed({
   }
 })
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
+// Remove checkScreen resize listener logic
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   loadDom()
   // loadMemberForEdit()
   // loadResidents()
@@ -606,9 +600,10 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
 const isAllEmpty = computed(() => {
   return (

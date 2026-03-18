@@ -19,6 +19,7 @@ import { useNotificationManager } from '@/stores/NotificationManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import {
   getItemById,
   deleteItemById,
@@ -59,7 +60,7 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-const isCollapsed = ref(false)
+// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
@@ -205,16 +206,8 @@ const getParcelDetail = async (tid) => {
   } catch (err) {}
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
+// Remove checkScreen resize listener logic
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   await getCompanies()
   if (tidNum) {
@@ -535,8 +528,10 @@ const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''

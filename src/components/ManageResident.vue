@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useSidebarManager } from '@/stores/SidebarManager'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
@@ -97,6 +99,9 @@ const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
 const userManager = useUserManager()
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -123,9 +128,6 @@ const ShowManageResidentPage = async function () {
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
 }
 const mapStatus = (status) => {
   switch (status) {
@@ -165,12 +167,8 @@ const mapActiveStatus = (status) => {
 }
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -285,10 +283,6 @@ const showDashBoardPage = async function () {
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 const currentPage = ref(1)
 const perPage = ref(10)

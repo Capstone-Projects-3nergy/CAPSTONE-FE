@@ -12,7 +12,12 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import { getProfile } from '@/utils/fetchUtils'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
 import axios from 'axios'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const profileManager = useProfileManager()
 const errorAccount = ref(false)
 const successAccount = ref(false)
@@ -146,21 +151,6 @@ const returnLoginPage = async () => {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
-})
 
 const closePopUp = () => {
   profileManager.clearAlert()

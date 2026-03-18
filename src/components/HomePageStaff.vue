@@ -19,9 +19,15 @@ import { useNotificationManager } from '@/stores/NotificationManager'
 import { storeToRefs } from 'pinia'
 import { getItems, editItem } from '@/utils/fetchUtils'
 import { useDashboardManager } from '@/stores/DashboardManager'
+import { useSidebarManager } from '@/stores/SidebarManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ReportExport from './ReportExport.vue'
+
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
+
 
 const reportExportRef = ref(null)
 
@@ -173,9 +179,6 @@ const monthsTH = [
 const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
 ]
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 
 const currentDate = ref('')
 const dashboardViewTab = ref('activity') // 'activity' | 'status'
@@ -304,7 +307,6 @@ const updateDate = () => {
 let dateInterval
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
   if (dateInterval) clearInterval(dateInterval)
 })
 const activityInterval = ref('daily');
@@ -462,14 +464,12 @@ watch([filterStartDate, filterEndDate], async () => {
 })
 
 onMounted(async () => {
-  checkScreen()
+  sidebarManager.checkScreenSize()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
   // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
-
-  window.addEventListener('resize', checkScreen)
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
@@ -659,13 +659,10 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const activeTab = ref('parcel')
 
 const handleExportExcel = () => reportExportRef.value?.handleExportExcel();
+
 const handleExportPDF = () => reportExportRef.value?.handleExportPDF();
 const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 </script>

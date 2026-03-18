@@ -3,6 +3,11 @@ import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
@@ -134,16 +139,9 @@ const mapStatus = (status) => {
   }
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-  
   // Fetch parcels data
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -381,10 +379,6 @@ const showDashBoardPage = async function () {
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 
 const currentPage = ref(1)

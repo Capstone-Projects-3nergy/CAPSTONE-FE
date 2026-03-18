@@ -14,6 +14,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
 import LineNotificationManager from '@/stores/LineNotificationManager'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 const loginManager = useAuthManager()
 
 
@@ -180,21 +181,7 @@ const ShowManageResidentPage = async function () {
 const returnHomepage = () => {
   showLogoutConfirm.value = false
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
-})
+// Remove old checkScreen and resize listener logic
 // const menuClass = (tab) => {
 //   return [
 //     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
@@ -226,9 +213,13 @@ import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationStore = useNotificationManager()
 const notifications = computed(() => notificationStore.notifications)
 
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
+const toggleSidebar = () => {
+  sidebarManager.toggleSidebar()
+}
+
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   await notificationStore.fetchNotifications(router)
 })
 

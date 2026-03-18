@@ -3,6 +3,11 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Chart from 'chart.js/auto'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import LoginPage from './LoginPage.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
@@ -30,12 +35,7 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 
 const fetchDashboardData = async () => {
@@ -88,9 +88,6 @@ watch(() => dashboardStore.chartData.labels, () => {
 }, { deep: true })
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-  
   await fetchDashboardData()
   renderChart()
 })
@@ -139,10 +136,6 @@ const ShowManageResidentPage = async function () {
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 </script>
 

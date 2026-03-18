@@ -16,7 +16,11 @@ import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { useSidebarManager } from '@/stores/SidebarManager'
 import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -128,16 +132,11 @@ const mapStatus = (status) => {
   }
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  // Removed resize listener to allow global state persistence
 })
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
+  // Sidebar responsive logic is now handled by SidebarManager
 
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
@@ -382,10 +381,7 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+// isCollapsed and toggleSidebar are now provided by SidebarManager
 
 const currentPage = ref(1)
 const perPage = ref(10)

@@ -2,16 +2,28 @@
 import UserInfo from '@/components/UserInfo.vue'
 import { computed, ref } from 'vue'
 import { useAuthManager } from '@/stores/AuthManager'
+import { useSidebarManager } from '@/stores/SidebarManager'
 
 const authStore = useAuthManager()
+const sidebarManager = useSidebarManager()
 const userFullName = computed(() => authStore.user?.fullName || 'User')
 const userInfoRef = ref(null)
 
-defineProps({
+const props = defineProps({
   title: String,
-  collapsed: Boolean
+  collapsed: {
+    type: Boolean,
+    default: null
+  }
 })
+
+const isCollapsed = computed(() => {
+  if (props.collapsed !== null) return props.collapsed
+  return sidebarManager.isCollapsed
+})
+
 defineEmits(['click'])
+
 const userRole = computed(() => {
   const role = authStore.user?.role
   if (!role) return ''

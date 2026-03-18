@@ -17,6 +17,8 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import axios from 'axios'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
 import {
   getItems,
   getItemById,
@@ -41,6 +43,9 @@ const notificationManager = useNotificationManager()
 const tid = route.params.tid
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const duplicateParcelError = ref(false)
 const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
@@ -295,16 +300,7 @@ const getParcelDetail = async (tid) => {
   await loadResidents()
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   loadCompanies()
   loadResidents()
   const tid = route.params.tid
@@ -558,10 +554,6 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const isAllEmpty = computed(() => {
   return (
     !form.value.trackingNumber &&
@@ -585,7 +577,6 @@ const closePopUp = (operate) => {
   if (operate === 'RecipientName') recipientNameError.value = false
   if (operate === 'selectName') selectName.value = false
   if (operate === 'trackingNumberRequired') trackingNumberRequired.value = false
-  if (operate === 'recipientNameRequired') recipientNameRequired.value = false
   if (operate === 'recipientNameRequired') recipientNameRequired.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
   if (operate === 'senderNameMin') showSenderMinLengthError.value = false

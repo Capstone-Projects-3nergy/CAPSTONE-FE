@@ -14,6 +14,7 @@ import ConfirmLogout from './ConfirmLogout.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import axios from 'axios'
 const emailInvalidCharsError = ref(false)
@@ -55,9 +56,11 @@ const lastName = computed(() => {
   return parts.slice(1).join(' ') || ''
 })
 
-const isCollapsed = ref(false)
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
+
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
@@ -103,16 +106,8 @@ const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
+// Remove checkScreen resize listener logic
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
     const res = await axios.get(`${baseURL}/api/dorms/list`, {

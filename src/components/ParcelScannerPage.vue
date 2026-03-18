@@ -20,6 +20,11 @@ import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationManager = useNotificationManager()
 import { useParcelManager } from '@/stores/ParcelsManager'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import {
   getItems,
   getItemById,
@@ -327,10 +332,6 @@ async function extractParcelInfo(imageDataUrl) {
   }
 }
 
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
 const processScanResult = (text) => {
   if (!text) return
@@ -886,20 +887,11 @@ const showProfileStaffPage = async () => {
   showProfileStaff.value = true
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-   const existingParcels = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      router
-    )
-  window.addEventListener('resize', checkScreen)
-  const auth = useAuthManager()
+  const existingParcels = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
 
   try {
     const res = await getItems(

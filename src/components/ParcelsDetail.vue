@@ -4,6 +4,11 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
@@ -45,7 +50,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const isCollapsed = ref(false)
 const showLogoutConfirm = ref(false)
 const parcel = ref(null)
 
@@ -97,16 +101,7 @@ const getParcelDetail = async (tid) => {
     }
   } catch (err) {}
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
 })
@@ -156,9 +151,6 @@ const showDashBoardPage = async () => {
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 const showEditParacelDetail = async function (parcelId) {
   router.push({

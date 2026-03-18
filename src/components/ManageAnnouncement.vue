@@ -2,6 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
@@ -42,7 +47,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
-const isCollapsed = ref(false)
 const showDeleteModal = ref(false)
 const showViewModal = ref(false)
 const selectedAnnouncement = ref(null)
@@ -255,33 +259,15 @@ console.log(data)
   }
 }
 
-const checkScreen = () => {
-  if (typeof window !== 'undefined') {
-    isCollapsed.value = window.innerWidth < 768
-  }
-}
-
 onUnmounted(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', checkScreen)
-  }
 })
 onMounted(async () => {
-  checkScreen()
-
-  if (typeof window !== 'undefined') {
-    window.addEventListener('resize', checkScreen)
-  }
-  
   await Promise.all([
     fetchAnnouncementData(),
     fetchCategoriesFromAnnouncements()
   ])
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
   showParcelScanner.value = true
