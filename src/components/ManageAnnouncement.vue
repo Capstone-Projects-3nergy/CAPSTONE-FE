@@ -205,9 +205,10 @@ const handlePin = async (item) => {
   const newPinnedStatus = !item.pinned
   
   if (newPinnedStatus && totalPinned.value >= 5) {
-    setTimeout(() => {
       showPinLimitAlert.value = true
-    }, 1000)
+      setTimeout(() => {
+        showPinLimitAlert.value = false
+      }, 10000)
     return
   }
 

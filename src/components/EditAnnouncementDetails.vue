@@ -85,6 +85,7 @@ const ensureDateTimeLocal = (dateStr) => {
 
 const loginManager = useAuthManager()
 const announcementStore = useAnnouncementManager()
+const { totalPinned } = storeToRefs(announcementStore)
 const notificationManager = useNotificationManager()
 const router = useRouter()
 const route = useRoute()
@@ -95,6 +96,7 @@ const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
+const showPinLimitAlert = ref(false)
 
 const titleError = ref(false)
 const categoryError = ref(false)
@@ -325,6 +327,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'fileSizeError') {
     fileSizeError.value = false
+  }
+  if (operate === 'pinLimitMessage') {
+    showPinLimitAlert.value = false
   }
 }
 
@@ -637,6 +642,14 @@ const handleSave = async () => {
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
   if (!announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
+  
+  if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 5) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+    showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
   
   if (hasError) {
     setTimeout(() => {
@@ -1372,7 +1385,7 @@ const showProfileStaffPage = async function () {
              </div>
           </div>
 
-          <!-- <div class="fixed top-5 left-5 z-50">
+          <div class="fixed top-5 left-5 z-50">
             <AlertPopUp
               v-if="editSuccess"
               :titles="'Edit Announcement is Successful.'"
@@ -1389,7 +1402,15 @@ const showProfileStaffPage = async function () {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
-          </div> -->
+            <AlertPopUp
+              v-if="showPinLimitAlert"
+              :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              message="Error!!"
+              styleType="red"
+              operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />
+          </div> 
 
         </div>
       </main>

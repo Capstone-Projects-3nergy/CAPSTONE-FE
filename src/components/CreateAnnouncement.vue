@@ -46,6 +46,7 @@ const formatDateTimeDisplay = (dateTimeStr) => {
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const announcementManager = useAnnouncementManager()
+const { totalPinned } = storeToRefs(announcementManager)
 const router = useRouter()
 const route = useRoute()
 const error = ref(false)
@@ -113,6 +114,7 @@ const categoryOptions = computed(() => {
 })
 
 const addSuccess = ref(false)
+const showPinLimitAlert = ref(false)
 const isLoading = ref(false)
 const titleError = ref(false)
 const titleLengthError = ref(false)
@@ -191,6 +193,7 @@ const closePopUp = (operate) => {
   if (operate === 'contentError') { contentError.value = false }
   if (operate === 'fileSizeError') { fileSizeError.value = false }
   if (operate === 'errorMessage') { error.value = false }
+  if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -332,6 +335,14 @@ const submitAnnouncement = async () => {
     return
   }
 
+  if (pinned.value && totalPinned.value >= 5) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+    showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
+
   try {
     isLoading.value = true
     // -----------------------
@@ -430,6 +441,14 @@ const saveDraft = async () => {
       categoryError.value = false
       contentError.value = false
     }, 5000)
+    return
+  }
+
+  if (pinned.value && totalPinned.value >= 5) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+      showPinLimitAlert.value = false
+    }, 10000)
     return
   }
 
@@ -778,6 +797,14 @@ const returnLoginPage = async () => {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
+             <AlertPopUp
+              v-if="showPinLimitAlert"
+              :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              message="Error!!"
+              styleType="red"
+              operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />  
           </div>
 
           <LoadingPopUp v-if="isLoading" />
