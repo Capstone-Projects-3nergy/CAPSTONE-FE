@@ -178,6 +178,65 @@ const checkScreen = () => {
 }
 
 const currentDate = ref('')
+const dashboardViewTab = ref('activity') // 'activity' | 'status'
+const filterStartDate = ref('')
+const filterEndDate = ref('')
+const statusChartInstance = ref(null)
+
+const initStatusChart = () => {
+  const ctx = document.getElementById('statusChart')
+  if (!ctx) return
+  
+  // Destroy existing if any
+  if (statusChartInstance.value) statusChartInstance.value.destroy()
+
+  statusChartInstance.value = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Picked Up', 'Awaiting', 'Overdue'],
+      datasets: [{
+        data: [stats.value.pickedUpParcels, stats.value.awaitingParcels, stats.value.overdueParcels],
+        backgroundColor: ['#10B981', '#FACC15', '#EF4444'], 
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: (context) => ` ${context.label}: ${context.parsed} parcels`
+          }
+        }
+      },
+      cutout: '70%'
+    }
+  })
+}
+
+watch([() => stats.value.pickedUpParcels, () => stats.value.awaitingParcels, () => stats.value.overdueParcels], () => {
+  if (statusChartInstance.value) {
+    statusChartInstance.value.data.datasets[0].data = [
+      stats.value.pickedUpParcels, 
+      stats.value.awaitingParcels, 
+      stats.value.overdueParcels
+    ]
+    statusChartInstance.value.update()
+  }
+})
+
+watch(dashboardViewTab, (newTab) => {
+  if (newTab === 'status') {
+    setTimeout(initStatusChart, 50)
+  }
+})
 const updateDate = () => {
   const date = new Date()
   const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
@@ -293,7 +352,6 @@ const pendingResidentsList = computed(() => {
 const fetchDashboardData = async () => {
   try {
     const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
-    // Using staff users API to get detailed resident/member status as in ManageResident.vue
     const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
     const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
 
@@ -325,8 +383,14 @@ const fetchDashboardData = async () => {
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
 
-    // Update Dashboard store for status overview stats
-    dashboardStore.calculateDashboardData(parcels, residentList, announcements)
+    // Update Dashboard store for status overview stats with date range
+    dashboardStore.calculateDashboardData(
+      parcels, 
+      residentList, 
+      announcements,
+      filterStartDate.value,
+      filterEndDate.value
+    )
     
     // Also update parcels store for other pages
     if (parcels.length > 0) {
@@ -336,6 +400,10 @@ const fetchDashboardData = async () => {
     console.warn('Fetch dashboard data failed', err)
   }
 }
+
+watch([filterStartDate, filterEndDate], async () => {
+  await fetchDashboardData()
+})
 
 onMounted(async () => {
   checkScreen()
@@ -884,6 +952,31 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
           <!-- Tab Content: Parcel Dashboard -->
           <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
+            
+            <!-- Dashboard Date Range Selector -->
+            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 text-gray-900 mb-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <h4 class="text-sm font-extrabold tracking-tight">Statistics Range Filter</h4>
+                </div>
+                <p class="text-xs text-gray-500 font-medium">Customize the data visualization period</p>
+              </div>
+              <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="flex-1 sm:flex-none">
+                  <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Date From</label>
+                  <input v-model="filterStartDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+                </div>
+                <div class="h-px w-2 bg-gray-200 mt-5 hidden sm:block"></div>
+                <div class="flex-1 sm:flex-none">
+                  <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Date To</label>
+                  <input v-model="filterEndDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+                </div>
+                <button v-if="filterStartDate || filterEndDate" @click="filterStartDate = ''; filterEndDate = ''" class="mt-5 p-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-all cursor-pointer shadow-sm border border-red-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            </div>
           
             <!-- Stats Grid -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
@@ -1072,106 +1165,157 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </button>
           </div>
 
-          <!-- Charts Grid 1 -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Parcel Activity Chart -->
-            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <div class="flex items-center justify-between mb-8">
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900">Parcel Activity</h3>
-                  <p class="text-xs text-gray-500">Received · Picked Up · Overdue</p>
-                </div>
-                <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                  <button 
-                    @click="updateParcelChart('daily')"
-                    :class="activityInterval === 'daily' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
-                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
-                  >
-                    Daily
-                  </button>
-                  <button 
-                    @click="updateParcelChart('weekly')"
-                    :class="activityInterval === 'weekly' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
-                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
-                  >
-                    Weekly
-                  </button>
-                  <button 
-                    @click="updateParcelChart('monthly')"
-                    :class="activityInterval === 'monthly' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
-                    class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
-                  >
-                    Monthly
-                  </button>
-                </div>
+          <!-- Integrated Chart Dashboard -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
+
+            <!-- Card Header with Tabs -->
+            <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+              <div class="flex flex-col">
+                <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                  Analytics Center
+                  <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 uppercase tracking-widest">Live Data</span>
+                </h3>
+                <p class="text-xs text-gray-500 font-medium mt-0.5">Visualizing parcel performance metrics</p>
               </div>
-              <div class="h-[250px] w-full relative">
-                 <canvas id="parcelChart"></canvas>
-              </div>
-              <div class="flex items-center gap-6 mt-6">
-                <div class="flex items-center gap-2">
-                  <div class="w-3 h-3 rounded bg-blue-500"></div>
-                  <span class="text-xs text-gray-600 font-medium">Received</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-3 h-3 rounded bg-emerald-500"></div>
-                  <span class="text-xs text-gray-600 font-medium">Picked Up</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-3 h-3 rounded bg-red-500"></div>
-                  <span class="text-xs text-gray-600 font-medium">Overdue</span>
-                </div>
+
+              <div class="flex items-center gap-1 bg-gray-100/60 p-1.5 rounded-2xl w-full sm:w-auto shadow-inner">
+                <button 
+                  @click="dashboardViewTab = 'activity'"
+                  :class="dashboardViewTab === 'activity' ? 'bg-white text-[#0E4B90] shadow-md border-gray-100' : 'text-gray-500 hover:text-gray-700'"
+                  class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                  ACTIVITY
+                </button>
+                <button 
+                  @click="dashboardViewTab = 'status'"
+                  :class="dashboardViewTab === 'status' ? 'bg-white text-[#0E4B90] shadow-md border-gray-100' : 'text-gray-500 hover:text-gray-700'"
+                  class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                  DISTRIBUTION
+                </button>
               </div>
             </div>
 
-            <!-- Status Distribution -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 class="text-lg font-bold text-gray-900">Status Distribution</h3>
-              <p class="text-xs text-gray-500 mb-8">Current month</p>
-              
-              <div class="flex justify-center mb-8 relative">
-                <!-- Placeholder for Donut Chart -->
-                <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-l-red-500 flex items-center justify-center flex-col">
-                  <span class="text-3xl font-black text-gray-900 leading-none">{{ stats.totalParcels }}</span>
-                  <span class="text-xs text-gray-500">Total</span>
+            <!-- Card Body -->
+            <div class="p-6 md:p-8">
+              <!-- Parcel Activity Tab (Bar Chart) -->
+              <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
+                <div class="flex justify-end">
+                   <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner">
+                    <button @click="updateParcelChart('daily')" :class="activityInterval === 'daily' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Daily</button>
+                    <button @click="updateParcelChart('weekly')" :class="activityInterval === 'weekly' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Weekly</button>
+                    <button @click="updateParcelChart('monthly')" :class="activityInterval === 'monthly' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Monthly</button>
+                  </div>
+                </div>
+                
+                <div class="h-[300px] w-full relative">
+                  <canvas id="parcelChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-50">
+                  <div class="bg-blue-50/30 p-4 rounded-2xl border border-blue-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels + stats.pickedUpParcels }}</span>
+                    </div>
+                  </div>
+                  <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Success</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
+                    </div>
+                  </div>
+                  <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Alerts</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div>
-                    <span class="text-sm text-gray-600">Picked Up</span>
+              <!-- Status Distribution Tab (Donut Chart) -->
+              <div v-show="dashboardViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
+                <div class="h-[300px] w-full relative flex items-center justify-center">
+                  <div class="w-full h-full relative">
+                    <canvas id="statusChart"></canvas>
                   </div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">{{ stats.pickedUpParcels }}</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}%</span>
-                  </div>
-                </div>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></div>
-                    <span class="text-sm text-gray-600">Awaiting</span>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">{{ stats.awaitingParcels }}</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                  <!-- Enhanced Data Display in Center -->
+                  <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
+                      <span class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">In System</span>
+                      <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalParcels }}</span>
+                      <div class="w-8 h-1 bg-blue-500 rounded-full mt-3"></div>
+                    </div>
                   </div>
                 </div>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-sm bg-red-500"></div>
-                    <span class="text-sm text-gray-600">Overdue</span>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-900">{{ stats.overdueParcels }}</span>
-                    <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalParcels ? Math.round((stats.overdueParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                
+                <div class="space-y-5 flex flex-col justify-center">
+                  <div class="bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50">
+                    <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center justify-between">
+                      Composition Summary
+                      <span class="text-[10px] lowercase text-gray-400 font-medium">All Units</span>
+                    </h4>
+                    
+                    <div class="space-y-4">
+                      <!-- Picked Up Detail -->
+                      <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                          <div class="w-4 h-4 rounded-lg bg-emerald-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Picked Up</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <span class="text-sm font-black text-gray-900">{{ stats.pickedUpParcels }}</span>
+                          <span class="text-xs font-bold text-emerald-500 px-2 py-0.5 bg-emerald-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Awaiting Detail -->
+                      <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                          <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Awaiting</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <span class="text-sm font-black text-gray-900">{{ stats.awaitingParcels }}</span>
+                          <span class="text-xs font-bold text-yellow-600 px-2 py-0.5 bg-yellow-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Overdue Detail -->
+                      <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                          <div class="w-4 h-4 rounded-lg bg-red-500 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Overdue</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <span class="text-sm font-black text-gray-900">{{ stats.overdueParcels }}</span>
+                          <span class="text-xs font-bold text-red-500 px-2 py-0.5 bg-red-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.overdueParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-dashed border-gray-200">
+                      <p class="text-[10px] text-gray-500 leading-relaxed font-medium">
+                        * Distribution reflects current inventory status for the selected date range. Data is updated in real-time as parcels are scanned or picked up.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            
           </div>
 
           <!-- Charts Grid 2 -->

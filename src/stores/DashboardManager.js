@@ -129,19 +129,43 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return 'Received'
   }
 
-  const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null) => {
+  const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null, startDate = null, endDate = null) => {
     // 1. Update internal state if new data is provided (ONLY if data is not empty)
     if (Array.isArray(parcelsRaw) && parcelsRaw.length > 0) setParcels(parcelsRaw)
     if (Array.isArray(residentsRaw) && residentsRaw.length > 0) setMembers(residentsRaw)
     if (Array.isArray(announcementsRaw) && announcementsRaw.length > 0) setAnnouncements(announcementsRaw)
 
-    // 2. Decide which data to use (internal state or mock fallback)
-    const parcelsData = parcels.length > 0 ? parcels : []
+    // 2. Filter parcels by range if provided
+    let parcelsData = parcels.length > 0 ? parcels : []
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate) : null
+      const end = endDate ? new Date(endDate) : null
+      if (end) end.setHours(23, 59, 59, 999)
+
+      parcelsData = parcelsData.filter(p => {
+        const receivedDate = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
+        const date = receivedDate ? new Date(receivedDate) : null
+        if (!date || isNaN(date.getTime())) return true // Include if date is unknown
+        
+        let inRange = true
+        if (start) inRange = inRange && (date >= start)
+        if (end) inRange = inRange && (date <= end)
+        return inRange
+      })
+    }
+
     const residentsData = members.length > 0 ? members : []
     const announcementsData = announcements.length > 0 ? announcements : []
 
     // If NO data at all (not even in store), don't overwrite the initial view
     if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
+      // Still need to reset stats if we just filtered to zero
+      if (startDate || endDate) {
+        stats.totalParcels = 0
+        stats.pickedUpParcels = 0
+        stats.awaitingParcels = 0
+        stats.overdueParcels = 0
+      }
       return
     }
 
