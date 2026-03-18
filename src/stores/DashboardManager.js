@@ -154,8 +154,25 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       })
     }
 
-    const residentsData = members.length > 0 ? members : []
+    let residentsData = members.length > 0 ? members : []
     const announcementsData = announcements.length > 0 ? announcements : []
+
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate) : null
+      const end = endDate ? new Date(endDate) : null
+      if (end) end.setHours(23, 59, 59, 999)
+
+      residentsData = residentsData.filter(r => {
+        const dateStr = r.updatedAt || r.updateAt || r.createdAt
+        const date = dateStr ? new Date(dateStr) : null
+        if (!date || isNaN(date.getTime())) return true
+        
+        let inRange = true
+        if (start) inRange = inRange && (date >= start)
+        if (end) inRange = inRange && (date <= end)
+        return inRange
+      })
+    }
 
     // If NO data at all (not even in store), don't overwrite the initial view
     if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
@@ -165,6 +182,10 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         stats.pickedUpParcels = 0
         stats.awaitingParcels = 0
         stats.overdueParcels = 0
+        stats.totalResidents = 0
+        stats.activeResidents = 0
+        stats.pendingResidents = 0
+        stats.inactiveResidents = 0
       }
       return
     }

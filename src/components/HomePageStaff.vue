@@ -179,9 +179,11 @@ const checkScreen = () => {
 
 const currentDate = ref('')
 const dashboardViewTab = ref('activity') // 'activity' | 'status'
+const residentViewTab = ref('growth') // 'growth' | 'status'
 const filterStartDate = ref('')
 const filterEndDate = ref('')
 const statusChartInstance = ref(null)
+const residentStatusChartInstance = ref(null)
 
 const initStatusChart = () => {
   const ctx = document.getElementById('statusChart')
@@ -193,10 +195,10 @@ const initStatusChart = () => {
   statusChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Picked Up', 'Awaiting', 'Overdue'],
+      labels: ['Picked Up', 'Received', 'Overdue'],
       datasets: [{
         data: [stats.value.pickedUpParcels, stats.value.awaitingParcels, stats.value.overdueParcels],
-        backgroundColor: ['#10B981', '#FACC15', '#EF4444'], 
+        backgroundColor: ['#10B981', '#3b82f6', '#EF4444'], 
         borderWidth: 0,
         hoverOffset: 4
       }]
@@ -221,6 +223,43 @@ const initStatusChart = () => {
   })
 }
 
+const initResidentStatusChart = () => {
+  const ctx = document.getElementById('residentStatusChart')
+  if (!ctx) return
+  
+  if (residentStatusChartInstance.value) residentStatusChartInstance.value.destroy()
+
+  residentStatusChartInstance.value = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Active', 'Pending', 'Inactive'],
+      datasets: [{
+        data: [stats.value.activeResidents, stats.value.pendingResidents, stats.value.inactiveResidents],
+        backgroundColor: ['#10B981', '#FACC15', '#F97316'], 
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: (context) => ` ${context.label}: ${context.parsed} residents`
+          }
+        }
+      },
+      cutout: '70%'
+    }
+  })
+}
+
 watch([() => stats.value.pickedUpParcels, () => stats.value.awaitingParcels, () => stats.value.overdueParcels], () => {
   if (statusChartInstance.value) {
     statusChartInstance.value.data.datasets[0].data = [
@@ -232,9 +271,26 @@ watch([() => stats.value.pickedUpParcels, () => stats.value.awaitingParcels, () 
   }
 })
 
+watch([() => stats.value.activeResidents, () => stats.value.pendingResidents, () => stats.value.inactiveResidents], () => {
+  if (residentStatusChartInstance.value) {
+    residentStatusChartInstance.value.data.datasets[0].data = [
+      stats.value.activeResidents, 
+      stats.value.pendingResidents, 
+      stats.value.inactiveResidents
+    ]
+    residentStatusChartInstance.value.update()
+  }
+})
+
 watch(dashboardViewTab, (newTab) => {
   if (newTab === 'status') {
     setTimeout(initStatusChart, 50)
+  }
+})
+
+watch(residentViewTab, (newTab) => {
+  if (newTab === 'status') {
+    setTimeout(initResidentStatusChart, 50)
   }
 })
 const updateDate = () => {
@@ -1516,79 +1572,117 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div> -->
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              <!-- Resident Growth Chart -->
-              <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
-                <div class="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 class="text-lg font-bold text-gray-900">Resident Growth</h3>
-                    <p class="text-xs text-gray-500">New residents registered per month</p>
-                  </div>
-                  <div class="flex bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                    <button 
-                      @click="updateResidentChart('2025')"
-                      :class="residentYear === '2025' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
-                      class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
-                    >2025</button>
-                    <button 
-                      @click="updateResidentChart('2026')"
-                      :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold' : 'text-gray-500 font-medium'"
-                      class="px-4 py-1.5 text-xs rounded-md transition-all cursor-pointer"
-                    >2026</button>
-                  </div>
+            <!-- Integrated Resident Chart Dashboard -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600"></div>
+
+              <!-- Card Header with Tabs -->
+              <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+                <div class="flex flex-col">
+                  <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                    Resident Insights
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 uppercase tracking-widest">Growth & Status</span>
+                  </h3>
+                  <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and member status</p>
                 </div>
-                <div class="h-[250px] w-full relative flex-1">
-                   <canvas id="residentChart"></canvas>
-                </div>
-                <div class="mt-6 flex items-center justify-between">
-                  <span class="text-sm font-bold text-gray-800">Total: {{ residentChartData[residentYear].total }} residents</span>
-                  <span class="text-sm text-gray-500">Peak: {{ residentChartData[residentYear].peak }}</span>
+
+                <div class="flex items-center gap-1 bg-gray-100/60 p-1.5 rounded-2xl w-full sm:w-auto shadow-inner">
+                  <button 
+                    @click="residentViewTab = 'growth'"
+                    :class="residentViewTab === 'growth' ? 'bg-white text-emerald-700 shadow-md border-gray-100' : 'text-gray-500 hover:text-gray-700'"
+                    class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+                    GROWTH
+                  </button>
+                  <button 
+                    @click="residentViewTab = 'status'"
+                    :class="residentViewTab === 'status' ? 'bg-white text-emerald-700 shadow-md border-gray-100' : 'text-gray-500 hover:text-gray-700'"
+                    class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                    STATUS
+                  </button>
                 </div>
               </div>
 
-              <!-- Status Overview -->
-              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
-                <h3 class="text-lg font-bold text-gray-900">Status Overview</h3>
-                <p class="text-xs text-transparent mb-8">.</p>
-                
-                <div class="flex justify-center mb-8 relative">
-                  <div class="w-40 h-40 rounded-full border-[16px] border-emerald-500 border-b-yellow-400 border-r-orange-500 flex items-center justify-center flex-col">
-                    <span class="text-3xl font-black text-gray-900 leading-none">{{ stats.totalResidents }}</span>
-                    <span class="text-xs text-gray-500">Residents</span>
+              <!-- Card Body -->
+              <div class="p-6 md:p-8">
+                <!-- Resident Growth Tab (Bar Chart) -->
+                <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                       <span class="text-sm font-black text-gray-800">Total: {{ residentChartData[residentYear].total }} residents</span>
+                       <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                       <span class="text-xs text-gray-500 font-bold">Peak: {{ residentChartData[residentYear].peak }}</span>
+                    </div>
+                    <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner">
+                      <button @click="updateResidentChart('2025')" :class="residentYear === '2025' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2025</button>
+                      <button @click="updateResidentChart('2026')" :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2026</button>
+                    </div>
+                  </div>
+                  
+                  <div class="h-[250px] w-full relative">
+                    <canvas id="residentChart"></canvas>
                   </div>
                 </div>
 
-                <div class="space-y-4 mt-auto">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div>
-                      <span class="text-sm text-gray-600">Active</span>
+                <!-- Resident Status Tab (Donut Chart) -->
+                <div v-show="residentViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
+                  <div class="h-[300px] w-full relative flex items-center justify-center">
+                    <div class="w-full h-full relative">
+                      <canvas id="residentStatusChart"></canvas>
                     </div>
-                    <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">{{ stats.activeResidents }}</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.activeResidents / stats.totalResidents) * 100) : 0 }}%</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></div>
-                      <span class="text-sm text-gray-600">Pending</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">{{ stats.pendingResidents }}</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.pendingResidents / stats.totalResidents) * 100) : 0 }}%</span>
+                    <!-- Center Display -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
+                        <span class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Members</span>
+                        <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalResidents }}</span>
+                        <div class="w-8 h-1 bg-emerald-500 rounded-full mt-3"></div>
+                      </div>
                     </div>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2.5 h-2.5 rounded-sm bg-orange-500"></div>
-                      <span class="text-sm text-gray-600">Inactive</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                      <span class="text-sm font-bold text-gray-900">{{ stats.inactiveResidents }}</span>
-                      <span class="text-xs text-gray-400 w-8 text-right">{{ stats.totalResidents ? Math.round((stats.inactiveResidents / stats.totalResidents) * 100) : 0 }}%</span>
+                  
+                  <div class="space-y-5 flex flex-col justify-center">
+                    <div class="bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50">
+                      <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 border-b border-gray-200/20 pb-4">
+                        Status Breakdown
+                      </h4>
+                      
+                      <div class="space-y-4">
+                        <div class="flex items-center justify-between group">
+                          <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 rounded-lg bg-emerald-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform"></div>
+                            <span class="text-sm font-bold text-gray-700">Active</span>
+                          </div>
+                          <div class="flex items-center gap-4">
+                            <span class="text-sm font-black text-gray-900">{{ stats.activeResidents }}</span>
+                            <span class="text-xs font-bold text-emerald-500 px-2 py-0.5 bg-emerald-50 rounded-md">{{ stats.totalResidents ? Math.round((stats.activeResidents / stats.totalResidents) * 100) : 0 }}%</span>
+                          </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between group">
+                          <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
+                            <span class="text-sm font-bold text-gray-700">Pending</span>
+                          </div>
+                          <div class="flex items-center gap-4">
+                            <span class="text-sm font-black text-gray-900">{{ stats.pendingResidents }}</span>
+                            <span class="text-xs font-bold text-yellow-600 px-2 py-0.5 bg-yellow-50 rounded-md">{{ stats.totalResidents ? Math.round((stats.pendingResidents / stats.totalResidents) * 100) : 0 }}%</span>
+                          </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between group">
+                          <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 rounded-lg bg-orange-500 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform"></div>
+                            <span class="text-sm font-bold text-gray-700">Inactive</span>
+                          </div>
+                          <div class="flex items-center gap-4">
+                            <span class="text-sm font-black text-gray-900">{{ stats.inactiveResidents }}</span>
+                            <span class="text-xs font-bold text-orange-600 px-2 py-0.5 bg-orange-50 rounded-md">{{ stats.totalResidents ? Math.round((stats.inactiveResidents / stats.totalResidents) * 100) : 0 }}%</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
