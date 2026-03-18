@@ -47,6 +47,18 @@ const getCategoryIcon = (category) => {
     default: return ''
   }
 }
+
+const formatDate = (dateString) => {
+  if (!dateString || dateString === 'Just now') return 'Just now'
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
 </script>
 
 <template>
@@ -123,7 +135,7 @@ const getCategoryIcon = (category) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
-                <span class="truncate">{{ item.date }}</span>
+                <span class="truncate">{{ formatDate(item.date) }}</span>
               </div>
               <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
                 <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
@@ -181,7 +193,7 @@ const getCategoryIcon = (category) => {
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500 font-bold">
-                {{ item.date }}
+                {{ formatDate(item.date) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-center text-xs text-gray-500 font-bold">
                 {{ item.views || 0 }}

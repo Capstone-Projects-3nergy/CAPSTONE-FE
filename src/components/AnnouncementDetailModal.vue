@@ -84,6 +84,18 @@ const getCategoryIcon = (category) => {
     default: return ''
   }
 }
+
+const formatDate = (dateString) => {
+  if (!dateString || dateString === 'Just now') return 'Just now'
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
 </script>
 
 <template>
@@ -142,7 +154,7 @@ const getCategoryIcon = (category) => {
           </div>
           <div class="flex flex-col">
             <span class="font-bold text-gray-900">{{ author }}</span>
-            <!-- Posted on {{ date.split(' - ')[0] }} -->
+            <span class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
             <span v-if="status && status.toUpperCase() !== 'PUBLISHED'" class="mt-1 px-2 py-0.5 rounded text-[10px] font-bold" :class="getStatusBadgeClass(status)">
               {{ status }}
             </span>

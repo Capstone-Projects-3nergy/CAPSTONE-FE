@@ -54,6 +54,18 @@ const getCategoryIcon = (category) => {
     case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>`
   }
 }
+
+const formatDate = (dateString) => {
+  if (!dateString || dateString === 'Just now') return 'Just now'
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
 </script>
 
 <template>
@@ -136,7 +148,7 @@ const getCategoryIcon = (category) => {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                   </svg>
-                  <span class="whitespace-nowrap">{{ item.datePosted.split(' - ')[0] }}</span>
+                  <span class="whitespace-nowrap">{{ formatDate(item.datePosted) }}</span>
                 </div>
                 <div class="flex items-center gap-0.5 min-w-0">
                   <div class="h-2.5 w-2.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[5px] font-black flex-shrink-0">P</div>
@@ -278,7 +290,7 @@ const getCategoryIcon = (category) => {
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-middle md:align-middle">
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Date Posted:</span>
-                  <span class="text-xs sm:text-sm">{{ item.datePosted.split(' - ')[0] }}</span>
+                  <span class="text-xs sm:text-sm">{{ formatDate(item.datePosted) }}</span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Status:</span>
@@ -322,7 +334,7 @@ const getCategoryIcon = (category) => {
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                       </svg>
-                      <span>{{ item.datePosted.split(' - ')[0] }}</span>
+                      <span>{{ formatDate(item.datePosted) }}</span>
                     </div>
                     <div class="flex items-center gap-1 min-w-0">
                       <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold flex-shrink-0">P</div>
