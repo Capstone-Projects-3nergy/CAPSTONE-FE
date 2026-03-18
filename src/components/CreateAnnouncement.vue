@@ -974,7 +974,7 @@ const returnLoginPage = async () => {
                 </div>
 
                 <!-- Target Audience -->
-                <div class="space-y-3 pt-2">
+                <!-- <div class="space-y-3 pt-2">
                   <label class="text-sm font-semibold text-gray-700">Target Audience</label>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <label class="relative cursor-pointer h-full">
@@ -986,7 +986,7 @@ const returnLoginPage = async () => {
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'ALL_RESIDENTS' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
                       </div>
                     </label>
-<!-- 
+
                     <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
@@ -995,9 +995,9 @@ const returnLoginPage = async () => {
                         </div>
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
                       </div>
-                    </label> -->
+                    </label>
 
-                    <!-- <label class="relative cursor-pointer h-full">
+                     <label class="relative cursor-pointer h-full">
                       <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
                       <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
                         <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
@@ -1005,9 +1005,9 @@ const returnLoginPage = async () => {
                         </div>
                         <span class="font-medium text-sm text-center" :class="targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
                       </div>
-                    </label> -->
+                    </label> 
                   </div>
-                </div>
+                </div> -->
 
                 <!-- Toggles -->
                 <div class="space-y-3 pt-2">

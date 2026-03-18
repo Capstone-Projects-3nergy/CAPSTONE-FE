@@ -89,6 +89,8 @@ watch(
   (tab) => {
     if (tab === 'notify') {
       activeTab.value = 'notify'
+    } else if (tab === 'status') {
+      activeTab.value = 'status'
     }
   },
   { immediate: true }

@@ -24,7 +24,8 @@ import { computed } from 'vue'
 import {
   getAnnouncements,
   getAnnouncementById,
-  recordAnnouncementView
+  recordAnnouncementView,
+  editItem
 } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { searchAnnouncements } from '@/stores/SortManager.js'
@@ -181,9 +182,38 @@ const handleView = async (item) => {
   showViewModal.value = true
 }
 
-const handlePin = (item) => {
-  // Toggle pinned status temporarily
-  item.pinned = !item.pinned
+const handlePin = async (item) => {
+  const newPinnedStatus = !item.pinned
+  
+  // Construct payload focusing on necessary fields for UpdateAnnouncementDto
+  const payload = {
+    title: item.title,
+    subtitle: item.subtitle || '',
+    content: item.content || '',
+    categoryId: item.categoryId || (item.category ? item.category.id : null),
+    pinned: newPinnedStatus,
+    sendNotification: false, // Don't re-notify when just pinning
+    priority: item.priority || 1,
+    publishAt: item.publishAt || null,
+    targetAudience: item.targetAudience || 'ALL_RESIDENTS',
+    status: item.status || 'PUBLISHED'
+  }
+
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
+    const updated = await editItem(url, item.id, payload, router)
+    
+    if (updated) {
+      // Update local state and manager
+      item.pinned = newPinnedStatus
+      announcementManager.updateAnnouncement(updated)
+      console.log('Announcement pin status updated successfully')
+    } else {
+      console.error('Failed to update pin status: No data returned from API')
+    }
+  } catch (err) {
+    console.error('Error toggling pin:', err)
+  }
 }
 
 const handleDelete = (item) => {

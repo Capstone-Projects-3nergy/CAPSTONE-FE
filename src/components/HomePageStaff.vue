@@ -117,7 +117,8 @@ const showRegistrationDetail = (id) => {
     params: {
       id: route.params.id,
       tid: id
-    }
+    },
+    query: { tab: 'status' }
   })
 }
 const showParcelDetail = (id) => {
