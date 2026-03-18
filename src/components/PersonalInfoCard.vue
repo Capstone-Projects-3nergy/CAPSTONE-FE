@@ -1048,15 +1048,15 @@ const handleUnlink = async () => {
             </div>
 
             <!-- Bottom Actions -->
-            <div class="flex justify-end gap-x-3 mt-12 pt-6 border-t border-gray-50">
+            <div class="flex justify-between sm:justify-end gap-x-2 sm:gap-x-3 mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-50">
               <ButtonWeb
-                class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-2xl transition-all active:scale-95 cursor-pointer"
+                class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl sm:rounded-2xl transition-all active:scale-95 flex items-center cursor-pointer"
                 label="Back"
                 color="gray"
                 @click="$emit('cancel')"
               />
               <ButtonWeb
-                class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 cursor-pointer"
+                class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
                 label="Edit Profile"
                 color="blue"
                 @click="$emit('edit')"
