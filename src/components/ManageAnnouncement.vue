@@ -51,11 +51,14 @@ const showDeleteModal = ref(false)
 const showViewModal = ref(false)
 const selectedAnnouncement = ref(null)
 const deleteSuccess = ref(false)
+const showPinLimitAlert = ref(false)
 const error = ref('')
 
 const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') {
     deleteSuccess.value = false
+  } else if (operate === 'pinLimitMessage') {
+    showPinLimitAlert.value = false
   }
 }
 
@@ -201,6 +204,11 @@ const handleView = async (item) => {
 const handlePin = async (item) => {
   const newPinnedStatus = !item.pinned
   
+  if (newPinnedStatus && totalPinned.value >= 5) {
+    showPinLimitAlert.value = true
+    return
+  }
+
   // Construct payload focusing on necessary fields for UpdateAnnouncementDto
   const payload = {
     title: item.title,
@@ -336,6 +344,14 @@ const showProfileStaffPage = async function () {
           message="Success!!"
           styleType="green"
           operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="showPinLimitAlert"
+          :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+          message="Error!!"
+          styleType="red"
+          operate="pinLimitMessage"
           @closePopUp="closePopUp"
         />
       </div>

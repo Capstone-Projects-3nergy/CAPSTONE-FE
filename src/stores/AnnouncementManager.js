@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useAnnouncementManager = defineStore('announcementManager', () => {
@@ -123,6 +123,8 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
   /* ---------- find ---------- */
   const findAnnouncementById = (id) => announcements.find((a) => a.id === id)
 
+  const totalPinned = computed(() => announcements.filter((a) => a.pinned).length)
+
   return {
     announcements,
     trash,
@@ -142,7 +144,8 @@ export const useAnnouncementManager = defineStore('announcementManager', () => {
     restoreFromTrash,
     deletePermanent,
 
-    findAnnouncementById
+    findAnnouncementById,
+    totalPinned
   }
 })
 
