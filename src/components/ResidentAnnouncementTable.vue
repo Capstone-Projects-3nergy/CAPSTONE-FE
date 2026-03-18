@@ -106,9 +106,14 @@ const getCategoryIcon = (category) => {
           <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight break-words whitespace-normal">
             {{ item.title }}
           </h4>
-          <p class="text-gray-500 text-sm break-words whitespace-normal leading-relaxed mb-6 flex-grow line-clamp-3">
-            {{ item.subtitle || item.content }}
-          </p>
+          <div class="flex-grow mb-6">
+            <p v-if="item.subtitle" class="text-gray-900 text-sm font-bold mb-1 line-clamp-2">
+              {{ item.subtitle }}
+            </p>
+            <p v-if="item.content" class="text-gray-500 text-[11px] line-clamp-2">
+              {{ item.content }}
+            </p>
+          </div>
 
           <div class="h-px bg-gray-100 w-full mb-4"></div>
 
@@ -163,7 +168,10 @@ const getCategoryIcon = (category) => {
               <td class="px-6 py-4">
                 <div class="flex flex-col">
                   <div class="text-sm font-bold text-gray-900 group-hover:text-[#0E4B90] transition-colors">{{ item.title }}</div>
-                  <div class="text-xs text-gray-500 mt-1 line-clamp-1 truncate max-w-md">{{ item.subtitle || item.content }}</div>
+                  <div class="flex flex-col gap-0.5 mt-1 max-w-md">
+                    <div v-if="item.subtitle" class="text-[11px] text-gray-700 font-bold line-clamp-1">{{ item.subtitle }}</div>
+                    <div v-if="item.content" class="text-[10px] text-gray-500 line-clamp-1">{{ item.content }}</div>
+                  </div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">

@@ -125,11 +125,11 @@ const getCategoryIcon = (category) => {
           </div>
         </div>
         
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{{ title }}</h2>
-        <p v-if="subtitle" class="text-lg font-medium text-gray-700 mb-6">{{ subtitle }}</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
+        <p v-if="subtitle" class="text-lg font-medium text-gray-700 mb-6">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
         
         <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-8">
-          <p>{{ content }}</p>
+          <p>{{ content?.replace(/^Draft\s*-\s*/i, '') || content }}</p>
           <slot></slot>
         </div>
 

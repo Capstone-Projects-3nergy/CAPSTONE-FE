@@ -116,9 +116,14 @@ const getCategoryIcon = (category) => {
           <h3 class="font-bold text-gray-900 text-base mb-2 break-words whitespace-normal leading-tight group-hover:text-[#0E4B90] transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
-          <p class="text-sm text-gray-600 mb-6 leading-relaxed flex-grow">
-            {{ item.subtitle ? item.subtitle.replace(/^Draft\s*-\s*/i, '') : '' }}
-          </p>
+          <div class="flex-grow mb-6 overflow-hidden">
+            <p v-if="item.subtitle" class="text-sm text-gray-800 font-bold mb-1 leading-relaxed line-clamp-2">
+              {{ item.subtitle.replace(/^Draft\s*-\s*/i, '') }}
+            </p>
+            <p v-if="item.content" class="text-[11px] text-gray-500 leading-relaxed line-clamp-3">
+              {{ item.content.replace(/^Draft\s*-\s*/i, '') }}
+            </p>
+          </div>
 
           <!-- Divider -->
           <div class="h-px bg-gray-100 w-full mb-4"></div>
@@ -253,9 +258,12 @@ const getCategoryIcon = (category) => {
                           </svg>
                         </span>
                       </div>
-                      <div class="mt-1 md:mt-0">
-                        <div class="text-xs text-gray-500 leading-relaxed min-w-0 break-words">
-                          {{ item.subtitle ? item.subtitle.replace(/^Draft\s*-\s*/i, '') : '' }}
+                      <div class="mt-1 md:mt-0 flex flex-col gap-0.5 max-w-sm sm:max-w-md">
+                        <div v-if="item.subtitle" class="text-[11px] text-gray-700 font-bold leading-relaxed min-w-0 break-words line-clamp-1">
+                          {{ item.subtitle.replace(/^Draft\s*-\s*/i, '') }}
+                        </div>
+                        <div v-if="item.content" class="text-[10px] text-gray-400 leading-relaxed min-w-0 break-words line-clamp-1">
+                          {{ item.content.replace(/^Draft\s*-\s*/i, '') }}
                         </div>
                       </div>
                     </div>
