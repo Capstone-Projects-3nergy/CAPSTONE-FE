@@ -464,7 +464,7 @@ watch([filterStartDate, filterEndDate], async () => {
 })
 
 onMounted(async () => {
-  sidebarManager.checkScreenSize()
+  // sidebarManager.checkScreenSize()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
