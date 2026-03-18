@@ -255,9 +255,9 @@ const formatDate = (dateString) => {
               <tr class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle">
                   <div class="flex items-center gap-4">
-                    <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#0E4B90] rounded-full flex items-center justify-center font-bold text-sm">
+                    <!-- <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-[#0E4B90] rounded-full flex items-center justify-center font-bold text-sm">
                       SP
-                    </div>
+                    </div> -->
                     <div class="flex-grow">
                        <div class="flex items-start gap-2 mb-2">
                         <span class="md:hidden font-semibold text-[#0E4B90] text-xs shrink-0">Title:</span>
