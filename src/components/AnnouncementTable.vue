@@ -125,7 +125,7 @@ const formatDate = (dateString) => {
           </div>
           
           <!-- Card Body -->
-          <h3 class="font-bold text-blue-500 text-base mb-2 break-words whitespace-normal leading-tight transition-colors">
+          <h3 class="font-bold text-[#0E4B90] text-base mb-2 break-words whitespace-normal leading-tight transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
           <div class="flex-grow mb-6 overflow-hidden">
@@ -260,8 +260,8 @@ const formatDate = (dateString) => {
                     </div> -->
                     <div class="flex-grow">
                        <div class="flex items-start gap-2 mb-2">
-                        <span class="md:hidden font-semibold text-blue-500 text-xs shrink-0">Title:</span>
-                        <div class="text-sm font-bold text-blue-500 flex-grow break-words whitespace-normal transition-colors">
+                        <span class="md:hidden font-semibold text-[#0E4B90]  text-xs shrink-0">Title:</span>
+                        <div class="text-sm font-bold md:text-[#0E4B90] flex-grow break-words whitespace-normal transition-colors">
                           {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
                         </div>
                         <span v-if="item.pinned" class="text-red-500 flex-shrink-0" title="Pinned">
@@ -282,18 +282,18 @@ const formatDate = (dateString) => {
                   </div>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
-                  <span class="md:hidden font-semibold text-blue-500 mr-2 text-xs">Category:</span>
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Category:</span>
                   <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-full" :class="getCategoryBadgeClass(item.category)">
                     <span v-html="getCategoryIcon(item.category)"></span>
                     {{ item.category }}
                   </span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-middle md:align-middle">
-                  <span class="md:hidden font-semibold text-blue-500 mr-2 text-xs">Date Posted:</span>
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Date Posted:</span>
                   <span class="text-xs sm:text-sm">{{ formatDate(item.datePosted) }}</span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
-                  <span class="md:hidden font-semibold text-blue-500 mr-2 text-xs">Status:</span>
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Status:</span>
                   <span class="px-3 py-1 inline-flex text-xs font-bold rounded-full" :class="getStatusBadgeClass(item.status)">
                     {{ item.status }}
                   </span>
@@ -301,7 +301,7 @@ const formatDate = (dateString) => {
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
                   <!-- Action row for mobile replaces Views row -->
                   <div class="md:hidden flex items-center justify-start gap-2 w-full">
-                    <span class="font-semibold text-blue-500 text-xs">Action:</span>
+                    <span class="font-semibold text-[#0E4B90] text-xs">Action:</span>
                     <div class="flex items-center gap-1">
                       <button @click="$emit('pin', item)" 
                         :class="[
