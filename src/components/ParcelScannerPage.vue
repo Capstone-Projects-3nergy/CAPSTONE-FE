@@ -1356,7 +1356,7 @@ onMounted(async () => {
                     
                     <!-- Helper Text -->
                     <div class="absolute -top-10 left-0 right-0 text-center">
-                      <span class="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">Align text within frame</span>
+                      <span class="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full font-bold tracking-widest">Align text within frame</span>
                     </div>
                   </div>
                 </div>
@@ -1715,7 +1715,7 @@ onMounted(async () => {
                   >
                     <div class="flex-1 space-y-1">
                       <div class="text-sm font-bold text-gray-800">{{ p.recipientName }}</div>
-                      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                      <div class="text-[11px] font-medium text-gray-400 tracking-wider flex items-center gap-2">
                         <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                         {{ p.trackingNumber }}
                       </div>

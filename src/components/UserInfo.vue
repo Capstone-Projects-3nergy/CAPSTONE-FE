@@ -199,7 +199,7 @@ defineExpose({
           :class="align === 'right' ? 'absolute right-0 top-14 items-end text-right' : 'items-start text-left'"
         >
           <p class="font-bold text-xs text-white leading-none mb-1">{{ userName }}</p>
-          <p class="text-[9px] text-blue-200 font-medium tracking-wide uppercase opacity-80">{{ userEmail }}</p>
+          <p class="text-[9px] text-blue-200 font-medium tracking-wide opacity-80">{{ userEmail }}</p>
         </div>
       </transition>
     </teleport>

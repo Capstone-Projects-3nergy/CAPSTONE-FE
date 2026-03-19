@@ -996,7 +996,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div class="flex flex-col h-full justify-center">
                 <div class="flex items-center gap-1.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">System Live</span>
+                  <span class="text-[10px] font-bold text-gray-400 tracking-widest leading-none">System Live</span>
                 </div>
                 <span class="text-xs font-extrabold text-[#1D355E] mt-0.5">3 Staff Active</span>
               </div>
@@ -1054,12 +1054,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto">
                 <div class="flex-1 sm:flex-none">
-                  <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Date From</label>
+                  <label class="block text-[10px] font-bold text-gray-400 ml-1 mb-1">Date From</label>
                   <input v-model="filterStartDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
                 </div>
                 <div class="h-px w-2 bg-gray-200 mt-5 hidden sm:block"></div>
                 <div class="flex-1 sm:flex-none">
-                  <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Date To</label>
+                  <label class="block text-[10px] font-bold text-gray-400 ml-1 mb-1">Date To</label>
                   <input v-model="filterEndDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
                 </div>
                 <button v-if="filterStartDate || filterEndDate" @click="filterStartDate = ''; filterEndDate = ''" class="mt-5 p-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-all cursor-pointer shadow-sm border border-red-100">
@@ -1082,7 +1082,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
               </div>
             </div>
 
@@ -1103,7 +1103,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Received</p>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Received</p>
               </div>
             </div>
 
@@ -1126,7 +1126,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Overdue</p>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Overdue</p>
               </div>
             </div>
 
@@ -1147,7 +1147,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 uppercase tracking-wider text-[9px] md:text-[11px]">Total Units</p>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Total Units</p>
               </div>
             </div>
           </div>
@@ -1259,7 +1259,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div class="flex flex-col">
                 <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                   Analytics Center
-                  <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 uppercase tracking-widest">Live Data</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 tracking-widest">Live Data</span>
                 </h3>
                 <p class="text-xs text-gray-500 font-medium mt-0.5">Visualizing parcel performance metrics</p>
               </div>
@@ -1306,7 +1306,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Picked Up</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Picked Up</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
                     </div>
                   </div>
@@ -1315,7 +1315,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Received</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Received</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
@@ -1324,7 +1324,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Overdue</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Overdue</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>
@@ -1340,7 +1340,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <!-- Enhanced Data Display in Center -->
                   <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
-                      <span class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">In System</span>
+                      <span class="text-xs font-black text-gray-400 tracking-widest mb-1">In System</span>
                       <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalParcels }}</span>
                       <div class="w-8 h-1 bg-blue-500 rounded-full mt-3"></div>
                     </div>
@@ -1349,7 +1349,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 
                 <div class="space-y-5 flex flex-col justify-center">
                   <div class="bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50">
-                    <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center justify-between">
+                    <h4 class="text-sm font-black text-gray-900 tracking-widest mb-6 flex items-center justify-between">
                       Composition Summary
                       <span class="text-[10px] lowercase text-gray-400 font-medium">All Units</span>
                     </h4>
@@ -1436,16 +1436,16 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
               <!-- Table Header -->
               <div class="grid grid-cols-4 px-2 mb-4">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tracking</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Resident</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Room</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2">Status</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Tracking</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Resident</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider text-center">Room</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider pl-2">Status</span>
               </div>
 
               <!-- List -->
-              <div class="space-y-4">
-                <div v-for="parcel in recentParcels" :key="parcel.id" class="grid grid-cols-4 items-center px-2 py-1">
-                  <span @click="showParcelDetail(parcel.id)" class="text-xs font-bold text-[#0E4B90] underline cursor-pointer truncate mr-2">{{ parcel.trackingNumber }}</span>
+              <div class="space-y-4 flex-1 overflow-hidden pr-1">
+                <div v-for="parcel in recentParcels.slice(0, 5)" :key="parcel.id" class="grid grid-cols-4 items-center px-2 py-1 hover:bg-gray-50 rounded-lg transition-colors group">
+                  <span class="text-xs font-bold text-[#0E4B90] truncate mr-2">{{ parcel.trackingNumber }}</span>
                   <span class="text-xs text-gray-600 truncate mr-2">{{ parcel.residentName }}</span>
                   <span class="text-xs text-gray-600 text-center">{{ parcel.roomNumber }}</span>
                   <div class="flex items-center justify-between ml-2">
@@ -1455,8 +1455,19 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       </svg>
                       {{ parcel.status }}
                     </span>
+                    <button @click="showParcelDetail(parcel.id)" class="opacity-0 group-hover:opacity-100 bg-blue-500 text-white text-[9px] font-black py-1 px-2 rounded hover:bg-blue-600 transition-all cursor-pointer shadow-sm">
+                      View
+                    </button>
                   </div>
                 </div>
+
+                <!-- Remaining Count Message -->
+                <div v-if="recentParcels.length > 5" class="text-center py-1.5 mt-1">
+                  <p class="text-[10px] md:text-xs font-semibold text-blue-600 bg-blue-50/40 py-2 rounded-lg border border-dashed border-blue-200">
+                    {{ (recentParcels.length - 5) > 99 ? '+99' : '+ ' + (recentParcels.length - 5) }} more active parcels
+                  </p>
+                </div>
+
                 <!-- Empty State -->
                 <div v-if="recentParcels.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/50 py-10 opacity-40">
                   <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -1488,10 +1499,10 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
-              <div class="space-y-2 flex-1 overflow-hidden pr-1">
+              <div class="space-y-3 flex-1 overflow-hidden pr-1">
                 <!-- Overdue Item -->
                 <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
-                     class="bg-white rounded-xl py-2 px-3.5 flex items-center justify-between border border-red-100 shadow-sm hover:border-red-300 transition-all duration-300">
+                     class="bg-white rounded-xl py-3 px-3.5 flex items-center justify-between border border-red-100 shadow-sm hover:border-red-300 transition-all duration-300">
                   <div class="flex items-center gap-3 min-w-0 flex-1">
                     <span class="bg-red-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full flex-shrink-0 shadow-sm">
                       {{ calculateOverdueDays(parcel.receiveAt) }}d
@@ -1600,7 +1611,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <div class="flex flex-col">
                   <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                     Resident Insights
-                    <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 uppercase tracking-widest">Growth & Status</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 tracking-widest">Growth & Status</span>
                   </h3>
                   <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and member status</p>
                 </div>
@@ -1655,7 +1666,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <!-- Center Display -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
-                        <span class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Members</span>
+                        <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Members</span>
                         <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalResidents }}</span>
                         <div class="w-8 h-1 bg-emerald-500 rounded-full mt-3"></div>
                       </div>
@@ -1664,7 +1675,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   
                   <div class="space-y-5 flex flex-col justify-center">
                     <div class="bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50">
-                      <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 border-b border-gray-200/20 pb-4">
+                      <h4 class="text-sm font-black text-gray-900 tracking-widest mb-6 border-b border-gray-200/20 pb-4">
                         Status Breakdown
                       </h4>
                       
@@ -1787,7 +1798,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
                 <div class="space-y-4 flex-1">
                   <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Occupied</h4>
+                    <h4 class="text-xs font-bold text-gray-400 tracking-wider mb-3">Occupied</h4>
                     <div class="flex flex-wrap gap-2">
                       <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">1</div>
                       <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">13</div>
@@ -1797,7 +1808,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
 
                   <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-6">Vacant</h4>
+                    <h4 class="text-xs font-bold text-gray-400 tracking-wider mb-3 mt-6">Vacant</h4>
                     <div class="grid grid-cols-4 gap-2">
                       <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
                         <p class="text-sm font-bold text-gray-700">101</p>

@@ -615,7 +615,7 @@ const handleUnlink = async () => {
             >
               <span>Email</span>
 
-              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
+              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] tracking-wider">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="12"
@@ -765,7 +765,7 @@ const handleUnlink = async () => {
                     <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
                   </div>
                   <div>
-                    <span class="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
+                    <span class="text-[9px] sm:text-[10px] tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
                     <span :class="[
                       'text-lg sm:text-xl font-black transition-colors duration-300',
                       effectiveLineId ? 'text-green-600' : 'text-gray-500'
@@ -910,7 +910,7 @@ const handleUnlink = async () => {
 
               <div class="flex items-center gap-2 mt-2">
                 <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-tight">
+                <p class="text-[11px] font-bold text-gray-400 tracking-tight">
                   {{ item.user }}
                 </p>
               </div>
@@ -944,7 +944,7 @@ const handleUnlink = async () => {
                 </div>
               </div>
             </div>
-            <p class="text-sm font-extrabold text-[#0E4B90] pt-6 uppercase tracking-wider">
+            <p class="text-sm font-extrabold text-[#0E4B90] pt-6 tracking-wider">
               {{ userRoleLabel }}
             </p>
             <p class="mt-4 text-black font-bold text-xl truncate max-w-[200px] mx-auto">
@@ -1006,42 +1006,42 @@ const handleUnlink = async () => {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">First Name</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">First Name</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ firstName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Last Name</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Last Name</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ lastName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Email</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Email</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ email }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Room Number</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Room Number</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(roomNumber) }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Dormitory</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Dormitory</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ dormName }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 uppercase tracking-wider">Phone Number</label>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Phone Number</label>
                 <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
                   {{ display(phoneNumber) }}
                 </p>
@@ -1058,7 +1058,7 @@ const handleUnlink = async () => {
               />
               <ButtonWeb
                 class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
-                label="Edit Profile"
+                label="Edit"
                 color="blue"
                 @click="$emit('edit')"
               />
@@ -1069,7 +1069,7 @@ const handleUnlink = async () => {
           <div v-if="activeTab === 'status'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex items-center gap-4 mb-10">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight uppercase font-black">
+              <h3 class="font-extrabold text-xl text-black tracking-tight font-black">
                 Account Status
               </h3>
             </div>
@@ -1083,7 +1083,7 @@ const handleUnlink = async () => {
                                  safeStatus?.toUpperCase() === 'PENDING' ? '#3B82F6' : '#9CA3AF' 
                     }" class="w-4 h-4 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] animate-pulse"></div>
                     <div>
-                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5">Current Status</p>
+                      <p class="text-[10px] font-black text-gray-400 tracking-[0.2em] mb-1.5">Current Status</p>
                       <h4 class="text-3xl font-black text-slate-800 tracking-tight">{{ displayStatus(safeStatus) }}</h4>
                     </div>
                   </div>
@@ -1093,7 +1093,7 @@ const handleUnlink = async () => {
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
                     <div>
-                      <p class="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest leading-none mb-1.5">Verified Account</p>
+                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Verified Account</p>
                       <p class="text-lg font-black text-emerald-900 leading-none uppercase">Approved</p>
                     </div>
                   </div>

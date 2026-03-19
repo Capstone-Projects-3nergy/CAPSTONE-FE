@@ -844,7 +844,7 @@ const goToPage = (page) => {
                       {{ item.time }}
                     </span>
                     <div v-if="item.isRead === 1" class="flex items-center gap-1 opacity-60">
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-[#0E4B90]">{{ item.isRead === 1 ? 'Read' : item.status }}</span>
+                      <span class="text-[10px] font-bold tracking-widest text-[#0E4B90]">{{ item.isRead === 1 ? 'Read' : item.status }}</span>
                       <svg class="w-3 h-3 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>

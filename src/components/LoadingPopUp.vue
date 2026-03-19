@@ -38,7 +38,7 @@ defineEmits(['closePopUp'])
             <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]"></span>
             <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce"></span>
           </div>
-          <p class="text-xs font-medium text-slate-400 uppercase tracking-widest pt-2">
+          <p class="text-xs font-medium text-slate-400 tracking-widest pt-2">
             Please wait a moment
           </p>
         </div>

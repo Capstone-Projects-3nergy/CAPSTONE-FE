@@ -1082,7 +1082,7 @@ function formatDateTime(datetimeStr) {
                 @click="showAnnouncementPage" 
                 class="group flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-[#0E4B90]/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
-                <span class="text-slate-700 font-bold text-xs uppercase tracking-widest group-hover:text-[#0E4B90] transition-colors">View All Announcements</span>
+                <span class="text-slate-700 font-bold text-xs tracking-widest group-hover:text-[#0E4B90] transition-colors">View All Announcements</span>
                 <div class="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center group-hover:bg-[#0E4B90] transition-all duration-300">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -1111,13 +1111,13 @@ function formatDateTime(datetimeStr) {
                 <!-- Hover Overlay -->
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                   <div class="bg-white/20 border border-white/40 px-6 py-3 rounded-2xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
-                    <span class="text-white text-sm font-bold uppercase tracking-wider">Read Full Details</span>
+                    <span class="text-white text-sm font-bold tracking-wider">Read Full Details</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                   </div>
                 </div>
 
                 <div class="absolute top-5 left-5 flex gap-2">
-                  <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-red-200/50">
+                  <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-red-100 text-red-600 text-[10px] font-black tracking-widest px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-red-200/50">
                     <span class="h-1.5 w-1.5 bg-red-600 rounded-full animate-pulse"></span>
                     Urgent
                   </div>
@@ -1177,7 +1177,7 @@ function formatDateTime(datetimeStr) {
                   <!-- Hover Overlay -->
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                     <div class="bg-white/20 border border-white/40 px-2 py-1.5 rounded-lg backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-xl flex items-center gap-1.5">
-                      <span class="text-white text-[7px] font-black uppercase tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
+                      <span class="text-white text-[7px] font-black tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
                       <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="text-white flex-shrink-0"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                     </div>
                   </div>
@@ -1221,7 +1221,7 @@ function formatDateTime(datetimeStr) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
                 </svg>
              </div>
-             <p class="text-slate-400 font-black text-sm uppercase tracking-[0.2em]">No recent stories found</p>
+             <p class="text-slate-400 font-black text-sm tracking-[0.2em]">No recent stories found</p>
           </div>
         </div>
       </main>

@@ -916,7 +916,7 @@ const showResidentDetail = async function (id) {
                     </svg>
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-[7px] sm:text-[10px] uppercase tracking-widest font-bold text-gray-400 leading-none mb-0.5 sm:mb-1.5 truncate">Total Users</span>
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-gray-400 leading-none mb-0.5 sm:mb-1.5 truncate">Total Users</span>
                     <div class="flex items-baseline gap-1">
                       <span class="text-sm sm:text-xl font-black text-[#1D355E]">{{ totalUsers }}</span>
                       <span class="text-[7px] sm:text-[10px] font-medium text-gray-400 hidden sm:inline-block">Total</span>
@@ -932,7 +932,7 @@ const showResidentDetail = async function (id) {
                     </svg>
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-[7px] sm:text-[10px] uppercase tracking-widest font-bold text-emerald-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Active Now</span>
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-emerald-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Active Now</span>
                     <div class="flex items-baseline gap-1">
                       <span class="text-sm sm:text-xl font-black text-emerald-700">{{ currentUsed }}</span>
                       <span class="text-[7px] sm:text-[11px] font-bold text-emerald-500/60 ml-0.5 hidden sm:inline-block">Total</span>
@@ -948,7 +948,7 @@ const showResidentDetail = async function (id) {
                     </svg>
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-[7px] sm:text-[10px] uppercase tracking-widest font-bold text-amber-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Pending</span>
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-amber-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Pending</span>
                     <div class="flex items-baseline gap-1">
                       <span class="text-sm sm:text-xl font-black text-amber-700">{{ currentPending }}</span>
                       <span class="text-[7px] sm:text-[11px] font-bold text-amber-500/60 ml-0.5 hidden sm:inline-block">Total</span>

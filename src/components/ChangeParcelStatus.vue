@@ -170,7 +170,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h3 class="text-2xl font-black text-slate-900 tracking-tight">Change Status</h3>
-                <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">Management Console</p>
+                <p class="text-xs font-bold text-blue-600 tracking-widest mt-1">Management Console</p>
               </div>
               <button @click="cancel" class="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -182,7 +182,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
               </div>
               <div class="min-w-0">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tracking Number</p>
+                <p class="text-[10px] font-black text-slate-400 tracking-wider">Tracking Number</p>
                 <h4 class="text-sm font-bold text-slate-900 truncate">{{ form.trackingNumber }}</h4>
                 <p class="text-xs text-slate-500 truncate mt-0.5">{{ form.recipientName }} • Room {{ form.roomNumber }}</p>
               </div>
@@ -215,7 +215,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
                     </svg>
                     <div v-if="currentStatus === step" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
-                  <span class="text-[9px] font-extrabold uppercase tracking-tight" 
+                  <span class="text-[9px] font-extrabold tracking-tight" 
                         :class="currentStatus === step ? 'text-blue-600' : 'text-slate-400'">
                     {{ step.split('_')[0] }}
                   </span>
@@ -235,7 +235,7 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
             </div>
 
             <div class="mb-8">
-              <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">New Assignment</label>
+              <label class="block text-xs font-black text-slate-500 tracking-widest mb-3 ml-1">New Assignment</label>
               <SelectWeb
                 v-model="newStatus"
                 :options="statusOptions"

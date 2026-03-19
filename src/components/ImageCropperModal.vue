@@ -200,7 +200,7 @@ const cropImage = () => {
         <div class="px-8 py-6 space-y-6">
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Zoom Level</label>
+              <label class="text-xs font-bold text-gray-400 tracking-widest">Zoom Level</label>
               <span class="text-xs font-bold text-[#0E4B90]">{{ Math.round(scale * 100) }}%</span>
             </div>
             <div class="relative flex items-center group">

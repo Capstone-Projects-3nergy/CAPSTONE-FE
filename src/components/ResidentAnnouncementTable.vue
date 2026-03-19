@@ -93,7 +93,7 @@ const formatDate = (dateString) => {
           <!-- Hover Overlay -->
           <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
             <div class="bg-white/20 border border-white/40 px-4 py-2 rounded-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
-              <span class="text-white text-xs font-bold uppercase tracking-wider">Read Full Details</span>
+              <span class="text-white text-xs font-bold tracking-wider">Read Full Details</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
             </div>
           </div>

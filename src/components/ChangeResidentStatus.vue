@@ -234,7 +234,7 @@ const currentStepIndex = computed(() => {
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h3 class="text-2xl font-black text-slate-900 tracking-tight">Resident Status</h3>
-                <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mt-1">Approval Console</p>
+                <p class="text-xs font-bold text-blue-600 tracking-widest mt-1">Approval Console</p>
               </div>
               <button @click="cancel" class="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400 cursor-pointer">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -247,7 +247,7 @@ const currentStepIndex = computed(() => {
                 <svg v-else class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               </div>
               <div class="min-w-0">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Resident Name</p>
+                <p class="text-[10px] font-black text-slate-400 tracking-wider">Resident Name</p>
                 <h4 class="text-sm font-bold text-slate-900 truncate">{{ form.fullName }}</h4>
                 <p class="text-xs text-slate-500 truncate mt-0.5">Room {{ form.roomNumber }} • {{ form.dormName }}</p>
               </div>
@@ -268,7 +268,7 @@ const currentStepIndex = computed(() => {
             </div>
 
             <div class="mb-8" v-if="!isLocked">
-              <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Update Status</label>
+              <label class="block text-xs font-black text-slate-500 tracking-widest mb-3 ml-1">Update Status</label>
               <SelectWeb
                 v-model="newStatus"
                 :options="statusOptions"

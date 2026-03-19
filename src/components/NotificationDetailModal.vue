@@ -94,7 +94,7 @@ const showParcelDetail = async function (id) {
               />
             </div>
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">
+              <p class="text-xs font-bold tracking-wider text-gray-400 mb-1">
                 {{ notification.type }}
               </p>
               <h3 class="text-xl font-bold text-gray-900 leading-tight">
@@ -111,7 +111,7 @@ const showParcelDetail = async function (id) {
              <span>{{ notification.time }}</span>
              <span 
                v-if="notification.status" 
-               class="ml-auto text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md transition-colors"
+               class="ml-auto text-[10px] font-bold tracking-widest px-2 py-1 rounded-md transition-colors"
                :class="(notification.isRead === true || notification.isRead === 1) ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'"
              >
                {{ (notification.isRead === true || notification.isRead === 1) ? 'READ' : notification.status }}

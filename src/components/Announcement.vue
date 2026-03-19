@@ -528,7 +528,7 @@ onMounted(async () => {
             <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
             
             <div v-if="bannerAnnouncements.length > 0" class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
-              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
+              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 bg-blue-800/50 rounded-full border border-blue-400/30">
                 {{ bannerAnnouncements[currentSlide - 1]?.category || 'Featured' }}
               </span>
               <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight line-clamp-2">
@@ -781,7 +781,7 @@ onMounted(async () => {
          
             <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
               <div class="flex items-center gap-4 mb-3">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ month }} 2026</h3>
+                <h3 class="text-sm font-bold text-gray-400 tracking-widest">{{ month }} 2026</h3>
                 <div class="h-px bg-gray-100 flex-1"></div>
               </div>
               

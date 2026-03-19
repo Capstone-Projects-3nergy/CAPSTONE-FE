@@ -659,10 +659,10 @@ const showProfileStaffPage = async function () {
 
               <!-- Table Header -->
               <div class="grid grid-cols-4 px-2 mb-4">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tracking</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Resident</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Room</span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-2">Status</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Tracking</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Resident</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider text-center">Room</span>
+                <span class="text-[10px] font-bold text-gray-400 tracking-wider pl-2">Status</span>
               </div>
 
               <!-- List -->
