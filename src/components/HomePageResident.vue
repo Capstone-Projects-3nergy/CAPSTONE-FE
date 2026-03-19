@@ -1098,42 +1098,51 @@ function formatDateTime(datetimeStr) {
             <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
-              class="lg:col-span-7 group cursor-pointer bg-white rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 ..."
+              class="lg:col-span-7 group cursor-pointer bg-white rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
             >
-              <div class="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-slate-50 flex items-center justify-center mb-5 md:mb-8">
-                <!-- Generic Premium Placeholder Icon -->
-                <div class="text-slate-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <div class="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-5 md:mb-8 group/img">
+                <!-- Placeholder for Image -->
+                <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                  <svg class="w-20 h-20 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
+                
+                <!-- Hover Overlay -->
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                  <div class="bg-white/20 border border-white/40 px-6 py-3 rounded-2xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
+                    <span class="text-white text-sm font-bold uppercase tracking-wider">Read Full Details</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                  </div>
+                </div>
+
                 <div class="absolute top-5 left-5 flex gap-2">
-                  <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-[#FEF2F2] text-[#EF4444] text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
-                    <span class="h-1.5 w-1.5 bg-[#EF4444] rounded-full animate-pulse"></span>
+                  <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-red-200/50">
+                    <span class="h-1.5 w-1.5 bg-red-600 rounded-full animate-pulse"></span>
                     Urgent
                   </div>
                 </div>
               </div>
               
               <div class="px-2 space-y-4">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px] uppercase tracking-widest" :class="getCategoryBadgeClass(latestAnnouncements[0].category)">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px]" :class="getCategoryBadgeClass(latestAnnouncements[0].category)">
                   <span v-html="getCategoryIcon(latestAnnouncements[0].category)"></span>
                   {{ latestAnnouncements[0].category }}
                 </div>
-                <h3 class="text-xl md:text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
+                <h3 class="text-xl md:text-3xl font-black text-[#0E4B90] leading-tight group-hover:text-blue-600 transition-colors">
                   {{ latestAnnouncements[0].title }}
                 </h3>
                 <div class="space-y-2">
-                  <p v-if="latestAnnouncements[0].subtitle" class="text-slate-700 text-lg font-bold leading-tight line-clamp-2">
+                  <p v-if="latestAnnouncements[0].subtitle" class="text-gray-900 text-lg font-bold leading-tight line-clamp-2">
                     {{ latestAnnouncements[0].subtitle }}
                   </p>
-                  <p v-if="latestAnnouncements[0].content" class="text-slate-500 text-base leading-relaxed line-clamp-3 font-medium">
+                  <p v-if="latestAnnouncements[0].content" class="text-gray-500 text-base leading-relaxed line-clamp-3 font-medium">
                     {{ latestAnnouncements[0].content }}
                   </p>
                 </div>
-                <div class="pt-6 border-t border-slate-50 flex items-center justify-between">
+                <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
                   <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1.5 text-slate-400 font-bold text-xs border-l border-slate-100 pl-0">
+                    <div class="flex items-center gap-1.5 text-gray-400 font-bold text-xs border-l border-gray-100 pl-4">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -1141,7 +1150,7 @@ function formatDateTime(datetimeStr) {
                       {{ latestAnnouncements[0].viewCount || latestAnnouncements[0].views || 0 }}
                     </div>
                   </div>
-                  <div class="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                  <div class="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                     </svg>
@@ -1156,39 +1165,45 @@ function formatDateTime(datetimeStr) {
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
                 :key="news.id"
                 @click="openModal(news)"
-                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-slate-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
+                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner">
-                  <div class="text-slate-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 4v4h4" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12h10M7 16h6" />
+                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
+                  <div class="text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
+                  </div>
+
+                  <!-- Hover Overlay -->
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                    <div class="bg-white/20 border border-white/40 px-2 py-1.5 rounded-lg backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-xl flex items-center gap-1.5">
+                      <span class="text-white text-[7px] font-black uppercase tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="text-white flex-shrink-0"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </div>
                   </div>
                 </div>
                 <div class="flex flex-col justify-between py-1 overflow-hidden">
                   <div class="space-y-1.5">
-                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg font-bold text-[9px] uppercase tracking-widest" :class="getCategoryBadgeClass(news.category)">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px]" :class="getCategoryBadgeClass(news.category)">
                       <span v-html="getCategoryIcon(news.category)"></span>
                       {{ news.category }}
                     </div>
-                    <h4 class="font-bold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight text-lg">
+                    <h4 class="font-bold text-[#0E4B90] line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight text-lg">
                       {{ news.title }}
                     </h4>
-                    <p v-if="news.subtitle" class="text-slate-500 text-xs font-medium line-clamp-2 mt-1">
+                    <p v-if="news.subtitle" class="text-gray-700 text-xs font-bold line-clamp-2 mt-1">
                       {{ news.subtitle }}
                     </p>
                   </div>
                   <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center gap-1 text-slate-400 text-[11px] font-bold tracking-tight">
+                    <div class="flex items-center gap-1 text-gray-400 text-[11px] font-bold tracking-tight">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                       {{ news.viewCount || news.views || 0 }}
                     </div>
-                    <div class="h-7 w-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                    <div class="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
                       </svg>
@@ -1211,7 +1226,7 @@ function formatDateTime(datetimeStr) {
         </div>
       </main>
       <AnnouncementDetailModal
-        v-if="isModalOpen" Latest News
+        v-if="isModalOpen"
         :isOpen="isModalOpen"
         :title="selectedAnnouncement?.title || ''"
         :subtitle="selectedAnnouncement?.subtitle || ''"
