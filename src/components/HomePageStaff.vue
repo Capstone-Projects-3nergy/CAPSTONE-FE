@@ -52,6 +52,39 @@ const recentParcels = computed(() => {
     .slice(0, 5)
 })
 
+const calculateOverdueDays = (receiveAt) => {
+  if (!receiveAt) return 0
+  const now = new Date()
+  const receivedAt = new Date(receiveAt)
+  if (isNaN(receivedAt.getTime())) return 0
+  const diffTime = Math.abs(now - receivedAt)
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24))
+}
+
+const overdueParcelsList = computed(() => {
+  if (!getMappedParcels.value) return []
+  const now = new Date()
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+  
+  return [...getMappedParcels.value]
+    .filter(p => {
+      // Exclude 'Picked Up' status
+      if (p.status === 'Picked Up') return false
+      
+      const receivedDate = new Date(p.receiveAt)
+      if (isNaN(receivedDate.getTime())) return false
+      return (now - receivedDate) > sevenDaysMs
+    })
+    .sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
+})
+
+const displayOverdueCountBadge = computed(() => {
+  const total = overdueParcelsList.value.length
+  if (total <= 3) return null
+  const remaining = total - 3
+  return remaining > 99 ? '+99' : `+ ${remaining}`
+})
+
 const topResidents = computed(() => {
   if (!getMappedParcels.value || getMappedParcels.value.length === 0) return []
   
@@ -1427,88 +1460,67 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
             </div>
 
-          <div class="bg-red-50/50 rounded-2xl border border-red-200 p-4 md:p-6 flex flex-col h-[500px] md:h-[400px]">
-            <div class="flex items-center gap-3 mb-3 md:mb-4">
-              <div class="p-1.5 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                  <path d="M12 8l0 4" />
-                  <path d="M12 16l.01 0" />
-                </svg>
+            <!-- Overdue Parcels Section -->
+            <div class="bg-red-50/50 rounded-2xl border border-red-200 p-4 flex flex-col h-full min-h-[350px]">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="p-2 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                    <path d="M12 8l0 4" />
+                    <path d="M12 16l.01 0" />
+                  </svg>
+                </div>
+                <h3 class="text-red-600 font-bold text-base">{{ overdueParcelsList.length }} Overdue Parcels (>7 days)</h3>
               </div>
-              <h3 class="text-red-600 font-bold text-base md:text-lg">5 Overdue Parcels (>7 days)</h3>
-            </div>
-            <p class="text-red-500 text-xs md:text-sm mb-4">Please contact residents immediately</p>
-            
-            <div class="space-y-3 flex-1 overflow-y-auto pr-2 no-scrollbar">
-              <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
-                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
-                  <div class="flex items-center gap-2">
-                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">10 days</span>
-                    <span class="font-bold text-gray-800 text-sm md:text-base">kong zeed</span>
+              <p class="text-red-500 text-[10px] md:text-xs mb-3 italic">Please contact residents immediately</p>
+              
+              <div class="space-y-2 flex-1 overflow-y-auto pr-1 no-scrollbar">
+                <!-- Overdue Item -->
+                <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
+                     class="bg-white rounded-lg p-2 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-2">
+                  <div class="flex items-center justify-between md:justify-start gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {{ calculateOverdueDays(parcel.receiveAt) }} days
+                      </span>
+                      <span class="font-bold text-gray-800 text-xs truncate max-w-[80px] md:max-w-[120px]">{{ parcel.residentName }}</span>
+                    </div>
+                    <span class="text-gray-400 text-[10px] md:hidden">Room {{ parcel.roomNumber }}</span>
                   </div>
-                  <span class="text-gray-500 text-xs md:hidden">Room 13</span>
+                  
+                  <div class="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 pt-1.5 md:pt-0">
+                    <div class="flex items-center gap-2">
+                      <span class="hidden md:inline text-gray-400 text-xs font-medium">Room {{ parcel.roomNumber }}</span>
+                      <span @click="showParcelDetail(parcel.id)" class="text-blue-500 text-[11px] font-bold underline cursor-pointer truncate max-w-[90px]">
+                        {{ parcel.trackingNumber }}
+                      </span>
+                    </div>
+                    
+                    <button class="flex items-center gap-1 px-2 py-1 border border-emerald-100 rounded-md text-[10px] font-bold text-[#06C755] bg-emerald-50/30 hover:bg-emerald-50 transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
+                       <span>Notify</span>
+                    </button>
+                  </div>
                 </div>
-                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
-                  <div class="flex items-center gap-3">
-                    <span class="hidden md:inline text-gray-500 text-sm">Room 13</span>
-                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH198273645</span>
+                
+                <!-- More Overdue Badge -->
+                <div v-if="displayOverdueCountBadge" class="flex justify-center pt-1">
+                  <div class="px-2 py-0.5 bg-red-600/10 rounded-full border border-red-200">
+                    <span class="text-[9px] font-black text-red-600 uppercase tracking-tighter">{{ displayOverdueCountBadge }} more overdue</span>
                   </div>
-                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-[#06C755] hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                     <span class="text-black">Notify</span>
-                  </button>
-                </div>
-              </div>
-
-               <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
-                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
-                  <div class="flex items-center gap-2">
-                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">9 days</span>
-                    <span class="font-bold text-gray-800 text-sm md:text-base">Suklita Mook</span>
-                  </div>
-                  <span class="text-gray-500 text-xs md:hidden">Room 1</span>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
-                  <div class="flex items-center gap-3">
-                    <span class="hidden md:inline text-gray-500 text-sm">Room 1</span>
-                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH291837465</span>
-                  </div>
-                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-[#06C755] hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                      <span class="text-black">Notify</span>
-                  </button>
                 </div>
               </div>
 
-               <!-- Overdue Item -->
-              <div class="bg-white rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-3 md:gap-0">
-                <div class="flex items-center justify-between md:justify-start gap-3 md:gap-4">
-                  <div class="flex items-center gap-2">
-                    <span class="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full whitespace-nowrap">7 days</span>
-                    <span class="font-bold text-gray-800 text-sm md:text-base">testkub</span>
-                  </div>
-                  <span class="text-gray-500 text-xs md:hidden">Room 532</span>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-3 md:gap-6 border-t md:border-t-0 pt-2 md:pt-0">
-                  <div class="flex items-center gap-3">
-                    <span class="hidden md:inline text-gray-500 text-sm">Room 532</span>
-                    <span class="text-blue-500 text-xs md:text-sm font-medium underline cursor-pointer truncate max-w-[100px] md:max-w-none">TH001328374</span>
-                  </div>
-                  <button class="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 border border-gray-200 rounded-lg text-xs md:text-sm font-medium text-[#06C755] hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                     <span class="text-black">Notify</span>
-                  </button>
-                </div>
-              </div>
-
-                </div>
+              <!-- View All Button -->
+              <div v-if="overdueParcelsList.length > 0" class="mt-3 pt-2 border-t border-red-100/50 flex justify-center">
+                <button @click="activeTab = 'parcels'" class="text-[9px] font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest flex items-center gap-1 group">
+                  Action Required <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                </button>
               </div>
             </div>
           </div>
+        </div>
           
           <!-- Tab Content: Resident Dashboard -->
           <div v-show="activeTab === 'resident'" class="space-y-6 mt-8">
