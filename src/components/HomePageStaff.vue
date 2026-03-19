@@ -63,17 +63,21 @@ const calculateOverdueDays = (receiveAt) => {
 
 const overdueParcelsList = computed(() => {
   if (!getMappedParcels.value) return []
-  const now = new Date()
-  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+  // const now = new Date()
+  // const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
     .filter(p => {
       // Exclude 'Picked Up' status
       if (p.status === 'Picked Up') return false
       
+      // Commented out overdue logic (> 7 days)
+      /*
       const receivedDate = new Date(p.receiveAt)
       if (isNaN(receivedDate.getTime())) return false
       return (now - receivedDate) > sevenDaysMs
+      */
+      return true
     })
     .sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 })
@@ -1453,69 +1457,75 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </span>
                   </div>
                 </div>
+                <!-- Empty State -->
+                <div v-if="recentParcels.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/50 py-10 opacity-40">
+                  <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                  <p class="text-xs font-medium">No recent activity</p>
+                </div>
               </div>
 
-              <div class="mt-auto border-t border-gray-100 pt-4 text-center">
-                <button @click="showManageParcelPage" class="text-xs font-medium text-blue-500 hover:text-blue-700 cursor-pointer">View all parcels →</button>
+              <div v-if="recentParcels.length > 0" class="mt-auto border-t border-gray-100 pt-4 text-center">
+                <button @click="showManageParcelPage" class="text-xs font-medium text-blue-500 hover:text-blue-700 cursor-pointer transition-colors">View all parcels →</button>
               </div>
             </div>
 
             <!-- Overdue Parcels Section -->
-            <div class="bg-red-50/50 rounded-2xl border border-red-200 p-4 flex flex-col h-full min-h-[350px]">
+            <div class="bg-red-50/50 rounded-2xl border border-red-200 p-5 flex flex-col h-[400px]">
               <div class="flex items-center gap-3 mb-3">
                 <div class="p-2 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                    <path d="M12 8l0 4" />
-                    <path d="M12 16l.01 0" />
+                    <circle cx="12" cy="12" r="9" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
                 </div>
-                <h3 class="text-red-600 font-bold text-base">{{ overdueParcelsList.length }} Overdue Parcels (>7 days)</h3>
+                <h3 class="text-red-600 font-bold text-base md:text-lg">
+                  {{ overdueParcelsList.length }} 
+                  <!-- Overdue Parcels (>7 days) -->
+                  Overdue Parcels (>7 days)
+                </h3>
               </div>
-              <p class="text-red-500 text-[10px] md:text-xs mb-3 italic">Please contact residents immediately</p>
+              <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
-              <div class="space-y-2 flex-1 overflow-y-auto pr-1 no-scrollbar">
+              <div class="space-y-2 flex-1 overflow-hidden pr-1">
                 <!-- Overdue Item -->
                 <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
-                     class="bg-white rounded-lg p-2 flex flex-col md:flex-row md:items-center justify-between border border-red-100 gap-2">
-                  <div class="flex items-center justify-between md:justify-start gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap">
-                        {{ calculateOverdueDays(parcel.receiveAt) }} days
-                      </span>
-                      <span class="font-bold text-gray-800 text-xs truncate max-w-[80px] md:max-w-[120px]">{{ parcel.residentName }}</span>
+                     class="bg-white rounded-xl py-2 px-3.5 flex items-center justify-between border border-red-100 shadow-sm hover:border-red-300 transition-all duration-300">
+                  <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <span class="bg-red-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full flex-shrink-0 shadow-sm">
+                      {{ calculateOverdueDays(parcel.receiveAt) }}d
+                    </span>
+                    <div class="min-w-0">
+                      <p class="font-bold text-gray-900 text-xs truncate">{{ parcel.residentName }}</p>
+                      <p class="text-[10px] text-gray-400 font-medium">Room {{ parcel.roomNumber }}</p>
                     </div>
-                    <span class="text-gray-400 text-[10px] md:hidden">Room {{ parcel.roomNumber }}</span>
                   </div>
                   
-                  <div class="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 pt-1.5 md:pt-0">
-                    <div class="flex items-center gap-2">
-                      <span class="hidden md:inline text-gray-400 text-xs font-medium">Room {{ parcel.roomNumber }}</span>
-                      <span @click="showParcelDetail(parcel.id)" class="text-blue-500 text-[11px] font-bold underline cursor-pointer truncate max-w-[90px]">
-                        {{ parcel.trackingNumber }}
-                      </span>
-                    </div>
+                  <div class="flex items-center gap-3 ml-2">
+                    <span class="text-[#0E4B90] text-[10px] font-bold underline truncate max-w-[80px] hidden sm:block">
+                      {{ parcel.trackingNumber }}
+                    </span>
                     
-                    <button class="flex items-center gap-1 px-2 py-1 border border-emerald-100 rounded-md text-[10px] font-bold text-[#06C755] bg-emerald-50/30 hover:bg-emerald-50 transition-colors">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="currentColor"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                       <span>Notify</span>
+                    <button @click="showParcelDetail(parcel.id)" class="bg-yellow-500 text-white text-[9px] font-black py-1.5 px-3 rounded-lg hover:bg-yellow-600 transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-1 whitespace-nowrap">
+                       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      View Detail
                     </button>
                   </div>
                 </div>
                 
-                <!-- More Overdue Badge -->
-                <div v-if="displayOverdueCountBadge" class="flex justify-center pt-1">
-                  <div class="px-2 py-0.5 bg-red-600/10 rounded-full border border-red-200">
-                    <span class="text-[9px] font-black text-red-600 uppercase tracking-tighter">{{ displayOverdueCountBadge }} more overdue</span>
-                  </div>
+                <!-- Remaining Count Message -->
+                <div v-if="overdueParcelsList.length > 3" class="text-center py-1.5 mt-1">
+                  <p class="text-[10px] md:text-xs font-semibold text-red-600 bg-red-50/40 py-2 rounded-lg border border-dashed border-red-200">
+                    {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
+                  </p>
                 </div>
               </div>
 
               <!-- View All Button -->
-              <div v-if="overdueParcelsList.length > 0" class="mt-3 pt-2 border-t border-red-100/50 flex justify-center">
-                <button @click="activeTab = 'parcels'" class="text-[9px] font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest flex items-center gap-1 group">
-                  Action Required <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+              <div v-if="overdueParcelsList.length > 0" class="mt-auto border-t border-red-100/50 pt-3 text-center">
+                <button @click="showManageParcelPage" class="text-xs font-medium text-red-500 hover:text-red-700 cursor-pointer transition-colors">
+                  View all parcels →
                 </button>
               </div>
             </div>
@@ -1871,7 +1881,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <!-- Remaining Count Message -->
                   <div v-if="stats.pendingResidents > 2" class="text-center py-2">
                     <p class="text-xs font-semibold text-yellow-600 bg-yellow-50/50 py-2 rounded-lg border border-dashed border-yellow-200">
-                      + {{ stats.pendingResidents - 2 }} more residents awaiting approval
+                      {{ (stats.pendingResidents - 2) > 99 ? '+99' : '+ ' + (stats.pendingResidents - 2) }} more residents awaiting approval
                     </p>
                   </div>
 
@@ -1888,7 +1898,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
                 </div>
 
-                <div class="mt-auto border-t border-yellow-100 pt-4 text-center">
+                <div v-if="pendingResidentsList.length > 0" class="mt-auto border-t border-yellow-100 pt-4 text-center">
                   <button @click="ShowManageResidentPage" class="text-xs font-medium text-yellow-600 hover:text-yellow-700 cursor-pointer">View all residents →</button>
                 </div>
               </div>
