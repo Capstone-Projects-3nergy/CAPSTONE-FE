@@ -481,7 +481,7 @@ function formatDateTime(datetimeStr) {
 
         <div class="flex flex-col md:flex-row gap-6">
           <!-- LEFT : Menu Sidebar -->
-          <div class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 h-fit">
+          <div class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div class="flex flex-col items-center text-center">
               <div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#1D355E] to-[#0E4B90] flex items-center justify-center shadow-lg transform transition-transform hover:scale-105">
                 <svg
@@ -516,7 +516,7 @@ function formatDateTime(datetimeStr) {
           </div>
 
           <!-- RIGHT : Content Area -->
-          <div class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8">
+          <div class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div v-if="activeTab === 'info'" class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <section>
                 <div class="flex items-center gap-4 mb-8">
