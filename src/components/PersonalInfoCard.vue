@@ -78,6 +78,7 @@ const safeFullName = computed(() => {
 
 const safeStatus = computed(() => {
   return props.status || routeUser.value?.status || null
+  // return 'PENDING'
 })
 
 function display(value) {
