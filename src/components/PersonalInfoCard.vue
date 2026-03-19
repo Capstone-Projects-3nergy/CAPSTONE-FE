@@ -1154,20 +1154,23 @@ const handleUnlink = async () => {
         <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive notifications.</p>
         
         <div class="space-y-4">
-          <button 
+          <ButtonWeb 
             @click="addLineOA"
-            class="w-full py-5 bg-[#00b900] hover:bg-[#00a300] text-white font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+            label="Add Tractify OA"
+            color="green"
+            class="w-full py-5 font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
-            Add Tractify OA
-          </button>
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
+            </template>
+          </ButtonWeb>
           
-          <button 
+          <ButtonWeb 
             @click="showLineSuccessPopup = false"
-            class="w-full py-4 text-gray-400 hover:text-gray-600 font-bold transition-colors cursor-pointer"
-          >
-            Remind me later
-          </button>
+            label="Remind me later"
+            color="gray"
+            class="w-full py-4 text-gray-400 font-bold border-none shadow-none bg-transparent hover:bg-transparent hover:text-gray-600 transition-colors"
+          />
         </div>
       </div>
     </div>

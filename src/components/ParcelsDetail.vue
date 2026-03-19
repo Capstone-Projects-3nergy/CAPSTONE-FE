@@ -98,7 +98,7 @@ const sendLineNotify = async () => {
       notifySuccess.value = true
       lineAlertVisible.value = true
       lineAlertStyle.value = 'blue'
-      lineAlertMessage.value = 'Notification Sent'
+      lineAlertMessage.value = 'Success!!'
       lineAlertTitle.value = 'LINE notification has been sent successfully.'
     } else {
       throw new Error('Failed to send')
@@ -107,7 +107,7 @@ const sendLineNotify = async () => {
     notifyError.value = true
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
-    lineAlertMessage.value = 'Sending Failed'
+    lineAlertMessage.value = 'Error!!'
     lineAlertTitle.value = 'Could not send LINE notification. Please check connection.'
   } finally {
     isSending.value = false
@@ -641,7 +641,7 @@ function formatDateTime(datetimeStr) {
                       class="px-8 py-4 bg-[#06C755] hover:bg-[#05b34b] text-white font-black rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                     >
                        <span>Send Reminder</span>
-                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                       <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg> -->
                     </button>
                   </div>
                </div>
@@ -666,16 +666,21 @@ function formatDateTime(datetimeStr) {
            </div>
            <h3 class="text-2xl font-black text-gray-900 mb-2">Send LINE Reminder?</h3>
            <p class="text-gray-500 font-medium mb-10 leading-relaxed">System will send a notification to resident's connected LINE account about this parcel.</p>
-           <div class="flex flex-col gap-3">
-             <button 
-                @click="sendLineNotify" 
-                :disabled="isSending"
-                class="w-full py-4 bg-[#06C755] text-white font-black rounded-2xl shadow-xl shadow-green-100 hover:bg-[#05b34b] transition-all disabled:opacity-50 cursor-pointer"
-             >
-                {{ isSending ? 'Sending...' : 'Confirm and Send' }}
-             </button>
-             <button @click="showNotifyPopup = false" class="w-full py-4 text-gray-400 font-bold hover:text-gray-600 transition-colors cursor-pointer">Cancel</button>
-           </div>
+            <div class="flex flex-col gap-3">
+              <ButtonWeb 
+                 @click="sendLineNotify" 
+                 :label="isSending ? 'Sending...' : 'Confirm and Send'"
+                 color="green"
+                 class="w-full py-4 font-black rounded-2xl shadow-xl shadow-green-100"
+                 :loading="isSending"
+              />
+              <ButtonWeb 
+                 @click="showNotifyPopup = false" 
+                 label="Cancel"
+                 color="gray"
+                 class="w-full py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all"
+              />
+            </div>
         </div>
       </div>
     </div>
