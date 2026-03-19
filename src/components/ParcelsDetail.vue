@@ -666,19 +666,22 @@ function formatDateTime(datetimeStr) {
            </div>
            <h3 class="text-2xl font-black text-gray-900 mb-2">Send LINE Reminder?</h3>
            <p class="text-gray-500 font-medium mb-10 leading-relaxed">System will send a notification to resident's connected LINE account about this parcel.</p>
-            <div class="flex flex-col gap-3">
-              <ButtonWeb 
-                 @click="sendLineNotify" 
-                 :label="isSending ? 'Sending...' : 'Confirm and Send'"
-                 color="green"
-                 class="w-full py-4 font-black rounded-2xl shadow-xl shadow-green-100"
-                 :loading="isSending"
-              />
-              <ButtonWeb 
+            <div class="flex gap-3">
+               <ButtonWeb 
                  @click="showNotifyPopup = false" 
                  label="Cancel"
                  color="gray"
-                 class="w-full py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all"
+                 class="flex-1 py-2.5 text-gray-400 font-bold hover:bg-gray-50 rounded-xl transition-all"
+              />
+              <ButtonWeb 
+                 @click="sendLineNotify" 
+                 :label="isSending ? 'Sending...' : 'Confirm'"
+                 :color="isSending ? 'gray' : 'green'"
+                 :class="[
+                   'flex-1 py-2.5 font-black rounded-xl shadow-lg',
+                   isSending ? 'shadow-gray-100' : 'shadow-green-100'
+                 ]"
+                 :loading="isSending"
               />
             </div>
         </div>
