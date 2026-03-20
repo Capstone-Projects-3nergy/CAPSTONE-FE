@@ -478,7 +478,7 @@ function formatDateTime(datetimeStr) {
             </div>
             <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
               <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                Manage Parcel &gt; Details
+                Manage Parcel 
               </span>
             </h2>
           </div>
@@ -581,7 +581,7 @@ function formatDateTime(datetimeStr) {
                   <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
                   <h3 class="font-extrabold text-xl text-black tracking-tight">Timeline</h3>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
                   <div class="flex flex-col">
                     <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Received At</label>
                     <div class="px-4 py-3 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center h-[58px]">
@@ -628,7 +628,7 @@ function formatDateTime(datetimeStr) {
                       <svg v-else xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                   </div>
-                  <h4 class="text-[10px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Lifecycle Status</h4>
+                  <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Lifecycle Status</h4>
                   <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
                     {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
@@ -648,7 +648,7 @@ function formatDateTime(datetimeStr) {
                     </g>
                   </svg>
                     </div>
-                    <div class="flex-1 text-center sm:text-left">
+                    <div class="flex-1 text-left">
                        <h5 class="text-lg font-black text-gray-800 mb-1">LINE Notification</h5>
                        <p class="text-sm text-gray-500 font-medium">Send a reminder to resident about uncollected parcel.</p>
                     </div>

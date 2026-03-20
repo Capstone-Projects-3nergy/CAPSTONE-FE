@@ -1159,7 +1159,7 @@ function formatDateTime(datetimeStr) {
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
               <h3 class="font-extrabold text-xl text-black tracking-tight">Timeline</h3>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
               <div class="flex flex-col">
                 <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Received At</label>
                 <div class="px-4 py-3 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center h-[58px]">

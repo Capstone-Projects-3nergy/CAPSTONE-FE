@@ -1083,7 +1083,7 @@ const handleUnlink = async () => {
                                  safeStatus?.toUpperCase() === 'PENDING' ? '#3B82F6' : '#9CA3AF' 
                     }" class="w-4 h-4 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] animate-pulse"></div>
                     <div>
-                      <p class="text-[10px] font-black text-gray-400 tracking-[0.2em] mb-1.5">Current Status</p>
+                      <p class="text-xs sm:text-sm font-black text-gray-400 tracking-[0.2em] mb-1.5">Current Status</p>
                       <h4 class="text-3xl font-black text-slate-800 tracking-tight">{{ displayStatus(safeStatus) }}</h4>
                     </div>
                   </div>
@@ -1101,10 +1101,10 @@ const handleUnlink = async () => {
                   <button 
                     v-else
                     @click="$emit('changeStatus')"
-                    class="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 cursor-pointer group"
+                    class="px-6 py-4 sm:px-10 sm:py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 cursor-pointer group whitespace-nowrap"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-12 transition-transform"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                    Update Status
+                    <span>Update Status</span>
                   </button>
                 </div>
                 
@@ -1112,8 +1112,8 @@ const handleUnlink = async () => {
                 <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
               </div>
 
-              <div class="flex items-start gap-4 p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30">
-                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+              <div class="flex flex-col sm:flex-row items-start gap-4 p-5 sm:p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30 text-left">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </div>
                 <div class="space-y-1.5 pt-0.5">
