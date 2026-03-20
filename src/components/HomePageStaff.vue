@@ -1671,13 +1671,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div class="p-6 md:p-8">
                 <!-- Resident Growth Tab (Bar Chart) -->
                 <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
-                  <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                       <span class="text-sm font-black text-gray-800">Total: {{ residentChartData[residentYear].total }} residents</span>
-                       <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
-                       <span class="text-xs text-gray-500 font-bold">Peak: {{ residentChartData[residentYear].peak }}</span>
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 sm:mb-0">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                       <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ residentChartData[residentYear].total }} residents</span>
+                       <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                       <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ residentChartData[residentYear].peak }}</span>
                     </div>
-                    <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner">
+                    <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner self-end sm:self-auto">
                       <button @click="updateResidentChart('2026')" :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2026</button>
                       <button @click="updateResidentChart('2027')" :class="residentYear === '2027' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2027</button>
                     </div>
