@@ -512,7 +512,7 @@ function formatDateTime(datetimeStr) {
                   <path d="M12 22V12" />
                 </svg>
               </div>
-              <p class="text-sm font-extrabold text-[#0E4B90] pt-6 tracking-wider">Parcel Reference</p>
+              <p class="text-sm font-extrabold text-[#0E4B90] pt-6 tracking-wider">Package</p>
               <p class="mt-2 text-gray-900 font-bold text-xl">{{ parcel?.trackingNumber || 'No ID' }}</p>
             </div>
 
