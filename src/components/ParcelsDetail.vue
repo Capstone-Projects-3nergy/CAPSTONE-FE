@@ -591,21 +591,21 @@ function formatDateTime(datetimeStr) {
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
                   <div class="flex flex-col">
                     <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Received At</label>
-                    <div class="p-4 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center min-h-[80px]">
+                    <div class="px-4 py-3 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center h-[58px]">
                       <span class="text-sm font-bold text-blue-900 leading-tight">{{ formatDateTime(parcel?.receivedAt)?.split(' ')[0] || '-' }}</span>
                       <span class="text-xs text-blue-400 mt-1">{{ formatDateTime(parcel?.receivedAt)?.split(' ')[1] || '' }}</span>
                     </div>
                   </div>
                   <div class="flex flex-col">
                     <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Updated At</label>
-                    <div class="p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex flex-col justify-center min-h-[80px]">
+                    <div class="px-4 py-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex flex-col justify-center h-[58px]">
                       <span class="text-sm font-bold text-gray-700 leading-tight">{{ formatDateTime(parcel?.updatedAt)?.split(' ')[0] || '-' }}</span>
                       <span class="text-xs text-gray-400 mt-1">{{ formatDateTime(parcel?.updatedAt)?.split(' ')[1] || '' }}</span>
                     </div>
                   </div>
                   <div class="flex flex-col">
                     <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Picked Up At</label>
-                    <div class="p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50 flex flex-col justify-center min-h-[80px]">
+                    <div class="px-4 py-3 bg-emerald-50/30 rounded-2xl border border-emerald-100/50 flex flex-col justify-center h-[58px]">
                       <span :class="['text-sm font-bold leading-tight', parcel?.pickedUpAt ? 'text-emerald-900' : 'text-gray-400']">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[0] || '-' }}</span>
                       <span class="text-xs text-emerald-400 mt-1">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[1] || '' }}</span>
                     </div>

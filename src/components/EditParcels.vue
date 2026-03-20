@@ -583,7 +583,9 @@ const closePopUp = (operate) => {
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
-  return datetimeStr.replace('T', ' ')
+  // If it's already formatted with a space (e.g. from local storage/cache), return as is
+  // Otherwise replace the T from ISO format
+  return datetimeStr.includes('T') ? datetimeStr.replace('T', ' ') : datetimeStr
 }
 </script>
 
@@ -1155,38 +1157,31 @@ function formatDateTime(datetimeStr) {
           <section>
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
+              <h3 class="font-extrabold text-xl text-black tracking-tight">Timeline</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="flex-1">
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
-                <input
-                  type="text"
-                  :value="form.receivedAt"
-                  readonly
-                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
-                />
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+              <div class="flex flex-col">
+                <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Received At</label>
+                <div class="px-4 py-3 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center h-[58px]">
+                  <span class="text-sm font-bold text-blue-900 leading-tight">{{ formatDateTime(form.receivedAt)?.split(' ')[0] || '-' }}</span>
+                  <span class="text-xs text-blue-400 mt-1">{{ formatDateTime(form.receivedAt)?.split(' ')[1] || '' }}</span>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
-                <input
-                  type="text"
-                  :value="form.updatedAt"
-                  readonly
-                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
-                />
+              <div class="flex flex-col">
+                <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Updated At</label>
+                <div class="px-4 py-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex flex-col justify-center h-[58px]">
+                  <span class="text-sm font-bold text-gray-700 leading-tight">{{ formatDateTime(form.updatedAt)?.split(' ')[0] || '-' }}</span>
+                  <span class="text-xs text-gray-400 mt-1">{{ formatDateTime(form.updatedAt)?.split(' ')[1] || '' }}</span>
+                </div>
               </div>
 
-              <div class="flex-1">
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
-                <input
-                  placeholder="-"
-                  type="text"
-                  :value="form.pickedUpAt"
-                  readonly
-                  class="w-full border-none rounded-2xl p-4 bg-gray-50/80 text-gray-500 font-medium cursor-not-allowed shadow-inner"
-                />
+              <div class="flex flex-col">
+                <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Picked Up At</label>
+                <div class="px-4 py-3 bg-emerald-50/30 rounded-2xl border border-emerald-100/50 flex flex-col justify-center h-[58px]">
+                  <span :class="['text-sm font-bold leading-tight', form.pickedUpAt ? 'text-emerald-900' : 'text-gray-400']">{{ formatDateTime(form.pickedUpAt)?.split(' ')[0] || '-' }}</span>
+                  <span class="text-xs text-emerald-400 mt-1">{{ formatDateTime(form.pickedUpAt)?.split(' ')[1] || '' }}</span>
+                </div>
               </div>
             </div>
           </section>
