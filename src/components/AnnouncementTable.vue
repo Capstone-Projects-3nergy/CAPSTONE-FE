@@ -46,6 +46,11 @@ const getStatusBadgeClass = (status) => {
   }
 }
 
+const formatStatus = (status) => {
+  if (!status) return ''
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+}
+
 const getCategoryIcon = (category) => {
   switch (category) {
     case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`
@@ -118,7 +123,7 @@ const formatDate = (dateString) => {
 
                 <!-- Status Pill -->
                 <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(item.status)">
-                  {{ item.status }}
+                  {{ formatStatus(item.status) }}
                 </span>
               </div>
             </div>
@@ -295,7 +300,7 @@ const formatDate = (dateString) => {
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Status:</span>
                   <span class="px-3 py-1 inline-flex text-xs font-bold rounded-full" :class="getStatusBadgeClass(item.status)">
-                    {{ item.status }}
+                    {{ formatStatus(item.status) }}
                   </span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
