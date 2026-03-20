@@ -66,13 +66,15 @@ const getCategoryBadgeClass = (category) => {
 }
 
 const getStatusBadgeClass = (status) => {
-  switch (status) {
-    case 'PUBLISHED':
-    case 'Published': return 'bg-green-100 text-green-800'
-    case 'DRAFT':
-    case 'Draft': return 'bg-orange-100 text-orange-800'
-    default: return 'bg-gray-100 text-gray-800'
-  }
+  const s = status?.toUpperCase()
+  if (s === 'PUBLISHED') return 'bg-green-100 text-green-800'
+  if (s === 'DRAFT') return 'bg-orange-100 text-orange-800'
+  return 'bg-gray-100 text-gray-800'
+}
+
+const formatStatus = (status) => {
+  if (!status) return ''
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
 }
 
 const getCategoryIcon = (category) => {
@@ -128,6 +130,11 @@ const formatDate = (dateString) => {
             </svg>
             PINNED
           </div>
+          
+          <!-- Status Badge -->
+          <span v-if="status" class="px-3 py-1 inline-flex items-center text-[11px] font-bold rounded-xl" :class="getStatusBadgeClass(status)">
+            {{ formatStatus(status) }}
+          </span>
           <div class="flex items-center text-gray-500 text-sm font-medium gap-1.5 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -155,9 +162,6 @@ const formatDate = (dateString) => {
           <div class="flex flex-col">
             <span class="font-bold text-gray-900">{{ author }}</span>
             <span class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
-            <span v-if="status && status.toUpperCase() !== 'PUBLISHED'" class="mt-1 px-2 py-0.5 rounded text-[10px] font-bold" :class="getStatusBadgeClass(status)">
-              {{ status }}
-            </span>
           </div>
         </div>
       </div>

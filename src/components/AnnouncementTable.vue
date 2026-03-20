@@ -46,10 +46,13 @@ const getStatusBadgeClass = (status) => {
   }
 }
 
-const formatStatus = (status) => {
-  if (!status) return ''
-  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+const formatText = (text) => {
+  if (!text) return ''
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
 }
+
+const formatStatus = (status) => formatText(status)
+const formatCategory = (category) => formatText(category)
 
 const getCategoryIcon = (category) => {
   switch (category) {
@@ -118,7 +121,7 @@ const formatDate = (dateString) => {
                 <!-- Category Badge -->
                 <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
                   <span v-html="getCategoryIcon(item.category)"></span>
-                  {{ item.category }}
+                  {{ formatCategory(item.category) }}
                 </span>
 
                 <!-- Status Pill -->
@@ -290,7 +293,7 @@ const formatDate = (dateString) => {
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Category:</span>
                   <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-full" :class="getCategoryBadgeClass(item.category)">
                     <span v-html="getCategoryIcon(item.category)"></span>
-                    {{ item.category }}
+                    {{ formatCategory(item.category) }}
                   </span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-middle md:align-middle">
