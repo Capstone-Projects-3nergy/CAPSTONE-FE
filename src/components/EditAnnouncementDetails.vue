@@ -1065,6 +1065,14 @@ const showProfileStaffPage = async function () {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
+              <AlertPopUp
+              v-if="showPinLimitAlert"
+              :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              message="Error!!"
+              styleType="red"
+              operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <LoadingPopUp v-if="isSubmitting" />
@@ -1384,34 +1392,6 @@ const showProfileStaffPage = async function () {
                 </ButtonWeb>
              </div>
           </div>
-
-          <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
-              v-if="editSuccess"
-              :titles="'Edit Announcement is Successful.'"
-              message="Success!!"
-              styleType="green"
-              operate="editSuccessMessage"
-              @closePopUp="closePopUp"
-            />
-            <AlertPopUp
-              v-if="error"
-              :titles="'There is a problem. Please try again later.'"
-              message="Error!!"
-              styleType="red"
-              operate="errorMessage"
-              @closePopUp="closePopUp"
-            />
-            <AlertPopUp
-              v-if="showPinLimitAlert"
-              :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
-              message="Error!!"
-              styleType="red"
-              operate="pinLimitMessage"
-              @closePopUp="closePopUp"
-            />
-          </div> 
-
         </div>
       </main>
     </div>
