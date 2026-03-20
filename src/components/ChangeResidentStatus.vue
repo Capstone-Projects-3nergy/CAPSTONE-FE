@@ -69,7 +69,7 @@ const getUserDetail = async (id) => {
   if (!id) return
   try {
     const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users/status`,
       Number(id),
       router
     )
@@ -150,7 +150,7 @@ const saveStatusChange = async () => {
     delete body.id
 
     const updatedUser = await editItem(
-      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users/status`,
       form.value.id,
       body,
       router
