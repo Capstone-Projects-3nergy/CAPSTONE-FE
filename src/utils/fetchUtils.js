@@ -685,15 +685,10 @@ async function addAnnouncementWithFile(url, payload, router) {
 
   const { coverImage, ...announcementData } = payload
 
-  formData.append(
-    'data',
-    new Blob([JSON.stringify(announcementData)], {
-      type: 'application/json'
-    })
-  )
+  formData.append('data', JSON.stringify(announcementData))
 
   if (coverImage instanceof File || coverImage instanceof Blob) {
-    formData.append('coverImage', coverImage)
+    formData.append('image', coverImage)
   }
 
   try {
@@ -720,15 +715,10 @@ async function editAnnouncementWithFile(url, id, payload, router) {
 
   const { coverImage, ...announcementData } = payload
 
-  formData.append(
-    'data',
-    new Blob([JSON.stringify(announcementData)], {
-      type: 'application/json'
-    })
-  )
+  formData.append('data', JSON.stringify(announcementData))
 
   if (coverImage instanceof File || coverImage instanceof Blob) {
-    formData.append('coverImage', coverImage)
+    formData.append('image', coverImage)
   }
 
   try {

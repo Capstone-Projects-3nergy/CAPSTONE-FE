@@ -335,7 +335,7 @@ const submitAnnouncement = async () => {
     return
   }
 
-  if (pinned.value && totalPinned.value >= 5) {
+  if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
     setTimeout(() => {
     showPinLimitAlert.value = false
@@ -369,8 +369,7 @@ const submitAnnouncement = async () => {
     // -----------------------
     // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const apiCall = imageFile.value ? addAnnouncementWithFile : addAnnouncement
-    const savedAnnouncement = await apiCall(
+    const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
@@ -445,7 +444,7 @@ const saveDraft = async () => {
     return
   }
 
-  if (pinned.value && totalPinned.value >= 5) {
+  if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
     setTimeout(() => {
       showPinLimitAlert.value = false
@@ -479,8 +478,7 @@ const saveDraft = async () => {
     // -----------------------
     // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const apiCall = imageFile.value ? addAnnouncementWithFile : addAnnouncement
-    const savedAnnouncement = await apiCall(
+    const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router

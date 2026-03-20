@@ -643,7 +643,7 @@ const handleSave = async () => {
   if (!announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
   
-  if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 5) {
+  if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
     setTimeout(() => {
     showPinLimitAlert.value = false
@@ -671,18 +671,19 @@ const handleSave = async () => {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
       content: announcementForm.content,
-      coverImageUrl: imagePreview.value && typeof imagePreview.value === 'string' && imagePreview.value.startsWith('http') ? imagePreview.value : (announcementForm.coverImageUrl || null),
+      coverImageUrl: (imagePreview.value && typeof imagePreview.value === 'string' && imagePreview.value.startsWith('http')) ? imagePreview.value : (announcementForm.coverImageUrl || null),
       categoryId: announcementForm.categoryId,
       pinned: announcementForm.pinned,
       priority: announcementForm.priority || 1,
       sendNotification: announcementForm.sendNotification,
       publishAt: announcementForm.publishAt ? (announcementForm.publishAt.includes('T') && announcementForm.publishAt.length === 16 ? announcementForm.publishAt + ':00' : announcementForm.publishAt) : null,
       targetAudience: announcementForm.targetAudience,
-      status: announcementForm.status
+      status: announcementForm.status,
+      coverImage: coverImage.value // Include the File object for multipart upload
     }
 
     // -----------------------
-    // API call - Use editItem for JSON payload
+    // API call - Use editAnnouncementWithFile for multipart/form-data (required by backend)
     // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
@@ -693,12 +694,8 @@ const handleSave = async () => {
       return
     }
 
-    // Since the provided backend uses @RequestBody UpdateAnnouncementDto, 
-    // we MUST send a plain JSON body, not multipart/form-data.
-    // editItem (from fetchUtils) sends JSON via PUT.
-    
     const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
-    const updated = await editItem(url, aid, payload, router)
+    const updated = await editAnnouncementWithFile(url, aid, payload, router)
 
     if (!updated) {
       isSubmitting.value = false
