@@ -376,26 +376,26 @@ const updateParcelChart = (interval) => {
 const residentYear = ref('2026');
 let residentChartInstance = null;
 
-const residentChartData = {
-  '2025': {
-    labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    data: [2, 5, 8, 12, 15, 18],
-    total: 60,
-    peak: 'December 2025'
-  },
+const residentChartData = ref({
   '2026': {
-    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
-    data: [0, 1, 1, 1, 3, 6],
-    total: 12,
-    peak: 'February 2026'
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: new Array(12).fill(0),
+    total: 0,
+    peak: '-'
+  },
+  '2027': {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    data: new Array(12).fill(0),
+    total: 0,
+    peak: '-'
   }
-};
+});
 
 const updateResidentChart = (year) => {
   residentYear.value = year;
   if (!residentChartInstance) return;
 
-  const data = residentChartData[year];
+  const data = residentChartData.value[year];
   residentChartInstance.data.labels = data.labels;
   residentChartInstance.data.datasets[0].data = data.data;
   residentChartInstance.update();
@@ -487,6 +487,36 @@ const fetchDashboardData = async () => {
       filterStartDate.value,
       filterEndDate.value
     )
+    
+    // Process Growth Chart Data (Year-over-Year)
+    const years = ['2026', '2027']
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+    years.forEach(yr => {
+      const yearlyData = residentList.filter(u => {
+        const d = new Date(u.updateAt)
+        return d.getFullYear().toString() === yr
+      })
+      
+      const counts = new Array(12).fill(0)
+      yearlyData.forEach(u => {
+        const month = new Date(u.updateAt).getMonth()
+        counts[month]++
+      })
+      
+      const maxCount = Math.max(...counts)
+      const peakMth = maxCount > 0 ? monthNames[counts.indexOf(maxCount)] : '-'
+      
+      residentChartData.value[yr] = {
+        labels: monthNames,
+        data: counts,
+        total: yearlyData.length,
+        peak: maxCount > 0 ? `${peakMth} ${yr}` : `No Growth in ${yr}`
+      }
+    })
+    
+    // Refresh chart displaying current year data
+    updateResidentChart(residentYear.value)
     
     // Also update parcels store for other pages
     if (parcels.length > 0) {
@@ -585,11 +615,11 @@ onMounted(async () => {
     residentChartInstance = new Chart(residentCtx, {
       type: 'bar',
       data: {
-        labels: residentChartData['2026'].labels,
+        labels: residentChartData.value['2026'].labels,
         datasets: [
           {
             label: 'New Residents',
-            data: residentChartData['2026'].data,
+            data: residentChartData.value['2026'].data,
             backgroundColor: (context) => {
               const data = context.dataset.data;
               const max = Math.max(...data);
@@ -1648,8 +1678,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                        <span class="text-xs text-gray-500 font-bold">Peak: {{ residentChartData[residentYear].peak }}</span>
                     </div>
                     <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner">
-                      <button @click="updateResidentChart('2025')" :class="residentYear === '2025' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2025</button>
                       <button @click="updateResidentChart('2026')" :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2026</button>
+                      <button @click="updateResidentChart('2027')" :class="residentYear === '2027' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2027</button>
                     </div>
                   </div>
                   
