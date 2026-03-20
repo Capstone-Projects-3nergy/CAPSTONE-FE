@@ -1272,7 +1272,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                  ACTIVITY
+                  Activity
                 </button>
                 <button 
                   @click="dashboardViewTab = 'status'"
@@ -1280,7 +1280,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                  DISTRIBUTION
+                  Distribution
                 </button>
               </div>
             </div>
@@ -1624,7 +1624,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
-                    GROWTH
+                    Growth
                   </button>
                   <button 
                     @click="residentViewTab = 'status'"
@@ -1632,7 +1632,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     class="flex-1 sm:flex-none px-6 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-transparent"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                    STATUS
+                    Status
                   </button>
                 </div>
               </div>
