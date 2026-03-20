@@ -221,6 +221,7 @@ const packagesPerMonth = [
 const currentDate = ref('')
 const dashboardViewTab = ref('activity') // 'activity' | 'status'
 const residentViewTab = ref('growth') // 'growth' | 'status'
+const hoveredParcelId = ref(null)
 const filterStartDate = ref('')
 const filterEndDate = ref('')
 const statusChartInstance = ref(null)
@@ -1475,8 +1476,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
               <!-- List -->
               <div class="space-y-4 flex-1 overflow-hidden pr-1">
-                <div v-for="parcel in recentParcels.slice(0, 5)" :key="parcel.id" class="grid grid-cols-4 items-center px-2 py-1 hover:bg-gray-50 rounded-lg transition-colors group">
-                  <span class="text-xs font-bold text-[#0E4B90] truncate mr-2">{{ parcel.trackingNumber }}</span>
+                <div v-for="parcel in recentParcels.slice(0, 5)" :key="parcel.id" 
+                     class="grid grid-cols-4 items-center px-2 py-1 rounded-lg transition-colors group"
+                     :class="{ 'bg-gray-50': hoveredParcelId === parcel.id }">
+                  <span @click="showParcelDetail(parcel.id)" 
+                        @mouseenter="hoveredParcelId = parcel.id" 
+                        @mouseleave="hoveredParcelId = null"
+                        class="text-xs font-bold text-[#0E4B90] truncate mr-2 cursor-pointer">{{ parcel.trackingNumber }}</span>
                   <span class="text-xs text-gray-600 truncate mr-2">{{ parcel.residentName }}</span>
                   <span class="text-xs text-gray-600 text-center">{{ parcel.roomNumber }}</span>
                   <div class="flex items-center justify-between ml-2">
@@ -1486,9 +1492,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       </svg>
                       {{ parcel.status }}
                     </span>
-                    <button @click="showParcelDetail(parcel.id)" class="opacity-0 group-hover:opacity-100 bg-blue-500 text-white text-[9px] font-black py-1 px-2 rounded hover:bg-blue-600 transition-all cursor-pointer shadow-sm">
-                      View
-                    </button>
                   </div>
                 </div>
 
