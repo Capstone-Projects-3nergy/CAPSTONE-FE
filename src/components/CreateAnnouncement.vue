@@ -357,7 +357,7 @@ const submitAnnouncement = async () => {
       pinned: pinned.value,
       sendNotification: sendNotification.value,
       priority: 1,
-      publishAt: publishAt.value || null,
+      publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
       publishNow: true,
       coverImageUrl: "" // Backend คาดหวังฟิลด์นี้ (ใส่ว่างไว้ก่อนถ้ายังไม่ได้ upload ภาพแยก)
     }
@@ -367,9 +367,10 @@ const submitAnnouncement = async () => {
     }
 
     // -----------------------
-    // API call - เปลื่ยนมาใช้ addAnnouncement เพื่อให้จัดการ Auth อัตโนมัติ
+    // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const savedAnnouncement = await addAnnouncement(
+    const apiCall = imageFile.value ? addAnnouncementWithFile : addAnnouncement
+    const savedAnnouncement = await apiCall(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
@@ -466,8 +467,9 @@ const saveDraft = async () => {
       pinned: pinned.value,
       sendNotification: false,
       priority: 1,
-      publishAt: publishAt.value || null,
-      publishNow: false
+      publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
+      publishNow: false,
+      coverImageUrl: "" // Backend expects this field
     }
 
     if (imageFile.value) {
@@ -475,9 +477,10 @@ const saveDraft = async () => {
     }
 
     // -----------------------
-    // API call - JSON POST
+    // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const savedAnnouncement = await addAnnouncement(
+    const apiCall = imageFile.value ? addAnnouncementWithFile : addAnnouncement
+    const savedAnnouncement = await apiCall(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
