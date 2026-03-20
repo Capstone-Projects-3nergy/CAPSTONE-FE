@@ -369,11 +369,22 @@ const submitAnnouncement = async () => {
     // -----------------------
     // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const savedAnnouncement = await addAnnouncementWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-      body,
-      router
-    )
+    let savedAnnouncement;
+    if (imageFile.value) {
+      savedAnnouncement = await addAnnouncementWithFile(
+        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+        body,
+        router
+      )
+    } else {
+      // ส่งแบบ JSON ปกติหากไม่มีรูป
+      const { coverImage, ...jsonBody } = body;
+      savedAnnouncement = await addAnnouncement(
+        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+        jsonBody,
+        router
+      )
+    }
 
     // ตรวจสอบว่าเป็น Object หรือไม่ (ถ้าเป็นตัวเลขคือ status code/error)
     if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
@@ -478,11 +489,22 @@ const saveDraft = async () => {
     // -----------------------
     // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
     // -----------------------
-    const savedAnnouncement = await addAnnouncementWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-      body,
-      router
-    )
+    let savedAnnouncement;
+    if (imageFile.value) {
+      savedAnnouncement = await addAnnouncementWithFile(
+        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+        body,
+        router
+      )
+    } else {
+      // ส่งแบบ JSON ปกติหากไม่มีรูป
+      const { coverImage, ...jsonBody } = body;
+      savedAnnouncement = await addAnnouncement(
+        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+        jsonBody,
+        router
+      )
+    }
 
     if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false

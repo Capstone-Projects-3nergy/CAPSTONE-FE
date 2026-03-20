@@ -12,7 +12,7 @@ import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
-import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements, editItem } from '@/utils/fetchUtils.js'
+import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements, editAnnouncement } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 import ConfirmLogout from './ConfirmLogout.vue'
@@ -683,7 +683,7 @@ const handleSave = async () => {
     }
 
     // -----------------------
-    // API call - Use editAnnouncementWithFile for multipart/form-data (required by backend)
+    // API call - Conditional use of withFile version or normal JSON version
     // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
@@ -695,7 +695,16 @@ const handleSave = async () => {
     }
 
     const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
-    const updated = await editAnnouncementWithFile(url, aid, payload, router)
+    
+    let updated;
+    if (coverImage.value) {
+      // Use multipart/form-data for file upload
+      updated = await editAnnouncementWithFile(url, aid, payload, router)
+    } else {
+      // Use standard JSON for text-only update
+      const { coverImage: file, ...jsonPayload } = payload;
+      updated = await editAnnouncement(url, aid, jsonPayload, router)
+    }
 
     if (!updated) {
       isSubmitting.value = false
