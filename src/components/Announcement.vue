@@ -689,7 +689,7 @@ onMounted(async () => {
     :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || selectedAnnouncement?.date || ''"
     :author="selectedAnnouncement?.author || 'Community Admin'"
     :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
-    :status="selectedAnnouncement?.status || 'Published'"
+    :status="''"
     :pinned="selectedAnnouncement?.pinned || false"
     @close="closeModal"
   />
