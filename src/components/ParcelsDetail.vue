@@ -606,7 +606,7 @@ function formatDateTime(datetimeStr) {
                   <div class="flex flex-col">
                     <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Picked Up At</label>
                     <div class="p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50 flex flex-col justify-center min-h-[80px]">
-                      <span :class="['text-sm font-bold leading-tight', parcel?.pickedUpAt ? 'text-emerald-900' : 'text-gray-400']">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[0] || 'Pending' }}</span>
+                      <span :class="['text-sm font-bold leading-tight', parcel?.pickedUpAt ? 'text-emerald-900' : 'text-gray-400']">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[0] || '-' }}</span>
                       <span class="text-xs text-emerald-400 mt-1">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[1] || '' }}</span>
                     </div>
                   </div>
