@@ -940,7 +940,7 @@ onMounted(async () => {
 <template>
   <div
     class="min-h-screen bg-gray-100 flex flex-col pt-16 transition-all duration-300"
-    :class="isCollapsed ? 'md:ml-16' : 'md:ml-64'"
+    :class="isCollapsed ? 'md:ml-16' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1 overflow-x-hidden">
