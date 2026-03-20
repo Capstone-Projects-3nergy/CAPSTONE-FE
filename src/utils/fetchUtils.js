@@ -756,6 +756,32 @@ async function getDashboardData(url, router) {
 }
 
 // LINE API Helpers
+async function sendParcelNotification(parcelId, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const url = `${import.meta.env.VITE_BASE_URL}/api/line/parcel-notify/${parcelId}`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('sendParcelNotification error:', error)
+    return null
+  }
+}
+
 async function sendLineNotification(payload, router, customUrl = null) {
   try {
     const options = {
@@ -892,6 +918,7 @@ export {
   editAnnouncementWithFile,
   getDashboardData,
   sendLineNotification,
+  sendParcelNotification,
   unlinkLineAccount,
   linkLineAccount,
   getLineConnectUrl

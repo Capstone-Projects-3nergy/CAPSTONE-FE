@@ -35,7 +35,7 @@ import {
   editItemWithFile,
   deleteFile,
   updateParcelStatus,
-  sendLineNotification
+  sendParcelNotification
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -85,14 +85,7 @@ const sendLineNotify = async () => {
   
   isSending.value = true
   try {
-    const message = `📦 แจ้งเตือนพัสดุค้างรับ\n📌 หมายเลขพัสดุ: ${parcel.value.trackingNumber}\n🚚 ผู้ขนส่ง: ${parcel.value.companyName || '-'}\n📍 โปรดมารับพัสดุได้ที่นิติบุคคลครับ`
-    
-    const payload = {
-      userId: parcel.value.residentId,
-      message: message
-    }
-    
-    const result = await sendLineNotification(payload, router)
+    const result = await sendParcelNotification(parcel.value.parcelId, router)
     
     if (result) {
       notifySuccess.value = true
