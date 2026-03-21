@@ -683,7 +683,8 @@ const handleSave = async () => {
     }
 
     // -----------------------
-    // API call - Conditional use of withFile version or normal JSON version
+    // API call - Always use editAnnouncementWithFile to ensure multipart/form-data
+    // This resolves HttpMediaTypeNotSupportedException as the backend expects multipart
     // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
@@ -695,16 +696,7 @@ const handleSave = async () => {
     }
 
     const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
-    
-    let updated;
-    if (coverImage.value) {
-      // Use multipart/form-data for file upload
-      updated = await editAnnouncementWithFile(url, aid, payload, router)
-    } else {
-      // Use standard JSON for text-only update
-      const { coverImage: file, ...jsonPayload } = payload;
-      updated = await editAnnouncement(url, aid, jsonPayload, router)
-    }
+    const updated = await editAnnouncementWithFile(url, aid, payload, router)
 
     if (!updated) {
       isSubmitting.value = false
