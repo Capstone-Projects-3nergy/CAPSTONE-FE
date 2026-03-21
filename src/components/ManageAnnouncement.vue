@@ -33,7 +33,15 @@ import {
   editItem
 } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { searchAnnouncements } from '@/stores/SortManager.js'
+import {
+  searchAnnouncements,
+  sortByCategory,
+  sortByCategoryReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByStatus,
+  sortByStatusReverse
+} from '@/stores/SortManager.js'
 
 const announcementManager = useAnnouncementManager()
 
@@ -94,6 +102,29 @@ const totalPinned = computed(() => announcements.value.filter(a => a.pinned).len
 const totalDrafts = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'draft').length)
 const totalViews = computed(() => announcements.value.reduce((sum, a) => sum + (a.views || 0), 0))
 
+const isCategoryAsc = ref(true)
+const isDateAsc = ref(false) // Default newest first for announcements
+const isStatusAsc = ref(true)
+const currentSort = ref('pinned')
+
+const toggleSortCategory = () => {
+  currentSort.value = 'category'
+  isCategoryAsc.value = !isCategoryAsc.value
+  currentPage.value = 1
+}
+
+const toggleSortDate = () => {
+  currentSort.value = 'date'
+  isDateAsc.value = !isDateAsc.value
+  currentPage.value = 1
+}
+
+const toggleSortStatus = () => {
+  currentSort.value = 'status'
+  isStatusAsc.value = !isStatusAsc.value
+  currentPage.value = 1
+}
+
 const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
@@ -130,9 +161,23 @@ const filteredAnnouncements = computed(() => {
     return matchesCategory && matchesDate
   })
 
-  const searched = searchAnnouncements(filtered, searchQuery.value)
+  // Start with searched results
+  let result = searchAnnouncements(filtered, searchQuery.value)
 
-  return searched.sort((a, b) => {
+  // Apply sorting
+  if (currentSort.value === 'category') {
+    isCategoryAsc.value ? sortByCategory(result) : sortByCategoryReverse(result)
+  } else if (currentSort.value === 'date') {
+    isDateAsc.value ? sortByDate(result) : sortByDateReverse(result)
+  } else if (currentSort.value === 'status') {
+    isStatusAsc.value ? sortByStatus(result) : sortByStatusReverse(result)
+  }
+
+  // Always keep pinned items at the top regardless of other sorts (common pattern for pinned)
+  // Or if you want to follow ParcelTable exactly, they might not have pinned.
+  // Let's keep pinned items prioritized as before unless the user expects otherwise.
+  // Actually, usually users expect pinned items to stay at top.
+  return result.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
     return 0
@@ -725,7 +770,77 @@ const showProfileStaffPage = async function () {
             @delete="handleDelete"
             @view="handleView"
             @pin="handlePin"
-          />
+          >
+            <template #sort-category>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortCategory"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+            <template #sort-date>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortDate"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+            <template #sort-status>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortStatus"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+          </AnnouncementTable>
         </div>
       </main>
     </div>

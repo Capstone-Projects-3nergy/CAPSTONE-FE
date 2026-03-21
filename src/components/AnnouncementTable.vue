@@ -236,9 +236,33 @@ const formatDate = (dateString) => {
           <thead class="hidden md:table-header-group bg-gray-50/50">
             <tr>
               <th scope="col" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider w-[40%]">Title</th>
-              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Category</th>
-              <th scope="col" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Date Posted</th>
-              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Status</th>
+              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">
+                <div class="inline-flex items-center justify-center gap-1">
+                  <div class="w-[18px] invisible"></div>
+                  Category
+                  <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+                    <slot name="sort-category"></slot>
+                  </div>
+                </div>
+              </th>
+              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">
+                <div class="inline-flex items-center justify-center gap-1">
+                  <div class="w-[18px] invisible"></div>
+                  Date Posted
+                  <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+                    <slot name="sort-date"></slot>
+                  </div>
+                </div>
+              </th>
+              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">
+                <div class="inline-flex items-center justify-center gap-1">
+                  <div class="w-[18px] invisible"></div>
+                  Status
+                  <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+                    <slot name="sort-status"></slot>
+                  </div>
+                </div>
+              </th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Views</th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Actions</th>
             </tr>
@@ -296,7 +320,7 @@ const formatDate = (dateString) => {
                     {{ formatCategory(item.category) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap text-sm text-gray-500 font-medium align-middle md:align-middle">
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:text-center md:align-middle">
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Date Posted:</span>
                   <span class="text-xs sm:text-sm">{{ formatDate(item.datePosted) }}</span>
                 </td>
