@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted, watch, onUnmounted, nextTick } from
 import { useRouter } from 'vue-router'
 import QrScanner from 'qr-scanner'
 import Quagga from '@ericblade/quagga2'
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
@@ -177,7 +178,9 @@ let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const barcodeReaderRef = ref(null)
+const barcodeVideoRef = ref(null)
 const isCameraReady = ref(false)
+let zxingReader = null
 
 async function extractParcelInfo(imageDataUrl) {
   if (
@@ -565,7 +568,49 @@ function startScan(mode) {
         scanningMode.value = ''
       }
     } else if (mode === 'barcode') {
-      startQuagga()
+      const videoElem = document.getElementById('barcode-video-sender')
+      if (!videoElem) {
+        alert('Barcode video element not found')
+        scanningMode.value = ''
+        return
+      }
+
+      zxingReader = new BrowserMultiFormatReader()
+      const hints = new Map()
+      const formats = [
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.UPC_A,
+        BarcodeFormat.UPC_E,
+        BarcodeFormat.QR_CODE,
+        BarcodeFormat.DATA_MATRIX,
+        BarcodeFormat.PDF_417
+      ]
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, formats)
+      zxingReader.hints = hints
+
+      try {
+        zxingReader.decodeFromVideoDevice(undefined, videoElem, (result, err) => {
+          if (result) {
+            isSuccessScan.value = true
+            setTimeout(() => {
+              isSuccessScan.value = false
+            }, 1000)
+            processScanResult(result.text)
+            
+            if (!form.value.parcelType) {
+              const code = result.text.toUpperCase()
+              if (code.startsWith('B')) form.value.parcelType = 'BOX'
+              else if (code.startsWith('D')) form.value.parcelType = 'DOCUMENT'
+            }
+          }
+        })
+      } catch (e) {
+        console.error('ZXing Error:', e)
+        startQuagga()
+      }
     }
   })
 }
@@ -576,6 +621,10 @@ function stopScan() {
     qrScanner.stop()
     qrScanner.destroy()
     qrScanner = null
+  }
+  if (zxingReader) {
+    zxingReader.reset()
+    zxingReader = null
   }
   stopQuagga()
   stopCameraOnly()
@@ -952,7 +1001,9 @@ const closePopUp = (operate) => {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative"></div>
+                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative">
+                    <video id="barcode-video-sender" class="w-full h-full object-cover"></video>
+                  </div>
                   <video id="qr-video-sender" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
