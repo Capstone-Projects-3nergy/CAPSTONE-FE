@@ -240,8 +240,11 @@ async function extractParcelInfo(imageDataUrl) {
 
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result?.data?.text?.trim()
+    let text = result?.data?.text?.trim()
     if (!text) return null
+
+    // Pre-processing: Normalize some common OCR errors in tracking-like strings
+    const normalizedText = text.replace(/[OD]/g, '0').replace(/[IL]/g, '1')
 
     const info = {
       recipientName: '',
@@ -252,48 +255,70 @@ async function extractParcelInfo(imageDataUrl) {
       roomNumber: ''
     }
 
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0)
+
     // 👤 Recipient Search
-    const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'To', 'Recipient', 'ชือผู้รับ']
-    for (const kw of recipientKeywords) {
-      const regex = new RegExp(`${kw}[:\\s]*([\\u0E00-\\u0E7Fa-zA-Z\\s]{3,})`, 'i')
-      const match = text.match(regex)
-      if (match) {
-        let name = match[1].split('\n')[0].trim()
-        name = name.split(/[\d]/)[0].trim()
-        if (name.length >= 2) {
-          info.recipientName = name
-          break
+    const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'ถึง', 'To', 'Recipient', 'ชือผู้รับ', 'ชื่อ']
+    for (const line of lines) {
+      for (const kw of recipientKeywords) {
+        const regex = new RegExp(`^${kw}[:\\s]*(.*)`, 'i')
+        const match = line.match(regex)
+        if (match) {
+          let name = match[1].trim()
+          // Clean up: remove phone numbers or addresses if they follow the name
+          name = name.split(/(\d{9,10}|โทร|Tel|Address|ที่อยู่)/i)[0].trim()
+          name = name.replace(/[^\u0E00-\u0E7Fa-zA-Z\s]/g, '').trim()
+          if (name.length >= 2) {
+            info.recipientName = name
+            break
+          }
         }
       }
+      if (info.recipientName) break
     }
 
     // 📤 Sender Search
-    const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'From', 'Sender', 'ชือผู้ส่ง']
-    for (const kw of senderKeywords) {
-      const regex = new RegExp(`${kw}[:\\s]*([\\u0E00-\\u0E7Fa-zA-Z\\s]{3,})`, 'i')
-      const match = text.match(regex)
-      if (match) {
-        let name = match[1].split('\n')[0].trim()
-        name = name.split(/[\d]/)[0].trim()
-        if (name.length >= 2) {
-          info.senderName = name
-          break
+    const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'จาก', 'From', 'Sender', 'ชือผู้ส่ง']
+    for (const line of lines) {
+      for (const kw of senderKeywords) {
+        const regex = new RegExp(`^${kw}[:\\s]*(.*)`, 'i')
+        const match = line.match(regex)
+        if (match) {
+          let name = match[1].trim()
+          name = name.split(/(\d{9,10}|โทร|Tel|Address|ที่อยู่)/i)[0].trim()
+          name = name.replace(/[^\u0E00-\u0E7Fa-zA-Z\s]/g, '').trim()
+          if (name.length >= 2) {
+            info.senderName = name
+            break
+          }
         }
       }
+      if (info.senderName) break
     }
 
     // 📦 Tracking & Company Detection
     const trackingPatterns = [
       { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
-      { id: 'Kerry', regex: /KEX[A-Z\d]{9,12}/i },
+      { id: 'Kerry', regex: /KEX[A-Z]{1}\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
       { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
       { id: 'JT', regex: /JD\d{13}/i },
       { id: 'DHL', regex: /\d{10,12}/ },
-      { id: 'Generic', regex: /[A-Z0-9\-]{8,22}/ }
+      { id: 'FedEx', regex: /\d{12,22}/ },
+      { id: 'Generic', regex: /[A-Z0-9]{8,22}/ }
     ]
 
+    // Use normalized text for tracking numbers
+    const searchString = text + ' ' + normalizedText
+    const sanitizedSearchString = searchString.replace(/[^A-Z0-9]/g, '')
+    
     for (const pattern of trackingPatterns) {
-      const match = text.match(pattern.regex)
+      let match = searchString.match(pattern.regex) || (pattern.altRegex && searchString.match(pattern.altRegex))
+      
+      // If no match in raw text, try in sanitized text (useful for messy OCR with dots/slashes)
+      if (!match && pattern.id !== 'Generic' && pattern.id !== 'DHL' && pattern.id !== 'FedEx') {
+        match = sanitizedSearchString.match(pattern.regex)
+      }
+
       if (match) {
         info.trackingNumber = match[0].toUpperCase()
         const comp = companyList.value.find(c => {
@@ -302,6 +327,8 @@ async function extractParcelInfo(imageDataUrl) {
           if (pattern.id === 'Kerry' && cName.includes('kerry')) return true
           if (pattern.id === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
           if (pattern.id === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+          if (pattern.id === 'DHL' && cName.includes('dhl')) return true
+          if (pattern.id === 'FedEx' && cName.includes('fedex')) return true
           return false
         })
         if (comp) info.companyId = comp.companyId
@@ -319,7 +346,7 @@ async function extractParcelInfo(imageDataUrl) {
     }
 
     // 🏠 Room Number
-    const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No)[:\s]*(\d+[\/\d]*)/i)
+    const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No|Unit)[:\s]*(\d+[\/\d]*)/i)
     if (roomMatch) info.roomNumber = roomMatch[2]
 
     // 📦 Parcel Type
@@ -393,7 +420,11 @@ async function startCamera() {
   }
   try {
     videoStream.value = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
+      video: { 
+        facingMode: 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
     })
     videoRef.value.srcObject = videoStream.value
     videoRef.value.onloadedmetadata = () => {
@@ -1395,20 +1426,17 @@ onMounted(async () => {
 
                 <!-- OCR Scanner Focus Frame -->
                 <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
-                  <!-- Darkened Overlay -->
-                  <div class="absolute inset-0 bg-black/40"></div>
-                  
-                  <!-- Focus Frame (Clear Center) -->
-                  <div class="relative w-[85%] h-[60%] border-2 border-white/50 rounded-2xl shadow-[0_0_0_1000px_rgba(0,0,0,0.3)]">
+                  <!-- Focus Frame with Shadow Overlay -->
+                  <div class="relative w-[85%] h-[60%] border-2 border-white/70 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
                     <!-- Corner Brackets -->
-                    <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
-                    <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
-                    <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
-                    <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                    <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
+                    <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
+                    <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-xl shadow-lg"></div>
+                    <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-xl shadow-lg"></div>
                     
                     <!-- Helper Text -->
-                    <div class="absolute -top-10 left-0 right-0 text-center">
-                      <span class="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full font-bold tracking-widest">Align text within frame</span>
+                    <div class="absolute -top-12 left-0 right-0 text-center">
+                      <span class="bg-[#185DC0] text-white text-[11px] px-4 py-1.5 rounded-full font-bold tracking-widest shadow-xl scale-110">Align text within frame</span>
                     </div>
                   </div>
                 </div>
