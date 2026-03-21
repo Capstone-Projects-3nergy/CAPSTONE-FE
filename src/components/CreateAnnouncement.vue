@@ -299,6 +299,13 @@ const removeImage = () => {
   imagePreview.value = ''
 }
 
+const isLightboxOpen = ref(false)
+const toggleLightbox = () => {
+  if (imagePreview.value) {
+    isLightboxOpen.value = !isLightboxOpen.value
+  }
+}
+
 // Sidebar Logic
 
 const buttonSize = computed(() => {
@@ -966,35 +973,58 @@ const returnLoginPage = async () => {
                 <!-- Cover Image Upload -->
                 <div class="space-y-2">
                   <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
+                  
                   <div 
-                    class="relative w-full h-48 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:bg-gray-100"
-                    :class="{ 'border-blue-400 bg-blue-50': imagePreview }"
+                    v-if="!imagePreview"
+                    @click="$refs.fileInput.click()"
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]"
                   >
-                    <template v-if="!imagePreview">
-                      <div class="flex flex-col items-center justify-center p-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p class="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
-                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 1MB)</p>
-                      </div>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        class="absolute inset-0 opacity-0 cursor-pointer" 
-                        @change="onFileChange"
-                      />
-                    </template>
-                    <template v-else>
-                      <img :src="imagePreview" class="w-full h-full object-cover" />
-                      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <button @click="removeImage" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </template>
+                     <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                     </div>
+                     <p class="text-sm font-medium text-gray-700 mt-2">Click to upload or drag file here</p>
+                     <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 1MB</p>
+                     <input 
+                       type="file" 
+                       ref="fileInput" 
+                       class="hidden" 
+                       @change="onFileChange" 
+                       accept="image/*"
+                     />
+                  </div>
+                  <div v-else class="relative group">
+                     <img 
+                       :src="imagePreview" 
+                       alt="Preview" 
+                       class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
+                       @click="toggleLightbox"
+                     />
+                     
+                     <!-- Image Actions Overlay -->
+                     <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                       <!-- <button 
+                         @click="toggleLightbox" 
+                         class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
+                         title="View full image"
+                       >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                       </button> -->
+                       <button 
+                         @click="removeImage" 
+                         class="p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm backdrop-blur-sm border border-rose-100 cursor-pointer"
+                         title="Remove image"
+                       >
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                       </button>
+                     </div>
+
+                     <input 
+                       type="file" 
+                       ref="fileInput" 
+                       class="hidden" 
+                       @change="onFileChange" 
+                       accept="image/*"
+                     />
                   </div>
                 </div>
 
@@ -1109,5 +1139,48 @@ const returnLoginPage = async () => {
       </main>
     </div>
     <LoadingPopUp v-if="isLoading" />
+
+    <!-- Lightbox Overlay -->
+    <Transition name="fade">
+      <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
+          <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <img 
+            :src="imagePreview" 
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full Preview"
+            @click.stop
+          />
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.zoom-in {
+  animation-name: zoomIn;
+}
+</style>

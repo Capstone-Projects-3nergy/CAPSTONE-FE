@@ -242,6 +242,13 @@ const removeImage = () => {
   announcementForm.coverImage = null
 }
 
+const isLightboxOpen = ref(false)
+const toggleLightbox = () => {
+  if (imagePreview.value) {
+    isLightboxOpen.value = !isLightboxOpen.value
+  }
+}
+
 const handleTitleInput = (event) => {
   let val = event.target.value
   
@@ -1274,10 +1281,22 @@ const showProfileStaffPage = async function () {
                       />
                    </div>
                    <div v-else class="relative group">
-                      <img :src="imagePreview" alt="Preview" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                      <img 
+                        :src="imagePreview" 
+                        alt="Preview" 
+                        class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
+                        @click="toggleLightbox"
+                      />
                       
                       <!-- Image Actions Overlay -->
                       <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <!-- <button 
+                          @click="toggleLightbox" 
+                          class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
+                          title="View full image"
+                        >
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                        </button> -->
                         <button 
                           @click="$refs.fileInput.click()" 
                           class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
@@ -1411,5 +1430,50 @@ const showProfileStaffPage = async function () {
     />
 
     <LoadingPopUp v-if="isLoading" />
+
+    <!-- Lightbox Overlay -->
+    <Transition name="fade">
+      <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
+          <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <img 
+            :src="imagePreview" 
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full Preview"
+            @click.stop
+          />
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Animations using standard CSS as fallback for Tailwind animate */
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.zoom-in {
+  animation-name: zoomIn;
+}
+</style>
