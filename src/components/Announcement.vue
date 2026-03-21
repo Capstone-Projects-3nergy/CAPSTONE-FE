@@ -41,10 +41,26 @@ watch(
     }
   }
 )
-const currentSlide = ref(1)
+
+const bannerContainer = ref(null)
 const bannerAnnouncements = computed(() => {
-  return allPublishedAnnouncements.value.slice(0, 4)
+  return allPublishedAnnouncements.value
+    .filter(item => {
+      const cat = (item.category || '').toLowerCase()
+      return cat === 'events' || cat === 'general'
+    })
+    .slice(0, 8)
 })
+
+const scrollBanner = (direction) => {
+  if (bannerContainer.value) {
+    const scrollAmount = 300
+    bannerContainer.value.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    })
+  }
+}
 
 // Modal State
 const isModalOpen = ref(false)
@@ -92,6 +108,16 @@ const formatDate = (dateString) => {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
+
+const getCategoryIcon = (category) => {
+  switch (category) {
+    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`
+    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`
+    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`
+    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+    default: return ''
+  }
 }
 
 const updateDate = () => {
@@ -520,69 +546,115 @@ onMounted(async () => {
             </h2>
           </div>
 
-          <!-- Featured Banner -->
-          <div class="relative overflow-hidden rounded-2xl shadow-lg mb-10 group">
-            <!-- Background Image -->
-            <div 
-              v-if="bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage"
-              class="absolute inset-0 z-0 scale-105"
-            >
-              <img 
-                :src="bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage"
-                class="w-full h-full object-cover"
-                alt="Banner Background"
-              />
-              <!-- Dark Overlay for readability -->
-              <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
-            </div>
-            
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90" v-if="!(bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage)"></div>
-            <!-- Decorative circles -->
-            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
-            
-            <div v-if="bannerAnnouncements.length > 0" class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
-              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 bg-blue-800/50 rounded-full border border-blue-400/30">
-                {{ bannerAnnouncements[currentSlide - 1]?.category || 'Featured' }}
-              </span>
-              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.title }}
-              </h3>
-              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px] line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.subtitle }}
-              </p>
-              
-              <!-- Navigation Arrows -->
-              <button 
-                @click="currentSlide = currentSlide === 1 ? 4 : currentSlide - 1" 
-                class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              
-              <button 
-                @click="currentSlide = currentSlide === 4 ? 1 : currentSlide + 1" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
+          <!-- Featured Banner Section -->
+          <div 
+            class="mb-14 overflow-visible px-1" 
+            v-if="bannerAnnouncements.length > 0 && (!selectedCategory || selectedCategory === 'all' || selectedCategory === 'General' || selectedCategory === 'Events')"
+          >
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1D4ED8] to-[#2563EB] p-6 sm:p-8">
+              <!-- Decorative Background Pattern -->
+              <div class="absolute right-0 bottom-0 w-64 h-64 opacity-20 transform translate-x-10 translate-y-10">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#FFF" d="M44.7,-76.4C58.1,-69.2,69.5,-57.4,77.3,-43.7C85.1,-30,89.2,-15,88.4,-0.5C87.5,14,81.6,28,73.1,40.4C64.6,52.8,53.5,63.6,40.4,71.5C27.2,79.4,12.1,84.4,-2,87.9C-16.1,91.3,-32.2,93.2,-46.3,87.2C-60.4,81.2,-72.5,67.3,-80.4,52C-88.3,36.7,-92,20,-91.1,3.2C-90.2,-13.6,-84.7,-30.5,-74.6,-43.8C-64.4,-57.1,-49.6,-66.8,-35.1,-73.4C-20.6,-80,0,-83.4,44.7,-76.4Z" transform="translate(100 100)" />
+                </svg>
+              </div>
 
-              <!-- Carousel Indicators -->
-              <div class="flex justify-center gap-3">
-                <button
-                  v-for="n in bannerAnnouncements.length"
-                  :key="n"
-                  @click="currentSlide = n"
-                  class="transition-all duration-300 rounded-full h-2 cursor-pointer"
-                  :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
-                ></button>
+              <!-- Header Content -->
+              <div class="relative z-10 mb-6">
+                <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">Recommended for you</h3>
+                <p class="text-white/90 text-sm sm:text-base font-medium opacity-90">Specially selected updates for your community</p>
+              </div>
+
+              <!-- Scrollable Area with Absolute Arrows -->
+              <div v-if="bannerAnnouncements.length > 0" class="relative group/banner">
+                <!-- Left Navigation Button -->
+                <button 
+                  @click="scrollBanner('left')" 
+                  class="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <!-- Right Navigation Button -->
+                <button 
+                  @click="scrollBanner('right')" 
+                  class="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+              <!-- Horizontal Scroll Container -->
+              <div 
+                ref="bannerContainer"
+                class="relative z-10 flex gap-5 overflow-x-auto pb-4 custom-scrollbar-hide snap-x snap-mandatory px-2"
+              >
+                <div 
+                  v-for="(item, index) in bannerAnnouncements" 
+                  :key="index"
+                  class="flex-shrink-0 w-[240px] sm:w-[280px] snap-start group cursor-pointer"
+                  @click="openModal(item)"
+                >
+                  <div class="bg-white rounded-2xl overflow-hidden shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[340px] flex flex-col relative">
+                    <!-- Image Section -->
+                    <div class="relative h-[220px] overflow-hidden">
+                      <img 
+                        v-if="item.coverImageUrl || item.coverImage"
+                        :src="item.coverImageUrl || item.coverImage" 
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        alt="Banner Image"
+                      />
+                      <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
+                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <!-- Bookmark Icon Overlay -->
+                      <div class="absolute top-3 right-3">
+                        <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-blue-600 shadow-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Text Section -->
+                    <div class="p-4 flex-grow flex flex-col justify-between">
+                      <h4 class="text-gray-900 font-bold text-base line-clamp-2 leading-tight mb-2">
+                        {{ item.title?.replace(/^Draft\s*-\s*/i, '') }}
+                      </h4>
+                      
+                      <div>
+                        <span 
+                          class="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold rounded-lg tracking-wider border shadow-sm"
+                          :class="item.type === 'event' 
+                            ? 'bg-purple-50 text-purple-600 border-purple-100' 
+                            : 'bg-blue-50 text-blue-600 border-blue-100'"
+                        >
+                          <span v-html="getCategoryIcon(item.category || 'General')"></span>
+                          {{ item.category || 'General' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            
+
             <!-- Fallback when no banners -->
-            <div v-else class="relative z-10 p-16 flex flex-col items-center text-center text-white">
-              <h3 class="text-2xl font-bold mb-2">No Active Announcements</h3>
-              <p class="text-blue-100">Check back later for community updates.</p>
+            <div v-else class="relative z-10 py-12 flex flex-col items-center text-center text-white">
+              <div class="p-4 bg-white/20 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-1">No Events Scheduled</h3>
+              <p class="text-white/70">Check back later for community activities.</p>
+            </div>
             </div>
           </div>
 
@@ -852,5 +924,12 @@ onMounted(async () => {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>

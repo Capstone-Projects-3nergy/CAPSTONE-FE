@@ -30,11 +30,11 @@ defineEmits(['prev', 'next', 'go', 'view'])
 
 const getCategoryBadgeClass = (category) => {
   switch (category) {
-    case 'Urgent': return 'bg-red-50 text-red-500'
-    case 'Maintenance': return 'bg-orange-50 text-orange-500'
-    case 'Events': return 'bg-purple-50 text-purple-500'
-    case 'General': return 'bg-blue-50 text-blue-500'
-    default: return 'bg-gray-100 text-gray-800'
+    case 'Urgent': return 'bg-red-50 text-red-500 border-red-100'
+    case 'Maintenance': return 'bg-orange-50 text-orange-500 border-orange-100'
+    case 'Events': return 'bg-purple-50 text-purple-600 border-purple-100'
+    case 'General': return 'bg-blue-50 text-blue-600 border-blue-100'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
   }
 }
 
@@ -115,7 +115,7 @@ const formatDate = (dateString) => {
                 </svg>
                 Pinned
               </span>
-              <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
+              <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg border transition-colors cursor-default" :class="getCategoryBadgeClass(item.category)">
                 <span v-html="getCategoryIcon(item.category)"></span>
                 {{ item.category }}
               </span>
@@ -194,7 +194,7 @@ const formatDate = (dateString) => {
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-full" :class="getCategoryBadgeClass(item.category)">
+                <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-full border transition-colors cursor-default" :class="getCategoryBadgeClass(item.category)">
                   <span v-html="getCategoryIcon(item.category)"></span>
                   {{ item.category }}
                 </span>
