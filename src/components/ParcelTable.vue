@@ -91,7 +91,7 @@ const authStore = useAuthManager()
         <tr>
           <th
             v-if="showPhoto"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Photo
           </th>
@@ -134,11 +134,12 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showRoom"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center gap-2">
+              <div class="w-4 invisible"></div>
               Room
-              <div class="transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-room"></slot>
               </div>
             </div>
@@ -174,11 +175,12 @@ const authStore = useAuthManager()
 
           <th
             v-if="showStatus"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center gap-2">
+              <div class="w-4 invisible"></div>
               Status
-              <div class="transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-status"></slot>
               </div>
             </div>
@@ -197,11 +199,12 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showActionStatus"
-            class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center gap-2">
+              <div class="w-4 invisible"></div>
               Status
-              <div class="transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-status"></slot>
               </div>
             </div>
@@ -246,7 +249,7 @@ const authStore = useAuthManager()
             v-if="showPhoto"
             class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-start md:justify-center gap-2">
               <span class="md:hidden font-semibold text-[#0E4B90]">Photo:</span>
 
               <div
@@ -322,7 +325,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showRoom"
-            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
             {{ p.roomNumber }}
@@ -373,7 +376,7 @@ const authStore = useAuthManager()
 
           <td
             v-if="showStatus"
-            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle whitespace-nowrap"
+            class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
@@ -427,7 +430,7 @@ const authStore = useAuthManager()
           </td>
             <td
             v-if="showActionStatus"
-            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
+            class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90] mr-2">Status:</span>
 
