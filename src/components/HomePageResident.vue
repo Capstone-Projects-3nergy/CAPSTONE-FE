@@ -1101,8 +1101,14 @@ function formatDateTime(datetimeStr) {
               class="lg:col-span-7 group cursor-pointer bg-white rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
             >
               <div class="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-5 md:mb-8 group/img">
-                <!-- Placeholder for Image -->
-                <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                <!-- Image with fallback to Placeholder -->
+                <img 
+                  v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
+                  :src="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  alt="Featured News"
+                />
+                <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400">
                   <svg class="w-20 h-20 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -1168,7 +1174,13 @@ function formatDateTime(datetimeStr) {
                 class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
                 <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
-                  <div class="text-gray-400">
+                  <img 
+                    v-if="news.coverImageUrl || news.coverImage"
+                    :src="news.coverImageUrl || news.coverImage"
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    alt="News Thumbnail"
+                  />
+                  <div v-else class="text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -1237,6 +1249,7 @@ function formatDateTime(datetimeStr) {
         :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
         :status="selectedAnnouncement?.status"
         :pinned="selectedAnnouncement?.pinned || false"
+        :coverImage="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
         @close="closeModal"
       />
     </div>

@@ -522,7 +522,21 @@ onMounted(async () => {
 
           <!-- Featured Banner -->
           <div class="relative overflow-hidden rounded-2xl shadow-lg mb-10 group">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90"></div>
+            <!-- Background Image -->
+            <div 
+              v-if="bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage"
+              class="absolute inset-0 z-0 scale-105"
+            >
+              <img 
+                :src="bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage"
+                class="w-full h-full object-cover"
+                alt="Banner Background"
+              />
+              <!-- Dark Overlay for readability -->
+              <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+            </div>
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90" v-if="!(bannerAnnouncements[currentSlide - 1]?.coverImageUrl || bannerAnnouncements[currentSlide - 1]?.coverImage)"></div>
             <!-- Decorative circles -->
             <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
             <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
@@ -691,6 +705,7 @@ onMounted(async () => {
     :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
     :status="''"
     :pinned="selectedAnnouncement?.pinned || false"
+    :cover-image="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="closeModal"
   />
 

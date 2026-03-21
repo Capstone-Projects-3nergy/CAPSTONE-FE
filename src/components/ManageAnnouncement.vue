@@ -858,6 +858,7 @@ const showProfileStaffPage = async function () {
     :author="selectedAnnouncement?.author || 'Staff Portal'"
     :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
     :pinned="selectedAnnouncement?.pinned || false"
+    :coverImage="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="showViewModal = false; selectedAnnouncement = null"
   />
 
