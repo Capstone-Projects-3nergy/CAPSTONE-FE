@@ -7,44 +7,46 @@ defineEmits(['closePopUp'])
 </script>
 
 <template>
-  <div
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md"
-  >
-    <Transition name="fade-scale" appear>
-      <div
-        class="bg-white/95 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 flex flex-col items-center gap-6 min-w-[280px] border border-white/20"
-      >
-        <!-- Modern Dual-Ring Spinner -->
-        <div class="relative w-16 h-16">
-          <div
-            class="absolute inset-0 rounded-full border-[3px] border-blue-100/50"
-          ></div>
-          <div
-            class="absolute inset-0 rounded-full border-[3px] border-t-blue-600 border-r-transparent border-b-transparent border-l-transparent animate-spin-slow"
-          ></div>
-          <div
-            class="absolute inset-2 rounded-full border-[3px] border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent animate-spin-fast"
-          ></div>
-          <!-- Pulse Effect -->
-          <div class="absolute inset-0 rounded-full bg-blue-400/10 animate-pulse-slow"></div>
-        </div>
-
-        <div class="flex flex-col items-center text-center space-y-2">
-          <h3 class="text-xl font-bold bg-gradient-to-br from-slate-800 to-slate-500 bg-clip-text text-transparent italic">
-            {{ props.operate || 'Processing...' }}
-          </h3>
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce"></span>
+  <Teleport to="body">
+    <div
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md"
+    >
+      <Transition name="fade-scale" appear>
+        <div
+          class="bg-white/95 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 flex flex-col items-center gap-6 min-w-[280px] border border-white/20"
+        >
+          <!-- Modern Dual-Ring Spinner -->
+          <div class="relative w-16 h-16">
+            <div
+              class="absolute inset-0 rounded-full border-[3px] border-blue-100/50"
+            ></div>
+            <div
+              class="absolute inset-0 rounded-full border-[3px] border-t-blue-600 border-r-transparent border-b-transparent border-l-transparent animate-spin-slow"
+            ></div>
+            <div
+              class="absolute inset-2 rounded-full border-[3px] border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent animate-spin-fast"
+            ></div>
+            <!-- Pulse Effect -->
+            <div class="absolute inset-0 rounded-full bg-blue-400/10 animate-pulse-slow"></div>
           </div>
-          <p class="text-xs font-medium text-slate-400 tracking-widest pt-2">
-            Please wait a moment
-          </p>
+
+          <div class="flex flex-col items-center text-center space-y-2">
+            <h3 class="text-xl font-bold bg-gradient-to-br from-slate-800 to-slate-500 bg-clip-text text-transparent italic">
+              {{ props.operate || 'Processing...' }}
+            </h3>
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce"></span>
+            </div>
+            <p class="text-xs font-medium text-slate-400 tracking-widest pt-2">
+              Please wait a moment
+            </p>
+          </div>
         </div>
-      </div>
-    </Transition>
-  </div>
+      </Transition>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>

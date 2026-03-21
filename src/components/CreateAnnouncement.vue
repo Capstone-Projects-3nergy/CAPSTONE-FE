@@ -1108,5 +1108,6 @@ const returnLoginPage = async () => {
         </div>
       </main>
     </div>
+    <LoadingPopUp v-if="isLoading" />
   </div>
 </template>

@@ -94,6 +94,7 @@ const route = useRoute()
 const isCategoryOpen = ref(false)
 const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
+const isLoading = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
 const showPinLimitAlert = ref(false)
@@ -662,6 +663,7 @@ const handleSave = async () => {
   }
   
   try {
+    isLoading.value = true
     isSubmitting.value = true
     
     // -----------------------
@@ -690,6 +692,7 @@ const handleSave = async () => {
     const aid = aidParam ? Number(aidParam) : null
     
     if (!aid || isNaN(aid)) {
+      isLoading.value = false
       isSubmitting.value = false
       error.value = true
       return
@@ -699,6 +702,7 @@ const handleSave = async () => {
     const updated = await editAnnouncementWithFile(url, aid, payload, router)
 
     if (!updated) {
+      isLoading.value = false
       isSubmitting.value = false
       error.value = true
       setTimeout(() => {
@@ -757,6 +761,7 @@ const handleSave = async () => {
     initialForm.value = JSON.parse(JSON.stringify(announcementForm))
     initialForm.value.coverImage = imagePreview.value || null
 
+    isLoading.value = false
     isSubmitting.value = false
     editSuccess.value = true
     setTimeout(() => {
@@ -764,6 +769,7 @@ const handleSave = async () => {
     }, 5000)
   } catch (err) {
     console.error('Update failed:', err)
+    isLoading.value = false
     isSubmitting.value = false
     error.value = true
     setTimeout(() => {
@@ -1269,20 +1275,25 @@ const showProfileStaffPage = async function () {
                    </div>
                    <div v-else class="relative group">
                       <img :src="imagePreview" alt="Preview" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" />
-                      <button 
-                        @click="removeImage" 
-                        class="absolute top-3 right-3 p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-rose-100 cursor-pointer"
-                        title="Remove image"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                      </button>
-                      <button 
-                        @click="$refs.fileInput.click()" 
-                        class="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-blue-100 cursor-pointer"
-                        title="Change image"
-                      >
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                      </button>
+                      
+                      <!-- Image Actions Overlay -->
+                      <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <button 
+                          @click="$refs.fileInput.click()" 
+                          class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
+                          title="Change image"
+                        >
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
+                        <button 
+                          @click="removeImage" 
+                          class="p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm backdrop-blur-sm border border-rose-100 cursor-pointer"
+                          title="Remove image"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        </button>
+                      </div>
+
                       <input 
                         type="file" 
                         ref="fileInput" 
@@ -1398,5 +1409,7 @@ const showProfileStaffPage = async function () {
       v-if="showLogoutConfirm"
       @cancelLogout="handleCancelLogout"
     />
+
+    <LoadingPopUp v-if="isLoading" />
   </div>
 </template>
