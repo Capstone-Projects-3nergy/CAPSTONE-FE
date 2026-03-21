@@ -544,7 +544,7 @@ const handleImageUpload = (event) => {
     return
   }
 
-  const maxSize = 5 * 1024 * 1024
+  const maxSize = 1 * 1024 * 1024
   if (file.size > maxSize) {
     showFileSizeError()
     return
@@ -1024,7 +1024,7 @@ const showFileSizeError = () => {
           />
           <AlertPopUp
             v-if="fileSizeError"
-            :titles="'The file size of the profile image must not exceed 5MB.'"
+            :titles="'The file size of the profile image must not exceed 1MB.'"
             message="Error!!"
             styleType="red"
             operate="fileSizeError"

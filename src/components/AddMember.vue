@@ -550,7 +550,7 @@ const showFileSizeError = () => {
           />
           <AlertPopUp
             v-if="fileSizeError"
-            titles="The file size of the profile image must not exceed 5MB."
+            titles="The file size of the profile image must not exceed 1MB."
             message="Error!!"
             styleType="red"
             operate="fileSizeError"
