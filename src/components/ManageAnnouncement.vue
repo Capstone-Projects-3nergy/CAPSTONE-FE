@@ -30,7 +30,7 @@ import {
   getAnnouncements,
   getAnnouncementById,
   recordAnnouncementView,
-  editItem
+  editAnnouncementWithFile
 } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
 import {
@@ -262,18 +262,19 @@ const handlePin = async (item) => {
     title: item.title,
     subtitle: item.subtitle || '',
     content: item.content || '',
-    categoryId: item.categoryId || (item.category ? item.category.id : null),
+    categoryId: item.categoryId || (item.category ? item.category.id : item.category),
     pinned: newPinnedStatus,
     sendNotification: false, // Don't re-notify when just pinning
     priority: item.priority || 1,
     publishAt: item.publishAt || null,
     targetAudience: item.targetAudience || 'ALL_RESIDENTS',
-    status: item.status || 'PUBLISHED'
+    status: item.status || 'PUBLISHED',
+    coverImageUrl: item.coverImageUrl || item.coverImage || null
   }
 
   try {
     const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
-    const updated = await editItem(url, item.id, payload, router)
+    const updated = await editAnnouncementWithFile(url, item.id, payload, router)
     
     if (updated) {
       // Update local state and manager
