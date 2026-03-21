@@ -249,7 +249,7 @@ const handleView = async (item) => {
 const handlePin = async (item) => {
   const newPinnedStatus = !item.pinned
   
-  if (newPinnedStatus && totalPinned.value >= 5) {
+  if (newPinnedStatus && totalPinned.value >= 3) {
       showPinLimitAlert.value = true
       setTimeout(() => {
         showPinLimitAlert.value = false
@@ -397,7 +397,7 @@ const showProfileStaffPage = async function () {
         />
         <AlertPopUp
           v-if="showPinLimitAlert"
-          :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+          :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
           message="Error!!"
           styleType="red"
           operate="pinLimitMessage"

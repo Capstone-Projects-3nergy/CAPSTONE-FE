@@ -1065,7 +1065,7 @@ const showProfileStaffPage = async function () {
             />
               <AlertPopUp
               v-if="showPinLimitAlert"
-              :titles="'Maximum of 5 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
               message="Error!!"
               styleType="red"
               operate="pinLimitMessage"
