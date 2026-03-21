@@ -136,10 +136,10 @@ const authStore = useAuthManager()
             v-if="showRoom"
             class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center justify-center gap-2">
-              <div class="w-4 invisible"></div>
+            <div class="inline-flex items-center justify-center gap-1">
+              <div class="w-[18px] invisible"></div>
               Room
-              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-room"></slot>
               </div>
             </div>
@@ -177,10 +177,10 @@ const authStore = useAuthManager()
             v-if="showStatus"
             class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center justify-center gap-2">
-              <div class="w-4 invisible"></div>
+            <div class="inline-flex items-center justify-center gap-1">
+              <div class="w-[18px] invisible"></div>
               Status
-              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-status"></slot>
               </div>
             </div>
@@ -201,10 +201,10 @@ const authStore = useAuthManager()
             v-if="showActionStatus"
             class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
-            <div class="flex items-center justify-center gap-2">
-              <div class="w-4 invisible"></div>
+            <div class="inline-flex items-center justify-center gap-1">
+              <div class="w-[18px] invisible"></div>
               Status
-              <div class="w-4 flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+              <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
                 <slot name="sort-status"></slot>
               </div>
             </div>
@@ -507,7 +507,7 @@ const authStore = useAuthManager()
             class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-center whitespace-nowrap"
           >
             <div class="flex items-center justify-start w-full md:justify-center gap-3 sm:gap-4">
-              <span class="md:hidden font-semibold text-gray-400">Action:</span>
+              <span class="md:hidden font-semibold text-[#0E4B90]">Action:</span>
               <div class="flex items-center justify-center md:justify-center gap-1.5 flex-shrink-0">
             <button
               v-if="!!$slots['icon-view']"
