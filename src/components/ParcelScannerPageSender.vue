@@ -1343,7 +1343,7 @@ const closePopUp = (operate) => {
                   </div>
                 </div>
 
-                <div v-if="previewUrl" class="mt-6">
+                <!-- <div v-if="previewUrl" class="mt-6">
                   <span class="block text-sm font-bold text-gray-500 mb-3 ml-1">Parcel picture</span>
                   <div class="relative group">
                     <img
@@ -1358,7 +1358,7 @@ const closePopUp = (operate) => {
                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                   </div>
-                </div>
+                </div> -->
               </div>
 
               <div class="flex justify-end space-x-3 mt-8 flex-nowrap border-t border-gray-100 pt-8">
