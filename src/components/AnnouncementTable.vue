@@ -240,7 +240,7 @@ const formatDate = (dateString) => {
               <th scope="col" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Date Posted</th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 tracking-wider">Status</th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Views</th>
-              <th scope="col" class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider">Actions</th>
+              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody class="bg-transparent md:bg-white divide-y divide-gray-100">
@@ -358,7 +358,7 @@ const formatDate = (dateString) => {
                   </div>
 
                   <!-- Desktop Actions (Hidden on Mobile as they moved up) -->
-                  <div class="hidden md:flex items-center justify-end gap-1.5">
+                  <div class="hidden md:flex items-center justify-center gap-1.5">
                      <button @click="$emit('pin', item)" 
                         :class="[
                           'relative group/btn p-1.5 border border-gray-100 rounded-lg transition-colors cursor-pointer flex items-center justify-center shadow-sm',
