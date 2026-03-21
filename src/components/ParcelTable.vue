@@ -219,7 +219,7 @@ const authStore = useAuthManager()
           </th>
           <th
             v-if="showAction"
-            class="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
+            class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider align-middle whitespace-nowrap"
           >
             Action
           </th>
@@ -501,11 +501,11 @@ const authStore = useAuthManager()
           </td> -->
           <td
             v-if="showAction"
-            class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-right whitespace-nowrap"
+            class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-center whitespace-nowrap"
           >
-            <div class="flex items-center justify-start w-full md:justify-end gap-3 sm:gap-4">
+            <div class="flex items-center justify-start w-full md:justify-center gap-3 sm:gap-4">
               <span class="md:hidden font-semibold text-gray-400">Action:</span>
-              <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
+              <div class="flex items-center justify-center md:justify-center gap-1.5 flex-shrink-0">
             <button
               v-if="!!$slots['icon-view']"
               @click="$emit('view-detail', p.id)"
