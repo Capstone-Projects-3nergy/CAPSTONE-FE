@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import ButtonWeb from './ButtonWeb.vue'
 
 const props = defineProps({
@@ -55,9 +55,16 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
+const isLightboxOpen = ref(false)
 
 const closeModal = () => {
   emit('close')
+}
+
+const toggleLightbox = () => {
+  if (props.coverImage) {
+    isLightboxOpen.value = !isLightboxOpen.value
+  }
 }
 
 const getCategoryBadgeClass = (category) => {
@@ -107,31 +114,38 @@ const formatDate = (dateString) => {
 
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6" @click.self="closeModal">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all flex flex-col max-h-[95vh]">
-      <!-- Image Area -->
-      <div class="w-full bg-gray-100 relative shrink-0 overflow-hidden flex items-center justify-center min-h-[160px] max-h-[280px]">
-        <div class="absolute top-4 right-4 z-20">
-          <button @click="closeModal" class="p-2 bg-white/40 hover:bg-white/80 text-gray-800 rounded-full backdrop-blur-md transition-all cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        
-        <img 
-          v-if="coverImage"
-          :src="coverImage"
-          alt="Announcement Image"
-          class="w-full h-full max-h-[280px] object-contain block"
-        />
-        <div v-else class="h-32 sm:h-40 w-full flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-100 to-gray-200">
-           <svg class="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-           </svg>
-        </div>
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all flex flex-col max-h-[95vh] relative">
+      <!-- Close Button (Absolute) -->
+      <div class="absolute top-4 right-4 z-[110]">
+        <button @click="closeModal" class="p-2 bg-gray-100/80 hover:bg-gray-200 text-gray-700 rounded-full transition-all cursor-pointer shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
-      
+
       <!-- Content Area -->
-      <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-grow">
-        <div class="flex flex-wrap items-center gap-3 mb-4">
+      <div class="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-grow">
+         <!-- Author & Status Header -->
+         <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+                {{ author.substring(0, 2).toUpperCase() }}
+              </div>
+              <div class="flex flex-col">
+                <span class="font-bold text-gray-900 leading-tight text-lg">{{ author }}</span>
+                <span class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
+              </div>
+            </div>
+            <div class="hidden sm:flex items-center text-gray-400 text-sm font-medium gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              {{ views }} views
+            </div>
+         </div>
+
+         <!-- Tags -->
+        <div class="flex flex-wrap items-center gap-2.5 mb-6">
           <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-xl" :class="getCategoryBadgeClass(tag)">
             <span v-html="getCategoryIcon(tag)"></span>
             {{ tag }}
@@ -142,52 +156,63 @@ const formatDate = (dateString) => {
             </svg>
             PINNED
           </div>
-          
-          <!-- Status Badge -->
           <span v-if="status" class="px-3 py-1 inline-flex items-center text-[11px] font-bold rounded-xl" :class="getStatusBadgeClass(status)">
             {{ formatStatus(status) }}
           </span>
-          <div class="flex items-center text-gray-500 text-sm font-medium gap-1.5 ml-auto">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            {{ views }}
-          </div>
         </div>
         
-        <h2 class="text-2xl sm:text-4xl font-extrabold text-[#0E4B90] mb-2 leading-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
-        <p v-if="subtitle" class="text-base font-medium text-gray-700 mb-4">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
+        <!-- Text Content -->
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-[#0E4B90] mb-3 leading-tight tracking-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
+        <p v-if="subtitle" class="text-lg font-bold text-gray-700 mb-6 leading-relaxed">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
         
-        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-6 text-base sm:text-[1.1rem]">
+        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-8 text-lg">
           <p>{{ content?.replace(/^Draft\s*-\s*/i, '') || content }}</p>
           <slot></slot>
         </div>
 
-        <div class="h-px bg-gray-100 w-full mb-4"></div>
-
-        <!-- Author & Date Box -->
-        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-          <div class="h-10 w-10 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-base">
-            {{ author.substring(0, 2).toUpperCase() }}
-          </div>
-          <div class="flex flex-col">
-            <span class="font-bold text-sm text-gray-900">{{ author }}</span>
-            <span class="text-[10px] text-gray-500 font-medium tracking-wide">POSTED ON {{ formatDate(date).toUpperCase() }}</span>
-          </div>
+        <!-- Image Below Content -->
+        <div v-if="coverImage" class="mb-8 group relative cursor-zoom-in rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm transition-all hover:shadow-md" @click="toggleLightbox">
+            <img 
+              :src="coverImage"
+              alt="Announcement Image"
+              class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+               <div class="bg-black/50 text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+               </div>
+            </div>
         </div>
+
+        <div class="h-px bg-gray-100 w-full"></div>
       </div>
       
-      <div class="p-3 sm:p-4 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
+      <!-- Footer -->
+      <div class="p-4 sm:p-5 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
         <ButtonWeb 
           label="Close" 
           color="gray" 
           size="md" 
-          class="hover:opacity-90 hover:bg-gray-100 rounded-2xl shadow-sm transition-all font-bold px-10 text-gray-600"
+          class="hover:opacity-90 hover:bg-white rounded-2xl shadow-sm transition-all font-bold px-12 text-gray-600 border border-gray-200"
           @click="closeModal" 
         />
       </div>
     </div>
+
+    <!-- Lightbox Overlay -->
+    <Transition name="fade">
+      <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
+          <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <img 
+            :src="coverImage" 
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full Image"
+            @click.stop
+          />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -205,6 +230,35 @@ const formatDate = (dateString) => {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Animations using standard CSS as fallback for Tailwind animate */
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.zoom-in {
+  animation-name: zoomIn;
 }
 </style>
 
