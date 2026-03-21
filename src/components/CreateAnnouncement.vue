@@ -270,7 +270,7 @@ const onFileChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
 
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > 1 * 1024 * 1024) {
     fileSizeError.value = true
     imageFile.value = null
     imagePreview.value = ''
@@ -789,7 +789,7 @@ const returnLoginPage = async () => {
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
-            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -976,7 +976,7 @@ const returnLoginPage = async () => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <p class="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
-                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 1MB)</p>
                       </div>
                       <input 
                         type="file" 

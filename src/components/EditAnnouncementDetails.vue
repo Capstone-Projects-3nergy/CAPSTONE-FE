@@ -215,7 +215,7 @@ const formatText = (style) => {
 const handleImageUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 1 * 1024 * 1024) {
       fileSizeError.value = true
       coverImage.value = null
       imagePreview.value = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
@@ -1060,7 +1060,7 @@ const showProfileStaffPage = async function () {
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
-            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -1264,7 +1264,7 @@ const showProfileStaffPage = async function () {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       </div>
                       <p class="text-sm font-medium text-gray-700 mt-2">Click to replace or drag file here</p>
-                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
+                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 1MB</p>
                       <input 
                         type="file" 
                         ref="fileInput" 
