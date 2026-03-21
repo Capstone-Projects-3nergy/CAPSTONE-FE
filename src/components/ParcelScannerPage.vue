@@ -1464,12 +1464,12 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-2 sm:gap-3 px-2 overflow-x-auto items-center py-2">
+              <div class="flex flex-row flex-nowrap gap-2 sm:gap-3 px-2 items-center py-2 w-full">
                 <ButtonWeb
                   label="Scan QR Code"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
+                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
@@ -1477,7 +1477,7 @@ onMounted(async () => {
                   label="Scan Barcode"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
+                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
@@ -1485,9 +1485,16 @@ onMounted(async () => {
                   label="OCR Scan"
                   color="blue"
                   size="sm"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm"
+                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startCamera"
                   :disabled="scanningMode || videoStream || isOcrLoading"
+                />
+                <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  size="sm"
+                  class="hidden md:flex flex-1 cursor-pointer hover:opacity-90 transition-all rounded-xl whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center justify-center items-center"
+                  @click="cancelParcel"
                 />
               </div>
 
@@ -1670,7 +1677,7 @@ onMounted(async () => {
                 <ButtonWeb
                   label="Reset"
                   color="red"
-                  class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  class="w-auto block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
                   @click="cancelParcel"
                 />
                 <ButtonWeb
