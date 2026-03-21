@@ -107,10 +107,11 @@ const formatDate = (dateString) => {
 
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6" @click.self="closeModal">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
-      <div class="h-48 sm:h-56 bg-gray-100 relative shrink-0 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all flex flex-col max-h-[95vh]">
+      <!-- Image Area -->
+      <div class="w-full bg-gray-100 relative shrink-0 overflow-hidden flex items-center justify-center min-h-[160px] max-h-[280px]">
         <div class="absolute top-4 right-4 z-20">
-          <button @click="closeModal" class="p-2 bg-white/50 hover:bg-white text-gray-700 rounded-full backdrop-blur-md transition-all cursor-pointer">
+          <button @click="closeModal" class="p-2 bg-white/40 hover:bg-white/80 text-gray-800 rounded-full backdrop-blur-md transition-all cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -119,18 +120,18 @@ const formatDate = (dateString) => {
           v-if="coverImage"
           :src="coverImage"
           alt="Announcement Image"
-          class="w-full h-full object-cover"
+          class="w-full h-full max-h-[280px] object-contain block"
         />
-        <div v-else class="absolute inset-0 flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-100 to-gray-200">
-           <svg class="w-16 h-16 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div v-else class="h-32 sm:h-40 w-full flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-100 to-gray-200">
+           <svg class="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
            </svg>
         </div>
       </div>
       
       <!-- Content Area -->
-      <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
-        <div class="flex flex-wrap items-center gap-3 mb-6">
+      <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-grow">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
           <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-xl" :class="getCategoryBadgeClass(tag)">
             <span v-html="getCategoryIcon(tag)"></span>
             {{ tag }}
@@ -155,34 +156,34 @@ const formatDate = (dateString) => {
           </div>
         </div>
         
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0E4B90] mb-2 leading-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
-        <p v-if="subtitle" class="text-base font-medium text-gray-700 mb-6">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-[#0E4B90] mb-2 leading-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
+        <p v-if="subtitle" class="text-base font-medium text-gray-700 mb-4">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
         
-        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-8">
+        <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-6 text-base sm:text-[1.1rem]">
           <p>{{ content?.replace(/^Draft\s*-\s*/i, '') || content }}</p>
           <slot></slot>
         </div>
 
-        <div class="h-px bg-gray-100 w-full mb-6"></div>
+        <div class="h-px bg-gray-100 w-full mb-4"></div>
 
         <!-- Author & Date Box -->
-        <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-          <div class="h-12 w-12 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-lg">
+        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+          <div class="h-10 w-10 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-base">
             {{ author.substring(0, 2).toUpperCase() }}
           </div>
           <div class="flex flex-col">
-            <span class="font-bold text-gray-900">{{ author }}</span>
-            <span class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
+            <span class="font-bold text-sm text-gray-900">{{ author }}</span>
+            <span class="text-[10px] text-gray-500 font-medium tracking-wide">POSTED ON {{ formatDate(date).toUpperCase() }}</span>
           </div>
         </div>
       </div>
       
-      <div class="p-4 sm:p-6 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
+      <div class="p-3 sm:p-4 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
         <ButtonWeb 
           label="Close" 
           color="gray" 
           size="md" 
-          class="hover:opacity-90 hover:bg-gray-100 rounded-2xl shadow-sm transition-all font-bold px-8 text-gray-600"
+          class="hover:opacity-90 hover:bg-gray-100 rounded-2xl shadow-sm transition-all font-bold px-10 text-gray-600"
           @click="closeModal" 
         />
       </div>
