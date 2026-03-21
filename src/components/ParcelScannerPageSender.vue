@@ -1070,7 +1070,7 @@ const closePopUp = (operate) => {
                 <!-- OCR Scanner Focus Frame -->
                 <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
                   <!-- Focus Frame with Shadow Overlay -->
-                  <div class="relative w-[85%] h-[60%] border-2 border-white/70 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
+                  <div class="relative w-[85%] h-[60%] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
                     <!-- Corner Brackets -->
                     <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
                     <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
