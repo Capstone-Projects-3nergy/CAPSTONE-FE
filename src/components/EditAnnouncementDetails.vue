@@ -26,6 +26,7 @@ const handleResize = () => {
 }
 
 const openDatePicker = () => {
+  if (announcementForm.status !== 'PUBLISHED') return;
   if (dateInput.value?.showPicker) {
     dateInput.value.showPicker();
   } else {
@@ -648,7 +649,7 @@ const handleSave = async () => {
   let hasError = false
   if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
-  if (!announcementForm.publishAt) { dateError.value = true; hasError = true }
+  if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
   
   if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 3) {
@@ -1190,20 +1191,27 @@ const showProfileStaffPage = async function () {
                       </SelectWeb>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
+                      <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        Publish Date
+                      </label>
                       <div class="relative flex items-center group">
                         <!-- Icon Overlay -->
                         <div 
-                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                          class="absolute right-3 z-20 transition-transform duration-200"
+                          :class="announcementForm.status === 'PUBLISHED' ? 'group-hover:scale-105 cursor-pointer' : 'cursor-not-allowed'"
                           @click="openDatePicker"
                         >
-                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
+                          <div 
+                            class="p-1.5 rounded-lg shadow-sm flex items-center justify-center border transition-colors"
+                            :class="announcementForm.status === 'PUBLISHED' ? 'bg-white text-[#0E4B90] border-gray-100' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                          >
+                            <svg v-if="announcementForm.status === 'PUBLISHED'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                               <line x1="16" y1="2" x2="16" y2="6"></line>
                               <line x1="8" y1="2" x2="8" y2="6"></line>
                               <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                           </div>
                         </div>
 
@@ -1213,8 +1221,13 @@ const showProfileStaffPage = async function () {
                             readonly
                             :value="formatDateTimeDisplay(announcementForm.publishAt)"
                             placeholder="DD/MM/YYYY - HH:mm"
-                            @click="openDatePicker"
-                            class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                            @click="announcementForm.status === 'PUBLISHED' && openDatePicker()"
+                            class="w-full pl-4 pr-13 py-3 rounded-xl border transition-all outline-none font-medium"
+                            :class="[
+                              announcementForm.status === 'PUBLISHED' 
+                              ? 'border-gray-200 bg-white text-gray-700 cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-100' 
+                              : 'border-gray-100 bg-gray-50/80 text-gray-400 cursor-not-allowed'
+                            ]"
                          />
 
                         <!-- Hidden Native Datetime Input -->
@@ -1223,6 +1236,7 @@ const showProfileStaffPage = async function () {
                             type="datetime-local" 
                             v-model="announcementForm.publishAt"
                             :min="minDateTime"
+                            :disabled="announcementForm.status !== 'PUBLISHED'"
                             class="absolute opacity-0 w-0 h-0 pointer-events-none"
                          />
                       </div>

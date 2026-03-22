@@ -62,6 +62,7 @@ const publishAt = ref('')
 const targetAudience = ref('ALL_RESIDENTS')
 const pinned = ref(false)
 const sendNotification = ref(true)
+const activeTab = ref('publish')
 
 // ให้นำออก เพราะดึงจาก backend แล้ว
 const categories = ref([])
@@ -181,7 +182,9 @@ const minDateTime = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return title.value.trim() !== '' && categoryId.value !== null && publishAt.value !== '' && content.value.trim() !== ''
+  const common = title.value.trim() !== '' && categoryId.value !== null && content.value.trim() !== ''
+  if (activeTab.value === 'draft') return common
+  return common && publishAt.value !== ''
 })
 
 const closePopUp = (operate) => {
@@ -821,6 +824,36 @@ const returnLoginPage = async () => {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
                 
+                <!-- Tabs Selector -->
+                <div class="flex items-center gap-2 mb-8">
+                    <div class="flex bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
+                        <button 
+                            @click="activeTab = 'publish'"
+                            :class="[
+                                'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap',
+                                activeTab === 'publish' 
+                                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            ]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                            Publish
+                        </button>
+                        <button 
+                            @click="activeTab = 'draft'"
+                            :class="[
+                                'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap',
+                                activeTab === 'draft' 
+                                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            ]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Draft
+                        </button>
+                    </div>
+                </div>
+                
                 <!-- Title Input -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
@@ -892,8 +925,9 @@ const returnLoginPage = async () => {
                         </template>
                       </SelectWeb>
                    </div>
-                   <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date <span class="text-red-500">*</span></label>
+                   <!-- Publish Date (Conditional) -->
+                   <div v-if="activeTab === 'publish'" class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
                       <div class="relative flex items-center group">
                         <!-- Icon Overlay -->
                         <div 
@@ -1109,6 +1143,7 @@ const returnLoginPage = async () => {
                   @click="goBack" 
                 />
                 <ButtonWeb 
+                  v-if="activeTab === 'draft'" 
                   :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
                   color="yellow" 
                   :size="buttonSize"
@@ -1121,6 +1156,7 @@ const returnLoginPage = async () => {
                   </template>
                 </ButtonWeb>
                 <ButtonWeb 
+                  v-if="activeTab === 'publish'" 
                   label="Publish" 
                   color="blue" 
                   :size="buttonSize"
