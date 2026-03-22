@@ -61,6 +61,7 @@ const selectedAnnouncement = ref(null)
 const deleteSuccess = ref(false)
 const showPinLimitAlert = ref(false)
 const error = ref('')
+let statsInterval = null
 
 const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') {
@@ -220,6 +221,14 @@ const handleEdit = (item) => {
 
 const handleView = async (item) => {
   try {
+    // 1. Record the view first to ensure the view count is incremented on the server
+    await recordAnnouncementView(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    // 2. Fetch fresh announcement details with the updated view count
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -227,12 +236,6 @@ const handleView = async (item) => {
     )
 
     if (data) {
-      recordAnnouncementView(
-        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-        item.id,
-        router
-      )
-      
       announcementManager.updateAnnouncement(data)
       selectedAnnouncement.value = announcementManager.findAnnouncementById(item.id)
     } else {
@@ -317,12 +320,20 @@ console.log(data)
 }
 
 onUnmounted(() => {
+  if (statsInterval) {
+    clearInterval(statsInterval)
+  }
 })
 onMounted(async () => {
   await Promise.all([
     fetchAnnouncementData(),
     fetchCategoriesFromAnnouncements()
   ])
+
+  // Set up auto-refresh every 30 seconds to keep stats and view counts fresh for staff
+  statsInterval = setInterval(() => {
+    fetchAnnouncementData()
+  }, 30000)
 })
 
 const showParcelScannerPage = async function () {

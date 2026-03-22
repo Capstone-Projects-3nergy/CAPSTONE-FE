@@ -256,6 +256,15 @@ const filteredNews = computed(() => {
 
 const openModal = async (item) => {
   try {
+    // 1. Record the view first to ensure the standard view count is updated on server
+    // Added await here to make sure server updates before we fetch the record in next step
+    await recordAnnouncementView(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    // 2. Fetch the announcement details (which now has the updated view count)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -263,13 +272,9 @@ const openModal = async (item) => {
     )
 
     if (data) {
-      recordAnnouncementView(
-        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-        item.id,
-        router
-      )
-      
+      // Update the local store so other components (like tables) sync up
       announcementManager.updateAnnouncement(data)
+      // Retrieve the freshly updated item from manager to ensure all calculated fields are consistent
       const freshItem = announcementManager.findAnnouncementById(item.id)
       
       if (freshItem) {
