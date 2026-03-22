@@ -154,7 +154,7 @@ const formatDate = (dateString) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
             </svg>
-            PINNED
+            Pinned
           </div>
           <span v-if="status" class="px-3 py-1 inline-flex items-center text-[11px] font-bold rounded-xl" :class="getStatusBadgeClass(status)">
             {{ formatStatus(status) }}
