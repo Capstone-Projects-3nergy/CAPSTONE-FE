@@ -1596,7 +1596,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <!-- Pending Approval -->
+              <!--   Pending Accounts -->
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
@@ -1882,7 +1882,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div> -->
 
-              <!-- Pending Approval List -->
+              <!--   Pending Accounts List -->
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
@@ -1890,7 +1890,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <div class="p-1.5 bg-amber-100 rounded-lg text-amber-600 shadow-sm flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6.5 7h11" /><path d="M6.5 17h11" /><path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1z" /><path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1z" /></svg>
                       </div>
-                      Pending Approval
+                      Pending Accounts
                     </h3>
                     <p class="text-xs text-yellow-600/80 mt-1">{{ stats.pendingResidents }} residents awaiting verification</p>
                   </div>
@@ -1938,7 +1938,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       </svg>
                     </div>
                     <p class="text-sm font-medium">All residents verified</p>
-                    <p class="text-[10px] opacity-70">No pending approvals at this time</p>
+                    <p class="text-[10px] opacity-70">No   Pending Accountss at this time</p>
                   </div>
 
                 </div>

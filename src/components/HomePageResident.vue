@@ -1078,7 +1078,7 @@ function formatDateTime(datetimeStr) {
                    </svg>
                  </div>
                  <h2 class="text-[20px] sm:text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight whitespace-nowrap">
-                    Latest <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0E4B90] to-blue-600">Dormitory</span> News
+                   Dormitory <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0E4B90] to-blue-600">Announcements</span>
                  </h2>
               </div>
               
