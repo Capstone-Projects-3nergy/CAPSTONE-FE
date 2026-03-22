@@ -533,6 +533,11 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchKeyword, selectedDate], () => {
+  currentPage.value = 1
+})
+
 const handleSearchUpdate = (val) => {
   filterSearch.value = val
   searchKeyword.value = val
