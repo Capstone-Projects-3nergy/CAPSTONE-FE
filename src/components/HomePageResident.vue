@@ -134,6 +134,7 @@ const mapStatus = (status) => {
 
 onUnmounted(() => {
   // Removed resize listener to allow global state persistence
+  if (announcementsInterval) clearInterval(announcementsInterval)
 })
 onMounted(async () => {
   // Sidebar responsive logic is now handled by SidebarManager
@@ -617,6 +618,14 @@ const openModal = async (item) => {
   if (!item || !item.id) return
 
   try {
+    // 1. Record the view first to ensure the standard view count is updated on server
+    await recordAnnouncementView(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    // 2. Fetch the announcement details (which now has the updated view count)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -624,12 +633,6 @@ const openModal = async (item) => {
     )
 
     if (data) {
-      recordAnnouncementView(
-        `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-        item.id,
-        router
-      )
-      
       announcementManager.updateAnnouncement(data)
       const freshItem = announcementManager.findAnnouncementById(item.id)
       
@@ -638,7 +641,7 @@ const openModal = async (item) => {
           ...freshItem,
           tag: freshItem.category || 'General',
           date: freshItem.publishAt || freshItem.datePosted || 'Just now',
-          views: freshItem.viewCount || 0,
+          views: freshItem.views || freshItem.viewCount || 0,
           author: 'Staff Portal',
           type: (freshItem.category || '').toLowerCase().includes('event') ? 'event' : 'news'
         }
@@ -663,9 +666,10 @@ const closeModal = () => {
   }, 300)
 }
 
+let announcementsInterval = null
+
 onMounted(async () => {
-  // Fetch announcements if empty
-  if (announcementManager.announcements.length === 0) {
+  const fetchAnnouncements = async () => {
     try {
       const data = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`)
       if (data && Array.isArray(data)) {
@@ -675,6 +679,12 @@ onMounted(async () => {
       console.warn('Fetch announcements failed', e)
     }
   }
+
+  // Initial fetch
+  await fetchAnnouncements()
+
+  // Set up periodic fetch for latest updates
+  announcementsInterval = setInterval(fetchAnnouncements, 30000)
 })
 
 //   const data = await getItems(
