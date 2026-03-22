@@ -1103,14 +1103,14 @@ function formatDateTime(datetimeStr) {
           </div>
 
           <!-- Dynamic Stories Grid -->
-          <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+          <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-stretch anim-fade-in">
             
             <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
-              class="lg:col-span-7 group cursor-pointer bg-white rounded-[2rem] md:rounded-[2.5rem] p-3 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
+              class="lg:col-span-7 group cursor-pointer bg-white rounded-xl lg:rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
             >
-              <div class="relative aspect-[16/9] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-5 md:mb-8 group/img">
+              <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
                 <!-- Image with fallback to Placeholder -->
                 <img 
                   v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
@@ -1140,23 +1140,24 @@ function formatDateTime(datetimeStr) {
                 </div>
               </div>
               
-              <div class="px-2 space-y-4">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px]" :class="getCategoryBadgeClass(latestAnnouncements[0].category)">
+              <div class="px-1 space-y-3 flex flex-col flex-grow">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px] self-start" :class="getCategoryBadgeClass(latestAnnouncements[0].category)">
                   <span v-html="getCategoryIcon(latestAnnouncements[0].category)"></span>
                   {{ latestAnnouncements[0].category }}
                 </div>
-                <h3 class="text-xl md:text-3xl font-black text-[#0E4B90] leading-tight group-hover:text-blue-600 transition-colors">
+                <h3 class="text-xl md:text-2xl font-black text-[#0E4B90] leading-tight group-hover:text-blue-600 transition-colors">
                   {{ latestAnnouncements[0].title }}
                 </h3>
-                <div class="space-y-2">
-                  <p v-if="latestAnnouncements[0].subtitle" class="text-gray-900 text-lg font-bold leading-tight line-clamp-2">
+                <div class="space-y-1.5 flex-grow">
+                  <p v-if="latestAnnouncements[0].subtitle" class="text-gray-900 text-base md:text-lg font-bold leading-tight line-clamp-2">
                     {{ latestAnnouncements[0].subtitle }}
                   </p>
-                  <p v-if="latestAnnouncements[0].content" class="text-gray-500 text-base leading-relaxed line-clamp-3 font-medium">
+                  <p v-if="latestAnnouncements[0].content" class="text-gray-500 text-sm md:text-base leading-relaxed line-clamp-2 font-medium">
                     {{ latestAnnouncements[0].content }}
                   </p>
                 </div>
-                <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
+                <div class="pt-6 border-t border-gray-50 flex items-center justify-between mt-auto">
+
                   <div class="flex items-center gap-4">
                     <div class="flex items-center gap-1.5 text-gray-400 font-bold text-xs border-l border-gray-100 pl-4">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1181,7 +1182,7 @@ function formatDateTime(datetimeStr) {
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
                 :key="news.id"
                 @click="openModal(news)"
-                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-[1.5rem] md:rounded-[2rem] border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
+                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-xl md:rounded-2xl border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
                 <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
                   <img 
@@ -1237,7 +1238,7 @@ function formatDateTime(datetimeStr) {
           </div>
 
           <!-- Empty State -->
-          <div v-else class="py-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
+          <div v-else class="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
              <div class="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
@@ -1284,4 +1285,19 @@ function formatDateTime(datetimeStr) {
   ></Teleport>
 </template>
 
-<style scoped></style>
+<style scoped>
+.anim-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
