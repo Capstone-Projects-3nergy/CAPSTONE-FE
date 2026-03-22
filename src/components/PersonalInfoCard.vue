@@ -48,6 +48,7 @@ const props = defineProps({
   roomNumber: { type: String, default: null },
   status: { type: String, default: null },
   lineId: { type: String, default: null },
+  isLineLinked: { type: Boolean, default: null },
   phoneNumber: { type: String, default: null },
   showNotify: { type: Boolean, default: true },
   showMenu: { type: Boolean, default: true },
@@ -395,18 +396,21 @@ const userRoleLabel = computed(() => {
 })
 
 const effectiveLineId = computed(() => {
+  let isLinked = false
   let id = null
 
   if (props.useCurrentProfile) {
-    // ✅ ตรวจสอบจาก Store และ Profile ก่อนสำหรับผู้ใช้งานปัจจุบัน
+    // ✅ ตรวจสอบสถานะจริงจากการเชื่อมต่อ LINE (Boolean)
+    isLinked = profileManager.currentProfile?.isLineLinked || loginManager.user?.isLineLinked || props.isLineLinked
     id = loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId
   } else {
-    // ✅ สำหรับการดูโปรไฟล์คนอื่น (เช่น Staff ดู Resident)
+    // ✅ สำหรับการดูโปรไฟล์คนอื่น
+    isLinked = props.isLineLinked !== null ? props.isLineLinked : routeUser.value?.isLineLinked
     id = props.lineId || routeUser.value?.lineId
   }
 
-  // ✅ ตรวจสอบสถานะการเชื่อมต่อ: ถ้าค่าเป็น null, "null", หรือ "unlinked" ให้ถือว่าไม่ได้เชื่อมต่อ
-  if (!id || id === 'null' || id === 'unlinked' || id === '') {
+  // ✅ ใช้ Boolean 'isLinked' เป็นตัวตัดสิน UI แทนการเช็ค String แบบเดิม
+  if (!isLinked) {
     return null
   }
 
