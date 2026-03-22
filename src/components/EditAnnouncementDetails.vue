@@ -686,8 +686,9 @@ const handleSave = async () => {
       priority: announcementForm.priority || 1,
       sendNotification: announcementForm.sendNotification,
       publishAt: announcementForm.publishAt ? (announcementForm.publishAt.includes('T') && announcementForm.publishAt.length === 16 ? announcementForm.publishAt + ':00' : announcementForm.publishAt) : null,
-      targetAudience: announcementForm.targetAudience,
+      publishNow: announcementForm.status === 'PUBLISHED',
       status: announcementForm.status,
+      targetAudience: announcementForm.targetAudience,
       coverImage: coverImage.value // Include the File object for multipart upload
     }
 
@@ -1147,6 +1148,7 @@ const showProfileStaffPage = async function () {
                       <SelectWeb 
                          v-model="announcementForm.status"
                          :options="statusOptions"
+                         :disabled="initialForm && initialForm.status === 'PUBLISHED'"
                          placeholder="Select status"
                          customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                        >
