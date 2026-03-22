@@ -1144,7 +1144,13 @@ const showProfileStaffPage = async function () {
                       </div>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Status </label>
+                      <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        Status
+                        <span v-if="initialForm && initialForm.status === 'PUBLISHED'" class="flex items-center text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md border border-gray-200 uppercase tracking-wider font-bold">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                          Locked
+                        </span>
+                      </label>
                       <SelectWeb 
                          v-model="announcementForm.status"
                          :options="statusOptions"
