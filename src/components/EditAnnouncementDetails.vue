@@ -577,10 +577,10 @@ const fetchAnnouncementDetail = async () => {
 
   // 2) Load from Backend to ensure data is correct/up-to-date
   try {
-    // Note: Detail endpoint is /api/announcements/{id} (not /api/announcements/staff/{id})
-    console.log('Fetching from API:', `${import.meta.env.VITE_BASE_URL}/api/announcements/${aid}`)
+    // Note: Use /api/announcements/staff/{id} to support viewing Drafts
+    console.log('Fetching from API:', `${import.meta.env.VITE_BASE_URL}/api/announcements/staff/${aid}`)
     const data = await getAnnouncementById(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
       aid,
       router
     )
