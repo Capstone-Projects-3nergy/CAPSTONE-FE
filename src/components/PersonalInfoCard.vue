@@ -466,6 +466,18 @@ const reconnectLine = async () => {
   }
 }
 
+const handleSendEmailNotification = () => {
+  // Placeholder for email notification logic
+  lineAlertVisible.value = true
+  lineAlertStyle.value = 'blue'
+  lineAlertMessage.value = 'Email Sent'
+  lineAlertTitle.value = 'The verification email has been sent to the resident.'
+  
+  setTimeout(() => {
+    lineAlertVisible.value = false
+  }, 5000)
+}
+
 const handleUnlink = async () => {
   if (confirm('Are you sure you want to disconnect your LINE account?')) {
     const success = await unlinkLineAccount(router)
@@ -1131,24 +1143,36 @@ const handleUnlink = async () => {
                     </div>
                   </div>
                   
+                  <!-- Verified Status Badge (For Active/Inactive) -->
                   <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" class="flex items-center gap-3 px-8 py-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
                     <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
                     <div>
-                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Account</p>
+                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5 uppercase">Account</p>
                       <p class="text-lg font-black text-emerald-900 leading-none">Verified</p>
                     </div>
                   </div>
 
-                  <button 
-                    v-else
-                    @click="$emit('changeStatus')"
-                    class="px-6 py-4 sm:px-10 sm:py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 cursor-pointer group whitespace-nowrap"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-12 transition-transform"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                    <span>Update Status</span>
-                  </button>
+                  <!-- Email Notification Reminder (For Pending) -->
+                  <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" class="bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 flex flex-col sm:flex-row items-center gap-5">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                          <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="flex-1 text-left">
+                       <h5 class="text-base font-black text-gray-800 mb-0.5">Account Verification</h5>
+                       <p class="text-xs text-gray-500 font-medium leading-relaxed">Resident hasn't verified account yet. Send verification email to resident to complete account setup.</p>
+                    </div>
+                    <button 
+                      @click="handleSendEmailNotification"
+                      class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                    >
+                       <span>Send Email</span>
+                    </button>
+                  </div>
                 </div>
                 
                 <!-- Background decoration -->
