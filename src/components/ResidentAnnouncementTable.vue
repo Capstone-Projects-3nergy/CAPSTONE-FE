@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   items: {
     type: Array,
     default: () => []
@@ -27,6 +29,19 @@ defineProps({
 })
 
 defineEmits(['prev', 'next', 'go', 'view'])
+
+const sortedItems = computed(() => {
+  return [...props.items].sort((a, b) => {
+    // 1. Pinned status (Pinned items first)
+    if (a.pinned && !b.pinned) return -1
+    if (!a.pinned && b.pinned) return 1
+    
+    // 2. Date (Latest first)
+    const dateA = new Date(a.publishAt || a.createdAt || a.datePosted || a.date || 0)
+    const dateB = new Date(b.publishAt || b.createdAt || b.datePosted || b.date || 0)
+    return dateB - dateA
+  })
+})
 
 const getCategoryBadgeClass = (category) => {
   switch (category) {
@@ -77,7 +92,7 @@ const formatDate = (dateString) => {
       </div>
       
       <div
-        v-for="item in items"
+        v-for="item in sortedItems"
         :key="item.id"
         @click="$emit('view', item)"
         class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
@@ -183,7 +198,7 @@ const formatDate = (dateString) => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
-            <tr v-for="item in items" :key="'list-' + item.id" class="hover:bg-gray-50/50 transition-colors cursor-pointer group" @click="$emit('view', item)">
+            <tr v-for="item in sortedItems" :key="'list-' + item.id" class="hover:bg-gray-50/50 transition-colors cursor-pointer group" @click="$emit('view', item)">
               <td class="px-6 py-4">
                 <div class="flex flex-col">
                   <div class="text-sm font-bold text-[#0E4B90] transition-colors">{{ item.title }}</div>
