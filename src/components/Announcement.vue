@@ -565,8 +565,8 @@ onMounted(async () => {
 
               <!-- Header Content -->
               <div class="relative z-10 mb-6 px-5 sm:px-0">
-                <h3 class="text-2xl sm:text-4xl font-extrabold text-[#1D355E] mb-1.5 tracking-tight">Community Highlights</h3>
-                <p class="text-gray-500 text-xs sm:text-base font-medium">Important news and updates shared with everyone in our community</p>
+                <h3 class="text-2xl sm:text-4xl font-extrabold text-[#1D355E] mb-1.5 tracking-tight">Recommended News</h3>
+                <p class="text-gray-500 text-xs sm:text-base font-medium">Specially selected updates for dormitory</p>
               </div>
 
               <!-- Scrollable Area with Absolute Arrows -->
