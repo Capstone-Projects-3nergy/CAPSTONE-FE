@@ -852,6 +852,29 @@ async function connectLineAccount(lineUserId, router) {
   }
 }
 
+async function sendVerificationEmail(userId, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/staff/users/${userId}/send-verification`
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('sendVerificationEmail error:', error)
+    return false
+  }
+}
+
 async function linkLineAccount(code, state, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -940,6 +963,7 @@ export {
   sendParcelNotification,
   unlinkLineAccount,
   connectLineAccount,
+  sendVerificationEmail,
   linkLineAccount,
   getLineConnectUrl
 }

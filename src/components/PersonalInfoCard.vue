@@ -5,7 +5,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl, sendVerificationEmail } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 import AlertPopUp from './AlertPopUp.vue'
 const emit = defineEmits([
@@ -466,16 +466,36 @@ const reconnectLine = async () => {
   }
 }
 
-const handleSendEmailNotification = () => {
-  // Placeholder for email notification logic
-  lineAlertVisible.value = true
-  lineAlertStyle.value = 'blue'
-  lineAlertMessage.value = 'Email Sent'
-  lineAlertTitle.value = 'The verification email has been sent to the resident.'
+const handleSendEmailNotification = async () => {
+  // ✅ ระบุ userId จาก props หรือจาก routeUser (Staff ดู Resident)
+  const userId = props.userId || routeUser.value?.id || (props.useCurrentProfile ? profileManager.currentProfile?.userId : null)
   
-  setTimeout(() => {
-    lineAlertVisible.value = false
-  }, 5000)
+  if (!userId) {
+    console.error('No valid user ID available for sending email')
+    return
+  }
+
+  const success = await sendVerificationEmail(userId, router)
+  
+  if (success) {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'blue'
+    lineAlertMessage.value = 'Email Sent'
+    lineAlertTitle.value = 'The verification email has been sent to the resident.'
+    
+    setTimeout(() => {
+      lineAlertVisible.value = false
+    }, 10000)
+  } else {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Failed'
+    lineAlertTitle.value = 'Unable to send verification email. Please try again.'
+    
+    setTimeout(() => {
+      lineAlertVisible.value = false
+    }, 10000)
+  }
 }
 
 const handleUnlink = async () => {
