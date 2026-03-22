@@ -1072,7 +1072,7 @@ function formatDateTime(datetimeStr) {
           <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
             <div class="space-y-4">
               <div class="flex items-center gap-4">
-                 <div class="p-2 md:p-2.5 bg-blue-50 text-[#0E4B90] rounded-xl md:rounded-2xl shadow-sm border border-blue-100/50">
+                 <div class="p-2 md:p-2.5 bg-blue-50 text-[#0E4B90] rounded-2xl shadow-sm border border-blue-100/50">
                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                    </svg>
@@ -1108,9 +1108,9 @@ function formatDateTime(datetimeStr) {
             <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
-              class="lg:col-span-7 group cursor-pointer bg-white rounded-xl lg:rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
+              class="lg:col-span-7 group cursor-pointer bg-white rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
             >
-              <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
+              <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
                 <!-- Image with fallback to Placeholder -->
                 <img 
                   v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
@@ -1182,9 +1182,9 @@ function formatDateTime(datetimeStr) {
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
                 :key="news.id"
                 @click="openModal(news)"
-                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-xl md:rounded-2xl border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
+                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-2xl border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
+                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
                   <img 
                     v-if="news.coverImageUrl || news.coverImage"
                     :src="news.coverImageUrl || news.coverImage"

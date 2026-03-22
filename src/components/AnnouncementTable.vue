@@ -80,7 +80,7 @@ const formatDate = (dateString) => {
   <div>
     <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-16 px-4 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+      <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-16 px-4 text-center bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
         <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 text-gray-300">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>

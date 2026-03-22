@@ -88,7 +88,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
 </script>
 <template>
   <div
-    class="bg-white h-auto mb-3 shadow-md rounded-xl p-4 border border-gray-200"
+    class="bg-white h-auto mb-3 shadow-md rounded-2xl p-4 border border-gray-200"
   >
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div v-if="props.showDate" class="relative flex items-center group">

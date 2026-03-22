@@ -867,7 +867,7 @@ const handleTrackingInput = (event, index) => {
       <main class="flex-1 p-9 bg-[#f8f9fb]">
            <div class="max-w-4xl mx-auto flex flex-col gap-4 mb-6 px-2">
           <div class="flex items-center gap-4">
-                <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+                <div class="p-3 bg-blue-100 rounded-2xl text-[#0E4B90] shadow-sm">
                          <svg
                   width="25"
                   height="25"
@@ -1008,7 +1008,7 @@ const handleTrackingInput = (event, index) => {
                 </div> -->
 
                 <!-- Dynamic Parcel List -->
-                <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
+                <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-2xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
                   <div class="absolute top-4 right-4" v-if="form.items.length > 1">
                     <button @click="removeParcelItem(index)" type="button" class="text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full shadow-sm border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -1097,7 +1097,7 @@ const handleTrackingInput = (event, index) => {
                 <button
                   @click="addParcelItem"
                   type="button"
-                  class="w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#0E4B90] hover:text-[#0E4B90] transition-colors flex items-center justify-center gap-2 group font-medium cursor-pointer"
+                  class="w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-2xl hover:border-[#0E4B90] hover:text-[#0E4B90] transition-colors flex items-center justify-center gap-2 group font-medium cursor-pointer"
                 >
                   <div class="bg-gray-100 rounded-full p-1 group-hover:bg-blue-50 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -1112,7 +1112,7 @@ const handleTrackingInput = (event, index) => {
                 <ButtonWeb
                   label="Back"
                   color="gray"
-                  class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#0E4B90] hover:border-[#0E4B90] transition-all duration-200 font-medium"
+                  class="px-6 py-2.5 rounded-2xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#0E4B90] hover:border-[#0E4B90] transition-all duration-200 font-medium"
                   @click="showHomePageResidentWeb"
                 />
                 <ButtonWeb
@@ -1120,7 +1120,7 @@ const handleTrackingInput = (event, index) => {
                   label="Add"
                   :loading="isLoading"
                   :disabled="!isFormValid"
-                  class="px-8 py-2.5 rounded-xl bg-[#1D355E] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
+                  class="px-8 py-2.5 rounded-2xl bg-[#1D355E] text-white hover:bg-[#0c3e77] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-bold shadow-md"
                   color="blue"
                   @click="submitVerification"
                 />

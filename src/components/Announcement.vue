@@ -553,7 +553,7 @@ onMounted(async () => {
             class="mb-10 sm:mb-14 overflow-visible -mx-6 sm:mx-0 px-0 sm:px-1" 
             v-if="bannerAnnouncements.length > 0 && (!selectedCategory || selectedCategory === 'all' || selectedCategory === 'General' || selectedCategory === 'Events')"
           >
-            <div class="relative overflow-hidden rounded-none sm:rounded-3xl bg-white p-5 sm:p-8 border-y sm:border border-blue-50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+            <div class="relative overflow-hidden rounded-none sm:rounded-2xl bg-white p-5 sm:p-8 border-y sm:border border-blue-50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
               <!-- Decorative Background Pattern (Waves like Image 2) -->
               <div class="absolute bottom-0 left-0 right-0 h-48 sm:h-64 pointer-events-none overflow-hidden">
                 <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
