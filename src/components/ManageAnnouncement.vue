@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import { useSidebarManager } from '@/stores/SidebarManager'
@@ -24,7 +24,6 @@ import AnnouncementTable from './AnnouncementTable.vue'
 import DeleteAnnouncement from './DeleteAnnouncement.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import AlertPopUp from './AlertPopUp.vue'
-import { computed } from 'vue'
 
 import {
   getAnnouncements,
@@ -97,6 +96,11 @@ const selectedDate = ref('')
 const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
+
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchQuery, selectedCategory, selectedDate], () => {
+  currentPage.value = 1
+})
 
 const totalPublished = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'published').length)
 const totalPinned = computed(() => announcements.value.filter(a => a.pinned).length)
