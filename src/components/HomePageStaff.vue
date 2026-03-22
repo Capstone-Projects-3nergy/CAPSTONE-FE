@@ -63,21 +63,18 @@ const calculateOverdueDays = (receiveAt) => {
 
 const overdueParcelsList = computed(() => {
   if (!getMappedParcels.value) return []
-  // const now = new Date()
-  // const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+  const now = new Date()
+  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
     .filter(p => {
       // Exclude 'Picked Up' status
       if (p.status === 'Picked Up') return false
       
-      // Commented out overdue logic (> 7 days)
-      /*
+      // Use 3 days for overdue threshold
       const receivedDate = new Date(p.receiveAt)
       if (isNaN(receivedDate.getTime())) return false
-      return (now - receivedDate) > sevenDaysMs
-      */
-      return true
+      return (now - receivedDate) > threeDaysMs
     })
     .sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 })
@@ -1528,7 +1525,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <h3 class="text-red-600 font-bold text-base md:text-lg">
                   {{ overdueParcelsList.length }} 
                   <!-- Overdue Parcels (>7 days) -->
-                  Overdue Parcels (>7 days)
+                  Overdue Parcels (>3 days)
                 </h3>
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>

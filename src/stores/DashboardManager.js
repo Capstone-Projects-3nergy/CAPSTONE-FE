@@ -117,6 +117,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       residentName: p.ownerName || p.residentName || 'N/A',
       roomNumber: p.roomNumber || 'N/A',
       status: mapStatus(p.status),
+      receiveAt: p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt || new Date().toISOString(),
       updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString()
     }))
   })
@@ -215,7 +216,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const currentMonth = today.getMonth()
       const currentYear = today.getFullYear()
       const currentWeekIdx = getWeekIndex(today)
-      const sevenDaysAgo = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000))
+      const threeDaysAgo = new Date(today.getTime() - (3 * 24 * 60 * 60 * 1000))
 
       parcelsData.forEach(p => {
         // Calculate Stats
@@ -225,7 +226,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         
         const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
         const isExplicitOverdue = pStatus.includes('OVERDUE')
-        const isOld = rDate && rDate < sevenDaysAgo && !isPickedUp
+        const isOld = rDate && rDate < threeDaysAgo && !isPickedUp
 
         if (isPickedUp) {
           stats.pickedUpParcels++
@@ -322,7 +323,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     }
     // Distribute 5 Overdue across the month
     for (let i = 0; i < 5; i++) {
-      const offset = Math.floor(Math.random() * 20) + 7 // 7-27 days ago (old enough to be overdue)
+      const offset = Math.floor(Math.random() * 20) + 3 // 3-23 days ago (old enough to be overdue)
       mockParcels.push({ status: 'OVERDUE', createdAt: daysAgo(offset) })
     }
     

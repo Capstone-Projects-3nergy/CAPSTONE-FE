@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageStaff.vue'
@@ -54,6 +54,14 @@ const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
 const parcel = ref(null)
+const isOverdue = computed(() => {
+  if (!parcel.value || !parcel.value.receivedAt) return false
+  const receivedDate = new Date(parcel.value.receivedAt)
+  const currentDate = new Date()
+  const diffTime = Math.abs(currentDate - receivedDate)
+  const diffDays = diffTime / (1000 * 60 * 60 * 24)
+  return diffDays > 3
+})
 
 const activeTab = ref('info')
 
@@ -635,7 +643,7 @@ function formatDateTime(datetimeStr) {
                   </p>
                </div>
 
-               <div v-if="parcel?.status !== 'PICKED_UP'" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500">
+               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500">
                   <div class="flex flex-col sm:flex-row items-center gap-6">
                     <div class="w-16 h-16 rounded-2xl bg-[#06C755] flex items-center justify-center shrink-0 shadow-lg shadow-green-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
