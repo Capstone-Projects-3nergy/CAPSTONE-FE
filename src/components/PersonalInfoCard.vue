@@ -443,19 +443,37 @@ const reconnectLine = async () => {
   }
 }
 
-/* 
 const handleUnlink = async () => {
   if (confirm('Are you sure you want to disconnect your LINE account?')) {
     const success = await unlinkLineAccount(router)
     if (success) {
-      // Refresh user profile or redirect
-      window.location.reload()
+      // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
+      if (profileManager.currentProfile) {
+        profileManager.currentProfile.isLineLinked = false
+        profileManager.currentProfile.lineId = null
+      }
+      if (loginManager.user) {
+        loginManager.user.isLineLinked = false
+        loginManager.user.lineId = null
+      }
+      
+      // ✅ แสดง Popup แจ้งเตือนความสำเร็จ
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'blue'
+      lineAlertMessage.value = 'Disconnected'
+      lineAlertTitle.value = 'Your LINE account has been unlinked successfully.'
+      
+      setTimeout(() => {
+        lineAlertVisible.value = false
+      }, 5000)
     } else {
-      alert('Failed to disconnect LINE account. Please try again.')
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'red'
+      lineAlertMessage.value = 'Error'
+      lineAlertTitle.value = 'Failed to disconnect. Please try again later.'
     }
   }
 }
-*/
 </script>
 <template>
   <div class="w-full mx-auto px-4 relative">
@@ -781,32 +799,31 @@ const handleUnlink = async () => {
 
                 <!-- Action Buttons Area -->
                 <div class="flex flex-col items-center gap-3">
+                  <!-- Action Button: Connect or Status -->
                   <button
+                    v-if="!effectiveLineId"
                     @click="handleLineAction"
                     class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
                   >
-                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access / Switch Account' : 'Connect Now' }}</span>
+                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">Connect Now</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
+
+                  <!-- Status Display when connected -->
+                  <div
+                    v-else
+                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-gray-100 text-gray-400 border border-gray-200 font-black cursor-default transition-all duration-300"
+                  >
+                    <span class="text-sm sm:text-base whitespace-nowrap">LINE Account Connected</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
                   
                   <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
-                    <!-- Secondary Action: Switch Account -->
-                    <!-- <button 
-                      @click="reconnectLine"
-                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
-                        <path d="M21 2v6h-6"></path>
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                        <path d="M3 22v-6h6"></path>
-                        <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
-                      </svg>
-                      <span>Switch Account</span>
-                    </button> -->
-
-                    <!-- Unlink Action (Commented out for future use)
                     <button 
                       @click="handleUnlink"
                       class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
@@ -817,7 +834,6 @@ const handleUnlink = async () => {
                       </svg>
                       <span>Disconnect</span>
                     </button>
-                    -->
                   </div>
                 </div>
               </div>
@@ -1097,8 +1113,8 @@ const handleUnlink = async () => {
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
                     <div>
-                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Verified Account</p>
-                      <p class="text-lg font-black text-emerald-900 leading-none uppercase">Approved</p>
+                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Account</p>
+                      <p class="text-lg font-black text-emerald-900 leading-none">Verified</p>
                     </div>
                   </div>
 

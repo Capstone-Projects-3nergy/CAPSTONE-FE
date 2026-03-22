@@ -808,14 +808,14 @@ async function sendLineNotification(payload, router, customUrl = null) {
 async function unlinkLineAccount(router) {
   try {
     const options = {
-      method: 'DELETE',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       }
     }
 
     const res = await fetchWithAuth(
-      `${import.meta.env.VITE_BASE_URL}/api/line/unlink`,
+      `${import.meta.env.VITE_BASE_URL}/api/profile/disconnect-line`,
       options,
       router
     )
@@ -838,7 +838,7 @@ async function linkLineAccount(code, state, router) {
     const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {
       // ตรวจสอบว่า Backend คืนค่าเป็น JSON หรือไม่
-      const contentType = res.headers.get('content-type')
+      const contentType = res.headers.get('content-type')  
       if (contentType && contentType.includes('application/json')) {
         return await res.json()
       }
