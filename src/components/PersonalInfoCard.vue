@@ -417,14 +417,37 @@ const effectiveLineId = computed(() => {
   return id
 })
 
-const handleLineAction = () => {
+const handleLineAction = async (directLineId = null) => {
+  // 1. เช็คสถานะการเชื่อมต่อเดิม (ถ้าผูกไว้แล้ว ให้เปิดโปรไฟล์ LINE OA)
   if (effectiveLineId.value) {
-    // กรณีที่เชื่อมต่อแล้ว: เปิดโปรไฟล์ LINE หรือแอดเพื่อน
-    window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
-  } else {
-    // กรณีที่ยังไม่ได้เชื่อมต่อ: ไปยังหน้า LINE Login ของ Backend เพื่อผูกบัญชี
-    reconnectLine()
+    if (typeof effectiveLineId.value === 'string') {
+      window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
+    }
+    return
   }
+
+  // 2. 🚀 [ระบบใหม่] การผูกบัญชีแบบ Direct (ถ้าได้รับไอดีส่งมาโดยตรงจาก LIFF หรือพารามิเตอร์)
+  if (directLineId && typeof directLineId === 'string') {
+    const success = await connectLineAccount(directLineId, router)
+    if (success) {
+      // ✅ อัปเดต UI ทันทีใน Store
+      if (profileManager.currentProfile) {
+        profileManager.currentProfile.isLineLinked = true
+        profileManager.currentProfile.lineId = directLineId
+      }
+      if (loginManager.user) {
+        loginManager.user.isLineLinked = true
+        loginManager.user.lineId = directLineId
+      }
+      
+      // ✅ แสดง Popup ความสำเร็จ
+      showLineSuccessPopup.value = true
+      return
+    }
+  }
+
+  // 3. 🛡️ [ระบบเดิม] ถ้าไม่มีไอดีส่งมา ให้ทำงานแบบ Redirect ไปหน้า LINE Login (OAuth)
+  reconnectLine()
 }
 
 const reconnectLine = async () => {
@@ -436,7 +459,7 @@ const reconnectLine = async () => {
 
   const url = await getLineConnectUrl(token, router)
   if (url) {
-    // Backend returns the full authorize URL
+    // 🛡️ พาลูกบ้านไปหน้า Auth ของ LINE (ระบบเดิมที่คุณใช้งานอยู่ 100%)
     window.location.href = url
   } else {
     console.error('Failed to get LINE login URL from backend')
