@@ -174,7 +174,7 @@ const formatDate = (dateString) => {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
-                  <span>{{ item.views || 0 }}</span>
+                  <span>{{ item.viewCount || item.views || 0 }}</span>
                 </div>
             </div>
             
@@ -363,7 +363,7 @@ const formatDate = (dateString) => {
                   </div>
                   <!-- Desktop Views (Hidden on Mobile) -->
                   <div class="hidden md:block md:text-center text-sm text-gray-500 font-medium">
-                    {{ item.views || 0 }}
+                    {{ item.viewCount || item.views || 0 }}
                   </div>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 whitespace-nowrap align-middle bg-[#F8FAFC] md:bg-transparent">
@@ -384,7 +384,7 @@ const formatDate = (dateString) => {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      <span>{{ item.views || 0 }} views</span>
+                      <span>{{ item.viewCount || item.views || 0 }} views</span>
                     </div>
                   </div>
 
