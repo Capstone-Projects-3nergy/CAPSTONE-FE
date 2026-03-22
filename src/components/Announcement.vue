@@ -45,7 +45,7 @@ watch(
 const bannerContainer = ref(null)
 const bannerAnnouncements = computed(() => {
   return allPublishedAnnouncements.value
-    .filter(item => item.pinned)
+    .filter(item => item.category === 'Events' || item.category === 'General')
     .slice(0, 8)
 })
 
@@ -617,7 +617,7 @@ onMounted(async () => {
                         </svg>
                       </div>
                       <!-- Bookmark Icon Overlay -->
-                      <div class="absolute top-3 right-3">
+                      <div class="absolute top-3 right-3" v-if="item.pinned">
                         <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-red-600 shadow-lg">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
