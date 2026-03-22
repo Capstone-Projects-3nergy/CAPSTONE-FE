@@ -5,7 +5,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems, unlinkLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 import AlertPopUp from './AlertPopUp.vue'
 const emit = defineEmits([

@@ -829,6 +829,29 @@ async function unlinkLineAccount(router) {
   }
 }
 
+async function connectLineAccount(lineUserId, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/profile/connect-line?lineUserId=${lineUserId}`
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('connectLineAccount error:', error)
+    return false
+  }
+}
+
 async function linkLineAccount(code, state, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -916,6 +939,7 @@ export {
   sendLineNotification,
   sendParcelNotification,
   unlinkLineAccount,
+  connectLineAccount,
   linkLineAccount,
   getLineConnectUrl
 }
