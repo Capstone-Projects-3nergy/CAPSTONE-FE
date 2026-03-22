@@ -1032,6 +1032,37 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div> -->
           </div>
           
+          <!-- Export Actions -->
+          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="text-sm font-medium text-gray-500">Export:</span>
+              <button 
+                @click="handleExportExcel"
+                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
+                <span class="hidden sm:inline">Export Excel (.xlsx)</span>
+                <span class="sm:hidden">Excel</span>
+              </button>
+              <button 
+                @click="handleExportPDF"
+                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
+                <span class="hidden sm:inline">Export PDF Report</span>
+                <span class="sm:hidden">PDF</span>
+              </button>
+            </div>
+            <button 
+              @click="handlePrintSummary"
+              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              <span class="hidden sm:inline">Print Summary</span>
+              <span class="sm:hidden">Print</span>
+            </button>
+          </div>
+
           <!-- Welcome Banner & Date -->
           <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-2 sm:gap-4 transition-all duration-300 hover:shadow-md">
             <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
@@ -1247,38 +1278,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
 
             </div>
           </div> -->
-
-          <!-- Export Actions -->
-          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-              <span class="text-sm font-medium text-gray-500">Export:</span>
-              <button 
-                @click="handleExportExcel"
-                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
-                <span class="hidden sm:inline">Export Excel (.xlsx)</span>
-                <span class="sm:hidden">Excel</span>
-              </button>
-              <button 
-                @click="handleExportPDF"
-                class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
-                <span class="hidden sm:inline">Export PDF Report</span>
-                <span class="sm:hidden">PDF</span>
-              </button>
-            </div>
-            <button 
-              @click="handlePrintSummary"
-              class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              <span class="hidden sm:inline">Print Summary</span>
-              <span class="sm:hidden">Print</span>
-            </button>
-          </div>
-
+          
           <!-- Integrated Chart Dashboard -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
