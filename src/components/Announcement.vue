@@ -45,10 +45,7 @@ watch(
 const bannerContainer = ref(null)
 const bannerAnnouncements = computed(() => {
   return allPublishedAnnouncements.value
-    .filter(item => {
-      const cat = (item.category || '').toLowerCase()
-      return cat === 'events' || cat === 'general'
-    })
+    .filter(item => item.pinned)
     .slice(0, 8)
 })
 
@@ -548,21 +545,23 @@ onMounted(async () => {
 
           <!-- Featured Banner Section -->
           <div 
-            class="mb-14 overflow-visible px-1" 
+            class="mb-10 sm:mb-14 overflow-visible -mx-6 sm:mx-0 px-0 sm:px-1" 
             v-if="bannerAnnouncements.length > 0 && (!selectedCategory || selectedCategory === 'all' || selectedCategory === 'General' || selectedCategory === 'Events')"
           >
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1D4ED8] to-[#2563EB] p-6 sm:p-8">
-              <!-- Decorative Background Pattern -->
-              <div class="absolute right-0 bottom-0 w-64 h-64 opacity-20 transform translate-x-10 translate-y-10">
-                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#FFF" d="M44.7,-76.4C58.1,-69.2,69.5,-57.4,77.3,-43.7C85.1,-30,89.2,-15,88.4,-0.5C87.5,14,81.6,28,73.1,40.4C64.6,52.8,53.5,63.6,40.4,71.5C27.2,79.4,12.1,84.4,-2,87.9C-16.1,91.3,-32.2,93.2,-46.3,87.2C-60.4,81.2,-72.5,67.3,-80.4,52C-88.3,36.7,-92,20,-91.1,3.2C-90.2,-13.6,-84.7,-30.5,-74.6,-43.8C-64.4,-57.1,-49.6,-66.8,-35.1,-73.4C-20.6,-80,0,-83.4,44.7,-76.4Z" transform="translate(100 100)" />
+            <div class="relative overflow-hidden rounded-none sm:rounded-3xl bg-white p-5 sm:p-8 border-y sm:border border-blue-50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+              <!-- Decorative Background Pattern (Waves like Image 2) -->
+              <div class="absolute bottom-0 left-0 right-0 h-48 sm:h-64 pointer-events-none overflow-hidden">
+                <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                  <path fill="#1D355E" opacity="0.15" d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,181.3C672,203,768,213,864,192C960,171,1056,117,1152,106.7C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                  <path fill="#2563EB" opacity="0.1" d="M0,224L60,213.3C120,203,240,181,360,181.3C480,181,600,203,720,218.7C840,235,960,245,1080,224C1200,203,1320,149,1380,122.7L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
                 </svg>
               </div>
+              <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#1D355E] rounded-full blur-3xl opacity-[0.07]"></div>
 
               <!-- Header Content -->
-              <div class="relative z-10 mb-6">
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">Recommended for you</h3>
-                <p class="text-white/90 text-sm sm:text-base font-medium opacity-90">Specially selected updates for your community</p>
+              <div class="relative z-10 mb-6 px-5 sm:px-0">
+                <h3 class="text-2xl sm:text-4xl font-extrabold text-[#1D355E] mb-1.5 tracking-tight">Community Highlights</h3>
+                <p class="text-gray-500 text-xs sm:text-base font-medium">Important news and updates shared with everyone in our community</p>
               </div>
 
               <!-- Scrollable Area with Absolute Arrows -->
@@ -590,17 +589,17 @@ onMounted(async () => {
               <!-- Horizontal Scroll Container -->
               <div 
                 ref="bannerContainer"
-                class="relative z-10 flex gap-5 overflow-x-auto pb-4 custom-scrollbar-hide snap-x snap-mandatory px-2"
+                class="relative z-10 flex gap-4 sm:gap-5 overflow-x-auto pb-6 custom-scrollbar-hide snap-x snap-mandatory px-5 sm:px-2"
               >
                 <div 
                   v-for="(item, index) in bannerAnnouncements" 
                   :key="index"
-                  class="flex-shrink-0 w-[240px] sm:w-[280px] snap-start group cursor-pointer"
+                  class="flex-shrink-0 w-[260px] sm:w-[280px] snap-start group cursor-pointer"
                   @click="openModal(item)"
                 >
-                  <div class="bg-white rounded-2xl overflow-hidden shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[340px] flex flex-col relative">
+                  <div class="bg-white rounded-2xl overflow-hidden shadow-lg sm:shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[320px] sm:h-[340px] flex flex-col relative">
                     <!-- Image Section -->
-                    <div class="relative h-[220px] overflow-hidden">
+                    <div class="relative h-[180px] sm:h-[220px] overflow-hidden">
                       <img 
                         v-if="item.coverImageUrl || item.coverImage"
                         :src="item.coverImageUrl || item.coverImage" 
@@ -614,7 +613,7 @@ onMounted(async () => {
                       </div>
                       <!-- Bookmark Icon Overlay -->
                       <div class="absolute top-3 right-3">
-                        <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-blue-600 shadow-lg">
+                        <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-red-600 shadow-lg">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                           </svg>
@@ -623,8 +622,8 @@ onMounted(async () => {
                     </div>
 
                     <!-- Text Section -->
-                    <div class="p-4 flex-grow flex flex-col justify-between">
-                      <h4 class="text-gray-900 font-bold text-base line-clamp-2 leading-tight mb-2">
+                    <div class="p-3.5 sm:p-4 flex-grow flex flex-col justify-between">
+                      <h4 class="text-gray-900 font-bold text-sm sm:text-base line-clamp-2 leading-tight mb-2">
                         {{ item.title?.replace(/^Draft\s*-\s*/i, '') }}
                       </h4>
                       
