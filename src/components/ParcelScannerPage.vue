@@ -298,12 +298,18 @@ async function extractParcelInfo(imageDataUrl) {
 
     // 📦 Tracking & Company Detection
     const trackingPatterns = [
+      // 🔹 Priority 1: Clear Prefixes (Check these first)
       { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
-      { id: 'Kerry', regex: /KEX[A-Z]{1}\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
+      { id: 'Kerry', regex: /KEX[A-Z]\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
       { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
-      { id: 'JT', regex: /JD\d{13}/i },
-      { id: 'DHL', regex: /\d{10,12}/ },
-      { id: 'FedEx', regex: /\d{12,22}/ },
+      { id: 'JT_Prefix', idMap: 'JT', regex: /JD\d{13}/i },
+      
+      // 🔹 Priority 2: Purely Numeric (Check these last)
+      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, // DHL usually 10 or 12 digits
+      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, // FedEx often longer
+      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, // J&T also uses 12 digits numeric
+      
+      // Fallback
       { id: 'Generic', regex: /[A-Z0-9]{8,22}/ }
     ]
 
@@ -321,14 +327,15 @@ async function extractParcelInfo(imageDataUrl) {
 
       if (match) {
         info.trackingNumber = match[0].toUpperCase()
+        const matchId = pattern.idMap || pattern.id
         const comp = companyList.value.find(c => {
           const cName = c.companyName.toLowerCase()
-          if (pattern.id === 'Flash' && cName.includes('flash')) return true
-          if (pattern.id === 'Kerry' && cName.includes('kerry')) return true
-          if (pattern.id === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
-          if (pattern.id === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
-          if (pattern.id === 'DHL' && cName.includes('dhl')) return true
-          if (pattern.id === 'FedEx' && cName.includes('fedex')) return true
+          if (matchId === 'Flash' && cName.includes('flash')) return true
+          if (matchId === 'Kerry' && cName.includes('kerry')) return true
+          if (matchId === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+          if (matchId === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+          if (matchId === 'DHL' && cName.includes('dhl')) return true
+          if (matchId === 'FedEx' && cName.includes('fedex')) return true
           return false
         })
         if (comp) info.companyId = comp.companyId
@@ -403,25 +410,31 @@ const processScanResult = (text) => {
 
   // Carrier Pattern Detection - Auto select company
   const trackingPatterns = [
+    // 🔹 Priority 1: Clear Prefixes
     { id: 'Flash', regex: /^TH\d{11}[A-Z]$/i },
-    { id: 'Kerry', regex: /^KEX[A-Z]{1}\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
+    { id: 'Kerry', regex: /^KEX[A-Z]\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
     { id: 'Thaipost', regex: /^[A-Z]{2}\d{9}TH$/i },
-    { id: 'JT', regex: /^JD\d{13}$/i },
-    { id: 'DHL', regex: /^\d{10,12}$/ },
-    { id: 'FedEx', regex: /^\d{12,22}$/ }
+    { id: 'JT_Prefix', idMap: 'JT', regex: /^JD\d{13}$/i },
+    
+    // 🔹 Priority 2: Purely Numeric (Ordered by specific length hints)
+    { id: 'DHL', regex: /^\d{10}$/ },
+    { id: 'FedEx', regex: /^\d{15}$/ },
+    { id: 'JT_Numeric', idMap: 'JT', regex: /^\d{12}$/ },
+    { id: 'FedEx_Long', idMap: 'FedEx', regex: /^\d{20,22}$/ }
   ]
 
   for (const pattern of trackingPatterns) {
     const isMatched = pattern.regex.test(text) || (pattern.altRegex && pattern.altRegex.test(text))
     if (isMatched) {
+      const matchId = pattern.idMap || pattern.id
       const comp = companyList.value.find(c => {
         const cName = c.companyName.toLowerCase()
-        if (pattern.id === 'Flash' && cName.includes('flash')) return true
-        if (pattern.id === 'Kerry' && cName.includes('kerry')) return true
-        if (pattern.id === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
-        if (pattern.id === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
-        if (pattern.id === 'DHL' && cName.includes('dhl')) return true
-        if (pattern.id === 'FedEx' && cName.includes('fedex')) return true
+        if (matchId === 'Flash' && cName.includes('flash')) return true
+        if (matchId === 'Kerry' && cName.includes('kerry')) return true
+        if (matchId === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+        if (matchId === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+        if (matchId === 'DHL' && cName.includes('dhl')) return true
+        if (matchId === 'FedEx' && cName.includes('fedex')) return true
         return false
       })
       if (comp) {
@@ -783,15 +796,15 @@ const saveParcel = async () => {
       isValid = false
     else if (
       name.includes('kerry') &&
-      !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)
+      !/^(KEX[A-Z]\d{9,12}|KEX\d{10,13}|[A-Z]\d{9,12})$/i.test(tracking)
     )
       isValid = false
     else if (
       name.includes('flash') &&
-      !/^TH\d{11}[A-Z]$/.test(tracking)
+      !/^TH\d{11}[A-Z]$/i.test(tracking)
     )
       isValid = false
-    else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking))
+    else if ((name.includes('j&t') || name.includes('jt')) && !/^(JD\d{13}|\d{12})$/i.test(tracking))
       isValid = false
     else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
       isValid = false
