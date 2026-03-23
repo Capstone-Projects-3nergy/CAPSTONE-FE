@@ -33,6 +33,7 @@ function extractDisplayDates(item) {
   return {
     displayDate: `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`,
     isoDate: `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`,
+    slashDate: `${dd}/${mm}/${yyyy} - ${hh}:${min}`,
     originalDate: rawDate.toString(),
     originalDateClean: cleanDateStr
   };
@@ -360,9 +361,10 @@ function searchParcels(parcels, keyword) {
       normalize(p.status)
     ]
 
-    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(p);
+    const { displayDate, isoDate, slashDate, originalDate, originalDateClean } = extractDisplayDates(p);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(slashDate) fields.push(normalize(slashDate));
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
 
@@ -415,9 +417,10 @@ function searchAnnouncements(announcements, keyword) {
       normalize(a.announcementId)
     ]
 
-    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(a);
+    const { displayDate, isoDate, slashDate, originalDate, originalDateClean } = extractDisplayDates(a);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(slashDate) fields.push(normalize(slashDate));
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
 
@@ -426,6 +429,7 @@ function searchAnnouncements(announcements, keyword) {
       const delDates = extractDisplayDates({ deletedAt: a.deletedAt });
       if (delDates.displayDate) fields.push(normalize(delDates.displayDate));
       if (delDates.isoDate) fields.push(normalize(delDates.isoDate));
+      if (delDates.slashDate) fields.push(normalize(delDates.slashDate));
     }
 
     // exact match
@@ -467,9 +471,10 @@ function searchUsers(users, keyword) {
       normalize(u.lineId)
     ]
 
-    const { displayDate, isoDate, originalDate, originalDateClean } = extractDisplayDates(u);
+    const { displayDate, isoDate, slashDate, originalDate, originalDateClean } = extractDisplayDates(u);
     if(displayDate) fields.push(normalize(displayDate));
     if(isoDate && isoDate !== displayDate) fields.push(normalize(isoDate));
+    if(slashDate) fields.push(normalize(slashDate));
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
 
