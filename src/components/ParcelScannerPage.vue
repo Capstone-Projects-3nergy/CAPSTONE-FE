@@ -1716,18 +1716,18 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="flex justify-end space-x-3 mt-8">
+              <div class="flex justify-end space-x-3 mt-8 px-2">
                 <ButtonWeb
                   label="Reset"
                   color="red"
-                  class="w-auto block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  class="flex-1 block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
                   @click="cancelParcel"
                 />
                 <ButtonWeb
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] block md:hidden cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
+                  class="text-[#898989] flex-1 block md:hidden cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1739,7 +1739,7 @@ onMounted(async () => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden cursor-pointer transition-all rounded-xl"
+                  class="flex-1 block md:hidden cursor-pointer transition-all rounded-xl"
                 />
               </div>
             </div>
@@ -1819,7 +1819,7 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] w-auto cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
+                  class="text-[#898989] w-32 cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1831,7 +1831,7 @@ onMounted(async () => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto cursor-pointer transition-all rounded-xl px-8"
+                  class="w-32 cursor-pointer transition-all rounded-xl"
                 />
               </div>
 

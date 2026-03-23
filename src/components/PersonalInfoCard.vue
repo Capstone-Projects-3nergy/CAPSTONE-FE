@@ -672,18 +672,18 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ firstName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ firstName }}</p>
+            </div>
           </div>
 
           <div>
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ lastName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ lastName }}</p>
+            </div>
           </div>
 
           <div>
@@ -727,17 +727,17 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ position }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ position }}</p>
+            </div>
           </div>
           <div v-if="roomNumber !== null">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ roomNumber }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ roomNumber }}</p>
+            </div>
           </div>
           <div
             v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
@@ -745,9 +745,9 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ dormName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ dormName }}</p>
+            </div>
           </div>
 
           <!-- line removed from here and moved to a new tab -->
@@ -756,9 +756,9 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] truncate">
-              {{ display(phoneNumber) }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ display(phoneNumber) }}</p>
+            </div>
           </div>
           <!-- <div class="flex items-center gap-2 mt-2">
             <label class="text-sm font-bold text-gray-500"> Status: </label>
@@ -1074,7 +1074,7 @@ const handleUnlink = async () => {
           <div v-if="activeTab === 'profile'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight uppercase">
+              <h3 class="font-extrabold text-xl text-black tracking-tight">
                 Resident Details
               </h3>
             </div>
@@ -1082,44 +1082,44 @@ const handleUnlink = async () => {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">First Name</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ firstName }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ firstName }}</p>
+                </div>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Last Name</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ lastName }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ lastName }}</p>
+                </div>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Email</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ email }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ email }}</p>
+                </div>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Room Number</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ display(roomNumber) }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ display(roomNumber) }}</p>
+                </div>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Dormitory</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ dormName }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ dormName }}</p>
+                </div>
               </div>
 
               <div>
                 <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Phone Number</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] truncate">
-                  {{ display(phoneNumber) }}
-                </p>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ display(phoneNumber) }}</p>
+                </div>
               </div>
             </div>
 

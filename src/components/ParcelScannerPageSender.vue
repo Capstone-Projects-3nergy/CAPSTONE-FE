@@ -1346,7 +1346,7 @@ const closePopUp = (operate) => {
                 <ButtonWeb
                   label="Reset"
                   color="red"
-                  class="block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  class="flex-1 block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
                   @click="cancelParcel"
                 />
                 <ButtonWeb
@@ -1359,7 +1359,7 @@ const closePopUp = (operate) => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden cursor-pointer transition-all rounded-xl"
+                  class="flex-1 block md:hidden cursor-pointer transition-all rounded-xl"
                 />
               </div>
             </div>
@@ -1439,7 +1439,7 @@ const closePopUp = (operate) => {
                   label="Reset"
                   color="red"
                   @click="cancelParcel"
-                  class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  class="w-32 cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1451,7 +1451,7 @@ const closePopUp = (operate) => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto cursor-pointer transition-all rounded-xl px-8"
+                  class="w-32 cursor-pointer transition-all rounded-xl"
                 />
               </div>
 
