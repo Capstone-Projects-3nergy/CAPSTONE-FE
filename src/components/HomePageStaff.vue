@@ -1530,7 +1530,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
-              <div class="space-y-3 flex-1 overflow-hidden pr-1">
+              <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-hidden pr-1">
                 <!-- Overdue Item -->
                 <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
                      class="bg-white rounded-xl py-3 px-3.5 flex items-center justify-between border border-red-100 shadow-sm hover:border-red-300 transition-all duration-300">
@@ -1562,6 +1562,16 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
                   </p>
                 </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-else class="flex-1 flex flex-col items-center justify-center py-10 opacity-50">
+                <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mb-3">
+                  <svg class="w-8 h-8 text-red-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p class="text-xs font-bold text-red-300">No parcel overdue</p>
               </div>
 
               <!-- View All Button -->
