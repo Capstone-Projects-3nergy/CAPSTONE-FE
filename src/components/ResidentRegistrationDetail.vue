@@ -108,7 +108,6 @@ const getMemberDetail = async (userId) => {
     userId,
     router
   )
-  console.log(data)
 
   if (data) {
     residentDetail.value = {
