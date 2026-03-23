@@ -28,7 +28,6 @@ import AlertPopUp from './AlertPopUp.vue'
 import {
   getAnnouncements,
   getAnnouncementById,
-  recordAnnouncementView,
   editAnnouncementWithFile
 } from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
@@ -218,14 +217,7 @@ const handleEdit = (item) => {
 
 const handleView = async (item) => {
   try {
-    // 1. Record the view first to ensure the view count is incremented on the server
-    await recordAnnouncementView(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-      item.id,
-      router
-    )
-
-    // 2. Fetch fresh announcement details with the updated view count
+    // 1. Fetch fresh announcement details (without recording a view for staff)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,

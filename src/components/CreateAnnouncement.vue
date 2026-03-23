@@ -126,6 +126,7 @@ const categoryError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
 const fileSizeError = ref(false)
+const showDateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
@@ -184,7 +185,7 @@ const minDateTime = computed(() => {
 const isFormValid = computed(() => {
   const common = title.value.trim() !== '' && categoryId.value !== null && content.value.trim() !== ''
   if (activeTab.value === 'draft') return common
-  return common && publishAt.value !== ''
+  return common
 })
 
 const closePopUp = (operate) => {
@@ -197,6 +198,7 @@ const closePopUp = (operate) => {
   if (operate === 'fileSizeError') { fileSizeError.value = false }
   if (operate === 'errorMessage') { error.value = false }
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
+  if (operate === 'dateError') { showDateError.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -210,7 +212,7 @@ const handleTitleInput = (event) => {
     val = val.replace(/[๐-๙]/g, '')
     setTimeout(() => {
       titleThaiNumError.value = false
-    }, 5000)
+    }, 10000)
   }
 
   if (val.length > MAX_TITLE_LENGTH) {
@@ -220,7 +222,7 @@ const handleTitleInput = (event) => {
     titleLengthError.value = true
     setTimeout(() => {
       titleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     title.value = val
     event.target.value = val
@@ -237,7 +239,7 @@ const handleSubtitleInput = (event) => {
   //   val = val.replace(/[๐-๙]/g, '')
   //   setTimeout(() => {
   //     subtitleThaiNumError.value = false
-  //   }, 5000)
+  //   }, 10000)
   // }
 
   if (val.length > MAX_SUBTITLE_LENGTH) {
@@ -247,7 +249,7 @@ const handleSubtitleInput = (event) => {
     subtitleLengthError.value = true
     setTimeout(() => {
       subtitleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     subtitle.value = val
     event.target.value = val
@@ -263,7 +265,7 @@ const handleContentInput = (event) => {
     contentLengthError.value = true
     setTimeout(() => {
       contentLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     content.value = val
   }
@@ -279,7 +281,7 @@ const onFileChange = (e) => {
     imagePreview.value = ''
     setTimeout(() => {
       fileSizeError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   
@@ -334,14 +336,32 @@ const goBack = () => {
 const submitAnnouncement = async () => {
   if (!title.value.trim()) {
     titleError.value = true
+    setTimeout(() => {
+      titleError.value = false
+    }, 10000)
     return
   }
   if (categoryId.value === null) {
     categoryError.value = true
+    setTimeout(() => {
+      categoryError.value = false
+    }, 10000)
     return
   }
   if (!content.value.trim()) {
     contentError.value = true
+    setTimeout(() => {
+      contentError.value = false
+    }, 10000)
+    return
+  }
+
+  // Check for publish date if in publish tab
+  if (activeTab.value === 'publish' && !publishAt.value) {
+    showDateError.value = true
+    setTimeout(() => {
+      showDateError.value = false
+    }, 10000)
     return
   }
 
@@ -450,7 +470,7 @@ const saveDraft = async () => {
       titleError.value = false
       categoryError.value = false
       contentError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
 
@@ -815,7 +835,15 @@ const returnLoginPage = async () => {
               styleType="red"
               operate="pinLimitMessage"
               @closePopUp="closePopUp"
-            />  
+            />
+             <AlertPopUp
+              v-if="showDateError"
+              :titles="'Please enter a publish date and time.'"
+              message="Error!!"
+              styleType="red"
+              operate="dateError"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <LoadingPopUp v-if="isLoading" />
