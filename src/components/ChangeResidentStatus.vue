@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ButtonWeb from './ButtonWeb.vue'
-import { getItemById, editItem, sendVerificationEmail } from '@/utils/fetchUtils'
+import { getItemById, editItem, resendVerification } from '@/utils/fetchUtils'
 import SelectWeb from './SelectWeb.vue'
 
 const route = useRoute()
@@ -32,9 +32,24 @@ const isSaving = ref(false)
 
 const handleSendEmailNotification = async () => {
   const userId = form.value.id
-  if (!userId) return
+  if (!userId) {
+    console.error('No resident ID available for sending email')
+    return
+  }
 
-  const success = await sendVerificationEmail(userId, router)
+  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
+  const currentStatusUpper = String(currentStatus.value || form.value.status || '').toUpperCase()
+  if (currentStatusUpper !== 'PENDING') {
+    emit('showAlert', {
+      style: 'red',
+      message: 'Failed!!',
+      title: 'Only users with PENDING status can receive verification emails.'
+    })
+    return
+  }
+
+  const success = await resendVerification(userId, router)
+  
   if (success) {
     emit('showAlert', {
       style: 'blue',

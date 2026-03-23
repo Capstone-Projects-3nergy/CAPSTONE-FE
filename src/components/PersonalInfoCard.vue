@@ -5,7 +5,7 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl, sendVerificationEmail } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl, resendVerification } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 import AlertPopUp from './AlertPopUp.vue'
 import ConfirmPopUp from './ConfirmPopUp.vue'
@@ -58,6 +58,7 @@ const props = defineProps({
   showMenu: { type: Boolean, default: true },
   profile: { type: Boolean, default: true },
   residentDetail: { type: Boolean, default: false },
+  userId: { type: [String, Number], default: null },
   profileImage: String,
   useCurrentProfile: {
     type: Boolean,
@@ -482,15 +483,28 @@ const reconnectLine = async () => {
 }
 
 const handleSendEmailNotification = async () => {
+  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
+  if (safeStatus.value?.toUpperCase() !== 'PENDING') {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Failed'
+    lineAlertTitle.value = 'Only users with PENDING status can receive verification emails.'
+    
+    setTimeout(() => {
+      lineAlertVisible.value = false
+    }, 10000)
+    return
+  }
+
   // ✅ ระบุ userId จาก props หรือจาก routeUser (Staff ดู Resident)
-  const userId = props.userId || routeUser.value?.id || (props.useCurrentProfile ? profileManager.currentProfile?.userId : null)
+  const userId = props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
   
   if (!userId) {
     console.error('No valid user ID available for sending email')
     return
   }
 
-  const success = await sendVerificationEmail(userId, router)
+  const success = await resendVerification(userId, router)
   
   if (success) {
     lineAlertVisible.value = true

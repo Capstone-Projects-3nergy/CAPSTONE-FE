@@ -467,6 +467,7 @@ watch(
             :useCurrentProfile="false"
             :key="residentDetail.id"
             :fullName="residentDetail.fullName"
+            :userId="residentDetail.id"
             :firstName="residentFirstName"
             :lastName="residentLastName"
             :email="residentDetail.email"

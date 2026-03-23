@@ -880,10 +880,10 @@ async function sendLineNotification(payload, router, customUrl = null) {
 
 // Previous position of LINE functions
 
-async function sendVerificationEmail(userId, router) {
+async function resendVerification(userId, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    const url = `${baseURL}/api/staff/users/${userId}/send-verification`
+    const url = `${baseURL}/api/staff/users/${userId}/resend-verification`
 
     const options = {
       method: 'POST',
@@ -898,7 +898,7 @@ async function sendVerificationEmail(userId, router) {
     }
     return false
   } catch (error) {
-    console.error('sendVerificationEmail error:', error)
+    console.error('resendVerification error:', error)
     return false
   }
 }
@@ -992,7 +992,7 @@ export {
   sendOverdueReminder,
   unlinkLineAccount,
   connectLineAccount,
-  sendVerificationEmail,
+  resendVerification,
   linkLineAccount,
   getLineConnectUrl
 }
