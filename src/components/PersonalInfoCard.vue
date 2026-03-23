@@ -162,7 +162,7 @@ onMounted(async () => {
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
-
+console.log(dataUser)
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.userId,
@@ -880,7 +880,29 @@ const confirmUnlinkAction = async () => {
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none mb-2">LINE Notification</h3>
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none">LINE Notification</h3>
+                  
+                  <!-- Compact Status Badge -->
+                  <div :class="[
+                    'flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300',
+                    effectiveLineId ? 'bg-green-50/50 border-green-100' : 'bg-gray-50/50 border-gray-100'
+                  ]">
+                    <div class="relative flex items-center justify-center">
+                      <div :class="[
+                        'w-2 h-2 rounded-full',
+                        effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
+                      ]"></div>
+                      <div v-if="effectiveLineId" class="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75"></div>
+                    </div>
+                    <span :class="[
+                      'text-[10px] font-black tracking-wider',
+                      effectiveLineId ? 'text-green-600' : 'text-gray-400'
+                    ]">
+                      {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
+                    </span>
+                  </div>
+                </div>
                 <p class="text-xs sm:text-sm text-gray-500 font-medium break-words">Smart alerts for parcels & announcements</p>
               </div>
             </div>
@@ -888,62 +910,52 @@ const confirmUnlinkAction = async () => {
             <!-- Main Connection Status -->
             <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
               <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <!-- Status -->
-                <div class="flex items-center gap-4">
-                  <div class="relative">
-                    <div :class="[
-                      'w-4 h-4 rounded-full',
-                      effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
-                    ]"></div>
-                    <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
-                  </div>
-                  <div>
-                    <span class="text-[9px] sm:text-[10px] tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
-                    <span :class="[
-                      'text-lg sm:text-xl font-black transition-colors duration-300',
-                      effectiveLineId ? 'text-green-600' : 'text-gray-500'
-                    ]">
-                      {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
-                    </span>
-                  </div>
-                </div>
+                <!-- Removed Status Badge (Moved to header) -->
 
                 <!-- Action Buttons Area -->
-                <div class="flex flex-col items-center gap-3">
-                  <!-- Action Button: Connect or Status -->
+                <div class="flex flex-col items-center gap-4 w-full sm:w-auto">
+                  <!-- Action Button: Connect Now (Premium Branded Version) -->
                   <button
                     v-if="!effectiveLineId"
                     @click="handleLineAction"
-                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
+                    class="group/line-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(6,199,85,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(6,199,85,0.5)]"
                   >
-                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">Connect Now</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                    <!-- Background Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#06C755] via-[#05B34B] to-[#05A344]"></div>
+                    
+                    <!-- Content Layer -->
+                    <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent">
+                      <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Connect Now</span>
+                      <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-btn:translate-x-1 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </div>
+                    </div>
                   </button>
 
-                  <!-- Status Display when connected -->
+                  <!-- Action Button: Disconnect (Premium Styled version) -->
                   <div
                     v-else
-                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-gray-100 text-gray-400 border border-gray-200 font-black cursor-default transition-all duration-300"
+                    class="flex flex-col items-center w-full"
                   >
-                    <span class="text-sm sm:text-base whitespace-nowrap">LINE Account Connected</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                  </div>
-                  
-                  <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
-                    <button 
+                    <button
                       @click="handleUnlink"
-                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
+                      class="group/line-disconnect-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(239,68,68,0.4)]"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/unlink:scale-110 transition-transform duration-300">
-                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                        <line x1="12" y1="2" x2="12" y2="12"></line>
-                      </svg>
-                      <span>Disconnect</span>
+                      <!-- Background Gradient (Red theme) -->
+                      <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-rose-500 to-red-600"></div>
+                      
+                      <!-- Content Layer -->
+                      <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent text-white">
+                        <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Disconnect LINE</span>
+                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-disconnect-btn:rotate-90 transition-transform duration-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                          </svg>
+                        </div>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -1225,7 +1237,7 @@ const confirmUnlinkAction = async () => {
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
                     <div>
-                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5 uppercase">Account</p>
+                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Account</p>
                       <p class="text-lg font-black text-emerald-900 leading-none">Verified</p>
                     </div>
                   </div>
