@@ -65,7 +65,7 @@ const isOverdue = computed(() => {
 
 const activeTab = ref('info')
 
-// LINE Notification states
+// Notification states
 const showNotifyPopup = ref(false)
 const isSending = ref(false)
 const notifySuccess = ref(false)
@@ -100,7 +100,7 @@ const sendLineNotify = async () => {
       lineAlertVisible.value = true
       lineAlertStyle.value = 'blue'
       lineAlertMessage.value = 'Success!!'
-      lineAlertTitle.value = 'LINE notification has been sent successfully.'
+      lineAlertTitle.value = 'Notification has been sent successfully.'
     } else {
       throw new Error('Failed to send')
     }
@@ -109,7 +109,7 @@ const sendLineNotify = async () => {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
     lineAlertMessage.value = 'Error!!'
-    lineAlertTitle.value = 'Could not send LINE notification. Please check connection.'
+    lineAlertTitle.value = 'Could not send notification. Please check connection.'
   } finally {
     isSending.value = false
     showNotifyPopup.value = false
@@ -660,24 +660,19 @@ function formatDateTime(datetimeStr) {
 
                <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500">
                   <div class="flex flex-col sm:flex-row items-center gap-6">
-                    <div class="w-16 h-16 rounded-2xl bg-[#06C755] flex items-center justify-center shrink-0 shadow-lg shadow-green-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                    <!-- Chat Bubble (White) -->
-                    <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/>
-                    <!-- "LINE" Text (Branded Green) -->
-                    <g fill="#06C755">
-                      <path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/>
-                      <path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/>
-                    </g>
-                  </svg>
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                        </svg>
                     </div>
                     <div class="flex-1 text-left">
-                       <h5 class="text-lg font-black text-gray-800 mb-1">LINE Notification</h5>
+                       <h5 class="text-lg font-black text-gray-800 mb-1">Send Notification</h5>
                        <p class="text-sm text-gray-500 font-medium">Send a reminder to resident about uncollected parcel.</p>
                     </div>
                     <button 
                       @click="triggerNotifyPopup"
-                      class="px-8 py-4 bg-[#06C755] hover:bg-[#05b34b] text-white font-black rounded-2xl shadow-xl shadow-green-200 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                      class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                     >
                        <span>Send Reminder</span>
                        <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg> -->
@@ -695,17 +690,17 @@ function formatDateTime(datetimeStr) {
     </div>
   </main>
 
-      <!-- LINE Notify Confirmation Modal -->
+      <!-- Notification Confirmation Modal -->
       <div v-if="showNotifyPopup" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showNotifyPopup = false"></div>
         <div class="relative bg-white rounded-[2.5rem] w-full max-w-md p-10 text-center shadow-2xl animate-in zoom-in-95 duration-300">
-           <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
-             <div class="w-16 h-16 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg animate-bounce">
+           <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8">
+             <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg animate-bounce">
                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
              </div>
            </div>
-           <h3 class="text-2xl font-black text-gray-900 mb-2">Send LINE Reminder?</h3>
-           <p class="text-gray-500 font-medium mb-10 leading-relaxed">System will send a notification to resident's connected LINE account about this parcel.</p>
+           <h3 class="text-2xl font-black text-gray-900 mb-2">Send Notification?</h3>
+           <p class="text-gray-500 font-medium mb-10 leading-relaxed">System will send a notification to the resident about this parcel.</p>
             <div class="flex gap-3">
                <ButtonWeb 
                  @click="showNotifyPopup = false" 
@@ -716,10 +711,10 @@ function formatDateTime(datetimeStr) {
               <ButtonWeb 
                  @click="sendLineNotify" 
                  :label="isSending ? 'Sending...' : 'Confirm'"
-                 :color="isSending ? 'gray' : 'green'"
+                 :color="isSending ? 'gray' : 'blue'"
                  :class="[
                    'flex-1 py-2.5 font-black rounded-xl shadow-lg',
-                   isSending ? 'shadow-gray-100' : 'shadow-green-100'
+                   isSending ? 'shadow-gray-100' : 'shadow-blue-100'
                  ]"
                  :loading="isSending"
               />
