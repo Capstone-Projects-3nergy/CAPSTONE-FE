@@ -474,7 +474,7 @@ function formatDateTime(datetimeStr) {
         </aside>
 
       <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
-        <div v-if="lineAlertVisible" class="fixed top-24 right-6 z-[110] w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
+        <div v-if="lineAlertVisible" class="fixed top-5 left-5 z-50 w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
           <AlertPopUp
             :message="lineAlertMessage"
             :titles="lineAlertTitle"
