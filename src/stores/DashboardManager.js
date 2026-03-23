@@ -125,6 +125,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const mapStatus = (status) => {
     const s = status?.toUpperCase() || ''
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
+    if (s.includes('WAITING')) return 'Waiting for Staff'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
     return 'Received'
@@ -209,8 +210,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         const rDate = receivedDate ? new Date(receivedDate) : null
         
         const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
+        const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE')
         const isExplicitOverdue = pStatus.includes('OVERDUE')
-        const isOld = rDate && rDate < threeDaysAgo && !isPickedUp
+        const isOld = rDate && rDate < threeDaysAgo && isArrived && !isPickedUp
 
         if (isPickedUp) {
           stats.pickedUpParcels++

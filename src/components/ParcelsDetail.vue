@@ -56,6 +56,8 @@ const showLogoutConfirm = ref(false)
 const parcel = ref(null)
 const isOverdue = computed(() => {
   if (!parcel.value || !parcel.value.receivedAt) return false
+  const status = parcel.value.status?.toUpperCase() || ''
+  if (!['RECEIVED', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
   const receivedDate = new Date(parcel.value.receivedAt)
   const currentDate = new Date()
   const diffTime = Math.abs(currentDate - receivedDate)
@@ -651,8 +653,11 @@ function formatDateTime(datetimeStr) {
                       <svg v-else xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                   </div>
-                  <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Lifecycle Status</h4>
-                  <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
+                  <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Status</h4>
+                  <div class="flex items-center gap-3">
+                    <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
+                    <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">OVERDUE</span>
+                  </div>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
                     {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
                   </p>

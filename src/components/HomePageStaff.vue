@@ -58,7 +58,10 @@ const calculateOverdueDays = (receiveAt) => {
   const receivedAt = new Date(receiveAt)
   if (isNaN(receivedAt.getTime())) return 0
   const diffTime = Math.abs(now - receivedAt)
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  // Return days past the 3-day threshold
+  const overdueDays = totalDays - 3
+  return Math.max(1, overdueDays) // Return at least 1 if it's in the list
 }
 
 const overdueParcelsList = computed(() => {
@@ -68,8 +71,8 @@ const overdueParcelsList = computed(() => {
   
   return [...getMappedParcels.value]
     .filter(p => {
-      // Exclude 'Picked Up' status
-      if (p.status === 'Picked Up') return false
+      // Only check 'Received', 'Notified', or 'Overdue' statuses
+      if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
       
       // Use 3 days for overdue threshold
       const receivedDate = new Date(p.receiveAt)
