@@ -143,6 +143,11 @@ const statusClass = (value) => {
   }
 }
 onMounted(async () => {
+  // ✅ ดึงโปรไฟล์ล่าสุดของผู้ใช้เพื่อเช็คสถานะการเชื่อมต่อ (LINE, etc.)
+  if (props.useCurrentProfile) {
+    await profileManager.fetchProfile()
+  }
+  console.log(profileManager.profile) // ✅ ตอนนี้ใช้งานได้แล้วเพราะเพิ่ม alias ใน store
   // กันกรณี refresh แล้ว store ว่าง
   if (userManager.members.length || userManager.staffs.length) return
 
@@ -188,6 +193,8 @@ watch(
 
     if (status === 'success') {
       showLineSuccessPopup.value = true
+      // ✅ Refresh profile ข้อมูลการเชื่อมต่อ LINE ทันทีที่กลับมาจาก Redirect
+      profileManager.fetchProfile()
     } else if (status === 'error') {
       lineAlertVisible.value = true
       lineAlertStyle.value = 'red'
@@ -409,12 +416,13 @@ const effectiveLineId = computed(() => {
     id = props.lineId || routeUser.value?.lineId
   }
 
-  // ✅ ใช้ Boolean 'isLinked' เป็นตัวตัดสิน UI แทนการเช็ค String แบบเดิม
+  // ✅ ใช้ Boolean 'isLinked' เป็นตัวตัดสิน UI ว่าเชื่อมต่อหรือยัง
   if (!isLinked) {
     return null
   }
 
-  return id
+  // คืนค่า ID เพื่อใช้เปิดลิงก์ ถ้าไม่มีให้คืน true เพื่อบอกว่าเชื่อมแล้ว
+  return id || true
 })
 
 const handleLineAction = async (directLineId = null) => {
@@ -439,6 +447,9 @@ const handleLineAction = async (directLineId = null) => {
         loginManager.user.isLineLinked = true
         loginManager.user.lineId = directLineId
       }
+      
+      // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
+      await profileManager.fetchProfile()
       
       // ✅ แสดง Popup ความสำเร็จ
       showLineSuccessPopup.value = true
@@ -511,6 +522,9 @@ const handleUnlink = async () => {
         loginManager.user.isLineLinked = false
         loginManager.user.lineId = null
       }
+
+      // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
+      await profileManager.fetchProfile()
       
       // ✅ แสดง Popup แจ้งเตือนความสำเร็จ
       lineAlertVisible.value = true

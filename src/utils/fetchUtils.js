@@ -391,6 +391,53 @@ export async function getProfile(url, router) {
   }
 }
 
+async function unlinkLineAccount(router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(
+      `${import.meta.env.VITE_BASE_URL}/api/profile/disconnect-line`,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('unlinkLineAccount error:', error)
+    return false
+  }
+}
+
+async function connectLineAccount(lineUserId, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/profile/connect-line?lineUserId=${lineUserId}`
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('connectLineAccount error:', error)
+    return false
+  }
+}
+
 //Member and stadd
 async function getMembers(url, router) {
   return await getItems(url, router)
@@ -805,52 +852,7 @@ async function sendLineNotification(payload, router, customUrl = null) {
   }
 }
 
-async function unlinkLineAccount(router) {
-  try {
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-
-    const res = await fetchWithAuth(
-      `${import.meta.env.VITE_BASE_URL}/api/profile/disconnect-line`,
-      options,
-      router
-    )
-    if (res && res.ok) {
-      return true
-    }
-    return false
-  } catch (error) {
-    console.error('unlinkLineAccount error:', error)
-    return false
-  }
-}
-
-async function connectLineAccount(lineUserId, router) {
-  try {
-    const baseURL = import.meta.env.VITE_BASE_URL
-    const url = `${baseURL}/api/profile/connect-line?lineUserId=${lineUserId}`
-
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-
-    const res = await fetchWithAuth(url, options, router)
-    if (res && res.ok) {
-      return true
-    }
-    return false
-  } catch (error) {
-    console.error('connectLineAccount error:', error)
-    return false
-  }
-}
+// Previous position of LINE functions
 
 async function sendVerificationEmail(userId, router) {
   try {
