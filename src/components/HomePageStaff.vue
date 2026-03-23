@@ -136,11 +136,19 @@ const formatResidentStatus = (status) => {
 
 const getStatusClass = (status) => {
   switch (status) {
-    case 'Received': return 'text-yellow-600 bg-yellow-50 border-yellow-100'
-    case 'Notified': return 'text-blue-600 bg-blue-50 border-blue-100'
-    case 'Picked Up': return 'text-emerald-600 bg-emerald-50 border-emerald-100'
-    case 'Overdue': return 'text-red-600 bg-red-50 border-red-100'
-    default: return 'text-gray-600 bg-gray-50 border-gray-100'
+    case 'Received':
+    case 'Notified':
+      return 'text-blue-600 bg-blue-50 border-blue-100'
+    case 'Waiting for Staff':
+    case 'Pending':
+      return 'text-yellow-600 bg-yellow-50 border-yellow-100'
+    case 'Picked Up':
+      return 'text-green-600 bg-green-50 border-green-100'
+    case 'Overdue':
+    case 'TRASH':
+      return 'text-red-600 bg-red-50 border-red-100'
+    default:
+      return 'text-gray-600 bg-gray-50 border-gray-100'
   }
 }
 
