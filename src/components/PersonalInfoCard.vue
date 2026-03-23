@@ -1290,7 +1290,7 @@ const confirmUnlinkAction = async () => {
                 </div>
               </div>
 
-              <div class="flex flex-col sm:flex-row items-start gap-4 p-5 sm:p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30 text-left">
+              <!-- <div class="flex flex-col sm:flex-row items-start gap-4 p-5 sm:p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30 text-left">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </div>
@@ -1298,7 +1298,7 @@ const confirmUnlinkAction = async () => {
                   <h5 class="text-base font-black text-blue-900">About Status Management</h5>
                   <p class="text-sm text-blue-700/70 leading-relaxed font-medium">Account status determines access privileges for the resident. <span class="font-bold text-blue-800">Pending</span> accounts require approval before they can access the full system features.</p>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
