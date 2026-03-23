@@ -1210,61 +1210,79 @@ const confirmUnlinkAction = async () => {
 
           <!-- Tab 2: Resident Status -->
           <div v-if="activeTab === 'status'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
-            <div class="flex items-center gap-4 mb-10">
-              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight font-black">
-                Account Status
-              </h3>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-black tracking-tight font-black">
+                  Account Status
+                </h3>
+              </div>
+              
+              <!-- Compact Status Badge (Moved from Body) -->
+              <div :class="[
+                'px-5 py-2.5 rounded-2xl border flex items-center gap-3 transition-all duration-500 shadow-sm grow-0',
+                safeStatus?.toUpperCase() === 'ACTIVE' ? 'bg-emerald-50 border-emerald-100' : 
+                safeStatus?.toUpperCase() === 'PENDING' ? 'bg-amber-50 border-amber-100' : 
+                safeStatus?.toUpperCase() === 'DELETED' ? 'bg-rose-50 border-rose-100' : 'bg-gray-50 border-gray-100'
+              ]">
+                <div :class="[
+                  'w-2 h-2 rounded-full animate-pulse',
+                  safeStatus?.toUpperCase() === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 
+                  safeStatus?.toUpperCase() === 'PENDING' ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 
+                  safeStatus?.toUpperCase() === 'DELETED' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]' : 'bg-gray-400'
+                ]"></div>
+                <div class="flex flex-col">
+                  <p class="text-[9px] font-black text-gray-400/80 tracking-widest leading-none mb-1 uppercase">CURRENT STATE</p>
+                  <p :class="[
+                    'text-sm font-black leading-none tracking-tight',
+                    safeStatus?.toUpperCase() === 'ACTIVE' ? 'text-emerald-600' :
+                    safeStatus?.toUpperCase() === 'INACTIVE' ? 'text-gray-600' :
+                    safeStatus?.toUpperCase() === 'DELETED' ? 'text-rose-600' :
+                    safeStatus?.toUpperCase() === 'PENDING' ? 'text-amber-600' : 'text-slate-800'
+                  ]">{{ displayStatus(safeStatus) }}</p>
+                </div>
+              </div>
             </div>
 
             <div class="space-y-8">
-              <div class="bg-gray-50 rounded-[32px] p-8 border border-gray-100 shadow-sm relative overflow-hidden">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-8 relative z-10">
-                  <div class="flex items-center gap-5">
-                    <div :style="{ 
-                      background: safeStatus?.toUpperCase() === 'ACTIVE' ? '#10B981' : 
-                                 safeStatus?.toUpperCase() === 'PENDING' ? '#3B82F6' : '#9CA3AF' 
-                    }" class="w-4 h-4 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] animate-pulse"></div>
-                    <div>
-                      <p class="text-xs sm:text-sm font-black text-gray-400 tracking-[0.2em] mb-1.5">Current Status</p>
-                      <h4 class="text-3xl font-black text-slate-800 tracking-tight">{{ displayStatus(safeStatus) }}</h4>
-                    </div>
-                  </div>
-                  
-                  <!-- Verified Status Badge (For Active/Inactive) -->
-                  <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" class="flex items-center gap-3 px-8 py-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                    </div>
-                    <div>
-                      <p class="text-[10px] font-black text-emerald-600/60 tracking-widest leading-none mb-1.5">Account</p>
-                      <p class="text-lg font-black text-emerald-900 leading-none">Verified</p>
-                    </div>
-                  </div>
 
-                  <!-- Email Notification Reminder (For Pending) -->
-                  <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" class="bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 flex flex-col sm:flex-row items-center gap-5">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                          <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
-                    </div>
-                    <div class="flex-1 text-left">
-                       <h5 class="text-base font-black text-gray-800 mb-0.5">Account Verification</h5>
-                       <p class="text-xs text-gray-500 font-medium leading-relaxed">Resident hasn't verified account yet. Send verification email to resident to complete account setup.</p>
-                    </div>
-                    <button 
-                      @click="handleSendEmailNotification"
-                      class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                    >
-                       <span>Send Email</span>
-                    </button>
+              <!-- Section 2: Account Features & Verification (Separate Card) -->
+              <div class="space-y-6">
+                <!-- Verified Status Card -->
+                <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" 
+                     class="flex items-center gap-6 px-8 py-8 bg-white rounded-[32px] border border-emerald-100 shadow-[0_15px_40px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-500">
+                  <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-black text-emerald-600/60 tracking-[0.2em] leading-none mb-2.5 text-left">Identity Verification</p>
+                    <p class="text-2xl font-black text-emerald-900 leading-none text-left">Verified</p>
                   </div>
                 </div>
-                
-                <!-- Background decoration -->
-                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
+
+                <!-- Account Verification Action Card -->
+                <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" 
+                     class="bg-white rounded-[32px] p-8 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div class="w-20 h-20 rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-2 hover:rotate-0 transition-transform duration-500 mb-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                  </div>
+                  <div class="flex-1 mb-8">
+                     <h5 class="text-xl font-black text-gray-900 mb-2">Pending Verification</h5>
+                     <p class="text-sm text-gray-500 font-medium leading-relaxed max-w-md mx-auto">This account has not been activated yet. Please send a verification link to the resident's registered email to complete the process.</p>
+                  </div>
+                  <button 
+                    @click="handleSendEmailNotification"
+                    class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 group/sendbtn text-sm"
+                  >
+                     <span>Send Activation Email</span>
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                     </svg>
+                  </button>
+                </div>
               </div>
 
               <div class="flex flex-col sm:flex-row items-start gap-4 p-5 sm:p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30 text-left">
