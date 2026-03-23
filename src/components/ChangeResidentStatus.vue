@@ -5,7 +5,6 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ButtonWeb from './ButtonWeb.vue'
 import { getItemById, editItem, sendVerificationEmail } from '@/utils/fetchUtils'
 import SelectWeb from './SelectWeb.vue'
-import AlertPopUp from './AlertPopUp.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,7 +13,8 @@ const userStore = useUserManager()
 const emit = defineEmits([
   'cancelStatusDetail',
   'confirmStatusDetail',
-  'redStatusAlert'
+  'redStatusAlert',
+  'showAlert'
 ])
 
 const props = defineProps({
@@ -29,11 +29,6 @@ const currentStatus = ref('')
 const statusChangedSuccessfuly = ref(false)
 const isSaving = ref(false)
 
-// Alert state (from PersonalInfoCard)
-const lineAlertVisible = ref(false)
-const lineAlertMessage = ref('')
-const lineAlertTitle = ref('')
-const lineAlertStyle = ref('blue')
 
 const handleSendEmailNotification = async () => {
   const userId = form.value.id
@@ -41,20 +36,18 @@ const handleSendEmailNotification = async () => {
 
   const success = await sendVerificationEmail(userId, router)
   if (success) {
-    lineAlertVisible.value = true
-    lineAlertStyle.value = 'blue'
-    lineAlertMessage.value = 'Email Sent'
-    lineAlertTitle.value = 'The verification email has been sent to the resident.'
+    emit('showAlert', {
+      style: 'blue',
+      message: 'Success!!',
+      title: 'The verification email has been sent to the resident.'
+    })
   } else {
-    lineAlertVisible.value = true
-    lineAlertStyle.value = 'red'
-    lineAlertMessage.value = 'Failed'
-    lineAlertTitle.value = 'Unable to send verification email. Please try again.'
+    emit('showAlert', {
+      style: 'red',
+      message: 'Error!!',
+      title: 'Unable to send verification email. Please try again.'
+    })
   }
-  
-  setTimeout(() => {
-    lineAlertVisible.value = false
-  }, 10000)
 }
 
 const form = ref({
@@ -234,15 +227,6 @@ const currentStepIndex = computed(() => {
       class="fixed inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-md z-50 p-4"
       @click="cancel"
     >
-      <!-- Feedback Alert -->
-      <div v-if="lineAlertVisible" class="fixed top-8 right-6 z-[110] w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
-        <AlertPopUp
-          :message="lineAlertMessage"
-          :titles="lineAlertTitle"
-          :styleType="lineAlertStyle"
-          @closePopUp="lineAlertVisible = false"
-        />
-      </div>
 
       <div
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"

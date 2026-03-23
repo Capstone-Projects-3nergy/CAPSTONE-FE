@@ -95,6 +95,27 @@ const residentStatusDetail = ref(null)
 const showDeleteMemberSuccess = ref(false)
 const showDeleteMemberError = ref(false)
 
+// Generic State for Alerts from Child Components
+const childAlert = ref({
+  visible: false,
+  message: '',
+  title: '',
+  style: 'blue',
+  operate: 'childAlert'
+})
+
+const handleChildAlert = (payload) => {
+  showChangeResidentStatus.value = false
+  childAlert.value = {
+    ...childAlert.value,
+    ...payload,
+    visible: true
+  }
+  setTimeout(() => {
+    childAlert.value.visible = false
+  }, 10000)
+}
+
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
@@ -239,6 +260,7 @@ const openResidentStatusPopup = (user) => {
 }
 
 const confirmStatusChange = () => {
+  showChangeResidentStatus.value = false
   statusSuccess.value = true 
   setTimeout(() => (statusSuccess.value = false), 10000)
   showChangeResidentStatus.value = false
@@ -648,6 +670,9 @@ const closePopUp = (operate) => {
     case 'statusSuccessMessage':
       statusSuccess.value = false
       break
+    case 'childAlert':
+      childAlert.value.visible = false
+      break
   }
 }
 const showResidentDetail = async function (id) {
@@ -1040,6 +1065,15 @@ const showResidentDetail = async function (id) {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <!-- Unified Popup for Child Component Events -->
+          <AlertPopUp
+            v-if="childAlert.visible"
+            :titles="childAlert.title"
+            :message="childAlert.message"
+            :styleType="childAlert.style"
+            :operate="childAlert.operate"
+            @closePopUp="closePopUp"
+          />
         </div>
         <ParcelTable
           v-if="activeTab === 'Residents'"
@@ -1323,18 +1357,7 @@ const showResidentDetail = async function (id) {
       @cancelStatusDetail="showChangeResidentStatus = false"
       @confirmStatusDetail="confirmStatusChange"
       @redStatusAlert="openRedMemPopup"
+      @showAlert="handleChildAlert"
     />
   </Teleport>
-
-  <AlertPopUp
-    v-if="statusSuccess"
-    :message="'Updated resident status successfully'"
-    @close="closePopUp('statusSuccessMessage')"
-  />
-  <AlertPopUp
-    v-if="error"
-    :status="'danger'"
-    :message="'Something went wrong. Please try again.'"
-    @close="closePopUp('problem')"
-  />
 </template>
