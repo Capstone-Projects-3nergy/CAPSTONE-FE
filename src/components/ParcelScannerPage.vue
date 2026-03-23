@@ -400,6 +400,36 @@ const processScanResult = (text) => {
 
   // Fallback: Treat as tracking number
   form.value.trackingNumber = text
+
+  // Carrier Pattern Detection - Auto select company
+  const trackingPatterns = [
+    { id: 'Flash', regex: /^TH\d{11}[A-Z]$/i },
+    { id: 'Kerry', regex: /^KEX[A-Z]{1}\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
+    { id: 'Thaipost', regex: /^[A-Z]{2}\d{9}TH$/i },
+    { id: 'JT', regex: /^JD\d{13}$/i },
+    { id: 'DHL', regex: /^\d{10,12}$/ },
+    { id: 'FedEx', regex: /^\d{12,22}$/ }
+  ]
+
+  for (const pattern of trackingPatterns) {
+    const isMatched = pattern.regex.test(text) || (pattern.altRegex && pattern.altRegex.test(text))
+    if (isMatched) {
+      const comp = companyList.value.find(c => {
+        const cName = c.companyName.toLowerCase()
+        if (pattern.id === 'Flash' && cName.includes('flash')) return true
+        if (pattern.id === 'Kerry' && cName.includes('kerry')) return true
+        if (pattern.id === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+        if (pattern.id === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+        if (pattern.id === 'DHL' && cName.includes('dhl')) return true
+        if (pattern.id === 'FedEx' && cName.includes('fedex')) return true
+        return false
+      })
+      if (comp) {
+        form.value.companyId = comp.companyId
+        break
+      }
+    }
+  }
 }
 
 const deleteScanResult = () => (scanResult.value = null)
