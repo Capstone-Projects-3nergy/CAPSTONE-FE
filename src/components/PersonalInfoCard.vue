@@ -1232,7 +1232,7 @@ const confirmUnlinkAction = async () => {
                   safeStatus?.toUpperCase() === 'DELETED' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]' : 'bg-gray-400'
                 ]"></div>
                 <div class="flex flex-col">
-                  <p class="text-[9px] font-black text-gray-400/80 tracking-widest leading-none mb-1 uppercase">CURRENT STATE</p>
+                  <p class="text-[9px] font-black text-gray-400/80 tracking-widest leading-none mb-1 uppercase">Current Status</p>
                   <p :class="[
                     'text-sm font-black leading-none tracking-tight',
                     safeStatus?.toUpperCase() === 'ACTIVE' ? 'text-emerald-600' :
