@@ -825,6 +825,32 @@ async function sendParcelNotification(parcelId, router) {
   }
 }
 
+async function sendOverdueReminder(parcelId, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const url = `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}/remind-overdue`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return null
+  } catch (error) {
+    console.error('sendOverdueReminder error:', error)
+    return null
+  }
+}
+
 async function sendLineNotification(payload, router, customUrl = null) {
   try {
     const options = {
@@ -963,6 +989,7 @@ export {
   getDashboardData,
   sendLineNotification,
   sendParcelNotification,
+  sendOverdueReminder,
   unlinkLineAccount,
   connectLineAccount,
   sendVerificationEmail,

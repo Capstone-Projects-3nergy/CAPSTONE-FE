@@ -35,7 +35,8 @@ import {
   editItemWithFile,
   deleteFile,
   updateParcelStatus,
-  sendParcelNotification
+  sendParcelNotification,
+  sendOverdueReminder
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -65,6 +66,15 @@ const isOverdue = computed(() => {
   return diffDays > 3
 })
 
+const overdueDays = computed(() => {
+  if (!parcel.value || !parcel.value.receivedAt) return 0
+  const receivedDate = new Date(parcel.value.receivedAt)
+  const now = new Date()
+  const diffTime = Math.abs(now - receivedDate)
+  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.max(1, totalDays - 3)
+})
+
 const activeTab = ref('info')
 
 // Notification states
@@ -90,12 +100,15 @@ const triggerNotifyPopup = () => {
   showNotifyPopup.value = true
 }
 
-const sendLineNotify = async () => {
+const sendNotify = async () => {
   if (!parcel.value || !parcel.value.residentId) return
   
   isSending.value = true
   try {
-    const result = await sendParcelNotification(parcel.value.parcelId, router)
+    // If it's overdue, use the remind-overdue api, otherwise use standard notify
+    const result = isOverdue.value 
+      ? await sendOverdueReminder(parcel.value.parcelId, router)
+      : await sendParcelNotification(parcel.value.parcelId, router)
     
     if (result) {
       notifySuccess.value = true
@@ -672,8 +685,8 @@ function formatDateTime(datetimeStr) {
                         </svg>
                     </div>
                     <div class="flex-1 text-left">
-                       <h5 class="text-lg font-black text-gray-800 mb-1">Send Notification</h5>
-                       <p class="text-sm text-gray-500 font-medium">Send a reminder to resident about uncollected parcel.</p>
+                       <h5 class="text-lg font-black text-gray-800 mb-1">Send Overdue Reminder</h5>
+                       <p class="text-sm text-gray-500 font-medium italic">This parcel is {{ overdueDays }}d overdue. Remind resident to pick up.</p>
                     </div>
                     <button 
                       @click="triggerNotifyPopup"
@@ -704,8 +717,12 @@ function formatDateTime(datetimeStr) {
                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
              </div>
            </div>
-           <h3 class="text-2xl font-black text-gray-900 mb-2">Send Notification?</h3>
-           <p class="text-gray-500 font-medium mb-10 leading-relaxed">System will send a notification to the resident about this parcel.</p>
+           <h3 class="text-2xl font-black text-gray-900 mb-2">{{ isOverdue ? 'Send Overdue Reminder?' : 'Send Notification?' }}</h3>
+           <p class="text-gray-500 font-medium mb-10 leading-relaxed">
+             {{ isOverdue 
+                ? 'Resident will be reminded that this parcel is ' + overdueDays + ' days overdue.' 
+                : 'System will send a notification to the resident about this parcel.' }}
+           </p>
             <div class="flex gap-3">
                <ButtonWeb 
                  @click="showNotifyPopup = false" 
@@ -714,7 +731,7 @@ function formatDateTime(datetimeStr) {
                  class="flex-1 py-2.5 text-gray-400 font-bold hover:bg-gray-50 rounded-xl transition-all"
               />
               <ButtonWeb 
-                 @click="sendLineNotify" 
+                 @click="sendNotify" 
                  :label="isSending ? 'Sending...' : 'Confirm'"
                  :color="isSending ? 'gray' : 'blue'"
                  :class="[
