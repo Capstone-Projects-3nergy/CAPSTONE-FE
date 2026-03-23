@@ -248,6 +248,7 @@ function formatDateTime(datetimeStr) {
   let datePart = parts[0]
 
   if (datePart.includes('-')) {
+    const dateComp = datePart.split('-')
     if (dateComp.length === 3) {
       if (dateComp[0].length === 4) {
         datePart = `${dateComp[2]}/${dateComp[1]}/${dateComp[0]}`
