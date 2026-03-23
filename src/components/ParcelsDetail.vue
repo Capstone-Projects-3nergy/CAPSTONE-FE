@@ -243,7 +243,21 @@ const showEditParacelDetail = async function (parcelId) {
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
-  return datetimeStr.replace('T', ' ')
+  let formatted = datetimeStr.replace('T', ' ')
+  let parts = formatted.split(' ')
+  let datePart = parts[0]
+
+  if (datePart.includes('-')) {
+    if (dateComp.length === 3) {
+      if (dateComp[0].length === 4) {
+        datePart = `${dateComp[2]}/${dateComp[1]}/${dateComp[0]}`
+      } else {
+        datePart = dateComp.join('/')
+      }
+    }
+  }
+  parts[0] = datePart
+  return parts.join(' ')
 }
 </script>
 

@@ -67,7 +67,14 @@ const props = defineProps({
 
 function formatDateTime(datetimeStr) {
   if (!datetimeStr || datetimeStr === 'Just now') return '-'
-  return datetimeStr.replace('T', ' ')
+  const date = new Date(datetimeStr)
+  if (isNaN(date.getTime())) return datetimeStr.replace('T', ' ')
+  const d = date.getDate().toString().padStart(2, '0')
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const y = date.getFullYear()
+  const hh = date.getHours().toString().padStart(2, '0')
+  const mm = date.getMinutes().toString().padStart(2, '0')
+  return `${d}/${m}/${y} - ${hh}:${mm}`
 }
 const formatStatus = (status) => {
   if (!status) return ''

@@ -583,9 +583,22 @@ const closePopUp = (operate) => {
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
-  // If it's already formatted with a space (e.g. from local storage/cache), return as is
-  // Otherwise replace the T from ISO format
-  return datetimeStr.includes('T') ? datetimeStr.replace('T', ' ') : datetimeStr
+  let formatted = datetimeStr.replace('T', ' ')
+  let parts = formatted.split(' ')
+  let datePart = parts[0]
+
+  if (datePart.includes('-')) {
+    const dateComp = datePart.split('-')
+    if (dateComp.length === 3) {
+      if (dateComp[0].length === 4) {
+        datePart = `${dateComp[2]}/${dateComp[1]}/${dateComp[0]}`
+      } else {
+        datePart = dateComp.join('/')
+      }
+    }
+  }
+  parts[0] = datePart
+  return parts.join(' ')
 }
 </script>
 
