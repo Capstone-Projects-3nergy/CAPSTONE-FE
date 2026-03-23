@@ -1404,8 +1404,8 @@ onMounted(async () => {
                 id="scanner"
                 class="w-full h-58 sm:h-64 border-2 border-dashed border-blue-200 rounded-3xl bg-gray-900 flex items-center justify-center relative overflow-hidden shadow-inner"
               >
-                <span v-if="!scanningMode && !videoStream" class="text-gray-400 font-medium tracking-wide">
-                  Scan QR/Barcode or Take Picture
+                <span v-if="!scanningMode && !videoStream" class="text-gray-400 font-medium tracking-wide text-center px-6">
+                  Position the parcel label within the frame
                 </span>
 
                 <div
@@ -1511,14 +1511,14 @@ onMounted(async () => {
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
-                <ButtonWeb
+                <!-- <ButtonWeb
                   label="OCR Scan"
                   color="blue"
                   size="sm"
                   class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startCamera"
                   :disabled="scanningMode || videoStream || isOcrLoading"
-                />
+                /> -->
                 <ButtonWeb
                   label="Reset"
                   color="red"
