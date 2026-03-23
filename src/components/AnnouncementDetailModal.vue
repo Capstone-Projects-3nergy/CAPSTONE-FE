@@ -100,7 +100,7 @@ const getCategoryIcon = (category) => {
 }
 
 const formatDate = (dateString) => {
-  if (!dateString || dateString === 'Just now') return 'Just now'
+  if (!dateString || dateString === 'Just now') return '-'
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   const day = String(date.getDate()).padStart(2, '0')

@@ -66,7 +66,7 @@ const props = defineProps({
 })
 
 function formatDateTime(datetimeStr) {
-  if (!datetimeStr) return ''
+  if (!datetimeStr || datetimeStr === 'Just now') return '-'
   return datetimeStr.replace('T', ' ')
 }
 const formatStatus = (status) => {
@@ -371,7 +371,7 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:table-cell md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Date Posted: </span>
-            {{ formatDateTime(p.datePosted) }}
+            {{ formatDateTime(p.datePosted) || '-' }}
           </td>
 
           <td
