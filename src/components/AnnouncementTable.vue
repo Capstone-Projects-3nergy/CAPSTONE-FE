@@ -163,7 +163,7 @@ const formatDate = (dateString) => {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                   </svg>
-                  <span class="whitespace-nowrap">{{ formatDate(item.datePosted) }}</span>
+                  <span class="whitespace-nowrap">{{ formatDate(item.publishAt) }}</span>
                 </div>
                 <div class="flex items-center gap-0.5 min-w-0">
                   <div class="h-2.5 w-2.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[5px] font-black flex-shrink-0">P</div>
@@ -364,7 +364,7 @@ const formatDate = (dateString) => {
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                       </svg>
-                      <span>{{ formatDate(item.datePosted) }}</span>
+                      <span>{{ formatDate(item.publishAt) }}</span>
                     </div>
                     <div class="flex items-center gap-1 min-w-0">
                       <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold flex-shrink-0">P</div>

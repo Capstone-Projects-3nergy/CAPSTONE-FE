@@ -157,7 +157,7 @@ const formatDate = (dateString) => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                 </svg>
-                <span class="truncate">{{ formatDate(item.publishAt || item.createdAt || item.datePosted || item.date) }}</span>
+                <span class="truncate">{{ formatDate(item.publishAt) }}</span>
               </div>
               <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
                 <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
@@ -215,7 +215,7 @@ const formatDate = (dateString) => {
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500 font-bold">
-                {{ formatDate(item.publishAt || item.createdAt || item.datePosted || item.date) }}
+                {{ formatDate(item.publishAt) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-center text-xs text-gray-500 font-bold">
                 {{ item.viewCount || item.views || 0 }}
