@@ -28,6 +28,7 @@ const newStatus = ref('')
 const currentStatus = ref('')
 const statusChangedSuccessfuly = ref(false)
 const isSaving = ref(false)
+const loadingEmail = ref(false)
 
 
 const handleSendEmailNotification = async () => {
@@ -42,26 +43,31 @@ const handleSendEmailNotification = async () => {
   if (currentStatusUpper !== 'PENDING') {
     emit('showAlert', {
       style: 'red',
-      message: 'Failed!!',
+      message: 'Error!!',
       title: 'Only users with PENDING status can receive verification emails.'
     })
     return
   }
 
-  const success = await resendVerification(userId, router)
-  
-  if (success) {
-    emit('showAlert', {
-      style: 'blue',
-      message: 'Success!!',
-      title: 'The verification email has been sent to the resident.'
-    })
-  } else {
-    emit('showAlert', {
-      style: 'red',
-      message: 'Error!!',
-      title: 'Unable to send verification email. Please try again.'
-    })
+  loadingEmail.value = true
+  try {
+    const success = await resendVerification(userId, router)
+    
+    if (success) {
+      emit('showAlert', {
+        style: 'blue',
+        message: 'Success!!',
+        title: 'The verification email has been sent to the resident.'
+      })
+    } else {
+      emit('showAlert', {
+        style: 'red',
+        message: 'Error!!',
+        title: 'Unable to send verification email. Please try again.'
+      })
+    }
+  } finally {
+    loadingEmail.value = false
   }
 }
 
@@ -306,12 +312,13 @@ const currentStepIndex = computed(() => {
                  <h5 class="text-sm font-black text-gray-800 mb-0.5">Account Verification</h5>
                  <p class="text-[10px] text-gray-500 font-medium leading-relaxed">Resident hasn't verified account yet. Send verification email to complete setup.</p>
               </div>
-              <button 
+              <ButtonWeb
+                label="Send Email"
+                color="blue"
+                :loading="loadingEmail"
                 @click="handleSendEmailNotification"
-                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center gap-2 whitespace-nowrap"
-              >
-                 <span>Send Email</span>
-              </button>
+                class="text-[11px] font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+              />
             </div>
 
             <!-- Locking Alert -->

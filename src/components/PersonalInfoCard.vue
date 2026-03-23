@@ -35,6 +35,7 @@ const lineAlertTitle = ref('')
 const lineAlertStyle = ref('blue')
 const showUnlinkSuccessPopup = ref(false)
 const showUnlinkConfirm = ref(false)
+const loadingEmail = ref(false)
 
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
@@ -487,7 +488,7 @@ const handleSendEmailNotification = async () => {
   if (safeStatus.value?.toUpperCase() !== 'PENDING') {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
-    lineAlertMessage.value = 'Failed'
+    lineAlertMessage.value = 'Error!!'
     lineAlertTitle.value = 'Only users with PENDING status can receive verification emails.'
     
     setTimeout(() => {
@@ -504,26 +505,31 @@ const handleSendEmailNotification = async () => {
     return
   }
 
-  const success = await resendVerification(userId, router)
-  
-  if (success) {
-    lineAlertVisible.value = true
-    lineAlertStyle.value = 'blue'
-    lineAlertMessage.value = 'Email Sent'
-    lineAlertTitle.value = 'The verification email has been sent to the resident.'
+  loadingEmail.value = true
+  try {
+    const success = await resendVerification(userId, router)
     
-    setTimeout(() => {
-      lineAlertVisible.value = false
-    }, 10000)
-  } else {
-    lineAlertVisible.value = true
-    lineAlertStyle.value = 'red'
-    lineAlertMessage.value = 'Failed'
-    lineAlertTitle.value = 'Unable to send verification email. Please try again.'
-    
-    setTimeout(() => {
-      lineAlertVisible.value = false
-    }, 10000)
+    if (success) {
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'blue'
+      lineAlertMessage.value = 'Email Sent'
+      lineAlertTitle.value = 'The verification email has been sent to the resident.'
+      
+      setTimeout(() => {
+        lineAlertVisible.value = false
+      }, 10000)
+    } else {
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'red'
+      lineAlertMessage.value = 'Failed'
+      lineAlertTitle.value = 'Unable to send verification email. Please try again.'
+      
+      setTimeout(() => {
+        lineAlertVisible.value = false
+      }, 10000)
+    }
+  } finally {
+    loadingEmail.value = false
   }
 }
 
@@ -1292,15 +1298,19 @@ const confirmUnlinkAction = async () => {
                   </div>
 
                   <!-- Footer Area: Primary Action -->
-                  <button 
+                  <ButtonWeb
+                    label="Send Activation Email"
+                    color="blue"
+                    :loading="loadingEmail"
                     @click="handleSendEmailNotification"
-                    class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-3 group/sendbtn text-sm"
+                    class="px-10 py-4 font-black shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer text-sm"
                   >
-                     <span>Send Activation Email</span>
-                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                     </svg>
-                  </button>
+                     <template #icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                     </template>
+                  </ButtonWeb>
                 </div>
               </div>
 
