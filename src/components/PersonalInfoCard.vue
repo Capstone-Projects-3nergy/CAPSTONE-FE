@@ -8,6 +8,7 @@ import { useUserManager } from '@/stores/MemberAndStaffManager'
 import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl, sendVerificationEmail } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 import AlertPopUp from './AlertPopUp.vue'
+import ConfirmPopUp from './ConfirmPopUp.vue'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
@@ -27,11 +28,14 @@ const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
 const showLineSuccessPopup = ref(false)
 
-// LINE Connection alert state
+// Dynamic Feedback & Modals state
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
 const lineAlertStyle = ref('blue')
+const showUnlinkSuccessPopup = ref(false)
+const showUnlinkConfirm = ref(false)
+
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -509,38 +513,39 @@ const handleSendEmailNotification = async () => {
   }
 }
 
-const handleUnlink = async () => {
-  if (confirm('Are you sure you want to disconnect your LINE account?')) {
-    const success = await unlinkLineAccount(router)
-    if (success) {
-      // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
-      if (profileManager.currentProfile) {
-        profileManager.currentProfile.isLineLinked = false
-        profileManager.currentProfile.lineId = null
-      }
-      if (loginManager.user) {
-        loginManager.user.isLineLinked = false
-        loginManager.user.lineId = null
-      }
+const handleUnlink = () => {
+  showUnlinkConfirm.value = true
+}
 
-      // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
-      await profileManager.fetchProfile()
-      
-      // ✅ แสดง Popup แจ้งเตือนความสำเร็จ
-      lineAlertVisible.value = true
-      lineAlertStyle.value = 'blue'
-      lineAlertMessage.value = 'Disconnected'
-      lineAlertTitle.value = 'Your LINE account has been unlinked successfully.'
-      
-      setTimeout(() => {
-        lineAlertVisible.value = false
-      }, 5000)
-    } else {
-      lineAlertVisible.value = true
-      lineAlertStyle.value = 'red'
-      lineAlertMessage.value = 'Error'
-      lineAlertTitle.value = 'Failed to disconnect. Please try again later.'
+const confirmUnlinkAction = async () => {
+  showUnlinkConfirm.value = false
+  const success = await unlinkLineAccount(router)
+  if (success) {
+    // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
+    if (profileManager.currentProfile) {
+      profileManager.currentProfile.isLineLinked = false
+      profileManager.currentProfile.lineId = null
     }
+    if (loginManager.user) {
+      loginManager.user.isLineLinked = false
+      loginManager.user.lineId = null
+    }
+
+    // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
+    await profileManager.fetchProfile()
+    
+    // ✅ แสดง Popup แจ้งเตือนความสำเร็จ (ระบบใหม่)
+    showUnlinkSuccessPopup.value = true
+    
+    // Auto hide after 5 seconds if user doesn't close
+    setTimeout(() => {
+      showUnlinkSuccessPopup.value = false
+    }, 5000)
+  } else {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Error'
+    lineAlertTitle.value = 'Failed to disconnect. Please try again later.'
   }
 }
 </script>
@@ -549,11 +554,48 @@ const handleUnlink = async () => {
     <!-- Beautiful LINE Feedback Alert -->
     <div v-if="lineAlertVisible" class="fixed top-24 right-6 z-[110] w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
       <AlertPopUp
+        v-if="lineAlertVisible"
         :message="lineAlertMessage"
         :titles="lineAlertTitle"
         :styleType="lineAlertStyle"
         @closePopUp="lineAlertVisible = false"
       />
+    </div>
+
+    <!-- Confirm Disconnect Modal -->
+    <ConfirmPopUp
+      v-if="showUnlinkConfirm"
+      title="Disconnect LINE?"
+      message="Are you sure you want to disconnect your LINE account? You will stop receiving important notifications directly to your LINE app."
+      confirmLabel="Yes, Disconnect"
+      cancelLabel="Keep Connected"
+      styleType="red"
+      @confirm="confirmUnlinkAction"
+      @cancel="showUnlinkConfirm = false"
+    />
+
+    <!-- Unlink Success Modal -->
+    <div v-if="showUnlinkSuccessPopup" class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showUnlinkSuccessPopup = false"></div>
+      
+      <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] scale-in-center animate-pulse-once border border-white/20">
+        <div class="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+            <line x1="12" y1="2" x2="12" y2="12"></line>
+          </svg>
+        </div>
+
+        <h3 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Successfully Unlinked</h3>
+        <p class="text-gray-400 font-bold leading-relaxed mb-10 px-4">Your LINE account has been disconnected from <span class="text-blue-500 font-black">Tractify</span>.</p>
+        
+        <ButtonWeb 
+          @click="showUnlinkSuccessPopup = false"
+          label="Got it"
+          color="blue"
+          class="w-full py-4 font-black shadow-lg hover:shadow-xl rounded-2xl"
+        />
+      </div>
     </div>
 
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
