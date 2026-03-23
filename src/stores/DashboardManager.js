@@ -131,10 +131,10 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   }
 
   const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null, startDate = null, endDate = null) => {
-    // 1. Update internal state if new data is provided (ONLY if data is not empty)
-    if (Array.isArray(parcelsRaw) && parcelsRaw.length > 0) setParcels(parcelsRaw)
-    if (Array.isArray(residentsRaw) && residentsRaw.length > 0) setMembers(residentsRaw)
-    if (Array.isArray(announcementsRaw) && announcementsRaw.length > 0) setAnnouncements(announcementsRaw)
+    // 1. Update internal state if new data is provided
+    if (Array.isArray(parcelsRaw)) setParcels(parcelsRaw)
+    if (Array.isArray(residentsRaw)) setMembers(residentsRaw)
+    if (Array.isArray(announcementsRaw)) setAnnouncements(announcementsRaw)
 
     // 2. Filter parcels by range if provided
     let parcelsData = parcels.length > 0 ? parcels : []
@@ -175,43 +175,27 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       })
     }
 
-    // If NO data at all (not even in store), don't overwrite the initial view
-    if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
-      // Still need to reset stats if we just filtered to zero
-      if (startDate || endDate) {
-        stats.totalParcels = 0
-        stats.pickedUpParcels = 0
-        stats.awaitingParcels = 0
-        stats.overdueParcels = 0
-        stats.totalResidents = 0
-        stats.activeResidents = 0
-        stats.pendingResidents = 0
-        stats.inactiveResidents = 0
-      }
-      return
-    }
+    // 3. Reset stats and charts before recalculating
+    stats.totalParcels = parcelsData.length
+    stats.pickedUpParcels = 0
+    stats.awaitingParcels = 0
+    stats.overdueParcels = 0
 
-    // Populate Chart Data if we have parcels
+    // Reset charts
+    chartData.daily.received.fill(0)
+    chartData.daily.pickedUp.fill(0)
+    chartData.daily.overdue.fill(0)
+    
+    chartData.weekly.received.fill(0)
+    chartData.weekly.pickedUp.fill(0)
+    chartData.weekly.overdue.fill(0)
+
+    chartData.monthly.received.fill(0)
+    chartData.monthly.pickedUp.fill(0)
+    chartData.monthly.overdue.fill(0)
+
+    // 4. Continue with calculations ONLY if we have data
     if (parcelsData.length > 0) {
-      // Reset parcel stats
-      stats.totalParcels = parcelsData.length
-      stats.pickedUpParcels = 0
-      stats.awaitingParcels = 0
-      stats.overdueParcels = 0
-
-      // Reset charts
-      chartData.daily.received.fill(0)
-      chartData.daily.pickedUp.fill(0)
-      chartData.daily.overdue.fill(0)
-      
-      chartData.weekly.received.fill(0)
-      chartData.weekly.pickedUp.fill(0)
-      chartData.weekly.overdue.fill(0)
-
-      chartData.monthly.received.fill(0)
-      chartData.monthly.pickedUp.fill(0)
-      chartData.monthly.overdue.fill(0)
-
       const today = new Date()
       const currentMonth = today.getMonth()
       const currentYear = today.getFullYear()
@@ -339,8 +323,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     calculateDashboardData()
   }
 
-  // Auto-init with mock data
-  initMockData()
+  // Auto-init removed to prevent mock data override
+  // initMockData()
 
   return {
     parcels,
