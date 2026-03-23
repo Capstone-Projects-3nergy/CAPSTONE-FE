@@ -3,8 +3,9 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ButtonWeb from './ButtonWeb.vue'
-import { getItemById, editItem } from '@/utils/fetchUtils'
+import { getItemById, editItem, sendVerificationEmail } from '@/utils/fetchUtils'
 import SelectWeb from './SelectWeb.vue'
+import AlertPopUp from './AlertPopUp.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +28,34 @@ const newStatus = ref('')
 const currentStatus = ref('')
 const statusChangedSuccessfuly = ref(false)
 const isSaving = ref(false)
+
+// Alert state (from PersonalInfoCard)
+const lineAlertVisible = ref(false)
+const lineAlertMessage = ref('')
+const lineAlertTitle = ref('')
+const lineAlertStyle = ref('blue')
+
+const handleSendEmailNotification = async () => {
+  const userId = form.value.id
+  if (!userId) return
+
+  const success = await sendVerificationEmail(userId, router)
+  if (success) {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'blue'
+    lineAlertMessage.value = 'Email Sent'
+    lineAlertTitle.value = 'The verification email has been sent to the resident.'
+  } else {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Failed'
+    lineAlertTitle.value = 'Unable to send verification email. Please try again.'
+  }
+  
+  setTimeout(() => {
+    lineAlertVisible.value = false
+  }, 10000)
+}
 
 const form = ref({
   id: '',
@@ -205,6 +234,16 @@ const currentStepIndex = computed(() => {
       class="fixed inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-md z-50 p-4"
       @click="cancel"
     >
+      <!-- Feedback Alert -->
+      <div v-if="lineAlertVisible" class="fixed top-8 right-6 z-[110] w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
+        <AlertPopUp
+          :message="lineAlertMessage"
+          :titles="lineAlertTitle"
+          :styleType="lineAlertStyle"
+          @closePopUp="lineAlertVisible = false"
+        />
+      </div>
+
       <div
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
         @click.stop
@@ -256,6 +295,26 @@ const currentStepIndex = computed(() => {
 
           <div class="p-6 sm:p-8">
 
+            <!-- Email Notification Reminder (For Pending) -->
+            <div v-if="!isLocked" class="mb-8 bg-blue-50/50 rounded-3xl p-5 border border-blue-100 flex flex-col sm:flex-row items-center gap-5">
+              <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+              </div>
+              <div class="flex-1 text-left min-w-0">
+                 <h5 class="text-sm font-black text-gray-800 mb-0.5">Account Verification</h5>
+                 <p class="text-[10px] text-gray-500 font-medium leading-relaxed">Resident hasn't verified account yet. Send verification email to complete setup.</p>
+              </div>
+              <button 
+                @click="handleSendEmailNotification"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center gap-2 whitespace-nowrap"
+              >
+                 <span>Send Email</span>
+              </button>
+            </div>
+
             <!-- Locking Alert -->
             <div v-if="isLocked" class="mb-8 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3">
               <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5">
@@ -266,7 +325,7 @@ const currentStepIndex = computed(() => {
                 <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already approved. Modifications are restricted to pending registrations for data integrity.</p>
               </div>
             </div>
-
+<!-- 
             <div class="mb-8" v-if="!isLocked">
               <label class="block text-xs font-black text-slate-500 tracking-widest mb-3 ml-1">Update Status</label>
               <SelectWeb
@@ -277,7 +336,6 @@ const currentStepIndex = computed(() => {
               />
             </div>
 
-            <!-- Actions -->
             <div class="flex flex-col sm:flex-row gap-3">
               <ButtonWeb
                 :label="isLocked ? 'Close' : 'Cancel'"
@@ -293,7 +351,7 @@ const currentStepIndex = computed(() => {
                 @click="saveStatusChange"
                 :disabled="isSaveDisabled"
               />
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
