@@ -162,7 +162,7 @@ onMounted(async () => {
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
-console.log(dataUser)
+
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.userId,
@@ -934,30 +934,7 @@ const confirmUnlinkAction = async () => {
                     </div>
                   </button>
 
-                  <!-- Action Button: Disconnect (Premium Styled version) -->
-                  <div
-                    v-else
-                    class="flex flex-col items-center w-full"
-                  >
-                    <button
-                      @click="handleUnlink"
-                      class="group/line-disconnect-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(239,68,68,0.4)]"
-                    >
-                      <!-- Background Gradient (Red theme) -->
-                      <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-rose-500 to-red-600"></div>
-                      
-                      <!-- Content Layer -->
-                      <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent text-white">
-                        <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Disconnect LINE</span>
-                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-disconnect-btn:rotate-90 transition-transform duration-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                            <line x1="12" y1="2" x2="12" y2="12"></line>
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
+                  <!-- Status Display when connected (Premium Badge Version) -->
                 </div>
               </div>
             </div>
