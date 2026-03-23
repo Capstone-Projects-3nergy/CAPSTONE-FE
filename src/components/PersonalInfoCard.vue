@@ -1345,7 +1345,7 @@ const confirmUnlinkAction = async () => {
           
           <ButtonWeb 
             @click="showLineSuccessPopup = false"
-            label="Remind me later"
+            label="Close"
             color="gray"
             class="w-full py-4 text-gray-400 font-bold border-none shadow-none bg-transparent hover:bg-transparent hover:text-gray-600 transition-colors"
           />
