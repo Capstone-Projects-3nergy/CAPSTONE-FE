@@ -1147,10 +1147,6 @@ const showProfileStaffPage = async function () {
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
                         Status
-                        <span v-if="initialForm && initialForm.status === 'PUBLISHED'" class="flex items-center text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md border border-gray-200 uppercase tracking-wider font-bold">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                          Locked
-                        </span>
                       </label>
                       <SelectWeb 
                          v-model="announcementForm.status"
@@ -1198,14 +1194,14 @@ const showProfileStaffPage = async function () {
                         <!-- Icon Overlay -->
                         <div 
                           class="absolute right-3 z-20 transition-transform duration-200"
-                          :class="announcementForm.status === 'PUBLISHED' ? 'group-hover:scale-105 cursor-pointer' : 'cursor-not-allowed'"
+                          :class="announcementForm.status === 'DRAFT' ? 'group-hover:scale-105 cursor-pointer' : 'cursor-not-allowed'"
                           @click="openDatePicker"
                         >
                           <div 
                             class="p-1.5 rounded-lg shadow-sm flex items-center justify-center border transition-colors"
-                            :class="announcementForm.status === 'PUBLISHED' ? 'bg-white text-[#0E4B90] border-gray-100' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                            :class="announcementForm.status === 'DRAFT' ? 'bg-white text-[#0E4B90] border-gray-100' : 'bg-gray-100 text-gray-400 border-gray-200'"
                           >
-                            <svg v-if="announcementForm.status === 'PUBLISHED'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg v-if="announcementForm.status === 'DRAFT'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                               <line x1="16" y1="2" x2="16" y2="6"></line>
                               <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -1221,10 +1217,10 @@ const showProfileStaffPage = async function () {
                             readonly
                             :value="formatDateTimeDisplay(announcementForm.publishAt)"
                             placeholder="DD/MM/YYYY - HH:mm"
-                            @click="announcementForm.status === 'PUBLISHED' && openDatePicker()"
+                            @click="announcementForm.status === 'DRAFT' && openDatePicker()"
                             class="w-full pl-4 pr-13 py-3 rounded-xl border transition-all outline-none font-medium"
                             :class="[
-                              announcementForm.status === 'PUBLISHED' 
+                              announcementForm.status === 'DRAFT' 
                               ? 'border-gray-200 bg-white text-gray-700 cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-100' 
                               : 'border-gray-100 bg-gray-50/80 text-gray-400 cursor-not-allowed'
                             ]"
@@ -1236,7 +1232,7 @@ const showProfileStaffPage = async function () {
                             type="datetime-local" 
                             v-model="announcementForm.publishAt"
                             :min="minDateTime"
-                            :disabled="announcementForm.status !== 'PUBLISHED'"
+                            :disabled="announcementForm.status !== 'DRAFT'"
                             class="absolute opacity-0 w-0 h-0 pointer-events-none"
                          />
                       </div>
