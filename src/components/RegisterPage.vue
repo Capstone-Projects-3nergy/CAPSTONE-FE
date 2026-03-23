@@ -125,6 +125,53 @@ onMounted(async () => {
   } catch (err) {}
 })
 
+const clearAllErrors = () => {
+  isNameOverLimit.value = false
+  isFullNameWeak.value = false
+  isEmailOverLimit.value = false
+  isEmailInvalidChars.value = false
+  isStaffPositionOverLimit.value = false
+  isStaffPositionTooShort.value = false
+  isPasswordOverLimit.value = false
+  isPasswordTooShort.value = false
+  showPasswordPopup.value = false
+  isConfirmPasswordOverLimit.value = false
+  isConfirmPasswordTooShort.value = false
+  showConfirmPasswordPopup.value = false
+  isRoomNumberOverLimit.value = false
+  isNotMatch.value = false
+  isFullNameWrong.value = false
+  isEmailStaff.value = false
+  incorrectemailform.value = false
+  roomidnotnumber.value = false
+  isNoDorm.value = false
+  isRoomRequired.value = false
+  isPositionRequired.value = false
+  isPositionWrong.value = false
+  isEmailExist.value = false
+  isEmailDuplicate.value = false
+  isEmailFirebase.value = false
+  error.value = false
+  isPasswordWeak.value = false
+  isPasswordMax.value = false
+  isPasswordNotMatch.value = false
+  showConfirmPasswordTooShort.value = false
+  success.value = false
+}
+
+const triggerError = (errorRef, timeout = 10000) => {
+  const needsSetting = !errorRef.value
+  if (needsSetting) {
+    clearAllErrors()
+    errorRef.value = true
+    if (timeout > 0) {
+      setTimeout(() => {
+        if (errorRef.value) errorRef.value = false
+      }, timeout)
+    }
+  }
+}
+
 const submitForm = async (roleType) => {
   try {
     const MAX_NAME_LENGTH = 100
@@ -136,83 +183,74 @@ const submitForm = async (roleType) => {
     const MIN_FULLNAME_LENGTH = 6
 
     if (form.fullName.trim().length > MAX_NAME_LENGTH) {
-      isNameOverLimit.value = true
-      setTimeout(() => (isNameOverLimit.value = false), 10000)
+      triggerError(isNameOverLimit)
       return
     }
     const lettersOnly = form.fullName.trim().replace(/\s+/g, '')
     if (lettersOnly.length > 0 && lettersOnly.length < MIN_FULLNAME_LENGTH) {
-      isFullNameWeak.value = true
-      setTimeout(() => (isFullNameWeak.value = false), 10000)
+      triggerError(isFullNameWeak)
       return
     }
 
     if (form.email.trim().length > MAX_EMAIL_LENGTH) {
-      isEmailOverLimit.value = true
-      setTimeout(() => (isEmailOverLimit.value = false), 10000)
+      triggerError(isEmailOverLimit)
       return
     }
 
     if (/[^a-zA-Z0-9.@]/.test(form.email)) {
-      isEmailInvalidChars.value = true
-      setTimeout(() => (isEmailInvalidChars.value = false), 10000)
+      triggerError(isEmailInvalidChars)
       return
     }
 
     if (form.position.trim().length > MAX_STAFFPOSITION_LENGTH) {
-      isStaffPositionOverLimit.value = true
-      setTimeout(() => (isStaffPositionOverLimit.value = false), 10000)
+      triggerError(isStaffPositionOverLimit)
       return
     }
     if (form.position.trim().length > 0 && form.position.trim().length < 2) {
-      isStaffPositionTooShort.value = true
-      setTimeout(() => (isStaffPositionTooShort.value = false), 10000)
+      triggerError(isStaffPositionTooShort)
       return
     }
 
     if (form.password.trim().length > MAX_PASSWORD_LENGTH) {
-      isPasswordOverLimit.value = true
-      setTimeout(() => (isPasswordOverLimit.value = false), 10000)
+      triggerError(isPasswordOverLimit)
       return
     }
     if (
       form.password.trim().length > 0 &&
       form.password.trim().length < MIN_PASSWORD_LENGTH
     ) {
+      clearAllErrors()
       isPasswordTooShort.value = true
       showPasswordPopup.value = true
       return
     }
 
     if (form.confirmPassword.trim().length > MAX_PASSWORD_LENGTH) {
-      isConfirmPasswordOverLimit.value = true
-      setTimeout(() => (isConfirmPasswordOverLimit.value = false), 10000)
+      triggerError(isConfirmPasswordOverLimit)
       return
     }
     if (
       form.confirmPassword.trim().length > 0 &&
       form.confirmPassword.trim().length < MIN_PASSWORD_LENGTH
     ) {
+      clearAllErrors()
       isConfirmPasswordTooShort.value = true
       showConfirmPasswordPopup.value = true
       return
     }
 
     if (form.roomNumber.trim().length > MAX_ROOMNUMBER_LENGTH) {
-      isRoomNumberOverLimit.value = true
-      setTimeout(() => (isRoomNumberOverLimit.value = false), 10000)
+      triggerError(isRoomNumberOverLimit)
       return
     }
 
     if (form.password !== form.confirmPassword) {
-      isNotMatch.value = true
-      setTimeout(() => (isNotMatch.value = false), 10000)
+      triggerError(isNotMatch)
       return
     }
 
     if (/\d/.test(form.fullName)) {
-      isFullNameWrong.value = true
-      setTimeout(() => (isFullNameWrong.value = false), 10000)
+      triggerError(isFullNameWrong)
       return
     }
     // if (!form.password || form.password.length > 20) {
@@ -232,20 +270,17 @@ const submitForm = async (roleType) => {
         form.email.endsWith('@email.com') ||
         form.email.endsWith('@outlook.com') 
       ) {
-        isEmailStaff.value = true
-        setTimeout(() => (isEmailStaff.value = false), 10000)
+        triggerError(isEmailStaff)
         return
       }
     }
     if (roleType === 'RESIDENT') {
       if (!form.email || !form.email.endsWith('@gmail.com')) {
-        incorrectemailform.value = true
-        setTimeout(() => (incorrectemailform.value = false), 10000)
+        triggerError(incorrectemailform)
         return
       }
       if (!/^[0-9]+$/.test(form.roomNumber)) {
-        roomidnotnumber.value = true
-        setTimeout(() => (roomidnotnumber.value = false), 10000)
+        triggerError(roomidnotnumber)
         return
       }
     }
@@ -279,24 +314,20 @@ const submitForm = async (roleType) => {
 
     if (roleUpper === 'RESIDENT') {
       if (!payload.dormId) {
-        isNoDorm.value = true
-        setTimeout(() => (isNoDorm.value = false), 10000)
+        triggerError(isNoDorm)
         return
       }
       if (!payload.roomNumber) {
-        isRoomRequired.value = true
-        setTimeout(() => (isRoomRequired.value = false), 10000)
+        triggerError(isRoomRequired)
         return
       }
     } else if (roleUpper === 'STAFF') {
       if (!payload.position) {
-        isPositionRequired.value = true
-        setTimeout(() => (isPositionRequired.value = false), 10000)
+        triggerError(isPositionRequired)
         return
       }
       if (/\d/.test(payload.position)) {
-        isPositionWrong.value = true
-        setTimeout(() => (isPositionWrong.value = false), 10000)
+        triggerError(isPositionWrong)
         return
       }
     }
@@ -319,21 +350,17 @@ const submitForm = async (roleType) => {
       })
 
     } else if (res.status === 404) {
-      isEmailExist.value = true
-      setTimeout(() => (isEmailExist.value = false), 10000)
+      triggerError(isEmailExist)
     } else if (res.status === 409) {
       // 📌 มีอีเมลซ้ำอยู่ใน Database แล้ว
-      isEmailDuplicate.value = true
-      setTimeout(() => (isEmailDuplicate.value = false), 10000)
+      triggerError(isEmailDuplicate)
     } else {
       // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว
       // แปลว่า "มีใน Firebase แต่ไม่มีใน Database"
       if (isFirebaseDuplicate) {
-        isEmailFirebase.value = true
-        setTimeout(() => (isEmailFirebase.value = false), 10000)
+        triggerError(isEmailFirebase)
       } else {
-        error.value = true
-        setTimeout(() => (error.value = false), 10000)
+        triggerError(error)
       }
     }
   } catch (err) {
@@ -370,7 +397,12 @@ const checkInputLength = (field) => {
     if (trimmed.length <= MAX_STAFFPOSITION_LENGTH) {
       isStaffPositionOverLimit.value = false
     }
-    isStaffPositionTooShort.value = trimmed.length > 0 && trimmed.length < 2
+    const isShort = trimmed.length > 0 && trimmed.length < 2
+    if (isShort && !isStaffPositionTooShort.value) {
+      triggerError(isStaffPositionTooShort, 0)
+    } else if (!isShort) {
+      isStaffPositionTooShort.value = false
+    }
   } else if (field === 'password') {
     const trimmed = form.password.trim()
 
@@ -378,8 +410,12 @@ const checkInputLength = (field) => {
       isPasswordOverLimit.value = false
     }
 
-    isPasswordTooShort.value =
-      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
+    const isShort = trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
+    if (isShort && !isPasswordTooShort.value) {
+      triggerError(isPasswordTooShort, 0)
+    } else if (!isShort) {
+      isPasswordTooShort.value = false
+    }
   } else if (field === 'confirmPassword') {
     const trimmed = form.confirmPassword.trim()
 
@@ -387,8 +423,12 @@ const checkInputLength = (field) => {
       isConfirmPasswordOverLimit.value = false
     }
 
-    isConfirmPasswordTooShort.value =
-      trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
+    const isShort = trimmed.length > 0 && trimmed.length < MIN_PASSWORD_LENGTH
+    if (isShort && !isConfirmPasswordTooShort.value) {
+      triggerError(isConfirmPasswordTooShort, 0)
+    } else if (!isShort) {
+      isConfirmPasswordTooShort.value = false
+    }
   } else if (field === 'roomNumber') {
     const trimmed = form.roomNumber.trim()
     if (trimmed.length <= MAX_ROOMNUMBER_LENGTH) {
