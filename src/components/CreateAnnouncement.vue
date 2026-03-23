@@ -356,15 +356,6 @@ const submitAnnouncement = async () => {
     return
   }
 
-  // Check for publish date if in publish tab
-  if (activeTab.value === 'publish' && !publishAt.value) {
-    showDateError.value = true
-    setTimeout(() => {
-      showDateError.value = false
-    }, 10000)
-    return
-  }
-
   if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
     setTimeout(() => {
@@ -478,6 +469,14 @@ const saveDraft = async () => {
     showPinLimitAlert.value = true
     setTimeout(() => {
       showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
+  
+  if (activeTab.value === 'draft' && !publishAt.value) {
+    showDateError.value = true
+    setTimeout(() => {
+      showDateError.value = false
     }, 10000)
     return
   }
@@ -954,7 +953,7 @@ const returnLoginPage = async () => {
                       </SelectWeb>
                    </div>
                    <!-- Publish Date (Conditional) -->
-                   <div v-if="activeTab === 'publish'" class="space-y-2">
+                   <div v-if="activeTab === 'draft'" class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date</label>
                       <div class="relative flex items-center group">
                         <!-- Icon Overlay -->
