@@ -132,7 +132,7 @@ const formatDate = (dateString) => {
               </div>
               <div class="flex flex-col">
                 <span class="font-bold text-gray-900 leading-tight text-lg">{{ author }}</span>
-                <span v-if="status?.toUpperCase() !== 'DRAFT'" class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
+                <span class="text-xs text-gray-500 font-medium">Posted on {{ formatDate(date) }}</span>
               </div>
             </div>
             <div class="hidden sm:flex items-center text-gray-400 text-sm font-medium gap-1.5">

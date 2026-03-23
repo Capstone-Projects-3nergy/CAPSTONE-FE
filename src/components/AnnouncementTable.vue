@@ -158,7 +158,7 @@ const formatDate = (dateString) => {
           <!-- Card Footer -->
           <div class="flex items-center justify-between gap-0.5 sm:gap-1 mt-auto min-w-0">
             <!-- Left Side: Metadata consolidated into single line -->
-            <div v-if="item.status !== 'DRAFT'" class="flex flex-row items-center gap-1 text-gray-400 text-[8px] font-bold min-w-0 flex-1 overflow-hidden">
+            <div class="flex flex-row items-center gap-1 text-gray-400 text-[8px] font-bold min-w-0 flex-1 overflow-hidden">
                 <div class="flex items-center gap-0.5 flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
@@ -178,8 +178,8 @@ const formatDate = (dateString) => {
                 </div>
             </div>
             <!-- If draft, only show basic info if needed, or hide metadata to match grid requested -->
-            <div v-else class="flex-1"></div>
-            
+            <!-- <div v-else class="flex-1"></div>
+             -->
             <!-- Right Side: Action Buttons -->
             <div class="flex items-center gap-0.5 flex-shrink-0">
               <button @click="$emit('pin', item)" 
@@ -359,7 +359,7 @@ const formatDate = (dateString) => {
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 whitespace-nowrap align-middle bg-[#F8FAFC] md:bg-transparent">
                   <!-- Metadata row for mobile at the bottom -->
-                  <div v-if="item.status !== 'DRAFT'" class="md:hidden flex items-center gap-4 text-gray-400 text-[10px] font-bold">
+                  <div class="md:hidden flex items-center gap-4 text-gray-400 text-[10px] font-bold">
                     <div class="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />

@@ -26,7 +26,6 @@ const handleResize = () => {
 }
 
 const openDatePicker = () => {
-  if (announcementForm.status !== 'PUBLISHED') return;
   if (dateInput.value?.showPicker) {
     dateInput.value.showPicker();
   } else {
@@ -1193,8 +1192,7 @@ const showProfileStaffPage = async function () {
                       <div class="relative flex items-center group">
                         <!-- Icon Overlay -->
                         <div 
-                          class="absolute right-3 z-20 transition-transform duration-200"
-                          :class="announcementForm.status === 'DRAFT' ? 'group-hover:scale-105 cursor-pointer' : 'cursor-not-allowed'"
+                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
                           @click="openDatePicker"
                         >
                           <div 
