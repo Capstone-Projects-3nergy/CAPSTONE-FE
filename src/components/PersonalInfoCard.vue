@@ -1262,24 +1262,29 @@ const confirmUnlinkAction = async () => {
 
                 <!-- Account Verification Action Card -->
                 <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" 
-                     class="bg-white rounded-[32px] p-8 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  <div class="w-20 h-20 rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-2 hover:rotate-0 transition-transform duration-500 mb-6">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                      </svg>
+                     class="bg-white rounded-[32px] p-8 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col items-center">
+                  <!-- Header Area: Icon + Info -->
+                  <div class="flex flex-col md:flex-row items-center gap-8 mb-10 w-full">
+                    <div class="w-20 h-20 rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                          <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                       <h5 class="text-xl font-black text-gray-900 mb-2">Pending Verification</h5>
+                       <p class="text-sm text-gray-500 font-medium leading-relaxed">This account has not been activated yet. Please send a verification link to the resident's registered email to complete the process.</p>
+                    </div>
                   </div>
-                  <div class="flex-1 mb-8">
-                     <h5 class="text-xl font-black text-gray-900 mb-2">Pending Verification</h5>
-                     <p class="text-sm text-gray-500 font-medium leading-relaxed max-w-md mx-auto">This account has not been activated yet. Please send a verification link to the resident's registered email to complete the process.</p>
-                  </div>
+
+                  <!-- Footer Area: Primary Action -->
                   <button 
                     @click="handleSendEmailNotification"
-                    class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 group/sendbtn text-sm"
+                    class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-3 group/sendbtn text-sm"
                   >
                      <span>Send Activation Email</span>
-                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                      </svg>
                   </button>
                 </div>
