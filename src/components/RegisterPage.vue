@@ -172,7 +172,9 @@ const triggerError = (errorRef, timeout = 10000) => {
   }
 }
 
-const submitForm = async (roleType) => {
+const submitForm = async () => {
+  if (loading.value) return
+  const roleType = role.value.toUpperCase()
   try {
     const MAX_NAME_LENGTH = 100
     const MAX_EMAIL_LENGTH = 100
@@ -339,6 +341,7 @@ const submitForm = async (roleType) => {
 
     // ลองให้ระบบ Register เพื่อเช็ค Database ให้ หากคืนค่า 409 แปลว่ามีใน DB แล้ว
     const res = await authManager.registerAccount(payload)
+    loading.value = false
 
     if (res.status === 201 || res.status === 200) {
       success.value = true
@@ -1383,7 +1386,6 @@ const toggleComfirmPasswordVisibility = () => {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="submitForm('RESIDENT')"
             :class="{
               'disabled bg-gray-400 text-gray-200  cursor-default':
                 trimmedFullName.length === 0 ||
@@ -1414,7 +1416,6 @@ const toggleComfirmPasswordVisibility = () => {
             type="submit"
             color="black"
             class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
-            @click="submitForm('STAFF')"
             :class="{
               'disabled bg-gray-400 text-gray-200 cursor-default':
                 trimmedFullName.length === 0 ||
