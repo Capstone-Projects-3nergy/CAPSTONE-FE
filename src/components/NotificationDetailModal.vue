@@ -1,9 +1,11 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthManager } from '@/stores/AuthManager'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthManager()
 
 const props = defineProps({
   show: Boolean,
@@ -15,7 +17,7 @@ const emit = defineEmits(['close'])
 const badgeClass = (type) => {
   const ACCOUNT_TYPES = ['message', 'announcement']
   const PARCEL_TYPES = ['new', 'comment', 'connect']
-  if (type === 'overdue') return 'bg-gray-400'
+  if (type === 'overdue') return 'bg-amber-500'
   if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
   if (PARCEL_TYPES.includes(type)) return 'bg-blue-500'
   return 'bg-gray-400'
@@ -76,10 +78,17 @@ const badgeIcon = (type) => {
 }
 
 const showParcelDetail = async function (id, tab = 'info') {
+  const userId = authStore.user?.id || authStore.user?.userId || route.params.id
+  
+  if (!id || !userId) {
+    console.error('Missing required IDs:', { id, userId })
+    return
+  }
+
   router.push({
     name: 'residentparcelsDetail',
     params: {
-      id: route.params.id,
+      id: userId,
       tid: id
     },
     query: { tab }
@@ -123,7 +132,11 @@ const displayType = computed(() => {
            <div class="relative">
               <div 
                 class="absolute inset-0 bg-current opacity-10 rounded-2xl blur-sm"
-                :class="notification.type === 'message' ? 'text-green-500' : 'text-blue-500'"
+                :class="{
+                  'text-green-500': notification.type === 'message' || notification.type === 'announcement',
+                  'text-amber-500': notification.type === 'overdue',
+                  'text-blue-500': !['message', 'announcement', 'overdue'].includes(notification.type)
+                }"
               ></div>
               <span
                 class="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white shadow-sm relative z-10"
@@ -174,7 +187,7 @@ const displayType = computed(() => {
              <div v-if="!notification.parcelId && notification.label !== 'Welcome to Tractify'" class="mt-4 pt-4 border-t border-gray-200">
                 <button 
                   @click="showAnnouncementPage"
-                  class="text-green-600 hover:text-green-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
+                  class="text-green-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
                 >
                   View All Announcements
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
