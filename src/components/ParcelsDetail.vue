@@ -79,13 +79,39 @@ const activeTab = ref('info')
 
 // Notification states
 const showNotifyPopup = ref(false)
+const lineAlertStyle = ref('blue')
 const isSending = ref(false)
 const notifySuccess = ref(false)
 const notifyError = ref(false)
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
-const lineAlertStyle = ref('blue')
+
+// Reminder Cooldown Logic (3 Days)
+const lastNotifySentTime = ref(null)
+const isNotifyDisabled = computed(() => {
+  if (!lastNotifySentTime.value) return false
+  const threeDays = 3 * 24 * 60 * 60 * 1000
+  return (Date.now() - lastNotifySentTime.value) < threeDays
+})
+
+const cooldownDaysRemaining = computed(() => {
+  if (!lastNotifySentTime.value) return 0
+  const threeDays = 3 * 24 * 60 * 60 * 1000
+  const diff = threeDays - (Date.now() - lastNotifySentTime.value)
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+})
+
+const checkLastNotifySent = () => {
+  if (parcel.value?.parcelId) {
+    const stored = localStorage.getItem(`lastNotifySent_${parcel.value.parcelId}`)
+    lastNotifySentTime.value = stored ? parseInt(stored) : null
+  }
+}
+
+watch(() => parcel.value?.parcelId, () => {
+  checkLastNotifySent()
+}, { immediate: true })
 
 const menuClass = (tab) => {
   return [
@@ -111,6 +137,10 @@ const sendNotify = async () => {
       : await sendParcelNotification(parcel.value.parcelId, router)
     
     if (result) {
+      const now = Date.now()
+      localStorage.setItem(`lastNotifySent_${parcel.value.parcelId}`, now.toString())
+      lastNotifySentTime.value = now
+
       notifySuccess.value = true
       lineAlertVisible.value = true
       lineAlertStyle.value = 'blue'
@@ -688,13 +718,22 @@ function formatDateTime(datetimeStr) {
                        <h5 class="text-lg font-black text-gray-800 mb-1">Send Overdue Reminder</h5>
                        <p class="text-sm text-gray-500 font-medium italic">This parcel is {{ overdueDays }}d overdue. Remind resident to pick up.</p>
                     </div>
-                    <button 
-                      @click="triggerNotifyPopup"
-                      class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-                    >
-                       <span>Send Reminder</span>
-                       <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg> -->
-                    </button>
+                    <div class="flex flex-col items-center gap-3">
+                      <ButtonWeb 
+                        label="Send Reminder"
+                        :color="isNotifyDisabled ? 'gray' : 'blue'"
+                        :loading="isSending"
+                        :disabled="isNotifyDisabled"
+                        @click="!isNotifyDisabled && triggerNotifyPopup()"
+                        :class="[
+                          'px-8 py-4 font-black rounded-2xl shadow-xl transition-all active:scale-95 text-base',
+                          isNotifyDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-200 cursor-pointer'
+                        ]"
+                      />
+                      <p v-if="isNotifyDisabled" class="text-xs font-bold text-red-500 animate-pulse">
+                        Reminder recently sent. Can resend in {{ cooldownDaysRemaining }} days.
+                      </p>
+                    </div>
                   </div>
                </div>
                
