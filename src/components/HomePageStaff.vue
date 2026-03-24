@@ -589,6 +589,25 @@ onMounted(async () => {
           callbacks: {
             title: (tooltipItems) => {
               const item = tooltipItems[0];
+              const now = new Date();
+              const currentYear = now.getFullYear();
+              
+              if (activityInterval.value === 'daily') {
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const targetDayIdx = days.indexOf(item.label);
+                if (targetDayIdx !== -1) {
+                  const currentDayIdx = (now.getDay() + 6) % 7; // Mon=0
+                  const diff = targetDayIdx - currentDayIdx;
+                  const targetDate = new Date(now);
+                  targetDate.setDate(now.getDate() + diff);
+                  return `Day: ${item.label} (${targetDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })})`;
+                }
+              } else if (activityInterval.value === 'monthly') {
+                return `Month: ${item.label} ${currentYear}`;
+              } else if (activityInterval.value === 'weekly') {
+                 return `${item.label} (${now.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`;
+              }
+              
               const intervalText = activityInterval.value === 'daily' ? 'Day' 
                                  : activityInterval.value === 'weekly' ? 'Week' 
                                  : 'Month';
@@ -615,10 +634,11 @@ onMounted(async () => {
           ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
           title: {
              display: true,
+             align: 'start',
              text: activityInterval.value === 'daily' ? 'Day' : activityInterval.value === 'weekly' ? 'Week' : 'Month',
              font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
              color: '#6B7280',
-             padding: { top: 10 }
+             padding: 0
           }
         },
         y: {
@@ -628,15 +648,16 @@ onMounted(async () => {
           ticks: { 
             font: { family: "'Inter', sans-serif", size: 11 }, 
             color: '#9CA3AF', 
-            padding: 10,
+            padding: 2,
             stepSize: 20 
           },
           title: {
              display: true,
+             align: 'end',
              text: 'Number of Parcels',
              font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
              color: '#6B7280',
-             padding: { bottom: 10 }
+             padding: 0
           }
         }
       }
@@ -696,7 +717,7 @@ onMounted(async () => {
             usePointStyle: true,
             callbacks: {
               title: (tooltipItems) => {
-                 return `Month: ${tooltipItems[0].label}`;
+                 return `Month: ${tooltipItems[0].label} ${residentYear.value}`;
               },
               label: (context) => {
                 const val = context.parsed.y || 0;
@@ -713,10 +734,11 @@ onMounted(async () => {
             ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
             title: {
                display: true,
+               align: 'start',
                text: 'Month',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
-               padding: { top: 10 }
+               padding: 0
             }
           },
           y: {
@@ -725,15 +747,16 @@ onMounted(async () => {
             ticks: { 
               font: { family: "'Inter', sans-serif", size: 11 }, 
               color: '#9CA3AF',
-              padding: 10,
+              padding: 2,
               stepSize: 5 
             },
             title: {
                display: true,
+               align: 'end',
                text: 'Number of Residents',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
-               padding: { bottom: 10 }
+               padding: 0
             }
           }
         }
