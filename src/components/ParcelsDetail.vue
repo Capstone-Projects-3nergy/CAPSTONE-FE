@@ -63,7 +63,7 @@ const isOverdue = computed(() => {
   const currentDate = new Date()
   const diffTime = Math.abs(currentDate - receivedDate)
   const diffDays = diffTime / (1000 * 60 * 60 * 24)
-  return diffDays > 3
+  return diffDays > 1
 })
 
 const overdueDays = computed(() => {

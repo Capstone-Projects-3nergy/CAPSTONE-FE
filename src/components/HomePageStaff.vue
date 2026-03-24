@@ -67,7 +67,7 @@ const calculateOverdueDays = (receiveAt) => {
 const overdueParcelsList = computed(() => {
   if (!getMappedParcels.value) return []
   const now = new Date()
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+  const threeDaysMs = 1 * 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
     .filter(p => {

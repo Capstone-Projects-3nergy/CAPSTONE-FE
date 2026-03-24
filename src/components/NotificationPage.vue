@@ -225,7 +225,7 @@ onMounted(async () => {
 
 const activeNotifyTab = ref('all')
 const ACCOUNT_TYPES = ['message', 'announcement']
-const PARCEL_TYPES = ['new', 'comment', 'connect']
+const PARCEL_TYPES = ['new', 'comment', 'connect', 'overdue']
 const filteredNotifications = computed(() => {
   if (activeNotifyTab.value === 'all') {
     return notifications.value
@@ -243,17 +243,39 @@ const filteredNotifications = computed(() => {
 })
 
 const badgeClass = (item) => {
+  if (item.type === 'overdue') return 'bg-amber-500' // Overdue
   if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' // Parcel
   return 'bg-green-500' // Announcement
 }
 
 const displayType = (item) => {
   if (item.type === 'announcement' || item.type === 'message') return 'New Announcement'
+  if (item.type === 'overdue') return 'Parcel Overdue'
   if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'New Parcel'
   return item.type || 'Notification'
 }
 
 const badgeIcon = (item) => {
+  // Overdue icon
+  if (item.type === 'overdue') {
+    return `
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    `
+  }
+
   // Announcement / Message
   if (!item.parcelId && (item.type === 'announcement' || item.type === 'message')) {
     return `

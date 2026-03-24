@@ -15,12 +15,32 @@ const emit = defineEmits(['close'])
 const badgeClass = (type) => {
   const ACCOUNT_TYPES = ['message', 'announcement']
   const PARCEL_TYPES = ['new', 'comment', 'connect']
+  if (type === 'overdue') return 'bg-gray-400'
   if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
   if (PARCEL_TYPES.includes(type)) return 'bg-blue-500'
   return 'bg-gray-400'
 }
 
 const badgeIcon = (type) => {
+  if (type === 'overdue') {
+    return `
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    `
+  }
+
   if (type === 'message' || type === 'announcement') {
     return `
       <svg
@@ -55,13 +75,14 @@ const badgeIcon = (type) => {
   `
 }
 
-const showParcelDetail = async function (id) {
+const showParcelDetail = async function (id, tab = 'info') {
   router.push({
     name: 'residentparcelsDetail',
     params: {
       id: route.params.id,
       tid: id
-    }
+    },
+    query: { tab }
   })
 }
 
@@ -76,10 +97,10 @@ const showAnnouncementPage = () => {
 
 const displayType = computed(() => {
   if (!props.notification) return ''
-  const type = props.notification.type
-  if (type === 'message' || type === 'announcement') return 'New Announcement'
-  if (props.notification.parcelId || ['new', 'comment', 'connect'].includes(type)) return 'New Parcel'
-  return type || 'Notification'
+  if (props.notification.type === 'announcement' || props.notification.type === 'message') return 'New Announcement'
+  if (props.notification.type === 'overdue') return 'Parcel Overdue'
+  if (props.notification.parcelId || ['new', 'comment', 'connect'].includes(props.notification.type)) return 'New Parcel'
+  return props.notification.type || 'Notification'
 })
 </script>
 
@@ -141,10 +162,10 @@ const displayType = computed(() => {
              <!-- Parcel View Detail -->
              <div v-if="notification.parcelId" class="mt-4 pt-4 border-t border-gray-200">
                 <button 
-                  @click="showParcelDetail(notification.parcelId)"
+                  @click="showParcelDetail(notification.parcelId, notification.type === 'overdue' ? 'status' : 'info')"
                   class="text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
                 >
-                  View Parcel Details 
+                  {{ notification.type === 'overdue' ? 'View Parcel Status' : 'View Parcel Details' }}
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
              </div>

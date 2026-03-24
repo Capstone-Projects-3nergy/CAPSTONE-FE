@@ -196,11 +196,14 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     const titleLower = backendTitle.toLowerCase()
     if (backendType === 'LINE' || backendType === 'EMAIL' || backendType === 'MESSAGE') {
       derivedType = 'announcement'
+    } else if (backendType?.includes('OVERDUE')) {
+      derivedType = 'overdue'
     } else {
-      if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
+      if (titleLower.includes('overdue')) derivedType = 'overdue'
+      else if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
       else if (titleLower.includes('picked up') || titleLower.includes('collected')) derivedType = 'connect'
       else if (titleLower.includes('updated')) derivedType = 'comment'
-      else if (backendParcelId) derivedType = 'new' // ถ้ามี parcelId ให้เดาว่าเป็นเรื่องพัสดุ
+      else if (backendParcelId) derivedType = 'new'
       else derivedType = 'announcement'
     }
 
@@ -295,9 +298,12 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           
           if (backendType === 'LINE' || backendType === 'EMAIL' || backendType === 'MESSAGE') {
              derivedType = 'announcement'
+          } else if (backendType?.includes('OVERDUE')) {
+             derivedType = 'overdue'
           } else {
              // Heuristics based on title
-             if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
+             if (titleLower.includes('overdue')) derivedType = 'overdue'
+             else if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
              else if (titleLower.includes('picked up') || titleLower.includes('collected')) derivedType = 'connect'
              else if (titleLower.includes('received')) derivedType = 'connect'
              else if (titleLower.includes('updated')) derivedType = 'comment'
@@ -415,7 +421,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
       }, 4000)
     },
     parcelNotifications: computed(() => {
-        const PARCEL_TYPES = ['new', 'comment', 'connect']
+        const PARCEL_TYPES = ['new', 'comment', 'connect', 'overdue']
         return notifications.value.filter(n => PARCEL_TYPES.includes(n.type))
     }),
     announcementNotifications: computed(() => {
