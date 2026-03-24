@@ -155,7 +155,7 @@ const displayType = computed(() => {
                   @click="showAnnouncementPage"
                   class="text-green-600 hover:text-green-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
                 >
-                  View All Announcements
+                  View Announcements
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
              </div>
