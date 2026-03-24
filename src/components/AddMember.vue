@@ -23,6 +23,7 @@ const emailError = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
 const emailRequire = ref(false)
+const isEmailFirebase = ref(false)
 const fileSizeError = ref(false)
 const dormList = ref([])
 const profileManager = useProfileManager()
@@ -203,6 +204,9 @@ const closePopUp = (operate) => {
     case 'fileSizeError':
       fileSizeError.value = false
       break
+    case 'emailFirebase':
+      isEmailFirebase.value = false
+      break
   }
 }
 
@@ -237,6 +241,10 @@ const showEmailFormError = () => {
 const showFileSizeError = () => {
   fileSizeError.value = true
   setTimeout(() => (fileSizeError.value = false), 10000)
+}
+const showEmailFirebaseError = () => {
+  isEmailFirebase.value = true
+  setTimeout(() => (isEmailFirebase.value = false), 10000)
 }
 </script>
 
@@ -556,6 +564,14 @@ const showFileSizeError = () => {
             operate="fileSizeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="isEmailFirebase"
+            titles="Registration could not be completed. Please contact our support team for assistance."
+            message="Error!!"
+            styleType="red"
+            operate="emailFirebase"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="add"
@@ -575,6 +591,7 @@ const showFileSizeError = () => {
           @line-id-error="lineIdErrorFn"
           @email-invalid-chars="showEmailInvalidCharsError"
           @file-size-error="showFileSizeError"
+          @email-firebase="showEmailFirebaseError"
         />
       </main>
     </div>

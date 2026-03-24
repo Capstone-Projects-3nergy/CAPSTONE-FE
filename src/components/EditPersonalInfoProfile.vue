@@ -791,6 +791,9 @@ const addResidents = async () => {
     router
   )
 
+  // 🔹 เช็คจาก Firebase ไว้ก่อน
+  const isFirebaseDuplicate = await loginManager.checkEmailInFirebase(form.value.email)
+
   if (dataUser) {
     const isDuplicate = dataUser.some(
       (u) => u.email?.toLowerCase() === form.value.email.toLowerCase()
@@ -833,7 +836,11 @@ const addResidents = async () => {
 
     if (!savedMember) {
       loading.value = false
-      emit('errorAddProfile')
+      if (isFirebaseDuplicate) {
+        emit('email-firebase')
+      } else {
+        emit('errorAddProfile')
+      }
       return
     }
     if (savedMember.status === 400) {
