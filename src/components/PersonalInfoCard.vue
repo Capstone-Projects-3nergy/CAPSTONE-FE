@@ -36,6 +36,7 @@ const lineAlertStyle = ref('blue')
 const showUnlinkSuccessPopup = ref(false)
 const showUnlinkConfirm = ref(false)
 const loadingEmail = ref(false)
+const lastEmailSentTime = ref(null)
 
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
@@ -483,6 +484,31 @@ const reconnectLine = async () => {
   }
 }
 
+const currentUserId = computed(() => {
+  return props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
+})
+
+const isEmailDisabled = computed(() => {
+  if (!lastEmailSentTime.value) return false
+  const oneDay = 24 * 60 * 60 * 1000
+  return (Date.now() - lastEmailSentTime.value) < oneDay
+})
+
+const checkLastEmailSent = () => {
+  if (currentUserId.value) {
+    const stored = localStorage.getItem(`lastEmailSent_${currentUserId.value}`)
+    if (stored) {
+      lastEmailSentTime.value = parseInt(stored)
+    } else {
+      lastEmailSentTime.value = null
+    }
+  }
+}
+
+watch(currentUserId, () => {
+  checkLastEmailSent()
+}, { immediate: true })
+
 const handleSendEmailNotification = async () => {
   // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
   if (safeStatus.value?.toUpperCase() !== 'PENDING') {
@@ -510,6 +536,10 @@ const handleSendEmailNotification = async () => {
     const success = await resendVerification(userId, router)
     
     if (success) {
+      const now = Date.now()
+      localStorage.setItem(`lastEmailSent_${currentUserId.value}`, now.toString())
+      lastEmailSentTime.value = now
+
       lineAlertVisible.value = true
       lineAlertStyle.value = 'blue'
       lineAlertMessage.value = 'Email Sent'
@@ -1298,19 +1328,33 @@ const confirmUnlinkAction = async () => {
                   </div>
 
                   <!-- Footer Area: Primary Action -->
-                  <ButtonWeb
-                    label="Send Activation Email"
-                    color="blue"
-                    :loading="loadingEmail"
-                    @click="handleSendEmailNotification"
-                    class="px-10 py-4 font-black shadow-lg shadow-blue-100 transition-all active:scale-95 cursor-pointer text-sm"
-                  >
-                     <template #icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                     </template>
-                  </ButtonWeb>
+                  <div class="flex flex-col items-center gap-3">
+                    <ButtonWeb
+                      label="Send Activation Email"
+                      :color="isEmailDisabled ? 'gray' : 'blue'"
+                      :loading="loadingEmail"
+                      :disabled="isEmailDisabled"
+                      @click="!isEmailDisabled && handleSendEmailNotification()"
+                      :class="[
+                        'group/sendbtn px-10 py-4 font-black shadow-lg transition-all active:scale-95 text-sm',
+                        isEmailDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
+                      ]"
+                    >
+                       <template #icon>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                       </template>
+                    </ButtonWeb>
+                    
+                    <div v-if="isEmailDisabled" class="flex items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-1 duration-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span class="text-[11px] font-bold text-red-700">Activation email sent. You can resend it again on the next day</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
