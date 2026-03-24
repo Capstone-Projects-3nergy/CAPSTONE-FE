@@ -142,10 +142,12 @@ const getUserDetail = async (id) => {
   if (!id) return
   try {
     const data = await getItemById(
-      `${import.meta.env.VITE_BASE_URL}/api/staff/users/status`,
+      `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       Number(id),
       router
     )
+    
+    if (!data) return
     
     // Smart merge: Only update if the API returns a value for that field
     // and provide fallbacks for common name field patterns
