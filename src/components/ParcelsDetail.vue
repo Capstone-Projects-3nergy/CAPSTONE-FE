@@ -706,33 +706,59 @@ function formatDateTime(datetimeStr) {
                   </p>
                </div>
 
-               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500">
-                  <div class="flex flex-col sm:flex-row items-center gap-6">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-                        </svg>
+               <!-- Send Overdue Reminder UI -->
+               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
+                  <!-- Decorative blur -->
+                  <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
+
+                  <div class="relative z-10">
+                    <div class="flex items-center gap-5 mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:hidden">
+                              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block">
+                              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                            </svg>
+                        </div>
+                        <div>
+                           <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-1 sm:mb-2 leading-tight">Send Overdue Reminder</h5>
+                           <p class="text-gray-500 font-medium text-xs sm:text-base sm:max-w-md leading-relaxed">
+                            This parcel is <strong>{{ overdueDays }} days</strong> overdue. Remind the resident now.
+                           </p>
+                        </div>
                     </div>
-                    <div class="flex-1 text-left">
-                       <h5 class="text-lg font-black text-gray-800 mb-1">Send Overdue Reminder</h5>
-                       <p class="text-sm text-gray-500 font-medium italic">This parcel is {{ overdueDays }}d overdue. Remind resident to pick up.</p>
-                    </div>
-                    <div class="flex flex-col items-center gap-3">
+
+                    <div class="flex flex-col items-center gap-4">
                       <ButtonWeb 
                         label="Send Reminder"
                         :color="isNotifyDisabled ? 'gray' : 'blue'"
                         :loading="isSending"
                         :disabled="isNotifyDisabled"
                         @click="!isNotifyDisabled && triggerNotifyPopup()"
+                        icon='<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>'
+                        class="w-full sm:w-auto px-10 py-5 font-black rounded-2xl shadow-lg transition-all active:scale-95 text-base border-0 focus:ring-4 focus:ring-blue-100"
                         :class="[
-                          'px-8 py-4 font-black rounded-2xl shadow-xl transition-all active:scale-95 text-base',
-                          isNotifyDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-200 cursor-pointer'
+                          isNotifyDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-[#e4e7ed] text-[#4d5b7a] hover:bg-gray-200'
                         ]"
                       />
-                      <p v-if="isNotifyDisabled" class="text-xs font-bold text-red-500 animate-pulse">
-                        Reminder recently sent. Can resend in {{ cooldownDaysRemaining }} days.
-                      </p>
+                      
+                      <!-- Status Message (Cooldown) -->
+                      <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
+                        <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-red-50 text-red-600 px-6 py-2.5 rounded-full border border-red-100 shadow-sm">
+                           <div class="relative">
+                              <div class="absolute inset-0 bg-red-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                              <svg class="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                           </div>
+                           <span class="text-xs font-bold tracking-tight">
+                            Reminder recently sent. You can resend it again in {{ cooldownDaysRemaining }} days.
+                           </span>
+                        </div>
+                      </transition>
                     </div>
                   </div>
                </div>

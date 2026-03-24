@@ -1312,48 +1312,53 @@ const confirmUnlinkAction = async () => {
 
                 <!-- Account Verification Action Card -->
                 <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" 
-                     class="bg-white rounded-[32px] p-8 border border-blue-100 shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col items-center">
-                  <!-- Header Area: Icon + Info -->
-                  <div class="flex flex-col md:flex-row items-center gap-8 mb-10 w-full">
-                    <div class="w-20 h-20 rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     class="bg-white rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 border border-blue-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 flex flex-col items-start text-left">
+                  <!-- Header Area: Icon + Info (Row on all screens) -->
+                  <div class="flex flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 w-full text-left">
+                    <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-1 sm:-rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-10 sm:h-10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                           <polyline points="22,6 12,13 2,6"></polyline>
                         </svg>
                     </div>
-                    <div class="flex-1 text-center md:text-left">
-                       <h5 class="text-xl font-black text-gray-900 mb-2">Pending Verification</h5>
-                       <p class="text-sm text-gray-500 font-medium leading-relaxed">This account has not been activated yet. Please send a verification link to the resident's registered email to complete the process.</p>
+                    <div class="flex-1 min-w-0">
+                       <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-0.5 sm:mb-2 leading-tight">Pending Verification</h5>
+                       <p class="text-[10px] sm:text-base text-gray-500 font-medium leading-relaxed max-w-sm">This account has not been activated yet. Please send a verification link to complete the process.</p>
                     </div>
                   </div>
 
-                  <!-- Footer Area: Primary Action -->
-                  <div class="flex flex-col items-center gap-3">
+                  <!-- Footer Area: Action Buttons -->
+                  <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
                       label="Send Activation Email"
                       :color="isEmailDisabled ? 'gray' : 'blue'"
                       :loading="loadingEmail"
                       :disabled="isEmailDisabled"
                       @click="!isEmailDisabled && handleSendEmailNotification()"
+                      class="w-full sm:w-auto min-h-[50px] sm:min-h-[60px] group/sendbtn px-6 sm:px-12 py-3 sm:py-5 font-black shadow-lg transition-all active:scale-95 text-xs sm:text-sm border-0"
                       :class="[
-                        'group/sendbtn px-6 sm:px-10 py-2.5 sm:py-4 font-black shadow-lg transition-all active:scale-95 text-[12px] sm:text-sm',
-                        isEmailDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
+                        isEmailDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
                       ]"
                     >
                        <template #icon>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 sm:group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                        </template>
                     </ButtonWeb>
                     
-                    <div v-if="isEmailDisabled" class="flex items-center gap-2 px-4 py-2 bg-red-50 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-1 duration-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      <span class="text-[11px] font-bold text-red-700">Activation email sent. You can resend it again on the next day</span>
-                    </div>
+                    <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
+                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-red-50 text-red-600 rounded-2xl border border-red-100 shadow-sm transition-all">
+                        <div class="relative flex-shrink-0">
+                           <div class="absolute inset-0 bg-red-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                           </svg>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold leading-snug">Activation email sent. You can resend it again on the next day</span>
+                      </div>
+                    </transition>
                   </div>
                 </div>
               </div>
