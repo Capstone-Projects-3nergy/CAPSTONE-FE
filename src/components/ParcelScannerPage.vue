@@ -608,6 +608,7 @@ function startQuagga() {
             else if (detectedCode.startsWith('D')) form.value.parcelType = 'DOCUMENT'
             else form.value.parcelType = 'ELECTRONIC'
         }
+        stopScan()
 
         // Require another 5 matches to process again
         lastCode = ''
@@ -639,10 +640,10 @@ async function startScan(mode) {
     qrScanner = new QrScanner(
       videoElem,
       (result) => {
-        if (result?.data) {
-           processScanResult(result.data)
-        } else if (typeof result === 'string') {
-           processScanResult(result)
+        const text = result?.data || (typeof result === 'string' ? result : null)
+        if (text) {
+          processScanResult(text)
+          stopScan()
         }
       },
       {
@@ -714,6 +715,7 @@ async function startScan(mode) {
             if (code.startsWith('B')) form.value.parcelType = 'BOX'
             else if (code.startsWith('D')) form.value.parcelType = 'DOCUMENT'
           }
+          stopScan()
         }
       })
     } catch (e) {
