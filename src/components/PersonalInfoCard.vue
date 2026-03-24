@@ -1337,7 +1337,7 @@ const confirmUnlinkAction = async () => {
                       @click="!isEmailDisabled && handleSendEmailNotification()"
                       :class="[
                         'group/sendbtn px-10 py-4 font-black shadow-lg transition-all active:scale-95 text-sm',
-                        isEmailDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
+                        isEmailDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
                       ]"
                     >
                        <template #icon>
