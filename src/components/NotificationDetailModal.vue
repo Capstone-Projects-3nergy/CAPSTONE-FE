@@ -76,8 +76,10 @@ const showAnnouncementPage = () => {
 
 const displayType = computed(() => {
   if (!props.notification) return ''
-  if (props.notification.type === 'message') return 'New Announcement'
-  return props.notification.type
+  const type = props.notification.type
+  if (type === 'message' || type === 'announcement') return 'New Announcement'
+  if (props.notification.parcelId || ['new', 'comment', 'connect'].includes(type)) return 'New Parcel'
+  return type || 'Notification'
 })
 </script>
 
