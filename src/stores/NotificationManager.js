@@ -192,15 +192,16 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     const backendType = n.type || n.notificationType || 'message'
     const backendParcelId = n.parcelId || (n.parcel ? n.parcel.parcelId : null)
 
-    let derivedType = 'message'
+    let derivedType = 'announcement'
     const titleLower = backendTitle.toLowerCase()
-    if (backendType === 'LINE' || backendType === 'EMAIL') {
-      derivedType = 'message'
+    if (backendType === 'LINE' || backendType === 'EMAIL' || backendType === 'MESSAGE') {
+      derivedType = 'announcement'
     } else {
       if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
       else if (titleLower.includes('picked up') || titleLower.includes('collected')) derivedType = 'connect'
       else if (titleLower.includes('updated')) derivedType = 'comment'
       else if (backendParcelId) derivedType = 'new' // ถ้ามี parcelId ให้เดาว่าเป็นเรื่องพัสดุ
+      else derivedType = 'announcement'
     }
 
     const timeValue = n.sentAt || n.createdAt || new Date();
@@ -289,11 +290,11 @@ export const useNotificationManager = defineStore('notificationManager', () => {
           const backendType = n.type || n.notificationType
           const backendParcelId = n.parcelId || (n.parcel ? n.parcel.parcelId : null) || (n.Parcel ? n.Parcel.parcelId : null)
 
-          let derivedType = 'message'
+          let derivedType = 'announcement'
           const titleLower = backendTitle.toLowerCase()
           
-          if (backendType === 'LINE' || backendType === 'EMAIL') {
-             derivedType = 'message'
+          if (backendType === 'LINE' || backendType === 'EMAIL' || backendType === 'MESSAGE') {
+             derivedType = 'announcement'
           } else {
              // Heuristics based on title
              if (titleLower.includes('new parcel') || titleLower.includes('arrived')) derivedType = 'new'
@@ -418,8 +419,8 @@ export const useNotificationManager = defineStore('notificationManager', () => {
         return notifications.value.filter(n => PARCEL_TYPES.includes(n.type))
     }),
     announcementNotifications: computed(() => {
-        const ACCOUNT_TYPES = ['message']
-        return notifications.value.filter(n => ACCOUNT_TYPES.includes(n.type))
+        const ANNOUNCEMENT_TYPES = ['announcement', 'message']
+        return notifications.value.filter(n => ANNOUNCEMENT_TYPES.includes(n.type))
     }),
 
     // ✅ Expose WebSocket actions

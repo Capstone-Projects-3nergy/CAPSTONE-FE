@@ -224,7 +224,7 @@ onMounted(async () => {
 })
 
 const activeNotifyTab = ref('all')
-const ACCOUNT_TYPES = ['message']
+const ACCOUNT_TYPES = ['message', 'announcement']
 const PARCEL_TYPES = ['new', 'comment', 'connect']
 const filteredNotifications = computed(() => {
   if (activeNotifyTab.value === 'all') {
@@ -243,13 +243,19 @@ const filteredNotifications = computed(() => {
 })
 
 const badgeClass = (item) => {
-  if (item.parcelId) return 'bg-blue-500' // Parcel
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' // Parcel
   return 'bg-green-500' // Announcement
+}
+
+const displayType = (item) => {
+  if (item.type === 'announcement' || item.type === 'message') return 'New Announcement'
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'New Parcel'
+  return item.type || 'Notification'
 }
 
 const badgeIcon = (item) => {
   // Announcement / Message
-  if (!item.parcelId) {
+  if (!item.parcelId && (item.type === 'announcement' || item.type === 'message')) {
     return `
       <svg
         width="24"
@@ -833,6 +839,9 @@ const goToPage = (page) => {
 
               <!-- CONTENT -->
               <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-bold tracking-wider text-gray-400 mb-0.5">
+                  {{ displayType(item) }}
+                </p>
                 <div class="flex justify-between items-start gap-4 pr-1">
                   <p class="text-sm font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors">
                     {{ item.label }}

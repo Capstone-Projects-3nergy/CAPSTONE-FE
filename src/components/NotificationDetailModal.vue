@@ -13,7 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const badgeClass = (type) => {
-  const ACCOUNT_TYPES = ['message']
+  const ACCOUNT_TYPES = ['message', 'announcement']
   const PARCEL_TYPES = ['new', 'comment', 'connect']
   if (ACCOUNT_TYPES.includes(type)) return 'bg-green-500'
   if (PARCEL_TYPES.includes(type)) return 'bg-blue-500'
@@ -21,7 +21,7 @@ const badgeClass = (type) => {
 }
 
 const badgeIcon = (type) => {
-  if (type === 'message') {
+  if (type === 'message' || type === 'announcement') {
     return `
       <svg
         width="24"
@@ -64,6 +64,21 @@ const showParcelDetail = async function (id) {
     }
   })
 }
+
+const showAnnouncementPage = () => {
+  router.push({
+    name: 'announcement',
+    params: {
+      id: route.params.id
+    }
+  })
+}
+
+const displayType = computed(() => {
+  if (!props.notification) return ''
+  if (props.notification.type === 'message') return 'New Announcement'
+  return props.notification.type
+})
 </script>
 
 <template>
@@ -95,7 +110,7 @@ const showParcelDetail = async function (id) {
             </div>
             <div>
               <p class="text-xs font-bold tracking-wider text-gray-400 mb-1">
-                {{ notification.type }}
+                {{ displayType }}
               </p>
               <h3 class="text-xl font-bold text-gray-900 leading-tight">
                 {{ notification.label }}
@@ -121,12 +136,24 @@ const showParcelDetail = async function (id) {
           <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
              {{ notification.title }}
              
+             <!-- Parcel View Detail -->
              <div v-if="notification.parcelId" class="mt-4 pt-4 border-t border-gray-200">
                 <button 
                   @click="showParcelDetail(notification.parcelId)"
                   class="text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
                 >
                   View Parcel Details 
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </button>
+             </div>
+
+             <!-- Announcement View Detail -->
+             <div v-if="!notification.parcelId && notification.label !== 'Welcome to Tractify'" class="mt-4 pt-4 border-t border-gray-200">
+                <button 
+                  @click="showAnnouncementPage"
+                  class="text-green-600 hover:text-green-800 font-medium text-xs flex items-center gap-1 cursor-pointer"
+                >
+                  View All Announcements
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </button>
              </div>
