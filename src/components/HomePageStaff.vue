@@ -379,6 +379,9 @@ const updateParcelChart = (interval) => {
     ds.barThickness = thickness;
   });
 
+  // Update Axis Title
+  parcelChartInstance.options.scales.x.title.text = interval === 'daily' ? 'Day' : interval === 'weekly' ? 'Week' : 'Month';
+
   parcelChartInstance.update();
 };
 
@@ -591,7 +594,17 @@ onMounted(async () => {
                                  : 'Month';
               return `${intervalText}: ${item.label}`;
             },
-            label: (context) => ` ${context.dataset.label}: ${context.parsed.y || 0} parcels`
+            label: (context) => {
+              const val = context.parsed.y || 0;
+              const dsIdx = context.datasetIndex;
+              const allDS = context.chart.data.datasets;
+              let total = 0;
+              allDS.forEach(ds => {
+                total += (ds.data[context.dataIndex] || 0);
+              });
+              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+              return ` ${context.dataset.label}: ${val} parcels (${pct}%)`;
+            }
           }
         }
       },
@@ -599,7 +612,14 @@ onMounted(async () => {
         x: { 
           stacked: false,
           grid: { display: false, drawBorder: false },
-          ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' }
+          ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
+          title: {
+             display: true,
+             text: activityInterval.value === 'daily' ? 'Day' : activityInterval.value === 'weekly' ? 'Week' : 'Month',
+             font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
+             color: '#6B7280',
+             padding: { top: 10 }
+          }
         },
         y: {
           stacked: false,
@@ -610,6 +630,13 @@ onMounted(async () => {
             color: '#9CA3AF', 
             padding: 10,
             stepSize: 20 
+          },
+          title: {
+             display: true,
+             text: 'Number of Parcels',
+             font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
+             color: '#6B7280',
+             padding: { bottom: 10 }
           }
         }
       }
@@ -671,14 +698,26 @@ onMounted(async () => {
               title: (tooltipItems) => {
                  return `Month: ${tooltipItems[0].label}`;
               },
-              label: (context) => ` ${context.parsed.y || 0} New Residents`
+              label: (context) => {
+                const val = context.parsed.y || 0;
+                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + (b || 0), 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                return ` ${val} New Residents (${pct}% of year)`;
+              }
             }
           }
         },
         scales: {
           x: { 
             grid: { display: false, drawBorder: false },
-            ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' }
+            ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
+            title: {
+               display: true,
+               text: 'Month',
+               font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
+               color: '#6B7280',
+               padding: { top: 10 }
+            }
           },
           y: {
             beginAtZero: true,
@@ -688,6 +727,13 @@ onMounted(async () => {
               color: '#9CA3AF',
               padding: 10,
               stepSize: 5 
+            },
+            title: {
+               display: true,
+               text: 'Number of Residents',
+               font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
+               color: '#6B7280',
+               padding: { bottom: 10 }
             }
           }
         }
