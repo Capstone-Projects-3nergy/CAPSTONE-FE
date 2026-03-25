@@ -1664,44 +1664,60 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             <!-- Recent Parcels -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-900">Recent Parcels</h3>
-                <!-- <ButtonWeb color="blue" label="Add" size="sm" @click="showParcelScannerPage">
-                  <template #icon>+</template>
-                </ButtonWeb> -->
-              </div>
-
-              <!-- Table Header -->
-              <div class="grid grid-cols-4 px-2 mb-4">
-                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Tracking</span>
-                <span class="text-[10px] font-bold text-gray-400 tracking-wider">Resident</span>
-                <span class="text-[10px] font-bold text-gray-400 tracking-wider text-center">Room</span>
-                <span class="text-[10px] font-bold text-gray-400 tracking-wider pl-2">Status</span>
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+                  <div class="p-1.5 bg-blue-100 rounded-lg text-blue-600 shadow-sm flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                  </div>
+                  Recent Parcels
+                </h3>
               </div>
 
               <!-- List -->
-              <div class="space-y-4 flex-1 overflow-hidden pr-1">
+              <div class="space-y-3 flex-1 overflow-hidden pr-1">
                 <div v-for="parcel in recentParcels.slice(0, 5)" :key="parcel.id" 
-                     class="grid grid-cols-4 items-center px-2 py-1 rounded-lg transition-colors group"
-                     :class="{ 'bg-gray-50': hoveredParcelId === parcel.id }">
-                  <span @click="showParcelDetail(parcel.id)" 
-                        @mouseenter="hoveredParcelId = parcel.id" 
-                        @mouseleave="hoveredParcelId = null"
-                        class="text-xs font-bold text-[#0E4B90] truncate mr-2 cursor-pointer">{{ parcel.trackingNumber }}</span>
-                  <span class="text-xs text-gray-600 truncate mr-2">{{ parcel.residentName }}</span>
-                  <span class="text-xs text-gray-600 text-center">{{ parcel.roomNumber }}</span>
-                  <div class="flex items-center justify-between ml-2">
-                    <span :class="['flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap border', getStatusClass(parcel.status)]">
-                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path :d="getStatusIconPath(parcel.status)" />
-                      </svg>
-                      {{ parcel.status }}
-                    </span>
+                     class="group bg-white rounded-2xl py-2.5 px-4 flex items-center border border-blue-50 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                     @click="showParcelDetail(parcel.id)">
+                  
+                  <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  
+                  <!-- Left: Icon + Info -->
+                  <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
+                    <div class="flex-shrink-0">
+                      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100/50 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-inner">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="font-bold text-gray-900 text-[13px] truncate leading-tight group-hover:text-[#0E4B90] transition-colors tracking-tight">{{ parcel.trackingNumber }}</p>
+                        <span :class="['flex-shrink-0 flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-lg border shadow-sm bg-white', getStatusClass(parcel.status)]">
+                          {{ parcel.status }}
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-medium text-gray-500 truncate max-w-[120px]">{{ parcel.residentName }}</span>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+                          Room {{ parcel.roomNumber }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Right: Action -->
+                  <div class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-50/20 text-gray-300 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm border border-gray-100 group-hover:border-blue-400 group-hover:scale-110 ml-3 relative z-10">
+                    <svg class="w-4 h-4 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
 
                 <!-- Remaining Count Message -->
-                <div v-if="recentParcels.length > 5" class="text-center py-1.5 mt-1">
-                  <p class="text-[10px] md:text-xs font-semibold text-blue-600 bg-blue-50/40 py-2 rounded-lg border border-dashed border-blue-200">
+                <div v-if="recentParcels.length > 5" class="text-center py-1 mt-1">
+                  <p class="text-[10px] font-semibold text-[#0E4B90] bg-blue-50/40 py-1.5 rounded-lg border border-dashed border-blue-200">
                     {{ (recentParcels.length - 5) > 99 ? '+99' : '+ ' + (recentParcels.length - 5) }} more active parcels
                   </p>
                 </div>
@@ -1713,7 +1729,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
               </div>
 
-              <div v-if="recentParcels.length > 0" class="mt-auto border-t border-gray-100 pt-4 text-center">
+              <div v-if="recentParcels.length > 0" class="mt-auto border-t border-gray-100 pt-3 text-center">
                 <button @click="showManageParcelPage" class="text-xs font-medium text-blue-500 hover:text-blue-700 cursor-pointer transition-colors">View all parcels →</button>
               </div>
             </div>
