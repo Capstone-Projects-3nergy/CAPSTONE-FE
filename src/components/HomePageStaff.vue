@@ -441,20 +441,6 @@ const updateParcelChart = (interval) => {
   let pickedUp = [...data.pickedUp];
   let overdue = [...data.overdue];
 
-  // Logic: Only show the last 7 days with activity if daily
-  if (interval === 'daily') {
-    const activeIndices = labels.map((_, i) => i).filter(i => 
-      received[i] > 0 || pickedUp[i] > 0 || overdue[i] > 0
-    );
-    
-    if (activeIndices.length > 0) {
-      labels = activeIndices.map(i => labels[i]);
-      received = activeIndices.map(i => received[i]);
-      pickedUp = activeIndices.map(i => pickedUp[i]);
-      overdue = activeIndices.map(i => overdue[i]);
-    }
-  }
-
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
   parcelChartInstance.data.datasets[1].data = pickedUp;
@@ -518,21 +504,6 @@ const updateResidentChart = (year) => {
   const rawData = residentChartData.value[year];
   let labels = [...rawData.labels];
   let data = [...rawData.data];
-
-  // Filter: Show only months with data or up to the current month to avoid wide empty charts
-  const now = new Date();
-  const currentYear = now.getFullYear().toString();
-  const currentMonthIdx = now.getMonth();
-
-  if (year === currentYear) {
-    const lastActiveMonthIdx = data.map((v, i) => v > 0 ? i : -1).reduce((a, b) => Math.max(a, b), -1);
-    const limitIdx = Math.max(2, currentMonthIdx, lastActiveMonthIdx);
-    labels = labels.slice(0, limitIdx + 1);
-    data = data.slice(0, limitIdx + 1);
-  } else if (data.every(v => v === 0)) {
-    labels = labels.slice(0, 3);
-    data = data.slice(0, 3);
-  }
 
   residentChartInstance.data.labels = labels;
   residentChartInstance.data.datasets[0].data = data;
