@@ -1701,6 +1701,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         <span class="text-[10px] font-medium text-gray-500 truncate max-w-[120px]">{{ parcel.residentName }}</span>
                         <span class="text-gray-300">•</span>
                         <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+                          <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                           Room {{ parcel.roomNumber }}
                         </div>
                       </div>
@@ -2051,7 +2052,10 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         <div class="min-w-0">
                           <p class="text-lg font-bold text-gray-900 truncate leading-tight group-hover:text-amber-600 transition-colors">{{ resident.name }}</p>
                           <div class="flex items-center gap-2.5 mt-2">
-                            <span class="text-[11px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-100 tracking-tight">Room {{ resident.room }}</span>
+                            <span class="flex items-center gap-1 text-[11px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-100 tracking-tight">
+                              <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                              Room {{ resident.room }}
+                            </span>
                             <span :class="getResidentStatusClass(resident.status)" class="scale-100 origin-left">
                               {{ formatResidentStatus(resident.status) }}
                             </span>
@@ -2182,7 +2186,14 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       </div>
                       <div>
                         <p class="text-xs font-bold text-gray-900 leading-tight truncate max-w-[120px]">{{ resident?.fullName || '-' }}</p>
-                        <p class="text-[10px] text-gray-500 truncate max-w-[140px]">Room {{ resident?.roomNumber || '-' }} • {{ resident?.email || '-' }}</p>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-500 truncate max-w-[170px]">
+                          <span class="flex items-center gap-1">
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Room {{ resident?.roomNumber || '-' }}
+                          </span>
+                          <span class="text-gray-300">•</span>
+                          <span class="truncate">{{ resident?.email || '-' }}</span>
+                        </div>
                       </div>
                     </div>
                     <p class="text-[9px] text-gray-400 mb-2">Updated: {{ resident?.updateAt ? new Date(resident.updateAt).toLocaleString() : '-' }}</p>
