@@ -133,14 +133,10 @@ const mapStatus = (status) => {
   }
 }
 
-onUnmounted(() => {
-  // Removed resize listener to allow global state persistence
-  window.removeEventListener('focus', fetchAnnouncements)
-  if (announcementsInterval) clearInterval(announcementsInterval)
-})
-onMounted(async () => {
-  // Sidebar responsive logic is now handled by SidebarManager
+let announcementsInterval = null
+let parcelsInterval = null
 
+const fetchParcels = async () => {
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -163,6 +159,21 @@ onMounted(async () => {
 
     parcelManager.setParcels(mapped)
   }
+}
+
+onUnmounted(() => {
+  // Removed resize listener to allow global state persistence
+  window.removeEventListener('focus', fetchAnnouncements)
+  window.removeEventListener('focus', fetchParcels)
+  if (announcementsInterval) clearInterval(announcementsInterval)
+  if (parcelsInterval) clearInterval(parcelsInterval)
+})
+onMounted(async () => {
+  // Sidebar responsive logic is now handled by SidebarManager
+  window.addEventListener('focus', fetchParcels)
+
+  await fetchParcels()
+  parcelsInterval = setInterval(fetchParcels, 30000)
 })
 
 const parcels = computed(() => parcelManager.getParcels())
@@ -679,7 +690,7 @@ const fetchAnnouncements = async () => {
   }
 }
 
-let announcementsInterval = null
+
 
 onMounted(async () => {
   window.addEventListener('focus', fetchAnnouncements)

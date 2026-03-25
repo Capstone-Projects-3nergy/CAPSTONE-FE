@@ -425,8 +425,11 @@ const updateDate = () => {
 }
 let dateInterval
 
+let dashboardInterval = null
 onUnmounted(() => {
+  window.removeEventListener('focus', fetchDashboardData)
   if (dateInterval) clearInterval(dateInterval)
+  if (dashboardInterval) clearInterval(dashboardInterval)
 })
 const activityInterval = ref('daily');
 let parcelChartInstance = null;
@@ -650,6 +653,7 @@ const fetchDashboardData = async () => {
     
     // Refresh chart displaying current year data
     updateResidentChart(residentYear.value)
+    updateParcelChart(activityInterval.value)
     
     // Also update parcels store for other pages
     if (parcels.length > 0) {
@@ -665,12 +669,18 @@ watch([filterStartDate, filterEndDate], async () => {
 })
 
 onMounted(async () => {
+  window.addEventListener('focus', fetchDashboardData)
   // sidebarManager.checkScreenSize()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
   // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
+
+  // Set up periodic polling for fresh stats every 30 seconds
+  dashboardInterval = setInterval(() => {
+    fetchDashboardData()
+  }, 30000)
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
