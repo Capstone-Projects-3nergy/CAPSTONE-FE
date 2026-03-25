@@ -33,8 +33,7 @@ const showHomePageResident = ref(false)
 const selectedCategory = ref(route.query.tab || 'all')
 const viewMode = ref('grid')
 const selectedDate = ref('')
-const tab = ref('') // Added for compatibility if needed, but we'll use selectedCategory
-
+const tab = ref('') 
 watch(
   () => route.query.tab,
   (newTab) => {
@@ -61,18 +60,11 @@ const scrollBanner = (direction) => {
   }
 }
 
-// Modal State
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
-
-// Calendar Modal State
 const isCalendarOpen = ref(false)
-
-// Archive Modal State
 const isArchiveOpen = ref(false)
-
 const searchQuery = ref('')
-
 const currentDate = ref('')
 const currentMonthName = ref('')
 const currentDay = ref(1)
@@ -162,15 +154,14 @@ const allPublishedAnnouncements = computed(() => {
 
 const filteredAnnouncements = computed(() => {
   const announcementsByTab = allPublishedAnnouncements.value.filter(item => {
-    // Category match
+
     const matchesCategory = (!selectedCategory.value || selectedCategory.value === 'all') 
       ? true 
       : item.category === selectedCategory.value
       
-    // Date match
     let matchesDate = true
     if (selectedDate.value) {
-      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const targetDate = selectedDate.value 
       const rawDateStr = item.publishAt || ''
       
       if (rawDateStr && rawDateStr !== 'Just now') {
@@ -202,7 +193,6 @@ const filteredAnnouncements = computed(() => {
   return searchAnnouncements(announcementsByTab, searchQuery.value)
 })
 
-// Pagination Logic
 const currentPage = ref(1)
 const pageSize = ref(6)
 
@@ -244,7 +234,6 @@ const goToPage = (p) => {
   currentPage.value = p
 }
 
-// Reset page when category, search or date changes
 watch([selectedCategory, searchQuery, selectedDate], () => {
   currentPage.value = 1
 })
@@ -259,15 +248,12 @@ const filteredNews = computed(() => {
 
 const openModal = async (item) => {
   try {
-    // 1. Record the view first to ensure the standard view count is updated on server
-    // Added await here to make sure server updates before we fetch the record in next step
     await recordAnnouncementView(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
       router
     )
 
-    // 2. Fetch the announcement details (which now has the updated view count)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -275,9 +261,7 @@ const openModal = async (item) => {
     )
 
     if (data) {
-      // Update the local store so other components (like tables) sync up
       announcementManager.updateAnnouncement(data)
-      // Retrieve the freshly updated item from manager to ensure all calculated fields are consistent
       const freshItem = announcementManager.findAnnouncementById(item.id)
       
       if (freshItem) {
@@ -541,7 +525,6 @@ onMounted(async () => {
         </aside>
       <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-50/50">
         <section class="max-w-7xl mx-auto">
-          <!-- Header -->
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
               <div class="p-2 bg-blue-100 rounded-lg text-[#0E4B90]">
@@ -555,13 +538,11 @@ onMounted(async () => {
             </h2>
           </div>
 
-          <!-- Featured Banner Section -->
           <div 
             class="mb-10 sm:mb-14 overflow-visible -mx-6 sm:mx-0 px-0 sm:px-1" 
             v-if="bannerAnnouncements.length > 0 && (!selectedCategory || selectedCategory === 'all' || selectedCategory === 'General' || selectedCategory === 'Events')"
           >
             <div class="relative overflow-hidden rounded-none sm:rounded-2xl bg-white p-5 sm:p-8 border-y sm:border border-blue-50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
-              <!-- Decorative Background Pattern (Waves like Image 2) -->
               <div class="absolute bottom-0 left-0 right-0 h-48 sm:h-64 pointer-events-none overflow-hidden">
                 <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
                   <path fill="#1D355E" opacity="0.15" d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,181.3C672,203,768,213,864,192C960,171,1056,117,1152,106.7C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -570,15 +551,12 @@ onMounted(async () => {
               </div>
               <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#1D355E] rounded-full blur-3xl opacity-[0.07]"></div>
 
-              <!-- Header Content -->
               <div class="relative z-10 mb-6 px-5 sm:px-0">
                 <h3 class="text-2xl sm:text-4xl font-extrabold text-[#1D355E] mb-1.5 tracking-tight">Recommended</h3>
                 <p class="text-gray-500 text-xs sm:text-base font-medium">Specially selected updates for dormitory</p>
               </div>
 
-              <!-- Scrollable Area with Absolute Arrows -->
               <div v-if="bannerAnnouncements.length > 0" class="relative group/banner">
-                <!-- Left Navigation Button -->
                 <button 
                   @click="scrollBanner('left')" 
                   class="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
@@ -588,7 +566,6 @@ onMounted(async () => {
                   </svg>
                 </button>
 
-                <!-- Right Navigation Button -->
                 <button 
                   @click="scrollBanner('right')" 
                   class="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
@@ -598,7 +575,6 @@ onMounted(async () => {
                   </svg>
                 </button>
 
-              <!-- Horizontal Scroll Container -->
               <div 
                 ref="bannerContainer"
                 class="relative z-10 flex gap-4 sm:gap-5 overflow-x-auto pb-6 custom-scrollbar-hide snap-x snap-mandatory px-5 sm:px-2"
@@ -610,7 +586,6 @@ onMounted(async () => {
                   @click="openModal(item)"
                 >
                   <div class="bg-white rounded-2xl overflow-hidden shadow-lg sm:shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[320px] sm:h-[340px] flex flex-col relative">
-                    <!-- Image Section -->
                     <div class="relative h-[180px] sm:h-[220px] overflow-hidden">
                       <img 
                         v-if="item.coverImageUrl || item.coverImage"
@@ -623,7 +598,6 @@ onMounted(async () => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <!-- Bookmark Icon Overlay -->
                       <div class="absolute top-3 right-3" v-if="item.pinned">
                         <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-red-600 shadow-lg">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -633,7 +607,6 @@ onMounted(async () => {
                       </div>
                     </div>
 
-                    <!-- Text Section -->
                     <div class="p-3.5 sm:p-4 flex-grow flex flex-col justify-between">
                       <h4 class="text-gray-900 font-bold text-sm sm:text-base line-clamp-2 leading-tight mb-2">
                         {{ item.title?.replace(/^Draft\s*-\s*/i, '') }}
@@ -656,7 +629,6 @@ onMounted(async () => {
               </div>
             </div>
 
-            <!-- Fallback when no banners -->
             <div v-else class="relative z-10 py-12 flex flex-col items-center text-center text-white">
               <div class="p-4 bg-white/20 rounded-full mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -669,7 +641,6 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Announcement Filters (Like ManageAnnouncement) -->
           <AnnouncementFilterBar
             :search="searchQuery"
             :category="selectedCategory"
@@ -684,7 +655,6 @@ onMounted(async () => {
             @update:viewMode="viewMode = $event"
           />
 
-          <!-- Category Filter -->
           <div class="mb-6 w-full">
             <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               <button
@@ -746,7 +716,6 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Content Grid -->
           <div class="min-h-[400px]">
             <ResidentAnnouncementTable
               :items="paginatedAnnouncements"
@@ -790,135 +759,7 @@ onMounted(async () => {
     :pinned="selectedAnnouncement?.pinned || false"
     :cover-image="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="closeModal"
-  />
-
-  <!-- Calendar Pop-up -->
-  <!-- <Teleport to="body">
-    <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="relative z-10 flex justify-between items-start">
-            <div>
-              <p class="text-blue-200 text-sm font-medium mb-1">Current Date & Time</p>
-              <h2 class="text-2xl font-bold mb-2">{{ currentDate }}</h2>
-            </div>
-            <button @click="isCalendarOpen = false" class="p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-        </div>
-      
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">{{ currentMonthName }}</h3>
-            <div class="flex gap-2">
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            <span v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']" :key="day" class="text-xs font-semibold text-gray-400">
-              {{ day }}
-            </span>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 text-center">
-            <div 
-              v-for="(day, index) in calendarDays" 
-              :key="index"
-              class="aspect-square flex items-center justify-center text-sm rounded-full transition-colors"
-              :class="[
-                !day ? '' : 'cursor-pointer',
-                day === currentDay ? 'bg-[#0E4B90] text-white font-bold shadow-md' : 'text-gray-700 hover:bg-blue-50',
-              ]"
-            >
-              {{ day || '' }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <ButtonWeb 
-            label="Close" 
-            color="blue" 
-            size="md" 
-            @click="isCalendarOpen = false" 
-          />
-        </div>
-      </div>
-    </div>
-  </Teleport> -->
-
-  <!-- Archive Pop-up -->
-  <!-- <Teleport to="body">
-    <div v-if="isArchiveOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden flex items-center gap-4">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="2"></rect><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2V9"></path><path d="M10 13h4"></path></svg>
-          </div>
-          <div class="relative z-10 flex-1">
-            <h2 class="text-2xl font-bold tracking-tight">News Archive</h2>
-            <p class="text-blue-200 text-sm font-medium mt-1">Browse past announcements</p>
-          </div>
-          <button @click="isArchiveOpen = false" class="relative z-10 p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        
-
-        <div class="p-6">
-          <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-         
-            <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
-              <div class="flex items-center gap-4 mb-3">
-                <h3 class="text-sm font-bold text-gray-400 tracking-widest">{{ month }} 2026</h3>
-                <div class="h-px bg-gray-100 flex-1"></div>
-              </div>
-              
-              <div class="space-y-3 pl-2 border-l-2 border-blue-100 ml-2">
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-[#0E4B90] rounded-full group-hover:scale-125 transition-transform"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-100 px-2 py-0.5 rounded-md">General</span>
-                    <span class="text-xs text-gray-400">12 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Quarterly Community Meeting Notes</h4>
-                  <p class="text-sm text-gray-500 break-words">Review the discussed topics and action items from our last gathering.</p>
-                </div>
-                
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2 py-0.5 rounded-md">Maintenance</span>
-                    <span class="text-xs text-gray-400">05 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Completed: Elevator Service</h4>
-                  <p class="text-sm text-gray-500 break-words">The scheduled maintenance for Building A elevators is now complete.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <ButtonWeb 
-            label="Close Archive" 
-            color="blue" 
-            size="md" 
-            @click="isArchiveOpen = false" 
-          />
-        </div>
-      </div>
-    </div>
-  </Teleport> -->
+  />>
 </template>
 
 <style scoped>

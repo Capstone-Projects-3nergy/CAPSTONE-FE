@@ -107,7 +107,7 @@ const showDashBoardPage = async function () {
   router.replace({ name: 'dashboard' })
   showDashBoard.value = true
 }
-// Remove checkScreen resize listener logic
+
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
