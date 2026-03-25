@@ -63,6 +63,31 @@ const props = defineProps({
   showCategory: { type: Boolean, default: false },
   showDatePosted: { type: Boolean, default: false },
   showRestoreAnnouncement: { type: Boolean, default: false },
+  totalPages: { type: Number, default: 0 }
+})
+
+const internalPages = computed(() => {
+  if (props.totalPages <= 0) return []
+  
+  // If parent component still provides pages prop, use it (for transition)
+  if (props.pages && props.pages.length > 0) return props.pages
+
+  const pages = []
+  const total = props.totalPages
+  const current = props.page
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    if (current <= 3) {
+      pages.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      pages.push(1, '...', total - 2, total - 1, total)
+    } else {
+      pages.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
+  }
+  return pages
 })
 
 function formatDateTime(datetimeStr) {
@@ -84,6 +109,13 @@ const getInitial = (name) => {
   if (!name) return ''
   return name.trim()[0].toUpperCase()
 }
+
+const canNextInternal = computed(() => {
+  if (props.totalPages > 0) {
+    return props.page < props.totalPages
+  }
+  return props.canNext
+})
 
 const authStore = useAuthManager()
 
@@ -821,7 +853,7 @@ const authStore = useAuthManager()
               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Previous</button>
             
-            <template v-for="(pg, index) in pages" :key="index">
+            <template v-for="(pg, index) in internalPages" :key="index">
               <button
                 v-if="pg !== '...'"
                 @click="$emit('go', pg)"
@@ -844,7 +876,7 @@ const authStore = useAuthManager()
 
             <button 
               @click="$emit('next')" 
-              :disabled="!canNext"
+              :disabled="!canNextInternal"
               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Next</button>
         </div>

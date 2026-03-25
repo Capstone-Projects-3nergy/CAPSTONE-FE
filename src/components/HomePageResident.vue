@@ -407,9 +407,6 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-const canGoNext = computed(() => {
-  return paginatedParcels.value.length === perPage.value
-})
 
 const showParcelDetail = async function (id) {
   router.push({
@@ -453,25 +450,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -971,12 +949,11 @@ function formatDateTime(datetimeStr) {
             <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
                 <ParcelTable
                 :items="paginatedParcels"
-                :pages="visiblePages"
                 :page="currentPage"
-                :total="totalPages"
+                :total="filteredParcels.length"
+                :totalPages="totalPages"
                 :clickableStatus="false"
                 :showDelete="false"
-                :can-next="canGoNext"
                 @prev="prevPage"
                 @next="nextPage"
                 @go="goToPage"

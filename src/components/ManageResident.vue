@@ -265,12 +265,6 @@ const confirmStatusChange = () => {
   showChangeResidentStatus.value = false
   refreshUserData()
 }
-const canGoNext = computed(() => {
-  return paginatedResidents.value.length === perPage.value
-})
-const canGoNextStaff = computed(() => {
-  return paginatedStaffs.value.length === perPage.value
-})
 
 const showRegistrationDetail = (id) => {
   // id = user.id (จาก mapped)
@@ -339,25 +333,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 const sortNameAsc = () => sortByFullName(usersByTab.value)
 const sortNameDesc = () => sortByFullNameReverse(usersByTab.value)
 
@@ -1045,9 +1020,9 @@ const showResidentDetail = async function (id) {
         <ParcelTable
           v-if="activeTab === 'Residents'"
           :items="paginatedResidents"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredResidents.length"
+          :totalPages="totalPages"
           :showPhoto="true"
           :showName="false"
           :showMemberName="true"
@@ -1167,9 +1142,9 @@ const showResidentDetail = async function (id) {
         <ParcelTable
           v-else-if="activeTab === 'Staffs'"
           :items="paginatedStaffs"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredStaffs.length"
+          :totalPages="totalPages"
           :showPhoto="true"
           :showName="false"
           :clickableStatus="false"

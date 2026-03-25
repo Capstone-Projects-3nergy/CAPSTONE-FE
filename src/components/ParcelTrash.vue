@@ -519,26 +519,17 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-const canGoNext = computed(() => {
-  return paginatedParcels.value.length === perPage.value
-})
 
 const paginatedMembers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredMembers.value.slice(start, end)
 })
-const canGoNextMember = computed(() => {
-  return paginatedMembers.value.length === perPage.value
-})
 
 const paginatedAnnouncements = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredAnnouncements.value.slice(start, end)
-})
-const canGoNextAnnouncement = computed(() => {
-  return paginatedAnnouncements.value.length === perPage.value
 })
 
 const goToPage = (page) => {
@@ -550,25 +541,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -1211,15 +1183,14 @@ const closePopUp = (operate) => {
         <ParcelTable
           v-if="activeTab === 'Parcels'"
           :items="paginatedParcels"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredParcels.length"
+          :totalPages="totalPages"
           :showDelete="true"
           :hideTrash="true"
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
-          :can-next="canGoNext"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1340,9 +1311,9 @@ const closePopUp = (operate) => {
         <ParcelTable
           v-if="activeTab === 'Residents'"
           :items="paginatedMembers"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredMembers.length"
+          :totalPages="totalPages"
           :showTracking="false"
           :showRoom="true"
           :showMobile="false"
@@ -1360,7 +1331,6 @@ const closePopUp = (operate) => {
           :showDeletedAt="true"
           :showMemberTrashName="true"
           :showName="false"
-          :can-next="canGoNextMember"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1481,9 +1451,9 @@ const closePopUp = (operate) => {
           <ParcelTable
           v-if="activeTab === 'Announcement'"
           :items="paginatedAnnouncements"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredAnnouncements.length"
+          :totalPages="totalPages"
           :showDeleteAnnouncement="true"
           :showRestoreAnnouncement="true"
           :showDelete="false"
@@ -1501,7 +1471,6 @@ const closePopUp = (operate) => {
           :showDatePosted="true"
           :showStatus="false"
           :showActionStatus="false"
-          :can-next="canGoNextAnnouncement"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
