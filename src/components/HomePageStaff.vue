@@ -224,17 +224,20 @@ const avgParcelReceived = ref(0)
 const avgResidentGrowth = ref(0)
 
 const chartRangeLabel = computed(() => {
-  const now = new Date()
-  if (activityInterval.value === 'daily') {
-    const start = new Date(now)
-    start.setDate(now.getDate() - (now.getDay() || 7) + 1)
+  const refDate = dashboardStore.referenceDate
+  const view = dashboardStore.currentView
+  
+  if (view === 'daily') {
+    return refDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  } else if (view === 'weekly') {
+    const start = new Date(refDate)
+    const day = start.getDay() || 7
+    start.setDate(start.getDate() - (day - 1))
     const end = new Date(start)
-    end.setDate(start.getDate() + 6)
+    end.setDate(end.getDate() + 6)
     return `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
-  } else if (activityInterval.value === 'weekly') {
-    return now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
   } else {
-    return `Annual Analytics ${now.getFullYear()}`
+    return refDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
   }
 })
 
@@ -417,23 +420,19 @@ onUnmounted(() => {
   if (dateInterval) clearInterval(dateInterval)
   if (dashboardInterval) clearInterval(dashboardInterval)
 })
-const activityInterval = ref('daily');
 let parcelChartInstance = null;
 
-const updateParcelChart = (interval) => {
-  activityInterval.value = interval;
+const updateParcelChart = () => {
   if (!parcelChartInstance) return;
 
-  const data = chartData.value[interval];
+  const data = dashboardStore.chartData;
   let labels = [...data.labels];
-  let received = [...data.received];
-  let pickedUp = [...data.pickedUp];
-  let overdue = [...data.overdue];
+  let received = [...data.datasets[0].data];
+  let pickedUp = [...data.datasets[1].data];
 
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
   parcelChartInstance.data.datasets[1].data = pickedUp;
-  // Overdue removed from graph display as per request
   
   // Calculate and Update Baseline (Average Received)
   const avg = received.reduce((a, b) => a + b, 0) / (received.length || 1);
@@ -454,43 +453,26 @@ const updateParcelChart = (interval) => {
   } else {
     parcelChartInstance.data.datasets[2].data = new Array(labels.length).fill(avg.toFixed(1));
     parcelChartInstance.data.datasets[2].label = `Avg (${avg.toFixed(1)})`;
-    parcelChartInstance.data.datasets[2].borderColor = 'rgba(59, 130, 246, 0.6)';
   }
 
   // Update bar thickness based on interval
+  const interval = dashboardStore.currentView;
   let thickness = interval === 'monthly' ? 12 : interval === 'daily' ? 32 : 28;
 
   parcelChartInstance.data.datasets.forEach(ds => {
     if (ds.type !== 'line') ds.barThickness = thickness;
   });
 
-  parcelChartInstance.options.scales.x.title.text = interval === 'daily' ? 'Active Days' : interval === 'weekly' ? 'Week' : 'Month';
+  parcelChartInstance.options.scales.x.title.text = interval === 'daily' ? 'Hours' : interval === 'weekly' ? 'Week Day' : 'Month Day';
   parcelChartInstance.update();
 };
 
-const residentYear = ref('2026');
 let residentChartInstance = null;
 
-const residentChartData = ref({
-  '2026': {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    data: new Array(12).fill(0),
-    total: 0,
-    peak: '-'
-  },
-  '2027': {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    data: new Array(12).fill(0),
-    total: 0,
-    peak: '-'
-  }
-});
-
-const updateResidentChart = (year) => {
-  residentYear.value = year;
+const updateResidentChart = () => {
   if (!residentChartInstance) return;
 
-  const rawData = residentChartData.value[year];
+  const rawData = dashboardStore.residentChartData;
   let labels = [...rawData.labels];
   let data = [...rawData.data];
 
@@ -516,10 +498,8 @@ const updateResidentChart = (year) => {
   } else {
     residentChartInstance.data.datasets[1].data = new Array(labels.length).fill(avg.toFixed(1));
     residentChartInstance.data.datasets[1].label = `AVG (${avg.toFixed(1)})`;
-    residentChartInstance.data.datasets[1].borderColor = 'rgba(99, 102, 241, 0.7)';
   }
 
-  residentChartInstance.options.scales.x.title.text = `Months of ${year}`;
   residentChartInstance.update();
 };
 
@@ -605,41 +585,12 @@ const fetchDashboardData = async () => {
     dashboardStore.calculateDashboardData(
       parcels, 
       residentList, 
-      announcements,
-      filterStartDate.value,
-      filterEndDate.value
+      announcements
     )
     
-    // Process Growth Chart Data (Year-over-Year)
-    const years = ['2026', '2027']
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    years.forEach(yr => {
-      const yearlyData = residentList.filter(u => {
-        const d = new Date(u.updateAt)
-        return d.getFullYear().toString() === yr
-      })
-      
-      const counts = new Array(12).fill(0)
-      yearlyData.forEach(u => {
-        const month = new Date(u.updateAt).getMonth()
-        counts[month]++
-      })
-      
-      const maxCount = Math.max(...counts)
-      const peakMth = maxCount > 0 ? monthNames[counts.indexOf(maxCount)] : '-'
-      
-      residentChartData.value[yr] = {
-        labels: monthNames,
-        data: counts,
-        total: yearlyData.length,
-        peak: maxCount > 0 ? `${peakMth} ${yr}` : `No Growth in ${yr}`
-      }
-    })
-    
-    // Refresh chart displaying current year data
-    updateResidentChart(residentYear.value)
-    updateParcelChart(activityInterval.value)
+    // Refresh chart displaying current data
+    updateResidentChart()
+    updateParcelChart()
     
     // Also update parcels store for other pages
     if (parcels.length > 0) {
@@ -652,6 +603,11 @@ const fetchDashboardData = async () => {
 
 watch([filterStartDate, filterEndDate], async () => {
   await fetchDashboardData()
+})
+
+watch([() => dashboardStore.currentView, () => dashboardStore.referenceDate], () => {
+  updateParcelChart()
+  updateResidentChart()
 })
 
 onMounted(async () => {
@@ -672,15 +628,15 @@ onMounted(async () => {
     type: 'bar',
     plugins: [dataLabelsPlugin, avgLinePlugin],
     data: {
-      labels: chartData.value.labels,
+      labels: dashboardStore.chartData.labels,
       // Filter out Overdue from this graph as per request
-      datasets: chartData.value.datasets.filter(ds => ds.label !== 'Overdue').map(ds => ({
+      datasets: dashboardStore.chartData.datasets.map(ds => ({
         ...ds,
         backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)',
         hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
         borderRadius: 4,
         borderSkipped: false,
-        barThickness: activityInterval.value === 'daily' ? 18 : 24
+        barThickness: dashboardStore.currentView === 'daily' ? 12 : 24
       }))
     },
     options: {
@@ -691,8 +647,8 @@ onMounted(async () => {
         intersect: false,
       },
       onClick: (event, elements) => {
-        if (elements.length > 0 && (activityInterval.value === 'weekly' || activityInterval.value === 'monthly')) {
-          updateParcelChart('daily');
+        if (elements.length > 0 && (dashboardStore.currentView === 'weekly' || dashboardStore.currentView === 'monthly')) {
+          dashboardStore.setPanelView('daily');
         }
       },
       plugins: {
@@ -743,11 +699,11 @@ onMounted(async () => {
         x: { 
           stacked: false,
           grid: { display: false, drawBorder: false },
-          ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
+          ticks: { font: { family: "'Inter', sans-serif", size: 10 }, color: '#9CA3AF' },
           title: {
              display: true,
              align: 'start',
-             text: activityInterval.value === 'daily' ? 'Day' : activityInterval.value === 'weekly' ? 'Week' : 'Month',
+             text: 'Timeline',
              font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
              color: '#6B7280',
              padding: 0
@@ -778,7 +734,7 @@ onMounted(async () => {
   })
 
   // Ensure chart reflects current interval data
-  updateParcelChart(activityInterval.value)
+  updateParcelChart()
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {
@@ -786,11 +742,11 @@ onMounted(async () => {
       type: 'bar',
       plugins: [dataLabelsPlugin, avgLinePlugin],
       data: {
-        labels: residentChartData.value['2026'].labels,
+        labels: dashboardStore.residentChartData.labels,
         datasets: [
           {
             label: 'New Residents',
-            data: residentChartData.value['2026'].data,
+            data: dashboardStore.residentChartData.data,
             backgroundColor: (context) => {
               const data = context.dataset.data;
               const max = Math.max(...data);
@@ -884,7 +840,7 @@ onMounted(async () => {
       }
     })
     // Explicitly update to apply filtering and baseline on first load
-    updateResidentChart(residentYear.value)
+    updateResidentChart()
   }
 })
 
@@ -1520,22 +1476,28 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             <div class="p-6 md:p-8">
               <!-- Parcel Activity Tab (Bar Chart) -->
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div class="flex flex-col">
-                    <span class="text-[11px] font-black text-[#0E4B90] tracking-[0.2em] opacity-70">Activity Period</span>
-                    <h4 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2 mt-1">
-                      {{ chartRangeLabel }}
-                      <span class="text-[10px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100 tracking-widest">{{ activityInterval.toUpperCase() }}</span>
-                      <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 tracking-widest ml-1">AVG: {{ avgParcelReceived.toFixed(1) }}</span>
-                    </h4>
+                  <div class="flex flex-col gap-1">
+                    <span class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Analytics Center</span>
+                    <div class="flex items-center gap-4">
+                      <div class="flex gap-6">
+                        <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
+                        <button @click="dashboardStore.setPanelView('weekly')" :class="dashboardStore.currentView === 'weekly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
+                        <button @click="dashboardStore.setPanelView('monthly')" :class="dashboardStore.currentView === 'monthly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
+                      </div>
+                    </div>
                   </div>
 
-                   <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner w-full sm:w-auto">
-                    <button @click="updateParcelChart('daily')" :class="activityInterval === 'daily' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Daily</button>
-                    <button @click="updateParcelChart('weekly')" :class="activityInterval === 'weekly' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Weekly</button>
-                    <button @click="updateParcelChart('monthly')" :class="activityInterval === 'monthly' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Monthly</button>
+                   <div class="flex items-center gap-6 self-end sm:self-auto">
+                    <div class="flex items-center gap-2">
+                       <button @click="dashboardStore.previousPeriod" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                       </button>
+                       <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ chartRangeLabel }}</span>
+                       <button @click="dashboardStore.nextPeriod" :disabled="dashboardStore.isAtCurrentPeriod" :class="dashboardStore.isAtCurrentPeriod ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                       </button>
+                    </div>
                   </div>
-                </div>
                 
                 <div class="h-[300px] w-full relative">
                   <canvas id="parcelChart"></canvas>
@@ -1921,17 +1883,36 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <!-- Resident Growth Tab (Bar Chart) -->
                 <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 sm:mb-0">
-                    <div class="flex items-center gap-3 sm:gap-4">
-                       <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ residentChartData[residentYear].total }} residents</span>
-                       <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                       <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ residentChartData[residentYear].peak }}</span>
-                       <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                       <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Mo: {{ avgResidentGrowth.toFixed(1) }}</span>
+                    <div class="flex flex-col gap-1">
+                      <span class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Growth Analytics</span>
+                      <div class="flex items-center gap-4">
+                        <div class="flex gap-6">
+                          <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
+                          <button @click="dashboardStore.setPanelView('weekly')" :class="dashboardStore.currentView === 'weekly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
+                          <button @click="dashboardStore.setPanelView('monthly')" :class="dashboardStore.currentView === 'monthly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
+                        </div>
+                      </div>
                     </div>
-                    <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner self-end sm:self-auto">
-                      <button @click="updateResidentChart('2026')" :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2026</button>
-                      <button @click="updateResidentChart('2027')" :class="residentYear === '2027' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2027</button>
+
+                    <div class="flex items-center gap-6 self-end sm:self-auto">
+                      <div class="flex items-center gap-2">
+                         <button @click="dashboardStore.previousPeriod" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                         </button>
+                         <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ chartRangeLabel }}</span>
+                         <button @click="dashboardStore.nextPeriod" :disabled="dashboardStore.isAtCurrentPeriod" :class="dashboardStore.isAtCurrentPeriod ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                         </button>
+                      </div>
                     </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-3 sm:gap-4 mt-2">
+                     <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ dashboardStore.residentChartData.total }} residents</span>
+                     <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                     <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ dashboardStore.residentChartData.peak }}</span>
+                     <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                     <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Period: {{ avgResidentGrowth.toFixed(1) }}</span>
                   </div>
                   
                   <div class="h-[250px] w-full relative">
