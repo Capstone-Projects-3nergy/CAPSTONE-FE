@@ -58,13 +58,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         borderColor: '#1cc88a',
         borderWidth: 1 
       },
-      { 
-        label: 'Overdue', 
-        data: [], 
-        backgroundColor: '#e74a3b',
-        borderColor: '#e74a3b',
-        borderWidth: 1 
-      }
     ]
   })
   
@@ -280,7 +273,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     chartData.labels = chartData[view].labels
     chartData.datasets[0].data = chartData[view].received
     chartData.datasets[1].data = chartData[view].pickedUp
-    chartData.datasets[2].data = chartData[view].overdue
   }
 
   /* ---------- actions ---------- */

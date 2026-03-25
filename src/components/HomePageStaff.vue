@@ -433,13 +433,12 @@ const updateParcelChart = (interval) => {
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
   parcelChartInstance.data.datasets[1].data = pickedUp;
-  parcelChartInstance.data.datasets[2].data = overdue;
   
   // Calculate and Update Baseline (Average Received)
   const avg = received.reduce((a, b) => a + b, 0) / (received.length || 1);
   avgParcelReceived.value = avg;
   
-  if (parcelChartInstance.data.datasets.length < 4) {
+  if (parcelChartInstance.data.datasets.length < 3) {
     parcelChartInstance.data.datasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
@@ -452,9 +451,9 @@ const updateParcelChart = (interval) => {
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avg.toFixed(1));
-    parcelChartInstance.data.datasets[3].label = `Avg (${avg.toFixed(1)})`;
-    parcelChartInstance.data.datasets[3].borderColor = 'rgba(59, 130, 246, 0.6)';
+    parcelChartInstance.data.datasets[2].data = new Array(labels.length).fill(avg.toFixed(1));
+    parcelChartInstance.data.datasets[2].label = `Avg (${avg.toFixed(1)})`;
+    parcelChartInstance.data.datasets[2].borderColor = 'rgba(59, 130, 246, 0.6)';
   }
 
   // Update bar thickness based on interval
@@ -675,12 +674,8 @@ onMounted(async () => {
       labels: chartData.value.labels,
       datasets: chartData.value.datasets.map(ds => ({
         ...ds,
-        backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' :
-                        ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' :
-                        'rgba(239, 68, 68, 0.85)',
-        hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' :
-                             ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' :
-                             'rgba(239, 68, 68, 1)',
+        backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)',
+        hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
         borderRadius: 4,
         borderSkipped: false,
         barThickness: activityInterval.value === 'daily' ? 18 : 24
