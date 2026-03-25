@@ -234,6 +234,8 @@ const filterStartDate = ref('')
 const filterEndDate = ref('')
 const statusChartInstance = ref(null)
 const residentStatusChartInstance = ref(null)
+const avgParcelReceived = ref(0)
+const avgResidentGrowth = ref(0)
 
 const chartRangeLabel = computed(() => {
   const now = new Date()
@@ -268,6 +270,38 @@ const dataLabelsPlugin = {
           ctx.fillText(value, bar.x, bar.y - 4);
         }
       });
+    });
+    ctx.restore();
+  }
+}
+
+const avgLinePlugin = {
+  id: 'avgLinePlugin',
+  afterDatasetsDraw(chart) {
+    const { ctx, data, chartArea: { right, top, bottom }, scales: { y } } = chart;
+    ctx.save();
+    data.datasets.forEach((dataset) => {
+      if (dataset.type === 'line' && (dataset.label.includes('AVG') || dataset.label.includes('Avg'))) {
+        const val = dataset.data[0];
+        const yPos = y.getPixelForValue(val);
+        if (yPos >= top && yPos <= bottom) {
+          const labelText = dataset.label;
+          ctx.font = 'bold 10px Inter';
+          const textWidth = ctx.measureText(labelText).width;
+          ctx.fillStyle = dataset.borderColor.replace('0.4', '1');
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(right - textWidth - 12, yPos - 18, textWidth + 8, 14, 4);
+          } else {
+            ctx.rect(right - textWidth - 12, yPos - 18, textWidth + 8, 14);
+          }
+          ctx.fill();
+          ctx.fillStyle = 'white';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(labelText, right - textWidth - 8, yPos - 10);
+        }
+      }
     });
     ctx.restore();
   }
@@ -427,22 +461,25 @@ const updateParcelChart = (interval) => {
   parcelChartInstance.data.datasets[2].data = overdue;
   
   // Calculate and Update Baseline (Average Received)
-  const avgReceived = received.reduce((a, b) => a + b, 0) / (received.length || 1);
+  const avg = received.reduce((a, b) => a + b, 0) / (received.length || 1);
+  avgParcelReceived.value = avg;
+  
   if (parcelChartInstance.data.datasets.length < 4) {
     parcelChartInstance.data.datasets.push({
-      label: `Avg Received (${avgReceived.toFixed(1)})`,
-      data: new Array(labels.length).fill(avgReceived.toFixed(1)),
+      label: `Avg (${avg.toFixed(1)})`,
+      data: new Array(labels.length).fill(avg.toFixed(1)),
       type: 'line',
-      borderColor: 'rgba(156, 163, 175, 0.4)',
+      borderColor: 'rgba(59, 130, 246, 0.6)',
       borderWidth: 2,
-      borderDash: [6, 4],
+      borderDash: [6, 3],
       pointRadius: 0,
       fill: false,
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avgReceived.toFixed(1));
-    parcelChartInstance.data.datasets[3].label = `Avg Received (${avgReceived.toFixed(1)})`;
+    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avg.toFixed(1));
+    parcelChartInstance.data.datasets[3].label = `Avg (${avg.toFixed(1)})`;
+    parcelChartInstance.data.datasets[3].borderColor = 'rgba(59, 130, 246, 0.6)';
   }
 
   // Update bar thickness based on interval
@@ -502,14 +539,16 @@ const updateResidentChart = (year) => {
   
   // Update Baseline (Average)
   const avg = data.reduce((a, b) => a + b, 0) / (data.length || 1);
+  avgResidentGrowth.value = avg;
+
   if (residentChartInstance.data.datasets.length < 2) {
     residentChartInstance.data.datasets.push({
       label: `AVG (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
       type: 'line',
-      borderColor: 'rgba(99, 102, 241, 0.4)',
+      borderColor: 'rgba(99, 102, 241, 0.7)',
       borderWidth: 2,
-      borderDash: [5, 5],
+      borderDash: [5, 3],
       pointRadius: 0,
       fill: false,
       order: 0
@@ -517,6 +556,7 @@ const updateResidentChart = (year) => {
   } else {
     residentChartInstance.data.datasets[1].data = new Array(labels.length).fill(avg.toFixed(1));
     residentChartInstance.data.datasets[1].label = `AVG (${avg.toFixed(1)})`;
+    residentChartInstance.data.datasets[1].borderColor = 'rgba(99, 102, 241, 0.7)';
   }
 
   residentChartInstance.options.scales.x.title.text = `Months of ${year}`;
@@ -663,7 +703,7 @@ onMounted(async () => {
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
-    plugins: [dataLabelsPlugin],
+    plugins: [dataLabelsPlugin, avgLinePlugin],
     data: {
       labels: chartData.value.labels,
       datasets: chartData.value.datasets.map(ds => ({
@@ -780,7 +820,7 @@ onMounted(async () => {
   if (residentCtx) {
     residentChartInstance = new Chart(residentCtx, {
       type: 'bar',
-      plugins: [dataLabelsPlugin],
+      plugins: [dataLabelsPlugin, avgLinePlugin],
       data: {
         labels: residentChartData.value['2026'].labels,
         datasets: [
@@ -1522,6 +1562,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <h4 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2 mt-1">
                       {{ chartRangeLabel }}
                       <span class="text-[10px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100 tracking-widest">{{ activityInterval.toUpperCase() }}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 tracking-widest ml-1">AVG: {{ avgParcelReceived.toFixed(1) }}</span>
                     </h4>
                   </div>
 
@@ -1929,6 +1970,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                        <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ residentChartData[residentYear].total }} residents</span>
                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ residentChartData[residentYear].peak }}</span>
+                       <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                       <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Mo: {{ avgResidentGrowth.toFixed(1) }}</span>
                     </div>
                     <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner self-end sm:self-auto">
                       <button @click="updateResidentChart('2026')" :class="residentYear === '2026' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">2026</button>

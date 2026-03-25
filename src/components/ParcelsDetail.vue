@@ -699,7 +699,7 @@ function formatDateTime(datetimeStr) {
                   <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Status</h4>
                   <div class="flex items-center gap-3">
                     <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
-                    <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">OVERDUE</span>
+                    <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">Overdue</span>
                   </div>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
                     {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
