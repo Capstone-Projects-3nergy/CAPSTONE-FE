@@ -491,7 +491,7 @@ const saveDraft = async () => {
       categoryId: categoryId.value,
       dormId: parseInt(route.params.id),
       pinned: pinned.value,
-      sendNotification: false,
+      sendNotification: true,
       priority: 1,
       publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
       publishNow: false,
