@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter, useRoute } from 'vue-router'
 import ButtonWeb from './ButtonWeb.vue'
 import HomePageResident from '@/components/HomePageResident.vue'
@@ -24,6 +25,7 @@ import ResidentAnnouncementTable from './ResidentAnnouncementTable.vue'
 
 const loginManager = useAuthManager()
 const announcementManager = useAnnouncementManager()
+const { announcements } = storeToRefs(announcementManager)
 const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
@@ -127,8 +129,9 @@ const updateDate = () => {
 let dateInterval
 
 const allPublishedAnnouncements = computed(() => {
-  return announcementManager.announcements
+  return announcements.value
     .filter(item => item.status === 'PUBLISHED')
+    .sort((a, b) => new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted))
     .map((item) => {
       const rawDate = item.publishAt || 'Just now'
       const rawType = (item.category || 'General').toLowerCase()
@@ -346,8 +349,10 @@ const toggleSidebar = () => {
   sidebarManager.toggleSidebar()
 }
 
+let fetchInterval
 onUnmounted(() => {
   if (dateInterval) clearInterval(dateInterval)
+  if (fetchInterval) clearInterval(fetchInterval)
 })
 const fetchAnnouncementData = async () => {
   try {
@@ -370,6 +375,7 @@ onMounted(async () => {
   dateInterval = setInterval(updateDate, 60000)
 
   await fetchAnnouncementData()
+  fetchInterval = setInterval(fetchAnnouncementData, 30000)
 })
 </script>
 

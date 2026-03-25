@@ -83,6 +83,7 @@ const authStore = useAuthManager()
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const announcementManager = useAnnouncementManager()
+const { announcements } = storeToRefs(announcementManager)
 const emit = defineEmits(['add-success'])
 
 const deletedParcel = ref(null)
@@ -581,7 +582,7 @@ const showResidentParcelPage = async function () {
 }
 
 const latestAnnouncements = computed(() => {
-  return announcementManager.announcements
+  return announcements.value
     .filter(item => item.status === 'PUBLISHED')
     .sort((a, b) => new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted))
     .slice(0, 4)
