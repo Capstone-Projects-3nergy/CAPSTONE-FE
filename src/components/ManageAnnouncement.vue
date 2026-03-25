@@ -70,7 +70,7 @@ const closePopUp = (operate) => {
 }
 
 // Announcement Data & Logic
-const announcements = ref([])
+const { announcements } = storeToRefs(announcementManager)
 const categories = ref([])
 
 const fetchCategoriesFromAnnouncements = async () => {
@@ -288,7 +288,7 @@ const handleDelete = (item) => {
 
 const onDeleteConfirm = () => {
   if (selectedAnnouncement.value) {
-    announcements.value = announcements.value.filter(a => a.id !== selectedAnnouncement.value.id)
+    announcementManager.moveAnnouncementToTrash(selectedAnnouncement.value.id)
     deleteSuccess.value = true
   }
   showDeleteModal.value = false
@@ -300,11 +300,8 @@ const fetchAnnouncementData = async () => {
     `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
     router
   )
-console.log(data)
-  if (data && data.length > 0) {
+  if (data) {
     announcementManager.setAnnouncements(data)
-    announcements.value = announcementManager.announcements
-    console.log('API data fetched and stored:', data.length, 'items')
   }
 }
 
