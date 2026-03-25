@@ -306,11 +306,13 @@ const fetchAnnouncementData = async () => {
 }
 
 onUnmounted(() => {
+  window.removeEventListener('focus', fetchAnnouncementData)
   if (statsInterval) {
     clearInterval(statsInterval)
   }
 })
 onMounted(async () => {
+  window.addEventListener('focus', fetchAnnouncementData)
   await Promise.all([
     fetchAnnouncementData(),
     fetchCategoriesFromAnnouncements()

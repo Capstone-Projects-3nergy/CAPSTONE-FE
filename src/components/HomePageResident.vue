@@ -135,6 +135,7 @@ const mapStatus = (status) => {
 
 onUnmounted(() => {
   // Removed resize listener to allow global state persistence
+  window.removeEventListener('focus', fetchAnnouncements)
   if (announcementsInterval) clearInterval(announcementsInterval)
 })
 onMounted(async () => {
@@ -667,19 +668,21 @@ const closeModal = () => {
   }, 300)
 }
 
+const fetchAnnouncements = async () => {
+  try {
+    const data = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`)
+    if (data && Array.isArray(data)) {
+      announcementManager.setAnnouncements(data)
+    }
+  } catch (e) {
+    console.warn('Fetch announcements failed', e)
+  }
+}
+
 let announcementsInterval = null
 
 onMounted(async () => {
-  const fetchAnnouncements = async () => {
-    try {
-      const data = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`)
-      if (data && Array.isArray(data)) {
-        announcementManager.setAnnouncements(data)
-      }
-    } catch (e) {
-      console.warn('Fetch announcements failed', e)
-    }
-  }
+  window.addEventListener('focus', fetchAnnouncements)
 
   // Initial fetch
   await fetchAnnouncements()

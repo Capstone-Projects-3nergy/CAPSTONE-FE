@@ -351,6 +351,7 @@ const toggleSidebar = () => {
 
 let fetchInterval
 onUnmounted(() => {
+  window.removeEventListener('focus', fetchAnnouncementData)
   if (dateInterval) clearInterval(dateInterval)
   if (fetchInterval) clearInterval(fetchInterval)
 })
@@ -370,6 +371,7 @@ const fetchAnnouncementData = async () => {
 }
 
 onMounted(async () => {
+  window.addEventListener('focus', fetchAnnouncementData)
   generateCalendar()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
