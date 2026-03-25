@@ -1518,7 +1518,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div class="flex flex-col">
-                    <span class="text-[11px] font-black text-[#0E4B90] tracking-[0.2em] uppercase opacity-70">Activity Period</span>
+                    <span class="text-[11px] font-black text-[#0E4B90] tracking-[0.2em] opacity-70">Activity Period</span>
                     <h4 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2 mt-1">
                       {{ chartRangeLabel }}
                       <span class="text-[10px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100 tracking-widest">{{ activityInterval.toUpperCase() }}</span>
@@ -1739,34 +1739,53 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               
               <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-hidden pr-1">
                 <!-- Overdue Item -->
-                <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
-                     class="bg-white rounded-xl py-3 px-3.5 flex items-center justify-between border border-red-100 shadow-sm hover:border-red-300 transition-all duration-300">
-                  <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <span class="bg-red-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full flex-shrink-0 shadow-sm">
-                      {{ calculateOverdueDays(parcel.receiveAt) }}d
-                    </span>
+                <div v-for="parcel in overdueParcelsList.slice(0, 4)" :key="parcel.id" 
+                     class="group bg-white rounded-2xl py-2.5 px-4 flex items-center justify-between border border-red-50 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                     @click="showParcelDetail(parcel.id, 'status')">
+                  
+                  <!-- Subtle background accent on hover -->
+                  <div class="absolute inset-0 bg-gradient-to-r from-red-50/0 to-red-50/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  
+                  <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
+                    <!-- Modern Overdue Badge (Compact) -->
+                    <div class="relative flex-shrink-0">
+                      <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
+                        <span class="text-xs font-black leading-none">{{ calculateOverdueDays(parcel.receiveAt) }}</span>
+                        <span class="text-[7px] font-black tracking-tighter mt-1 opacity-70">days</span>
+                      </div>
+                    </div>
+
                     <div class="min-w-0">
-                      <p class="font-bold text-gray-900 text-xs truncate">{{ parcel.residentName }}</p>
-                      <p class="text-[10px] text-gray-400 font-medium">Room {{ parcel.roomNumber }}</p>
+                      <p class="font-black text-gray-900 text-[13px] truncate leading-tight group-hover:text-red-700 transition-colors tracking-tight">{{ parcel.residentName }}</p>
+                      <div class="flex items-center gap-2 mt-1">
+                        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-gray-50 border border-gray-100 text-[9px] font-bold text-gray-500">
+                          <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                          Room {{ parcel.roomNumber }}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div class="flex items-center gap-3 ml-auto flex-1 justify-end min-w-0">
-                    <span class="text-[#0E4B90] text-[10px] font-bold underline truncate max-w-[100px] hidden sm:block text-right flex-1">
-                      {{ parcel.trackingNumber }}
-                    </span>
+                  <div class="flex items-center gap-3 ml-auto text-right relative z-10">
+                    <div class="hidden lg:flex flex-col items-end">
+                      <span class="text-[7px] font-black text-gray-400 tracking-widest leading-none mb-1 opacity-50">Tracking</span>
+                      <span class="text-[9px] font-black text-[#0E4B90] px-1.5 py-0.5 rounded-md truncate max-w-[100px] font-mono">
+                        {{ parcel.trackingNumber }}
+                      </span>
+                    </div>
                     
-                    <button @click="showParcelDetail(parcel.id, 'status')" class="bg-yellow-500 text-white text-[9px] font-black py-1.5 px-3 rounded-lg hover:bg-yellow-600 transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-1 whitespace-nowrap">
-                       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                      View Detail
-                    </button>
+                    <div class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50/50 text-gray-400 group-hover:bg-red-500 group-hover:text-white transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-red-500/30 border border-gray-100 group-hover:border-red-400 group-hover:scale-110">
+                      <svg class="w-4 h-4 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
                 
                 <!-- Remaining Count Message -->
-                <div v-if="overdueParcelsList.length > 3" class="text-center py-1.5 mt-1">
+                <div v-if="overdueParcelsList.length > 4" class="text-center py-1.5 mt-1">
                   <p class="text-[10px] md:text-xs font-semibold text-red-600 bg-red-50/40 py-2 rounded-lg border border-dashed border-red-200">
-                    {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
+                    {{ (overdueParcelsList.length - 4) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 4) }} more overdue parcels
                   </p>
                 </div>
               </div>
