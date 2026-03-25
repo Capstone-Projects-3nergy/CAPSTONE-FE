@@ -67,7 +67,7 @@ const calculateOverdueDays = (receiveAt) => {
 const overdueParcelsList = computed(() => {
   if (!getMappedParcels.value) return []
   const now = new Date()
-  const threeDaysMs = 1 * 24 * 60 * 60 * 1000
+  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
     .filter(p => {
@@ -207,20 +207,6 @@ const showManageResident = ref(false)
 const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
-const monthsTH = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.'
-]
 
 const packagesPerMonth = [
   120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
@@ -2117,73 +2103,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
                 </div>
               </div>
-
-              <!-- Vacant Rooms -->
-              <!-- <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full relative">
-                <div class="mb-6 flex justify-between items-start">
-                  <div>
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
-                      <div class="p-1.5 bg-rose-100 rounded-lg text-rose-500 shadow-sm flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
-                      </div>
-                      Vacant Rooms
-                    </h3>
-                    <p class="text-xs text-gray-500 mt-1">16 of 20 rooms available</p>
-                  </div>
-                  <span class="text-emerald-500 text-xs font-bold">80% vacant</span>
-                </div>
-
-                <div class="space-y-4 flex-1">
-                  <div>
-                    <h4 class="text-xs font-bold text-gray-400 tracking-wider mb-3">Occupied</h4>
-                    <div class="flex flex-wrap gap-2">
-                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">1</div>
-                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">13</div>
-                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">532</div>
-                      <div class="bg-blue-50 text-blue-600 text-sm font-bold px-4 py-1.5 rounded-lg border border-blue-100">123</div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 class="text-xs font-bold text-gray-400 tracking-wider mb-3 mt-6">Vacant</h4>
-                    <div class="grid grid-cols-4 gap-2">
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">101</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">102</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">201</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">202</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">203</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">301</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">302</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
-                        <p class="text-sm font-bold text-gray-700">401</p>
-                        <p class="text-[10px] text-gray-400 uppercase">Free</p>
-                      </div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2 text-center italic">+8 more rooms available</p>
-                  </div>
-                </div>
-              </div> -->
 
               <!--   Pending Accounts List -->
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
