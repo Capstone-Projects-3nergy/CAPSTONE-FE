@@ -60,6 +60,7 @@ const deleteSuccess = ref(false)
 const showPinLimitAlert = ref(false)
 const error = ref('')
 let statsInterval = null
+let statusUpdateInterval = null
 
 const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') {
@@ -312,6 +313,9 @@ onUnmounted(() => {
   if (statsInterval) {
     clearInterval(statsInterval)
   }
+  if (statusUpdateInterval) {
+    clearInterval(statusUpdateInterval)
+  }
 })
 onMounted(async () => {
   await Promise.all([
@@ -323,6 +327,26 @@ onMounted(async () => {
   statsInterval = setInterval(() => {
     fetchAnnouncementData()
   }, 30000)
+
+  // Set up status update check every second to auto-transition drafts to published
+  statusUpdateInterval = setInterval(() => {
+    const now = new Date()
+    let changed = false
+    announcements.value.forEach(ann => {
+      if (ann.status?.toLowerCase() === 'draft' && ann.publishAt) {
+        const publishDate = new Date(ann.publishAt)
+        if (!isNaN(publishDate.getTime()) && publishDate <= now) {
+          ann.status = 'PUBLISHED'
+          changed = true
+        }
+      }
+    })
+    
+    // If any status changed, we update the manager to keep it in sync
+    if (changed) {
+      announcementManager.setAnnouncements([...announcements.value])
+    }
+  }, 1000)
 })
 
 const showParcelScannerPage = async function () {
