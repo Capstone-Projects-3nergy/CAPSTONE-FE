@@ -1684,7 +1684,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div> -->
 
             <!-- Recent Parcels -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[400px] flex flex-col">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[450px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
                   <div class="p-1.5 bg-blue-100 rounded-lg text-blue-600 shadow-sm flex items-center justify-center">
@@ -1695,8 +1695,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
 
               <!-- List -->
-              <div class="space-y-3 flex-1 overflow-hidden pr-1">
-                <div v-for="parcel in recentParcels.slice(0, 5)" :key="parcel.id" 
+              <div class="space-y-3 flex-1 overflow-y-auto pr-1">
+                <div v-for="parcel in recentParcels.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center border border-blue-50 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 cursor-pointer relative overflow-hidden"
                      @click="showParcelDetail(parcel.id)">
                   
@@ -1739,9 +1739,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
 
                 <!-- Remaining Count Message -->
-                <div v-if="recentParcels.length > 5" class="text-center py-1 mt-1">
+                <div v-if="recentParcels.length > 3" class="text-center py-1 mt-1">
                   <p class="text-[10px] font-semibold text-[#0E4B90] bg-blue-50/40 py-1.5 rounded-lg border border-dashed border-blue-200">
-                    {{ (recentParcels.length - 5) > 99 ? '+99' : '+ ' + (recentParcels.length - 5) }} more active parcels
+                    {{ (recentParcels.length - 3) > 99 ? '+99' : '+ ' + (recentParcels.length - 3) }} more active parcels
                   </p>
                 </div>
 
@@ -1758,7 +1758,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
 
             <!-- Overdue Parcels Section -->
-            <div class="bg-red-50/50 rounded-2xl border border-red-200 p-5 flex flex-col h-[400px]">
+            <div class="bg-red-50/50 rounded-2xl border border-red-200 p-5 flex flex-col h-[450px]">
               <div class="flex items-center gap-3 mb-3">
                 <div class="p-2 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1776,7 +1776,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
-              <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-hidden pr-1">
+              <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-y-auto pr-1">
                 <!-- Overdue Item -->
                 <div v-for="parcel in overdueParcelsList.slice(0, 4)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center justify-between border border-red-50 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
