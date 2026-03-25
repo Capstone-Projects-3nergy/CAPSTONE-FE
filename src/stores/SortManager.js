@@ -423,8 +423,6 @@ function searchAnnouncements(announcements, keyword) {
     if(slashDate) fields.push(normalize(slashDate));
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
-
-    // Also extract deletedAt if it exists to make it searchable separately
     if (a.deletedAt) {
       const delDates = extractDisplayDates({ deletedAt: a.deletedAt });
       if (delDates.displayDate) fields.push(normalize(delDates.displayDate));
@@ -432,10 +430,7 @@ function searchAnnouncements(announcements, keyword) {
       if (delDates.slashDate) fields.push(normalize(delDates.slashDate));
     }
 
-    // exact match
     const isExact = fields.some((f) => f === key)
-
-    // partial match
     const isPartial = fields.some((f) => f.includes(key))
 
     if (isExact) {
