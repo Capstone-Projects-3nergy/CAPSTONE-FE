@@ -146,7 +146,6 @@ const fetchCategoriesFromAnnouncements = async () => {
 
       if (uniqueCategories.length > 0) {
         categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
-        console.log('Categories loaded:', categories.value)
       }
     }
   } catch (err) {
@@ -368,7 +367,6 @@ const statuses = ref([])
 const fetchStatusesFromAnnouncements = async () => {
   // Backend doesn't have a specific statuses endpoint, so we use common ones
   statuses.value = ['DRAFT', 'PUBLISHED']
-  console.log('Statuses set (hardcoded):', statuses.value)
 }
 
 const statusOptions = computed(() => {
@@ -514,7 +512,6 @@ const fetchAnnouncementDetail = async () => {
   // Helper to map any incoming data to our internal form structure
   const mapToForm = (item) => {
     if (!item) return null
-    console.log('Mapping from Store/Common:', item)
     
     // Find category ID if only name is present
     let catId = item.categoryId || item.category_id
@@ -560,11 +557,9 @@ const fetchAnnouncementDetail = async () => {
     ...(announcementStore.announcements || []),
     ...(announcementStore.trash || [])
   ]
-  console.log('Searching in store for ID:', aid, 'Existing count:', existingAnnouncements.length)
   const foundInStore = existingAnnouncements.find(a => Number(a.id) === aid || Number(a.announcementId) === aid)
 
   if (foundInStore) {
-    console.log('Found in store:', foundInStore)
     const storeMapped = mapToForm(foundInStore)
     Object.assign(announcementForm, storeMapped)
     if (storeMapped.coverImageUrl) {
@@ -578,7 +573,6 @@ const fetchAnnouncementDetail = async () => {
   // 2) Load from Backend to ensure data is correct/up-to-date
   try {
     // Note: Use /api/announcements/staff/{id} to support viewing Drafts
-    console.log('Fetching from API:', `${import.meta.env.VITE_BASE_URL}/api/announcements/staff/${aid}`)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
       aid,
@@ -586,7 +580,6 @@ const fetchAnnouncementDetail = async () => {
     )
 
     if (data) {
-      console.log('Received API data:', data)
       const apiMapped = mapToForm(data)
       Object.assign(announcementForm, apiMapped)
       if (apiMapped.coverImageUrl) {
@@ -724,7 +717,6 @@ const handleSave = async () => {
     
     // Mapper for server response
     const mapToFormServer = (item) => {
-      console.log('Mapping server update response:', item)
       let catId = item.categoryId || item.category_id
       if (!catId && item.category) {
         if (typeof item.category === 'object') {

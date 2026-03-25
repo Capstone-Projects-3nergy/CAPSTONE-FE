@@ -19,8 +19,6 @@ onMounted(async () => {
   const state = route.query.state;
   const savedState = sessionStorage.getItem('line_auth_state');
 
-  console.log('LINE Callback received:', { code, state });
-
   if (!code) {
     errorMessage.value = 'Authorization code not found.';
     showError.value = true;
@@ -37,7 +35,6 @@ onMounted(async () => {
     // ส่งทั้ง code และ state (ซึ่งเป็น Firebase Token) ไปให้ Backend
     const result = await linkLineAccount(code, state, router);
     if (result) {
-      console.log('LINE account linked successfully:', result);
       
       // Refresh ข้อมูล user เพื่อให้ได้ lineId ล่าสุด
       await authManager.loadUserFromBackend();

@@ -73,7 +73,6 @@ const fetchCategoriesFromAnnouncements = async () => {
       `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
       router
     )
-    console.log('Categories data from API:', data)
     if (data && data.length > 0) {
       const uniqueCategories = []
       const map = new Map()
@@ -95,7 +94,6 @@ const fetchCategoriesFromAnnouncements = async () => {
 
       if (uniqueCategories.length > 0) {
         categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
-        console.log('Categories processed:', categories.value)
       }
     }
   } catch (err) {

@@ -256,7 +256,6 @@ const openResidentStatusPopup = (user) => {
     status: mapActiveStatus(user.status)
   }
   showChangeResidentStatus.value = true
-  console.log(residentStatusDetail.value)
 }
 
 const confirmStatusChange = () => {

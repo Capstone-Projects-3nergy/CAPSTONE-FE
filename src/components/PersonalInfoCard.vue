@@ -154,7 +154,6 @@ onMounted(async () => {
   if (props.useCurrentProfile) {
     await profileManager.fetchProfile()
   }
-  console.log(profileManager.profile) // ✅ ตอนนี้ใช้งานได้แล้วเพราะเพิ่ม alias ใน store
   // กันกรณี refresh แล้ว store ว่าง
   if (userManager.members.length || userManager.staffs.length) return
 
@@ -165,7 +164,6 @@ onMounted(async () => {
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
-console.log(dataUser)
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.userId,
@@ -195,7 +193,6 @@ watch(
   (status) => {
     if (!status) return
 
-    console.log('Detected LINE status in URL:', status)
     const errorMsg = route.query.msg
 
     if (status === 'success') {

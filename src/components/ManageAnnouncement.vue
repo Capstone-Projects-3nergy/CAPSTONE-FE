@@ -82,7 +82,6 @@ const fetchCategoriesFromAnnouncements = async () => {
     if (data && data.length > 0) {
       const uniqueNames = [...new Set(data.map(item => item.categoryName || item.name || item.category))]
       categories.value = uniqueNames.filter(name => name).sort()
-      console.log('Categories loaded in ManageAnnouncement:', categories.value)
     }
   } catch (err) {
     console.error('Failed to fetch categories in ManageAnnouncement:', err)
@@ -272,7 +271,6 @@ const handlePin = async (item) => {
       // Update local state and manager
       item.pinned = newPinnedStatus
       announcementManager.updateAnnouncement(updated)
-      console.log('Announcement pin status updated successfully')
     } else {
       console.error('Failed to update pin status: No data returned from API')
     }
