@@ -22,6 +22,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     totalAnnouncements: 0
   })
 
+  const overallStats = reactive({
+    totalParcels: 0,
+    pickedUpParcels: 0,
+    awaitingParcels: 0,
+    overdueParcels: 0
+  })
+
   // Chart data structure for Parcel Activity
   const chartData = reactive({
     labels: [],
@@ -121,30 +128,44 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     if (Array.isArray(residentsRaw)) setMembers(residentsRaw)
     if (Array.isArray(announcementsRaw)) setAnnouncements(announcementsRaw)
 
+    const today = new Date()
+    
+    // 1. Calculate OVERALL Stats (Global, not period-dependent)
+    const allParcels = parcels || []
+    overallStats.totalParcels = allParcels.length
+    overallStats.pickedUpParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       return s === 'PICKED_UP' || s === 'TAKEN'
+    }).length
+    overallStats.awaitingParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       return s !== 'PICKED_UP' && s !== 'TAKEN' && !s.includes('OVERDUE')
+    }).length
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+    overallStats.overdueParcels = allParcels.filter(p => {
+      const pStatus = p.status?.toUpperCase() || ''
+      if (pStatus === 'PICKED_UP' || pStatus === 'TAKEN') return false
+      
+      const rDate = new Date(p.receivedAt || p.createdAt || p.date)
+      return (today - rDate) > threeDaysMs
+    }).length
+
     const { start, end } = getPeriodBounds()
     
-    // 1. Filter parcels for the current period for stats
-    // Note: Stats are usually based on current overall status, but chart is period-specific
-    // For this context, we calculate period-specific volume
+    // 2. Filter parcels for the current period for charts
     const parcelsInPeriod = parcels.filter(p => {
       const dStr = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
       const d = new Date(dStr)
       return d >= start && d <= end
     })
 
-    // Reset Current View Totals for Stats (Optional: keep global or make period specific? 
-    // Usually stats boxes show "Overall" or "Current Month"
-    // User requested "Period selector... เลื่อนได้เรื่อยๆ" suggesting stats follow period.
-    const overallReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
-    const overallPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
+    const periodReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
+    const periodPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
     
-    // We update stats based on period filtered data
+    // Update period-specific stats
     stats.totalParcels = parcelsInPeriod.length
-    stats.pickedUpParcels = overallPickedUp.length
-    stats.awaitingParcels = overallReceived.length
-    
-    // Overdue Logic (Global or period-specific? Let's keep it global-ish but filtered by arrival in period)
-    const today = new Date()
+    stats.pickedUpParcels = periodPickedUp.length
+    stats.awaitingParcels = periodReceived.length
     stats.overdueParcels = parcelsInPeriod.filter(p => {
       const pStatus = p.status?.toUpperCase() || ''
       const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE')
@@ -156,7 +177,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       return pStatus.includes('OVERDUE') || (diffMin >= 1 && isArrived)
     }).length
 
-    // 2. Generate Chart Data
+    // 3. Generate Chart Data
     generateParcelChart(parcelsInPeriod, start, end)
     generateResidentChart(members, start, end)
     
@@ -309,6 +330,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     chartData,
     residentChartData,
     stats,
+    overallStats,
     currentView,
     referenceDate,
     isAtCurrentPeriod,

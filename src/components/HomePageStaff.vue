@@ -35,7 +35,7 @@ const loginManager = useAuthManager()
 const userManager = useUserManager()
 const parcelManager = useParcelManager()
 const dashboardStore = useDashboardManager()
-const { chartData, stats, getMappedParcels } = storeToRefs(dashboardStore)
+const { chartData, stats, overallStats, getMappedParcels } = storeToRefs(dashboardStore)
 const showHomePage = ref(false)
 const notificationStore = useNotificationManager()
 const { welcomePopupVisible, welcomePopupMessage } = storeToRefs(notificationStore)
@@ -308,7 +308,7 @@ const initStatusChart = () => {
     data: {
       labels: ['Picked Up', 'Received', 'Overdue'],
       datasets: [{
-        data: [stats.value.pickedUpParcels, stats.value.awaitingParcels, stats.value.overdueParcels],
+        data: [overallStats.value.pickedUpParcels, overallStats.value.awaitingParcels, overallStats.value.overdueParcels],
         backgroundColor: ['#10B981', '#3b82f6', '#EF4444'], 
         borderWidth: 0,
         hoverOffset: 4
@@ -371,12 +371,12 @@ const initResidentStatusChart = () => {
   })
 }
 
-watch([() => stats.value.pickedUpParcels, () => stats.value.awaitingParcels, () => stats.value.overdueParcels], () => {
+watch([() => overallStats.value.pickedUpParcels, () => overallStats.value.awaitingParcels, () => overallStats.value.overdueParcels], () => {
   if (statusChartInstance.value) {
     statusChartInstance.value.data.datasets[0].data = [
-      stats.value.pickedUpParcels, 
-      stats.value.awaitingParcels, 
-      stats.value.overdueParcels
+      overallStats.value.pickedUpParcels, 
+      overallStats.value.awaitingParcels, 
+      overallStats.value.overdueParcels
     ]
     statusChartInstance.value.update()
   }
@@ -1296,11 +1296,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                  {{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}% success
+                  {{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}% success
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.pickedUpParcels }}</h3>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.pickedUpParcels }}</h3>
                 <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Picked Up</p>
               </div>
             </div>
@@ -1317,11 +1317,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </svg>
                 </div>
                 <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
-                  {{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}% awaiting
+                  {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.awaitingParcels }}</h3>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels }}</h3>
                 <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Received</p>
               </div>
             </div>
@@ -1336,7 +1336,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <path d="M12 16l.01 0" />
                   </svg>
                 </div>
-                <span v-if="stats.overdueParcels > 0" class="flex items-center text-red-600 text-[10px] font-bold bg-red-50 px-2 py-1 rounded animate-pulse">
+                <span v-if="overallStats.overdueParcels > 0" class="flex items-center text-red-600 text-[10px] font-bold bg-red-50 px-2 py-1 rounded animate-pulse">
                   Action needed
                 </span>
                 <span v-else class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
@@ -1344,7 +1344,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.overdueParcels }}</h3>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.overdueParcels }}</h3>
                 <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Overdue</p>
               </div>
             </div>
@@ -1365,79 +1365,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ stats.totalParcels }}</h3>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.totalParcels }}</h3>
                 <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Total Units</p>
               </div>
             </div>
           </div>
 
-  
-          <!-- <div class="bg-red-50/50 rounded-2xl border border-red-200 p-6">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="p-2 md:p-2.5 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                  <path d="M12 8l0 4" />
-                  <path d="M12 16l.01 0" />
-                </svg>
-              </div>
-              <h3 class="text-red-600 font-bold text-lg">5 Parcels Overdue - Not picked up for >7 days</h3>
-            </div>
-            <p class="text-red-500 text-sm mb-4">Please contact residents to pick up their parcels immediately</p>
-            
-            <div class="space-y-3">
-           
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">10 days</span>
-                  <span class="font-bold text-gray-800">kong zeed</span>
-                </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 13</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH198273645</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    Notify
-                  </button>
-                </div>
-              </div>
-
-            
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">9 days</span>
-                  <span class="font-bold text-gray-800">Suklita Mook</span>
-                </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 1</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH291837465</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    Notify
-                  </button>
-                </div>
-              </div>
-
-         
-              <div class="bg-white rounded-xl p-3 flex items-center justify-between border border-red-100">
-                <div class="flex items-center gap-4">
-                  <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">7 days</span>
-                  <span class="font-bold text-gray-800">testkub</span>
-                </div>
-                <div class="flex items-center gap-6">
-                  <span class="text-gray-500 text-sm">Room 532</span>
-                  <span class="text-blue-500 text-sm font-medium underline cursor-pointer">TH001328374</span>
-                  <button class="flex items-center gap-2 px-4 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                     <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    Notify
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div> -->
-          
           <!-- Integrated Chart Dashboard -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
@@ -1477,7 +1410,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <!-- Parcel Activity Tab (Bar Chart) -->
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col gap-1">
-                    <span class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Analytics Center</span>
                     <div class="flex items-center gap-4">
                       <div class="flex gap-6">
                         <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
@@ -1535,7 +1467,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
                       <span class="text-xs font-black text-gray-400 tracking-widest mb-1">In System</span>
-                      <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalParcels }}</span>
+                      <span class="text-5xl font-black text-[#1D355E] leading-none">{{ overallStats.totalParcels }}</span>
                       <div class="w-8 h-1 bg-blue-500 rounded-full mt-3"></div>
                     </div>
                   </div>
@@ -1556,8 +1488,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           <span class="text-sm font-bold text-gray-700">Picked Up</span>
                         </div>
                         <div class="flex items-center gap-4">
-                          <span class="text-sm font-black text-gray-900">{{ stats.pickedUpParcels }}</span>
-                          <span class="text-xs font-bold text-emerald-500 px-2 py-0.5 bg-emerald-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.pickedUpParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.pickedUpParcels }}</span>
+                          <span class="text-xs font-bold text-emerald-500 px-2 py-0.5 bg-emerald-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                       
@@ -1568,8 +1500,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           <span class="text-sm font-bold text-gray-700">Received</span>
                         </div>
                         <div class="flex items-center gap-4">
-                          <span class="text-sm font-black text-gray-900">{{ stats.awaitingParcels }}</span>
-                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.awaitingParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels }}</span>
+                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                       
@@ -1580,15 +1512,15 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           <span class="text-sm font-bold text-gray-700">Overdue</span>
                         </div>
                         <div class="flex items-center gap-4">
-                          <span class="text-sm font-black text-gray-900">{{ stats.overdueParcels }}</span>
-                          <span class="text-xs font-bold text-red-500 px-2 py-0.5 bg-red-50 rounded-md">{{ stats.totalParcels ? Math.round((stats.overdueParcels / stats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.overdueParcels }}</span>
+                          <span class="text-xs font-bold text-red-500 px-2 py-0.5 bg-red-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.overdueParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-dashed border-gray-200">
                       <p class="text-[10px] text-gray-500 leading-relaxed font-medium">
-                        * Distribution reflects current inventory status for the selected date range. Data is updated in real-time as parcels are scanned or picked up.
+                        * Distribution reflects current global inventory status. Data is updated in real-time as parcels are scanned or picked up.
                       </p>
                     </div>
                   </div>
@@ -1884,7 +1816,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 sm:mb-0">
                     <div class="flex flex-col gap-1">
-                      <span class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Growth Analytics</span>
                       <div class="flex items-center gap-4">
                         <div class="flex gap-6">
                           <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>

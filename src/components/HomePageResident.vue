@@ -162,14 +162,13 @@ const fetchParcels = async () => {
 }
 
 onUnmounted(() => {
-  // Removed resize listener to allow global state persistence
   window.removeEventListener('focus', fetchAnnouncements)
   window.removeEventListener('focus', fetchParcels)
   if (announcementsInterval) clearInterval(announcementsInterval)
   if (parcelsInterval) clearInterval(parcelsInterval)
 })
 onMounted(async () => {
-  // Sidebar responsive logic is now handled by SidebarManager
+
   window.addEventListener('focus', fetchParcels)
 
   await fetchParcels()
@@ -395,7 +394,7 @@ const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-// isCollapsed and toggleSidebar are now provided by SidebarManager
+
 
 const currentPage = ref(1)
 const perPage = ref(10)
