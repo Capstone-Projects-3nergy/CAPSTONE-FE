@@ -1,4 +1,3 @@
-// src/stores/LineNotificationManager.js
 import { sendLineNotification } from '@/utils/fetchUtils.js'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
 
@@ -13,12 +12,8 @@ class LineNotificationManager {
     try {
       const payload = { groupId, message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.API_URL}`
-      console.log('[LineNotification] sendToGroup (Mock):', payload, url)
-      // const response = await sendLineNotification(payload, router, url)
-      // return response
       return { success: true, mock: true }
     } catch (error) {
-      console.error('[LineNotification] sendToGroup Error:', error.message)
       throw error
     }
   }
@@ -32,9 +27,6 @@ class LineNotificationManager {
     try {
       const payload = { message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.NOTIFY_ADMIN_URL}`
-      console.log('[LineNotification] notifyAdmin (Mock):', payload, url)
-      // const response = await sendLineNotification(payload, router, url)
-      // return response
       return { success: true, mock: true }
     } catch (error) {
       console.error('[LineNotification] notifyAdmin Error:', error.message)
@@ -42,17 +34,11 @@ class LineNotificationManager {
     }
   }
 
-  /**
-   * Notify Admin about new parcel
-   */
   async notifyNewParcel(parcel, router = null) {
     const message = `📦 New Parcel Arrived!\n📌 Tracking: ${parcel.trackingNumber}\n👤 Recipient: ${parcel.receiverName || 'N/A'}\n🏠 Room: ${parcel.roomNumber || 'N/A'}\n🚚 Courier: ${parcel.courier || 'N/A'}`
     return this.notifyAdmin(message, router)
   }
 
-  /**
-   * Notify Admin about new announcement
-   */
   async notifyNewAnnouncement(announcement, router = null) {
     const message = `📢 New Announcement!\n📌 Title: ${announcement.title}\n📂 Category: ${announcement.category}${announcement.subtitle ? `\n📝 Subtitle: ${announcement.subtitle}` : ''}`
     return this.notifyAdmin(message, router)
@@ -68,27 +54,17 @@ class LineNotificationManager {
     try {
       const payload = { userId, message }
       const url = `${import.meta.env.VITE_BASE_URL}${LINE_CONFIG.SEND_PRIVATE_URL}`
-      console.log('[LineNotification] sendToUser (Mock):', payload, url)
-      // const response = await sendLineNotification(payload, router, url)
-      // return response
       return { success: true, mock: true }
     } catch (error) {
-      console.error('[LineNotification] sendToUser Error:', error.message)
       throw error
     }
   }
 
-  /**
-   * แจ้งเตือนลูกบ้านเมื่อพัสดุมาถึง
-   */
   async notifyParcelRecipient(userId, parcel, router = null) {
     const message = `📦 Your parcel has arrived!\n📌 Tracking: ${parcel.trackingNumber}\n🚚 Courier: ${parcel.courier || 'N/A'}\n📍 You can pick it up at the juristic office.`
     return this.sendToUser(userId, message, router)
   }
 
-  /**
-   * Notify through generic event
-   */
   async notifyAnnouncementCreated(announcement, router = null) {
     return this.notifyNewAnnouncement(announcement, router)
   }

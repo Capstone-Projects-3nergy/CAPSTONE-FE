@@ -115,16 +115,16 @@ const formatDate = (dateString) => {
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6" @click.self="closeModal">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all flex flex-col max-h-[95vh] relative">
-      <!-- Close Button (Absolute) -->
+  
       <div class="absolute top-4 right-4 z-[110]">
         <button @click="closeModal" class="p-2 bg-gray-100/80 hover:bg-gray-200 text-gray-700 rounded-full transition-all cursor-pointer shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
 
-      <!-- Content Area -->
+
       <div class="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-grow">
-         <!-- Author & Status Header -->
+        
          <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
@@ -144,7 +144,6 @@ const formatDate = (dateString) => {
             </div>
          </div>
 
-         <!-- Tags -->
         <div class="flex flex-wrap items-center gap-2.5 mb-6">
           <span class="px-3 py-1 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-xl" :class="getCategoryBadgeClass(tag)">
             <span v-html="getCategoryIcon(tag)"></span>

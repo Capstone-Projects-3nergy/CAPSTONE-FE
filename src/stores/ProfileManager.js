@@ -127,18 +127,13 @@ export const useProfileManager = defineStore('profileManager', () => {
   }
 
   return {
-    // state
     profiles,
     trash,
     loading,
     error,
-
-    // getters
     getProfiles,
     getProfileById,
     getTrash,
-
-    // actions
     setProfiles,
     setTrash,
     addProfile,
@@ -148,7 +143,7 @@ export const useProfileManager = defineStore('profileManager', () => {
     deletePermanent,
     clearProfiles,
     currentProfile,
-    profile: currentProfile, // ✅ เพิ่ม alias ตามที่คาดหวังใน PersonalInfoCard
+    profile: currentProfile, 
     setCurrentProfile,
     updateCurrentProfile,
     fetchProfile

@@ -24,7 +24,7 @@ export const useSidebarManager = defineStore('sidebarManager', () => {
     isCollapsed.value = isMobile()
   }
 
-  // Set up listener for window resizing
+
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', checkScreenSize)
   }
