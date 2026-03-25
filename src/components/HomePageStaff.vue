@@ -1990,60 +1990,86 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               
               <!-- Most Parcels Received -->
-              <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
-                <div class="mb-6">
-                  <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
-                    <div class="p-1.5 bg-yellow-100 rounded-lg text-yellow-600 shadow-sm flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 21l8 0" /><path d="M12 17l0 4" /><path d="M7 4l10 0" /><path d="M17 4v8a5 5 0 0 1 -10 0v-8" /><path d="M5 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg>
+              <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden">
+                <!-- Background Accent decoration -->
+                <div class="absolute top-0 right-0 w-48 h-48 bg-yellow-50/50 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+
+                <div class="mb-10 relative z-10">
+                  <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-yellow-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-yellow-400/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21l8 0" /><path d="M12 17l0 4" /><path d="M7 4l10 0" /><path d="M17 4v8a5 5 0 0 1 -10 0v-8" /><path d="M5 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg>
                     </div>
-                    Most Parcels Received
-                  </h3>
-                  <p class="text-xs text-gray-500 mt-1">Top 5 Residents by Total Parcels</p>
+                    <div>
+                      <h3 class="text-3xl font-bold text-gray-900 tracking-tight">Resident Ranking</h3>
+                      <p class="text-sm font-medium text-gray-500 mt-1.5 opacity-80">Top volume leaders by total parcels</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="space-y-4 flex-1">
-                  <div v-for="(resident, index) in topResidents" :key="resident.name" class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div :class="[
-                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold',
-                        index === 0 ? 'bg-yellow-100 text-yellow-600' : 
-                        index === 1 ? 'bg-gray-100 text-gray-600' : 
-                        index === 2 ? 'bg-orange-100 text-orange-600' : 
-                        'bg-gray-100 text-gray-400'
-                      ]">
-                        {{ index + 1 }}
+                <div class="space-y-10 flex-1 relative z-10">
+                  <div v-for="(resident, index) in topResidents" :key="resident.name" class="flex flex-col gap-4 group">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-5">
+                        <div class="relative flex-shrink-0">
+                          <div :class="[
+                            'w-16 h-16 rounded-2xl text-white flex items-center justify-center font-bold text-2xl overflow-hidden border-2 shadow-sm transition-transform group-hover:scale-105',
+                            index === 0 ? 'bg-yellow-400 border-yellow-200 shadow-yellow-200/50' : 
+                            index === 1 ? 'bg-blue-500 border-blue-200 shadow-blue-200/50' : 
+                            'bg-gray-100 text-gray-400 border-gray-100'
+                          ]">
+                            <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
+                            <span v-else>{{ resident.name.charAt(0) }}</span>
+                          </div>
+                          <!-- Ranking Medal Badge -->
+                          <div :class="[
+                            'absolute -top-2 -left-2 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white',
+                            index === 0 ? 'bg-yellow-500 text-white' : 
+                            index === 1 ? 'bg-gray-400 text-white' : 
+                            index === 2 ? 'bg-orange-500 text-white' : 
+                            'bg-white text-gray-400 border-gray-100'
+                          ]">
+                            {{ index + 1 }}
+                          </div>
+                        </div>
+
+                        <div class="min-w-0">
+                          <p class="text-lg font-bold text-gray-900 truncate leading-tight group-hover:text-amber-600 transition-colors">{{ resident.name }}</p>
+                          <div class="flex items-center gap-2.5 mt-2">
+                            <span class="text-[11px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-100 tracking-tight">Room {{ resident.room }}</span>
+                            <span :class="getResidentStatusClass(resident.status)" class="scale-100 origin-left">
+                              {{ formatResidentStatus(resident.status) }}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div :class="[
-                        'w-10 h-10 rounded-full text-white flex items-center justify-center font-bold overflow-hidden',
-                        index === 0 ? 'bg-yellow-400' : 
-                        index === 1 ? 'bg-blue-500' : 
-                        'bg-emerald-500'
-                      ]">
-                        <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
-                        <span v-else>{{ resident.name.charAt(0) }}</span>
-                      </div>
-                      <div>
-                        <p class="text-sm font-bold text-gray-900">{{ resident.name }}</p>
-                        <div class="flex items-center gap-2 mt-0.5">
-                          <p class="text-[11px] text-gray-500">Room {{ resident.room }}</p>
-                          <span :class="getResidentStatusClass(resident.status)">
-                            {{ formatResidentStatus(resident.status) }}
-                          </span>
+                      
+                      <div class="text-right">
+                        <div class="flex items-baseline justify-end gap-1.5">
+                          <span class="text-4xl font-bold text-gray-900">{{ resident.count }}</span>
+                          <span class="text-xs font-bold text-gray-400 tracking-tight opacity-70">Parcels</span>
                         </div>
                       </div>
                     </div>
-                    <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">{{ resident.count }}</p>
-                      <p class="text-[10px] text-gray-400">parcels</p>
+                    
+                    <!-- Volume Progress Bar (Enhanced) -->
+                    <div class="w-full h-2.5 bg-gray-50 rounded-full overflow-hidden border border-gray-100 shadow-inner p-[1.5px]">
+                      <div 
+                        class="h-full rounded-full transition-all duration-1000 ease-out"
+                        :style="{ width: `${(resident.count / (topResidents[0]?.count || 1)) * 100}%` }"
+                        :class="[
+                          index === 0 ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 shadow-lg shadow-yellow-500/20' : 
+                          'bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg shadow-blue-500/20'
+                        ]"
+                      ></div>
                     </div>
                   </div>
 
                   <!-- Empty State -->
-                  <div v-if="topResidents.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 py-8">
-                    <svg class="w-12 h-12 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div v-if="topResidents.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/30 py-20 opacity-40">
+                    <svg class="w-20 h-20 mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg>
-                    <p class="text-xs">No parcel data available</p>
+                    <p class="text-base font-bold tracking-normal">No leaderboard data available</p>
                   </div>
                 </div>
               </div>
