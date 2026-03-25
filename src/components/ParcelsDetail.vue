@@ -747,9 +747,9 @@ function formatDateTime(datetimeStr) {
                       
                       <!-- Status Message (Cooldown) -->
                       <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
-                        <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-red-50 text-red-600 px-6 py-2.5 rounded-full border border-red-100 shadow-sm">
+                        <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-yellow-50 text-yellow-600 px-6 py-2.5 rounded-full border border-yellow-100 shadow-sm">
                            <div class="relative">
-                              <div class="absolute inset-0 bg-red-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                              <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
                               <svg class="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>

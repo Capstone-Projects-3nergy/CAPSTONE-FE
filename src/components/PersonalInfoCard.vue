@@ -1348,9 +1348,9 @@ const confirmUnlinkAction = async () => {
                     </ButtonWeb>
                     
                     <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
-                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-red-50 text-red-600 rounded-2xl border border-red-100 shadow-sm transition-all">
+                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
                         <div class="relative flex-shrink-0">
-                           <div class="absolute inset-0 bg-red-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                           <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>

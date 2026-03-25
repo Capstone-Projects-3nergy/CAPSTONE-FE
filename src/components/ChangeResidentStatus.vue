@@ -356,7 +356,7 @@ const currentStepIndex = computed(() => {
                     isEmailDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
                   ]"
                 />
-                <span v-if="isEmailDisabled" class="text-[10px] font-bold text-red-600 text-center leading-tight">
+                <span v-if="isEmailDisabled" class="text-[10px] font-bold text-yellow-600 text-center leading-tight">
                   Email sent recently. <br> Resend tomorrow.
                 </span>
               </div>
