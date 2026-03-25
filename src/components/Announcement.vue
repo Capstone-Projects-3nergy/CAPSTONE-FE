@@ -358,7 +358,6 @@ const fetchAnnouncementData = async () => {
 
     if (data && Array.isArray(data)) {
       announcementManager.setAnnouncements(data)
-      console.log('Resident view: API data fetched and stored')
     }
   } catch (e) {
     console.warn('Fetch announcements failed', e)
