@@ -10,10 +10,6 @@ export const useResetPasswordManager = defineStore(
     const loading = ref(false)
     const successMessage = ref('')
     const errorMessage = ref('')
-
-    // ===============================
-    // SEND RESET EMAIL
-    // ===============================
     const sendResetEmail = async (email) => {
       loading.value = true
       successMessage.value = ''
@@ -46,10 +42,6 @@ export const useResetPasswordManager = defineStore(
         loading.value = false
       }
     }
-
-    // ===============================
-    // CONFIRM RESET PASSWORD
-    // ===============================
     const confirmResetPassword = async (oobCode, newPassword) => {
       loading.value = true
       successMessage.value = ''

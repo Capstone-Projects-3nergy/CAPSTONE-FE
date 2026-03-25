@@ -255,18 +255,6 @@ const returnLoginPage = () => {
             :disabled="isEmailOverLimit"
             @click="sendResetEmail"
           />
-          <!-- <ButtonWeb
-            label="Reset Password"
-            :loading="loading"
-            type="submit"
-            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
-            :class="{
-              'opacity-30 cursor-not-allowed hover:-translate-y-0': isEmailOverLimit,
-              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit
-            }"
-            :disabled="isEmailOverLimit"
-            @click="sendResetEmail"
-          /> -->
         </form>
 
         <p class="text-center text-sm text-gray-600 mt-6">

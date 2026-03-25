@@ -8,7 +8,7 @@ const props = defineProps({
   subMessage: { type: String, default: '' },
   confirmLabel: { type: String, default: 'Confirm' },
   cancelLabel: { type: String, default: 'Cancel' },
-  styleType: { type: String, default: 'red' }, // red, blue, green, orange, yellow
+  styleType: { type: String, default: 'red' }, 
 })
 
 const emit = defineEmits(['confirm', 'cancel'])
@@ -53,11 +53,8 @@ const styleConfig = computed(() => {
         @click.stop
       >
         <div class="px-8 py-10 text-center relative">
-          <!-- Background Decor -->
           <div :class="[styleConfig.iconBg, 'absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-50']"></div>
-
           <div :class="[styleConfig.iconBg, styleConfig.iconColor, 'mx-auto flex items-center justify-center h-20 w-20 rounded-3xl mb-6 relative overflow-hidden group shadow-inner']">
-             <!-- Status Icon -->
              <svg v-if="styleType === 'red'" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
              </svg>

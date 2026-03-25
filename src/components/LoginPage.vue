@@ -74,8 +74,6 @@ const loginHomePageWeb = async () => {
     return
   }
 
-  // 🔹 เช็คก่อนว่า Email นี้มีลงทะเบียนไว้ในระบบหรือไม่ (ผ่าน Firebase)
-  // ⚠️ เราใช้ข้อมูลจาก /api/staff/users ไม่ได้เพราะต้องล็อกอินก่อนถึงจะดึงได้ (จะติด 401 และเด้งหลุด)
   const isEmailExists = await authManager.checkEmailInFirebase(email.value.trim())
   if (!isEmailExists) {
     notRegisterError.value = true
@@ -565,16 +563,6 @@ const showResetPasswordPageWeb = async function () {
             }"
             :disabled="isEmailOverLimit"
           />
-          <!-- <ButtonWeb
-            label="Sign In"
-            type="submit"
-            class="w-full bg-gradient-to-r from-[#0047b1] to-[#7bb8ff] text-white py-3 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer font-semibold text-lg"
-            :class="{
-              'opacity-30 cursor-not-allowed': isEmailOverLimit,
-              'hover:shadow-lg hover:from-[#00388e] hover:to-[#6aa7ed]': !isEmailOverLimit
-            }"
-            :disabled="isEmailOverLimit"
-          /> -->
         </form>
 
         <p class="text-sm text-center text-[#8C8F91] mt-8">

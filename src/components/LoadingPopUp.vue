@@ -15,7 +15,6 @@ defineEmits(['closePopUp'])
         <div
           class="bg-white/95 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-10 flex flex-col items-center gap-6 min-w-[280px] border border-white/20"
         >
-          <!-- Modern Dual-Ring Spinner -->
           <div class="relative w-16 h-16">
             <div
               class="absolute inset-0 rounded-full border-[3px] border-blue-100/50"
@@ -26,7 +25,6 @@ defineEmits(['closePopUp'])
             <div
               class="absolute inset-2 rounded-full border-[3px] border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent animate-spin-fast"
             ></div>
-            <!-- Pulse Effect -->
             <div class="absolute inset-0 rounded-full bg-blue-400/10 animate-pulse-slow"></div>
           </div>
 
@@ -65,7 +63,6 @@ defineEmits(['closePopUp'])
   to { transform: rotate(360deg); }
 }
 
-/* Modal Transition */
 .fade-scale-enter-active,
 .fade-scale-leave-active {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);

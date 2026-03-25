@@ -17,7 +17,7 @@ const position = ref({ x: 0, y: 0 })
 const isDragging = ref(false)
 const startPos = ref({ x: 0, y: 0 })
 
-// Reset when opening
+
 watch(
   () => props.isOpen,
   (val) => {
@@ -50,7 +50,7 @@ const onMouseUp = () => {
   isDragging.value = false
 }
 
-// Touch support
+
 const onTouchStart = (e) => {
   if (!props.isOpen) return
   isDragging.value = true
@@ -136,15 +136,15 @@ const cropImage = () => {
 <template>
   <Transition name="fade">
     <div v-if="isOpen" class="fixed inset-0 z-[999] flex items-center justify-center p-4">
-      <!-- Backdrop -->
+   
       <div 
         class="absolute inset-0 bg-[#07192F]/80 backdrop-blur-md" 
         @click="$emit('close')"
       ></div>
       
-      <!-- Modal Content -->
+
       <div class="relative bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(7,25,47,0.3)] w-full max-w-md overflow-hidden animate-premium-in">
-        <!-- Header -->
+  
         <div class="px-8 pt-8 pb-4 flex flex-col items-center text-center">
           <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
             <svg class="w-6 h-6 text-[#0E4B90]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,9 +156,9 @@ const cropImage = () => {
           <p class="text-gray-400 text-sm mt-1">Drag and scale to fit the frame</p>
         </div>
 
-        <!-- Viewport -->
+    
         <div class="flex justify-center p-0 bg-[#07192F] overflow-hidden">
-          <!-- Main Controller Container -->
+       
           <div 
             class="relative w-full aspect-square max-w-[360px] flex items-center justify-center cursor-move touch-none p-8"
             @mousedown="onMouseDown"
@@ -169,7 +169,7 @@ const cropImage = () => {
             @touchmove="onTouchMove"
             @touchend="onMouseUp"
           >
-            <!-- The Only Image (Underneath the mask) -->
+       
             <img 
               ref="imageRef"
               :src="imageSrc" 
@@ -185,18 +185,16 @@ const cropImage = () => {
               ]"
             />
 
-            <!-- Mask Layer (The "Hole" in the shadow) -->
+         
             <div 
               ref="containerRef"
               class="relative w-64 h-64 rounded-full border-[4px] border-white/90 shadow-[0_0_0_999px_rgba(7,25,47,0.7)] z-10 pointer-events-none"
             >
-              <!-- Subtle Inner Gloss -->
               <div class="absolute inset-0 rounded-full shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]"></div>
             </div>
           </div>
         </div>
 
-        <!-- Controls -->
         <div class="px-8 py-6 space-y-6">
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
@@ -215,7 +213,6 @@ const cropImage = () => {
             </div>
           </div>
 
-          <!-- Buttons -->
           <div class="flex gap-4 pt-2">
             <ButtonWeb 
               label="Cancel"

@@ -888,39 +888,6 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -1235,23 +1202,6 @@ const showProfileStaffPage = async function () {
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
-                      <!-- <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        </button>
-                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                        </button>
-                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                        </button>
-                      </div> -->
                       <textarea 
                          ref="contentArea"
                          :value="announcementForm.content"
@@ -1298,13 +1248,7 @@ const showProfileStaffPage = async function () {
                       
                       <!-- Image Actions Overlay -->
                       <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                        <!-- <button 
-                          @click="toggleLightbox" 
-                          class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
-                          title="View full image"
-                        >
-                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                        </button> -->
+
                         <button 
                           @click="$refs.fileInput.click()" 
                           class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
@@ -1331,43 +1275,6 @@ const showProfileStaffPage = async function () {
                    </div>
                 </div>
 
-                <!-- Target Audience -->
-                <!-- <div class="space-y-3 pt-2">
-                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="ALL_RESIDENTS" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'ALL_RESIDENTS' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'ALL_RESIDENTS' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
-                      </div>
-                    </label>
-
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="ACTIVE_ONLY" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'ACTIVE_ONLY' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
-                      </div>
-                    </label>
-
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="Zone" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
-                      </div>
-                    </label> 
-                  </div>
-                  </div> -->
-
-                <!-- Toggles -->
                 <div class="space-y-3 pt-2">
                   <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
                      <div class="flex items-center gap-4">
@@ -1383,26 +1290,9 @@ const showProfileStaffPage = async function () {
                        <span :class="announcementForm.pinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
-
-                  <!-- <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                     <div class="flex items-center gap-4">
-                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                       </div>
-                       <div>
-                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
-                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
-                       </div>
-                     </div>
-                     <button @click="announcementForm.sendNotification = !announcementForm.sendNotification" :class="announcementForm.sendNotification ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="announcementForm.sendNotification ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
-                     </button>
-                  </div> -->
                 </div>
-
              </div>
 
-             <!-- Actions -->
              <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
@@ -1439,7 +1329,6 @@ const showProfileStaffPage = async function () {
 
     <LoadingPopUp v-if="isLoading" />
 
-    <!-- Lightbox Overlay -->
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
           <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">

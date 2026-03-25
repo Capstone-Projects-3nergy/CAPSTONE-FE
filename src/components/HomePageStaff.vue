@@ -1173,22 +1173,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 <span class="font-bold text-xs sm:text-sm tracking-tight whitespace-nowrap">Resident Dashboard</span>
               </button>
             </div>
-
-            <!-- Dashboard Status Badge (Visual Polish) -->
-            <!-- <div class="hidden lg:flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-white to-gray-50/50 rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex -space-x-2">
-                <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm">ST</div>
-                <div class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold shadow-sm">AD</div>
-                <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] text-gray-500 font-bold shadow-sm">+1</div>
-              </div>
-              <div class="flex flex-col h-full justify-center">
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  <span class="text-[10px] font-bold text-gray-400 tracking-widest leading-none">System Live</span>
-                </div>
-                <span class="text-xs font-extrabold text-[#1D355E] mt-0.5">3 Staff Active</span>
-              </div>
-            </div> -->
           </div>
           
           <!-- Export Actions -->

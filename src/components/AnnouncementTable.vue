@@ -177,9 +177,6 @@ const formatDate = (dateString) => {
                   <span>{{ item.viewCount || item.views || 0 }}</span>
                 </div>
             </div>
-            <!-- If draft, only show basic info if needed, or hide metadata to match grid requested -->
-            <!-- <div v-else class="flex-1"></div>
-             -->
             <!-- Right Side: Action Buttons -->
             <div class="flex items-center gap-0.5 flex-shrink-0">
               <button @click="$emit('pin', item)" 
@@ -307,9 +304,6 @@ const formatDate = (dateString) => {
                         <div v-if="item.subtitle" class="text-[10px] text-gray-700 font-bold leading-relaxed min-w-0 break-words line-clamp-1">
                           {{ item.subtitle.replace(/^Draft\s*-\s*/i, '') }}
                         </div>
-                        <!-- <div v-if="item.content" class="text-[10px] text-gray-400 leading-relaxed min-w-0 break-words line-clamp-1">
-                          {{ item.content.replace(/^Draft\s*-\s*/i, '') }}
-                        </div> -->
                       </div>
                     </div>
                   </div>

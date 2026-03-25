@@ -621,22 +621,6 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -721,44 +705,6 @@ const goToPage = (page) => {
 
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-50 relative overflow-x-hidden font-sans">
-        <!-- LINE Notification -->
-        <!-- <div class="fixed top-5 right-5 z-50 space-y-3">
-          <LineNotification
-            v-if="notification.show"
-            :type="notification.type"
-            :title="notification.title"
-            :message="notification.message"
-            @close="closeNotification"
-          />
-        </div>
-
-        <div
-          class="bg-white rounded-xl shadow p-6 mb-6 flex items-center gap-3"
-        >
-          <svg
-            class="w-8 h-8 text-[#185dc0]"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-1a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-
-          <div>
-            <h2 class="text-2xl font-bold text-[#185dc0]">
-              {{ roleTitle }}
-            </h2>
-            <p class="text-sm text-gray-500">
-              Manage your personal information
-            </p>
-          </div>
-        </div>
-        -->
-
-        <!-- Content Card -->
         <div
           class="w-full rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
         >
@@ -785,17 +731,6 @@ const goToPage = (page) => {
                     />
                   </g>
                 </svg>
-              <!-- <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="#185DC0"
-                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
-              />
-            </svg> -->
               </div>
                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">

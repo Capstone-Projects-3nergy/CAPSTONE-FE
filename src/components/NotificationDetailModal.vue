@@ -118,7 +118,7 @@ const displayType = computed(() => {
     <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
     
     <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl transform transition-all p-6 sm:p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-      <!-- Decor -->
+  
       <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50/80 to-transparent rounded-bl-full -z-0 pointer-events-none"></div>
 
       <button @click="$emit('close')" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10">
@@ -172,7 +172,7 @@ const displayType = computed(() => {
           <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 text-gray-700 leading-relaxed text-sm">
              {{ notification.title }}
              
-             <!-- Parcel View Detail -->
+       
              <div v-if="notification.parcelId" class="mt-4 pt-4 border-t border-gray-200">
                 <button 
                   @click="showParcelDetail(notification.parcelId, notification.type === 'overdue' ? 'status' : 'info')"
@@ -183,7 +183,6 @@ const displayType = computed(() => {
                 </button>
              </div>
 
-             <!-- Announcement View Detail -->
              <div v-if="!notification.parcelId && notification.label !== 'Welcome to Tractify'" class="mt-4 pt-4 border-t border-gray-200">
                 <button 
                   @click="showAnnouncementPage"
