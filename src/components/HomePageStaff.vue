@@ -235,6 +235,44 @@ const filterEndDate = ref('')
 const statusChartInstance = ref(null)
 const residentStatusChartInstance = ref(null)
 
+const chartRangeLabel = computed(() => {
+  const now = new Date()
+  if (activityInterval.value === 'daily') {
+    const start = new Date(now)
+    start.setDate(now.getDate() - (now.getDay() || 7) + 1)
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    return `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+  } else if (activityInterval.value === 'weekly') {
+    return now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+  } else {
+    return `Annual Analytics ${now.getFullYear()}`
+  }
+})
+
+const dataLabelsPlugin = {
+  id: 'dataLabelsPlugin',
+  afterDatasetsDraw(chart) {
+    const { ctx, data } = chart;
+    ctx.save();
+    data.datasets.forEach((dataset, i) => {
+      if (dataset.type === 'line' || dataset.hidden) return;
+      const meta = chart.getDatasetMeta(i);
+      meta.data.forEach((bar, index) => {
+        const value = dataset.data[index];
+        if (value > 0) {
+          ctx.fillStyle = i === 2 ? '#EF4444' : '#111827';
+          ctx.font = 'black 10px Inter';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(value, bar.x, bar.y - 4);
+        }
+      });
+    });
+    ctx.restore();
+  }
+}
+
 const initStatusChart = () => {
   const ctx = document.getElementById('statusChart')
   if (!ctx) return
@@ -364,24 +402,57 @@ const updateParcelChart = (interval) => {
   if (!parcelChartInstance) return;
 
   const data = chartData.value[interval];
-  parcelChartInstance.data.labels = data.labels;
-  parcelChartInstance.data.datasets[0].data = data.received;
-  parcelChartInstance.data.datasets[1].data = data.pickedUp;
-  parcelChartInstance.data.datasets[2].data = data.overdue;
+  let labels = [...data.labels];
+  let received = [...data.received];
+  let pickedUp = [...data.pickedUp];
+  let overdue = [...data.overdue];
+
+  // Logic: Only show the last 7 days with activity if daily
+  if (interval === 'daily') {
+    const activeIndices = labels.map((_, i) => i).filter(i => 
+      received[i] > 0 || pickedUp[i] > 0 || overdue[i] > 0
+    );
+    
+    if (activeIndices.length > 0) {
+      labels = activeIndices.map(i => labels[i]);
+      received = activeIndices.map(i => received[i]);
+      pickedUp = activeIndices.map(i => pickedUp[i]);
+      overdue = activeIndices.map(i => overdue[i]);
+    }
+  }
+
+  parcelChartInstance.data.labels = labels;
+  parcelChartInstance.data.datasets[0].data = received;
+  parcelChartInstance.data.datasets[1].data = pickedUp;
+  parcelChartInstance.data.datasets[2].data = overdue;
   
+  // Calculate and Update Baseline (Average Received)
+  const avgReceived = received.reduce((a, b) => a + b, 0) / (received.length || 1);
+  if (parcelChartInstance.data.datasets.length < 4) {
+    parcelChartInstance.data.datasets.push({
+      label: `Avg Received (${avgReceived.toFixed(1)})`,
+      data: new Array(labels.length).fill(avgReceived.toFixed(1)),
+      type: 'line',
+      borderColor: 'rgba(156, 163, 175, 0.4)',
+      borderWidth: 2,
+      borderDash: [6, 4],
+      pointRadius: 0,
+      fill: false,
+      order: 0
+    });
+  } else {
+    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avgReceived.toFixed(1));
+    parcelChartInstance.data.datasets[3].label = `Avg Received (${avgReceived.toFixed(1)})`;
+  }
+
   // Update bar thickness based on interval
-  let thickness = 28;
-  if (interval === 'monthly') thickness = 10;
-  else if (interval === 'daily') thickness = 18;
-  else thickness = 24;
+  let thickness = interval === 'monthly' ? 12 : interval === 'daily' ? 32 : 28;
 
   parcelChartInstance.data.datasets.forEach(ds => {
-    ds.barThickness = thickness;
+    if (ds.type !== 'line') ds.barThickness = thickness;
   });
 
-  // Update Axis Title
-  parcelChartInstance.options.scales.x.title.text = interval === 'daily' ? 'Day' : interval === 'weekly' ? 'Week' : 'Month';
-
+  parcelChartInstance.options.scales.x.title.text = interval === 'daily' ? 'Active Days' : interval === 'weekly' ? 'Week' : 'Month';
   parcelChartInstance.update();
 };
 
@@ -407,9 +478,48 @@ const updateResidentChart = (year) => {
   residentYear.value = year;
   if (!residentChartInstance) return;
 
-  const data = residentChartData.value[year];
-  residentChartInstance.data.labels = data.labels;
-  residentChartInstance.data.datasets[0].data = data.data;
+  const rawData = residentChartData.value[year];
+  let labels = [...rawData.labels];
+  let data = [...rawData.data];
+
+  // Filter: Show only months with data or up to the current month to avoid wide empty charts
+  const now = new Date();
+  const currentYear = now.getFullYear().toString();
+  const currentMonthIdx = now.getMonth();
+
+  if (year === currentYear) {
+    const lastActiveMonthIdx = data.map((v, i) => v > 0 ? i : -1).reduce((a, b) => Math.max(a, b), -1);
+    const limitIdx = Math.max(2, currentMonthIdx, lastActiveMonthIdx);
+    labels = labels.slice(0, limitIdx + 1);
+    data = data.slice(0, limitIdx + 1);
+  } else if (data.every(v => v === 0)) {
+    labels = labels.slice(0, 3);
+    data = data.slice(0, 3);
+  }
+
+  residentChartInstance.data.labels = labels;
+  residentChartInstance.data.datasets[0].data = data;
+  
+  // Update Baseline (Average)
+  const avg = data.reduce((a, b) => a + b, 0) / (data.length || 1);
+  if (residentChartInstance.data.datasets.length < 2) {
+    residentChartInstance.data.datasets.push({
+      label: `AVG (${avg.toFixed(1)})`,
+      data: new Array(labels.length).fill(avg.toFixed(1)),
+      type: 'line',
+      borderColor: 'rgba(99, 102, 241, 0.4)',
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      order: 0
+    });
+  } else {
+    residentChartInstance.data.datasets[1].data = new Array(labels.length).fill(avg.toFixed(1));
+    residentChartInstance.data.datasets[1].label = `AVG (${avg.toFixed(1)})`;
+  }
+
+  residentChartInstance.options.scales.x.title.text = `Months of ${year}`;
   residentChartInstance.update();
 };
 
@@ -553,6 +663,7 @@ onMounted(async () => {
   const ctx = document.getElementById('parcelChart')
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
+    plugins: [dataLabelsPlugin],
     data: {
       labels: chartData.value.labels,
       datasets: chartData.value.datasets.map(ds => ({
@@ -563,7 +674,7 @@ onMounted(async () => {
         hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' :
                              ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' :
                              'rgba(239, 68, 68, 1)',
-        borderRadius: 0,
+        borderRadius: 4,
         borderSkipped: false,
         barThickness: activityInterval.value === 'daily' ? 18 : 24
       }))
@@ -575,8 +686,24 @@ onMounted(async () => {
         mode: 'index',
         intersect: false,
       },
+      onClick: (event, elements) => {
+        if (elements.length > 0 && (activityInterval.value === 'weekly' || activityInterval.value === 'monthly')) {
+          updateParcelChart('daily');
+        }
+      },
       plugins: {
-        legend: { display: false },
+        legend: { 
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 20,
+            font: { family: "'Inter', sans-serif", size: 10, weight: 'bold' },
+            color: '#6B7280'
+          }
+        },
         tooltip: {
           enabled: true,
           backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
@@ -593,36 +720,17 @@ onMounted(async () => {
               const currentYear = now.getFullYear();
               
               if (activityInterval.value === 'daily') {
-                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                const targetDayIdx = days.indexOf(item.label);
-                if (targetDayIdx !== -1) {
-                  const currentDayIdx = (now.getDay() + 6) % 7; // Mon=0
-                  const diff = targetDayIdx - currentDayIdx;
-                  const targetDate = new Date(now);
-                  targetDate.setDate(now.getDate() + diff);
-                  return `Day: ${item.label} (${targetDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })})`;
-                }
+                return `Day: ${item.label}`;
               } else if (activityInterval.value === 'monthly') {
                 return `Month: ${item.label} ${currentYear}`;
               } else if (activityInterval.value === 'weekly') {
                  return `${item.label} (${now.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`;
               }
-              
-              const intervalText = activityInterval.value === 'daily' ? 'Day' 
-                                 : activityInterval.value === 'weekly' ? 'Week' 
-                                 : 'Month';
-              return `${intervalText}: ${item.label}`;
+              return `${activityInterval.value}: ${item.label}`;
             },
             label: (context) => {
               const val = context.parsed.y || 0;
-              const dsIdx = context.datasetIndex;
-              const allDS = context.chart.data.datasets;
-              let total = 0;
-              allDS.forEach(ds => {
-                total += (ds.data[context.dataIndex] || 0);
-              });
-              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-              return ` ${context.dataset.label}: ${val} parcels (${pct}%)`;
+              return ` ${context.dataset.label}: ${val} units`;
             }
           }
         }
@@ -644,17 +752,18 @@ onMounted(async () => {
         y: {
           stacked: false,
           beginAtZero: true,
+          suggestedMax: 10,
           grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
           ticks: { 
             font: { family: "'Inter', sans-serif", size: 11 }, 
             color: '#9CA3AF', 
             padding: 2,
-            stepSize: 20 
+            callback: (value) => value % 1 === 0 ? value : null
           },
           title: {
              display: true,
              align: 'end',
-             text: 'Number of Parcels',
+             text: 'Volume (Units)',
              font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
              color: '#6B7280',
              padding: 0
@@ -671,6 +780,7 @@ onMounted(async () => {
   if (residentCtx) {
     residentChartInstance = new Chart(residentCtx, {
       type: 'bar',
+      plugins: [dataLabelsPlugin],
       data: {
         labels: residentChartData.value['2026'].labels,
         datasets: [
@@ -680,20 +790,20 @@ onMounted(async () => {
             backgroundColor: (context) => {
               const data = context.dataset.data;
               const max = Math.max(...data);
-              return context.parsed.y === max
+              return context.parsed.y === max && max > 0
                 ? 'rgba(99, 102, 241, 0.85)' // Indigo peak
                 : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
             },
             hoverBackgroundColor: (context) => {
               const data = context.dataset.data;
               const max = Math.max(...data);
-              return context.parsed.y === max
+              return context.parsed.y === max && max > 0
                 ? 'rgba(99, 102, 241, 1)' 
                 : 'rgba(129, 140, 248, 0.6)' 
             },
-            borderRadius: 0,
+            borderRadius: 6,
             borderSkipped: false,
-            barThickness: 36
+            barThickness: 45 // Increased thickness since we have fewer months
           }
         ]
       },
@@ -705,7 +815,12 @@ onMounted(async () => {
           intersect: false,
         },
         plugins: {
-          legend: { display: false },
+          legend: { 
+            display: true, 
+            position: 'top', 
+            align: 'end',
+            labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } }
+          },
           tooltip: {
             enabled: true,
             backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
@@ -723,7 +838,7 @@ onMounted(async () => {
                 const val = context.parsed.y || 0;
                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + (b || 0), 0);
                 const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                return ` ${val} New Residents (${pct}% of year)`;
+                return ` ${val} Joined (${pct}%)`;
               }
             }
           }
@@ -731,11 +846,11 @@ onMounted(async () => {
         scales: {
           x: { 
             grid: { display: false, drawBorder: false },
-            ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#9CA3AF' },
+            ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: 'bold' }, color: '#4B5563' },
             title: {
                display: true,
                align: 'start',
-               text: 'Month',
+               text: 'Timeline',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
                padding: 0
@@ -743,17 +858,19 @@ onMounted(async () => {
           },
           y: {
             beginAtZero: true,
+            suggestedMax: 5,
             grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
             ticks: { 
               font: { family: "'Inter', sans-serif", size: 11 }, 
               color: '#9CA3AF',
               padding: 2,
-              stepSize: 5 
+              stepSize: 1,
+              callback: (value) => value % 1 === 0 ? value : null
             },
             title: {
                display: true,
                align: 'end',
-               text: 'Number of Residents',
+               text: 'Residents Joined',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
                padding: 0
@@ -762,6 +879,8 @@ onMounted(async () => {
         }
       }
     })
+    // Explicitly update to apply filtering and baseline on first load
+    updateResidentChart(residentYear.value)
   }
 })
 
@@ -1397,11 +1516,19 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             <div class="p-6 md:p-8">
               <!-- Parcel Activity Tab (Bar Chart) -->
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
-                <div class="flex justify-end">
-                   <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner">
-                    <button @click="updateParcelChart('daily')" :class="activityInterval === 'daily' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Daily</button>
-                    <button @click="updateParcelChart('weekly')" :class="activityInterval === 'weekly' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Weekly</button>
-                    <button @click="updateParcelChart('monthly')" :class="activityInterval === 'monthly' ? 'bg-white text-gray-900 shadow-sm font-bold border-gray-100' : 'text-gray-500 font-medium'" class="px-5 py-2 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Monthly</button>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div class="flex flex-col">
+                    <span class="text-[11px] font-black text-[#0E4B90] tracking-[0.2em] uppercase opacity-70">Activity Period</span>
+                    <h4 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2 mt-1">
+                      {{ chartRangeLabel }}
+                      <span class="text-[10px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100 tracking-widest">{{ activityInterval.toUpperCase() }}</span>
+                    </h4>
+                  </div>
+
+                   <div class="flex bg-gray-50/80 rounded-xl p-1 border border-gray-100 shadow-inner w-full sm:w-auto">
+                    <button @click="updateParcelChart('daily')" :class="activityInterval === 'daily' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Daily</button>
+                    <button @click="updateParcelChart('weekly')" :class="activityInterval === 'weekly' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Weekly</button>
+                    <button @click="updateParcelChart('monthly')" :class="activityInterval === 'monthly' ? 'bg-white text-[#0E4B90] shadow-md font-black border-gray-100' : 'text-gray-500 font-bold hover:bg-white/50'" class="flex-1 sm:flex-none px-6 py-2.5 text-[11px] rounded-lg transition-all cursor-pointer border border-transparent">Monthly</button>
                   </div>
                 </div>
                 
