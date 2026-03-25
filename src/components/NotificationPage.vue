@@ -355,9 +355,21 @@ const paginatedNotifications = computed(() => {
 
 const pages = computed(() => {
   const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) p.push(i)
+  } else {
+    if (current <= 3) {
+      p.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      p.push(1, '...', total - 2, total - 1, total)
+    } else {
+      p.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
   }
+
   return p
 })
 
@@ -853,19 +865,26 @@ const goToPage = (page) => {
                 Previous
               </button>
 
-              <button
-                v-for="pg in pages"
-                :key="pg"
-                @click="goToPage(pg)"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                  currentPage === pg 
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                {{ pg }}
-              </button>
+              <template v-for="(pg, index) in pages" :key="index">
+                <button
+                  v-if="pg !== '...'"
+                  @click="goToPage(pg)"
+                  :class="[
+                    'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                    currentPage === pg 
+                      ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pg }}
+                </button>
+                <span 
+                  v-else
+                  class="px-3 py-2 text-sm font-semibold text-gray-400 select-none"
+                >
+                  ...
+                </span>
+              </template>
 
               <button
                 @click="nextPage"
