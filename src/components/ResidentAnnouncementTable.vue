@@ -240,19 +240,26 @@ const formatDate = (dateString) => {
           Previous
         </button>
         
-        <button
-          v-for="p in pages"
-          :key="p"
-          @click="$emit('go', p)"
-          :class="[
-            'px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 cursor-pointer',
-            p === page 
-              ? 'bg-[#0E2856] text-white shadow-md' 
-              : 'text-gray-500 hover:text-[#0E2856] hover:bg-gray-50'
-          ]"
-        >
-          {{ p }}
-        </button>
+        <template v-for="(p, index) in pages" :key="index">
+          <button
+            v-if="p !== '...'"
+            @click="$emit('go', p)"
+            :class="[
+              'px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 cursor-pointer',
+              p === page 
+                ? 'bg-[#0E2856] text-white shadow-md' 
+                : 'text-gray-500 hover:text-[#0E2856] hover:bg-gray-50'
+            ]"
+          >
+            {{ p }}
+          </button>
+          <span 
+            v-else
+            class="px-3 py-2 text-sm font-semibold text-gray-400 select-none"
+          >
+            ...
+          </span>
+        </template>
 
         <button 
           @click="$emit('next')" 

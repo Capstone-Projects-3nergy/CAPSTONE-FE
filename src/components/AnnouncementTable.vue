@@ -442,19 +442,27 @@ const formatDate = (dateString) => {
             >Previous</button>
             
             <!-- Page Numbers -->
-            <button
-              v-for="p in pages"
-              :key="p"
-              @click="$emit('go', p)"
-              :class="[
-                'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                p === page 
-                  ? 'bg-[#0E2856] text-white shadow-md transform scale-105' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-              ]"
-            >
-              {{ p }}
-            </button>
+            <!-- Page Numbers -->
+            <template v-for="(p, index) in pages" :key="index">
+              <button
+                v-if="p !== '...'"
+                @click="$emit('go', p)"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                  p === page 
+                    ? 'bg-[#0E2856] text-white shadow-md transform scale-105' 
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                {{ p }}
+              </button>
+              <span 
+                v-else
+                class="px-3 py-2 text-sm font-semibold text-gray-400 select-none"
+              >
+                ...
+              </span>
+            </template>
 
             <button 
               @click="$emit('next')" 

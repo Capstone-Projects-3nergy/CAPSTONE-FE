@@ -821,19 +821,26 @@ const authStore = useAuthManager()
               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Previous</button>
             
-            <button
-              v-for="pg in pages"
-              :key="pg"
-              @click="$emit('go', pg)"
-              :class="[
-                'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                page === pg 
-                  ? 'bg-[#0E2856] text-white shadow-md transform scale-105' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-              ]"
-            >
-              {{ pg }}
-            </button>
+            <template v-for="(pg, index) in pages" :key="index">
+              <button
+                v-if="pg !== '...'"
+                @click="$emit('go', pg)"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                  page === pg 
+                    ? 'bg-[#0E2856] text-white shadow-md transform scale-105' 
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                ]"
+              >
+                {{ pg }}
+              </button>
+              <span 
+                v-else
+                class="px-3 py-2 text-sm font-semibold text-gray-400 select-none"
+              >
+                ...
+              </span>
+            </template>
 
             <button 
               @click="$emit('next')" 

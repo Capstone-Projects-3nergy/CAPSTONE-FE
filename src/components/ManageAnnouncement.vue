@@ -190,9 +190,21 @@ const paginatedAnnouncements = computed(() => {
 
 const pages = computed(() => {
   const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) p.push(i)
+  } else {
+    if (current <= 3) {
+      p.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      p.push(1, '...', total - 2, total - 1, total)
+    } else {
+      p.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
   }
+
   return p
 })
 
