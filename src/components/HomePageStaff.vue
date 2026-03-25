@@ -433,6 +433,7 @@ const updateParcelChart = (interval) => {
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
   parcelChartInstance.data.datasets[1].data = pickedUp;
+  // Overdue removed from graph display as per request
   
   // Calculate and Update Baseline (Average Received)
   const avg = received.reduce((a, b) => a + b, 0) / (received.length || 1);
@@ -672,7 +673,8 @@ onMounted(async () => {
     plugins: [dataLabelsPlugin, avgLinePlugin],
     data: {
       labels: chartData.value.labels,
-      datasets: chartData.value.datasets.map(ds => ({
+      // Filter out Overdue from this graph as per request
+      datasets: chartData.value.datasets.filter(ds => ds.label !== 'Overdue').map(ds => ({
         ...ds,
         backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)',
         hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
@@ -1539,7 +1541,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <canvas id="parcelChart"></canvas>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-50">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8 border-t border-gray-50">
                   <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
@@ -1556,15 +1558,6 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <div>
                       <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Received</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
-                    </div>
-                  </div>
-                  <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
-                    <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
-                    </div>
-                    <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Overdue</span>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>
                 </div>
