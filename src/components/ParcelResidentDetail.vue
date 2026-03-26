@@ -567,11 +567,11 @@ const closePopUp = (operate) => {
               </div>
             </section>
 
-            <div class="flex justify-end space-x-3 pt-6">
+            <div class="flex flex-row justify-end gap-3 pt-6 w-full">
               <ButtonWeb
                 label="Back"
                 color="gray"
-                class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
+                class="flex-1 sm:flex-none sm:min-w-[140px] text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3 font-bold"
                 @click="showHomePageResidentWeb"
               />
               <ButtonWeb
@@ -579,7 +579,7 @@ const closePopUp = (operate) => {
                 type="button"
                 label="Confirm"
                 color="blue"
-                class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
+                class="flex-1 sm:flex-none sm:min-w-[140px] cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20 font-black"
                 @click="confirmParcelPopUp(parcel)"
               />
             </div>

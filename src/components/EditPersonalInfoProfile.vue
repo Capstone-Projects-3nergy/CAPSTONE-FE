@@ -1668,13 +1668,13 @@ const isLineLinked = computed(() => {
           <!-- Actions -->
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"
+              class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:bg-gray-100 rounded-2xl transition-all font-bold px-4 md:px-8 whitespace-nowrap"
               label="Cancel"
               color="gray"
               @click="cancel"
             />
             <ButtonWeb
-              class="flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-3 md:px-10 whitespace-nowrap"
+              class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg transition-all font-black px-4 md:px-8 whitespace-nowrap"
               :label="mode === 'add' ? 'Add Resident' : 'Save'"
               color="blue"
               @click="submit"
