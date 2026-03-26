@@ -45,22 +45,37 @@ const handleExportExcel = () => {
   const announcements = props.announcements.slice(0, 5);
   const parcels = props.parcels.slice(0, 10);
 
-  // 1. MAIN HEADER
+  // 1. MAIN FILE HEADER
   const finalData = [
-    ['Dormitory Management System - Full Summary Report'],
+    ['Dormitory Management System - Full Dashboard Report'],
     ['Generated Date', new Date().toLocaleString()],
     []
   ];
 
-  let sectionNum = 1;
+  let mainSection = 1;
 
-  // 1. STATISTIC OVERVIEW (Always show)
-  finalData.push([`${sectionNum++}. STATISTIC OVERVIEW`]);
-  finalData.push(['Category', 'Status Item', 'Count / Value']);
-  finalData.push(['Parcels', 'Total Received', stats.totalParcels]);
+  // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
+  finalData.push([`${mainSection}. PARCEL MANAGEMENT OVERVIEW`]);
+  finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
+  finalData.push(['Parcels', 'Total Units (System)', stats.totalParcels]);
   finalData.push(['', 'Picked Up', stats.pickedUpParcels]);
   finalData.push(['', 'Awaiting Pickup', stats.awaitingParcels]);
-  finalData.push(['', 'Overdue', stats.overdueParcels]);
+  finalData.push(['', 'Overdue Parcels', stats.overdueParcels]);
+  finalData.push([]);
+
+  if (parcels && parcels.length > 0) {
+    finalData.push(['RECENT PARCELS (Latest Activity)']);
+    finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
+    parcels.forEach(p => {
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+    });
+    finalData.push([]);
+  }
+  mainSection++;
+
+  // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
+  finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
+  finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
   finalData.push(['Residents', 'Total Registered', stats.totalResidents]);
   finalData.push(['', 'Active Residents', stats.activeResidents]);
   finalData.push(['', 'Pending Approval', stats.pendingResidents]);
@@ -68,9 +83,8 @@ const handleExportExcel = () => {
   finalData.push(['Communications', 'Total Announcements', stats.totalAnnouncements]);
   finalData.push([]);
 
-  // 2. PENDING APPROVALS
   if (pending && pending.length > 0) {
-    finalData.push([`${sectionNum++}. PENDING APPROVALS`]);
+    finalData.push(['PENDING ACCOUNTS (Awaiting Verification)']);
     finalData.push(['Name', 'Room No.', 'Email', 'Updated At']);
     pending.forEach(r => {
       finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
@@ -78,9 +92,8 @@ const handleExportExcel = () => {
     finalData.push([]);
   }
 
-  // 3. TOP RESIDENTS
   if (topRes && topRes.length > 0) {
-    finalData.push([`${sectionNum++}. TOP RESIDENTS (Active Activity)`]);
+    finalData.push(['RESIDENT RANKING (Top volume leaders)']);
     finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
     topRes.forEach((r, i) => {
       finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
@@ -88,31 +101,20 @@ const handleExportExcel = () => {
     finalData.push([]);
   }
 
-  // 4. RECENT ANNOUNCEMENTS
   if (announcements && announcements.length > 0) {
-    finalData.push([`${sectionNum++}. RECENT ANNOUNCEMENTS`]);
+    finalData.push(['RECENT ANNOUNCEMENTS']);
     finalData.push(['Title', 'Type', 'Date']);
     announcements.forEach(a => {
       finalData.push([a.title, a.type, formatDate(a.createdAt || a.date)]);
-    });
-    finalData.push([]);
-  }
-
-  // 5. RECENT PARCELS 
-  if (parcels && parcels.length > 0) {
-    finalData.push([`${sectionNum++}. RECENT PARCELS (Latest Activity)`]);
-    finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
-    parcels.forEach(p => {
-      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
     });
   }
 
   const ws = XLSX.utils.aoa_to_sheet(finalData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Full Summary Report");
+  XLSX.utils.book_append_sheet(wb, ws, "Dashboard Report");
 
-  ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
-  XLSX.writeFile(wb, `Dormitory_Full_Data_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  ws['!cols'] = [{ wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
+  XLSX.writeFile(wb, `Dormitory_Dashboard_${new Date().toISOString().slice(0, 10)}.xlsx`);
 };
 
 const handleExportPDF = () => {
@@ -125,7 +127,6 @@ const handleExportPDF = () => {
   const brandColor = [29, 53, 94]; // Navy Blue style
 
   let y = 20;
-  let sectionNum = 1;
 
   const checkPage = (heightNeeded) => {
     if (y + heightNeeded > 275) {
@@ -136,22 +137,31 @@ const handleExportPDF = () => {
     return false;
   };
 
-  const drawVerticalBarHeader = (text) => {
-    checkPage(15);
+  const drawMainCategoryHeader = (text) => {
+    checkPage(20);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 5, 3, 8, 'F');
+    doc.rect(15, y - 6, 180, 10, 'F');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.setTextColor(29, 53, 94);
-    doc.text(text, 22, y);
-    y += 10;
+    doc.setTextColor(255, 255, 255);
+    doc.text(text, 105, y, { align: 'center' });
+    y += 12;
+  };
+
+  const drawSubHeader = (text) => {
+    checkPage(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
+    doc.text(text, 15, y);
+    y += 6;
   };
 
   // Main Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(29, 53, 94);
-  doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
+  doc.text("Dormitory Management System - Full Dashboard Report", 105, y, { align: 'center' });
   y += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -163,178 +173,52 @@ const handleExportPDF = () => {
   doc.line(15, y, 195, y);
   y += 15;
 
-  // 1. STATISTIC OVERVIEW Table
-  drawVerticalBarHeader(`${sectionNum++}. Statistic Overview`);
+  // --- 1. PARCEL MANAGEMENT OVERVIEW ---
+  drawMainCategoryHeader("1. PARCEL MANAGEMENT OVERVIEW");
+  
+  // 1.1 Parcel Statistics
+  drawSubHeader("Statistics Overview (Parcels)");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   
-  const statsItems = [
-    { cat: 'Parcels', item: 'Total Received', val: stats.totalParcels },
-    { cat: '', item: 'Picked Up', val: stats.pickedUpParcels },
-    { cat: '', item: 'Awaiting Pickup', val: stats.awaitingParcels },
-    { cat: 'Residents', item: 'Total Registered', val: stats.totalResidents },
-    { cat: '', item: 'Active Residents', val: stats.activeResidents },
-    { cat: '', item: 'Pending Approval', val: stats.pendingResidents },
-    { cat: 'Communications', item: 'Total Announcements', val: stats.totalAnnouncements }
+  const parcelStats = [
+    { item: 'Total Units (System)', val: stats.totalParcels },
+    { item: 'Picked Up', val: stats.pickedUpParcels },
+    { item: 'Awaiting Pickup', val: stats.awaitingParcels },
+    { item: 'Overdue Parcels', val: stats.overdueParcels }
   ];
 
-  // Header Background
   doc.setFillColor(245, 247, 250);
   doc.rect(15, y - 5, 180, 8, 'F');
-  
-  // Header Text
   doc.setFont("helvetica", "bold");
-  doc.text("CATEGORY", 18, y); 
-  doc.text("STATUS ITEM", 75, y); 
+  doc.text("PARCEL STATUS ITEM", 18, y); 
   doc.text("COUNT / VALUE", 160, y);
   
-  // Table Borders
   doc.setDrawColor(180, 180, 180);
-  doc.rect(15, y - 5, 180, (statsItems.length * 8) + 8);
+  doc.rect(15, y - 5, 180, (parcelStats.length * 8) + 8);
   doc.line(15, y + 3, 195, y + 3);
-
-  // Vertical Divider Lines
-  const vLine1 = 70;
-  const vLine2 = 155;
-  const tableTop = y - 5;
-  const tableBottom = y - 5 + (statsItems.length * 8) + 8;
-  doc.line(vLine1, tableTop, vLine1, tableBottom);
-  doc.line(vLine2, tableTop, vLine2, tableBottom);
+  doc.line(155, y - 5, 155, y - 5 + (parcelStats.length * 8) + 8);
 
   y += 8;
   doc.setFont("helvetica", "normal");
-  statsItems.forEach((row, idx) => {
-    doc.text(row.cat || '', 18, y);
-    doc.text(row.item, 75, y);
+  parcelStats.forEach((row, idx) => {
+    doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    if (idx < statsItems.length - 1) {
+    if (idx < parcelStats.length - 1) {
       doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
     }
     y += 8;
   });
-  y += 15;
+  y += 10;
 
-  // 2. Pending Approvals
-  if (pending && pending.length > 0) {
-    drawVerticalBarHeader(`${sectionNum++}. Pending Approvals`);
-    
+  // 1.2 Recent Parcels
+  if (parcels && parcels.length > 0) {
+    drawSubHeader("Recent Parcels (Latest Activity)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.text("NAME", 17, y); 
-    doc.text("ROOM", 72, y); 
-    doc.text("EMAIL", 97, y); 
-    doc.text("UPDATED AT", 157, y);
-
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (pending.length * 8) + 8);
-    doc.line(15, y + 3, 195, y + 3);
-
-    const penTableTop = y - 5;
-    const penTableBottom = penTableTop + (pending.length * 8) + 8;
-    doc.line(70, penTableTop, 70, penTableBottom);
-    doc.line(95, penTableTop, 95, penTableBottom);
-    doc.line(155, penTableTop, 155, penTableBottom);
-
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    pending.forEach((res, idx) => {
-      doc.text((res.fullName || '').substring(0, 25), 17, y);
-      doc.text((res.roomNumber || '-'), 72, y);
-      doc.text((res.email || '').substring(0, 30), 97, y);
-      doc.text(formatDateTime(res.updateAt), 157, y);
-      if (idx < pending.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
-      y += 8;
-    });
-    y += 15;
-  }
-
-  // 3. TOP RESIDENTS Table
-  if (topRes && topRes.length > 0) {
-    drawVerticalBarHeader(`${sectionNum++}. Top Residents (Active Activity)`);
-    
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("RANK", 17, y); 
-    doc.text("NAME", 37, y); 
-    doc.text("ROOM NO.", 102, y); 
-    doc.text("PARCELS", 162, y);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (topRes.length * 8) + 8);
-    doc.line(15, y + 3, 195, y + 3);
-
-    const topTableTop = y - 5;
-    const topTableBottom = topTableTop + (topRes.length * 8) + 8;
-    doc.line(33, topTableTop, 33, topTableBottom);
-    doc.line(100, topTableTop, 100, topTableBottom);
-    doc.line(160, topTableTop, 160, topTableBottom);
-
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    topRes.forEach((res, i) => {
-      doc.text((i + 1).toString(), 22, y, { align: 'center' });
-      doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
-      doc.text((res.roomNumber || res.room || '-'), 130, y, { align: 'right' });
-      doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
-      if (i < topRes.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
-      y += 8;
-    });
-    y += 15;
-  }
-
-  // 4. Recent Announcements
-  if (announcements && announcements.length > 0) {
-    drawVerticalBarHeader(`${sectionNum++}. Recent Announcements`);
-    
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("TITLE", 17, y); 
-    doc.text("TYPE", 112, y); 
-    doc.text("DATE", 162, y);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (announcements.length * 8) + 8);
-    doc.line(15, y + 3, 195, y + 3);
-
-    const annTableTop = y - 5;
-    const annTableBottom = annTableTop + (announcements.length * 8) + 8;
-    doc.line(110, annTableTop, 110, annTableBottom);
-    doc.line(160, annTableTop, 160, annTableBottom);
-
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    announcements.forEach((ann, idx) => {
-      doc.text((ann.title || '').substring(0, 50), 17, y);
-      doc.text((ann.type || ''), 112, y);
-      doc.text(formatDate(ann.createdAt || ann.date), 162, y);
-      if (idx < announcements.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
-      y += 8;
-    });
-    y += 15;
-  }
-
-  // 5. RECENT PARCELS Table
-  if (parcels && parcels.length > 0) {
-    drawVerticalBarHeader(`${sectionNum++}. Recent Parcels (Latest activity)`);
-    
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
     doc.text("DATE", 17, y); 
     doc.text("RESIDENT", 47, y); 
     doc.text("TRACKING NO.", 97, y); 
@@ -343,12 +227,9 @@ const handleExportPDF = () => {
     doc.setDrawColor(180, 180, 180);
     doc.rect(15, y - 5, 180, (parcels.length * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
-
-    const pTableTop = y - 5;
-    const pTableBottom = pTableTop + (parcels.length * 8) + 8;
-    doc.line(45, pTableTop, 45, pTableBottom);
-    doc.line(95, pTableTop, 95, pTableBottom);
-    doc.line(160, pTableTop, 160, pTableBottom);
+    doc.line(45, y - 5, 45, y - 5 + (parcels.length * 8) + 8);
+    doc.line(95, y - 5, 95, y - 5 + (parcels.length * 8) + 8);
+    doc.line(160, y - 5, 160, y - 5 + (parcels.length * 8) + 8);
 
     y += 8;
     doc.setFont("helvetica", "normal");
@@ -364,9 +245,150 @@ const handleExportPDF = () => {
       y += 8;
     });
   }
+  y += 15;
 
-  doc.save(`Dormitory_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+  // --- 2. RESIDENT MANAGEMENT OVERVIEW ---
+  drawMainCategoryHeader("2. RESIDENT MANAGEMENT OVERVIEW");
+  
+  // 2.1 Resident Statistics
+  drawSubHeader("Statistics Overview (Residents & Comms)");
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  
+  const residentStats = [
+    { item: 'Total Registered Residents', val: stats.totalResidents },
+    { item: 'Active / Verified', val: stats.activeResidents },
+    { item: 'Pending Approvals', val: stats.pendingResidents },
+    { item: 'Inactive Residents', val: stats.inactiveResidents },
+    { item: 'Total System Announcements', val: stats.totalAnnouncements }
+  ];
+
+  doc.setFillColor(245, 247, 250);
+  doc.rect(15, y - 5, 180, 8, 'F');
+  doc.setFont("helvetica", "bold");
+  doc.text("RESIDENT STATUS ITEM", 18, y); 
+  doc.text("COUNT / VALUE", 160, y);
+  
+  doc.setDrawColor(180, 180, 180);
+  doc.rect(15, y - 5, 180, (residentStats.length * 8) + 8);
+  doc.line(15, y + 3, 195, y + 3);
+  doc.line(155, y - 5, 155, y - 5 + (residentStats.length * 8) + 8);
+
+  y += 8;
+  doc.setFont("helvetica", "normal");
+  residentStats.forEach((row, idx) => {
+    doc.text(row.item, 18, y);
+    doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
+    if (idx < residentStats.length - 1) {
+      doc.setDrawColor(230, 230, 230);
+      doc.line(15, y + 2, 195, y + 2);
+    }
+    y += 8;
+  });
+  y += 10;
+
+  // 2.2 Pending Accounts
+  if (pending && pending.length > 0) {
+    drawSubHeader("Pending Accounts (Awaiting Verification)");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("NAME", 17, y); 
+    doc.text("ROOM", 72, y); 
+    doc.text("EMAIL", 97, y); 
+    doc.text("UPDATED AT", 157, y);
+
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (pending.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+    doc.line(70, y - 5, 70, y - 5 + (pending.length * 8) + 8);
+    doc.line(95, y - 5, 95, y - 5 + (pending.length * 8) + 8);
+    doc.line(155, y - 5, 155, y - 5 + (pending.length * 8) + 8);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    pending.forEach((res, idx) => {
+      doc.text((res.fullName || '').substring(0, 25), 17, y);
+      doc.text((res.roomNumber || '-'), 72, y);
+      doc.text((res.email || '').substring(0, 30), 97, y);
+      doc.text(formatDateTime(res.updateAt), 157, y);
+      if (idx < pending.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 10;
+  }
+
+  // 2.3 Resident Ranking
+  if (topRes && topRes.length > 0) {
+    drawSubHeader("Resident Ranking (Top Leaders by Volume)");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("RANK", 17, y); 
+    doc.text("NAME", 37, y); 
+    doc.text("ROOM NO.", 102, y); 
+    doc.text("PARCELS", 162, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (topRes.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+    doc.line(33, y - 5, 33, y - 5 + (topRes.length * 8) + 8);
+    doc.line(100, y - 5, 100, y - 5 + (topRes.length * 8) + 8);
+    doc.line(160, y - 5, 160, y - 5 + (topRes.length * 8) + 8);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    topRes.forEach((res, i) => {
+      doc.text((i + 1).toString(), 22, y, { align: 'center' });
+      doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
+      doc.text((res.roomNumber || res.room || '-'), 130, y, { align: 'right' });
+      doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
+      if (i < topRes.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 10;
+  }
+
+  // 2.4 Announcements
+  if (announcements && announcements.length > 0) {
+    drawSubHeader("Recent Announcements");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("TITLE", 17, y); 
+    doc.text("TYPE", 112, y); 
+    doc.text("DATE", 162, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (announcements.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+    doc.line(110, y - 5, 110, y - 5 + (announcements.length * 8) + 8);
+    doc.line(160, y - 5, 160, y - 5 + (announcements.length * 8) + 8);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    announcements.forEach((ann, idx) => {
+      doc.text((ann.title || '').substring(0, 50), 17, y);
+      doc.text((ann.type || ''), 112, y);
+      doc.text(formatDate(ann.createdAt || ann.date), 162, y);
+      if (idx < announcements.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+  }
+
+  doc.save(`Dormitory_Dashboard_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
+
 
 const handlePrintSummary = () => {
   window.print();
@@ -386,21 +408,21 @@ defineExpose({
       <p class="text-gray-600">Generated on: {{ new Date().toLocaleString() }}</p>
     </div>
 
-    <!-- Quick Stats Table -->
+    <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
     <div class="print-section">
-      <h2 class="print-section-title">Statistic Overview</h2>
+      <h2 class="print-main-header">1. Parcel Management Overview</h2>
+      
+      <h3 class="print-section-title">Statistics Overview (Parcels)</h3>
       <table class="print-table">
         <thead>
           <tr>
-            <th>Category</th>
             <th>Status Item</th>
             <th>Count / Value</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td rowspan="4" class="font-bold">Parcels</td>
-            <td>Total Received</td>
+            <td>Total Units (System)</td>
             <td>{{ stats.totalParcels }}</td>
           </tr>
           <tr>
@@ -412,38 +434,74 @@ defineExpose({
             <td>{{ stats.awaitingParcels }}</td>
           </tr>
           <tr>
-            <td>Overdue</td>
+            <td>Overdue Parcels</td>
             <td>{{ stats.overdueParcels }}</td>
           </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-section" v-if="parcels.length > 0">
+      <h3 class="print-section-title">Recent Parcels (Latest Activity)</h3>
+      <table class="print-table">
+        <thead>
           <tr>
-            <td rowspan="4" class="font-bold">Residents</td>
-            <td>Total Registered</td>
+            <th>Date</th>
+            <th>Resident</th>
+            <th>Tracking No.</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
+            <td>{{ formatDate(parcel.updatedAt) }}</td>
+            <td>{{ parcel.residentName }}</td>
+            <td>{{ parcel.trackingNumber }}</td>
+            <td>{{ parcel.status.toUpperCase() }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
+    <div class="print-section">
+      <h2 class="print-main-header">2. Resident Management Overview</h2>
+      
+      <h3 class="print-section-title">Statistics Overview (Residents & Comms)</h3>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Status Item</th>
+            <th>Count / Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total Registered Residents</td>
             <td>{{ stats.totalResidents }}</td>
           </tr>
           <tr>
-            <td>Active Residents</td>
+            <td>Active / Verified</td>
             <td>{{ stats.activeResidents }}</td>
           </tr>
           <tr>
-            <td>Pending Approval</td>
+            <td>Pending Approvals</td>
             <td>{{ stats.pendingResidents }}</td>
           </tr>
           <tr>
-            <td>Inactive</td>
+            <td>Inactive Residents</td>
             <td>{{ stats.inactiveResidents }}</td>
           </tr>
           <tr>
-            <td class="font-bold">Communications</td>
-            <td>Total Announcements</td>
+            <td>Total System Announcements</td>
             <td>{{ stats.totalAnnouncements }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pending Approvals Table -->
     <div class="print-section" v-if="pendingResidents.length > 0">
-      <h2 class="print-section-title">Pending Approvals</h2>
+      <h3 class="print-section-title">Pending Accounts (Awaiting Verification)</h3>
       <table class="print-table">
         <thead>
           <tr>
@@ -464,16 +522,15 @@ defineExpose({
       </table>
     </div>
 
-    <!-- Top Residents (Parcel counts) -->
     <div class="print-section" v-if="topResidents.length > 0">
-      <h2 class="print-section-title">Top Residents (Active Activity)</h2>
+      <h3 class="print-section-title">Resident Ranking (Top leaders by volume)</h3>
       <table class="print-table">
         <thead>
           <tr>
             <th>Rank</th>
             <th>Name</th>
-            <th>Room No.</th>
-            <th>Parcel Count</th>
+            <th>Room</th>
+            <th>Parcels</th>
           </tr>
         </thead>
         <tbody>
@@ -487,9 +544,8 @@ defineExpose({
       </table>
     </div>
 
-    <!-- Recent Announcements -->
     <div class="print-section" v-if="announcements.length > 0">
-      <h2 class="print-section-title">Recent Announcements</h2>
+      <h3 class="print-section-title">Recent Announcements</h3>
       <table class="print-table">
         <thead>
           <tr>
@@ -503,29 +559,6 @@ defineExpose({
             <td>{{ ann.title }}</td>
             <td>{{ ann.type }}</td>
             <td>{{ formatDate(ann.createdAt || ann.date) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Recent Parcels -->
-    <div class="print-section" v-if="parcels.length > 0">
-      <h2 class="print-section-title">Recent Parcels (Latest activity)</h2>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Resident</th>
-            <th>Tracking No.</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
-            <td>{{ formatDate(parcel.updatedAt) }}</td>
-            <td>{{ parcel.residentName }}</td>
-            <td>{{ parcel.trackingNumber }}</td>
-            <td>{{ parcel.status.toUpperCase() }}</td>
           </tr>
         </tbody>
       </table>
@@ -597,19 +630,31 @@ defineExpose({
   }
 
   .print-section {
-    margin-bottom: 3.5rem;
+    margin-bottom: 2.5rem;
     page-break-inside: avoid;
     width: 100% !important;
   }
 
+  .print-main-header {
+    display: block !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: white !important;
+    background-color: #1D355E !important;
+    padding: 10px 15px !important;
+    margin-bottom: 1.5rem !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+  }
+
   .print-section-title {
     display: block !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
     font-weight: 700 !important;
     color: #1D355E !important;
-    margin-bottom: 1.25rem !important;
-    border-left: 5px solid #1D355E !important;
-    padding-left: 1rem !important;
+    margin-bottom: 1rem !important;
+    border-left: 4px solid #1D355E !important;
+    padding-left: 0.75rem !important;
   }
 
   .print-section-title::before {
