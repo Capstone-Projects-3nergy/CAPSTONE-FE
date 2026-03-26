@@ -218,9 +218,27 @@ const residentStatusChartInstance = ref(null)
 const avgParcelReceived = ref(0)
 const avgResidentGrowth = ref(0)
 
-const chartRangeLabel = computed(() => {
-  const refDate = dashboardStore.referenceDate
-  const view = dashboardStore.currentView
+const parcelChartRangeLabel = computed(() => {
+  const refDate = dashboardStore.parcelRefDate
+  const view = dashboardStore.parcelView
+  
+  if (view === 'daily') {
+    return refDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  } else if (view === 'weekly') {
+    const start = new Date(refDate)
+    const day = start.getDay() || 7
+    start.setDate(start.getDate() - (day - 1))
+    const end = new Date(start)
+    end.setDate(end.getDate() + 6)
+    return `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
+  } else {
+    return refDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+  }
+})
+
+const residentChartRangeLabel = computed(() => {
+  const refDate = dashboardStore.residentRefDate
+  const view = dashboardStore.residentView
   
   if (view === 'daily') {
     return refDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -451,7 +469,7 @@ const updateParcelChart = () => {
   }
 
   // Update bar thickness based on interval
-  const interval = dashboardStore.currentView;
+  const interval = dashboardStore.parcelView;
   let thickness = interval === 'monthly' ? 12 : interval === 'daily' ? 32 : 28;
 
   parcelChartInstance.data.datasets.forEach(ds => {
@@ -600,8 +618,11 @@ watch([filterStartDate, filterEndDate], async () => {
   await fetchDashboardData()
 })
 
-watch([() => dashboardStore.currentView, () => dashboardStore.referenceDate], () => {
+watch([() => dashboardStore.parcelView, () => dashboardStore.parcelRefDate], () => {
   updateParcelChart()
+})
+
+watch([() => dashboardStore.residentView, () => dashboardStore.residentRefDate], () => {
   updateResidentChart()
 })
 
@@ -1388,20 +1409,20 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-4">
                       <div class="flex gap-6">
-                        <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
-                        <button @click="dashboardStore.setPanelView('weekly')" :class="dashboardStore.currentView === 'weekly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
-                        <button @click="dashboardStore.setPanelView('monthly')" :class="dashboardStore.currentView === 'monthly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
+                        <button @click="dashboardStore.setPanelView('daily', 'parcel')" :class="dashboardStore.parcelView === 'daily' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
+                        <button @click="dashboardStore.setPanelView('weekly', 'parcel')" :class="dashboardStore.parcelView === 'weekly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
+                        <button @click="dashboardStore.setPanelView('monthly', 'parcel')" :class="dashboardStore.parcelView === 'monthly' ? 'text-[#0E4B90] border-b-2 border-[#0E4B90]' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
                       </div>
                     </div>
                   </div>
 
                    <div class="flex items-center gap-6 self-end sm:self-auto">
                     <div class="flex items-center gap-2">
-                       <button @click="dashboardStore.previousPeriod" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
+                       <button @click="dashboardStore.previousPeriod('parcel')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                        </button>
-                       <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ chartRangeLabel }}</span>
-                       <button @click="dashboardStore.nextPeriod" :disabled="dashboardStore.isAtCurrentPeriod" :class="dashboardStore.isAtCurrentPeriod ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
+                       <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ parcelChartRangeLabel }}</span>
+                       <button @click="dashboardStore.nextPeriod('parcel')" :disabled="dashboardStore.isAtCurrentPeriod('parcel')" :class="dashboardStore.isAtCurrentPeriod('parcel') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                        </button>
                     </div>
@@ -1794,20 +1815,20 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <div class="flex flex-col gap-1">
                       <div class="flex items-center gap-4">
                         <div class="flex gap-6">
-                          <button @click="dashboardStore.setPanelView('daily')" :class="dashboardStore.currentView === 'daily' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
-                          <button @click="dashboardStore.setPanelView('weekly')" :class="dashboardStore.currentView === 'weekly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
-                          <button @click="dashboardStore.setPanelView('monthly')" :class="dashboardStore.currentView === 'monthly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
+                          <button @click="dashboardStore.setPanelView('daily', 'resident')" :class="dashboardStore.residentView === 'daily' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Daily</button>
+                          <button @click="dashboardStore.setPanelView('weekly', 'resident')" :class="dashboardStore.residentView === 'weekly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Weekly</button>
+                          <button @click="dashboardStore.setPanelView('monthly', 'resident')" :class="dashboardStore.residentView === 'monthly' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-400'" class="text-sm font-black pb-1 transition-all cursor-pointer">Monthly</button>
                         </div>
                       </div>
                     </div>
 
                     <div class="flex items-center gap-6 self-end sm:self-auto">
                       <div class="flex items-center gap-2">
-                         <button @click="dashboardStore.previousPeriod" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
+                         <button @click="dashboardStore.previousPeriod('resident')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                          </button>
-                         <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ chartRangeLabel }}</span>
-                         <button @click="dashboardStore.nextPeriod" :disabled="dashboardStore.isAtCurrentPeriod" :class="dashboardStore.isAtCurrentPeriod ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
+                         <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ residentChartRangeLabel }}</span>
+                         <button @click="dashboardStore.nextPeriod('resident')" :disabled="dashboardStore.isAtCurrentPeriod('resident')" :class="dashboardStore.isAtCurrentPeriod('resident') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                          </button>
                       </div>

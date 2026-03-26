@@ -34,7 +34,6 @@ const openDatePicker = () => {
 
 const formatDateTimeDisplay = (dateTimeStr) => {
   if (!dateTimeStr) return '';
-  // For datetime-local, the format is YYYY-MM-DDTHH:mm
   const parts = dateTimeStr.split('T');
   const datePart = parts[0];
   const timePart = parts[1] || '';
@@ -51,20 +50,15 @@ const router = useRouter()
 const route = useRoute()
 const error = ref(false)
 const isCategoryOpen = ref(false)
-
-// Form Data
 const title = ref('')
 const subtitle = ref('')
 const categoryId = ref(null)
 const content = ref('')
 const publishAt = ref('')
-
 const targetAudience = ref('ALL_RESIDENTS')
 const pinned = ref(false)
 const sendNotification = ref(true)
 const activeTab = ref('publish')
-
-// ให้นำออก เพราะดึงจาก backend แล้ว
 const categories = ref([])
 
 const fetchCategoriesFromAnnouncements = async () => {
@@ -78,9 +72,7 @@ const fetchCategoriesFromAnnouncements = async () => {
       const map = new Map()
       
       for (const item of data) {
-        // รองรับทั้ง id และ categoryId
         const id = item.categoryId || item.id
-        // รองรับชื่อฟิลด์ที่หลากหลาย
         const name = item.categoryName || item.name || item.category
         
         if (id && name && !map.has(id)) {
@@ -162,7 +154,6 @@ const formatText = (style) => {
 
   content.value = before + newText + after
   
-  // Set cursor position after formatting
   setTimeout(() => {
     textarea.focus()
     const newPos = start + newText.length
@@ -231,15 +222,6 @@ const MAX_SUBTITLE_LENGTH = 150
 
 const handleSubtitleInput = (event) => {
   let val = event.target.value
-  
-  // if (/[๐-๙]/.test(val)) {
-  //   subtitleThaiNumError.value = true
-  //   val = val.replace(/[๐-๙]/g, '')
-  //   setTimeout(() => {
-  //     subtitleThaiNumError.value = false
-  //   }, 10000)
-  // }
-
   if (val.length > MAX_SUBTITLE_LENGTH) {
     const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
     subtitle.value = sliced
@@ -283,7 +265,6 @@ const onFileChange = (e) => {
     return
   }
   
-  // Basic validation for image type
   if (!file.type.startsWith('image/')) {
     alert('Please upload an image file.')
     return
@@ -309,15 +290,12 @@ const toggleLightbox = () => {
   }
 }
 
-// Sidebar Logic
-
 const buttonSize = computed(() => {
   return 'md'
 })
 
 onMounted(async () => {
   window.addEventListener('resize', handleResize)
-  // ดึงหมวดหมู่จากประกาศที่มีอยู่จริงจาก /api/announcements
   await fetchCategoriesFromAnnouncements()
 })
 
@@ -326,7 +304,7 @@ onUnmounted(() => {
 })
 
 
-// Navigation
+
 const goBack = () => {
   router.back()
 }
@@ -364,9 +342,6 @@ const submitAnnouncement = async () => {
 
   try {
     isLoading.value = true
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       title: title.value,
       subtitle: subtitle.value,
@@ -385,16 +360,12 @@ const submitAnnouncement = async () => {
       body.coverImage = imageFile.value
     }
 
-    // -----------------------
-    // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
-    // -----------------------
     const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
     )
 
-    // ตรวจสอบว่าเป็น Object หรือไม่ (ถ้าเป็นตัวเลขคือ status code/error)
     if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false
       error.value = true
@@ -406,7 +377,6 @@ const submitAnnouncement = async () => {
 
     announcementManager.addAnnouncement(savedAnnouncement)
 
-    // Send Line notification and fetch updated data
     try {
       if (sendNotification.value) {
         await notificationManager.notifyAnnouncementCreated(body, router)
@@ -481,9 +451,6 @@ const saveDraft = async () => {
 
   try {
     isLoading.value = true
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       title: title.value,
       subtitle: subtitle.value,
@@ -495,16 +462,13 @@ const saveDraft = async () => {
       priority: 1,
       publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
       publishNow: false,
-      coverImageUrl: "" // Backend expects this field
+      coverImageUrl: "" 
     }
 
     if (imageFile.value) {
       body.coverImage = imageFile.value
     }
 
-    // -----------------------
-    // API call - Use addAnnouncementWithFile if there is an image, otherwise addAnnouncement
-    // -----------------------
     const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
@@ -540,7 +504,6 @@ const saveDraft = async () => {
 const handleCancel = () => {
   router.back()
 }
-// Sidebar Navigation (copied from ManageAnnouncement for consistency)
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
 }
@@ -755,11 +718,10 @@ const returnLoginPage = async () => {
         </aside>
       
 
-      <!-- Main Content -->
+
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
          <div class="max-w-4xl mx-auto space-y-6">
           
-          <!-- Header -->
           <div class="flex items-center gap-2 md:gap-4">
               <div class="flex items-center gap-2 md:gap-4">
                 <button @click="handleCancel" class="p-1.5 md:p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
@@ -809,11 +771,11 @@ const returnLoginPage = async () => {
 
           <LoadingPopUp v-if="isLoading" />
 
-          <!-- Form Card -->
+        
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
                 
-                <!-- Tabs Selector -->
+             
                 <div class="flex items-center gap-2 mb-8">
                     <div class="flex bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
                         <button 
@@ -843,7 +805,6 @@ const returnLoginPage = async () => {
                     </div>
                 </div>
                 
-                <!-- Title Input -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
                    <input 
@@ -868,7 +829,7 @@ const returnLoginPage = async () => {
                    </div>
                 </div>
 
-                <!-- Subtitle Input -->
+        
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Subtitle</label>
                    <input 
@@ -893,7 +854,7 @@ const returnLoginPage = async () => {
                    </div>
                 </div>
 
-                <!-- Category & Date Row -->
+              
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>

@@ -220,8 +220,6 @@ const loginHomePageWeb = async () => {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 10000)
     } else {
-      // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว (เก็บค่าไว้ที่ isEmailExists ตอนต้น)
-      // แปลว่า "มีใน Firebase แต่ล็อกอินเข้า Database ไม่ได้ หรือไม่มีข้อมูลใน Database"
       const isEmailExists = await authManager.checkEmailInFirebase(email.value.trim())
 
       if (isEmailExists) {

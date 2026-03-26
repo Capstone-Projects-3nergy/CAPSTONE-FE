@@ -2,9 +2,12 @@ import { reactive, computed, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
-  // Current state for navigation
-  const referenceDate = ref(new Date())
-  const currentView = ref('daily') // 'daily' | 'weekly' | 'monthly'
+  // Current state for navigation - Split for independent charts
+  const parcelRefDate = ref(new Date())
+  const parcelView = ref('daily') // 'daily' | 'weekly' | 'monthly'
+  
+  const residentRefDate = ref(new Date())
+  const residentView = ref('daily')
 
   const parcels = reactive([])
   const members = reactive([])
@@ -60,22 +63,24 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   })
 
   // Helper: Get start/end dates for the current view and reference date
-  const getPeriodBounds = () => {
-    const start = new Date(referenceDate.value)
-    const end = new Date(referenceDate.value)
+  const getPeriodBounds = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
+    const view = type === 'parcel' ? parcelView.value : residentView.value
     
-    if (currentView.value === 'daily') {
+    const start = new Date(refDate)
+    const end = new Date(refDate)
+    
+    if (view === 'daily') {
       start.setHours(0, 0, 0, 0)
       end.setHours(23, 59, 59, 999)
-    } else if (currentView.value === 'weekly') {
-      // Find Monday
+    } else if (view === 'weekly') {
       const day = start.getDay() || 7 // 1-7
       start.setDate(start.getDate() - (day - 1))
       start.setHours(0, 0, 0, 0)
       
       end.setDate(start.getDate() + 6)
       end.setHours(23, 59, 59, 999)
-    } else if (currentView.value === 'monthly') {
+    } else if (view === 'monthly') {
       start.setDate(1)
       start.setHours(0, 0, 0, 0)
       
@@ -150,19 +155,21 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       return (today - rDate) > threeDaysMs
     }).length
 
-    const { start, end } = getPeriodBounds()
+    // Separate bounds for parcel and resident
+    const parcelBounds = getPeriodBounds('parcel')
+    const residentBounds = getPeriodBounds('resident')
     
     // 2. Filter parcels for the current period for charts
     const parcelsInPeriod = parcels.filter(p => {
       const dStr = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
       const d = new Date(dStr)
-      return d >= start && d <= end
+      return d >= parcelBounds.start && d <= parcelBounds.end
     })
 
     const periodReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
     const periodPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
     
-    // Update period-specific stats
+    // Update period-specific stats (based on parcel view)
     stats.totalParcels = parcelsInPeriod.length
     stats.pickedUpParcels = periodPickedUp.length
     stats.awaitingParcels = periodReceived.length
@@ -177,9 +184,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       return pStatus.includes('OVERDUE') || (diffMin >= 1 && isArrived)
     }).length
 
-    // 3. Generate Chart Data
-    generateParcelChart(parcelsInPeriod, start, end)
-    generateResidentChart(members, start, end)
+    // 3. Generate Chart Data with separate bounds
+    generateParcelChart(parcelsInPeriod, parcelBounds.start, parcelBounds.end)
+    generateResidentChart(members, residentBounds.start, residentBounds.end)
     
     stats.totalResidents = members.length
     stats.activeResidents = members.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
@@ -193,7 +200,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     chartData.datasets[0].data = []
     chartData.datasets[1].data = []
 
-    if (currentView.value === 'daily') {
+    if (parcelView.value === 'daily') {
       // 24 Hours
       for (let i = 0; i < 24; i++) {
         chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
@@ -209,7 +216,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         chartData.datasets[0].data.push(received)
         chartData.datasets[1].data.push(pickedUp)
       }
-    } else if (currentView.value === 'weekly') {
+    } else if (parcelView.value === 'weekly') {
       // 7 Days (Mon-Sun)
       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       chartData.labels = days
@@ -227,7 +234,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         chartData.datasets[0].data.push(received)
         chartData.datasets[1].data.push(pickedUp)
       })
-    } else if (currentView.value === 'monthly') {
+    } else if (parcelView.value === 'monthly') {
       // 28-31 Days
       const daysInMonth = end.getDate()
       for (let i = 1; i <= daysInMonth; i++) {
@@ -248,19 +255,32 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   }
 
   const generateResidentChart = (data, start, end) => {
-    residentChartData.labels = chartData.labels
-    residentChartData.data = new Array(chartData.labels.length).fill(0)
+    const view = residentView.value
+    
+    // Create appropriate labels based on resident view
+    let labels = []
+    if (view === 'daily') {
+      for (let i = 0; i < 24; i++) labels.push(`${i.toString().padStart(2, '0')}:00`)
+    } else if (view === 'weekly') {
+      labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    } else if (view === 'monthly') {
+      const daysInMonth = end.getDate()
+      for (let i = 1; i <= daysInMonth; i++) labels.push(i.toString())
+    }
+
+    residentChartData.labels = labels
+    residentChartData.data = new Array(labels.length).fill(0)
     
     // Residents growth in period
     data.forEach(r => {
       const d = new Date(r.updateAt || r.createdAt)
       if (d >= start && d <= end) {
-        if (currentView.value === 'daily') {
+        if (view === 'daily') {
           residentChartData.data[d.getHours()]++
-        } else if (currentView.value === 'weekly') {
+        } else if (view === 'weekly') {
           const dIdx = (d.getDay() + 6) % 7
           if (dIdx >= 0 && dIdx < 7) residentChartData.data[dIdx]++
-        } else if (currentView.value === 'monthly') {
+        } else if (view === 'monthly') {
           const dIdx = d.getDate() - 1
           if (dIdx >= 0 && dIdx < residentChartData.data.length) residentChartData.data[dIdx]++
         }
@@ -277,38 +297,48 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     }
   }
 
-  const nextPeriod = () => {
-    const d = new Date(referenceDate.value)
-    if (currentView.value === 'daily') d.setDate(d.getDate() + 1)
-    else if (currentView.value === 'weekly') d.setDate(d.getDate() + 7)
-    else if (currentView.value === 'monthly') d.setMonth(d.getMonth() + 1)
+  const nextPeriod = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate : residentRefDate
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    const d = new Date(refDate.value)
+    if (view === 'daily') d.setDate(d.getDate() + 1)
+    else if (view === 'weekly') d.setDate(d.getDate() + 7)
+    else if (view === 'monthly') d.setMonth(d.getMonth() + 1)
     
     if (d <= new Date()) {
-      referenceDate.value = d
+      refDate.value = d
       calculateDashboardData()
     }
   }
 
-  const previousPeriod = () => {
-    const d = new Date(referenceDate.value)
-    if (currentView.value === 'daily') d.setDate(d.getDate() - 1)
-    else if (currentView.value === 'weekly') d.setDate(d.getDate() - 7)
-    else if (currentView.value === 'monthly') d.setMonth(d.getMonth() - 1)
-    referenceDate.value = d
+  const previousPeriod = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate : residentRefDate
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    const d = new Date(refDate.value)
+    if (view === 'daily') d.setDate(d.getDate() - 1)
+    else if (view === 'weekly') d.setDate(d.getDate() - 7)
+    else if (view === 'monthly') d.setMonth(d.getMonth() - 1)
+    
+    refDate.value = d
     calculateDashboardData()
   }
 
-  const setPanelView = (view) => {
-    currentView.value = view
+  const setPanelView = (view, type = 'parcel') => {
+    if (type === 'parcel') parcelView.value = view
+    else residentView.value = view
     calculateDashboardData()
   }
 
-  const isAtCurrentPeriod = computed(() => {
+  const isAtCurrentPeriod = (type = 'parcel') => {
     const today = new Date()
-    const ref = referenceDate.value
-    if (currentView.value === 'daily') {
+    const ref = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    if (view === 'daily') {
       return ref.toDateString() === today.toDateString()
-    } else if (currentView.value === 'weekly') {
+    } else if (view === 'weekly') {
       const getWeek = (date) => {
         const d = new Date(date)
         d.setHours(0,0,0,0)
@@ -317,11 +347,11 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         return Math.ceil((((d - yearStart) / 86400000) + 1)/7)
       }
       return getWeek(ref) === getWeek(today) && ref.getFullYear() === today.getFullYear()
-    } else if (currentView.value === 'monthly') {
+    } else if (view === 'monthly') {
       return ref.getMonth() === today.getMonth() && ref.getFullYear() === today.getFullYear()
     }
     return false
-  })
+  }
 
   return {
     parcels,
@@ -331,8 +361,12 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     residentChartData,
     stats,
     overallStats,
-    currentView,
-    referenceDate,
+    
+    parcelView,
+    parcelRefDate,
+    residentView,
+    residentRefDate,
+    
     isAtCurrentPeriod,
 
     setParcels,

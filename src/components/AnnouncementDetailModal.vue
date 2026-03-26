@@ -160,7 +160,6 @@ const formatDate = (dateString) => {
           </span>
         </div>
         
-        <!-- Text Content -->
         <h2 class="text-2xl sm:text-4xl font-extrabold text-[#0E4B90] mb-3 leading-tight tracking-tight">{{ title?.replace(/^Draft\s*-\s*/i, '') }}</h2>
         <p v-if="subtitle" class="text-lg font-bold text-gray-700 mb-6 leading-relaxed">{{ subtitle?.replace(/^Draft\s*-\s*/i, '') }}</p>
         
@@ -169,7 +168,6 @@ const formatDate = (dateString) => {
           <slot></slot>
         </div>
 
-        <!-- Image Below Content -->
         <div v-if="coverImage" class="mb-8 group relative cursor-zoom-in rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm transition-all hover:shadow-md" @click="toggleLightbox">
             <img 
               :src="coverImage"
@@ -186,7 +184,7 @@ const formatDate = (dateString) => {
         <div class="h-px bg-gray-100 w-full"></div>
       </div>
       
-      <!-- Footer -->
+
       <div class="p-4 sm:p-5 bg-gray-50 border-t border-gray-100 flex justify-end shrink-0">
         <ButtonWeb 
           label="Close" 
@@ -198,7 +196,7 @@ const formatDate = (dateString) => {
       </div>
     </div>
 
-    <!-- Lightbox Overlay -->
+
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
           <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">

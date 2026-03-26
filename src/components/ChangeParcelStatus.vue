@@ -190,18 +190,14 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
           </div>
 
           <div class="p-6 sm:p-8">
-            <!-- Visual Status Flow -->
             <div v-if="!isPickUp" class="mb-8 px-2 relative">
               <div class="flex items-center justify-between relative">
-                <!-- Background line -->
                 <div class="absolute top-[11px] left-0 w-full h-[3px] bg-slate-100 z-0"></div>
-                <!-- Progress line -->
                 <div 
                   class="absolute top-[11px] left-0 h-[3px] bg-blue-500 transition-all duration-700 z-0"
                   :style="{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }"
                 ></div>
                 
-                <!-- Steps Dots -->
                 <div v-for="(step, i) in steps" :key="step" class="relative z-10 flex flex-col items-center gap-2">
                   <div 
                     class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
@@ -223,7 +219,6 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
               </div>
             </div>
 
-            <!-- Locking Alert -->
             <div v-if="isPickUp" class="mb-8 p-4 bg-rose-50 rounded-2xl border border-rose-100 flex gap-3">
               <div class="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 15v2m0-8V7m0 11a1 1 0 100-2 1 1 0 000 2zm0-16a9 9 0 110 18 9 9 0 010-18z" /></svg>
@@ -244,7 +239,6 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
               />
             </div>
 
-            <!-- Actions -->
             <div class="flex flex-col sm:flex-row gap-3">
               <ButtonWeb
                 label="Cancel"

@@ -362,7 +362,6 @@ const currentStepIndex = computed(() => {
               </div>
             </div>
 
-            <!-- Locking Alert -->
             <div v-if="isLocked" class="mb-8 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3">
               <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -372,33 +371,6 @@ const currentStepIndex = computed(() => {
                 <p class="text-xs text-emerald-700 leading-relaxed mt-1">This resident is already approved. Modifications are restricted to pending registrations for data integrity.</p>
               </div>
             </div>
-<!-- 
-            <div class="mb-8" v-if="!isLocked">
-              <label class="block text-xs font-black text-slate-500 tracking-widest mb-3 ml-1">Update Status</label>
-              <SelectWeb
-                v-model="newStatus"
-                :options="statusOptions"
-                :disabled="isLocked"
-                placeholder="Choose Status..."
-              />
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3">
-              <ButtonWeb
-                :label="isLocked ? 'Close' : 'Cancel'"
-                color="gray"
-                class="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold transition-all hover:bg-slate-50 cursor-pointer"
-                @click="cancel"
-              />
-              <ButtonWeb
-                v-if="!isLocked"
-                label="Update Status"
-                color="blue"
-                class="flex-[1.5] py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                @click="saveStatusChange"
-                :disabled="isSaveDisabled"
-              />
-            </div> -->
           </div>
         </div>
       </div>

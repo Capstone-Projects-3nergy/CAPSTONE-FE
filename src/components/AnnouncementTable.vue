@@ -78,7 +78,6 @@ const formatDate = (dateString) => {
 
 <template>
   <div>
-    <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-16 px-4 text-center bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
         <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 text-gray-300">
@@ -94,16 +93,13 @@ const formatDate = (dateString) => {
       
       <template v-for="item in items" :key="item.id">
         <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col group relative">
-          <!-- Image display similar to Announcement.vue -->
           <div class="h-48 bg-gray-100 relative overflow-hidden">
-            <!-- Background Image -->
             <img 
               v-if="item.coverImageUrl || item.coverImage"
               :src="item.coverImageUrl || item.coverImage"
               alt="Announcement Cover"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <!-- Placeholder for Image -->
             <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
               <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -112,12 +108,9 @@ const formatDate = (dateString) => {
           </div>
 
         <div class="p-4 sm:p-5 flex-grow flex flex-col">
-          <!-- Card Header (Pinned, Category, and Status Badges) -->
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-2 w-full flex-wrap">
-              <!-- Left Side Badges -->
               <div class="flex items-center gap-2 flex-wrap">
-                <!-- Pinned Badge -->
                 <span v-if="item.pinned" class="px-2.5 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-lg bg-red-100 text-red-600 shadow-sm" title="Pinned">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
@@ -125,13 +118,11 @@ const formatDate = (dateString) => {
                   Pinned
                 </span>
 
-                <!-- Category Badge -->
                 <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-xs font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
                   <span v-html="getCategoryIcon(item.category)"></span>
                   {{ formatCategory(item.category) }}
                 </span>
 
-                <!-- Status Pill -->
                 <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-bold rounded-lg" :class="getStatusBadgeClass(item.status)">
                   {{ formatStatus(item.status) }}
                 </span>
@@ -139,7 +130,6 @@ const formatDate = (dateString) => {
             </div>
           </div>
           
-          <!-- Card Body -->
           <h3 class="font-bold text-[#0E4B90] text-base mb-2 break-words whitespace-normal leading-tight transition-colors">
             {{ item.title ? item.title.replace(/^Draft\s*-\s*/i, '') : '' }}
           </h3> 
@@ -152,12 +142,9 @@ const formatDate = (dateString) => {
             </p>
           </div>
 
-          <!-- Divider -->
+        
           <div class="h-px bg-gray-100 w-full mb-4"></div>
-          
-          <!-- Card Footer -->
           <div class="flex items-center justify-between gap-0.5 sm:gap-1 mt-auto min-w-0">
-            <!-- Left Side: Metadata consolidated into single line -->
             <div class="flex flex-row items-center gap-1 text-gray-400 text-[8px] font-bold min-w-0 flex-1 overflow-hidden">
                 <div class="flex items-center gap-0.5 flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -177,7 +164,6 @@ const formatDate = (dateString) => {
                   <span>{{ item.viewCount || item.views || 0 }}</span>
                 </div>
             </div>
-            <!-- Right Side: Action Buttons -->
             <div class="flex items-center gap-0.5 flex-shrink-0">
               <button @click="$emit('pin', item)" 
                 :class="[
@@ -235,7 +221,6 @@ const formatDate = (dateString) => {
     </template>
     </div>
 
-    <!-- List View -->
     <div v-else class="md:bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 w-full overflow-visible shrink-table-wrapper">
       <div class="w-full overflow-visible">
         <table class="w-full divide-y divide-gray-200">
@@ -285,9 +270,6 @@ const formatDate = (dateString) => {
               <tr class="md:table-row flex flex-col md:flex-row bg-gray-50 md:bg-white rounded-xl md:rounded-none mb-4 md:mb-0 p-4 md:p-0 shadow md:shadow-none hover:bg-gray-50/50 transition-colors duration-150 relative">
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none md:align-middle">
                   <div class="flex items-center gap-4">
-                    <!-- <div class="hidden md:flex h-10 w-10 flex-shrink-0 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center font-bold text-sm">
-                      SP
-                    </div> -->
                     <div class="flex-grow">
                        <div class="flex items-start gap-2 mb-2">
                         <span class="md:hidden font-semibold text-[#0E4B90]  text-xs shrink-0">Title:</span>
@@ -323,7 +305,6 @@ const formatDate = (dateString) => {
                   </span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
-                  <!-- Action row for mobile replaces Views row -->
                   <div class="md:hidden flex items-center justify-start gap-2 w-full">
                     <span class="font-semibold text-[#0E4B90] text-xs">Action:</span>
                     <div class="flex items-center gap-1">
@@ -346,13 +327,11 @@ const formatDate = (dateString) => {
                       </button>
                     </div>
                   </div>
-                  <!-- Desktop Views (Hidden on Mobile) -->
                   <div class="hidden md:block md:text-center text-sm text-gray-500 font-medium">
                     {{ item.viewCount || item.views || 0 }}
                   </div>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 whitespace-nowrap align-middle bg-[#F8FAFC] md:bg-transparent">
-                  <!-- Metadata row for mobile at the bottom -->
                   <div class="md:hidden flex items-center gap-4 text-gray-400 text-[10px] font-bold">
                     <div class="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -373,7 +352,6 @@ const formatDate = (dateString) => {
                     </div>
                   </div>
 
-                  <!-- Desktop Actions (Hidden on Mobile as they moved up) -->
                   <div class="hidden md:flex items-center justify-center gap-1.5">
                      <button @click="$emit('pin', item)" 
                         :class="[
@@ -432,7 +410,6 @@ const formatDate = (dateString) => {
       </div>
     </div>
     
-    <!-- Pagination -->
     <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
         <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
             <button 
@@ -440,9 +417,7 @@ const formatDate = (dateString) => {
               :disabled="page === 1"
               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500"
             >Previous</button>
-            
-            <!-- Page Numbers -->
-            <!-- Page Numbers -->
+
             <template v-for="(p, index) in pages" :key="index">
               <button
                 v-if="p !== '...'"
@@ -495,7 +470,7 @@ const formatDate = (dateString) => {
   }
 }
 
-/* Tooltip overrides */
+
 .shrink-table-wrapper table td .pointer-events-none > div.bg-gray-400 {
   white-space: nowrap !important;
   word-break: normal !important;

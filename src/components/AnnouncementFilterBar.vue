@@ -69,11 +69,8 @@ const formatDateDisplay = (dateStr) => {
 
 <template>
   <div class="bg-white p-3 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col xl:flex-row gap-4 justify-between items-center transition-all duration-300">
-    <!-- Top Row: Date Picker + View Toggles (Mobile context) -->
     <div class="flex items-center gap-3 w-full xl:w-auto">
-      <!-- Date Picker (Visible in Top Row on Mobile context) -->
       <div class="relative flex items-center group">
-        <!-- Icon Overlay -->
         <div 
           class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
           @click="openDatePicker"
@@ -88,7 +85,6 @@ const formatDateDisplay = (dateStr) => {
           </div>
         </div>
         
-        <!-- Display Input (Text) with English Placeholder -->
         <input
           type="text"
           readonly
@@ -97,7 +93,6 @@ const formatDateDisplay = (dateStr) => {
           @click="openDatePicker"
           class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap cursor-pointer relative z-0 w-[165px] sm:w-[190px]"
         />
-        <!-- Hidden Native Date Input for Picker functionality -->
         <input
           ref="dateInput"
           type="date"
@@ -107,7 +102,6 @@ const formatDateDisplay = (dateStr) => {
         />
       </div>
 
-      <!-- View Toggles (Visible on Mobile/Tablet, Hidden on XL) -->
       <div v-if="showViewToggles" class="xl:hidden flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-fit flex-shrink-0 ml-auto">
         <button 
           @click="$emit('update:viewMode', 'grid')"
@@ -128,7 +122,6 @@ const formatDateDisplay = (dateStr) => {
 
     <div class="flex flex-row items-center justify-between gap-3 sm:gap-4 w-full xl:w-auto mt-1 sm:mt-0">
       <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 overflow-x-auto hide-scrollbar">
-        <!-- Search Input (Moved from top to bottom row for Mobile) -->
         <div class="relative flex-1 xl:w-[400px]">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-20">
             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -177,10 +170,7 @@ const formatDateDisplay = (dateStr) => {
 </ButtonWeb>
       </div>
 
-      <!-- Divider (Deskstop only) -->
       <div v-if="showViewToggles" class="hidden xl:block w-px h-8 bg-gray-200 mx-1"></div>
-
-      <!-- View Toggles (Visible on XL only) -->
       <div v-if="showViewToggles" class="hidden xl:flex bg-[#F8FAFC] border border-gray-100 rounded-xl p-1 shadow-inner w-fit flex-shrink-0">
         <button 
           @click="$emit('update:viewMode', 'grid')"

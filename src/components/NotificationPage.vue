@@ -16,15 +16,9 @@ import LineNotificationManager from '@/stores/LineNotificationManager'
 import { useSidebarManager } from '@/stores/SidebarManager.js'
 const loginManager = useAuthManager()
 
-
-// await LineNotificationManager.sendToGroup(
-//   'GROUP_ID',
-//   'มีพัสดุมาถึงแล้ว 📦'
-// )
-// notification state
 const notification = ref({
   show: false,
-  type: 'success', // success | error
+  type: 'success',
   title: '',
   message: ''
 })
