@@ -5,14 +5,11 @@ import { storeToRefs } from 'pinia'
 import { useSidebarManager } from '@/stores/SidebarManager'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
@@ -71,15 +68,12 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const parcelsResidentDetail = ref(null)
 const MemberDetail = ref(null)
 const showDeleteMember = ref(false)
-const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const showAddParcels = ref(false)
 const showParcelDetailModal = ref(false)
@@ -288,13 +282,6 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
@@ -309,6 +296,8 @@ const totalPages = computed(() => {
   }
   return 0
 })
+const canGoNext = computed(() => currentPage.value < totalPages.value)
+const canGoNextStaff = computed(() => currentPage.value < totalPages.value)
 
 const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
@@ -1268,21 +1257,12 @@ const showResidentDetail = async function (id) {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
   <teleport to="body" v-if="showDeleteMember">
     <DeleteMemberStaff
       @cancelDetail="clearDeleteMemPopUp"

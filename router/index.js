@@ -1,12 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePageResident from '@/components/HomePageResident.vue'
 import ParcelScannerPage from '@/components/ParcelScannerPage.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from '@/components/LoginPage.vue'
 import RegisterPage from '@/components/RegisterPage.vue'
 import Announcement from '@/components/Announcement.vue'
-import DashBoard from '@/components/DashBoard.vue'
 import HomePageStaff from '@/components/HomePageStaff.vue'
 import ManageResident from '@/components/ManageResident.vue'
 import ManageAnnouncement from '@/components/ManageAnnouncement.vue'
@@ -103,11 +101,6 @@ const routes = [
     component: NotificationPage
   },
   {
-    path: '/homepage/resident/:id/parcelspage',
-    name: 'residentparcels',
-    component: ResidentParcelsPage
-  },
-  {
     path: '/homepage/resident/:id/parcelspage/:tid/detailparcel',
     name: 'residentparcelsDetail',
     component: ParcelResidentDetail
@@ -144,11 +137,6 @@ const routes = [
     path: '/homepage/staff/:id',
     name: 'homestaff',
     component: HomePageStaff
-  },
-  {
-    path: '/homepage/staff/:id/dashboardpage',
-    name: 'dashboard',
-    component: DashBoard
   },
   {
     path: '/homepage/staff/:id/manageresident',

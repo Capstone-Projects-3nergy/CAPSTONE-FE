@@ -559,9 +559,6 @@ const showParcelTrashPage = async function () {
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff', params: { id: route.params.id } })
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
-}
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }

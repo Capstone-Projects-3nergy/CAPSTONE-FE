@@ -15,7 +15,6 @@ import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements, editAnnouncement } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 
 const dateInput = ref(null)
@@ -92,7 +91,6 @@ const route = useRoute()
 
 // State
 const isCategoryOpen = ref(false)
-const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
 const isLoading = ref(false)
 const editSuccess = ref(false)
@@ -778,12 +776,6 @@ const handleSave = async () => {
   }
 }
 
-const returnLoginPage = () => {
-  showLogoutConfirm.value = true
-}
-const handleCancelLogout = () => {
-  showLogoutConfirm.value = false
-}
 const handleCancel = () => {
   router.back()
 }
@@ -811,9 +803,13 @@ const showParcelTrashPage = async function () {
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff', params: { id: route.params.id } })
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
+
+const returnLoginPage = async () => {
+  try {
+    await loginManager.logoutAccount(router)
+  } catch (err) {}
 }
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }
@@ -1321,11 +1317,6 @@ const showProfileStaffPage = async function () {
         </div>
       </main>
     </div>
-
-    <ConfirmLogout
-      v-if="showLogoutConfirm"
-      @cancelLogout="handleCancelLogout"
-    />
 
     <LoadingPopUp v-if="isLoading" />
 

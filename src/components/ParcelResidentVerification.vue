@@ -4,10 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
@@ -17,7 +15,6 @@ import { useParcelManager } from '@/stores/ParcelsManager.js'
 import { useParcelVerificationManager } from '@/stores/ParcelVerificationManager.js'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import { useSidebarManager } from '@/stores/SidebarManager.js'
 import {
@@ -54,10 +51,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const isNotFound = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
 // Removed local isCollapsed
@@ -66,7 +61,6 @@ const parcel = ref(null)
 const confirmSuccess = ref(false)
 const error = ref(false)
 const errorMessage = ref('')
-const showLogoutConfirm = ref(false)
 const companyList = ref([])
 const isResidentNameWrong = ref(false)
 const trackingNumberError = ref(false)
@@ -142,12 +136,7 @@ const mapParcelData = (data) => ({
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
 }
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
+
 
 const showVerifyParcelPage = async () => {
   // Stay on current page or navigate if needed
@@ -495,10 +484,7 @@ const openRedPopup = () => {
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
-const showManageParcelPage = async () => {
-  router.replace({ name: 'residentparcels' })
-  showResidentParcels.value = true
-}
+
 const ShowManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
@@ -517,13 +503,7 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async () => {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
@@ -1017,19 +997,10 @@ const handleTrackingInput = (event, index) => {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

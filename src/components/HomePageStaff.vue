@@ -7,12 +7,9 @@ import LoginPage from './LoginPage.vue'
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import AlertPopUp from './../components/AlertPopUp.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
@@ -201,10 +198,8 @@ const showHomePageStaff = ref(false)
 const returnLogin = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showLogoutConfirm = ref(false)
 
@@ -853,9 +848,6 @@ const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
-}
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
 }
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
@@ -2069,18 +2061,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
 
 <style scoped>

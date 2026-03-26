@@ -9,7 +9,6 @@ import { useSidebarManager } from '@/stores/SidebarManager.js'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import {
@@ -26,7 +25,6 @@ import ResidentAnnouncementTable from './ResidentAnnouncementTable.vue'
 const loginManager = useAuthManager()
 const announcementManager = useAnnouncementManager()
 const { announcements } = storeToRefs(announcementManager)
-const showLogoutConfirm = ref(false)
 const router = useRouter()
 const route = useRoute()
 const showHomePageResident = ref(false)
@@ -306,18 +304,11 @@ const closeModal = () => {
   }, 300)
 }
 
-const showResidentParcels = ref(false)
 const returnLogin = ref(false)
 const showProfileResident = ref(false)
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
-}
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
 }
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
@@ -329,9 +320,6 @@ const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
-}
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
 }
 const showProfileResidentPage = async function () {
   router.replace({
@@ -754,10 +742,6 @@ onMounted(async () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
-
   <AnnouncementDetailModal 
     :is-open="isModalOpen"
     :title="selectedAnnouncement?.title || ''"

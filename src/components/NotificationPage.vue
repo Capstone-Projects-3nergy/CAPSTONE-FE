@@ -6,7 +6,6 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
@@ -75,11 +74,9 @@ const router = useRouter()
 const editSuccess = ref(false)
 const error = ref(false)
 const showHomePageResident = ref(false)
-const showLogoutConfirm = ref(false)
 const showHomePageStaff = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const profileManager = useProfileManager()
@@ -121,12 +118,6 @@ const updateProfile = async (payload) => {
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
-}
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
 }
 const goBackProfilePage = async function () {
   if (loginManager.user.role === 'RESIDENT') {
@@ -178,20 +169,7 @@ const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-// Remove old checkScreen and resize listener logic
-// const menuClass = (tab) => {
-//   return [
-//     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
-//     activeTab.value === tab
-//       ? 'bg-[#D9D9D9] text-[#60a5fa]'
-//       : 'text-gray-500 hover:bg-gray-100'
-//   ]
-// }
 
-// แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
   if (!value || value.trim() === '') return 'ERROR'
   return value.toUpperCase()
@@ -913,7 +891,4 @@ const goToPage = (page) => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

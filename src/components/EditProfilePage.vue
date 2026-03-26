@@ -7,7 +7,6 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -25,11 +24,9 @@ const dormList = ref([])
 const editSuccess = ref(false)
 const error = ref(false)
 const showHomePageResident = ref(false)
-const showLogoutConfirm = ref(false)
 const showHomePageStaff = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const profileManager = useProfileManager()
@@ -93,12 +90,7 @@ const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
+
 const showProfileResidentPage = async function () {
   router.replace({
     name: 'profileresident'
@@ -207,9 +199,7 @@ const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
+
 onUnmounted(() => {
   // Removed resize listener to allow global state persistence
 })
@@ -852,7 +842,4 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

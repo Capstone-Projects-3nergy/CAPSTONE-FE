@@ -10,19 +10,15 @@ import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import SidebarItem from './SidebarItem.vue'
-import DashBoard from './DashBoard.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import { useNotificationManager } from '@/stores/NotificationManager'
 import { getItems, addItem } from '@/utils/fetchUtils'
 import WebHeader from './WebHeader.vue'
 const addSuccess = ref(false)
-const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
@@ -77,10 +73,8 @@ const scanResult = ref('')
 const previewUrl = ref(null)
 const showStaffParcels = ref(false)
 const showParcelScanner = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
 

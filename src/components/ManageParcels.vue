@@ -8,10 +8,8 @@ import { storeToRefs } from 'pinia'
 const sidebarManager = useSidebarManager()
 const { isCollapsed } = storeToRefs(sidebarManager)
 const { toggleSidebar } = sidebarManager
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -65,13 +63,11 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const notificationManager = useNotificationManager()
 const emit = defineEmits(['add-success'])
-const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -79,10 +75,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -369,13 +363,7 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
@@ -909,9 +897,6 @@ const handleSortUpdate = (val) => {
       :isPermanent="false"
     />
   </teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
   <Teleport to="body">
     <ChangeParcelStatus
       v-bind="{ parcelDataStatus }"

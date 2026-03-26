@@ -6,7 +6,6 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
@@ -31,9 +30,7 @@ const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
 const currentSlide = ref(1)
-const showResidentParcels = ref(false)
 const returnLogin = ref(false)
-const showLogoutConfirm = ref(false)
 const resident = ref({
   name: 'Somchai Suksan',
   email: 'somchai.suksan@example.com',
@@ -126,12 +123,6 @@ const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
 const firstName = computed(() => {
   return loginManager.user?.fullName?.split(' ')[0] || ''
 })
@@ -147,9 +138,6 @@ const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
-}
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
 }
 
 const closePopUp = () => {
@@ -425,7 +413,4 @@ const closePopUps = (operate) => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

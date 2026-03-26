@@ -11,12 +11,9 @@ import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import SidebarItem from './SidebarItem.vue'
-import DashBoard from './DashBoard.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationManager = useNotificationManager()
 import { useParcelManager } from '@/stores/ParcelsManager'
@@ -44,7 +41,6 @@ import {
 } from '@/utils/fetchUtils'
 
 const addSuccess = ref(false)
-const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
@@ -104,10 +100,8 @@ const scanResult = ref('')
 const previewUrl = ref(null)
 const showStaffParcels = ref(false)
 const showParcelScanner = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
@@ -450,11 +444,6 @@ function deleteSaveInformation(index) {
   savedParcels.value.splice(index, 1)
 }
 const deletePreview = () => (previewUrl.value = null)
-
-const showDashBoardPage = async () => {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
 
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -1003,9 +992,6 @@ const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
   } catch (err) {}
-}
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
 }
 
 const showProfileStaffPage = async () => {
@@ -1877,21 +1863,12 @@ onMounted(async () => {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
 
 <style scoped>

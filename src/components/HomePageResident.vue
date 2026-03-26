@@ -5,13 +5,10 @@ import SidebarItem from './SidebarItem.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ButtonWeb from './ButtonWeb.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
@@ -93,10 +90,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -108,7 +103,6 @@ const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelsResidentDetail = ref(null)
 const route = useRoute()
-const showLogoutConfirm = ref(false)
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
 
@@ -383,13 +377,7 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
@@ -561,13 +549,6 @@ function prevSlide() {
 
 function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
-}
-
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
 }
 
 const latestAnnouncements = computed(() => {
@@ -1259,21 +1240,12 @@ function formatDateTime(datetimeStr) {
   <Teleport to="body" v-if="showParcelScanner">
     <ParcelScannerPage> </ParcelScannerPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
 
 <style scoped>
