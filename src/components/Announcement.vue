@@ -41,22 +41,14 @@ watch(
   }
 )
 
-const bannerContainer = ref(null)
+
 const bannerAnnouncements = computed(() => {
   return allPublishedAnnouncements.value
     .filter(item => item.pinned)
-    .slice(0, 8)
+    .slice(0, 3)
 })
 
-const scrollBanner = (direction) => {
-  if (bannerContainer.value) {
-    const scrollAmount = 300
-    bannerContainer.value.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth'
-    })
-  }
-}
+
 
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
@@ -554,32 +546,15 @@ onMounted(async () => {
               </div>
 
               <div v-if="bannerAnnouncements.length > 0" class="relative group/banner">
-                <button 
-                  @click="scrollBanner('left')" 
-                  class="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
 
-                <button 
-                  @click="scrollBanner('right')" 
-                  class="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-white/90 backdrop-blur-xl rounded-full text-blue-600 shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100 border border-white/50"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
 
               <div 
-                ref="bannerContainer"
-                class="relative z-10 flex gap-4 sm:gap-5 overflow-x-auto pb-6 custom-scrollbar-hide snap-x snap-mandatory px-5 sm:px-2"
+                class="relative z-10 flex sm:grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-x-visible pb-6 sm:pb-0 custom-scrollbar-hide snap-x sm:snap-none px-5 sm:px-0"
               >
                 <div 
                   v-for="(item, index) in bannerAnnouncements" 
                   :key="index"
-                  class="flex-shrink-0 w-[260px] sm:w-[280px] snap-start group cursor-pointer"
+                  class="flex-shrink-0 w-[260px] sm:w-full snap-start group cursor-pointer"
                   @click="openModal(item)"
                 >
                   <div class="bg-white rounded-2xl overflow-hidden shadow-lg sm:shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[320px] sm:h-[340px] flex flex-col relative">
