@@ -1165,14 +1165,6 @@ const closePopUp = (operate) => {
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
                 />
-                <!-- <ButtonWeb
-                  label="OCR Scan"
-                  color="blue"
-                  size="sm"
-                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
-                  @click="startCamera"
-                  :disabled="scanningMode || videoStream || isOcrLoading"
-                /> -->
                 <ButtonWeb
                   label="Reset"
                   color="red"
