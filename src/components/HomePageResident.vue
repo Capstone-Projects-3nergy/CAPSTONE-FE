@@ -149,7 +149,7 @@ const fetchParcels = async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     parcelManager.setParcels(mapped)
   }

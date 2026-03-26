@@ -203,7 +203,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -226,7 +226,7 @@ onMounted(async () => {
     }))
 
     // เรียงตาม update ล่าสุด
-    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     // 🔹 แยก role
     const residentList = mapped.filter((u) => u.role === 'RESIDENT')

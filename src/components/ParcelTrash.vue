@@ -199,7 +199,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
+    mapped.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt))
     parcelManager.setTrash(mapped)
   }
   try {
