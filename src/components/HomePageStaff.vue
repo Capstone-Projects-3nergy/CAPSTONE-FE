@@ -217,6 +217,8 @@ const statusChartInstance = ref(null)
 const residentStatusChartInstance = ref(null)
 const avgParcelReceived = ref(0)
 const avgResidentGrowth = ref(0)
+const activityInterval = computed(() => dashboardStore.parcelView)
+const residentYear = computed(() => dashboardStore.residentRefDate.getFullYear())
 
 const parcelChartRangeLabel = computed(() => {
   const refDate = dashboardStore.parcelRefDate
