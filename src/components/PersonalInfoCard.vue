@@ -697,6 +697,7 @@ const confirmUnlinkAction = async () => {
           </button>
           
           <button
+            v-if="loginManager.user.role !== 'STAFF'"
             @click="activeTab = 'line'"
             :class="menuClass('line')"
             class="relative w-full cursor-pointer"
