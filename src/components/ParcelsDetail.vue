@@ -73,7 +73,7 @@ const activeTab = ref('info')
 
 // Notification states
 const showNotifyPopup = ref(false)
-const lineAlertStyle = ref('blue')
+const lineAlertStyle = ref('green')
 const isSending = ref(false)
 const notifySuccess = ref(false)
 const notifyError = ref(false)
@@ -137,7 +137,7 @@ const sendNotify = async () => {
 
       notifySuccess.value = true
       lineAlertVisible.value = true
-      lineAlertStyle.value = 'blue'
+      lineAlertStyle.value = 'green'
       lineAlertMessage.value = 'Success!!'
       lineAlertTitle.value = 'Notification has been sent successfully.'
     } else {

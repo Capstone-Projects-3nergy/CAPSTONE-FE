@@ -32,7 +32,7 @@ const showLineSuccessPopup = ref(false)
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
-const lineAlertStyle = ref('blue')
+const lineAlertStyle = ref('green')
 const showUnlinkSuccessPopup = ref(false)
 const showUnlinkConfirm = ref(false)
 const loadingEmail = ref(false)
@@ -538,8 +538,8 @@ const handleSendEmailNotification = async () => {
       lastEmailSentTime.value = now
 
       lineAlertVisible.value = true
-      lineAlertStyle.value = 'blue'
-      lineAlertMessage.value = 'Email Sent'
+      lineAlertStyle.value = 'green'
+      lineAlertMessage.value = 'Success!!'
       lineAlertTitle.value = 'The verification email has been sent to the resident.'
       
       setTimeout(() => {
@@ -863,16 +863,6 @@ const confirmUnlinkAction = async () => {
               <p class="truncate">{{ display(phoneNumber) }}</p>
             </div>
           </div>
-          <!-- <div class="flex items-center gap-2 mt-2">
-            <label class="text-sm font-bold text-gray-500"> Status: </label>
-
-            <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
-              :class="statusClass(safeStatus)"
-            >
-              {{ displayStatus(safeStatus) }}
-            </span>
-          </div> -->
         </div>
       </div>
       <div
@@ -885,22 +875,6 @@ const confirmUnlinkAction = async () => {
             Line Account
           </h3>
           <div class="relative group ml-auto">
-            <!-- <div 
-              class="p-2 cursor-pointer text-[#8C8F91] hover:text-[#00b900] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center rounded-full hover:bg-green-50"
-              @click="$emit('edit')"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentcolor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                />
-              </svg>
-            </div> -->
           </div>
         </div>
 
@@ -1359,16 +1333,6 @@ const confirmUnlinkAction = async () => {
                   </div>
                 </div>
               </div>
-
-              <!-- <div class="flex flex-col sm:flex-row items-start gap-4 p-5 sm:p-6 bg-blue-50/40 rounded-2xl border border-blue-100/30 text-left">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                </div>
-                <div class="space-y-1.5 pt-0.5">
-                  <h5 class="text-base font-black text-blue-900">About Status Management</h5>
-                  <p class="text-sm text-blue-700/70 leading-relaxed font-medium">Account status determines access privileges for the resident. <span class="font-bold text-blue-800">Pending</span> accounts require approval before they can access the full system features.</p>
-                </div>
-              </div> -->
             </div>
           </div>
         </div>
