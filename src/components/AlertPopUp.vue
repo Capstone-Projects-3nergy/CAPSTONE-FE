@@ -108,6 +108,7 @@ const config = computed(() => {
 }
 
 .itbkk-message {
-  word-break: break-all;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 </style>
