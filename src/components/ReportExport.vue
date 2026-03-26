@@ -37,13 +37,25 @@ const formatDateTime = (dateStr) => {
   const d = new Date(dateStr)
   return isNaN(d.getTime()) ? '-' : d.toLocaleString()
 }
+// Compute overdue parcels based on dashboard logic (> 3 days)
+const overdueParcels = computed(() => {
+  if (!props.parcels) return []
+  const now = new Date()
+  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+  return props.parcels.filter(p => {
+    if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
+    const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
+    if (isNaN(date.getTime())) return false
+    return (now - date) > threeDaysMs
+  }).sort((a, b) => new Date(b.receiveAt || b.createdAt) - new Date(a.receiveAt || a.createdAt))
+})
 
 const handleExportExcel = () => {
   const stats = props.stats;
   const pending = props.pendingResidents;
   const topRes = props.topResidents;
-  const announcements = props.announcements.slice(0, 5);
-  const parcels = props.parcels.slice(0, 10);
+  const recentParcels = props.parcels.slice(0, 10);
+  const overdueList = overdueParcels.value;
 
   // 1. MAIN FILE HEADER
   const finalData = [
@@ -59,15 +71,24 @@ const handleExportExcel = () => {
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
   finalData.push(['Parcels', 'Total Units (System)', stats.totalParcels]);
   finalData.push(['', 'Picked Up', stats.pickedUpParcels]);
-  finalData.push(['', 'Awaiting Pickup', stats.awaitingParcels]);
+  finalData.push(['', 'Received / Awaiting', stats.awaitingParcels]);
   finalData.push(['', 'Overdue Parcels', stats.overdueParcels]);
   finalData.push([]);
 
-  if (parcels && parcels.length > 0) {
+  if (recentParcels.length > 0) {
     finalData.push(['RECENT PARCELS (Latest Activity)']);
     finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
-    parcels.forEach(p => {
+    recentParcels.forEach(p => {
       finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+    });
+    finalData.push([]);
+  }
+
+  if (overdueList.length > 0) {
+    finalData.push(['OVERDUE PARCELS (> 3 Days)']);
+    finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
+    overdueList.forEach(p => {
+      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
     });
     finalData.push([]);
   }
@@ -77,8 +98,8 @@ const handleExportExcel = () => {
   finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
   finalData.push(['Residents', 'Total Registered', stats.totalResidents]);
-  finalData.push(['', 'Active Residents', stats.activeResidents]);
-  finalData.push(['', 'Pending Approval', stats.pendingResidents]);
+  finalData.push(['', 'Active / Verified', stats.activeResidents]);
+  finalData.push(['', 'Pending Approvals', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
   finalData.push(['Communications', 'Total Announcements', stats.totalAnnouncements]);
   finalData.push([]);
@@ -93,19 +114,10 @@ const handleExportExcel = () => {
   }
 
   if (topRes && topRes.length > 0) {
-    finalData.push(['RESIDENT RANKING (Top volume leaders)']);
+    finalData.push(['RESIDENT RANKING (Top Leaders by Volume)']);
     finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
     topRes.forEach((r, i) => {
       finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
-    });
-    finalData.push([]);
-  }
-
-  if (announcements && announcements.length > 0) {
-    finalData.push(['RECENT ANNOUNCEMENTS']);
-    finalData.push(['Title', 'Type', 'Date']);
-    announcements.forEach(a => {
-      finalData.push([a.title, a.type, formatDate(a.createdAt || a.date)]);
     });
   }
 
@@ -122,8 +134,8 @@ const handleExportPDF = () => {
   const stats = props.stats;
   const pending = props.pendingResidents;
   const topRes = props.topResidents;
-  const announcements = props.announcements.slice(0, 5);
-  const parcels = props.parcels.slice(0, 10);
+  const recentParcels = props.parcels.slice(0, 10);
+  const overdueList = overdueParcels.value;
   const brandColor = [29, 53, 94]; // Navy Blue style
 
   let y = 20;
@@ -184,7 +196,7 @@ const handleExportPDF = () => {
   const parcelStats = [
     { item: 'Total Units (System)', val: stats.totalParcels },
     { item: 'Picked Up', val: stats.pickedUpParcels },
-    { item: 'Awaiting Pickup', val: stats.awaitingParcels },
+    { item: 'Received / Awaiting', val: stats.awaitingParcels },
     { item: 'Overdue Parcels', val: stats.overdueParcels }
   ];
 
@@ -213,7 +225,7 @@ const handleExportPDF = () => {
   y += 10;
 
   // 1.2 Recent Parcels
-  if (parcels && parcels.length > 0) {
+  if (recentParcels.length > 0) {
     drawSubHeader("Recent Parcels (Latest Activity)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
@@ -225,20 +237,55 @@ const handleExportPDF = () => {
     doc.text("STATUS", 163, y);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (parcels.length * 8) + 8);
+    doc.rect(15, y - 5, 180, (recentParcels.length * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
-    doc.line(45, y - 5, 45, y - 5 + (parcels.length * 8) + 8);
-    doc.line(95, y - 5, 95, y - 5 + (parcels.length * 8) + 8);
-    doc.line(160, y - 5, 160, y - 5 + (parcels.length * 8) + 8);
+    doc.line(45, y - 5, 45, y - 5 + (recentParcels.length * 8) + 8);
+    doc.line(95, y - 5, 95, y - 5 + (recentParcels.length * 8) + 8);
+    doc.line(160, y - 5, 160, y - 5 + (recentParcels.length * 8) + 8);
 
     y += 8;
     doc.setFont("helvetica", "normal");
-    parcels.forEach((p, idx) => {
+    recentParcels.forEach((p, idx) => {
       doc.text(formatDate(p.updatedAt), 17, y);
       doc.text((p.residentName || '').substring(0, 18), 47, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
       doc.text((p.status || '').toUpperCase(), 163, y);
-      if (idx < parcels.length - 1) {
+      if (idx < recentParcels.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 10;
+  }
+
+  // 1.3 Overdue Parcels
+  if (overdueList.length > 0) {
+    drawSubHeader("Overdue Parcels (> 3 Days)");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("RECEIVED AT", 17, y); 
+    doc.text("RESIDENT", 47, y); 
+    doc.text("TRACKING NO.", 97, y); 
+    doc.text("STATUS", 163, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (overdueList.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+    doc.line(45, y - 5, 45, y - 5 + (overdueList.length * 8) + 8);
+    doc.line(95, y - 5, 95, y - 5 + (overdueList.length * 8) + 8);
+    doc.line(160, y - 5, 160, y - 5 + (overdueList.length * 8) + 8);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    overdueList.forEach((p, idx) => {
+      doc.text(formatDate(p.receiveAt || p.createdAt), 17, y);
+      doc.text((p.residentName || '').substring(0, 18), 47, y);
+      doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
+      doc.text((p.status || '').toUpperCase(), 163, y);
+      if (idx < overdueList.length - 1) {
         doc.setDrawColor(230, 230, 230);
         doc.line(15, y + 2, 195, y + 2);
       }
@@ -353,37 +400,6 @@ const handleExportPDF = () => {
       }
       y += 8;
     });
-    y += 10;
-  }
-
-  // 2.4 Announcements
-  if (announcements && announcements.length > 0) {
-    drawSubHeader("Recent Announcements");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("TITLE", 17, y); 
-    doc.text("TYPE", 112, y); 
-    doc.text("DATE", 162, y);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (announcements.length * 8) + 8);
-    doc.line(15, y + 3, 195, y + 3);
-    doc.line(110, y - 5, 110, y - 5 + (announcements.length * 8) + 8);
-    doc.line(160, y - 5, 160, y - 5 + (announcements.length * 8) + 8);
-
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    announcements.forEach((ann, idx) => {
-      doc.text((ann.title || '').substring(0, 50), 17, y);
-      doc.text((ann.type || ''), 112, y);
-      doc.text(formatDate(ann.createdAt || ann.date), 162, y);
-      if (idx < announcements.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
-      y += 8;
-    });
   }
 
   doc.save(`Dormitory_Dashboard_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -430,7 +446,7 @@ defineExpose({
             <td>{{ stats.pickedUpParcels }}</td>
           </tr>
           <tr>
-            <td>Awaiting Pickup</td>
+            <td>Received / Awaiting</td>
             <td>{{ stats.awaitingParcels }}</td>
           </tr>
           <tr>
@@ -455,6 +471,28 @@ defineExpose({
         <tbody>
           <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
             <td>{{ formatDate(parcel.updatedAt) }}</td>
+            <td>{{ parcel.residentName }}</td>
+            <td>{{ parcel.trackingNumber }}</td>
+            <td>{{ parcel.status.toUpperCase() }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-section" v-if="overdueParcels.length > 0">
+      <h3 class="print-section-title">Overdue Parcels (> 3 Days)</h3>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Received At</th>
+            <th>Resident</th>
+            <th>Tracking No.</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="parcel in overdueParcels" :key="parcel.id">
+            <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
             <td>{{ parcel.residentName }}</td>
             <td>{{ parcel.trackingNumber }}</td>
             <td>{{ parcel.status.toUpperCase() }}</td>
@@ -523,7 +561,7 @@ defineExpose({
     </div>
 
     <div class="print-section" v-if="topResidents.length > 0">
-      <h3 class="print-section-title">Resident Ranking (Top leaders by volume)</h3>
+      <h3 class="print-section-title">Resident Ranking (Top Leaders by Volume)</h3>
       <table class="print-table">
         <thead>
           <tr>
@@ -539,26 +577,6 @@ defineExpose({
             <td>{{ res.fullName || res.name }}</td>
             <td>{{ res.roomNumber || res.room }}</td>
             <td>{{ res.parcelCount || res.count }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="print-section" v-if="announcements.length > 0">
-      <h3 class="print-section-title">Recent Announcements</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Type</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="ann in announcements.slice(0, 5)" :key="ann.id">
-            <td>{{ ann.title }}</td>
-            <td>{{ ann.type }}</td>
-            <td>{{ formatDate(ann.createdAt || ann.date) }}</td>
           </tr>
         </tbody>
       </table>
