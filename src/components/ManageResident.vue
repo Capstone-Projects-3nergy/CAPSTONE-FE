@@ -94,7 +94,7 @@ const childAlert = ref({
   visible: false,
   message: '',
   title: '',
-  style: 'blue',
+  style: 'green',
   operate: 'childAlert'
 })
 
