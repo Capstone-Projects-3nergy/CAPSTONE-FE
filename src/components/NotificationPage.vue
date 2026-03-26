@@ -870,7 +870,7 @@ const goToPage = (page) => {
         </div>
       </main>
 
-    <!-- Notification Detail Modal -->
+  
     <NotificationDetailModal 
       :show="showDetailModal" 
       :notification="selectedNotification" 

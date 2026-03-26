@@ -162,11 +162,6 @@ const filteredAnnouncements = computed(() => {
   } else if (currentSort.value === 'status') {
     isStatusAsc.value ? sortByStatus(result) : sortByStatusReverse(result)
   }
-
-  // Always keep pinned items at the top regardless of other sorts (common pattern for pinned)
-  // Or if you want to follow ParcelTable exactly, they might not have pinned.
-  // Let's keep pinned items prioritized as before unless the user expects otherwise.
-  // Actually, usually users expect pinned items to stay at top.
   return result.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1

@@ -222,8 +222,6 @@ const submitVerification = async () => {
     const authStore = useAuthManager()
     const currentUserFullName = authStore.user?.fullName || ''
 
-    // Only apply the check if we have both values.
-    // Assuming we want to force residentName to match the logged-in user's name.
     if (form.value.residentName && currentUserFullName) {
         // Case-insensitive comparison and trimming
         if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {

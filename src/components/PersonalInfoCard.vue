@@ -114,12 +114,6 @@ const userInitial = computed(() => {
   return name.charAt(0)
 })
 
-// const userInitial = computed(() => {
-//   const name = props.fullName?.trim()
-//   if (!name) return '?'
-//   return name.split('')[0] // ไทยไม่ต้อง toUpperCase
-// })
-
 const hasProfileImageUrl = computed(
   () => props.profileImage && props.profileImage.trim() !== ''
 )
@@ -132,14 +126,14 @@ const menuClass = (tab) => {
   ]
 }
 
-// แสดงค่า (default = ACTIVE)
+
 const displayStatus = (value) => {
   if (!value || value.trim() === '') return 'Error'
   const s = value.toLowerCase()
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-// กำหนดสีตามสถานะ
+
 const statusClass = (value) => {
   const status = displayStatus(value)
 
@@ -150,14 +144,14 @@ const statusClass = (value) => {
   }
 }
 onMounted(async () => {
-  // ✅ ดึงโปรไฟล์ล่าสุดของผู้ใช้เพื่อเช็คสถานะการเชื่อมต่อ (LINE, etc.)
+
   if (props.useCurrentProfile) {
     await profileManager.fetchProfile()
   }
-  // กันกรณี refresh แล้ว store ว่าง
+  
   if (userManager.members.length || userManager.staffs.length) return
 
-  // Only STAFF can fetch all users
+
   if (loginManager.user?.role !== 'STAFF') return
 
   const dataUser = await getItems(
@@ -197,7 +191,6 @@ watch(
 
     if (status === 'success') {
       showLineSuccessPopup.value = true
-      // ✅ Refresh profile ข้อมูลการเชื่อมต่อ LINE ทันทีที่กลับมาจาก Redirect
       profileManager.fetchProfile()
     } else if (status === 'error') {
       lineAlertVisible.value = true
@@ -411,26 +404,24 @@ const effectiveLineId = computed(() => {
   let id = null
 
   if (props.useCurrentProfile) {
-    // ✅ ตรวจสอบสถานะจริงจากการเชื่อมต่อ LINE (Boolean)
+   
     isLinked = profileManager.currentProfile?.isLineLinked || loginManager.user?.isLineLinked || props.isLineLinked
     id = loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId
   } else {
-    // ✅ สำหรับการดูโปรไฟล์คนอื่น
+  
     isLinked = props.isLineLinked !== null ? props.isLineLinked : routeUser.value?.isLineLinked
     id = props.lineId || routeUser.value?.lineId
   }
 
-  // ✅ ใช้ Boolean 'isLinked' เป็นตัวตัดสิน UI ว่าเชื่อมต่อหรือยัง
   if (!isLinked) {
     return null
   }
 
-  // คืนค่า ID เพื่อใช้เปิดลิงก์ ถ้าไม่มีให้คืน true เพื่อบอกว่าเชื่อมแล้ว
   return id || true
 })
 
 const handleLineAction = async (directLineId = null) => {
-  // 1. เช็คสถานะการเชื่อมต่อเดิม (ถ้าผูกไว้แล้ว ให้เปิดโปรไฟล์ LINE OA)
+
   if (effectiveLineId.value) {
     if (typeof effectiveLineId.value === 'string') {
       window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
@@ -438,11 +429,11 @@ const handleLineAction = async (directLineId = null) => {
     return
   }
 
-  // 2. 🚀 [ระบบใหม่] การผูกบัญชีแบบ Direct (ถ้าได้รับไอดีส่งมาโดยตรงจาก LIFF หรือพารามิเตอร์)
+  
   if (directLineId && typeof directLineId === 'string') {
     const success = await connectLineAccount(directLineId, router)
     if (success) {
-      // ✅ อัปเดต UI ทันทีใน Store
+    
       if (profileManager.currentProfile) {
         profileManager.currentProfile.isLineLinked = true
         profileManager.currentProfile.lineId = directLineId
@@ -452,16 +443,11 @@ const handleLineAction = async (directLineId = null) => {
         loginManager.user.lineId = directLineId
       }
       
-      // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
       await profileManager.fetchProfile()
-      
-      // ✅ แสดง Popup ความสำเร็จ
       showLineSuccessPopup.value = true
       return
     }
   }
-
-  // 3. 🛡️ [ระบบเดิม] ถ้าไม่มีไอดีส่งมา ให้ทำงานแบบ Redirect ไปหน้า LINE Login (OAuth)
   reconnectLine()
 }
 
@@ -474,7 +460,6 @@ const reconnectLine = async () => {
 
   const url = await getLineConnectUrl(token, router)
   if (url) {
-    // 🛡️ พาลูกบ้านไปหน้า Auth ของ LINE (ระบบเดิมที่คุณใช้งานอยู่ 100%)
     window.location.href = url
   } else {
     console.error('Failed to get LINE login URL from backend')
@@ -928,23 +913,21 @@ const confirmUnlinkAction = async () => {
               </div>
             </div>
 
-            <!-- Main Connection Status -->
+   
             <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
               <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <!-- Removed Status Badge (Moved to header) -->
-
-                <!-- Action Buttons Area -->
+             
                 <div class="flex flex-col items-center gap-4 w-full sm:w-auto">
-                  <!-- Action Button: Connect Now (Premium Branded Version) -->
+
                   <button
                     v-if="!effectiveLineId"
                     @click="handleLineAction"
                     class="group/line-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(6,199,85,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(6,199,85,0.5)]"
                   >
-                    <!-- Background Gradient -->
+                  
                     <div class="absolute inset-0 bg-gradient-to-r from-[#06C755] via-[#05B34B] to-[#05A344]"></div>
                     
-                    <!-- Content Layer -->
+                   
                     <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent">
                       <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Connect Now</span>
                       <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-btn:translate-x-1 transition-transform duration-300">
@@ -955,7 +938,7 @@ const confirmUnlinkAction = async () => {
                     </div>
                   </button>
 
-                  <!-- Action Button: Disconnect (Premium Styled version) -->
+               
                   <div
                     v-else
                     class="flex flex-col items-center w-full"
@@ -1340,7 +1323,7 @@ const confirmUnlinkAction = async () => {
     </div>
   </div>
 
-  <!-- ✅ Popup แจ้งเตือนเชื่อมต่อสำเร็จและให้ Add OA -->
+
   <Transition
     enter-active-class="transition duration-300 ease-out"
     enter-from-class="opacity-0 scale-95"
@@ -1378,7 +1361,6 @@ const confirmUnlinkAction = async () => {
           >
             <template #icon>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256">
-                <!-- Only the Bubble part, using currentColor -->
                 <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="currentColor"/>
               </svg>
             </template>
