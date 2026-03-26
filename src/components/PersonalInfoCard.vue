@@ -1356,9 +1356,13 @@ const confirmUnlinkAction = async () => {
       <!-- Modal Content -->
       <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] border border-white/20">
         <!-- Success Icon -->
-        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100 animate-bounce">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
+        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_20px_40px_rgba(0,185,0,0.3)] animate-bounce relative">
+          <!-- Glassy inner glow for better contrast -->
+          <div class="absolute inset-0 bg-white/10 rounded-full blur-sm scale-90"></div>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="relative z-10 drop-shadow-sm">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
 
@@ -1373,7 +1377,10 @@ const confirmUnlinkAction = async () => {
             class="w-full py-5 font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)]"
           >
             <template #icon>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256">
+                <!-- Only the Bubble part, using currentColor -->
+                <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="currentColor"/>
+              </svg>
             </template>
           </ButtonWeb>
           
