@@ -17,7 +17,7 @@ const emit = defineEmits([
 const props = defineProps({
   restoreType: {
     type: String,
-    required: true // 'parcel' | 'resident' | 'staff'
+    required: true 
   },
   parcelData: Object,
   isPermanent: {

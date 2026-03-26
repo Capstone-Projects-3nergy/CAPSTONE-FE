@@ -5,15 +5,18 @@ import ButtonWeb from './ButtonWeb.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useProfileManager } from '@/stores/ProfileManager'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
-import { getItems, unlinkLineAccount, getLineConnectUrl } from '@/utils/fetchUtils'
+import { getItems, unlinkLineAccount, connectLineAccount, getLineConnectUrl, resendVerification } from '@/utils/fetchUtils'
 import { LINE_CONFIG } from '@/lineApi/line.config.js'
+import AlertPopUp from './AlertPopUp.vue'
+import ConfirmPopUp from './ConfirmPopUp.vue'
 const emit = defineEmits([
   'confirmAccount',
   'redAlertError',
   'incorrectemailform',
   'edit',
   'emailRequire',
-  'cancel'
+  'cancel',
+  'changeStatus'
 ])
 const userManager = useUserManager()
 const profileManager = useProfileManager()
@@ -24,6 +27,17 @@ const activeTab = ref('profile')
 const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
 const showLineSuccessPopup = ref(false)
+
+// Dynamic Feedback & Modals state
+const lineAlertVisible = ref(false)
+const lineAlertMessage = ref('')
+const lineAlertTitle = ref('')
+const lineAlertStyle = ref('green')
+const showUnlinkSuccessPopup = ref(false)
+const showUnlinkConfirm = ref(false)
+const loadingEmail = ref(false)
+const lastEmailSentTime = ref(null)
+
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -40,11 +54,13 @@ const props = defineProps({
   roomNumber: { type: String, default: null },
   status: { type: String, default: null },
   lineId: { type: String, default: null },
+  isLineLinked: { type: Boolean, default: null },
   phoneNumber: { type: String, default: null },
   showNotify: { type: Boolean, default: true },
   showMenu: { type: Boolean, default: true },
   profile: { type: Boolean, default: true },
   residentDetail: { type: Boolean, default: false },
+  userId: { type: [String, Number], default: null },
   profileImage: String,
   useCurrentProfile: {
     type: Boolean,
@@ -70,6 +86,7 @@ const safeFullName = computed(() => {
 
 const safeStatus = computed(() => {
   return props.status || routeUser.value?.status || null
+  // return 'PENDING'
 })
 
 function display(value) {
@@ -81,6 +98,8 @@ watch(
   (tab) => {
     if (tab === 'notify') {
       activeTab.value = 'notify'
+    } else if (tab === 'status') {
+      activeTab.value = 'status'
     }
   },
   { immediate: true }
@@ -95,12 +114,6 @@ const userInitial = computed(() => {
   return name.charAt(0)
 })
 
-// const userInitial = computed(() => {
-//   const name = props.fullName?.trim()
-//   if (!name) return '?'
-//   return name.split('')[0] // ไทยไม่ต้อง toUpperCase
-// })
-
 const hasProfileImageUrl = computed(
   () => props.profileImage && props.profileImage.trim() !== ''
 )
@@ -113,14 +126,14 @@ const menuClass = (tab) => {
   ]
 }
 
-// แสดงค่า (default = ACTIVE)
+
 const displayStatus = (value) => {
   if (!value || value.trim() === '') return 'Error'
   const s = value.toLowerCase()
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-// กำหนดสีตามสถานะ
+
 const statusClass = (value) => {
   const status = displayStatus(value)
 
@@ -131,17 +144,20 @@ const statusClass = (value) => {
   }
 }
 onMounted(async () => {
-  // กันกรณี refresh แล้ว store ว่าง
+
+  if (props.useCurrentProfile) {
+    await profileManager.fetchProfile()
+  }
+  
   if (userManager.members.length || userManager.staffs.length) return
 
-  // Only STAFF can fetch all users
+
   if (loginManager.user?.role !== 'STAFF') return
 
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
-
   if (dataUser) {
     const mapped = dataUser.map((p) => ({
       id: p.userId,
@@ -165,18 +181,36 @@ onMounted(async () => {
   }
 })
 
-// ✅ ย้ายออกมานอก onMounted เพื่อให้ทำงานได้ทุกเคส (รวมถึง Resident)
+// ✅ Detect LINE Connection results from URL redirect
 watch(
   () => route.query.line,
   (status) => {
-    console.log('Detected LINE status in URL:', status)
+    if (!status) return
+
+    const errorMsg = route.query.msg
+
     if (status === 'success') {
       showLineSuccessPopup.value = true
-      // ล้าง query string ออกหลังจากแสดง popup แล้ว
+      profileManager.fetchProfile()
+    } else if (status === 'error') {
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'red'
+      lineAlertMessage.value = 'LINE Connection Failed'
+      lineAlertTitle.value = errorMsg || 'Please try again or contact support'
+      
+      // Auto-hide alert after 8 seconds
       setTimeout(() => {
-        router.replace({ query: { ...route.query, line: undefined } })
-      }, 1000)
+        lineAlertVisible.value = false
+      }, 8000)
     }
+
+    // Clean up query string after processing
+    setTimeout(() => {
+      const newQuery = { ...route.query }
+      delete newQuery.line
+      delete newQuery.msg
+      router.replace({ query: newQuery })
+    }, 1500)
   },
   { immediate: true }
 )
@@ -366,27 +400,55 @@ const userRoleLabel = computed(() => {
 })
 
 const effectiveLineId = computed(() => {
-  // ✅ ตรวจสอบจาก AuthStore ก่อนเสมอ เพื่อให้สถานะเปลี่ยนทันทีหลัง Connect สำเร็จ
-  if (props.useCurrentProfile && loginManager.user?.lineId) {
-    return loginManager.user.lineId
-  }
-  
+  let isLinked = false
+  let id = null
+
   if (props.useCurrentProfile) {
-    // Priority: Store > Current Profile > Props
-    return loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId || null
+   
+    isLinked = profileManager.currentProfile?.isLineLinked || loginManager.user?.isLineLinked || props.isLineLinked
+    id = loginManager.user?.lineId || profileManager.currentProfile?.lineId || props.lineId
+  } else {
+  
+    isLinked = props.isLineLinked !== null ? props.isLineLinked : routeUser.value?.isLineLinked
+    id = props.lineId || routeUser.value?.lineId
   }
-  // สำหรับการดูโปรไฟล์คนอื่น
-  return props.lineId || routeUser.value?.lineId || null
+
+  if (!isLinked) {
+    return null
+  }
+
+  return id || true
 })
 
-const handleLineAction = () => {
+const handleLineAction = async (directLineId = null) => {
+
   if (effectiveLineId.value) {
-    // กรณีที่เชื่อมต่อแล้ว: เปิดโปรไฟล์ LINE หรือแอดเพื่อน
-    window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
-  } else {
-    // กรณีที่ยังไม่ได้เชื่อมต่อ: ไปยังหน้า LINE Login ของ Backend เพื่อผูกบัญชี
-    reconnectLine()
+    if (typeof effectiveLineId.value === 'string') {
+      window.open(`https://line.me/ti/p/~${effectiveLineId.value}`, '_blank')
+    }
+    return
   }
+
+  
+  if (directLineId && typeof directLineId === 'string') {
+    const success = await connectLineAccount(directLineId, router)
+    if (success) {
+    
+      if (profileManager.currentProfile) {
+        profileManager.currentProfile.isLineLinked = true
+        profileManager.currentProfile.lineId = directLineId
+      }
+      if (loginManager.user) {
+        loginManager.user.isLineLinked = true
+        loginManager.user.lineId = directLineId
+      }
+      
+      await profileManager.fetchProfile()
+      showLineSuccessPopup.value = true
+      return
+    }
+  }
+  reconnectLine()
 }
 
 const reconnectLine = async () => {
@@ -398,29 +460,176 @@ const reconnectLine = async () => {
 
   const url = await getLineConnectUrl(token, router)
   if (url) {
-    // Backend returns the full authorize URL
     window.location.href = url
   } else {
     console.error('Failed to get LINE login URL from backend')
   }
 }
 
-/* 
-const handleUnlink = async () => {
-  if (confirm('Are you sure you want to disconnect your LINE account?')) {
-    const success = await unlinkLineAccount(router)
-    if (success) {
-      // Refresh user profile or redirect
-      window.location.reload()
+const currentUserId = computed(() => {
+  return props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
+})
+
+const isEmailDisabled = computed(() => {
+  if (!lastEmailSentTime.value) return false
+  const oneDay = 24 * 60 * 60 * 1000
+  return (Date.now() - lastEmailSentTime.value) < oneDay
+})
+
+const checkLastEmailSent = () => {
+  if (currentUserId.value) {
+    const stored = localStorage.getItem(`lastEmailSent_${currentUserId.value}`)
+    if (stored) {
+      lastEmailSentTime.value = parseInt(stored)
     } else {
-      alert('Failed to disconnect LINE account. Please try again.')
+      lastEmailSentTime.value = null
     }
   }
 }
-*/
+
+watch(currentUserId, () => {
+  checkLastEmailSent()
+}, { immediate: true })
+
+const handleSendEmailNotification = async () => {
+  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
+  if (safeStatus.value?.toUpperCase() !== 'PENDING') {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Error!!'
+    lineAlertTitle.value = 'Only users with PENDING status can receive verification emails.'
+    
+    setTimeout(() => {
+      lineAlertVisible.value = false
+    }, 10000)
+    return
+  }
+
+  // ✅ ระบุ userId จาก props หรือจาก routeUser (Staff ดู Resident)
+  const userId = props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
+  
+  if (!userId) {
+    console.error('No valid user ID available for sending email')
+    return
+  }
+
+  loadingEmail.value = true
+  try {
+    const success = await resendVerification(userId, router)
+    
+    if (success) {
+      const now = Date.now()
+      localStorage.setItem(`lastEmailSent_${currentUserId.value}`, now.toString())
+      lastEmailSentTime.value = now
+
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'green'
+      lineAlertMessage.value = 'Success!!'
+      lineAlertTitle.value = 'The verification email has been sent to the resident.'
+      
+      setTimeout(() => {
+        lineAlertVisible.value = false
+      }, 10000)
+    } else {
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'red'
+      lineAlertMessage.value = 'Failed'
+      lineAlertTitle.value = 'Unable to send verification email. Please try again.'
+      
+      setTimeout(() => {
+        lineAlertVisible.value = false
+      }, 10000)
+    }
+  } finally {
+    loadingEmail.value = false
+  }
+}
+
+const handleUnlink = () => {
+  showUnlinkConfirm.value = true
+}
+
+const confirmUnlinkAction = async () => {
+  showUnlinkConfirm.value = false
+  const success = await unlinkLineAccount(router)
+  if (success) {
+    // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
+    if (profileManager.currentProfile) {
+      profileManager.currentProfile.isLineLinked = false
+      profileManager.currentProfile.lineId = null
+    }
+    if (loginManager.user) {
+      loginManager.user.isLineLinked = false
+      loginManager.user.lineId = null
+    }
+
+    // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
+    await profileManager.fetchProfile()
+    
+    // ✅ แสดง Popup แจ้งเตือนความสำเร็จ (ระบบใหม่)
+    showUnlinkSuccessPopup.value = true
+    
+    // Auto hide after 5 seconds if user doesn't close
+    setTimeout(() => {
+      showUnlinkSuccessPopup.value = false
+    }, 5000)
+  } else {
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Error'
+    lineAlertTitle.value = 'Failed to disconnect. Please try again later.'
+  }
+}
 </script>
 <template>
-  <div class="w-full mx-auto px-4">
+  <div class="w-full mx-auto px-4 relative"> 
+    <!-- Beautiful LINE Feedback Alert -->
+    <div v-if="lineAlertVisible" class="fixed top-5 left-5 z-50 w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
+      <AlertPopUp
+        v-if="lineAlertVisible"
+        :message="lineAlertMessage"
+        :titles="lineAlertTitle"
+        :styleType="lineAlertStyle"
+        @closePopUp="lineAlertVisible = false"
+      />
+    </div>
+
+    <!-- Confirm Disconnect Modal -->
+    <ConfirmPopUp
+      v-if="showUnlinkConfirm"
+      title="Disconnect LINE?"
+      message="Are you sure you want to disconnect your LINE account? You will stop receiving important notifications directly to your LINE app."
+      confirmLabel="Yes, Disconnect"
+      cancelLabel="Keep Connected"
+      styleType="red"
+      @confirm="confirmUnlinkAction"
+      @cancel="showUnlinkConfirm = false"
+    />
+
+    <!-- Unlink Success Modal -->
+    <div v-if="showUnlinkSuccessPopup" class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showUnlinkSuccessPopup = false"></div>
+      
+      <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] scale-in-center animate-pulse-once border border-white/20">
+        <div class="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+            <line x1="12" y1="2" x2="12" y2="12"></line>
+          </svg>
+        </div>
+
+        <h3 class="text-2xl font-black text-gray-900 mb-2 tracking-tight">Successfully Unlinked</h3>
+        <p class="text-gray-400 font-bold leading-relaxed mb-10 px-4">Your LINE account has been disconnected from <span class="text-blue-500 font-black">Tractify</span>.</p>
+        
+        <ButtonWeb 
+          @click="showUnlinkSuccessPopup = false"
+          label="Got it"
+          color="blue"
+          class="w-full py-4 font-black shadow-lg hover:shadow-xl rounded-2xl"
+        />
+      </div>
+    </div>
+
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Card -->
       <div
@@ -429,24 +638,26 @@ const handleUnlink = async () => {
         <!-- Avatar -->
         <div class="flex flex-col items-center text-center">
           <div
-            class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm relative"
+            class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar"
           >
-            <img
-              v-if="profileImageUrlPreview"
-              :src="profileImageUrlPreview"
-              class="w-full h-full object-cover"
-            />
-            <div
-              v-else
-              class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
-            >
-              {{ userInitial }}
+            <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+              <img
+                v-if="profileImageUrlPreview"
+                :src="profileImageUrlPreview"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              />
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-white text-4xl font-bold"
+              >
+                {{ userInitial }}
+              </div>
             </div>
           </div>
           <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
             {{ userRoleLabel }}
           </p>
-          <p class="mt-4 text-black font-semibold text-lg text-gray-500">
+          <p class="mt-4 text-black font-semibold text-lg text-gray-500 truncate max-w-[200px] mx-auto">
             {{ fullName }}
           </p>
         </div>
@@ -486,6 +697,7 @@ const handleUnlink = async () => {
           </button>
           
           <button
+            v-if="loginManager.user.role !== 'STAFF'"
             @click="activeTab = 'line'"
             :class="menuClass('line')"
             class="relative w-full cursor-pointer"
@@ -498,7 +710,7 @@ const handleUnlink = async () => {
       <!-- RIGHT : Information Card -->
       <div
         v-if="activeTab === 'profile'"
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 overflow-hidden"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -549,18 +761,18 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               First Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ firstName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ firstName }}</p>
+            </div>
           </div>
 
           <div>
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Last Name
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ lastName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ lastName }}</p>
+            </div>
           </div>
 
           <div>
@@ -569,7 +781,7 @@ const handleUnlink = async () => {
             >
               <span>Email</span>
 
-              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
+              <span class="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-[10px] tracking-wider">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="12"
@@ -604,17 +816,17 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Position
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ position }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ position }}</p>
+            </div>
           </div>
           <div v-if="roomNumber !== null">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Room Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ roomNumber }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ roomNumber }}</p>
+            </div>
           </div>
           <div
             v-if="dormName !== null && loginManager.user.role === 'RESIDENT'"
@@ -622,9 +834,9 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Dormitory
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ dormName }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ dormName }}</p>
+            </div>
           </div>
 
           <!-- line removed from here and moved to a new tab -->
@@ -633,20 +845,10 @@ const handleUnlink = async () => {
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
             </label>
-            <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-              {{ display(phoneNumber) }}
-            </p>
+            <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+              <p class="truncate">{{ display(phoneNumber) }}</p>
+            </div>
           </div>
-          <!-- <div class="flex items-center gap-2 mt-2">
-            <label class="text-sm font-bold text-gray-500"> Status: </label>
-
-            <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white inline-block"
-              :class="statusClass(safeStatus)"
-            >
-              {{ displayStatus(safeStatus) }}
-            </span>
-          </div> -->
         </div>
       </div>
       <div
@@ -659,112 +861,115 @@ const handleUnlink = async () => {
             Line Account
           </h3>
           <div class="relative group ml-auto">
-            <!-- <div 
-              class="p-2 cursor-pointer text-[#8C8F91] hover:text-[#00b900] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center rounded-full hover:bg-green-50"
-              @click="$emit('edit')"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentcolor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20.71 7.04055C21.1 6.65055 21.1 6.00055 20.71 5.63055L18.37 3.29055C18 2.90055 17.35 2.90055 16.96 3.29055L15.12 5.12055L18.87 8.87055M3 17.2505V21.0005H6.75L17.81 9.93055L14.06 6.18055L3 17.2505Z"
-                />
-              </svg>
-            </div> -->
           </div>
         </div>
 
         <div class="space-y-6">
-          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] group">
+          <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] group">
             <!-- Header section -->
             <div class="flex items-center gap-5 mb-8 relative z-10">
-              <div class="w-14 h-14 rounded-2xl bg-[#00b900] flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
-                    <path d="M40 176v-96h18v80h24v16H40zm48-96h18v96H88V80zm32 0h20l24 40V80h18v96h-18l-26-44v44h-18V80zm64 0h40v16h-22v24h20v16h-20v24h24v16h-42V80z" fill="#00b900"/>
+              <div class="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#06C755] via-[#05B34B] to-[#05A344] flex items-center justify-center shadow-[0_12px_30px_rgba(6,199,85,0.3)] relative overflow-hidden">
+                <!-- Glossy overlay -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 pointer-events-none"></div>
+                <!-- Inner Glow -->
+                <div class="absolute inset-px rounded-[21px] border border-white/20 pointer-events-none"></div>
+                
+                <div class="w-11 h-11 flex items-center justify-center relative z-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                    <!-- Chat Bubble (White) -->
+                    <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/>
+                    <!-- "LINE" Text (Branded Green) -->
+                    <g fill="#06C755">
+                      <path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/>
+                      <path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/>
+                    </g>
                   </svg>
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none mb-2">LINE Notification</h3>
-                <p class="text-xs sm:text-sm text-gray-500 font-medium break-words">Smart alerts for parcels & announcements</p>
-              </div>
-            </div>
-
-            <!-- Main Connection Status -->
-            <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
-              <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <!-- Status -->
-                <div class="flex items-center gap-4">
-                  <div class="relative">
-                    <div :class="[
-                      'w-4 h-4 rounded-full',
-                      effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
-                    ]"></div>
-                    <div v-if="effectiveLineId" class="absolute inset-0 w-4 h-4 rounded-full bg-green-500 animate-ping opacity-75"></div>
-                  </div>
-                  <div>
-                    <span class="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-0.5">Status</span>
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none">LINE Notification</h3>
+                  
+                  <!-- Compact Status Badge -->
+                  <div :class="[
+                    'flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300',
+                    effectiveLineId ? 'bg-green-50/50 border-green-100' : 'bg-gray-50/50 border-gray-100'
+                  ]">
+                    <div class="relative flex items-center justify-center">
+                      <div :class="[
+                        'w-2 h-2 rounded-full',
+                        effectiveLineId ? 'bg-green-500' : 'bg-gray-300'
+                      ]"></div>
+                      <div v-if="effectiveLineId" class="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75"></div>
+                    </div>
                     <span :class="[
-                      'text-lg sm:text-xl font-black transition-colors duration-300',
-                      effectiveLineId ? 'text-green-600' : 'text-gray-500'
+                      'text-[10px] font-black tracking-wider',
+                      effectiveLineId ? 'text-green-600' : 'text-gray-400'
                     ]">
                       {{ effectiveLineId ? 'Linked' : 'Not Linked' }}
                     </span>
                   </div>
                 </div>
+                <p class="text-xs sm:text-sm text-gray-500 font-medium break-words">Smart alerts for parcels & announcements</p>
+              </div>
+            </div>
 
-                <!-- Action Buttons Area -->
-                <div class="flex flex-col items-center gap-3">
+   
+            <div class="relative z-10 bg-gray-50/50 rounded-2xl border border-gray-100/50 p-4 sm:p-6 backdrop-blur-sm">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+             
+                <div class="flex flex-col items-center gap-4 w-full sm:w-auto">
+
                   <button
+                    v-if="!effectiveLineId"
                     @click="handleLineAction"
-                    class="w-full sm:w-auto flex flex-nowrap items-center justify-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-[#00b900] text-white font-black shadow-[0_10px_25px_rgba(0,185,0,0.25)] hover:bg-[#009900] hover:shadow-[0_15px_35px_rgba(0,185,0,0.35)] hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-300 group/btn"
+                    class="group/line-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(6,199,85,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(6,199,85,0.5)]"
                   >
-                    <span class="text-sm sm:text-base cursor-pointer whitespace-nowrap">{{ effectiveLineId ? 'Access Account' : 'Connect Now' }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="sm:w-5 sm:h-5 text-white group-hover/btn:translate-x-1.5 transition-transform duration-300">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
                   
-                  <div v-if="effectiveLineId" class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1">
-                    <!-- Secondary Action: Switch Account -->
-                    <button 
-                      @click="reconnectLine"
-                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-[#00b900] hover:bg-green-50/50 transition-all duration-300 group/switch cursor-pointer border border-transparent hover:border-green-100"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/switch:rotate-180 transition-transform duration-500">
-                        <path d="M21 2v6h-6"></path>
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                        <path d="M3 22v-6h6"></path>
-                        <path d="M21 12a9 9 0 1 1-15 6.7L3 16"></path>
-                      </svg>
-                      <span>Switch Account</span>
-                    </button>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#06C755] via-[#05B34B] to-[#05A344]"></div>
+                    
+                   
+                    <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent">
+                      <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Connect Now</span>
+                      <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-btn:translate-x-1 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
 
-                    <!-- Unlink Action (Commented out for future use)
-                    <button 
+               
+                  <div
+                    v-else
+                    class="flex flex-col items-center w-full"
+                  >
+                    <button
                       @click="handleUnlink"
-                      class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold text-gray-400 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300 group/unlink cursor-pointer border border-transparent hover:border-red-100"
+                      class="group/line-disconnect-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(239,68,68,0.4)]"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover/unlink:scale-110 transition-transform duration-300">
-                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                        <line x1="12" y1="2" x2="12" y2="12"></line>
-                      </svg>
-                      <span>Disconnect</span>
+                      <!-- Background Gradient (Red theme) -->
+                      <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-rose-500 to-red-600"></div>
+                      
+                      <!-- Content Layer -->
+                      <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent text-white">
+                        <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Disconnect LINE</span>
+                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-disconnect-btn:rotate-90 transition-transform duration-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                          </svg>
+                        </div>
+                      </div>
                     </button>
-                    -->
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Background Decoration -->
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl group-hover:bg-green-100/80 transition-colors duration-700 pointer-events-none"></div>
-            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/50 transition-colors duration-700 pointer-events-none"></div>
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl pointer-events-none"></div>
           </div>
 
           <!-- Helper Banner -->
@@ -853,7 +1058,7 @@ const handleUnlink = async () => {
 
               <div class="flex items-center gap-2 mt-2">
                 <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-tight">
+                <p class="text-[11px] font-bold text-gray-400 tracking-tight">
                   {{ item.user }}
                 </p>
               </div>
@@ -862,142 +1067,255 @@ const handleUnlink = async () => {
         </div>
       </div>
     </div>
-    <div v-if="residentDetail" class="max-w-5xl mx-auto">
-      <!-- 🔹 CARD เดียว -->
-      <div
-        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
-      >
-        <div class="mb-6 text-center md:hidden">
-          <p class=" hidden md:block text-sm font-extrabold text-[#0E4B90] pt-2">
-            {{ userRoleLabel }}
-          </p>
-          <h2 class="hidden md:block text-xl font-semibold text-gray-500">
-            {{ fullName }}
-          </h2>
-        </div>
-        <!-- 🔹 WRAPPER ซ้าย-ขวา -->
-        <div class="flex flex-col md:flex-row gap-10">
-          <!-- ================= LEFT : Profile Header ================= -->
-          <div
-            class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
-          >
+    <div v-else-if="residentDetail" class="w-full mx-auto px-4 relative">
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- LEFT : Profile Card -->
+        <div
+          class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
+        >
+          <!-- Avatar Section -->
+          <div class="flex flex-col items-center text-center">
             <div
-              class="w-28 h-28 rounded-full overflow-hidden border border-gray-200 shadow-sm"
+              class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar mx-auto"
             >
-              <img
-                v-if="profileImageUrlPreview"
-                :src="profileImageUrlPreview"
-                class="w-full h-full object-cover"
-              />
-              <div
-                v-else-if="fullName"
-                class="w-full h-full bg-[#185DC0] flex items-center justify-center text-white text-4xl font-semibold"
-              >
-                {{ userInitial }}
+              <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+                <img
+                  v-if="profileImageUrlPreview"
+                  :src="profileImageUrlPreview"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+                />
+                <div
+                  v-else-if="fullName"
+                  class="w-full h-full flex items-center justify-center text-white text-4xl font-bold"
+                >
+                  {{ userInitial }}
+                </div>
               </div>
             </div>
-              <p class="text-sm font-extrabold text-[#0E4B90] pt-6">
-          {{ userRoleLabel }}
-        </p>
-            <p
-              class="mb-4 text-black font-semibold text-lg pt-5 text-gray-500"
-            >
+            <p class="text-sm font-extrabold text-[#0E4B90] pt-6 tracking-wider">
+              {{ userRoleLabel }}
+            </p>
+            <p class="mt-4 text-black font-bold text-xl truncate max-w-[200px] mx-auto">
               {{ fullName }}
             </p>
           </div>
 
-          <!-- ================= RIGHT : Personal Information ================= -->
-          <div class="md:w-2/3">
+          <!-- Menu Navigation -->
+          <div class="mt-8 space-y-2 border-t border-gray-100 pt-6">
+            <button
+              @click="activeTab = 'profile'"
+              :class="menuClass('profile')"
+              class="relative w-full cursor-pointer"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 22C4 20.9391 4.42143 19.9217 5.17157 19.1716C5.92172 18.4214 6.93913 18 8 18H16C17.0609 18 18.0783 18.4214 18.8284 19.1716C19.5786 19.9217 20 20.9391 20 22C20 22.5304 19.7893 23.0391 19.4142 23.4142C19.0391 23.7893 18.5304 24 18 24H6C5.46957 24 4.96086 23.7893 4.58579 23.4142C4.21071 23.0391 4 22.5304 4 22Z"
+                  stroke-width="2.5"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M12 14C13.6569 14 15 12.6569 15 11C15 9.34315 13.6569 8 12 8C10.3431 8 9 9.34315 9 11C9 12.6569 10.3431 14 12 14Z"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <span>Personal Information</span>
+            </button>
+
+            <button
+              @click="activeTab = 'status'"
+              :class="menuClass('status')"
+              class="relative w-full cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span>Resident Status</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT : Content Area -->
+        <div class="w-full md:w-2/3">
+          <!-- Tab 1: Personal Information -->
+          <div v-if="activeTab === 'profile'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
               <h3 class="font-extrabold text-xl text-black tracking-tight">
-                User Information
+                Resident Details
               </h3>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >First Name</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-                  {{ firstName }}
-                </p>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">First Name</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ firstName }}</p>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Last Name</label>
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-                  {{ lastName }}
-                </p>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Last Name</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ lastName }}</p>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
-                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px] overflow-hidden">
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Email</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
                   <p class="truncate">{{ email }}</p>
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Room Number</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-                  {{ display(roomNumber) }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Dormitory</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-                  {{ dormName }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Line </label>
-                <div v-if="effectiveLineId" class="flex items-center h-[58px]">
-                  <div
-                    class="flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 bg-green-50 text-green-700 hover:bg-green-100 border border-green-100 font-bold max-w-fit"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#00b900"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#00b900"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Linked</span>
-                  </div>
-                </div>
-                <div v-else class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div
-                    class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 text-gray-400 cursor-default border border-transparent font-medium max-w-fit shadow-sm"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#9CA3AF"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g fill="#9CA3AF"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Not Linked</span>
-                  </div>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Room Number</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ display(roomNumber) }}</p>
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1"
-                  >Phone Number</label
-                >
-                <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 flex items-center h-[58px]">
-                  {{ display(phoneNumber) }}
-                </p>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Dormitory</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ dormName }}</p>
+                </div>
               </div>
-              <div class="sm:col-span-2 flex gap-3 mt-6 justify-end pt-4">
-                <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:bg-gray-50 rounded-2xl transition-all"
-                  label="Cancel"
-                  color="gray"
-                  @click="$emit('cancel')"
-                />
-                <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-2.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg shadow-blue-500/10 transition-all"
-                  label="Edit"
-                  color="blue"
-                  @click="$emit('edit')"
-                />
+
+              <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2 ml-1 tracking-wider">Phone Number</label>
+                <div class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-semibold text-gray-700 flex items-center h-[58px] overflow-hidden">
+                  <p class="truncate">{{ display(phoneNumber) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="flex justify-between sm:justify-end gap-x-2 sm:gap-x-3 mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-50">
+              <ButtonWeb
+                class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl sm:rounded-2xl transition-all active:scale-95 flex items-center cursor-pointer"
+                label="Back"
+                color="gray"
+                @click="$emit('cancel')"
+              />
+              <ButtonWeb
+                class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-2xl shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer"
+                label="Edit"
+                color="blue"
+                @click="$emit('edit')"
+              />
+            </div>
+          </div>
+
+          <!-- Tab 2: Resident Status -->
+          <div v-if="activeTab === 'status'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                <h3 class="font-extrabold text-xl text-black tracking-tight font-black">
+                  Account Status
+                </h3>
+              </div>
+              
+              <!-- Compact Status Badge (Moved from Body) -->
+              <div :class="[
+                'px-5 py-2.5 rounded-2xl border flex items-center gap-3 transition-all duration-500 shadow-sm grow-0',
+                safeStatus?.toUpperCase() === 'ACTIVE' ? 'bg-emerald-50 border-emerald-100' : 
+                safeStatus?.toUpperCase() === 'PENDING' ? 'bg-amber-50 border-amber-100' : 
+                safeStatus?.toUpperCase() === 'DELETED' ? 'bg-rose-50 border-rose-100' : 'bg-gray-50 border-gray-100'
+              ]">
+                <div :class="[
+                  'w-2 h-2 rounded-full animate-pulse',
+                  safeStatus?.toUpperCase() === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 
+                  safeStatus?.toUpperCase() === 'PENDING' ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 
+                  safeStatus?.toUpperCase() === 'DELETED' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]' : 'bg-gray-400'
+                ]"></div>
+                <div class="flex flex-col">
+                  <p class="text-[9px] font-black text-gray-400/80 tracking-widest leading-none mb-1">Current Status</p>
+                  <p :class="[
+                    'text-sm font-black leading-none tracking-tight',
+                    safeStatus?.toUpperCase() === 'ACTIVE' ? 'text-emerald-600' :
+                    safeStatus?.toUpperCase() === 'INACTIVE' ? 'text-gray-600' :
+                    safeStatus?.toUpperCase() === 'DELETED' ? 'text-rose-600' :
+                    safeStatus?.toUpperCase() === 'PENDING' ? 'text-amber-600' : 'text-slate-800'
+                  ]">{{ displayStatus(safeStatus) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-8">
+
+              <!-- Section 2: Account Features & Verification (Separate Card) -->
+              <div class="space-y-6">
+                <!-- Verified Status Card -->
+                <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" 
+                     class="flex items-center gap-6 px-8 py-8 bg-white rounded-[32px] border border-emerald-100 shadow-[0_15px_40px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-500">
+                  <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-black text-emerald-600/60 tracking-[0.2em] leading-none mb-2.5 text-left">Identity Verification</p>
+                    <p class="text-2xl font-black text-emerald-900 leading-none text-left">Verified</p>
+                  </div>
+                </div>
+
+                <!-- Account Verification Action Card -->
+                <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" 
+                     class="bg-white rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 border border-blue-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 flex flex-col items-start text-left">
+                  <!-- Header Area: Icon + Info (Row on all screens) -->
+                  <div class="flex flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 w-full text-left">
+                    <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-1 sm:-rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-10 sm:h-10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                          <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                       <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-0.5 sm:mb-2 leading-tight">Pending Verification</h5>
+                       <p class="text-[10px] sm:text-base text-gray-500 font-medium leading-relaxed max-w-sm">This account has not been activated yet. Please send a verification link to complete the process.</p>
+                    </div>
+                  </div>
+
+                  <!-- Footer Area: Action Buttons -->
+                  <div class="flex flex-col items-center gap-4 w-full">
+                    <ButtonWeb
+                      label="Send Activation Email"
+                      :color="isEmailDisabled ? 'gray' : 'blue'"
+                      :loading="loadingEmail"
+                      :disabled="isEmailDisabled"
+                      @click="!isEmailDisabled && handleSendEmailNotification()"
+                      class="w-full sm:w-auto min-h-[50px] sm:min-h-[60px] group/sendbtn px-6 sm:px-12 py-3 sm:py-5 font-black shadow-lg transition-all active:scale-95 text-xs sm:text-sm border-0"
+                      :class="[
+                        isEmailDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
+                      ]"
+                    >
+                       <template #icon>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 sm:group-hover/sendbtn:translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                       </template>
+                    </ButtonWeb>
+                    
+                    <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
+                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
+                        <div class="relative flex-shrink-0">
+                           <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                           </svg>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold leading-snug">Activation email sent. You can resend it again on the next day</span>
+                      </div>
+                    </transition>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1006,7 +1324,7 @@ const handleUnlink = async () => {
     </div>
   </div>
 
-  <!-- ✅ Popup แจ้งเตือนเชื่อมต่อสำเร็จและให้ Add OA -->
+
   <Transition
     enter-active-class="transition duration-300 ease-out"
     enter-from-class="opacity-0 scale-95"
@@ -1022,9 +1340,13 @@ const handleUnlink = async () => {
       <!-- Modal Content -->
       <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] border border-white/20">
         <!-- Success Icon -->
-        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100 animate-bounce">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
+        <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_20px_40px_rgba(0,185,0,0.3)] animate-bounce relative">
+          <!-- Glassy inner glow for better contrast -->
+          <div class="absolute inset-0 bg-white/10 rounded-full blur-sm scale-90"></div>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="relative z-10 drop-shadow-sm">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
 
@@ -1032,20 +1354,25 @@ const handleUnlink = async () => {
         <p class="text-gray-500 font-bold leading-relaxed mb-10 px-4">Please click the button below to add <span class="text-[#00b900]">Tractify OA</span> as a friend to receive notifications.</p>
         
         <div class="space-y-4">
-          <button 
+          <ButtonWeb 
             @click="addLineOA"
-            class="w-full py-5 bg-[#00b900] hover:bg-[#00a300] text-white font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+            label="Add Tractify OA"
+            color="green"
+            class="w-full py-5 font-black text-lg rounded-2xl shadow-[0_12px_24px_rgba(0,185,0,0.3)] hover:shadow-[0_15px_30px_rgba(0,185,0,0.4)]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="currentColor"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/></svg>
-            Add Tractify OA
-          </button>
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256">
+                <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="currentColor"/>
+              </svg>
+            </template>
+          </ButtonWeb>
           
-          <button 
+          <ButtonWeb 
             @click="showLineSuccessPopup = false"
-            class="w-full py-4 text-gray-400 hover:text-gray-600 font-bold transition-colors cursor-pointer"
-          >
-            Remind me later
-          </button>
+            label="Close"
+            color="gray"
+            class="w-full py-4 text-gray-400 font-bold border-none shadow-none bg-transparent hover:bg-transparent hover:text-gray-600 transition-colors"
+          />
         </div>
       </div>
     </div>

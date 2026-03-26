@@ -1,70 +1,60 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter, useRoute } from 'vue-router'
+import ButtonWeb from './ButtonWeb.vue'
 import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
-import { getAnnouncements } from '@/utils/fetchUtils.js'
+import {
+  getAnnouncements,
+  getAnnouncementById,
+  recordAnnouncementView
+} from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-
-const getCategoryBadgeClass = (category) => {
-  switch (category) {
-    case 'Urgent': return 'bg-[#FEF2F2] text-[#EF4444]'
-    case 'Maintenance': return 'bg-[#FFFBEB] text-[#F59E0B]'
-    case 'Events': return 'bg-[#EFF6FF] text-[#3B82F6]'
-    case 'General': return 'bg-[#F0FDF4] text-[#10B981]'
-    default: return 'bg-gray-100 text-gray-800'
-  }
-}
-
-const getCategoryIcon = (category) => {
-  switch (category) {
-    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`
-    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>`
-    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>`
-    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>`
-    default: return ''
-  }
-}
+import { searchAnnouncements } from '@/stores/SortManager.js'
+import AnnouncementFilterBar from './AnnouncementFilterBar.vue'
+import { getItems } from '@/utils/fetchUtils.js'
+import ResidentAnnouncementTable from './ResidentAnnouncementTable.vue'
 
 const loginManager = useAuthManager()
 const announcementManager = useAnnouncementManager()
-const showLogoutConfirm = ref(false)
+const { announcements } = storeToRefs(announcementManager)
 const router = useRouter()
 const route = useRoute()
 const showHomePageResident = ref(false)
-const tab = ref(route.query.tab || 'all')
-
+const selectedCategory = ref(route.query.tab || 'all')
+const viewMode = ref('grid')
+const selectedDate = ref('')
+const tab = ref('') 
 watch(
   () => route.query.tab,
   (newTab) => {
     if (newTab) {
-      tab.value = newTab
+      selectedCategory.value = newTab
     }
   }
 )
-const currentSlide = ref(1)
+
+
 const bannerAnnouncements = computed(() => {
-  return allPublishedAnnouncements.value.slice(0, 4)
+  return allPublishedAnnouncements.value
+    .filter(item => item.pinned)
+    .slice(0, 3)
 })
 
-// Modal State
+
+
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
-
-// Calendar Modal State
 const isCalendarOpen = ref(false)
-
-// Archive Modal State
 const isArchiveOpen = ref(false)
-
 const searchQuery = ref('')
-
 const currentDate = ref('')
 const currentMonthName = ref('')
 const currentDay = ref(1)
@@ -93,10 +83,22 @@ const formatDate = (dateString) => {
   if (!dateString || dateString === 'Just now') return 'Just now'
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
-  const d = date.getDate()
-  const m = date.toLocaleDateString('en-US', { month: 'short' })
-  const y = date.getFullYear()
-  return `${d} ${m} ${y}`
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} - ${hours}:${minutes}`
+}
+
+const getCategoryIcon = (category) => {
+  switch (category) {
+    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`
+    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`
+    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`
+    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+    default: return ''
+  }
 }
 
 const updateDate = () => {
@@ -109,57 +111,178 @@ const updateDate = () => {
 let dateInterval
 
 const allPublishedAnnouncements = computed(() => {
-  return announcementManager.announcements
-    .filter(item => item.status === 'Published')
-    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .map(item => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      const rawDate = item.createdAt || item.date || 'Just now'
-      
+  return announcements.value
+    .filter(item => item.status === 'PUBLISHED')
+    .sort((a, b) => new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted))
+    .map((item) => {
+      const rawDate = item.publishAt || 'Just now'
+      const rawType = (item.category || 'General').toLowerCase()
+      const normalizedType = rawType.includes('event') ? 'event' : 'news'
+
       return {
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.subtitle || item.description || '',
-        content: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        date: formatDate(rawDate),
-        views: item.views || 0,
-        author: item.author || 'Staff Portal',
-        type: type.includes('event') ? 'event' : 'news'
+        ...item,
+        date: rawDate,
+        type: normalizedType,
+        views: item.views || item.viewCount || 0
       }
     })
+    .sort((a, b) => {
+      const dateA = new Date(a.date)
+      const dateB = new Date(b.date)
+      if (isNaN(dateA.getTime())) return 1
+      if (isNaN(dateB.getTime())) return -1
+      return dateB - dateA
+    })
+    .map((item) => ({
+      ...item,
+      date: formatDate(item.date)
+    }))
 })
 
 const filteredAnnouncements = computed(() => {
-  const query = searchQuery.value.toLowerCase()
-  return allPublishedAnnouncements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(query) || 
-                          item.subtitle.toLowerCase().includes(query)
-    const matchesTab = tab.value === 'all' || 
-                      (tab.value === 'event' && item.type === 'event') ||
-                      (tab.value === 'news' && item.type === 'news')
-    return matchesSearch && matchesTab
+  const announcementsByTab = allPublishedAnnouncements.value.filter(item => {
+
+    const matchesCategory = (!selectedCategory.value || selectedCategory.value === 'all') 
+      ? true 
+      : item.category === selectedCategory.value
+      
+    let matchesDate = true
+    if (selectedDate.value) {
+      const targetDate = selectedDate.value 
+      const rawDateStr = item.publishAt || ''
+      
+      if (rawDateStr && rawDateStr !== 'Just now') {
+        const d = new Date(rawDateStr)
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+          const formattedItemDate = `${year}-${month}-${day}`
+          matchesDate = formattedItemDate === targetDate
+        } else {
+          matchesDate = false
+        }
+      } else if (rawDateStr === 'Just now') {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        const todayStr = `${year}-${month}-${day}`
+        matchesDate = todayStr === targetDate
+      } else {
+        matchesDate = false
+      }
+    }
+
+    return matchesCategory && matchesDate
   })
+  
+  return searchAnnouncements(announcementsByTab, searchQuery.value)
+})
+
+const currentPage = ref(1)
+const pageSize = ref(6)
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredAnnouncements.value.length / pageSize.value)
+})
+
+const paginatedAnnouncements = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredAnnouncements.value.slice(start, end)
+})
+
+const pages = computed(() => {
+  const p = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) p.push(i)
+  } else {
+    if (current <= 3) {
+      p.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      p.push(1, '...', total - 2, total - 1, total)
+    } else {
+      p.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
+  }
+
+  return p
+})
+
+const canGoNext = computed(() => {
+  return currentPage.value < totalPages.value
+})
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+const nextPage = () => {
+  if (canGoNext.value) {
+    currentPage.value++
+  }
+}
+
+const goToPage = (p) => {
+  currentPage.value = p
+}
+
+watch([selectedCategory, searchQuery, selectedDate], () => {
+  currentPage.value = 1
 })
 
 const filteredEvents = computed(() => {
-  return filteredAnnouncements.value.filter(e => e.type === 'event')
+  return paginatedAnnouncements.value.filter(e => e.type === 'event')
 })
 
 const filteredNews = computed(() => {
-  return filteredAnnouncements.value.filter(n => n.type === 'news')
+  return paginatedAnnouncements.value.filter(n => n.type === 'news')
 })
 
-const openModal = (item) => {
-  selectedAnnouncement.value = {
-    title: item.title,
-    subtitle: item.subtitle,
-    content: item.content,
-    tag: item.category,
-    date: item.date
+const openModal = async (item) => {
+  try {
+    await recordAnnouncementView(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    const data = await getAnnouncementById(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    if (data) {
+      announcementManager.updateAnnouncement(data)
+      const freshItem = announcementManager.findAnnouncementById(item.id)
+      
+      if (freshItem) {
+        selectedAnnouncement.value = {
+          ...freshItem,
+          tag: freshItem.category,
+          date: freshItem.publishAt,
+          views: freshItem.viewCount,
+          author: 'Staff Portal',
+          type: freshItem.category.toLowerCase().includes('event') ? 'event' : 'news'
+        }
+      } else {
+        selectedAnnouncement.value = item
+      }
+    } else {
+      selectedAnnouncement.value = item
+    }
+  } catch (error) {
+    console.error('Error fetching announcement detail:', error)
+    selectedAnnouncement.value = item
   }
+
   isModalOpen.value = true
 }
 
@@ -170,18 +293,11 @@ const closeModal = () => {
   }, 300)
 }
 
-const showResidentParcels = ref(false)
 const returnLogin = ref(false)
 const showProfileResident = ref(false)
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
-}
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
 }
 const showNotificationPage = async () => {
   router.replace({ name: 'notification' })
@@ -194,49 +310,47 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
 const showProfileResidentPage = async function () {
   router.replace({
     name: 'profileresident'
   })
   showProfileResident.value = true
 }
-const isCollapsed = ref(false)
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
+
+let fetchInterval
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  window.removeEventListener('focus', fetchAnnouncementData)
   if (dateInterval) clearInterval(dateInterval)
+  if (fetchInterval) clearInterval(fetchInterval)
 })
 const fetchAnnouncementData = async () => {
-  console.log('Fetching announcements disabled to avoid 500 error')
-  /*
-  const data = await getAnnouncements(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-    router
-  )
+  try {
+    const data = await getItems(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      router
+    )
 
-  if (data && data.length > 0) {
-    announcementManager.setAnnouncements(data)
+    if (data && Array.isArray(data)) {
+      announcementManager.setAnnouncements(data)
+    }
+  } catch (e) {
+    console.warn('Fetch announcements failed', e)
   }
-  */
 }
 
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
+  window.addEventListener('focus', fetchAnnouncementData)
   generateCalendar()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
   await fetchAnnouncementData()
+  fetchInterval = setInterval(fetchAnnouncementData, 30000)
 })
 </script>
 
@@ -245,18 +359,17 @@ onMounted(async () => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-    <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader @toggle-sidebar="toggleSidebar"/>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
-        <aside
-          :class="[
-            'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
-            isCollapsed ? 'w-0 md:w-16' : 'w-60'
-          ]"
-          class="overflow-hidden"
-        >
-          <nav class="flex-1 divide-y divide-transparent space-y-1">
-            <SidebarItem title="Tractify" @click="toggleSidebar">
+      <aside
+        :class="[
+          'fixed flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
+          isCollapsed ? 'w-0 md:w-16' : 'w-60'
+        ]"
+        class="overflow-hidden"
+      >
+        <nav class="flex-1 divide-y divide-transparent space-y-1">
+          <SidebarItem title="Tractify" @click="toggleSidebar" :collapsed="isCollapsed">
               <template #icon>
                 <svg
                   width="45"
@@ -399,25 +512,13 @@ onMounted(async () => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
-
       <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gray-50/50">
         <section class="max-w-7xl mx-auto">
-          <!-- Header -->
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
               <div class="p-2 bg-blue-100 rounded-lg text-[#0E4B90]">
-                 <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12 8H4C3.46957 8 2.96086 8.21071 2.58579 8.58579C2.21071 8.96086 2 9.46957 2 10V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H5V20C5 20.2652 5.10536 20.5196 5.29289 20.7071C5.48043 20.8946 5.73478 21 6 21H8C8.26522 21 8.51957 20.8946 8.70711 20.7071C8.89464 20.5196 9 20.2652 9 20V16H12L17 20V4L12 8ZM21.5 12C21.5 13.71 20.54 15.26 19 16V8C20.53 8.75 21.5 10.3 21.5 12Z"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="stroke-current stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                 </svg>
               </div>
               <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
@@ -426,311 +527,181 @@ onMounted(async () => {
             </h2>
           </div>
 
-          <!-- Featured Banner -->
-          <div class="relative overflow-hidden rounded-2xl shadow-lg mb-10 group">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0E4B90] opacity-90"></div>
-            <!-- Decorative circles -->
-            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-blue-400/20 blur-3xl"></div>
-            
-            <div v-if="bannerAnnouncements.length > 0" class="relative z-10 p-8 md:p-12 flex flex-col items-center text-center">
-              <span class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-100 uppercase bg-blue-800/50 rounded-full border border-blue-400/30">
-                {{ bannerAnnouncements[currentSlide - 1]?.category || 'Featured' }}
-              </span>
-              <h3 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.title }}
-              </h3>
-              <p class="text-blue-100 max-w-2xl text-lg mb-8 leading-relaxed min-h-[56px] line-clamp-2">
-                {{ bannerAnnouncements[currentSlide - 1]?.subtitle }}
-              </p>
-              
-              <!-- Navigation Arrows -->
-              <button 
-                @click="currentSlide = currentSlide === 1 ? 4 : currentSlide - 1" 
-                class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              
-              <button 
-                @click="currentSlide = currentSlide === 4 ? 1 : currentSlide + 1" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-
-              <!-- Carousel Indicators -->
-              <div class="flex justify-center gap-3">
-                <button
-                  v-for="n in bannerAnnouncements.length"
-                  :key="n"
-                  @click="currentSlide = n"
-                  class="transition-all duration-300 rounded-full h-2 cursor-pointer"
-                  :class="currentSlide === n ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'"
-                ></button>
-              </div>
-            </div>
-            
-            <!-- Fallback when no banners -->
-            <div v-else class="relative z-10 p-16 flex flex-col items-center text-center text-white">
-              <h3 class="text-2xl font-bold mb-2">No Active Announcements</h3>
-              <p class="text-blue-100">Check back later for community updates.</p>
-            </div>
-          </div>
-
-          <!-- Content Filter & Search -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <!-- Tabs -->
-            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex w-fit">
-              <button
-                @click="tab = 'all'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  (tab === 'all' || !tab)
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                All
-              </button>
-              <button
-                @click="tab = 'event'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ',
-                  tab === 'event'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                Events
-              </button>
-              <button
-                @click="tab = 'news'"
-                :class="[
-                  'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                  tab === 'news'
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                News
-              </button>
-            </div>
-
-            <!-- Search -->
-            <div class="relative w-full md:w-80 group">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <div 
+            class="mb-10 sm:mb-14 overflow-visible -mx-6 sm:mx-0 px-0 sm:px-1" 
+            v-if="bannerAnnouncements.length > 0 && (!selectedCategory || selectedCategory === 'all' || selectedCategory === 'General' || selectedCategory === 'Events')"
+          >
+            <div class="relative overflow-hidden rounded-none sm:rounded-2xl bg-white p-5 sm:p-8 border-y sm:border border-blue-50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
+              <div class="absolute bottom-0 left-0 right-0 h-48 sm:h-64 pointer-events-none overflow-hidden">
+                <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                  <path fill="#1D355E" opacity="0.15" d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,181.3C672,203,768,213,864,192C960,171,1056,117,1152,106.7C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                  <path fill="#2563EB" opacity="0.1" d="M0,224L60,213.3C120,203,240,181,360,181.3C480,181,600,203,720,218.7C840,235,960,245,1080,224C1200,203,1320,149,1380,122.7L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
                 </svg>
               </div>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search ..."
-                class="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E4B90]/20 focus:border-[#0E4B90] transition duration-200 shadow-sm"
-              />
-            </div>
-          </div>
+              <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#1D355E] rounded-full blur-3xl opacity-[0.07]"></div>
 
-          <!-- Content Grid -->
-          <div class="min-h-[400px]">
-            <!-- Events Grid -->
-            <div v-if="tab === 'event' || tab === 'all' || !tab" class="animate-in fade-in slide-in-from-bottom-4 duration-500" :class="{'mb-12': tab === 'all'}">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
-                <div class="flex items-center gap-4">
-                  <div class="w-1.5 h-8 bg-[#0E4B90] rounded-full"></div>
-                  <div>
-                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Upcoming Events</h3>
-                    <p class="text-xs font-medium text-gray-500 mt-0.5">Stay updated with community activities</p>
-                  </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Auto-hide symbol on mobile to save space) -->
-                  <div class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
-                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                    </div>
-                    <span class="tracking-wide">{{ currentDate }}</span>
-                  </div>
-                  <!-- Archive Button (Always Visible) -->
-                  <button 
-                    @click="isArchiveOpen = true" 
-                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
-                  >
-                    Archive History →
-                  </button>
-                </div>
+              <div class="relative z-10 mb-6 px-5 sm:px-0">
+                <h3 class="text-2xl sm:text-4xl font-extrabold text-[#1D355E] mb-1.5 tracking-tight">Recommended</h3>
+                <p class="text-gray-500 text-xs sm:text-base font-medium">Specially selected updates for dormitory</p>
               </div>
-              
-               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div
-                  v-for="item in filteredEvents"
-                  :key="item.id"
-                  @click="openModal(item)"
-                  class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
-                >
-                  <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                     <!-- Placeholder for Image -->
-                     <div class="absolute inset-0 flex items-center justify-center text-gray-400">
-                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                     </div>
-                  </div>
-                  
-                  <div class="p-6 flex-grow flex flex-col">
-                    <div class="flex justify-between items-start mb-4">
-                      <div class="flex items-center gap-2 flex-wrap">
 
-                        <!-- Category Badge -->
-                        <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
-                          <span v-html="getCategoryIcon(item.category)"></span>
-                          {{ item.category }}
+              <div v-if="bannerAnnouncements.length > 0" class="relative group/banner">
+
+
+              <div 
+                class="relative z-10 flex sm:grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-x-visible pb-6 sm:pb-0 custom-scrollbar-hide snap-x sm:snap-none px-5 sm:px-0"
+              >
+                <div 
+                  v-for="(item, index) in bannerAnnouncements" 
+                  :key="index"
+                  class="flex-shrink-0 w-[260px] sm:w-full snap-start group cursor-pointer"
+                  @click="openModal(item)"
+                >
+                  <div class="bg-white rounded-2xl overflow-hidden shadow-lg sm:shadow-xl transition-transform duration-300 group-hover:-translate-y-2 h-[320px] sm:h-[340px] flex flex-col relative">
+                    <div class="relative h-[180px] sm:h-[220px] overflow-hidden">
+                      <img 
+                        v-if="item.coverImageUrl || item.coverImage"
+                        :src="item.coverImageUrl || item.coverImage" 
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        alt="Banner Image"
+                      />
+                      <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
+                        <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div class="absolute top-3 right-3" v-if="item.pinned">
+                        <div class="p-2 bg-white/90 backdrop-blur-md rounded-full text-red-600 shadow-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="p-3.5 sm:p-4 flex-grow flex flex-col justify-between">
+                      <h4 class="text-gray-900 font-bold text-sm sm:text-base line-clamp-2 leading-tight mb-2">
+                        {{ item.title?.replace(/^Draft\s*-\s*/i, '') }}
+                      </h4>
+                      
+                      <div>
+                        <span 
+                          class="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold rounded-lg tracking-wider border shadow-sm"
+                          :class="item.type === 'event' 
+                            ? 'bg-purple-50 text-purple-600 border-purple-100' 
+                            : 'bg-blue-50 text-blue-600 border-blue-100'"
+                        >
+                          <span v-html="getCategoryIcon(item.category || 'General')"></span>
+                          {{ item.category || 'General' }}
                         </span>
                       </div>
                     </div>
-
-                    <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#0E4B90] transition-colors leading-tight line-clamp-2">
-                      {{ item.title }}
-                    </h4>
-                    <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-6 flex-grow">
-                      {{ item.subtitle || item.content }}
-                    </p>
-
-                    <!-- Divider -->
-                    <div class="h-px bg-gray-100 w-full mb-4"></div>
-
-                    <div class="flex items-center justify-between gap-2 mt-auto">
-                      <div class="flex flex-col gap-1.5 min-w-0">
-                        <!-- Row 1: Date -->
-                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                          </svg>
-                          <span class="truncate">{{ item.date }}</span>
-                        </div>
-                        
-                        <!-- Row 2: Author and Views -->
-                        <div class="flex items-center text-gray-500 text-[11px] font-bold gap-1.5 min-w-0">
-                          <div class="h-4 w-4 bg-blue-500 text-white rounded-full flex-shrink-0 flex items-center justify-center text-[8px] font-bold">P</div>
-                          <div class="flex items-center gap-1.5 truncate">
-                            <span class="truncate">{{ item.author }}</span>
-                            <span class="text-gray-300 flex-shrink-0">·</span>
-                            <div class="flex items-center gap-1 text-gray-400 flex-shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                              <span>{{ item.views }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <span class="text-sm font-semibold text-[#0E4B90] flex items-center gap-1">
-                        View
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- News List -->
-            <div v-if="tab === 'news' || tab === 'all'" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <!-- Modern News Header -->
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mb-8 gap-4 transition-all duration-300 hover:shadow-md">
-                <div class="flex items-center gap-4">
-                  <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
-                  <div>
-                    <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Latest News</h3>
-                    <p class="text-xs font-medium text-gray-500 mt-0.5">Important updates and official notices</p>
-                  </div>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <!-- Date Box (Visible on mobile when tab is 'news') -->
-                  <div v-if="tab !== 'all'" class="inline-flex items-center bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-sm shadow-inner whitespace-nowrap">
-                    <div class="mr-2 sm:mr-3 p-1 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-4 sm:h-4">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                    </div>
-                    <span class="tracking-wide">{{ currentDate }}</span>
-                  </div>
-
-                  <!-- Archive Button -->
-                  <button 
-                    v-if="tab !== 'all'"
-                    @click="isArchiveOpen = true" 
-                    class="text-sm font-bold text-blue-600 border border-blue-100 bg-blue-50/50 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
-                  >
-                    Archive History →
-                  </button>
-                </div>
+            <div v-else class="relative z-10 py-12 flex flex-col items-center text-center text-white">
+              <div class="p-4 bg-white/20 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div
-                  v-for="item in filteredNews"
-                  :key="'news-' + item.id"
-                  @click="openModal(item)"
-                  class="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-6 cursor-pointer"
-                >
-                  <div class="w-full md:w-40 h-28 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 relative overflow-hidden flex items-center justify-center text-gray-300 border border-gray-50">
-                    <svg class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div class="flex-1 flex flex-col">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="px-2 py-0.5 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg" :class="getCategoryBadgeClass(item.category)">
-                        <span v-html="getCategoryIcon(item.category)"></span>
-                        {{ item.category }}
-                      </span>
-                      <span class="text-[10px] font-bold text-gray-400 ml-auto">{{ item.date }}</span>
-                    </div>
-                    <h4 class="text-base font-bold text-gray-900 mb-1 group-hover:text-[#0E4B90] transition-colors line-clamp-1">
-                      {{ item.title }}
-                    </h4>
-                    <p class="text-gray-500 text-xs leading-relaxed line-clamp-2 flex-grow">
-                      {{ item.subtitle || item.content }}
-                    </p>
-                    <div class="mt-3 flex items-center justify-between">
-                       <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
-                          <span class="flex items-center gap-1">
-                             <div class="h-3.5 w-3.5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[7px]">P</div>
-                             {{ item.author }}
-                          </span>
-                          <span class="flex items-center gap-1">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                             </svg>
-                             {{ item.views }}
-                          </span>
-                       </div>
-                       <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
-                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                          </svg>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <h3 class="text-xl font-bold mb-1">No Pinned Announcements</h3>
+              <p class="text-white/70">Check back later for featured updates and community news.</p>
             </div>
+            </div>
+          </div>
+
+          <AnnouncementFilterBar
+            :search="searchQuery"
+            :category="selectedCategory"
+            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
+            :date="selectedDate"
+            :viewMode="viewMode"
+            :showNewButton="false"
+            :showViewToggles="false"
+            @update:search="searchQuery = $event"
+            @update:category="selectedCategory = $event"
+            @update:date="selectedDate = $event"
+            @update:viewMode="viewMode = $event"
+          />
+
+          <div class="mb-6 w-full">
+            <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
+              <button
+                @click="selectedCategory = 'all'"
+                class="order-first sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="(selectedCategory === 'all' || !selectedCategory) ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                All
+              </button>
+              
+              <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
+
+              <button
+                @click="selectedCategory = 'General'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'General' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'General' ? 'text-blue-300' : 'text-blue-500 bg-blue-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                General
+              </button>
+
+              <button
+                @click="selectedCategory = 'Maintenance'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Maintenance' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Maintenance' ? 'text-orange-300' : 'text-orange-500 bg-orange-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                Maintenance
+              </button>
+
+              <button
+                @click="selectedCategory = 'Events'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Events' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Events' ? 'text-purple-300' : 'text-purple-500 bg-purple-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
+                Events
+              </button>
+
+              <button
+                @click="selectedCategory = 'Urgent'"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                :class="selectedCategory === 'Urgent' ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
+              >
+                <div :class="selectedCategory === 'Urgent' ? 'text-red-300' : 'text-red-500 bg-red-50 p-1 rounded-lg'">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                Urgent
+              </button>
+            </div>
+          </div>
+
+          <div class="min-h-[400px]">
+            <ResidentAnnouncementTable
+              :items="paginatedAnnouncements"
+              :pages="pages"
+              :page="currentPage"
+              :total="filteredAnnouncements.length"
+              :can-next="canGoNext"
+              :viewMode="viewMode"
+              :status="false"
+              @prev="prevPage"
+              @next="nextPage"
+              @go="goToPage"
+              @view="openModal"
+            />
           </div>
         </section>
       </main>
@@ -743,144 +714,20 @@ onMounted(async () => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
-
   <AnnouncementDetailModal 
     :is-open="isModalOpen"
     :title="selectedAnnouncement?.title || ''"
     :subtitle="selectedAnnouncement?.subtitle || ''"
     :content="selectedAnnouncement?.content || ''"
-    :tag="selectedAnnouncement?.tag || ''"
-    :date="selectedAnnouncement?.date || ''"
+    :tag="selectedAnnouncement?.category || selectedAnnouncement?.tag || ''"
+    :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || selectedAnnouncement?.date || ''"
+    :author="selectedAnnouncement?.author || 'Community Admin'"
+    :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
+    :status="''"
+    :pinned="false"
+    :cover-image="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="closeModal"
-  />
-
-  <!-- Calendar Pop-up -->
-  <Teleport to="body">
-    <div v-if="isCalendarOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Calendar Header -->
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="relative z-10 flex justify-between items-start">
-            <div>
-              <p class="text-blue-200 text-sm font-medium mb-1">Current Date & Time</p>
-              <h2 class="text-2xl font-bold mb-2">{{ currentDate }}</h2>
-            </div>
-            <button @click="isCalendarOpen = false" class="p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Calendar Body -->
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">{{ currentMonthName }}</h3>
-            <div class="flex gap-2">
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button class="p-1 rounded-md hover:bg-gray-100 text-gray-500 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            <span v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']" :key="day" class="text-xs font-semibold text-gray-400">
-              {{ day }}
-            </span>
-          </div>
-          
-          <div class="grid grid-cols-7 gap-1 text-center">
-            <div 
-              v-for="(day, index) in calendarDays" 
-              :key="index"
-              class="aspect-square flex items-center justify-center text-sm rounded-full transition-colors"
-              :class="[
-                !day ? '' : 'cursor-pointer',
-                day === currentDay ? 'bg-[#0E4B90] text-white font-bold shadow-md' : 'text-gray-700 hover:bg-blue-50',
-              ]"
-            >
-              {{ day || '' }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isCalendarOpen = false" class="px-5 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
-
-  <!-- Archive Pop-up -->
-  <Teleport to="body">
-    <div v-if="isArchiveOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Archive Header -->
-        <div class="bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-6 text-white relative overflow-hidden flex items-center gap-4">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="2"></rect><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2V9"></path><path d="M10 13h4"></path></svg>
-          </div>
-          <div class="relative z-10 flex-1">
-            <h2 class="text-2xl font-bold tracking-tight">News Archive</h2>
-            <p class="text-blue-200 text-sm font-medium mt-1">Browse past announcements</p>
-          </div>
-          <button @click="isArchiveOpen = false" class="relative z-10 p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        
-        <!-- Archive Body -->
-        <div class="p-6">
-          <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-            <!-- Simulated Past Events -->
-            <div v-for="month in ['September', 'August', 'July']" :key="month" class="group">
-              <div class="flex items-center gap-4 mb-3">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ month }} 2026</h3>
-                <div class="h-px bg-gray-100 flex-1"></div>
-              </div>
-              
-              <div class="space-y-3 pl-2 border-l-2 border-blue-100 ml-2">
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-[#0E4B90] rounded-full group-hover:scale-125 transition-transform"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-100 px-2 py-0.5 rounded-md">General</span>
-                    <span class="text-xs text-gray-400">12 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Quarterly Community Meeting Notes</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">Review the discussed topics and action items from our last gathering.</p>
-                </div>
-                
-                <div class="relative flex flex-col gap-1 p-3 rounded-xl hover:bg-blue-50/50 transition-colors cursor-pointer">
-                  <div class="absolute -left-[23px] top-4 w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-[#0E4B90] bg-blue-50 px-2 py-0.5 rounded-md">Maintenance</span>
-                    <span class="text-xs text-gray-400">05 {{ month.slice(0,3) }}</span>
-                  </div>
-                  <h4 class="text-gray-800 font-semibold group-hover:text-[#0E4B90] transition-colors">Completed: Elevator Service</h4>
-                  <p class="text-sm text-gray-500 line-clamp-1">The scheduled maintenance for Building A elevators is now complete.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button @click="isArchiveOpen = false" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm cursor-pointer">
-            Close Archive
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+  />>
 </template>
 
 <style scoped>
@@ -897,5 +744,12 @@ onMounted(async () => {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>

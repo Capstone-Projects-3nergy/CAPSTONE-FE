@@ -4,22 +4,25 @@ import { useRouter } from 'vue-router'
 import QrScanner from 'qr-scanner'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import Quagga from '@ericblade/quagga2'
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library'
 import axios from 'axios'
 import Tesseract from 'tesseract.js'
 import ButtonWeb from './ButtonWeb.vue'
 import SelectWeb from './SelectWeb.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import SidebarItem from './SidebarItem.vue'
-import DashBoard from './DashBoard.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationManager = useNotificationManager()
 import { useParcelManager } from '@/stores/ParcelsManager'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import {
   getItems,
   getItemById,
@@ -38,7 +41,6 @@ import {
 } from '@/utils/fetchUtils'
 
 const addSuccess = ref(false)
-const showLogoutConfirm = ref(false)
 const parcelManager = useParcelManager()
 const trackingNumberError = ref(false)
 const recipientNameError = ref(false)
@@ -98,10 +100,8 @@ const scanResult = ref('')
 const previewUrl = ref(null)
 const showStaffParcels = ref(false)
 const showParcelScanner = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const returnLogin = ref(false)
 const showProfileStaff = ref(false)
 const showAddParcels = ref(false)
@@ -210,11 +210,14 @@ const savedParcels = ref([])
 
 const scanningMode = ref('')
 const isSuccessScan = ref(false)
+const isOcrLoading = ref(false) 
 let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
 const barcodeReaderRef = ref(null)
+const barcodeVideoRef = ref(null)
 const isCameraReady = ref(false)
+let zxingReader = null
 
 const showAddParcelPage = async () => {
   router.replace({ name: 'addparcels' })
@@ -231,49 +234,135 @@ async function extractParcelInfo(imageDataUrl) {
 
   try {
     const result = await Tesseract.recognize(imageDataUrl, 'tha+eng')
-    const text = result?.data?.text?.trim()
+    let text = result?.data?.text?.trim()
     if (!text) return null
+
+    // Pre-processing: Normalize some common OCR errors in tracking-like strings
+    const normalizedText = text.replace(/[OD]/g, '0').replace(/[IL]/g, '1')
 
     const info = {
       recipientName: '',
       trackingNumber: '',
       senderName: '',
-      parcelType: ''
+      parcelType: '',
+      companyId: null,
+      roomNumber: ''
     }
 
-    // 👤 Recipient
-    const nameMatch = text.match(
-      /(ชื่อผู้รับ|ผู้รับ|To|Recipient)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
-    )
-    if (nameMatch) info.recipientName = nameMatch[2].trim()
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0)
 
-    // 📦 Tracking (ไม่บังคับ TH)
-    const trackingMatch = text.match(/[A-Z0-9\-]{8,20}/)
-    if (trackingMatch) info.trackingNumber = trackingMatch[0]
+    // 👤 Recipient Search
+    const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'ถึง', 'To', 'Recipient', 'ชือผู้รับ', 'ชื่อ']
+    for (const line of lines) {
+      for (const kw of recipientKeywords) {
+        const regex = new RegExp(`^${kw}[:\\s]*(.*)`, 'i')
+        const match = line.match(regex)
+        if (match) {
+          let name = match[1].trim()
+          // Clean up: remove phone numbers or addresses if they follow the name
+          name = name.split(/(\d{9,10}|โทร|Tel|Address|ที่อยู่)/i)[0].trim()
+          name = name.replace(/[^\u0E00-\u0E7Fa-zA-Z\s]/g, '').trim()
+          if (name.length >= 2) {
+            info.recipientName = name
+            break
+          }
+        }
+      }
+      if (info.recipientName) break
+    }
 
-    // 📤 Sender
-    const senderMatch = text.match(
-      /(ชื่อผู้ส่ง|ผู้ส่ง|From|Sender)[:\s]*([\u0E00-\u0E7Fa-zA-Z\s]{3,})/i
-    )
-    if (senderMatch) info.senderName = senderMatch[2].trim()
+    // 📤 Sender Search
+    const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'จาก', 'From', 'Sender', 'ชือผู้ส่ง']
+    for (const line of lines) {
+      for (const kw of senderKeywords) {
+        const regex = new RegExp(`^${kw}[:\\s]*(.*)`, 'i')
+        const match = line.match(regex)
+        if (match) {
+          let name = match[1].trim()
+          name = name.split(/(\d{9,10}|โทร|Tel|Address|ที่อยู่)/i)[0].trim()
+          name = name.replace(/[^\u0E00-\u0E7Fa-zA-Z\s]/g, '').trim()
+          if (name.length >= 2) {
+            info.senderName = name
+            break
+          }
+        }
+      }
+      if (info.senderName) break
+    }
+
+    // 📦 Tracking & Company Detection
+    const trackingPatterns = [
+      // 🔹 Priority 1: Clear Prefixes (Check these first)
+      { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
+      { id: 'Kerry', regex: /KEX[A-Z]\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
+      { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
+      { id: 'JT_Prefix', idMap: 'JT', regex: /JD\d{13}/i },
+      
+      // 🔹 Priority 2: Purely Numeric (Check these last)
+      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, // DHL usually 10 or 12 digits
+      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, // FedEx often longer
+      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, // J&T also uses 12 digits numeric
+      
+      // Fallback
+      { id: 'Generic', regex: /[A-Z0-9]{8,22}/ }
+    ]
+
+    // Use normalized text for tracking numbers
+    const searchString = text + ' ' + normalizedText
+    const sanitizedSearchString = searchString.replace(/[^A-Z0-9]/g, '')
+    
+    for (const pattern of trackingPatterns) {
+      let match = searchString.match(pattern.regex) || (pattern.altRegex && searchString.match(pattern.altRegex))
+      
+      // If no match in raw text, try in sanitized text (useful for messy OCR with dots/slashes)
+      if (!match && pattern.id !== 'Generic' && pattern.id !== 'DHL' && pattern.id !== 'FedEx') {
+        match = sanitizedSearchString.match(pattern.regex)
+      }
+
+      if (match) {
+        info.trackingNumber = match[0].toUpperCase()
+        const matchId = pattern.idMap || pattern.id
+        const comp = companyList.value.find(c => {
+          const cName = c.companyName.toLowerCase()
+          if (matchId === 'Flash' && cName.includes('flash')) return true
+          if (matchId === 'Kerry' && cName.includes('kerry')) return true
+          if (matchId === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+          if (matchId === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+          if (matchId === 'DHL' && cName.includes('dhl')) return true
+          if (matchId === 'FedEx' && cName.includes('fedex')) return true
+          return false
+        })
+        if (comp) info.companyId = comp.companyId
+        if (pattern.id !== 'Generic') break 
+      }
+    }
+
+    if (!info.companyId) {
+      for (const comp of companyList.value) {
+        if (text.toLowerCase().includes(comp.companyName.toLowerCase())) {
+          info.companyId = comp.companyId
+          break
+        }
+      }
+    }
+
+    // 🏠 Room Number
+    const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No|Unit)[:\s]*(\d+[\/\d]*)/i)
+    if (roomMatch) info.roomNumber = roomMatch[2]
 
     // 📦 Parcel Type
-    if (text.match(/(กล่อง|Box)/i)) info.parcelType = 'BOX'
-    else if (text.match(/(ซอง|Document|Letter|Envelope)/i))
-      info.parcelType = 'DOCUMENT'
-    else if (text.match(/(Electronic|Device)/i))
-      info.parcelType = 'ELECTRONIC'
+    const typeText = text.toLowerCase()
+    if (typeText.match(/(กล่อง|box|package)/)) info.parcelType = 'BOX'
+    else if (typeText.match(/(ซอง|document|letter|envelope|จดหมาย|เอกสาร)/)) info.parcelType = 'DOCUMENT'
+    else if (typeText.match(/(electronic|device|อุปกรณ์|เครื่องใช้ไฟฟ้า)/)) info.parcelType = 'ELECTRONIC'
 
     return info
-  } catch {
+  } catch (err) {
+    console.error("OCR extraction failed:", err)
     return null
   }
 }
 
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
 const processScanResult = (text) => {
   if (!text) return
@@ -312,6 +401,42 @@ const processScanResult = (text) => {
 
   // Fallback: Treat as tracking number
   form.value.trackingNumber = text
+
+  // Carrier Pattern Detection - Auto select company
+  const trackingPatterns = [
+    // 🔹 Priority 1: Clear Prefixes
+    { id: 'Flash', regex: /^TH\d{11}[A-Z]$/i },
+    { id: 'Kerry', regex: /^KEX[A-Z]\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
+    { id: 'Thaipost', regex: /^[A-Z]{2}\d{9}TH$/i },
+    { id: 'JT_Prefix', idMap: 'JT', regex: /^JD\d{13}$/i },
+    
+    // 🔹 Priority 2: Purely Numeric (Ordered by specific length hints)
+    { id: 'DHL', regex: /^\d{10}$/ },
+    { id: 'FedEx', regex: /^\d{15}$/ },
+    { id: 'JT_Numeric', idMap: 'JT', regex: /^\d{12}$/ },
+    { id: 'FedEx_Long', idMap: 'FedEx', regex: /^\d{20,22}$/ }
+  ]
+
+  for (const pattern of trackingPatterns) {
+    const isMatched = pattern.regex.test(text) || (pattern.altRegex && pattern.altRegex.test(text))
+    if (isMatched) {
+      const matchId = pattern.idMap || pattern.id
+      const comp = companyList.value.find(c => {
+        const cName = c.companyName.toLowerCase()
+        if (matchId === 'Flash' && cName.includes('flash')) return true
+        if (matchId === 'Kerry' && cName.includes('kerry')) return true
+        if (matchId === 'Thaipost' && (cName.includes('thailand post') || cName.includes('thaipost'))) return true
+        if (matchId === 'JT' && (cName.includes('j&t') || cName.includes('jt'))) return true
+        if (matchId === 'DHL' && cName.includes('dhl')) return true
+        if (matchId === 'FedEx' && cName.includes('fedex')) return true
+        return false
+      })
+      if (comp) {
+        form.value.companyId = comp.companyId
+        break
+      }
+    }
+  }
 }
 
 const deleteScanResult = () => (scanResult.value = null)
@@ -320,11 +445,6 @@ function deleteSaveInformation(index) {
 }
 const deletePreview = () => (previewUrl.value = null)
 
-const showDashBoardPage = async () => {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
-
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
     alert('กล้องไม่รองรับ')
@@ -332,7 +452,11 @@ async function startCamera() {
   }
   try {
     videoStream.value = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
+      video: { 
+        facingMode: 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
     })
     videoRef.value.srcObject = videoStream.value
     videoRef.value.onloadedmetadata = () => {
@@ -358,27 +482,47 @@ async function capturePhoto() {
     return
   }
 
-  const canvas = document.createElement('canvas')
-  canvas.width = videoRef.value.videoWidth
-  canvas.height = videoRef.value.videoHeight
+  isOcrLoading.value = true
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = videoRef.value.videoWidth
+    canvas.height = videoRef.value.videoHeight
 
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(videoRef.value, 0, 0)
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(videoRef.value, 0, 0)
 
-  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
-  previewUrl.value = imageDataUrl
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9)
+    previewUrl.value = imageDataUrl
 
-  const info = await extractParcelInfo(imageDataUrl)
-  if (!info) return
-
-  // ✅ OCR เติมเฉพาะสิ่งที่ช่วย user
-  if (info.recipientName) {
-    form.value.recipientName = info.recipientName
-    recipientSearch.value = info.recipientName
+    const info = await extractParcelInfo(imageDataUrl)
+    if (info) {
+      if (info.recipientName) {
+        form.value.recipientName = info.recipientName
+        recipientSearch.value = info.recipientName
+        
+        // Try to find resident by name if available
+        const resident = residents.value.find(r => {
+           const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
+           return fullName.includes(info.recipientName.toLowerCase()) || 
+                  info.recipientName.toLowerCase().includes(fullName)
+        })
+        if (resident) {
+          selectedResidentId.value = resident.userId
+          if (resident.roomNumber) form.value.roomNumber = resident.roomNumber
+        }
+      }
+      if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
+      if (info.senderName) form.value.senderName = info.senderName
+      if (info.parcelType) form.value.parcelType = info.parcelType
+      if (info.companyId) form.value.companyId = info.companyId
+      if (info.roomNumber && !form.value.roomNumber) form.value.roomNumber = info.roomNumber
+    }
+  } catch (err) {
+    console.error("OCR Error:", err)
+  } finally {
+    isOcrLoading.value = false
+    stopCameraOnly()
   }
-  if (info.trackingNumber) form.value.trackingNumber = info.trackingNumber
-  if (info.senderName) form.value.senderName = info.senderName
-  if (info.parcelType) form.value.parcelType = info.parcelType
 }
 
 function startQuagga() {
@@ -453,6 +597,7 @@ function startQuagga() {
             else if (detectedCode.startsWith('D')) form.value.parcelType = 'DOCUMENT'
             else form.value.parcelType = 'ELECTRONIC'
         }
+        stopScan()
 
         // Require another 5 matches to process again
         lastCode = ''
@@ -484,10 +629,10 @@ async function startScan(mode) {
     qrScanner = new QrScanner(
       videoElem,
       (result) => {
-        if (result?.data) {
-           processScanResult(result.data)
-        } else if (typeof result === 'string') {
-           processScanResult(result)
+        const text = result?.data || (typeof result === 'string' ? result : null)
+        if (text) {
+          processScanResult(text)
+          stopScan()
         }
       },
       {
@@ -521,7 +666,51 @@ async function startScan(mode) {
     }
 
   } else if (mode === 'barcode') {
-    startQuagga()
+    await nextTick()
+    const videoElem = document.getElementById('barcode-video')
+    if (!videoElem) {
+      alert('Barcode video element not found')
+      scanningMode.value = ''
+      return
+    }
+
+    zxingReader = new BrowserMultiFormatReader()
+    const hints = new Map()
+    const formats = [
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.QR_CODE,
+      BarcodeFormat.DATA_MATRIX,
+      BarcodeFormat.PDF_417
+    ]
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, formats)
+    zxingReader.hints = hints
+
+    try {
+      zxingReader.decodeFromVideoDevice(undefined, videoElem, (result, err) => {
+        if (result) {
+          isSuccessScan.value = true
+          setTimeout(() => {
+            isSuccessScan.value = false
+          }, 1000)
+          processScanResult(result.text)
+          
+          if (!form.value.parcelType) {
+            const code = result.text.toUpperCase()
+            if (code.startsWith('B')) form.value.parcelType = 'BOX'
+            else if (code.startsWith('D')) form.value.parcelType = 'DOCUMENT'
+          }
+          stopScan()
+        }
+      })
+    } catch (e) {
+      console.error('ZXing Error:', e)
+      startQuagga() // Fallback to Quagga if ZXing fails
+    }
   }
 }
 
@@ -531,6 +720,10 @@ function stopScan() {
     qrScanner.stop()
     qrScanner.destroy()
     qrScanner = null
+  }
+  if (zxingReader) {
+    zxingReader.reset()
+    zxingReader = null
   }
   stopQuagga()
   stopCameraOnly()
@@ -594,15 +787,15 @@ const saveParcel = async () => {
       isValid = false
     else if (
       name.includes('kerry') &&
-      !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)
+      !/^(KEX[A-Z]\d{9,12}|KEX\d{10,13}|[A-Z]\d{9,12})$/i.test(tracking)
     )
       isValid = false
     else if (
       name.includes('flash') &&
-      !/^TH\d{11}[A-Z]$/.test(tracking)
+      !/^TH\d{11}[A-Z]$/i.test(tracking)
     )
       isValid = false
-    else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking))
+    else if ((name.includes('j&t') || name.includes('jt')) && !/^(JD\d{13}|\d{12})$/i.test(tracking))
       isValid = false
     else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
       isValid = false
@@ -800,29 +993,17 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
 
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-   const existingParcels = await getItems(
-      `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-      router
-    )
-  window.addEventListener('resize', checkScreen)
-  const auth = useAuthManager()
+  const existingParcels = await getItems(
+    `${import.meta.env.VITE_BASE_URL}/api/parcels`,
+    router
+  )
 
   try {
     const res = await getItems(
@@ -870,20 +1051,19 @@ onMounted(async () => {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col pt-16"
-    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16 transition-all duration-300"
+    :class="isCollapsed ? 'md:ml-16' : 'md:ml-60'"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
-        <aside
+    <div class="flex flex-1 overflow-x-hidden">
+     <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
           ]"
           class="overflow-hidden"
         >
-          <nav class="flex-1 divide-y divide-transparent space-y-1">
+        <nav class="flex-1 divide-y divide-transparent space-y-1">
             <SidebarItem title="Tractify" @click="toggleSidebar">
               <template #icon>
                 <svg
@@ -1079,15 +1259,15 @@ onMounted(async () => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
 
-      <main class="flex-1 p-9">
-    <div class="flex items-center space-x-2 mb-8 border-l-4 border-[#0E4B90] pl-6 py-1">
+
+      <main class="flex-1 p-4 md:p-8">
+    <div class="flex items-center space-x-2 mb-8 py-1">
         <div class="flex items-center gap-4">
-          <div class="p-3 bg-blue-50 rounded-2xl text-[#0E4B90] shadow-sm">
-        <svg
-              width="24"
-              height="24"
+          <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
+            <svg
+              width="25"
+              height="25"
               viewBox="0 0 25 25"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -1097,12 +1277,13 @@ onMounted(async () => {
                 fill="currentColor"
               />
             </svg>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight whitespace-nowrap">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                     Manage parcel &gt; Add </span>
-                </h2>
-              </div>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+              Manage Parcel &gt; Add
+            </span>
+          </h2>
+        </div>
         </div>
 
         <div
@@ -1224,8 +1405,8 @@ onMounted(async () => {
                 id="scanner"
                 class="w-full h-58 sm:h-64 border-2 border-dashed border-blue-200 rounded-3xl bg-gray-900 flex items-center justify-center relative overflow-hidden shadow-inner"
               >
-                <span v-if="!scanningMode && !videoStream" class="text-gray-400 font-medium tracking-wide">
-                  Scan QR/Barcode or Take Picture
+                <span v-if="!scanningMode && !videoStream" class="text-gray-400 font-medium tracking-wide text-center px-6">
+                  Position the parcel label within the frame
                 </span>
 
                 <div
@@ -1234,7 +1415,9 @@ onMounted(async () => {
                     scanningMode ? 'w-full h-full absolute inset-0' : 'hidden'
                   "
                 >
-                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative"></div>
+                  <div id="barcode-scanner-container" ref="barcodeReaderRef" v-show="scanningMode === 'barcode'" class="w-full h-full relative">
+                    <video id="barcode-video" class="w-full h-full object-cover"></video>
+                  </div>
                   <video id="qr-video" v-show="scanningMode === 'qr'" class="w-full h-full object-cover"></video>
                   <div
                     v-if="scanningMode === 'barcode'"
@@ -1271,29 +1454,70 @@ onMounted(async () => {
                       : 'hidden'
                   "
                 ></video>
+
+                <!-- OCR Scanner Focus Frame -->
+                <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
+                  <!-- Focus Frame with Shadow Overlay -->
+                  <div class="relative w-[85%] h-[60%] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
+                    <!-- Corner Brackets -->
+                    <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
+                    <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
+                    <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-xl shadow-lg"></div>
+                    <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-xl shadow-lg"></div>
+                    
+                    <!-- Helper Text -->
+                    <div class="absolute -top-12 left-0 right-0 text-center">
+                      <span class="bg-[#185DC0] text-white text-[11px] px-4 py-1.5 rounded-full font-bold tracking-widest shadow-xl scale-110">Align text within frame</span>
+                    </div>
+                  </div>
+                </div>
                 <ButtonWeb
-                  label="Close Camera"
-                  color="red"
-                  class="absolute bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 cursor-pointer transition-all duration-300"
                   v-if="videoStream"
+                  label="Cancel"
+                  color="red"
+                  class="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-600 z-20 cursor-pointer transition-all duration-300"
                   @click="stopCameraOnly"
                 />
+
+                <div v-if="videoStream" class="absolute bottom-4 left-0 right-0 flex justify-center px-4 z-20">
+                  <ButtonWeb
+                    label="Capture & OCR"
+                    color="green"
+                    class="bg-green-500 text-white px-8 py-2.5 rounded-xl shadow-lg hover:bg-green-600 cursor-pointer transition-all duration-300 font-bold"
+                    @click="capturePhoto"
+                    :loading="isOcrLoading"
+                  />
+                </div>
+                <!-- OCR Processing State Overlay -->
+                <div v-if="isOcrLoading" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-30">
+                  <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-4"></div>
+                  <p class="text-white font-bold">Extracting text...</p>
+                </div>
               </div>
 
-              <div class="flex flex-row flex-nowrap gap-3 px-2 overflow-x-auto items-center">
+              <div class="flex flex-row flex-nowrap gap-2 sm:gap-3 px-2 items-center py-2 w-full">
                 <ButtonWeb
-                  label="Scan QR code"
+                  label="Scan QR Code"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+                  size="sm"
+                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startScan('qr')"
                   :disabled="scanningMode || videoStream"
                 />
                 <ButtonWeb
                   label="Scan Barcode"
                   color="blue"
-                  class="cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-3 sm:!px-5 !text-[13px] sm:!text-sm"
+                  size="sm"
+                  class="flex-1 cursor-pointer hover:opacity-90 rounded-xl transition-all duration-300 whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center"
                   @click="startScan('barcode')"
                   :disabled="scanningMode || videoStream"
+                />
+                <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  size="sm"
+                  class="hidden md:flex flex-1 cursor-pointer hover:opacity-90 transition-all rounded-xl whitespace-nowrap !px-0 !py-2.5 sm:!py-3 !text-[12.5px] sm:!text-sm font-bold shadow-sm text-center justify-center items-center"
+                  @click="cancelParcel"
                 />
               </div>
 
@@ -1472,20 +1696,18 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="flex justify-end space-x-3 mt-8">
-                <div class="flex-1 flex justify-start md:justify-end">
-                  <ButtonWeb
-                    label="Reset"
-                    color="red"
-                    class="w-auto cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
-                    @click="cancelParcel"
-                  />
-                </div>
+              <div class="flex justify-end space-x-3 mt-8 px-2">
+                <ButtonWeb
+                  label="Reset"
+                  color="red"
+                  class="flex-1 block md:hidden cursor-pointer hover:opacity-90 transition-all rounded-xl shadow-lg shadow-red-500/10"
+                  @click="cancelParcel"
+                />
                 <ButtonWeb
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] block md:hidden cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
+                  class="text-[#898989] flex-1 block md:hidden cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1497,7 +1719,7 @@ onMounted(async () => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="block md:hidden cursor-pointer transition-all rounded-xl"
+                  class="flex-1 block md:hidden cursor-pointer transition-all rounded-xl"
                 />
               </div>
             </div>
@@ -1553,23 +1775,6 @@ onMounted(async () => {
                     <span class="font-bold text-gray-800 truncate max-w-[200px]">{{ form.senderName || '-' }}</span>
                   </div>
                 </div>
-
-                <div v-if="previewUrl" class="mt-6">
-                  <span class="block text-sm font-bold text-gray-500 mb-3 ml-1">Parcel picture</span>
-                  <div class="relative group">
-                    <img
-                      :src="previewUrl"
-                      class="w-full rounded-2xl shadow-xl border-4 border-white max-h-64 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
-                    <button
-                      @click="deletePreview"
-                      class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full shadow-lg w-8 h-8 flex items-center justify-center hover:bg-red-600 cursor-pointer transition-all duration-300 border-2 border-white"
-                      title="Clear photo"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                  </div>
-                </div>
               </div>
 
               <div class="flex justify-end space-x-3 mt-8 flex-nowrap border-t border-gray-100 pt-8">
@@ -1577,7 +1782,7 @@ onMounted(async () => {
                   label="Back"
                   color="gray"
                   @click="showManageParcelPage"
-                  class="text-[#898989] w-auto cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
+                  class="text-[#898989] w-32 cursor-pointer hover:bg-gray-100 rounded-xl transition-all"
                 />
                 <ButtonWeb
                   label="Save"
@@ -1589,7 +1794,7 @@ onMounted(async () => {
                     'bg-[#0E4B90] hover:bg-[#185DC0] text-white shadow-xl shadow-blue-500/20': !isAllFilled
                   }"
                   :disabled="isAllFilled"
-                  class="w-auto cursor-pointer transition-all rounded-xl px-8"
+                  class="w-32 cursor-pointer transition-all rounded-xl"
                 />
               </div>
 
@@ -1603,7 +1808,7 @@ onMounted(async () => {
                   >
                     <div class="flex-1 space-y-1">
                       <div class="text-sm font-bold text-gray-800">{{ p.recipientName }}</div>
-                      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                      <div class="text-[11px] font-medium text-gray-400 tracking-wider flex items-center gap-2">
                         <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                         {{ p.trackingNumber }}
                       </div>
@@ -1633,21 +1838,12 @@ onMounted(async () => {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
 
 <style scoped>

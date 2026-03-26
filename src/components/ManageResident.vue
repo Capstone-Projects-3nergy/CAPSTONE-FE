@@ -1,22 +1,22 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useSidebarManager } from '@/stores/SidebarManager'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager'
-import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from '@/components/ParcelTable.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import WebHeader from './WebHeader.vue'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import DeleteMemberStaff from './DeleteMemberStaff.vue'
+import ChangeResidentStatus from './ChangeResidentStatus.vue'
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -68,15 +68,12 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const parcelsResidentDetail = ref(null)
 const MemberDetail = ref(null)
 const showDeleteMember = ref(false)
-const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const showAddParcels = ref(false)
 const showParcelDetailModal = ref(false)
@@ -87,13 +84,39 @@ const deleteSuccess = ref(false)
 const statusSuccess = ref(false)
 const showDeleteParcel = ref(false)
 const showStatusParcel = ref(false)
+const showChangeResidentStatus = ref(false)
+const residentStatusDetail = ref(null)
 const showDeleteMemberSuccess = ref(false)
 const showDeleteMemberError = ref(false)
+
+// Generic State for Alerts from Child Components
+const childAlert = ref({
+  visible: false,
+  message: '',
+  title: '',
+  style: 'green',
+  operate: 'childAlert'
+})
+
+const handleChildAlert = (payload) => {
+  showChangeResidentStatus.value = false
+  childAlert.value = {
+    ...childAlert.value,
+    ...payload,
+    visible: true
+  }
+  setTimeout(() => {
+    childAlert.value.visible = false
+  }, 10000)
+}
 
 const parcelDetail = ref(null)
 const parcelStatusDetail = ref(null)
 const parcelManager = useParcelManager()
 const userManager = useUserManager()
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -121,9 +144,6 @@ const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 const mapStatus = (status) => {
   switch (status) {
     case 'WAITING_FOR_STAFF':
@@ -146,23 +166,24 @@ const showAddParcelPage = () => {
   // router.push({ name: 'addparcel' })
 }
 const mapActiveStatus = (status) => {
-  switch (status) {
+  if (!status) return ''
+  switch (status.toUpperCase()) {
     case 'ACTIVE':
       return 'Active'
     case 'INACTIVE':
       return 'Inactive'
+    case 'PENDING':
+      return 'Pending'
+    case 'DELETED':
+      return 'Deleted'
     default:
-      return status
+      return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
   }
 }
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
@@ -182,7 +203,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -205,7 +226,7 @@ onMounted(async () => {
     }))
 
     // เรียงตาม update ล่าสุด
-    mapped.sort((a, b) => new Date(a.updateAt) - new Date(b.updateAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     // 🔹 แยก role
     const residentList = mapped.filter((u) => u.role === 'RESIDENT')
@@ -221,12 +242,23 @@ const openStatusPopup = (parcel) => {
     parcelStatus: parcel.parcelStatus
   }
 }
-const canGoNext = computed(() => {
-  return paginatedResidents.value.length === perPage.value
-})
-const canGoNextStaff = computed(() => {
-  return paginatedStaffs.value.length === perPage.value
-})
+
+const openResidentStatusPopup = (user) => {
+  residentStatusDetail.value = {
+    ...user,
+    id: user.id,
+    status: mapActiveStatus(user.status)
+  }
+  showChangeResidentStatus.value = true
+}
+
+const confirmStatusChange = () => {
+  showChangeResidentStatus.value = false
+  statusSuccess.value = true 
+  setTimeout(() => (statusSuccess.value = false), 10000)
+  showChangeResidentStatus.value = false
+  refreshUserData()
+}
 
 const showRegistrationDetail = (id) => {
   // id = user.id (จาก mapped)
@@ -250,20 +282,9 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 const currentPage = ref(1)
 const perPage = ref(10)
@@ -275,6 +296,8 @@ const totalPages = computed(() => {
   }
   return 0
 })
+const canGoNext = computed(() => currentPage.value < totalPages.value)
+const canGoNextStaff = computed(() => currentPage.value < totalPages.value)
 
 const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
@@ -299,25 +322,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 const sortNameAsc = () => sortByFullName(usersByTab.value)
 const sortNameDesc = () => sortByFullNameReverse(usersByTab.value)
 
@@ -339,6 +343,10 @@ const totalUsers = computed(() => usersByTab.value.length)
 
 const currentUsed = computed(
   () => usersByTab.value.filter((u) => u.status === 'ACTIVE').length
+)
+
+const currentPending = computed(
+  () => usersByTab.value.filter((u) => u.status === 'PENDING').length
 )
 
 function autoClose(refVar, timeout = 10000) {
@@ -587,6 +595,12 @@ const handleSort = () => {
 const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
+
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchKeyword, selectedDate, activeTab], () => {
+  currentPage.value = 1
+})
+
 const handleSearchUpdate = (val) => {
   filterSearch.value = val
   searchKeyword.value = val
@@ -616,6 +630,12 @@ const closePopUp = (operate) => {
     case 'editSuccessMessage':
       editSuccess.value = false
       break
+    case 'statusSuccessMessage':
+      statusSuccess.value = false
+      break
+    case 'childAlert':
+      childAlert.value.visible = false
+      break
   }
 }
 const showResidentDetail = async function (id) {
@@ -631,12 +651,14 @@ const showResidentDetail = async function (id) {
 
 <template>
   <div
-    class="min-h-screen bg-gray-100 flex flex-col pt-16"
-    :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
+    class="min-h-screen bg-gray-100 flex flex-col pt-16 transition-all duration-300"
+    :class="[
+      isCollapsed ? 'md:ml-16' : 'md:ml-60',
+      'ml-0' 
+    ]"
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
-    <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
+    <div class="flex flex-1 flex-col p-4 md:p-8 overflow-x-hidden">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -698,38 +720,6 @@ const showResidentDetail = async function (id) {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -834,7 +824,7 @@ const showResidentDetail = async function (id) {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 p-9 x-full">
         <div class="flex flex-col gap-4 mb-6 px-2">
@@ -879,35 +869,51 @@ const showResidentDetail = async function (id) {
               </div>
 
               <!-- Status Stats Cards -->
-              <div class="flex flex-nowrap items-center gap-2 sm:gap-3 sm:ml-auto w-full sm:w-auto">
+              <div class="flex flex-wrap sm:flex-nowrap items-center justify-start sm:justify-end gap-1.5 sm:gap-3 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
                 <!-- Total Users Card -->
-                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
-                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
+                  <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-gray-400 leading-none mb-1 sm:mb-1.5 truncate">Total Users</span>
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-gray-400 leading-none mb-0.5 sm:mb-1.5 truncate">Total Users</span>
                     <div class="flex items-baseline gap-1">
-                      <span class="text-base sm:text-xl font-black text-[#1D355E]">{{ totalUsers }}</span>
-                      <span class="text-[8px] sm:text-[10px] font-medium text-gray-400">Total</span>
+                      <span class="text-sm sm:text-xl font-black text-[#1D355E]">{{ totalUsers }}</span>
+                      <span class="text-[7px] sm:text-[10px] font-medium text-gray-400 hidden sm:inline-block">Total</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Currently Active Card -->
-                <div class="flex-1 sm:flex-initial flex items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
-                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
+                  <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-[8px] sm:text-[10px] uppercase tracking-widest font-bold text-emerald-500/70 leading-none mb-1 sm:mb-1.5 truncate">Active Now</span>
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-emerald-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Active Now</span>
                     <div class="flex items-baseline gap-1">
-                      <span class="text-base sm:text-xl font-black text-emerald-700">{{ currentUsed }}</span>
-                      <span class="text-[9px] sm:text-[11px] font-bold text-emerald-500/60 ml-0.5">Total</span>
+                      <span class="text-sm sm:text-xl font-black text-emerald-700">{{ currentUsed }}</span>
+                      <span class="text-[7px] sm:text-[11px] font-bold text-emerald-500/60 ml-0.5 hidden sm:inline-block">Total</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pending Approval Card (Only for Residents tab) -->
+                <div v-if="activeTab === 'Residents'" class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-amber-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-200 group">
+                  <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 transition-colors duration-300 group-hover:bg-amber-100 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[7px] sm:text-[10px] tracking-widest font-bold text-amber-500/70 leading-none mb-0.5 sm:mb-1.5 truncate">Pending</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-sm sm:text-xl font-black text-amber-700">{{ currentPending }}</span>
+                      <span class="text-[7px] sm:text-[11px] font-bold text-amber-500/60 ml-0.5 hidden sm:inline-block">Total</span>
                     </div>
                   </div>
                 </div>
@@ -926,6 +932,7 @@ const showResidentDetail = async function (id) {
           :hideTrash="false"
           :showDate="false"
           :showAddMemberButton="true"
+          nameSortLabel="Resident Name"
           @view-detail="showResidentDetail"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
@@ -942,6 +949,7 @@ const showResidentDetail = async function (id) {
           :hideTrash="false"
           :showDate="false"
           :showAddStaffButton="false"
+          nameSortLabel="Staff Name"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
@@ -973,6 +981,14 @@ const showResidentDetail = async function (id) {
             @closePopUp="closePopUp"
           />
           <AlertPopUp
+            v-if="statusSuccess"
+            :titles="'Resident Status Updated Successfully.'"
+            message="Success!!"
+            styleType="green"
+            operate="statusSuccessMessage"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="error"
             :titles="'There is a problem. Please try again later.'"
             message="Error!!"
@@ -980,23 +996,33 @@ const showResidentDetail = async function (id) {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <!-- Unified Popup for Child Component Events -->
+          <AlertPopUp
+            v-if="childAlert.visible"
+            :titles="childAlert.title"
+            :message="childAlert.message"
+            :styleType="childAlert.style"
+            :operate="childAlert.operate"
+            @closePopUp="closePopUp"
+          />
         </div>
         <ParcelTable
           v-if="activeTab === 'Residents'"
           :items="paginatedResidents"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredResidents.length"
+          :totalPages="totalPages"
           :showPhoto="true"
           :showName="false"
           :showMemberName="true"
           :showTracking="false"
           :showStatus="false"
-          :clickableStatus="false"
+          :clickableStatus="true"
           :showDeleteMember="true"
           :hideTrash="true"
           :showMobile="false"
           :showActionStatus="true"
+          @status-click="openResidentStatusPopup"
           :showDelete="false"
           :showRoom="true"
           :showUpdateAt="true"
@@ -1097,7 +1123,7 @@ const showResidentDetail = async function (id) {
         V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
         21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
         V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                fill="red"
+                fill="currentColor"
               />
             </svg>
           </template>
@@ -1105,9 +1131,9 @@ const showResidentDetail = async function (id) {
         <ParcelTable
           v-else-if="activeTab === 'Staffs'"
           :items="paginatedStaffs"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredStaffs.length"
+          :totalPages="totalPages"
           :showPhoto="true"
           :showName="false"
           :clickableStatus="false"
@@ -1218,7 +1244,7 @@ const showResidentDetail = async function (id) {
         V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
         21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
         V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                fill="red"
+                fill="currentColor"
               />
             </svg>
           </template>
@@ -1231,21 +1257,12 @@ const showResidentDetail = async function (id) {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
   <teleport to="body" v-if="showDeleteMember">
     <DeleteMemberStaff
       @cancelDetail="clearDeleteMemPopUp"
@@ -1255,4 +1272,14 @@ const showResidentDetail = async function (id) {
       :isPermanent="false"
     />
   </teleport>
+  <Teleport to="body">
+    <ChangeResidentStatus
+      v-if="showChangeResidentStatus"
+      :residentDataStatus="residentStatusDetail"
+      @cancelStatusDetail="showChangeResidentStatus = false"
+      @confirmStatusDetail="confirmStatusChange"
+      @redStatusAlert="openRedMemPopup"
+      @showAlert="handleChildAlert"
+    />
+  </Teleport>
 </template>

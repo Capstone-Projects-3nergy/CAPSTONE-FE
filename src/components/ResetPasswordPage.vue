@@ -86,16 +86,20 @@ const returnLoginPage = () => {
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <div
-      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4"
+      class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 relative overflow-hidden"
     >
-      <div class="max-w-md text-center md:text-center">
-        <h2 class="text-3xl font-bold mb-4 md:text-center">
+      <!-- Subtle Decorative Blobs -->
+      <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-md text-center relative z-10 flex flex-col items-center">
+        <h2 class="text-3xl font-extrabold tracking-tight mb-2 drop-shadow-md">
           Welcome to Tractify!
         </h2>
-        <p class="text-sm text-white mb-8 md:text-left">
+        <p class="text-sm text-blue-50 mb-6 drop-shadow px-4">
           Forgot your password? Reset it here.
         </p>
-        <div class="flex md:justify-center">
+        <div class="flex justify-center drop-shadow-xl hover:scale-[1.02] transition-transform duration-500 ease-out">
           <svg
             class="hidden md:block w-[400px] h-[450px]"
             viewBox="0 0 490 569"
@@ -186,8 +190,8 @@ const returnLoginPage = () => {
      <div class="fixed top-30">
         <AlertPopUp
           v-if="error"
-          :titles="'Failed to send reset password email.'"
-          message="Please try again later."
+          :titles="'Failed to send reset password email. Please try again later.'"
+          message="Error!!"
           styleType="red"
           operate="problem"
           @closePopUp="closePopUp"
@@ -195,8 +199,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="success"
-          :titles="' Reset password link has been sent to your email.'"
-          message="Please check your email to continue."
+          :titles="' Reset password link has been sent to your email. Please check your email to continue.'"
+          message="Success!!"
           styleType="green"
           operate="success"
           @closePopUp="closePopUp"
@@ -204,8 +208,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="incorrectemailform"
-          :titles="'Invalid email format.'"
-          message="Please enter a valid email address."
+          :titles="'Invalid email format. Please enter a valid email address.'"
+          message="Error!!"
           styleType="red"
           operate="emailform"
           @closePopUp="closePopUp"
@@ -213,8 +217,8 @@ const returnLoginPage = () => {
 
         <AlertPopUp
           v-if="emailRequire"
-          :titles="'Email is required.'"
-          message="Please enter your email address."
+          :titles="'Email is required. Please enter your email address.'"
+          message="Error!!"
           styleType="red"
           operate="emailEmpty"
           @closePopUp="closePopUp"
@@ -235,15 +239,14 @@ const returnLoginPage = () => {
               v-model="form.email"
               type="email"
               placeholder="Enter Your Email Account"
-              class="w-full pl-4 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
             />
           </div>
 
           <!-- <p v-if="isEmailInvalid" class="text-sm text-red-600">
             Please enter a valid email address.
           </p> -->
-
-          <ButtonWeb
+           <ButtonWeb
             label="Reset Password"
             :loading="loading"
             type="submit"

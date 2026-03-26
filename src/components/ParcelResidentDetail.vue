@@ -4,18 +4,16 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
 import AlertPopUp from './AlertPopUp.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 import {
   getItemById,
   deleteItemById,
@@ -44,18 +42,15 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-const isCollapsed = ref(false)
+// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
 const error = ref(false)
-const showLogoutConfirm = ref(false)
 const mapParcelData = (data) => ({
   parcelId: data.parcelId,
   trackingNumber: data.trackingNumber,
@@ -86,12 +81,7 @@ const showNotificationPage = async () => {
 const showParcelResidentVerificationPage = async () => {
   router.replace({ name: 'parcelresidentverification' })
 } 
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
+
 const currentParcelStatus = computed(() => {
   return parcelStore.getParcels().find((p) => p.parcelId === tid)?.status || ''
 })
@@ -123,16 +113,8 @@ const getParcelDetail = async (tid) => {
   } catch (err) {}
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
+// Removed old resize listener and checkScreen
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
 })
@@ -188,10 +170,7 @@ const openRedPopup = () => {
   showConfirmParcel.value = false
   parcelConfirmDetail.value = null
 }
-const showManageParcelPage = async () => {
-  router.replace({ name: 'residentparcels' })
-  showResidentParcels.value = true
-}
+
 const ShowManageAnnouncementPage = async () => {
   router.replace({ name: 'manageannouncement' })
   showManageAnnouncement.value = true
@@ -210,23 +189,27 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async () => {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
+
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  sidebarManager.toggleSidebar()
 }
 function formatDateTime(datetimeStr) {
-  if (!datetimeStr) return ''
-  return datetimeStr.replace('T', ' ')
+  if (!datetimeStr || datetimeStr === 'Just now') return '-'
+  const date = new Date(datetimeStr)
+  if (isNaN(date.getTime())) return datetimeStr.replace('T', ' ')
+  const d = date.getDate().toString().padStart(2, '0')
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const y = date.getFullYear()
+  const hh = date.getHours().toString().padStart(2, '0')
+  const mm = date.getMinutes().toString().padStart(2, '0')
+  return `${d}/${m}/${y} - ${hh}:${mm}`
 }
 const closePopUp = (operate) => {
   switch (operate) {
@@ -253,7 +236,6 @@ const closePopUp = (operate) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-   <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -407,7 +389,7 @@ const closePopUp = (operate) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+   
 
       <main class="flex-1 p-4 md:p-9 x-full bg-[#F8FAFC]">
         <div class="flex flex-col gap-4 mb-6 px-2">
@@ -585,11 +567,11 @@ const closePopUp = (operate) => {
               </div>
             </section>
 
-            <div class="flex justify-end space-x-3 pt-6">
+            <div class="flex flex-row justify-end gap-3 pt-6 w-full">
               <ButtonWeb
                 label="Back"
                 color="gray"
-                class="text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3"
+                class="flex-1 sm:flex-none sm:min-w-[140px] text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all px-8 py-3 font-bold"
                 @click="showHomePageResidentWeb"
               />
               <ButtonWeb
@@ -597,7 +579,7 @@ const closePopUp = (operate) => {
                 type="button"
                 label="Confirm"
                 color="blue"
-                class="cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20"
+                class="flex-1 sm:flex-none sm:min-w-[140px] cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all px-8 py-3 shadow-lg shadow-blue-500/20 font-black"
                 @click="confirmParcelPopUp(parcel)"
               />
             </div>
@@ -618,19 +600,10 @@ const closePopUp = (operate) => {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

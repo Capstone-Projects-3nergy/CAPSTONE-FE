@@ -2,19 +2,21 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import { getProfile } from '@/utils/fetchUtils'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const errorAccount = ref(false)
 const successAccount = ref(false)
 const incorrectemail = ref(false)
@@ -30,11 +32,9 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showDashBoard = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showLogoutConfirm = ref(false)
+
 
 const firstName = computed(() => {
   return loginManager.user?.fullName?.split(' ')[0] || ''
@@ -46,10 +46,6 @@ const lastName = computed(() => {
   return parts.slice(1).join(' ') || ''
 })
 
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff' })
   showHomePageStaff.value = true
@@ -87,23 +83,11 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
+
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 const originalForm = ref(null)
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,
     router
@@ -166,7 +150,6 @@ const closePopUps = (operate) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -364,7 +347,7 @@ const closePopUps = (operate) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 p-6 md:p-9">
         <div class="fixed top-5 left-5 z-50">
@@ -437,19 +420,10 @@ const closePopUps = (operate) => {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
-  </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-    <Teleport to="body" v-if="showLogoutConfirm"
-      ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-    ></Teleport>
   </Teleport>
 </template>

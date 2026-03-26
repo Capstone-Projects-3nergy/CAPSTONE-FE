@@ -1,23 +1,23 @@
 <script setup>
 import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import HomePageResident from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import ButtonWeb from './ButtonWeb.vue'
-import HomePageStaff from '@/components/HomePageResident.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import { useParcelManager } from '@/stores/ParcelsManager'
 import AlertPopUp from './AlertPopUp.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 import ParcelTable from './ParcelTable.vue'
 import WebHeader from './WebHeader.vue'
 import { useNotificationManager } from '@/stores/NotificationManager'
+import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import { useSidebarManager } from '@/stores/SidebarManager'
 import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import {
   sortByRoomNumber,
   sortByRoomNumberReverse,
@@ -54,9 +54,13 @@ import {
   editInviteReadWrite,
   declineInvite,
   editItemWithFile,
-  deleteFile
+  deleteFile,
+  getAnnouncements,
+  getAnnouncementById,
+  recordAnnouncementView
 } from '@/utils/fetchUtils'
 import ParcelScannerPage from './ParcelScannerPage.vue'
+import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
@@ -75,6 +79,8 @@ const authStore = useAuthManager()
 
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
+const announcementManager = useAnnouncementManager()
+const { announcements } = storeToRefs(announcementManager)
 const emit = defineEmits(['add-success'])
 
 const deletedParcel = ref(null)
@@ -84,10 +90,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -99,9 +103,12 @@ const showDeleteParcel = ref(false)
 const parcelDetail = ref(null)
 const parcelsResidentDetail = ref(null)
 const route = useRoute()
-const showLogoutConfirm = ref(false)
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
+
+// Modal State
+const isModalOpen = ref(false)
+const selectedAnnouncement = ref(null)
 
 const showSuggestions = computed(
   () => recipientSearch.value.trim().length > 0 && !selectedResidentId.value
@@ -120,17 +127,10 @@ const mapStatus = (status) => {
   }
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
+let announcementsInterval = null
+let parcelsInterval = null
 
-  window.addEventListener('resize', checkScreen)
-
+const fetchParcels = async () => {
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
     router
@@ -149,10 +149,24 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     parcelManager.setParcels(mapped)
   }
+}
+
+onUnmounted(() => {
+  window.removeEventListener('focus', fetchAnnouncements)
+  window.removeEventListener('focus', fetchParcels)
+  if (announcementsInterval) clearInterval(announcementsInterval)
+  if (parcelsInterval) clearInterval(parcelsInterval)
+})
+onMounted(async () => {
+
+  window.addEventListener('focus', fetchParcels)
+
+  await fetchParcels()
+  parcelsInterval = setInterval(fetchParcels, 30000)
 })
 
 const parcels = computed(() => parcelManager.getParcels())
@@ -363,21 +377,12 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
 }
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+
 
 const currentPage = ref(1)
 const perPage = ref(10)
@@ -389,9 +394,6 @@ const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
-})
-const canGoNext = computed(() => {
-  return paginatedParcels.value.length === perPage.value
 })
 
 const showParcelDetail = async function (id) {
@@ -436,25 +438,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -568,44 +551,114 @@ function nextSlide() {
   currentIndex.value = (currentIndex.value + 1) % slides.length
 }
 
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
+const latestAnnouncements = computed(() => {
+  return announcements.value
+    .filter(item => item.status === 'PUBLISHED')
+    .sort((a, b) => new Date(b.publishAt || b.datePosted) - new Date(a.publishAt || a.datePosted))
+    .slice(0, 4)
+})
+
+const getCategoryBadgeClass = (category) => {
+  switch (category) {
+    case 'Urgent': return 'bg-red-50 text-red-500'
+    case 'Maintenance': return 'bg-orange-50 text-orange-500'
+    case 'Events': return 'bg-purple-50 text-purple-500'
+    case 'General': return 'bg-blue-50 text-blue-500'
+    default: return 'bg-gray-100 text-gray-800'
+  }
 }
 
-// onUnmounted(() => {
-//   window.removeEventListener('resize', checkScreen)
-// })
-// onMounted(async () => {
-//   checkScreen()
+const getCategoryIcon = (category) => {
+  switch (category) {
+    case 'Urgent': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`
+    case 'Maintenance': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`
+    case 'Events': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`
+    case 'General': return `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+    default: return ''
+  }
+}
 
-//   window.addEventListener('resize', checkScreen)
+const formatDate = (dateString) => {
+  if (!dateString || dateString === 'Just now') return 'Just now'
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
-//   const data = await getItems(
-//     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
-//     router
-//   )
+const openModal = async (item) => {
+  if (!item || !item.id) return
 
-//   if (data) {
-//     const mapped = data.map((p) => ({
-//       id: p.parcelId,
-//       trackingNumber: p.trackingNumber,
-//       recipientName: p.ownerName,
-//       roomNumber: p.roomNumber,
-//       email: p.contactEmail,
-//       status: mapStatus(p.status),
-//       receiveAt: p.receivedAt,
-//       updateAt: p.updatedAt || null,
-//       pickupAt: p.pickedUpAt || null
-//     }))
+  try {
+    // 1. Record the view first to ensure the standard view count is updated on server
+    await recordAnnouncementView(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
 
-//     mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    // 2. Fetch the announcement details (which now has the updated view count)
+    const data = await getAnnouncementById(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
 
-//     parcelManager.setParcels(mapped)
-//   }
-// })
+    if (data) {
+      announcementManager.updateAnnouncement(data)
+      const freshItem = announcementManager.findAnnouncementById(item.id)
+      
+      if (freshItem) {
+        selectedAnnouncement.value = {
+          ...freshItem,
+          tag: freshItem.category || 'General',
+          date: freshItem.publishAt || freshItem.datePosted || 'Just now',
+          views: freshItem.views || freshItem.viewCount || 0,
+          author: 'Staff Portal',
+          type: (freshItem.category || '').toLowerCase().includes('event') ? 'event' : 'news'
+        }
+      } else {
+        selectedAnnouncement.value = item
+      }
+    } else {
+      selectedAnnouncement.value = item
+    }
+  } catch (error) {
+    console.error('Error fetching announcement detail:', error)
+    selectedAnnouncement.value = item
+  }
+
+  isModalOpen.value = true
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  setTimeout(() => {
+    selectedAnnouncement.value = null
+  }, 300)
+}
+
+const fetchAnnouncements = async () => {
+  try {
+    const data = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`)
+    if (data && Array.isArray(data)) {
+      announcementManager.setAnnouncements(data)
+    }
+  } catch (e) {
+    console.warn('Fetch announcements failed', e)
+  }
+}
+
+
+
+onMounted(async () => {
+  window.addEventListener('focus', fetchAnnouncements)
+
+  // Initial fetch
+  await fetchAnnouncements()
+
+  // Set up periodic fetch for latest updates
+  announcementsInterval = setInterval(fetchAnnouncements, 30000)
+})
 
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -629,7 +682,6 @@ function formatDateTime(datetimeStr) {
       />
     </div>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -783,7 +835,7 @@ function formatDateTime(datetimeStr) {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+   
 
       <main class="flex-1 p-6 md:p-10 w-full font-sans flex flex-col gap-8">
             <div class="pt-0">
@@ -854,12 +906,11 @@ function formatDateTime(datetimeStr) {
             <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
                 <ParcelTable
                 :items="paginatedParcels"
-                :pages="visiblePages"
                 :page="currentPage"
-                :total="totalPages"
+                :total="filteredParcels.length"
+                :totalPages="totalPages"
                 :clickableStatus="false"
                 :showDelete="false"
-                :can-next="canGoNext"
                 @prev="prevPage"
                 @next="nextPage"
                 @go="goToPage"
@@ -963,423 +1014,207 @@ function formatDateTime(datetimeStr) {
                 </ParcelTable>
             </div>
           </div>
-        <!-- Hero / Carousel Section -->
-        <div class="px-6 pb-6 mb-12">
-          <section class="relative group">
-            <div class="relative h-[380px] md:h-[500px] w-full rounded-[2.5rem] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] transition-all duration-700">
-              <div
-                v-for="(slide, index) in slides"
-                :key="index"
-                class="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
-                :class="{
-                  'opacity-100': index === currentIndex,
-                  'opacity-0': index !== currentIndex
-                }"
-              >
-                <img
-                  :src="slide"
-                  alt="Carousel Image"
-                  class="w-full h-full object-cover transform transition-transform duration-[10000ms] group-hover:scale-110"
-                />
+        <!-- Latest News Section -->
+        <div class="px-3 md:px-6 pb-20 overflow-hidden">
+          <!-- Balanced Header Section -->
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+            <div class="space-y-4">
+              <div class="flex items-center gap-4">
+                 <div class="p-2 md:p-2.5 bg-blue-50 text-[#0E4B90] rounded-2xl shadow-sm border border-blue-100/50">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                   </svg>
+                 </div>
+                 <h2 class="text-[20px] sm:text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight whitespace-nowrap">
+                   Dormitory <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0E4B90] to-blue-600">Announcements</span>
+                 </h2>
               </div>
               
-              <!-- Premium Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-10 md:p-16">
-                  <span class="inline-block px-4 py-1.5 mb-4 text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-blue-600/30 backdrop-blur-md rounded-full w-fit">
-                    Community Hub
-                  </span>
-                  <h1 class="text-5xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl tracking-tighter leading-tight">
-                    Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Tractify</span>
-                  </h1>
-                  <p class="text-white/80 text-lg md:text-xl font-medium tracking-wide max-w-2xl leading-relaxed">
-                    Experience seamless community management and effortless parcel tracking in one place.
-                  </p>
-              </div>
-
-              <!-- Sleek Navigation Buttons (No Border) -->
-              <button
-                @click="prevSlide"
-                class="absolute left-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/90 text-white hover:text-slate-900 p-5 rounded-2xl backdrop-blur-lg transition-all focus:outline-none opacity-0 group-hover:opacity-100 shadow-xl scale-95 hover:scale-105 cursor-pointer z-20"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-              <button
-                @click="nextSlide"
-                class="absolute right-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/90 text-white hover:text-slate-900 p-5 rounded-2xl backdrop-blur-lg transition-all focus:outline-none opacity-0 group-hover:opacity-100 shadow-xl scale-95 hover:scale-105 cursor-pointer z-20"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-              
-              <!-- Premium Pill Indicators -->
-               <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-2">
-                <span
-                  v-for="(slide, index) in slides"
-                  :key="index"
-                  @click="currentIndex = index"
-                  class="h-1.5 rounded-full cursor-pointer transition-all duration-700 shadow-lg"
-                  :class="index === currentIndex ? 'bg-white w-12' : 'bg-white/30 w-3 hover:bg-white/60'"
-                ></span>
-              </div>
-            </div>
-          </section>
-
-          <!-- Explore Categories Header -->
-          <div class="flex items-end justify-between mb-10 mt-20">
-             <div class="space-y-1">
-                <div class="h-1.5 w-12 bg-gradient-to-r from-[#1D355E] to-blue-400 rounded-full mb-4"></div>
-                <h2 class="text-3xl md:text-4xl font-black text-[#07192F] tracking-tight">Explore Community</h2>
-                <p class="text-slate-400 font-medium">Get involved and stay informed with your neighborhood</p>
-             </div>
-             <div class="hidden md:block">
-                <button @click="showAnnouncementPage('all')" class="text-[#0E4B90] font-bold text-sm tracking-widest uppercase hover:underline cursor-pointer">View All Activities</button>
-             </div>
-          </div>
-
-          <!-- Categorized Cards (Border-less Modern Design) -->
-          <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
-            <!-- News Card -->
-            <div
-              @click="showAnnouncementPage('news')"
-              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
-            >
-              <div class="h-[220px] shrink-0 overflow-hidden relative">
-                 <div class="absolute inset-0 bg-gradient-to-t from-blue-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <img
-                  :src="newsImg"
-                  alt="News"
-                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                 <div class="absolute top-6 left-6 z-20">
-                    <span class="bg-blue-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
-                      Community News
-                    </span>
-                 </div>
-              </div>
-              <div class="p-8 pt-4 flex flex-col flex-1 relative">
-                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                    </svg>
-                 </div>
-                <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors">Latest Updates</h3>
-                <p class="text-slate-500 font-medium leading-relaxed">
-                  Real-time official notices, maintenance schedules, and essential updates directly from management.
-                </p>
-                <div class="mt-auto pt-8 flex items-center gap-3 text-blue-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
-                    Discover More <span class="text-lg">→</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Event Card -->
-            <div
-              @click="showAnnouncementPage('event')"
-              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
-            >
-              <div class="h-[220px] shrink-0 overflow-hidden relative">
-                  <div class="absolute inset-0 bg-gradient-to-t from-purple-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <img
-                  :src="eventImg"
-                  alt="Event"
-                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                 <div class="absolute top-6 left-6 z-20">
-                    <span class="bg-purple-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
-                      Events
-                    </span>
-                 </div>
-              </div>
-              <div class="p-8 pt-4 flex flex-col flex-1 relative">
-                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                 </div>
-                 <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-purple-600 transition-colors">Local Events</h3>
-                <p class="text-slate-500 font-medium leading-relaxed">
-                  Join upcoming workshops, social gatherings, and community activities designed for you.
-                </p>
-                 <div class="mt-auto pt-8 flex items-center gap-3 text-purple-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
-                    See Calendar <span class="text-lg">→</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- All Announcements Card -->
-            <div
-              @click="showAnnouncementPage('all')"
-              class="group cursor-pointer relative bg-white rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-all duration-500 overflow-hidden flex flex-col h-full min-h-[440px]"
-            >
-              <div class="h-[220px] shrink-0 overflow-hidden relative">
-                   <div class="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <img
-                  :src="communityImg"
-                  alt="All Announcements"
-                  class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                 <div class="absolute top-6 left-6 z-20">
-                    <span class="bg-emerald-600/90 backdrop-blur px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
-                     Archive
-                    </span>
-                 </div>
-              </div>
-             <div class="p-8 pt-4 flex flex-col flex-1 relative">
-                 <div class="absolute -top-10 right-8 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center z-20 group-hover:-translate-y-3 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-emerald-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                 </div>
-                   <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-emerald-700 transition-colors">Historical Log</h3>
-                 <p class="text-slate-500 font-medium leading-relaxed">
-                   Comprehensive access to all past notices and permanent community records.
-                </p>
-                 <div class="mt-auto pt-8 flex items-center gap-3 text-emerald-800 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all">
-                    Full History <span class="text-lg">→</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- All Announcements Card -->
-            <!-- <div
-              @click="showAnnouncementPage"
-              class="group cursor-pointer relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-[400px]"
-            >
-              <div class="h-1/2 overflow-hidden relative">
-                   <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <div class="absolute inset-0 bg-yellow-100 z-0"></div>
-                <img
-                  :src="newsImg"
-                  alt="All Announcements"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out yellowscale group-hover:yellowscale-0 relative z-10 opacity-80"
-                />
-                 <div class="absolute top-4 left-4 z-20">
-                    <span class="bg-yellow-800/90 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
-                      History
-                    </span>
-                 </div>
-              </div>
-              <div class="p-8 flex flex-col flex-1 relative bg-white">
-                 <div class="absolute -top-10 right-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center z-20 group-hover:-translate-y-2 transition-transform duration-300">
-                    <svg class="w-7 h-7 text-yellow-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                 </div>
-                 <h3 class="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-yellow-700 transition-colors">All Announcements</h3>
-                <p class="text-gray-500 text-sm leading-relaxed line-clamp-3">
-                   View the complete archive of all past and current notices, schedules, and official updates here.
-                </p>
-                 <div class="mt-auto pt-6 flex items-center text-yellow-800 font-bold text-sm uppercase tracking-wide group-hover:gap-2 transition-all">
-                    View Archive <span>→</span>
-                </div>
-              </div>
-            </div> -->
-
-          </section>
-        </div>
-
-        <!-- My Parcel Section -->
-        <!-- <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-100">
-          <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
-             <div class="bg-[#1D355E]/10 p-2 rounded-lg">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-[#0E4B90]">
-                  <path d="M12 3L2 8L12 13L22 8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M22 16L12 21L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M22 12L12 17L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-             </div>
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">My Parcels</h2>
-          </div>
-          
-          <div class="mb-6">
-             <ParcelFilterBar
-              :modelDate="filterDate"
-              :modelSearch="filterSearch"
-              :modelSort="filterSort"
-              :show-add-button="false"
-              :hideNameSort="true"
-              :hideTrash="false"
-              @update:date="handleDateUpdate"
-              @update:search="handleSearchUpdate"
-              @update:sort="handleSortUpdate"
-              @add="showAddParcelPage"
-            />
-          </div>
-
-            <div class="fixed top-5 left-5 z-50">
-              <AlertPopUp
-                v-if="deleteSuccess"
-                :titles="'Delete Parcel is Successful.'"
-                message="Success!!"
-                styleType="green"
-                operate="deleteSuccessMessage"
-                @closePopUp="closePopUp"
-              />
-              <AlertPopUp
-                v-if="addSuccess"
-                :titles="'Add New Parcel is Successful.'"
-                message="Success!!"
-                styleType="green"
-                operate="addSuccessMessage"
-                @closePopUp="closePopUp"
-              />
-              <AlertPopUp
-                v-if="editSuccess"
-                :titles="'Edit Parcel  is Successful.'"
-                message="Success!!"
-                styleType="green"
-                operate="editSuccessMessage"
-                @closePopUp="closePopUp"
-              />
-              <AlertPopUp
-                v-if="error"
-                :titles="'There is a problem. Please try again later.'"
-                message="Error!!"
-                styleType="red"
-                operate="problem"
-                @closePopUp="closePopUp"
-              />
+              <p class="text-slate-500 font-medium max-w-lg text-[13px] sm:text-sm md:text-base leading-relaxed pl-1">
+                Stay updated with the most recent updates and critical notices from management.
+              </p>
             </div>
             
-            <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-                <ParcelTable
-                :items="paginatedParcels"
-                :pages="visiblePages"
-                :page="currentPage"
-                :total="totalPages"
-                :clickableStatus="false"
-                :showDelete="false"
-                :can-next="canGoNext"
-                @prev="prevPage"
-                @next="nextPage"
-                @go="goToPage"
-                @status-click="openStatusPopup"
-                @view-detail="showParcelDetail"
-                >
-                <template #sort-room>
-                    <svg
-                    class="cursor-pointer"
-                    @click="toggleSortRoom"
-                    width="17"
-                    height="12"
-                    viewBox="0 0 17 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                    />
-                    <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#0E4B90"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                    </svg>
-                </template>
-
-                <template #sort-status>
-                    <svg
-                    class="cursor-pointer"
-                    @click="toggleSortStatus"
-                    width="17"
-                    height="12"
-                    viewBox="0 0 17 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                    />
-                    <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#0E4B90"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                    </svg>
-                </template>
-
-                <template #sort-date>
-                    <svg
-                    class="cursor-pointer"
-                    @click="toggleSortDate"
-                    width="17"
-                    height="12"
-                    viewBox="0 0 17 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <path
-                        d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
-                        fill="#185DC0"
-                    />
-                    <path
-                        d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
-                        stroke="#0E4B90"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                    </svg>
-                </template>
-
-                <template #icon-view>
-                    <svg
-                    class="cursor-pointer text-[#107EFF]"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <path
-                        d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M15.4698 7.83C14.8817 6.30882 13.8608 4.99331 12.5332 4.04604C11.2056 3.09878 9.62953 2.56129 7.99979 2.5C6.37005 2.56129 4.79398 3.09878 3.46639 4.04604C2.1388 4.99331 1.11787 6.30882 0.529787 7.83C0.490071 7.93985 0.490071 8.06015 0.529787 8.17C1.11787 9.69118 2.1388 11.0067 3.46639 11.954C4.79398 12.9012 6.37005 13.4387 7.99979 13.5C9.62953 13.4387 11.2056 12.9012 12.5332 11.954C13.8608 11.0067 14.8817 9.69118 15.4698 8.17C15.5095 8.06015 15.5095 7.93985 15.4698 7.83ZM7.99979 11.25C7.357 11.25 6.72864 11.0594 6.19418 10.7023C5.65972 10.3452 5.24316 9.83758 4.99718 9.24372C4.75119 8.64986 4.68683 7.99639 4.81224 7.36596C4.93764 6.73552 5.24717 6.15642 5.70169 5.7019C6.15621 5.24738 6.73531 4.93785 7.36574 4.81245C7.99618 4.68705 8.64965 4.75141 9.24351 4.99739C9.83737 5.24338 10.3449 5.65994 10.7021 6.1944C11.0592 6.72886 11.2498 7.35721 11.2498 8C11.2485 8.86155 10.9056 9.68743 10.2964 10.2966C9.68722 10.9058 8.86133 11.2487 7.99979 11.25Z"
-                        fill="currentColor"
-                    />
-                    </svg>
-                </template>
-                <template #icon-delete>
-                    <svg
-                    class="cursor-pointer text-red-500"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 21"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    >
-                    <path
-                        d="M3.375 21C2.75625 21 2.22675 20.7717 1.7865 20.3152C1.34625 19.8586 
-            1.12575 19.3091 1.125 18.6667V3.5H0V1.16667H5.625V0H12.375V1.16667H18V3.5H16.875
-            V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
-            21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
-            V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                        fill="currentColor"
-                    />
-                    </svg>
-                </template>
-                </ParcelTable>
+            <div class="flex shrink-0">
+              <button 
+                @click="showAnnouncementPage" 
+                class="group flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-[#0E4B90]/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+              >
+                <span class="text-slate-700 font-bold text-xs tracking-widest group-hover:text-[#0E4B90] transition-colors">View All Announcements</span>
+                <div class="h-8 w-8 rounded-xl bg-slate-900 text-white flex items-center justify-center group-hover:bg-[#0E4B90] transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </button>
             </div>
-          </div> -->
+          </div>
+
+          <!-- Dynamic Stories Grid -->
+          <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-stretch anim-fade-in">
+            
+            <!-- Featured Story (Left Large Card) -->
+            <div 
+              @click="openModal(latestAnnouncements[0])"
+              class="lg:col-span-7 group cursor-pointer bg-white rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
+            >
+              <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
+                <!-- Image with fallback to Placeholder -->
+                <img 
+                  v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
+                  :src="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  alt="Featured News"
+                />
+                <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400">
+                  <svg class="w-20 h-20 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                
+                <!-- Hover Overlay -->
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                  <div class="bg-white/20 border border-white/40 px-6 py-3 rounded-2xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
+                    <span class="text-white text-sm font-bold tracking-wider">Read Full Details</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                  </div>
+                </div>
+
+                <div class="absolute top-5 left-5 flex gap-2">
+                  <div v-if="latestAnnouncements[0].priority === 'URGENT' || latestAnnouncements[0].status === 'URGENT'" class="bg-red-100 text-red-600 text-[10px] font-black tracking-widest px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-red-200/50">
+                    <span class="h-1.5 w-1.5 bg-red-600 rounded-full animate-pulse"></span>
+                    Urgent
+                  </div>
+                </div>
+              </div>
+              
+              <div class="px-1 space-y-3 flex flex-col flex-grow">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px] self-start" :class="getCategoryBadgeClass(latestAnnouncements[0].category)">
+                  <span v-html="getCategoryIcon(latestAnnouncements[0].category)"></span>
+                  {{ latestAnnouncements[0].category }}
+                </div>
+                <h3 class="text-xl md:text-2xl font-black text-[#0E4B90] leading-tight group-hover:text-blue-600 transition-colors">
+                  {{ latestAnnouncements[0].title }}
+                </h3>
+                <div class="space-y-1.5 flex-grow">
+                  <p v-if="latestAnnouncements[0].subtitle" class="text-gray-900 text-base md:text-lg font-bold leading-tight line-clamp-2">
+                    {{ latestAnnouncements[0].subtitle }}
+                  </p>
+                  <p v-if="latestAnnouncements[0].content" class="text-gray-500 text-sm md:text-base leading-relaxed line-clamp-2 font-medium">
+                    {{ latestAnnouncements[0].content }}
+                  </p>
+                </div>
+                <div class="pt-6 border-t border-gray-50 flex items-center justify-between mt-auto">
+
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5 text-gray-400 font-bold text-xs border-l border-gray-100 pl-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {{ latestAnnouncements[0].viewCount || latestAnnouncements[0].views || 0 }}
+                    </div>
+                  </div>
+                  <div class="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Small Stories List (Right) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+              <div 
+                v-for="(news, index) in latestAnnouncements.slice(1)" 
+                :key="news.id"
+                @click="openModal(news)"
+                class="group flex flex-row gap-3 md:gap-6 bg-white p-3 md:p-5 rounded-2xl border border-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
+              >
+                <div class="w-20 sm:w-24 md:w-32 aspect-square shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-inner group/img relative">
+                  <img 
+                    v-if="news.coverImageUrl || news.coverImage"
+                    :src="news.coverImageUrl || news.coverImage"
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    alt="News Thumbnail"
+                  />
+                  <div v-else class="text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+
+                  <!-- Hover Overlay -->
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                    <div class="bg-white/20 border border-white/40 px-2 py-1.5 rounded-lg backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-xl flex items-center gap-1.5">
+                      <span class="text-white text-[7px] font-black tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="text-white flex-shrink-0"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col justify-between py-1 overflow-hidden">
+                  <div class="space-y-1.5">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[10px]" :class="getCategoryBadgeClass(news.category)">
+                      <span v-html="getCategoryIcon(news.category)"></span>
+                      {{ news.category }}
+                    </div>
+                    <h4 class="font-bold text-[#0E4B90] line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight text-lg">
+                      {{ news.title }}
+                    </h4>
+                    <p v-if="news.subtitle" class="text-gray-700 text-xs font-bold line-clamp-2 mt-1">
+                      {{ news.subtitle }}
+                    </p>
+                  </div>
+                  <div class="flex items-center justify-between mt-4">
+                    <div class="flex items-center gap-1 text-gray-400 text-[11px] font-bold tracking-tight">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {{ news.viewCount || news.views || 0 }}
+                    </div>
+                    <div class="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#1D355E] group-hover:text-white transition-all duration-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
+             <div class="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
+                </svg>
+             </div>
+             <p class="text-slate-400 font-black text-sm tracking-[0.2em]">No recent stories found</p>
+          </div>
+        </div>
       </main>
+      <AnnouncementDetailModal
+        v-if="isModalOpen"
+        :isOpen="isModalOpen"
+        :title="selectedAnnouncement?.title || ''"
+        :subtitle="selectedAnnouncement?.subtitle || ''"
+        :content="selectedAnnouncement?.content || ''"
+        :tag="selectedAnnouncement?.category || selectedAnnouncement?.tag || 'General'"
+        :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || selectedAnnouncement?.date || 'Just now'"
+        :author="selectedAnnouncement?.author || 'Staff Portal'"
+        :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
+        :status="selectedAnnouncement?.status"
+        :pinned="false"
+        :coverImage="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
+        @close="closeModal"
+      />
     </div>
   </div>
   <Teleport to="body" v-if="showParcelScanner">
     <ParcelScannerPage> </ParcelScannerPage>
-  </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
@@ -1387,12 +1222,21 @@ function formatDateTime(datetimeStr) {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
 
-<style scoped></style>
+<style scoped>
+.anim-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

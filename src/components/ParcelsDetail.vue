@@ -1,19 +1,22 @@
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import HomePageStaff from '@/components/HomePageResident.vue'
+import HomePageStaff from '@/components/HomePageStaff.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useParcelManager } from '@/stores/ParcelsManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
+import AlertPopUp from './AlertPopUp.vue'
 import {
   getItemById,
   deleteItemById,
@@ -28,7 +31,9 @@ import {
   declineInvite,
   editItemWithFile,
   deleteFile,
-  updateParcelStatus
+  updateParcelStatus,
+  sendParcelNotification,
+  sendOverdueReminder
 } from '@/utils/fetchUtils'
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -40,14 +45,120 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
-const isCollapsed = ref(false)
-const showLogoutConfirm = ref(false)
 const parcel = ref(null)
+const isOverdue = computed(() => {
+  if (!parcel.value || !parcel.value.receivedAt) return false
+  const status = parcel.value.status?.toUpperCase() || ''
+  if (!['RECEIVED', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
+  const receivedDate = new Date(parcel.value.receivedAt)
+  const currentDate = new Date()
+  const diffTime = Math.abs(currentDate - receivedDate)
+  const diffDays = diffTime / (1000 * 60 * 60 * 24)
+  return diffDays > 3
+})
+
+const overdueDays = computed(() => {
+  if (!parcel.value || !parcel.value.receivedAt) return 0
+  const receivedDate = new Date(parcel.value.receivedAt)
+  const now = new Date()
+  const diffTime = Math.abs(now - receivedDate)
+  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.max(1, totalDays - 3)
+})
+
+const activeTab = ref('info')
+
+// Notification states
+const showNotifyPopup = ref(false)
+const lineAlertStyle = ref('green')
+const isSending = ref(false)
+const notifySuccess = ref(false)
+const notifyError = ref(false)
+const lineAlertVisible = ref(false)
+const lineAlertMessage = ref('')
+const lineAlertTitle = ref('')
+
+// Reminder Cooldown Logic (3 Days)
+const lastNotifySentTime = ref(null)
+const isNotifyDisabled = computed(() => {
+  if (!lastNotifySentTime.value) return false
+  const threeDays = 3 * 24 * 60 * 60 * 1000
+  return (Date.now() - lastNotifySentTime.value) < threeDays
+})
+
+const cooldownDaysRemaining = computed(() => {
+  if (!lastNotifySentTime.value) return 0
+  const threeDays = 3 * 24 * 60 * 60 * 1000
+  const diff = threeDays - (Date.now() - lastNotifySentTime.value)
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+})
+
+const checkLastNotifySent = () => {
+  if (parcel.value?.parcelId) {
+    const stored = localStorage.getItem(`lastNotifySent_${parcel.value.parcelId}`)
+    lastNotifySentTime.value = stored ? parseInt(stored) : null
+  }
+}
+
+watch(() => parcel.value?.parcelId, () => {
+  checkLastNotifySent()
+}, { immediate: true })
+
+const menuClass = (tab) => {
+  return [
+    'w-full text-left px-5 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 flex items-center gap-3',
+    activeTab.value === tab
+      ? 'bg-blue-50 text-[#185DC0] shadow-sm shadow-blue-100/50 scale-[1.02]'
+      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:translate-x-1'
+  ]
+}
+
+const triggerNotifyPopup = () => {
+  showNotifyPopup.value = true
+}
+
+const sendNotify = async () => {
+  if (!parcel.value || !parcel.value.residentId) return
+  
+  isSending.value = true
+  try {
+    // If it's overdue, use the remind-overdue api, otherwise use standard notify
+    const result = isOverdue.value 
+      ? await sendOverdueReminder(parcel.value.parcelId, router)
+      : await sendParcelNotification(parcel.value.parcelId, router)
+    
+    if (result) {
+      const now = Date.now()
+      localStorage.setItem(`lastNotifySent_${parcel.value.parcelId}`, now.toString())
+      lastNotifySentTime.value = now
+
+      notifySuccess.value = true
+      lineAlertVisible.value = true
+      lineAlertStyle.value = 'green'
+      lineAlertMessage.value = 'Success!!'
+      lineAlertTitle.value = 'Notification has been sent successfully.'
+    } else {
+      throw new Error('Failed to send')
+    }
+  } catch (error) {
+    notifyError.value = true
+    lineAlertVisible.value = true
+    lineAlertStyle.value = 'red'
+    lineAlertMessage.value = 'Error!!'
+    lineAlertTitle.value = 'Could not send notification. Please check connection.'
+  } finally {
+    isSending.value = false
+    showNotifyPopup.value = false
+    setTimeout(() => {
+      lineAlertVisible.value = false
+      notifySuccess.value = false
+      notifyError.value = false
+    }, 5000)
+  }
+}
 
 const mapParcelData = (data) => ({
   parcelId: data.parcelId,
@@ -97,19 +208,22 @@ const getParcelDetail = async (tid) => {
     }
   } catch (err) {}
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)
+  if (route.query.tab) {
+    activeTab.value = route.query.tab
+  }
 })
+
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab) {
+      activeTab.value = newTab
+    }
+  }
+)
 
 watch(
   () => route.params.tid,
@@ -146,19 +260,10 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async () => {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async () => {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 const showEditParacelDetail = async function (parcelId) {
   router.push({
@@ -171,7 +276,22 @@ const showEditParacelDetail = async function (parcelId) {
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
-  return datetimeStr.replace('T', ' ')
+  let formatted = datetimeStr.replace('T', ' ')
+  let parts = formatted.split(' ')
+  let datePart = parts[0]
+
+  if (datePart.includes('-')) {
+    const dateComp = datePart.split('-')
+    if (dateComp.length === 3) {
+      if (dateComp[0].length === 4) {
+        datePart = `${dateComp[2]}/${dateComp[1]}/${dateComp[0]}`
+      } else {
+        datePart = dateComp.join('/')
+      }
+    }
+  }
+  parts[0] = datePart
+  return parts.join(' ')
 }
 </script>
 
@@ -182,7 +302,6 @@ function formatDateTime(datetimeStr) {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -386,196 +505,297 @@ function formatDateTime(datetimeStr) {
             </template>
           </SidebarItem>
         </aside>
-      </button>
 
       <main class="flex-1 p-4 md:p-9 bg-[#F8FAFC]">
-        <div class="flex items-center space-x-2 mb-6">
-          <!-- <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="currentColor"
-            />
-          </svg>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Manage Parcel ></h2>
-          <h2 class="text-2xl font-bold text-[#185dc0]">Details</h2> -->
-           <div class="flex items-center gap-4">
-                <div class="p-3 bg-blue-100 rounded-xl text-black shadow-sm text-[#0E4B90]">
-           <svg
-            width="25"
-            height="25"
-            viewBox="0 0 25 25"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
-              fill="#0E4B90"
-            />
-          </svg>
-              </div>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
-                     Manage Parcel &gt; Details </span>
-                </h2>
-              </div>
+        <div v-if="lineAlertVisible" class="fixed top-5 left-5 z-50 w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
+          <AlertPopUp
+            :message="lineAlertMessage"
+            :titles="lineAlertTitle"
+            :styleType="lineAlertStyle"
+            @closePopUp="lineAlertVisible = false"
+          />
         </div>
-        <div class="flex flex-col mb-4 gap-4"></div>
 
-        <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm">
-          <section>
-            <div class="flex items-center gap-4 mb-8">
-              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
+        <div class="flex items-center space-x-2 mb-6">
+          <div class="flex items-center gap-4">
+            <div class="p-3 bg-blue-100 rounded-xl text-black shadow-sm text-[#0E4B90]">
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.9674 2.6177C13.0261 2.23608 11.9732 2.23608 11.032 2.6177L8.75072 3.5427L18.7424 7.42812L22.257 6.07083C22.1124 5.95196 21.9509 5.85541 21.7778 5.78437L13.9674 2.6177ZM22.9163 7.49062L13.2809 11.2135V22.5917C13.5143 22.5444 13.7431 22.4753 13.9674 22.3844L21.7778 19.2177C22.1142 19.0814 22.4023 18.8478 22.6051 18.5468C22.808 18.2458 22.9163 17.8911 22.9163 17.5281V7.49062ZM11.7184 22.5917V11.2135L2.08301 7.49062V17.5292C2.08321 17.892 2.19167 18.2464 2.39449 18.5472C2.59732 18.8481 2.88529 19.0815 3.22155 19.2177L11.032 22.3844C11.2563 22.4746 11.4851 22.543 11.7184 22.5917ZM2.74238 6.07083L12.4997 9.84062L16.5799 8.26354L6.63926 4.39895L3.22155 5.78437C3.04377 5.85659 2.88405 5.95208 2.74238 6.07083Z"
+                  fill="#0E4B90"
+                />
+              </svg>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium whitespace-all flex items-center h-[58px]">
-                  {{ parcel?.trackingNumber || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.recipientName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.senderName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.parcelType || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.companyName || '-' }}
-                </p>
-              </div>
-<!-- 
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Image</label>
-                <div v-if="parcel?.imageUrl">
-                  <img
-                    :src="parcel.imageUrl"
-                    alt="Parcel Image"
-                    class="w-48 h-48 object-cover border border-gray-100 rounded-[2rem] shadow-lg shadow-blue-100/50 transition-transform duration-300 hover:scale-[1.02]"
-                  />
-                </div>
-                <div v-else class="text-gray-400">No image available</div>
-              </div> -->
-            </div>
-          </section>
-
-          <section>
-            <div class="flex items-center gap-4 mb-8">
-              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.residentName || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.roomNumber || '-' }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ parcel?.email || '-' }}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div class="flex items-center gap-4 mb-8">
-              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">Date</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Received At</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ formatDateTime(parcel?.receivedAt || '-') }}
-                </p>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Updated At</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ formatDateTime(parcel?.updatedAt || '-') }}
-                </p>
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Picked Up At</label>
-                <p class="w-full p-4 text-gray-700 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium flex items-center h-[58px]">
-                  {{ formatDateTime(parcel?.pickedUpAt || '-') }}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div class="flex items-center gap-4 mb-8">
-              <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
-              <h3 class="font-extrabold text-xl text-black tracking-tight">Status</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <div
-                  class="w-fit p-2 px-6 rounded-full font-bold shadow-sm transition-all duration-300 tracking-tight text-xs border"
-                  :class="{
-                    'bg-yellow-50 text-yellow-600 border-yellow-100': parcel?.status === 'WAITING_FOR_STAFF',
-                    'bg-blue-50 text-blue-600 border-blue-100': parcel?.status === 'RECEIVED',
-                    'bg-green-50 text-green-600 border-green-100': parcel?.status === 'PICKED_UP'
-                  }"
-                >
-                  {{ formatStatus(parcel?.status) }}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div class="flex items-center gap-3 ml-auto justify-end pt-4">
-            <ButtonWeb
-              label="Go Back"
-              color="gray"
-              @click="backToManageParcels"
-              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 text-[#898989] cursor-pointer hover:bg-gray-100 rounded-[1.25rem] transition-all"
-            />
-            <ButtonWeb
-              label="Edit"
-              color="blue"
-              @click="showEditParacelDetail(parcel.parcelId)"
-              class="px-8 py-3 text-xs md:text-sm w-auto md:w-40 cursor-pointer hover:opacity-90 rounded-[1.25rem] transition-all shadow-lg shadow-blue-500/20"
-            />
+            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
+              <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
+                Manage Parcel 
+              </span>
+            </h2>
           </div>
         </div>
-      </main>
+
+        <div class="flex flex-col md:flex-row gap-6 items-stretch">
+          <!-- LEFT : Menu Sidebar -->
+          <div class="w-full md:w-1/3 flex">
+            <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
+            <div class="flex flex-col items-center text-center">
+              <div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#1D355E] to-[#0E4B90] flex items-center justify-center shadow-lg transform transition-transform hover:scale-105">
+                <svg
+                  width="50"
+                  height="50"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                  <path d="m3.3 7 8.7 5 8.7-5" />
+                  <path d="M12 22V12" />
+                </svg>
+              </div>
+              <p class="text-sm font-extrabold text-[#0E4B90] pt-6 tracking-wider">Package</p>
+              <p class="mt-2 text-gray-900 font-bold text-xl">{{ parcel?.trackingNumber || 'No ID' }}</p>
+            </div>
+
+            <div class="mt-10 space-y-3">
+              <button @click="activeTab = 'info'" :class="menuClass('info')" class="cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+                <span>Information</span>
+              </button>
+              <button @click="activeTab = 'status'" :class="menuClass('status')" class="cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                <span>Status & Notify</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT : Content Area -->
+        <div class="w-full md:w-2/3 flex">
+            <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
+            <div v-if="activeTab === 'info'" class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <section>
+                <div class="flex items-center gap-4 mb-8">
+                  <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                  <h3 class="font-extrabold text-xl text-black tracking-tight">Parcel Information</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Tracking Number</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.trackingNumber || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Recipient Name</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.recipientName || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Sender Name</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.senderName || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Parcel Type</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.parcelType || '-' }}</p>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Company</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.companyName || '-' }}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <div class="flex items-center gap-4 mb-8">
+                  <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                  <h3 class="font-extrabold text-xl text-black tracking-tight">Resident Info</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Resident Name</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.residentName || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Room Number</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.roomNumber || '-' }}</p>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">Email</label>
+                    <p class="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 font-medium text-gray-700 truncate h-[58px] flex items-center">{{ parcel?.email || '-' }}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <div class="flex items-center gap-4 mb-8">
+                  <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
+                  <h3 class="font-extrabold text-xl text-black tracking-tight">Timeline</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+                  <div class="flex flex-col">
+                    <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Received At</label>
+                    <div class="px-4 py-3 bg-blue-50/30 rounded-2xl border border-blue-100/50 flex flex-col justify-center h-[58px]">
+                      <span class="text-sm font-bold text-blue-900 leading-tight">{{ formatDateTime(parcel?.receivedAt)?.split(' ')[0] || '-' }}</span>
+                      <span class="text-xs text-blue-400 mt-1">{{ formatDateTime(parcel?.receivedAt)?.split(' ')[1] || '' }}</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col">
+                    <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Updated At</label>
+                    <div class="px-4 py-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex flex-col justify-center h-[58px]">
+                      <span class="text-sm font-bold text-gray-700 leading-tight">{{ formatDateTime(parcel?.updatedAt)?.split(' ')[0] || '-' }}</span>
+                      <span class="text-xs text-gray-400 mt-1">{{ formatDateTime(parcel?.updatedAt)?.split(' ')[1] || '' }}</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col">
+                    <label class="block text-[10px] tracking-widest font-black text-gray-400 mb-2 ml-1">Picked Up At</label>
+                    <div class="px-4 py-3 bg-emerald-50/30 rounded-2xl border border-emerald-100/50 flex flex-col justify-center h-[58px]">
+                      <span :class="['text-sm font-bold leading-tight', parcel?.pickedUpAt ? 'text-emerald-900' : 'text-gray-400']">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[0] || '-' }}</span>
+                      <span class="text-xs text-emerald-400 mt-1">{{ formatDateTime(parcel?.pickedUpAt)?.split(' ')[1] || '' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="flex items-center gap-3 justify-end pt-6 border-t border-gray-50">
+                <ButtonWeb label="Go Back" color="gray" @click="backToManageParcels" class="px-8 py-3 w-40 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all" />
+                <ButtonWeb label="Edit" color="blue" @click="showEditParacelDetail(parcel.parcelId)" class="px-8 py-3 w-40 font-bold bg-[#185DC0] text-white rounded-2xl transition-all shadow-lg shadow-blue-200" />
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'status'" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div class="bg-gray-50/50 rounded-3xl p-8 border border-gray-100 flex flex-col items-center text-center">
+                  <div class="mb-6 relative">
+                    <div
+                      class="w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all duration-500 overflow-hidden"
+                      :class="{
+                        'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-100': parcel?.status === 'WAITING_FOR_STAFF',
+                        'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED',
+                        'bg-gradient-to-br from-emerald-400 to-green-600 shadow-green-100': parcel?.status === 'PICKED_UP'
+                      }"
+                    >
+                      <svg v-if="parcel?.status === 'PICKED_UP'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg v-else-if="parcel?.status === 'RECEIVED'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                  </div>
+                  <h4 class="text-[13px] font-black text-gray-400 tracking-[0.2em] mb-2">Current Status</h4>
+                  <div class="flex items-center gap-3">
+                    <p class="text-3xl font-black text-gray-900 tracking-tight">{{ formatStatus(parcel?.status) }}</p>
+                    <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">Overdue</span>
+                  </div>
+                  <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
+                    {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
+                  </p>
+               </div>
+
+               <!-- Send Overdue Reminder UI -->
+               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
+                  <!-- Decorative blur -->
+                  <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
+
+                  <div class="relative z-10">
+                    <div class="flex items-center gap-5 mb-8">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:hidden">
+                              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block">
+                              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                            </svg>
+                        </div>
+                        <div>
+                           <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-1 sm:mb-2 leading-tight">Send Overdue Reminder</h5>
+                           <p class="text-gray-500 font-medium text-xs sm:text-base sm:max-w-md leading-relaxed">
+                            This parcel is <strong>{{ overdueDays }} days</strong> overdue. Remind the resident now.
+                           </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4">
+                      <ButtonWeb 
+                        label="Send Reminder"
+                        :color="isNotifyDisabled ? 'gray' : 'blue'"
+                        :loading="isSending"
+                        :disabled="isNotifyDisabled"
+                        @click="!isNotifyDisabled && triggerNotifyPopup()"
+                        icon='<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>'
+                        class="w-full sm:w-auto px-10 py-5 font-black rounded-2xl shadow-lg transition-all active:scale-95 text-base border-0 focus:ring-4 focus:ring-blue-100"
+                        :class="[
+                          isNotifyDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-[#e4e7ed] text-[#4d5b7a] hover:bg-gray-200'
+                        ]"
+                      />
+                      
+                      <!-- Status Message (Cooldown) -->
+                      <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
+                        <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-yellow-50 text-yellow-600 px-6 py-2.5 rounded-full border border-yellow-100 shadow-sm">
+                           <div class="relative">
+                              <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
+                              <svg class="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                           </div>
+                           <span class="text-xs font-bold tracking-tight">
+                            Reminder recently sent. You can resend it again in {{ cooldownDaysRemaining }} days.
+                           </span>
+                        </div>
+                      </transition>
+                    </div>
+                  </div>
+               </div>
+               
+               
+               <div class="flex items-center gap-3 justify-end pt-6">
+                <ButtonWeb label="Go Back" color="gray" @click="backToManageParcels" class="px-8 py-3 w-40 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all" />
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+      <!-- Notification Confirmation Modal -->
+      <div v-if="showNotifyPopup" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showNotifyPopup = false"></div>
+        <div class="relative bg-white rounded-[2.5rem] w-full max-w-md p-10 text-center shadow-2xl animate-in zoom-in-95 duration-300">
+           <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8">
+             <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg animate-bounce">
+               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+             </div>
+           </div>
+           <h3 class="text-2xl font-black text-gray-900 mb-2">{{ isOverdue ? 'Send Overdue Reminder?' : 'Send Notification?' }}</h3>
+           <p class="text-gray-500 font-medium mb-10 leading-relaxed">
+             {{ isOverdue 
+                ? 'Resident will be reminded that this parcel is ' + overdueDays + ' days overdue.' 
+                : 'System will send a notification to the resident about this parcel.' }}
+           </p>
+            <div class="flex gap-3">
+               <ButtonWeb 
+                 @click="showNotifyPopup = false" 
+                 label="Cancel"
+                 color="gray"
+                 class="flex-1 py-2.5 text-gray-400 font-bold hover:bg-gray-50 rounded-xl transition-all"
+              />
+              <ButtonWeb 
+                 @click="sendNotify" 
+                 :label="isSending ? 'Sending...' : 'Confirm'"
+                 :color="isSending ? 'gray' : 'blue'"
+                 :class="[
+                   'flex-1 py-2.5 font-black rounded-xl shadow-lg',
+                   isSending ? 'shadow-gray-100' : 'shadow-blue-100'
+                 ]"
+                 :loading="isSending"
+              />
+            </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -583,19 +803,10 @@ function formatDateTime(datetimeStr) {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

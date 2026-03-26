@@ -3,37 +3,109 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import { useAuthManager } from '@/stores/AuthManager.js'
 import AlertPopUp from './AlertPopUp.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
 import { useNotificationManager } from '@/stores/NotificationManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { addAnnouncementWithFile } from '@/utils/fetchUtils.js'
+import { addAnnouncementWithFile, getAnnouncements, addAnnouncement } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
+import SelectWeb from './SelectWeb.vue'
+
+const dateInput = ref(null)
+const windowWidth = ref(window.innerWidth)
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
+
+const formatDateTimeDisplay = (dateTimeStr) => {
+  if (!dateTimeStr) return '';
+  const parts = dateTimeStr.split('T');
+  const datePart = parts[0];
+  const timePart = parts[1] || '';
+  
+  const [year, month, day] = datePart.split('-');
+  return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
+}
 
 const loginManager = useAuthManager()
 const notificationManager = useNotificationManager()
 const announcementManager = useAnnouncementManager()
+const { totalPinned } = storeToRefs(announcementManager)
 const router = useRouter()
 const route = useRoute()
 const error = ref(false)
-const isCollapsed = ref(false)
 const isCategoryOpen = ref(false)
-
-// Form Data
 const title = ref('')
 const subtitle = ref('')
-const category = ref('')
+const categoryId = ref(null)
 const content = ref('')
-const date = ref('')
+const publishAt = ref('')
+const targetAudience = ref('ALL_RESIDENTS')
+const pinned = ref(false)
+const sendNotification = ref(true)
+const activeTab = ref('publish')
+const categories = ref([])
 
-const targetAudience = ref('All')
-const isPinned = ref(false)
-const notify = ref(true)
+const fetchCategoriesFromAnnouncements = async () => {
+  try {
+    const data = await getAnnouncements(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
+      router
+    )
+    if (data && data.length > 0) {
+      const uniqueCategories = []
+      const map = new Map()
+      
+      for (const item of data) {
+        const id = item.categoryId || item.id
+        const name = item.categoryName || item.name || item.category
+        
+        if (id && name && !map.has(id)) {
+          map.set(id, true)
+          uniqueCategories.push({
+            id: id,
+            name: name
+          })
+        }
+      }
 
-const categories = ['General', 'Maintenance', 'Events', 'Urgent']
+      if (uniqueCategories.length > 0) {
+        categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch categories from announcements:', err)
+  }
+}
+
+const currentCategory = computed(() => {
+  return categories.value.find(c => c.id === categoryId.value) || null
+})
+
+const categoryOptions = computed(() => {
+  return categories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
+  }))
+})
 
 const addSuccess = ref(false)
+const showPinLimitAlert = ref(false)
 const isLoading = ref(false)
 const titleError = ref(false)
 const titleLengthError = ref(false)
@@ -44,6 +116,7 @@ const categoryError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
 const fileSizeError = ref(false)
+const showDateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
@@ -81,7 +154,6 @@ const formatText = (style) => {
 
   content.value = before + newText + after
   
-  // Set cursor position after formatting
   setTimeout(() => {
     textarea.focus()
     const newPos = start + newText.length
@@ -89,8 +161,20 @@ const formatText = (style) => {
   }, 0)
 }
 
+const minDateTime = computed(() => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+})
+
 const isFormValid = computed(() => {
-  return title.value.trim() !== '' && category.value !== '' && date.value !== '' && content.value.trim() !== ''
+  const common = title.value.trim() !== '' && categoryId.value !== null && content.value.trim() !== ''
+  if (activeTab.value === 'draft') return common
+  return common
 })
 
 const closePopUp = (operate) => {
@@ -102,6 +186,8 @@ const closePopUp = (operate) => {
   if (operate === 'contentError') { contentError.value = false }
   if (operate === 'fileSizeError') { fileSizeError.value = false }
   if (operate === 'errorMessage') { error.value = false }
+  if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
+  if (operate === 'dateError') { showDateError.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -115,7 +201,7 @@ const handleTitleInput = (event) => {
     val = val.replace(/[๐-๙]/g, '')
     setTimeout(() => {
       titleThaiNumError.value = false
-    }, 5000)
+    }, 10000)
   }
 
   if (val.length > MAX_TITLE_LENGTH) {
@@ -125,7 +211,7 @@ const handleTitleInput = (event) => {
     titleLengthError.value = true
     setTimeout(() => {
       titleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     title.value = val
     event.target.value = val
@@ -136,15 +222,6 @@ const MAX_SUBTITLE_LENGTH = 150
 
 const handleSubtitleInput = (event) => {
   let val = event.target.value
-  
-  // if (/[๐-๙]/.test(val)) {
-  //   subtitleThaiNumError.value = true
-  //   val = val.replace(/[๐-๙]/g, '')
-  //   setTimeout(() => {
-  //     subtitleThaiNumError.value = false
-  //   }, 5000)
-  // }
-
   if (val.length > MAX_SUBTITLE_LENGTH) {
     const sliced = val.slice(0, MAX_SUBTITLE_LENGTH)
     subtitle.value = sliced
@@ -152,7 +229,7 @@ const handleSubtitleInput = (event) => {
     subtitleLengthError.value = true
     setTimeout(() => {
       subtitleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     subtitle.value = val
     event.target.value = val
@@ -168,7 +245,7 @@ const handleContentInput = (event) => {
     contentLengthError.value = true
     setTimeout(() => {
       contentLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     content.value = val
   }
@@ -178,17 +255,16 @@ const onFileChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
 
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > 1 * 1024 * 1024) {
     fileSizeError.value = true
     imageFile.value = null
     imagePreview.value = ''
     setTimeout(() => {
       fileSizeError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   
-  // Basic validation for image type
   if (!file.type.startsWith('image/')) {
     alert('Please upload an image file.')
     return
@@ -207,31 +283,28 @@ const removeImage = () => {
   imagePreview.value = ''
 }
 
-// Sidebar Logic
-const windowWidth = ref(window.innerWidth)
-const checkScreen = () => {
-  windowWidth.value = window.innerWidth
-  isCollapsed.value = windowWidth.value < 768
+const isLightboxOpen = ref(false)
+const toggleLightbox = () => {
+  if (imagePreview.value) {
+    isLightboxOpen.value = !isLightboxOpen.value
+  }
 }
 
 const buttonSize = computed(() => {
-  return windowWidth.value < 640 ? 'xs' : 'md'
+  return 'md'
 })
 
-onMounted(() => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
+onMounted(async () => {
+  window.addEventListener('resize', handleResize)
+  await fetchCategoriesFromAnnouncements()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  window.removeEventListener('resize', handleResize)
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
-// Navigation
+
 const goBack = () => {
   router.back()
 }
@@ -239,48 +312,61 @@ const goBack = () => {
 const submitAnnouncement = async () => {
   if (!title.value.trim()) {
     titleError.value = true
+    setTimeout(() => {
+      titleError.value = false
+    }, 10000)
     return
   }
-  if (!category.value) {
+  if (categoryId.value === null) {
     categoryError.value = true
+    setTimeout(() => {
+      categoryError.value = false
+    }, 10000)
     return
   }
   if (!content.value.trim()) {
     contentError.value = true
+    setTimeout(() => {
+      contentError.value = false
+    }, 10000)
+    return
+  }
+
+  if (pinned.value && totalPinned.value >= 3) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+    showPinLimitAlert.value = false
+    }, 10000)
     return
   }
 
   try {
     isLoading.value = true
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       title: title.value,
       subtitle: subtitle.value,
-      category: category.value,
       content: content.value,
-      datePosted: date.value || new Date().toISOString(),
-      targetAudience: targetAudience.value,
-      isPinned: isPinned.value,
-      notify: notify.value,
-      status: 'Published'
+      categoryId: categoryId.value,
+      dormId: parseInt(route.params.id),
+      pinned: pinned.value,
+      sendNotification: sendNotification.value,
+      priority: 1,
+      publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
+      publishNow: true,
+      coverImageUrl: "" // Backend คาดหวังฟิลด์นี้ (ใส่ว่างไว้ก่อนถ้ายังไม่ได้ upload ภาพแยก)
     }
 
     if (imageFile.value) {
       body.coverImage = imageFile.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
     )
 
-    if (!savedAnnouncement) {
+    if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false
       error.value = true
       setTimeout(() => {
@@ -291,18 +377,19 @@ const submitAnnouncement = async () => {
 
     announcementManager.addAnnouncement(savedAnnouncement)
 
-    // Send Line notification and fetch updated data
     try {
-      await notificationManager.notifyAnnouncementCreated(body, router)
+      if (sendNotification.value) {
+        await notificationManager.notifyAnnouncementCreated(body, router)
+      }
     } catch (lineError) {
       console.error('Notification failed:', lineError)
     }
 
     isLoading.value = false
     addSuccess.value = true
+    resetForm()
     setTimeout(() => {
       addSuccess.value = false
-      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
     }, 10000)
   } catch (err) {
     console.error('Submission failed:', err)
@@ -314,6 +401,19 @@ const submitAnnouncement = async () => {
   }
 }
 
+const resetForm = () => {
+  title.value = ''
+  subtitle.value = ''
+  categoryId.value = null
+  content.value = ''
+  publishAt.value = ''
+  targetAudience.value = 'ALL_RESIDENTS'
+  pinned.value = false
+  sendNotification.value = true
+  imageFile.value = null
+  imagePreview.value = ''
+}
+
 const saveDraft = async () => {
   titleError.value = false
   categoryError.value = false
@@ -321,7 +421,7 @@ const saveDraft = async () => {
   
   let hasError = false
   if (!title.value.trim()) { titleError.value = true; hasError = true }
-  if (!category.value) { categoryError.value = true; hasError = true }
+  if (categoryId.value === null) { categoryError.value = true; hasError = true }
   if (!content.value.trim()) { contentError.value = true; hasError = true }
   
   if (hasError) {
@@ -329,41 +429,53 @@ const saveDraft = async () => {
       titleError.value = false
       categoryError.value = false
       contentError.value = false
-    }, 5000)
+    }, 10000)
+    return
+  }
+
+  if (pinned.value && totalPinned.value >= 3) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+      showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
+  
+  if (activeTab.value === 'draft' && !publishAt.value) {
+    showDateError.value = true
+    setTimeout(() => {
+      showDateError.value = false
+    }, 10000)
     return
   }
 
   try {
     isLoading.value = true
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       title: title.value,
       subtitle: subtitle.value,
-      category: category.value,
       content: content.value,
-      datePosted: date.value || new Date().toISOString(),
-      targetAudience: targetAudience.value,
-      isPinned: isPinned.value,
-      notify: notify.value,
-      status: 'Draft'
+      categoryId: categoryId.value,
+      dormId: parseInt(route.params.id),
+      pinned: pinned.value,
+      sendNotification: true,
+      priority: 1,
+      publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
+      publishNow: false,
+      coverImageUrl: "" 
     }
 
     if (imageFile.value) {
       body.coverImage = imageFile.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     const savedAnnouncement = await addAnnouncementWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       body,
       router
     )
 
-    if (!savedAnnouncement) {
+    if (!savedAnnouncement || typeof savedAnnouncement !== 'object') {
       isLoading.value = false
       error.value = true
       setTimeout(() => {
@@ -376,9 +488,9 @@ const saveDraft = async () => {
     
     isLoading.value = false
     addSuccess.value = true
+    resetForm()
     setTimeout(() => {
       addSuccess.value = false
-      router.push({ name: 'manageannouncement', params: { id: route.params.id } })
     }, 10000)
   } catch (err) {
     console.error('Save draft failed:', err)
@@ -392,7 +504,6 @@ const saveDraft = async () => {
 const handleCancel = () => {
   router.back()
 }
-// Sidebar Navigation (copied from ManageAnnouncement for consistency)
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
 }
@@ -411,12 +522,14 @@ const showParcelTrashPage = async function () {
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff', params: { id: route.params.id } })
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
-}
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }
+const showManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' , params: { id: route.params.id } })
+  showManageAnnouncement.value = true
+}
+
 const returnLoginPage = async () => {
   try {
     await loginManager.logoutAccount(router)
@@ -430,9 +543,8 @@ const returnLoginPage = async () => {
     class="min-h-screen bg-gray-100 flex flex-col pt-16"
     :class="isCollapsed ? 'md:ml-10' : 'md:ml-60'"
   >
-      <WebHeader @toggle-sidebar="toggleSidebar" />
+    <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -494,39 +606,6 @@ const returnLoginPage = async () => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -565,6 +644,7 @@ const returnLoginPage = async () => {
 
             <SidebarItem
               title="Manage Announcements"
+              @click="showManageAnnouncementPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>
@@ -636,13 +716,12 @@ const returnLoginPage = async () => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+      
 
-      <!-- Main Content -->
+
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
          <div class="max-w-4xl mx-auto space-y-6">
           
-          <!-- Header -->
           <div class="flex items-center gap-2 md:gap-4">
               <div class="flex items-center gap-2 md:gap-4">
                 <button @click="handleCancel" class="p-1.5 md:p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
@@ -663,7 +742,7 @@ const returnLoginPage = async () => {
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
-            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -672,22 +751,67 @@ const returnLoginPage = async () => {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
+             <AlertPopUp
+              v-if="showPinLimitAlert"
+              :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              message="Error!!"
+              styleType="red"
+              operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />
+             <AlertPopUp
+              v-if="showDateError"
+              :titles="'Please enter a publish date and time.'"
+              message="Error!!"
+              styleType="red"
+              operate="dateError"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <LoadingPopUp v-if="isLoading" />
 
-          <!-- Form Card -->
+        
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
                 
-                <!-- Title Input -->
+             
+                <div class="flex items-center gap-2 mb-8">
+                    <div class="flex bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
+                        <button 
+                            @click="activeTab = 'publish'"
+                            :class="[
+                                'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap',
+                                activeTab === 'publish' 
+                                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            ]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                            Publish
+                        </button>
+                        <button 
+                            @click="activeTab = 'draft'"
+                            :class="[
+                                'px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap',
+                                activeTab === 'draft' 
+                                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            ]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Draft
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Announcement Title <span class="text-red-500">*</span></label>
                    <input 
                       type="text" 
                       :value="title"
                       @input="handleTitleInput"
-                      placeholder="Enter announcement title..."
+                      placeholder="Enter announcement title"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
                         titleLengthError || titleThaiNumError
@@ -705,14 +829,14 @@ const returnLoginPage = async () => {
                    </div>
                 </div>
 
-                <!-- Subtitle Input -->
+        
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Subtitle</label>
                    <input 
                       type="text" 
                       :value="subtitle"
                       @input="handleSubtitleInput"
-                      placeholder="Enter brief description..."
+                      placeholder="Enter brief description"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
                         subtitleLengthError 
@@ -730,56 +854,63 @@ const returnLoginPage = async () => {
                    </div>
                 </div>
 
-                <!-- Category & Date Row -->
+              
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category <span class="text-red-500">*</span></label>
-                      <div class="relative">
-                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
-                            <span v-if="!category" class="text-gray-500">Select category...</span>
-                            <template v-else>
-                              <!-- General -->
-                              <svg v-if="category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                              <!-- Maintenance -->
-                              <svg v-else-if="category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                              <!-- Events -->
-                              <svg v-else-if="category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                              <!-- Urgent -->
-                              <svg v-else-if="category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                              <span class="text-gray-800">{{ category }}</span>
-                            </template>
-                        </div>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                        <!-- Dropdown Options -->
-                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                             General
-                          </div>
-                          <div @click="category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                             Maintenance
-                          </div>
-                          <div @click="category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                             Activity/Events
-                          </div>
-                          <div @click="category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                             Urgent
-                          </div>
-                        </div>
-                      </div>
+                      <SelectWeb 
+                        v-model="categoryId"
+                        :options="categoryOptions"
+                        placeholder="Select category"
+                        :error="categoryError"
+                        customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                      >
+                        <template v-if="currentCategory" #icon>
+                          <!-- Dynamic Icon Mapping for SelectWeb -->
+                          <svg v-if="currentCategory.name.includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                          <svg v-else-if="currentCategory.name.includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                          <svg v-else-if="currentCategory.name.includes('Event') || currentCategory.name.includes('Activity')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                          <svg v-else-if="currentCategory.name.includes('Urgent')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </template>
+                      </SelectWeb>
                    </div>
-                   <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date  <span class="text-red-500">*</span></label>
-                      <div class="relative">
+                   <!-- Publish Date (Conditional) -->
+                   <div v-if="activeTab === 'draft'" class="space-y-2">
+                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
+                      <div class="relative flex items-center group">
+                        <!-- Icon Overlay -->
+                        <div 
+                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                          @click="openDatePicker"
+                        >
+                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        <!-- Display Input (Text) -->
                         <input 
+                           type="text" 
+                           readonly
+                           :value="formatDateTimeDisplay(publishAt)"
+                           placeholder="DD/MM/YYYY - HH:mm"
+                           @click="openDatePicker"
+                           class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                        />
+
+                        <!-- Hidden Native Datetime Input -->
+                        <input
+                           ref="dateInput"
                            type="datetime-local" 
-                           v-model="date"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
+                           v-model="publishAt"
+                           :min="minDateTime"
+                           class="absolute opacity-0 w-0 h-0 pointer-events-none"
                         />
                       </div>
                    </div>
@@ -791,30 +922,13 @@ const returnLoginPage = async () => {
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
-                      <!-- <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        </button>
-                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                        </button>
-                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                        </button>
-                      </div> -->
                       <textarea 
                          ref="contentArea"
                          :value="content"
                          @input="handleContentInput"
                          rows="6"
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                         placeholder="Enter announcement content... Supports text formatting."
+                         placeholder="Enter announcement content"
                       ></textarea>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
@@ -826,75 +940,54 @@ const returnLoginPage = async () => {
                 <!-- Cover Image Upload -->
                 <div class="space-y-2">
                   <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
+                  
                   <div 
-                    class="relative w-full h-48 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:bg-gray-100"
-                    :class="{ 'border-blue-400 bg-blue-50': imagePreview }"
+                    v-if="!imagePreview"
+                    @click="$refs.fileInput.click()"
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer group bg-[#F8FAFC]"
                   >
-                    <template v-if="!imagePreview">
-                      <div class="flex flex-col items-center justify-center p-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p class="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
-                        <p class="text-xs text-gray-500 mt-1">PNG, JPG or WEBP (Max 5MB)</p>
-                      </div>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        class="absolute inset-0 opacity-0 cursor-pointer" 
-                        @change="onFileChange"
-                      />
-                    </template>
-                    <template v-else>
-                      <img :src="imagePreview" class="w-full h-full object-cover" />
-                      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <button @click="removeImage" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </template>
+                     <div class="p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-gray-600 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                     </div>
+                     <p class="text-sm font-medium text-gray-700 mt-2">Click to upload or drag file here</p>
+                     <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 1MB</p>
+                     <input 
+                       type="file" 
+                       ref="fileInput" 
+                       class="hidden" 
+                       @change="onFileChange" 
+                       accept="image/*"
+                     />
+                  </div>
+                  <div v-else class="relative group">
+                     <img 
+                       :src="imagePreview" 
+                       alt="Preview" 
+                       class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
+                       @click="toggleLightbox"
+                     />
+                     
+                     <!-- Image Actions Overlay -->
+                     <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                       <button 
+                         @click="removeImage" 
+                         class="p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm backdrop-blur-sm border border-rose-100 cursor-pointer"
+                         title="Remove image"
+                       >
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                       </button>
+                     </div>
+
+                     <input 
+                       type="file" 
+                       ref="fileInput" 
+                       class="hidden" 
+                       @change="onFileChange" 
+                       accept="image/*"
+                     />
                   </div>
                 </div>
 
-                <!-- Target Audience -->
-                <div class="space-y-3 pt-2">
-                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="targetAudience" value="All" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
-                      </div>
-                    </label>
-
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="targetAudience" value="Active" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
-                      </div>
-                    </label>
-
-                    <!-- <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="targetAudience" value="Zone" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
-                      </div>
-                    </label> -->
-                  </div>
-                </div>
-
-                <!-- Toggles -->
                 <div class="space-y-3 pt-2">
                   <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
                      <div class="flex items-center gap-4">
@@ -906,57 +999,45 @@ const returnLoginPage = async () => {
                          <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
                        </div>
                      </div>
-                     <button @click="isPinned = !isPinned" :class="isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
-                     </button>
-                  </div>
-
-                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                     <div class="flex items-center gap-4">
-                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                       </div>
-                       <div>
-                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
-                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
-                       </div>
-                     </div>
-                     <button @click="notify = !notify" :class="notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="pinned = !pinned" :class="pinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="pinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>
-
              </div>
 
-             <!-- Footer Actions -->
-             <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
+             <div class="bg-gray-50 px-2 sm:px-8 py-3 sm:py-4 flex flex-nowrap items-center justify-between sm:justify-end gap-1.5 sm:gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
-                  color="white-outline" 
+                  color="gray" 
                    :size="buttonSize"
+                  class="flex-1 sm:flex-none sm:w-60 !px-1.5 sm:!px-4 !text-xs sm:!text-sm flex justify-center items-center"
                   @click="goBack" 
                 />
                 <ButtonWeb 
+                  v-if="activeTab === 'draft'" 
                   :label="windowWidth < 640 ? 'Draft' : 'Save Draft'" 
-                  color="light-gray" 
+                  color="yellow" 
                   :size="buttonSize"
+                  class="flex-1 sm:flex-none sm:w-60 !px-1.5 sm:!px-4 !text-xs sm:!text-sm flex justify-center items-center"
                   @click="saveDraft" 
                   :disabled="!isFormValid"
                 >
                   <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="sm:w-[18px] sm:h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                   </template>
                 </ButtonWeb>
                 <ButtonWeb 
-                  :label="windowWidth < 640 ? 'Publish' : 'Publish Announcement'" 
+                  v-if="activeTab === 'publish'" 
+                  label="Publish" 
                   color="blue" 
                   :size="buttonSize"
+                  class="flex-1 sm:flex-none sm:w-60 !px-1.5 sm:!px-4 !text-xs sm:!text-sm flex justify-center items-center"
                   @click="submitAnnouncement" 
                   :disabled="!isFormValid"
                 >
                   <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="sm:w-[18px] sm:h-[18px] text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
                   </template>
                 </ButtonWeb>
              </div>
@@ -965,5 +1046,49 @@ const returnLoginPage = async () => {
         </div>
       </main>
     </div>
+    <LoadingPopUp v-if="isLoading" />
+
+    <!-- Lightbox Overlay -->
+    <Transition name="fade">
+      <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
+          <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <img 
+            :src="imagePreview" 
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full Preview"
+            @click.stop
+          />
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.zoom-in {
+  animation-name: zoomIn;
+}
+</style>

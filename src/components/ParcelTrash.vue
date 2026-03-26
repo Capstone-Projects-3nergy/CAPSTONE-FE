@@ -3,10 +3,13 @@ import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -40,11 +43,19 @@ import {
   sortByFirstNameReverse,
   sortByLastNameReverse,
   searchParcels,
+  searchAnnouncements,
+  searchUsers,
   sortByDeleteDateReverse,
   sortByDeleteDate,
   filterByDay,
   filterByMonth,
-  filterByYear
+  filterByYear,
+  sortByCategory,
+  sortByCategoryReverse,
+  sortByTitle,
+  sortByTitleReverse,
+  sortByFullName,
+  sortByFullNameReverse
 } from '@/stores/SortManager'
 import {
   getItems,
@@ -65,7 +76,8 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
+import DeleteAnnouncement from './DeleteAnnouncement.vue'
+import RestoreAnnouncement from './RestoreAnnouncement.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
@@ -73,7 +85,6 @@ const userManager = useUserManager()
 const announcementManager = useAnnouncementManager()
 
 const emit = defineEmits(['add-success'])
-const showLogoutConfirm = ref(null)
 const parcelStore = useParcelManager()
 
 const trashList = computed(() => parcelManager.getTrash?.() || [])
@@ -86,10 +97,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showDeleteMember = ref(false)
 const showRestoreMember = ref(false)
 const showProfileStaff = ref(false)
@@ -114,6 +123,11 @@ const deleteMemberSuccess = ref(false)
 const recipientSearch = ref('')
 const restoreMemberSuccess = ref(false)
 const selectedResidentId = ref(null)
+const showDeleteAnnouncement = ref(false)
+const showRestoreAnnouncement = ref(false)
+const announcementDetail = ref(null)
+const deleteAnnouncementSuccess = ref(false)
+const restoreAnnouncementSuccess = ref(false)
 
 const selectedResident = computed(
   () =>
@@ -165,16 +179,7 @@ const mapActiveStatus = (activeStatus) => {
       return activeStatus
   }
 }
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
 
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/trash`,
@@ -194,7 +199,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.deletedAt) - new Date(b.deletedAt))
+    mapped.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt))
     parcelManager.setTrash(mapped)
   }
   try {
@@ -234,6 +239,7 @@ const usersByTab = computed(() => {
 const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
+const isCategoryAsc = ref(true)
 
 const sortRoomAsc = () => sortByRoomNumber(usersByTab.value)
 const sortRoomDesc = () => sortByRoomNumberReverse(usersByTab.value)
@@ -241,8 +247,25 @@ const sortStatusAsc = () => sortByStatus(usersByTab.value)
 const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
 const sortDateAsc = () => sortByDeleteDate(usersByTab.value)
 const sortDateDesc = () => sortByDeleteDateReverse(usersByTab.value)
-const sortByNameAsc = () => sortByName(usersByTab.value)
-const sortByNameDesc = () => sortByNameReverse(usersByTab.value)
+const sortByNameAsc = () => {
+  if (activeTab.value === 'Parcels') {
+    sortByName(usersByTab.value)
+  } else if (activeTab.value === 'Residents') {
+    sortByFullName(usersByTab.value)
+  } else if (activeTab.value === 'Announcement') {
+    sortByTitle(usersByTab.value)
+  }
+}
+
+const sortByNameDesc = () => {
+  if (activeTab.value === 'Parcels') {
+    sortByNameReverse(usersByTab.value)
+  } else if (activeTab.value === 'Residents') {
+    sortByFullNameReverse(usersByTab.value)
+  } else if (activeTab.value === 'Announcement') {
+    sortByTitleReverse(usersByTab.value)
+  }
+}
 
 const toggleSortRoom = () => {
   isRoomAsc.value
@@ -263,6 +286,13 @@ const toggleSortDate = () => {
     ? sortByDeleteDate(usersByTab.value)
     : sortByDeleteDateReverse(usersByTab.value)
   isDateAsc.value = !isDateAsc.value
+}
+
+const toggleSortCategory = () => {
+  isCategoryAsc.value
+    ? sortByCategory(usersByTab.value)
+    : sortByCategoryReverse(usersByTab.value)
+  isCategoryAsc.value = !isCategoryAsc.value
 }
 const selectedSort = ref('Sort by:')
 
@@ -285,6 +315,12 @@ const handleSort = () => {
       break
     case 'Status (Z→A)':
       sortStatusDesc()
+      break
+    case 'Category (A→Z)':
+      sortByCategory(usersByTab.value)
+      break
+    case 'Category (Z→A)':
+      sortByCategoryReverse(usersByTab.value)
       break
     case 'Name (A→Z)':
       sortByNameAsc()
@@ -363,7 +399,7 @@ const filteredMembers = computed(() => {
   }))
 
   if (searchKeyword.value) {
-    result = searchParcels(result, searchKeyword.value)
+    result = searchUsers(result, searchKeyword.value)
   }
 
   if (selectedDate.value) {
@@ -384,12 +420,7 @@ const filteredAnnouncements = computed(() => {
   }))
 
   if (searchKeyword.value) {
-    result = result.filter(item => {
-      const kw = searchKeyword.value.toLowerCase()
-      return (item.title && item.title.toLowerCase().includes(kw)) ||
-             (item.subtitle && item.subtitle.toLowerCase().includes(kw)) ||
-             (item.category && item.category.toLowerCase().includes(kw))
-    })
+    result = searchAnnouncements(result, searchKeyword.value)
   }
 
   if (selectedDate.value) {
@@ -452,20 +483,10 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 
 const currentPage = ref(1)
@@ -486,26 +507,17 @@ const paginatedParcels = computed(() => {
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
 })
-const canGoNext = computed(() => {
-  return paginatedParcels.value.length === perPage.value
-})
 
 const paginatedMembers = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredMembers.value.slice(start, end)
 })
-const canGoNextMember = computed(() => {
-  return paginatedMembers.value.length === perPage.value
-})
 
 const paginatedAnnouncements = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredAnnouncements.value.slice(start, end)
-})
-const canGoNextAnnouncement = computed(() => {
-  return paginatedAnnouncements.value.length === perPage.value
 })
 
 const goToPage = (page) => {
@@ -517,25 +529,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -575,7 +568,42 @@ const restoreMemberPopUp = (id) => {
     lastName: id.lastName
   }
 }
-
+const deleteAnnouncementPopUp = (announcement) => {
+  showDeleteAnnouncement.value = true
+  announcementDetail.value = {
+    id: announcement.id,
+    title: announcement.title
+  }
+}
+const restoreAnnouncementPopUp = (announcement) => {
+  showRestoreAnnouncement.value = true
+  announcementDetail.value = {
+    id: announcement.id,
+    title: announcement.title
+  }
+}
+const clearDeleteAnnouncementPopUp = () => {
+  showDeleteAnnouncement.value = false
+  announcementDetail.value = null
+}
+const clearRestoreAnnouncementPopUp = () => {
+  showRestoreAnnouncement.value = false
+  announcementDetail.value = null
+}
+const showDeleteAnnouncementComplete = () => {
+  showDeleteAnnouncement.value = false
+  deleteAnnouncementSuccess.value = true
+  setTimeout(() => (deleteAnnouncementSuccess.value = false), 10000)
+  announcementDetail.value = null
+  fetchTrashAnnouncements()
+}
+const showRestoreAnnouncementComplete = () => {
+  showRestoreAnnouncement.value = false
+  restoreAnnouncementSuccess.value = true
+  setTimeout(() => (restoreAnnouncementSuccess.value = false), 10000)
+  announcementDetail.value = null
+  fetchTrashAnnouncements()
+}
 const clearDeletePopUp = () => {
   showDeleteParcel.value = false
   parcelDetail.value = null
@@ -601,18 +629,21 @@ const showRestoreComplete = () => {
   setTimeout(() => (restoreSuccess.value = false), 10000)
   showRestoreParcel.value = false
   parcelDetail.value = null
+  fetchTrash()
 }
 const showRestoreMemberComplete = () => {
   restoreMemberSuccess.value = true
   setTimeout(() => (restoreMemberSuccess.value = false), 10000)
   showRestoreMember.value = false
   residentDetail.value = null
+  fetchTrashMembers()
 }
 const showDelMemComplete = () => {
   showDeleteMember.value = false
   deleteMemberSuccess.value = true
   setTimeout(() => (deleteMemberSuccess.value = false), 10000)
   residentDetail.value = null
+  fetchTrashMembers()
 }
 
 const showDelComplete = () => {
@@ -620,6 +651,7 @@ const showDelComplete = () => {
   setTimeout(() => (deleteSuccess.value = false), 10000)
   showDeleteParcel.value = false
   parcelDetail.value = null
+  fetchTrash()
 }
 const showStatusComplete = (updatedParcel) => {
   parcelManager.updateParcel(updatedParcel)
@@ -658,6 +690,11 @@ const openRedStatusPopup = () => {
 const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
+
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchKeyword, selectedDate, activeTab], () => {
+  currentPage.value = 1
+})
 
 const handleSearchUpdate = (val) => {
   filterSearch.value = val
@@ -712,13 +749,14 @@ const fetchTrashMembers = async () => {
       id: u.userId,
       firstName: u.firstName,
       lastName: u.lastName,
+      fullName: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
       phoneNumber: u.phoneNumber || '-',
       email: u.email,
       roomNumber: u.roomNumber,
       role: u.role || 'RESIDENT',
       status: u.status,
       deletedAt: u.deletedAt || u.updatedAt || null,
-      photo: u.profileImageUrl // 🔥 แก้ typo (p → u)
+      photo: u.profileImageUrl 
     }))
 
     userManager.setTrash(mapped)
@@ -737,20 +775,15 @@ const fetchTrashAnnouncements = async () => {
     const list = Array.isArray(dataAnnouncement) ? dataAnnouncement : []
 
     const mapped = list.map((a) => {
-      const type = (a.type || a.category || 'General').toLowerCase()
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
       return {
-        id: a.id || a.announcementId,
-        title: a.title || a.header || '',
-        subtitle: a.content || a.description || '',
-        category: a.tag || capitalizedType,
-        pinned: a.pinned || false,
-        datePosted: a.createdAt || a.date || 'Just now',
-        status: a.status || 'Published',
-        author: a.author || 'Staff Portal',
-        views: a.views || 0,
-        originalData: a,
-        deletedAt: a.deletedAt || null
+        id: a.announcementId,
+        title: a.title || '',
+        subtitle: a.subtitle || '',
+        category: a.categoryName || 'General',
+        publishAt: a.publishAt || null,
+        datePosted: a.publishAt || '-',
+        deletedAt: a.deletedAt || null,
+        deletedBy: a.deletedBy || '-'
       }
     })
 
@@ -772,6 +805,8 @@ const closePopUp = (operate) => {
   if (operate === 'restoreSuccessMessage') restoreSuccess.value = false
   if (operate === 'restoreMemberSuccessMessage') restoreMemberSuccess.value = false
   if (operate === 'deleteMemberSuccessMessage') deleteMemberSuccess.value = false
+  if (operate === 'deleteAnnouncementSuccessMessage') deleteAnnouncementSuccess.value = false
+  if (operate === 'restoreAnnouncementSuccessMessage') restoreAnnouncementSuccess.value = false
 }
 </script>
 
@@ -782,7 +817,6 @@ const closePopUp = (operate) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -844,39 +878,6 @@ const closePopUp = (operate) => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -986,32 +987,12 @@ const closePopUp = (operate) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-100 min-h-screen font-sans overflow-x-hidden">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
           <div class="flex items-center space-x-1 w-full md:w-auto">
                <div class="flex items-center gap-4">
-            <!-- <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <g fill="currentColor">
-                <path
-                  fill="currentColor"
-                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9"
-                />
-                <path
-                  stroke="#185DC0"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="m20 9l-1.995 11.346A2 2 0 0 1 16.035 22h-8.07a2 2 0 0 1-1.97-1.654L4 9zm1-3h-5.625M3 6h5.625m0 0V4a2 2 0 0 1 2-2h2.75a2 2 0 0 1 2 2v2m-6.75 0h6.75"
-                />
-              </g>
-            </svg> -->
            <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1067,65 +1048,84 @@ const closePopUp = (operate) => {
           :show-add-button="false"
           :hideNameSort="false"
           :hideTrash="false"
+          :nameSortLabel="activeTab === 'Residents' ? 'Resident Name' : activeTab === 'Announcement' ? 'Title' : 'Name'"
+          :showStatusSort="activeTab !== 'Residents' && activeTab !== 'Announcement'"
           @update:date="handleDateUpdate"
           @update:search="handleSearchUpdate"
           @update:sort="handleSortUpdate"
           @add="showAddParcelPage"
         />
-        <div class="fixed top-5 left-5 z-50">
-          <AlertPopUp
-            v-if="deleteSuccess"
-            :titles="'Delete Parcel is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="deleteSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="deleteMemberSuccess"
-            :titles="'Delete Resident is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="deleteMemberSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="restoreSuccess"
-            :titles="'Restore Parcel is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="restoreSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="restoreMemberSuccess"
-            :titles="'Restore Resident is Successful.'"
-            message="Success!!"
-            styleType="green"
-            operate="restoreMemberSuccessMessage"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="error"
-            :titles="'There is a problem. Please try again later.'"
-            message="Error!!"
-            styleType="red"
-            operate="problem"
-            @closePopUp="closePopUp"
-          />
-        </div>
+        <teleport to="body">
+          <div class="fixed top-5 left-5 z-[999]">
+            <AlertPopUp
+              v-if="deleteSuccess"
+              :titles="'Delete Parcel is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="deleteMemberSuccess"
+              :titles="'Delete Resident is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteMemberSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreSuccess"
+              :titles="'Restore Parcel is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreMemberSuccess"
+              :titles="'Restore Resident is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreMemberSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="error"
+              :titles="'There is a problem. Please try again later.'"
+              message="Error!!"
+              styleType="red"
+              operate="problem"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="deleteAnnouncementSuccess"
+              :titles="'Delete Announcement is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="deleteAnnouncementSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="restoreAnnouncementSuccess"
+              :titles="'Restore Announcement is Successful.'"
+              message="Success!!"
+              styleType="green"
+              operate="restoreAnnouncementSuccessMessage"
+              @closePopUp="closePopUp"
+            />
+          </div>
+        </teleport>
         <ParcelTable
           v-if="activeTab === 'Parcels'"
           :items="paginatedParcels"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredParcels.length"
+          :totalPages="totalPages"
           :showDelete="true"
           :hideTrash="true"
           :clickableStatus="false"
           :showUpdateAt="false"
           :showDeletedAt="true"
-          :can-next="canGoNext"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1211,7 +1211,7 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <path
-                fill="red"
+                fill="currentColor"
                 d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
               />
             </svg>
@@ -1224,7 +1224,6 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <g
-                class="text-yellow-500"
                 fill="none"
                 stroke="currentColor"
                 stroke-linecap="round"
@@ -1247,9 +1246,9 @@ const closePopUp = (operate) => {
         <ParcelTable
           v-if="activeTab === 'Residents'"
           :items="paginatedMembers"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredMembers.length"
+          :totalPages="totalPages"
           :showTracking="false"
           :showRoom="true"
           :showMobile="false"
@@ -1267,7 +1266,6 @@ const closePopUp = (operate) => {
           :showDeletedAt="true"
           :showMemberTrashName="true"
           :showName="false"
-          :can-next="canGoNextMember"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
@@ -1353,7 +1351,7 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <path
-                fill="red"
+                fill="currentColor"
                 d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
               />
             </svg>
@@ -1366,7 +1364,6 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <g
-                class="text-yellow-500"
                 fill="none"
                 stroke="currentColor"
                 stroke-linecap="round"
@@ -1389,10 +1386,13 @@ const closePopUp = (operate) => {
           <ParcelTable
           v-if="activeTab === 'Announcement'"
           :items="paginatedAnnouncements"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
-          :showDelete="true"
+          :total="filteredAnnouncements.length"
+          :totalPages="totalPages"
+          :showDeleteAnnouncement="true"
+          :showRestoreAnnouncement="true"
+          :showDelete="false"
+          :showRestore="false"
           :hideTrash="true"
           :clickableStatus="false"
           :showUpdateAt="false"
@@ -1404,17 +1404,18 @@ const closePopUp = (operate) => {
           :showTitle="true"
           :showCategory="true"
           :showDatePosted="true"
-          :can-next="canGoNextAnnouncement"
+          :showStatus="false"
+          :showActionStatus="false"
           @prev="prevPage"
           @next="nextPage"
           @go="goToPage"
-          @delete="deleteParcelPopUp"
-          @restore="restoreParcelPopUp"
+          @delete="deleteAnnouncementPopUp"
+          @restore="restoreAnnouncementPopUp"
         >
-          <template #sort-room>
+          <template #sort-category>
             <svg
               class="cursor-pointer"
-              @click="toggleSortRoom"
+              @click="toggleSortCategory"
               width="17"
               height="12"
               viewBox="0 0 17 12"
@@ -1434,7 +1435,6 @@ const closePopUp = (operate) => {
               />
             </svg>
           </template>
-
           <template #sort-status>
             <svg
               class="cursor-pointer"
@@ -1490,7 +1490,7 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <path
-                fill="red"
+                fill="currentColor"
                 d="M20 6a1 1 0 0 1 .117 1.993L20 8h-.081L19 19a3 3 0 0 1-2.824 2.995L16 22H8c-1.598 0-2.904-1.249-2.992-2.75l-.005-.167L4.08 8H4a1 1 0 0 1-.117-1.993L4 6zm-9.489 5.14a1 1 0 0 0-1.218 1.567L10.585 14l-1.292 1.293l-.083.094a1 1 0 0 0 1.497 1.32L12 15.415l1.293 1.292l.094.083a1 1 0 0 0 1.32-1.497L13.415 14l1.292-1.293l.083-.094a1 1 0 0 0-1.497-1.32L12 12.585l-1.293-1.292l-.094-.083zM14 2a2 2 0 0 1 2 2a1 1 0 0 1-1.993.117L14 4h-4l-.007.117A1 1 0 0 1 8 4a2 2 0 0 1 1.85-1.995L10 2z"
               />
             </svg>
@@ -1503,7 +1503,6 @@ const closePopUp = (operate) => {
               viewBox="0 0 24 24"
             >
               <g
-                class="text-yellow-500"
                 fill="none"
                 stroke="currentColor"
                 stroke-linecap="round"
@@ -1560,6 +1559,25 @@ const closePopUp = (operate) => {
       @redAlert="openRedMemPopup"
       :residentData="residentDetail"
       :isPermanent="true"
+    />
+  </teleport>
+
+  <teleport to="body" v-if="showDeleteAnnouncement">
+    <DeleteAnnouncement
+      @cancelDetail="clearDeleteAnnouncementPopUp"
+      @confirmDetail="showDeleteAnnouncementComplete"
+      @redAlert="openRedPopup"
+      :announcementData="announcementDetail"
+      :isPermanent="true"
+    />
+  </teleport>
+
+  <teleport to="body" v-if="showRestoreAnnouncement">
+    <RestoreAnnouncement
+      :announcementData="announcementDetail"
+      @confirmDetail="showRestoreAnnouncementComplete"
+      @cancelDetail="clearRestoreAnnouncementPopUp"
+      @redAlert="openRedRestorePopup"
     />
   </teleport>
 </template>

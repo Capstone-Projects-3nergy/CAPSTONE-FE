@@ -57,10 +57,7 @@ const config = computed(() => {
         :class="config.base"
         role="alert"
       >
-        <!-- Decorative line at the top -->
         <div class="absolute top-0 left-0 h-1 w-full opacity-60" :class="config.progress"></div>
-
-        <!-- Status Icon -->
         <div class="flex-shrink-0 mt-0.5">
           <svg v-if="styleType === 'green'" class="w-6 h-6" :class="config.icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -76,7 +73,6 @@ const config = computed(() => {
           </svg>
         </div>
 
-        <!-- Content -->
         <div class="flex-1 min-w-0">
           <strong class="block font-black text-[15px] tracking-tight mb-0.5 leading-tight">{{ message }}</strong>
           <p class="itbkk-message text-sm font-medium opacity-80 leading-relaxed">
@@ -84,7 +80,6 @@ const config = computed(() => {
           </p>
         </div>
 
-        <!-- Close Button -->
         <button
           class="flex-shrink-0 p-1.5 rounded-full transition-all duration-200 hover:rotate-90 cursor-pointer"
           :class="config.close"
@@ -113,6 +108,7 @@ const config = computed(() => {
 }
 
 .itbkk-message {
-  word-break: break-all;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 </style>

@@ -1,15 +1,17 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import HomePageStaff from './HomePageStaff.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import WebHeader from './WebHeader.vue'
 const loginManager = useAuthManager()
 const router = useRouter()
@@ -19,10 +21,22 @@ import AnnouncementTable from './AnnouncementTable.vue'
 import DeleteAnnouncement from './DeleteAnnouncement.vue'
 import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import AlertPopUp from './AlertPopUp.vue'
-import { computed } from 'vue'
 
-import { getAnnouncements } from '@/utils/fetchUtils.js'
+import {
+  getAnnouncements,
+  getAnnouncementById,
+  editAnnouncementWithFile
+} from '@/utils/fetchUtils.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
+import {
+  searchAnnouncements,
+  sortByCategory,
+  sortByCategoryReverse,
+  sortByDate,
+  sortByDateReverse,
+  sortByStatus,
+  sortByStatusReverse
+} from '@/stores/SortManager.js'
 
 const announcementManager = useAnnouncementManager()
 
@@ -30,213 +44,125 @@ const showHomePageStaff = ref(false)
 const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showDashBoard = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
-const showLogoutConfirm = ref(false)
-const isCollapsed = ref(false)
 const showDeleteModal = ref(false)
 const showViewModal = ref(false)
 const selectedAnnouncement = ref(null)
 const deleteSuccess = ref(false)
+const showPinLimitAlert = ref(false)
 const error = ref('')
+let statsInterval = null
 
 const closePopUp = (operate) => {
   if (operate === 'deleteSuccessMessage') {
     deleteSuccess.value = false
+  } else if (operate === 'pinLimitMessage') {
+    showPinLimitAlert.value = false
   }
 }
 
 // Announcement Data & Logic
-const announcements = ref([
-  {
-    id: 1,
-    title: 'Temporary Water Shutoff — Plumbing Repair',
-    subtitle: 'Water will be shut off from 08:00–14:00 on February 20, 2026, for main plumbing repairs. Please reserve water in advance. We apologize for the inconvenience. If you have any questions, please contact the staff at the counter.',
-    category: 'Urgent',
-    pinned: true,
-    datePosted: '19 Feb 2026 - 10:30',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 82
-  },
-  {
-    id: 2,
-    title: 'Temporary Elevator Shutdown for Annual Inspection',
-    subtitle: 'The elevator will be closed for service on February 21-22, 2026, for annual inspection and maintenance by specialized technicians. Residents may use the stairs on the left side of the building.',
-    category: 'Maintenance',
-    pinned: true,
-    datePosted: '18 Feb 2026 - 15:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 54
-  },
-  {
-    id: 3,
-    title: 'New Regulations for Parcel Collection',
-    subtitle: 'Starting from March 1, 2026, residents must collect their parcels within 7 days of notification. A storage fee may apply if overdue.',
-    category: 'General',
-    pinned: false,
-    datePosted: '17 Feb 2026 - 09:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 61
-  },
-  {
-    id: 4,
-    title: 'New Resident Welcome Party — March 2026',
-    subtitle: 'All residents are invited to join the welcome party for new members on March 1, 2026, at 18:00 in the 1st-floor activity area. There will be food, snacks, and many fun activities.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '15 Feb 2026 - 14:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 29
-  },
-  {
-    id: 5,
-    title: 'Notice of Office Hours Change',
-    subtitle: 'Starting in March, the office will be open from 08:30–18:30, Monday–Friday, and 09:00–14:00 on Saturday (closed on Sundays and public holidays).',
-    category: 'General',
-    pinned: false,
-    datePosted: '12 Feb 2026 - 11:00',
-    status: 'Published',
-    author: 'Staff Portal',
-    views: 17
-  },
-  {
-    id: 6,
-    title: 'Notice of Common Area Renovation',
-    subtitle: 'Not yet published — content under revision. The renovation schedule for the ground floor hall and lounge area is expected to be completed by March 2026.',
-    category: 'General',
-    pinned: false,
-    datePosted: '10 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 7,
-    title: 'Survey of Facilities Improvement',
-    subtitle: 'Draft - seeking feedback from management. This survey aims to gather resident opinions on potential upgrades to the gym and swimming pool facilities.',
-    category: 'General',
-    pinned: false,
-    datePosted: '08 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 8,
-    title: 'Upcoming Fire Drill Exercise',
-    subtitle: 'Draft - awaiting final schedule confirmation. Annual fire safety drill is tentatively planned for mid-March. All systems will be tested.',
-    category: 'Urgent',
-    pinned: false,
-    datePosted: '05 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 9,
-    title: 'Waste Management Workshop',
-    subtitle: 'Draft - coordinating with city waste department. A session to educate residents on new recycling guidelines and sustainable waste disposal practices.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '02 Feb 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 10,
-    title: 'Parking Lot Striping Project',
-    subtitle: 'Draft - reviewing contractor bids. Sections of the parking garage will be repainted. Resident notification letters will be sent once the schedule is fixed.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '28 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 11,
-    title: 'Water Quality Report Update',
-    subtitle: 'Draft - finalizing laboratory results. The annual water quality assessment is almost complete. Results will be shared with the community next week.',
-    category: 'General',
-    pinned: false,
-    datePosted: '25 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 12,
-    title: 'Gym Equipment Maintenance',
-    subtitle: 'Draft - scheduling with technician. Several cardio machines are due for service. A temporary partial closure of the fitness center may be required.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '20 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 13,
-    title: 'Roof Inspection Notice',
-    subtitle: 'Draft - awaiting weather forecast. Periodic roof maintenance and gutter cleaning are scheduled for the coming weeks to prevent leaks.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '15 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 14,
-    title: 'Community Garden Meeting',
-    subtitle: 'Draft - proposing agenda items. Join the discussion on how to improve our shared green spaces and prepare for the spring planting season.',
-    category: 'Events',
-    pinned: false,
-    datePosted: '10 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
-  },
-  {
-    id: 15,
-    title: 'Elevator Modernization Project',
-    subtitle: 'Draft - reviewing long-term project plan. We are in the early stages of planning a full elevator system upgrade over the next twelve months.',
-    category: 'Maintenance',
-    pinned: false,
-    datePosted: '05 Jan 2026 - Draft',
-    status: 'Draft',
-    author: 'Staff Portal',
-    views: 0
+const { announcements } = storeToRefs(announcementManager)
+const categories = ref([])
+
+const fetchCategoriesFromAnnouncements = async () => {
+  try {
+    const data = await getAnnouncements(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
+      router
+    )
+    if (data && data.length > 0) {
+      const uniqueNames = [...new Set(data.map(item => item.categoryName || item.name || item.category))]
+      categories.value = uniqueNames.filter(name => name).sort()
+    }
+  } catch (err) {
+    console.error('Failed to fetch categories in ManageAnnouncement:', err)
   }
-])
+}
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
+const selectedDate = ref('')
 const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
 
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchQuery, selectedCategory, selectedDate], () => {
+  currentPage.value = 1
+})
+
+const totalPublished = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'published').length)
+const totalPinned = computed(() => announcements.value.filter(a => a.pinned).length)
+const totalDrafts = computed(() => announcements.value.filter(a => a.status?.toLowerCase() === 'draft').length)
+const totalViews = computed(() => announcements.value.reduce((sum, a) => sum + (a.views || 0), 0))
+
+const isCategoryAsc = ref(true)
+const isDateAsc = ref(false) // Default newest first for announcements
+const isStatusAsc = ref(true)
+const currentSort = ref('pinned')
+
+const toggleSortCategory = () => {
+  currentSort.value = 'category'
+  isCategoryAsc.value = !isCategoryAsc.value
+  currentPage.value = 1
+}
+
+const toggleSortDate = () => {
+  currentSort.value = 'date'
+  isDateAsc.value = !isDateAsc.value
+  currentPage.value = 1
+}
+
+const toggleSortStatus = () => {
+  currentSort.value = 'status'
+  isStatusAsc.value = !isStatusAsc.value
+  currentPage.value = 1
+}
+
 const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          item.subtitle.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
-    // Filter to show only non-published items in the management view
-    const isNotPublished = item.status !== 'Published'
     
-    return matchesSearch && matchesCategory && isNotPublished
+    // Date Filtering Logic
+    let matchesDate = true
+    if (selectedDate.value) {
+      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const rawDateStr = item.publishAt || item.datePosted || ''
+      
+      if (rawDateStr && rawDateStr !== 'Just now') {
+        const d = new Date(rawDateStr)
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+          const formattedItemDate = `${year}-${month}-${day}`
+          matchesDate = formattedItemDate === targetDate
+        } else {
+          matchesDate = false
+        }
+      } else {
+        matchesDate = false
+      }
+    }
+    
+    return matchesCategory && matchesDate
   })
 
-  // Sort: Pinned items first, then ordered originally
-  return filtered.sort((a, b) => {
+  // Start with searched results
+  let result = searchAnnouncements(filtered, searchQuery.value)
+
+  // Apply sorting
+  if (currentSort.value === 'category') {
+    isCategoryAsc.value ? sortByCategory(result) : sortByCategoryReverse(result)
+  } else if (currentSort.value === 'date') {
+    isDateAsc.value ? sortByDate(result) : sortByDateReverse(result)
+  } else if (currentSort.value === 'status') {
+    isStatusAsc.value ? sortByStatus(result) : sortByStatusReverse(result)
+  }
+  return result.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1
     if (!a.pinned && b.pinned) return 1
     return 0
@@ -253,9 +179,21 @@ const paginatedAnnouncements = computed(() => {
 
 const pages = computed(() => {
   const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) p.push(i)
+  } else {
+    if (current <= 3) {
+      p.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      p.push(1, '...', total - 2, total - 1, total)
+    } else {
+      p.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
   }
+
   return p
 })
 
@@ -277,14 +215,69 @@ const handleEdit = (item) => {
   router.push({ name: 'editannouncement', params: { id: route.params.id, aid: item.id } })
 }
 
-const handleView = (item) => {
-  selectedAnnouncement.value = item
+const handleView = async (item) => {
+  try {
+    // 1. Fetch fresh announcement details (without recording a view for staff)
+    const data = await getAnnouncementById(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      item.id,
+      router
+    )
+
+    if (data) {
+      announcementManager.updateAnnouncement(data)
+      selectedAnnouncement.value = announcementManager.findAnnouncementById(item.id)
+    } else {
+      selectedAnnouncement.value = item
+    }
+  } catch (err) {
+    console.error('Error fetching announcement detail:', err)
+    selectedAnnouncement.value = item
+  }
+
   showViewModal.value = true
 }
 
-const handlePin = (item) => {
-  // Toggle pinned status temporarily
-  item.pinned = !item.pinned
+const handlePin = async (item) => {
+  const newPinnedStatus = !item.pinned
+  
+  if (newPinnedStatus && totalPinned.value >= 3) {
+      showPinLimitAlert.value = true
+      setTimeout(() => {
+        showPinLimitAlert.value = false
+      }, 10000)
+    return
+  }
+
+  // Construct payload focusing on necessary fields for UpdateAnnouncementDto
+  const payload = {
+    title: item.title,
+    subtitle: item.subtitle || '',
+    content: item.content || '',
+    categoryId: item.categoryId || (item.category ? item.category.id : item.category),
+    pinned: newPinnedStatus,
+    sendNotification: false, // Don't re-notify when just pinning
+    priority: item.priority || 1,
+    publishAt: item.publishAt || null,
+    targetAudience: item.targetAudience || 'ALL_RESIDENTS',
+    status: item.status || 'PUBLISHED',
+    coverImageUrl: item.coverImageUrl || item.coverImage || null
+  }
+
+  try {
+    const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
+    const updated = await editAnnouncementWithFile(url, item.id, payload, router)
+    
+    if (updated) {
+      // Update local state and manager
+      item.pinned = newPinnedStatus
+      announcementManager.updateAnnouncement(updated)
+    } else {
+      console.error('Failed to update pin status: No data returned from API')
+    }
+  } catch (err) {
+    console.error('Error toggling pin:', err)
+  }
 }
 
 const handleDelete = (item) => {
@@ -294,7 +287,7 @@ const handleDelete = (item) => {
 
 const onDeleteConfirm = () => {
   if (selectedAnnouncement.value) {
-    announcements.value = announcements.value.filter(a => a.id !== selectedAnnouncement.value.id)
+    announcementManager.moveAnnouncementToTrash(selectedAnnouncement.value.id)
     deleteSuccess.value = true
   }
   showDeleteModal.value = false
@@ -302,66 +295,34 @@ const onDeleteConfirm = () => {
 }
 
 const fetchAnnouncementData = async () => {
-  console.log('Fetching announcements disabled to avoid 500 error')
-  /*
   const data = await getAnnouncements(
-    `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+    `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
     router
   )
-
-  if (data && data.length > 0) {
+  if (data) {
     announcementManager.setAnnouncements(data)
-
-    const mapped = []
-
-    data.forEach((item) => {
-      const type = (item.type || item.category || 'General').toLowerCase()
-      // capitalize first letter of type
-      const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1)
-      
-      mapped.push({
-        id: item.id || item.announcementId,
-        title: item.title || item.header || '',
-        subtitle: item.content || item.description || '',
-        category: item.tag || capitalizedType,
-        pinned: item.pinned || false,
-        datePosted: item.createdAt || item.date || 'Just now',
-        status: item.status || 'Published',
-        author: item.author || 'Staff Portal',
-        views: item.views || 0,
-        originalData: item
-      })
-    })
-
-    // For testing with mock data, we comment out the overwrite
-    // Or you can merge them: announcements.value = [...mapped, ...announcements.value]
-    
-    if (mapped.length > 0) {
-      announcements.value = mapped
-    }
-    
-    console.log('API data fetched:', mapped.length, 'items')
   }
-  */
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  window.removeEventListener('focus', fetchAnnouncementData)
+  if (statsInterval) {
+    clearInterval(statsInterval)
+  }
 })
 onMounted(async () => {
-  checkScreen()
+  window.addEventListener('focus', fetchAnnouncementData)
+  await Promise.all([
+    fetchAnnouncementData(),
+    fetchCategoriesFromAnnouncements()
+  ])
 
-  window.addEventListener('resize', checkScreen)
-  
-  await fetchAnnouncementData()
+  // Set up auto-refresh every 30 seconds to keep stats and view counts fresh for staff
+  statsInterval = setInterval(() => {
+    fetchAnnouncementData()
+  }, 30000)
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
   showParcelScanner.value = true
@@ -395,13 +356,7 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
   showProfileStaff.value = true
@@ -422,19 +377,28 @@ const showProfileStaffPage = async function () {
       @cancel-detail="showDeleteModal = false"
     />
 
-    <div class="fixed top-5 left-5 z-50">
-      <AlertPopUp
-        v-if="deleteSuccess"
-        :titles="'Delete Announcement to Trash is Successful.'"
-        message="Success!!"
-        styleType="green"
-        operate="deleteSuccessMessage"
-        @closePopUp="closePopUp"
-      />
-    </div>
+    <teleport to="body">
+      <div class="fixed top-5 left-5 z-[999]">
+        <AlertPopUp
+          v-if="deleteSuccess"
+          :titles="'Delete Announcement to Trash is Successful.'"
+          message="Success!!"
+          styleType="green"
+          operate="deleteSuccessMessage"
+          @closePopUp="closePopUp"
+        />
+        <AlertPopUp
+          v-if="showPinLimitAlert"
+          :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+          message="Error!!"
+          styleType="red"
+          operate="pinLimitMessage"
+          @closePopUp="closePopUp"
+        />
+      </div>
+    </teleport>
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
-        <aside
+      <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
@@ -495,39 +459,6 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -637,7 +568,7 @@ const showProfileStaffPage = async function () {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+     
 
       <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
@@ -668,7 +599,7 @@ const showProfileStaffPage = async function () {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">6</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalPublished }}</div>
                   <div class="text-sm font-semibold text-gray-500">Total Published</div>
                 </div>
               </div>
@@ -676,11 +607,11 @@ const showProfileStaffPage = async function () {
             
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#EF4444] bg-[#FEF2F2] p-3 rounded-xl shadow-inner">
+                <div class="text-blue-600 bg-blue-50 p-3 rounded-xl shadow-inner">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">2</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalPinned }}</div>
                   <div class="text-sm font-semibold text-gray-500">Pinned</div>
                 </div>
               </div>
@@ -692,7 +623,7 @@ const showProfileStaffPage = async function () {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">1</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalDrafts }}</div>
                   <div class="text-sm font-semibold text-gray-500">Drafts</div>
                 </div>
               </div>
@@ -700,11 +631,11 @@ const showProfileStaffPage = async function () {
 
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
-                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner">
+                <div class="text-[#10B981] bg-[#ECFDF5] p-3 rounded-xl shadow-inner" title="Total views from all announcements">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </div>
                 <div>
-                  <div class="text-2xl font-black text-[#1D355E]">248</div>
+                  <div class="text-2xl font-black text-[#1D355E]">{{ totalViews }}</div>
                   <div class="text-sm font-semibold text-gray-500">Total Views</div>
                 </div>
               </div>
@@ -713,13 +644,11 @@ const showProfileStaffPage = async function () {
 
           <!-- Announcement Filters -->
           <AnnouncementFilterBar
-            :modelSearch="searchQuery"
-            :modelCategory="selectedCategory"
-            :categories="['General', 'Maintenance', 'Events', 'Urgent']"
-            :viewMode="viewMode"
-            @update:search="searchQuery = $event"
-            @update:category="selectedCategory = $event"
-            @update:viewMode="viewMode = $event"
+            v-model:search="searchQuery"
+            v-model:category="selectedCategory"
+            :categories="categories"
+            v-model:date="selectedDate"
+            v-model:viewMode="viewMode"
             @new-announcement="showNewAnnouncementPage"
           />
 
@@ -729,7 +658,7 @@ const showProfileStaffPage = async function () {
               
               <button
                 @click="selectedCategory = ''"
-                class="order-last sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
+                class="order-first sm:order-none w-full sm:w-auto flex-none sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg sm:rounded-xl text-[11px] xs:text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap cursor-pointer"
                 :class="!selectedCategory ? 'bg-[#0E2856] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#0E2856]'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -801,7 +730,77 @@ const showProfileStaffPage = async function () {
             @delete="handleDelete"
             @view="handleView"
             @pin="handlePin"
-          />
+          >
+            <template #sort-category>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortCategory"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+            <template #sort-date>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortDate"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+            <template #sort-status>
+              <svg
+                class="cursor-pointer"
+                @click="toggleSortStatus"
+                width="17"
+                height="12"
+                viewBox="0 0 17 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.75 0.75H15.75H0.75ZM3.25 5.75H13.25H3.25ZM6.25 10.75H10.25H6.25Z"
+                  fill="#0E4B90"
+                />
+                <path
+                  d="M0.75 0.75H15.75M3.25 5.75H13.25M6.25 10.75H10.25"
+                  stroke="#0E4B90"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </template>
+          </AnnouncementTable>
         </div>
       </main>
     </div>
@@ -810,14 +809,15 @@ const showProfileStaffPage = async function () {
   <AnnouncementDetailModal
     :isOpen="showViewModal"
     :title="selectedAnnouncement?.title || ''"
-    :subtitle="''"
-    :content="selectedAnnouncement?.subtitle || ''"
+    :subtitle="selectedAnnouncement?.subtitle || ''"
+    :content="selectedAnnouncement?.content || ''"
     :tag="selectedAnnouncement?.category || ''"
     :status="selectedAnnouncement?.status || 'Published'"
-    :date="selectedAnnouncement?.datePosted || ''"
+    :date="selectedAnnouncement?.publishAt || selectedAnnouncement?.createdAt || selectedAnnouncement?.datePosted || ''"
     :author="selectedAnnouncement?.author || 'Staff Portal'"
-    :views="selectedAnnouncement?.views || 0"
+    :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
     :pinned="selectedAnnouncement?.pinned || false"
+    :coverImage="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="showViewModal = false; selectedAnnouncement = null"
   />
 
@@ -828,19 +828,10 @@ const showProfileStaffPage = async function () {
   <Teleport to="body" v-if="showParcelScanner">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
-  <Teleport to="body" v-if="showResidentParcels">
-    <ResidentParcelsPage> </ResidentParcelsPage>
-  </Teleport>
   <Teleport to="body" v-if="showStaffParcels">
     <StaffParcelsPage> </StaffParcelsPage>
   </Teleport>
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showDashBoard">
-    <DashBoard> </DashBoard>
-  </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

@@ -6,7 +6,6 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
@@ -14,17 +13,12 @@ import AlertPopUp from './AlertPopUp.vue'
 import NotificationDetailModal from './NotificationDetailModal.vue'
 import EditPersonalInfoProfile from '@/components/EditPersonalInfoProfile.vue'
 import LineNotificationManager from '@/stores/LineNotificationManager'
+import { useSidebarManager } from '@/stores/SidebarManager.js'
 const loginManager = useAuthManager()
 
-
-// await LineNotificationManager.sendToGroup(
-//   'GROUP_ID',
-//   'มีพัสดุมาถึงแล้ว 📦'
-// )
-// notification state
 const notification = ref({
   show: false,
-  type: 'success', // success | error
+  type: 'success',
   title: '',
   message: ''
 })
@@ -74,11 +68,9 @@ const router = useRouter()
 const editSuccess = ref(false)
 const error = ref(false)
 const showHomePageResident = ref(false)
-const showLogoutConfirm = ref(false)
 const showHomePageStaff = ref(false)
 const showStaffParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const profileManager = useProfileManager()
@@ -120,12 +112,6 @@ const updateProfile = async (payload) => {
 const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
-}
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
 }
 const goBackProfilePage = async function () {
   if (loginManager.user.role === 'RESIDENT') {
@@ -177,34 +163,7 @@ const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident' })
   showManageResident.value = true
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
 
-  window.addEventListener('resize', checkScreen)
-})
-// const menuClass = (tab) => {
-//   return [
-//     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition',
-//     activeTab.value === tab
-//       ? 'bg-[#D9D9D9] text-[#60a5fa]'
-//       : 'text-gray-500 hover:bg-gray-100'
-//   ]
-// }
-
-// แสดงค่า (default = ACTIVE)
 const displayStatus = (value) => {
   if (!value || value.trim() === '') return 'ERROR'
   return value.toUpperCase()
@@ -226,15 +185,19 @@ import { useNotificationManager } from '@/stores/NotificationManager'
 const notificationStore = useNotificationManager()
 const notifications = computed(() => notificationStore.notifications)
 
+const sidebarManager = useSidebarManager()
+const isCollapsed = computed(() => sidebarManager.isCollapsed)
+const toggleSidebar = () => {
+  sidebarManager.toggleSidebar()
+}
+
 onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
   await notificationStore.fetchNotifications(router)
 })
 
 const activeNotifyTab = ref('all')
-const ACCOUNT_TYPES = ['message']
-const PARCEL_TYPES = ['new', 'comment', 'connect']
+const ACCOUNT_TYPES = ['message', 'announcement']
+const PARCEL_TYPES = ['new', 'comment', 'connect', 'overdue']
 const filteredNotifications = computed(() => {
   if (activeNotifyTab.value === 'all') {
     return notifications.value
@@ -252,13 +215,41 @@ const filteredNotifications = computed(() => {
 })
 
 const badgeClass = (item) => {
-  if (item.parcelId) return 'bg-blue-500' // Parcel
+  if (item.type === 'overdue') return 'bg-amber-500' // Overdue
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' // Parcel
   return 'bg-green-500' // Announcement
 }
 
+const displayType = (item) => {
+  if (item.type === 'announcement' || item.type === 'message') return 'New Announcement'
+  if (item.type === 'overdue') return 'Parcel Overdue'
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'New Parcel'
+  return item.type || 'Notification'
+}
+
 const badgeIcon = (item) => {
+  // Overdue icon
+  if (item.type === 'overdue') {
+    return `
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    `
+  }
+
   // Announcement / Message
-  if (!item.parcelId) {
+  if (!item.parcelId && (item.type === 'announcement' || item.type === 'message')) {
     return `
       <svg
         width="24"
@@ -336,9 +327,21 @@ const paginatedNotifications = computed(() => {
 
 const pages = computed(() => {
   const p = []
-  for (let i = 1; i <= totalPages.value; i++) {
-    p.push(i)
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) p.push(i)
+  } else {
+    if (current <= 3) {
+      p.push(1, 2, 3, '...', total)
+    } else if (current >= total - 2) {
+      p.push(1, '...', total - 2, total - 1, total)
+    } else {
+      p.push(1, '...', current - 1, current, current + 1, '...', total)
+    }
   }
+
   return p
 })
 
@@ -366,12 +369,8 @@ const goToPage = (page) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button
-        @click="toggleSidebar"
-        class="text-white focus:outline-none"
-        v-if="loginManager.user.role === 'RESIDENT'"
-      >
         <aside
+          v-if="loginManager.user.role === 'RESIDENT'"
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
@@ -521,13 +520,10 @@ const goToPage = (page) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
-      <button
-        @click="toggleSidebar"
-        class="text-white focus:outline-none"
-        v-if="loginManager.user.role === 'STAFF'"
-      >
+
+
         <aside
+          v-if="loginManager.user.role === 'STAFF'"
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-[#1D355E] text-white',
             isCollapsed ? 'w-0 md:w-16' : 'w-60'
@@ -609,22 +605,6 @@ const goToPage = (page) => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
             <SidebarItem title=" Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -706,47 +686,9 @@ const goToPage = (page) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-gray-50 relative overflow-x-hidden font-sans">
-        <!-- LINE Notification -->
-        <!-- <div class="fixed top-5 right-5 z-50 space-y-3">
-          <LineNotification
-            v-if="notification.show"
-            :type="notification.type"
-            :title="notification.title"
-            :message="notification.message"
-            @close="closeNotification"
-          />
-        </div>
-
-        <div
-          class="bg-white rounded-xl shadow p-6 mb-6 flex items-center gap-3"
-        >
-          <svg
-            class="w-8 h-8 text-[#185dc0]"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-1a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-
-          <div>
-            <h2 class="text-2xl font-bold text-[#185dc0]">
-              {{ roleTitle }}
-            </h2>
-            <p class="text-sm text-gray-500">
-              Manage your personal information
-            </p>
-          </div>
-        </div>
-        -->
-
-        <!-- Content Card -->
         <div
           class="w-full rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
         >
@@ -773,17 +715,6 @@ const goToPage = (page) => {
                     />
                   </g>
                 </svg>
-              <!-- <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="#185DC0"
-                d="M3.5 7a5 5 0 1 1 10 0a5 5 0 0 1-10 0M5 14a5 5 0 0 0-5 5v2h17v-2a5 5 0 0 0-5-5zm19 7h-5v-2c0-1.959-.804-3.73-2.1-5H19a5 5 0 0 1 5 5zm-8.5-9a5 5 0 0 1-1.786-.329A6.97 6.97 0 0 0 15.5 7a6.97 6.97 0 0 0-1.787-4.671A5 5 0 1 1 15.5 12"
-              />
-            </svg> -->
               </div>
                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight whitespace-nowrap">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#0E4B90] to-blue-600">
@@ -849,6 +780,9 @@ const goToPage = (page) => {
 
               <!-- CONTENT -->
               <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-bold tracking-wider text-gray-400 mb-0.5">
+                  {{ displayType(item) }}
+                </p>
                 <div class="flex justify-between items-start gap-4 pr-1">
                   <p class="text-sm font-bold text-gray-800 group-hover:text-[#0E4B90] transition-colors">
                     {{ item.label }}
@@ -860,7 +794,7 @@ const goToPage = (page) => {
                       {{ item.time }}
                     </span>
                     <div v-if="item.isRead === 1" class="flex items-center gap-1 opacity-60">
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-[#0E4B90]">{{ item.isRead === 1 ? 'Read' : item.status }}</span>
+                      <span class="text-[10px] font-bold tracking-widest text-[#0E4B90]">{{ item.isRead === 1 ? 'Read' : item.status }}</span>
                       <svg class="w-3 h-3 text-[#0E4B90]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
@@ -903,19 +837,26 @@ const goToPage = (page) => {
                 Previous
               </button>
 
-              <button
-                v-for="pg in pages"
-                :key="pg"
-                @click="goToPage(pg)"
-                :class="[
-                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
-                  currentPage === pg 
-                    ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                ]"
-              >
-                {{ pg }}
-              </button>
+              <template v-for="(pg, index) in pages" :key="index">
+                <button
+                  v-if="pg !== '...'"
+                  @click="goToPage(pg)"
+                  :class="[
+                    'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer',
+                    currentPage === pg 
+                      ? 'bg-[#1D355E] text-white shadow-md transform scale-105' 
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ pg }}
+                </button>
+                <span 
+                  v-else
+                  class="px-3 py-2 text-sm font-semibold text-gray-400 select-none"
+                >
+                  ...
+                </span>
+              </template>
 
               <button
                 @click="nextPage"
@@ -929,7 +870,7 @@ const goToPage = (page) => {
         </div>
       </main>
 
-    <!-- Notification Detail Modal -->
+  
     <NotificationDetailModal 
       :show="showDetailModal" 
       :notification="selectedNotification" 
@@ -944,7 +885,4 @@ const goToPage = (page) => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>

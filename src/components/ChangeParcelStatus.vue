@@ -5,6 +5,8 @@ import { useParcelManager } from '@/stores/ParcelsManager.js'
 import ButtonWeb from './ButtonWeb.vue'
 import { getItemById, editItem } from '@/utils/fetchUtils'
 import ManageParcels from './ManageParcels.vue'
+import SelectWeb from './SelectWeb.vue'
+
 const route = useRoute()
 const router = useRouter()
 const parcelStore = useParcelManager()
@@ -17,15 +19,18 @@ const emit = defineEmits([
   'confirmStatusDetail',
   'redStatusAlert'
 ])
+
 defineProps({
   parcelDataStatus: {
     type: Object,
     required: false
   }
 })
+
 const newStatus = ref('')
 const currentStatus = ref('')
 const statusChangedSuccessfuly = ref(false)
+const isSaving = ref(false)
 
 const form = ref({
   parcelId: '',
@@ -47,10 +52,12 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  if (currentStatus.value === 'WAITING_FOR_STAFF')
-    return ['WAITING_FOR_STAFF', 'RECEIVED']
-  if (currentStatus.value === 'RECEIVED') return ['RECEIVED', 'PICKED_UP']
-  return ['RECEIVED', 'PICKED_UP']
+  let options = ['RECEIVED', 'PICKED_UP']
+  
+  return options.map(s => ({
+    value: s,
+    label: s.replace(/_/g, ' ')
+  }))
 })
 
 const isPickUp = computed(() => currentStatus.value === 'PICKED_UP')
@@ -74,7 +81,7 @@ watch(
     if (!tid) return
     await getParcelDetail(tid)
 
-    const status = form.value.status.toUpperCase().replace(' ', '_')
+    const status = form.value.status?.toUpperCase().replace(' ', '_') || ''
     newStatus.value = status
     currentStatus.value = status
   },
@@ -82,6 +89,8 @@ watch(
 )
 
 const saveStatusChange = async () => {
+  if (isSaving.value) return
+  isSaving.value = true
   try {
     const body = {
       trackingNumber: form.value.trackingNumber,
@@ -109,146 +118,160 @@ const saveStatusChange = async () => {
     emit('confirmStatusDetail')
   } catch (err) {
     emit('redStatusAlert', err)
+  } finally {
+    isSaving.value = false
   }
 }
 
 const isSaveDisabled = computed(() => {
-  return !newStatus.value || newStatus.value === currentStatus.value
+  return !newStatus.value || newStatus.value === currentStatus.value || isSaving.value
 })
 
 const cancel = () => {
   router.replace({ name: 'staffparcels' })
 }
+
+const steps = ['RECEIVED', 'PICKED_UP']
+const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
 </script>
 
 <template>
   <Transition name="modal-fade" appear>
     <div
-      class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4"
+      class="fixed inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-md z-50 p-4"
+      @click="cancel"
     >
       <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 transform transition-all"
+        class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
         @click.stop
       >
-        <div
-          v-if="statusChangedSuccessfuly"
-          class="flex flex-col items-center justify-center space-y-4 py-6"
-        >
-          <div class="rounded-full bg-green-100 p-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-10 w-10 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
+        <!-- Modal Content -->
+        <div v-if="statusChangedSuccessfuly" class="p-8 sm:p-10 flex flex-col items-center text-center">
+          <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6 animate-bounce-short">
+             <svg class="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 text-center">
-            Update Successful
-          </h3>
-          <p class="text-gray-500 text-center">
-            The parcel status has been updated.
+          <h3 class="text-2xl font-black text-slate-900 mb-2">Success!</h3>
+          <p class="text-slate-500 mb-8 leading-relaxed">
+            The status for parcel <span class="font-bold text-slate-900">#{{ form.trackingNumber }}</span> has been updated to <span class="font-bold text-emerald-600">{{ newStatus.replace('_', ' ') }}</span>.
           </p>
           <ButtonWeb
-            label="Close"
+            label="Dismiss"
             color="green"
-            class="mt-4 w-full sm:w-auto px-6 py-2.5 rounded-xl hover:bg-green-700 transition font-medium"
+            class="w-full py-4 rounded-2xl font-bold shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98]"
             @click="cancel"
           />
         </div>
 
-        <div v-else>
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="font-bold text-2xl text-gray-800">Change Status</h3>
-          </div>
-
-          <div v-if="!isPickUp" class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-             <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                </svg>
+        <div v-else class="p-0">
+          <!-- Header Area -->
+          <div class="bg-slate-50 p-6 sm:p-8 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight">Change Status</h3>
+                <p class="text-xs font-bold text-blue-600 tracking-widest mt-1">Management Console</p>
               </div>
-              <div class="ml-3">
-                <p class="text-sm text-blue-700">
-                  Update order: <strong>Waiting for Staff</strong> →
-                  <strong>Received</strong> → <strong>Picked Up</strong>
-                </p>
+              <button @click="cancel" class="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-400">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+
+            <!-- Parcel Summary Card -->
+            <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[10px] font-black text-slate-400 tracking-wider">Tracking Number</p>
+                <h4 class="text-sm font-bold text-slate-900 truncate">{{ form.trackingNumber }}</h4>
+                <p class="text-xs text-slate-500 truncate mt-0.5">{{ form.recipientName }} • Room {{ form.roomNumber }}</p>
               </div>
             </div>
           </div>
 
-          <div v-if="isPickUp" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm text-red-700">
-                  This parcel has been <strong>PICKED_UP</strong>. Status changes are locked.
-                </p>
+          <div class="p-6 sm:p-8">
+            <div v-if="!isPickUp" class="mb-8 px-2 relative">
+              <div class="flex items-center justify-between relative">
+                <div class="absolute top-[11px] left-0 w-full h-[3px] bg-slate-100 z-0"></div>
+                <div 
+                  class="absolute top-[11px] left-0 h-[3px] bg-blue-500 transition-all duration-700 z-0"
+                  :style="{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }"
+                ></div>
+                
+                <div v-for="(step, i) in steps" :key="step" class="relative z-10 flex flex-col items-center gap-2">
+                  <div 
+                    class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
+                    :class="[
+                      currentStatus === step ? 'bg-white border-blue-500 scale-125' : 
+                      (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
+                    ]"
+                  >
+                    <svg v-if="i < currentStepIndex" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div v-if="currentStatus === step" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                  </div>
+                  <span class="text-[9px] font-extrabold tracking-tight" 
+                        :class="currentStatus === step ? 'text-blue-600' : 'text-slate-400'">
+                    {{ step.split('_')[0] }}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">New Status</label>
-            <div class="relative">
-              <select
+            <div v-if="isPickUp" class="mb-8 p-4 bg-rose-50 rounded-2xl border border-rose-100 flex gap-3">
+              <div class="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 15v2m0-8V7m0 11a1 1 0 100-2 1 1 0 000 2zm0-16a9 9 0 110 18 9 9 0 010-18z" /></svg>
+              </div>
+              <div>
+                <h5 class="text-sm font-bold text-rose-900">Chain Locked</h5>
+                <p class="text-xs text-rose-700 leading-relaxed mt-1">This parcel has been completed (Picked Up). Modifications are restricted for security.</p>
+              </div>
+            </div>
+
+            <div class="mb-8">
+              <label class="block text-xs font-black text-slate-500 tracking-widest mb-3 ml-1">New Assignment</label>
+              <SelectWeb
                 v-model="newStatus"
-                class="appearance-none block w-full px-4 py-3 rounded-xl border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+                :options="statusOptions"
                 :disabled="isPickUp"
-              >
-                <option v-for="s in statusOptions" :key="s" :value="s">
-                  {{ s.replace('_', ' ') }}
-                </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </div>
+                placeholder="Choose Status..."
+              />
             </div>
-          </div>
 
-          <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
-            <ButtonWeb
-              label="Cancel"
-              color="gray"
-              class="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium transition"
-              @click="cancel"
-            />
-             <ButtonWeb
-              v-if="!isPickUp"
-              label="Save Changes"
-              color="blue"
-              class="w-full sm:w-auto px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:bg-blue-600 font-medium transition"
-              @click="saveStatusChange"
-              :disabled="isSaveDisabled"
-            />
+            <div class="flex flex-col sm:flex-row gap-3">
+              <ButtonWeb
+                label="Cancel"
+                color="gray"
+                class="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold transition-all hover:bg-slate-50"
+                @click="cancel"
+              />
+              <ButtonWeb
+                v-if="!isPickUp"
+                label="Confirm Change"
+                color="blue"
+                class="flex-[1.5] py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                @click="saveStatusChange"
+                :disabled="isSaveDisabled"
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
   </Transition>
+
   <Teleport to="body">
     <ManageParcels />
   </Teleport>
 </template>
 
 <style scoped>
-.modal-fade-enter-active,
+.modal-fade-enter-active {
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
 .modal-fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-fade-enter-from,
@@ -256,13 +279,26 @@ const cancel = () => {
   opacity: 0;
 }
 
-.modal-fade-enter-active .bg-white,
+.modal-fade-enter-active .bg-white {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 .modal-fade-leave-active .bg-white {
-  transition: transform 0.3s ease-out;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.modal-fade-enter-from .bg-white,
+.modal-fade-enter-from .bg-white {
+  transform: scale(0.8) translateY(20px);
+}
 .modal-fade-leave-to .bg-white {
   transform: scale(0.95);
 }
+
+@keyframes bounce-short {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.animate-bounce-short {
+  animation: bounce-short 2s ease-in-out infinite;
+}
 </style>
+

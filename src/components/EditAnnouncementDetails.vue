@@ -3,27 +3,99 @@ import { ref, onMounted, onUnmounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 import WebHeader from './WebHeader.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import AlertPopUp from './AlertPopUp.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
 import { useAnnouncementManager } from '@/stores/AnnouncementManager.js'
-import { getAnnouncementById, editAnnouncementWithFile } from '@/utils/fetchUtils.js'
+import { useNotificationManager } from '@/stores/NotificationManager.js'
+import { getAnnouncementById, editAnnouncementWithFile, getAnnouncements, editAnnouncement } from '@/utils/fetchUtils.js'
 import ButtonWeb from './ButtonWeb.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
+import SelectWeb from './SelectWeb.vue'
 import LoadingPopUp from './LoadingPopUp.vue'
+
+const dateInput = ref(null)
+const windowWidth = ref(window.innerWidth)
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+const openDatePicker = () => {
+  if (dateInput.value?.showPicker) {
+    dateInput.value.showPicker();
+  } else {
+    dateInput.value?.click();
+  }
+}
+
+const formatDateTimeDisplay = (dateTimeStr) => {
+  if (!dateTimeStr) return '';
+  // Remove "Z" if it exists in the raw data string
+  const sanitized = dateTimeStr.toString().replace(/\s*Z$/i, '');
+  
+  // Handle native datetime-local format: YYYY-MM-DDTHH:mm
+  if (sanitized.includes('T')) {
+    const parts = sanitized.split('T');
+    const datePart = parts[0];
+    const timePart = parts[1] ? parts[1].substring(0, 5) : ''; 
+    const dateParts = datePart.split('-');
+    if (dateParts.length === 3) {
+      const [year, month, day] = dateParts;
+      // Convert YYYY-MM-DD to DD/MM/YYYY
+      return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
+    }
+  }
+  return sanitized;
+}
+
+const ensureDateTimeLocal = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const str = dateStr.toString()
+    // Remove "Z" and any suffix like " - Staff Portal" or " - Draft"
+    let sanitized = str.replace(/\s*Z$/i, '').split(' - ')[0];
+    
+    // If already in YYYY-MM-DDTHH:mm, return it
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(sanitized)) return sanitized.substring(0, 16);
+    
+    // Try parsing to Date object
+    const d = new Date(sanitized);
+    if (isNaN(d.getTime())) {
+      console.warn('Invalid date string:', dateStr);
+      return '';
+    }
+    
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (e) {
+    console.error('Date parsing error:', e);
+    return '';
+  }
+}
 // No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
 const announcementStore = useAnnouncementManager()
+const { totalPinned } = storeToRefs(announcementStore)
+const notificationManager = useNotificationManager()
 const router = useRouter()
 const route = useRoute()
 
 // State
-const isCollapsed = ref(false)
 const isCategoryOpen = ref(false)
-const showLogoutConfirm = ref(false)
 const isSubmitting = ref(false)
+const isLoading = ref(false)
 const editSuccess = ref(false)
 const error = ref(false)
+const showPinLimitAlert = ref(false)
 
 const titleError = ref(false)
 const categoryError = ref(false)
@@ -41,10 +113,60 @@ const MAX_TITLE_LENGTH = 100
 const MAX_SUBTITLE_LENGTH = 150
 const MAX_CONTENT_LENGTH = 2000
 
+// Categories mapping
+const categories = ref([])
+
+const fetchCategoriesFromAnnouncements = async () => {
+  try {
+    const data = await getAnnouncements(
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/categories`,
+      router
+    )
+    
+    if (data && data.length > 0) {
+      const uniqueCategories = []
+      const map = new Map()
+      
+      for (const item of data) {
+        // รองรับทั้ง id และ categoryId
+        const id = item.categoryId || item.id
+        // รองรับชื่อฟิลด์ที่หลากหลาย
+        const name = item.categoryName || item.name || item.category
+        
+        if (id && name && !map.has(id)) {
+          map.set(id, true)
+          uniqueCategories.push({
+            id: id,
+            name: name
+          })
+        }
+      }
+
+      if (uniqueCategories.length > 0) {
+        categories.value = uniqueCategories.sort((a, b) => a.id - b.id)
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch categories from announcements:', err)
+  }
+}
+
+const categoryOptions = computed(() => {
+  return categories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
+  }))
+})
+
 // Image State
 const coverImage = ref(null)
 const imagePreview = ref(null)
 const contentArea = ref(null)
+
+const getCategoryName = (id) => {
+  const category = categories.value.find(c => c.id === id)
+  return category ? category.name : ''
+}
 
 const formatText = (style) => {
   if (!contentArea.value) return
@@ -90,7 +212,7 @@ const formatText = (style) => {
 const handleImageUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 1 * 1024 * 1024) {
       fileSizeError.value = true
       coverImage.value = null
       imagePreview.value = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
@@ -115,6 +237,13 @@ const removeImage = () => {
   imagePreview.value = null
   // Reset announcementForm.coverImage if it was there
   announcementForm.coverImage = null
+}
+
+const isLightboxOpen = ref(false)
+const toggleLightbox = () => {
+  if (imagePreview.value) {
+    isLightboxOpen.value = !isLightboxOpen.value
+  }
 }
 
 const handleTitleInput = (event) => {
@@ -204,41 +333,94 @@ const closePopUp = (operate) => {
   if (operate === 'fileSizeError') {
     fileSizeError.value = false
   }
+  if (operate === 'pinLimitMessage') {
+    showPinLimitAlert.value = false
+  }
 }
 
 // Announcement Data Data will be fetched from the backend.
 const announcementForm = reactive({
   title: '',
   subtitle: '',
-  category: 'General',
-  datePosted: '',
-  status: 'Published',
+  categoryId: null,
+  publishAt: '',
   content: '',
-  targetAudience: 'All',
-  isPinned: false,
-  notify: true,
-  coverImage: null
+  targetAudience: 'ALL_RESIDENTS',
+  pinned: false,
+  sendNotification: true,
+  priority: 1,
+  coverImageUrl: null,
+  status: 'PUBLISHED',
+  author: '',
+  views: 0
 })
 
-// Categories for dropdown
-const categories = ['General', 'Maintenance', 'Events', 'Urgent']
-const statuses = ['Draft', 'Published']
+const currentCategory = computed(() => {
+  return categories.value.find(c => c.id === announcementForm.categoryId) || null
+})
+
+// Statuses
+const statuses = ref([])
+
+const fetchStatusesFromAnnouncements = async () => {
+  // Backend doesn't have a specific statuses endpoint, so we use common ones
+  statuses.value = ['DRAFT', 'PUBLISHED']
+}
+
+const statusOptions = computed(() => {
+  return statuses.value.map(s => ({
+    label: s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(),
+    value: s.toUpperCase()
+  }))
+})
+
+const minDateTime = computed(() => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+})
 
 // Initial Form State
 const initialForm = ref(null)
 
 const hasChanges = computed(() => {
-  if (!initialForm.value) return false
-  const formStr = JSON.stringify(announcementForm)
-  const initialStr = JSON.stringify(initialForm.value)
-  const imageChanged = imagePreview.value !== initialForm.value.coverImage
-  return formStr !== initialStr || imageChanged
+  if (!initialForm.value || !announcementForm) return false
+  
+  // Normalization helper for more accurate comparison
+  const normalize = (val) => {
+    if (val === undefined || val === null) return ''
+    if (typeof val === 'boolean') return val
+    if (typeof val === 'number') return val.toString()
+    return val.toString().trim()
+  }
+
+  const fieldsToCompare = [
+    'title', 'subtitle', 'categoryId', 'publishAt', 'content', 
+    'targetAudience', 'pinned', 'sendNotification', 'status'
+  ]
+  
+  const formChanged = fieldsToCompare.some(field => {
+    const current = normalize(announcementForm[field])
+    const initial = normalize(initialForm.value[field])
+    return current !== initial
+  })
+
+  // Compare images - handle both string URLs and empty values
+  const currentImage = imagePreview.value || ''
+  const initialImage = initialForm.value.coverImage || ''
+  const imageChanged = currentImage !== initialImage
+
+  return formChanged || imageChanged
 })
 
 const isFormValid = computed(() => {
   return announcementForm.title.trim() !== '' && 
-         announcementForm.category !== '' && 
-         announcementForm.datePosted !== '' && 
+         announcementForm.categoryId !== null && 
+         announcementForm.publishAt !== '' && 
          announcementForm.content.trim() !== ''
 })
 
@@ -315,95 +497,132 @@ const fetchAnnouncementDetail = async () => {
   const aidParam = route.params.aid
   const aid = aidParam ? Number(aidParam) : null
   
-  console.log('Fetching details for aid:', aid)
   if (!aid || isNaN(aid)) {
     console.warn('Invalid or missing announcement ID')
     return
   }
 
-  // 1) Find in Pinia first to show immediately
+  // Ensure categories are loaded for lookup
+  if (!categories.value.length) {
+    await fetchCategoriesFromAnnouncements()
+  }
+
+  // Helper to map any incoming data to our internal form structure
+  const mapToForm = (item) => {
+    if (!item) return null
+    
+    // Find category ID if only name is present
+    let catId = item.categoryId || item.category_id
+    if (!catId && item.category) {
+      if (typeof item.category === 'object') {
+        catId = item.category.id || item.category.categoryId
+      } else if (typeof item.category === 'string') {
+        const catObj = categories.value.find(c => 
+          (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+          c.id == item.category
+        )
+        if (catObj) catId = catObj.id
+      } else if (typeof item.category === 'number') {
+        catId = item.category
+      }
+    }
+    
+    if (!catId && item.categoryName) {
+      const catObj = categories.value.find(c => 
+        (c.name && item.categoryName && c.name.toString().toLowerCase() === item.categoryName.toString().toLowerCase())
+      )
+      if (catObj) catId = catObj.id
+    }
+
+    return {
+      title: item.title || '',
+      subtitle: item.subtitle || '',
+      content: item.content || '',
+      categoryId: catId || null,
+      pinned: !!(item.pinned || item.isPinned || item.is_pinned),
+      publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date || item.created_at),
+      targetAudience: item.targetAudience || item.target_audience || 'ALL_RESIDENTS',
+      sendNotification: item.sendNotification ?? item.notify ?? item.send_notification ?? true,
+      status: (item.status || 'PUBLISHED').toUpperCase(),
+      coverImageUrl: item.coverImageUrl || item.coverImage || item.cover_image_url || null,
+      author: item.author || (item.user ? item.user.fullName : '') || (item.staff ? item.staff.fullName : '') || 'Staff Portal',
+      views: item.views || item.viewCount || item.view_count || 0
+    }
+  }
+
+  // 1) Load from Pinia store first for perceived speed and persistence
   const existingAnnouncements = [
     ...(announcementStore.announcements || []),
     ...(announcementStore.trash || [])
   ]
-  const found = existingAnnouncements.find((a) => (a.id === aid || a.announcementId === aid))
+  const foundInStore = existingAnnouncements.find(a => Number(a.id) === aid || Number(a.announcementId) === aid)
 
-  if (found) {
-    Object.assign(announcementForm, found)
+  if (foundInStore) {
+    const storeMapped = mapToForm(foundInStore)
+    Object.assign(announcementForm, storeMapped)
+    if (storeMapped.coverImageUrl) {
+      imagePreview.value = storeMapped.coverImageUrl
+    }
+    // Set initial state from store immediately
+    initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+    initialForm.value.coverImage = imagePreview.value || null
   }
 
+  // 2) Load from Backend to ensure data is correct/up-to-date
   try {
+    // Note: Use /api/announcements/staff/{id} to support viewing Drafts
     const data = await getAnnouncementById(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
+      `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
       aid,
       router
     )
 
     if (data) {
-      // Map API response to our form structure if needed
-      const mapped = {
-        id: data.id || data.announcementId,
-        title: data.title || '',
-        subtitle: data.subTitle || data.subtitle || '',
-        content: data.content || '',
-        category: data.category || data.tag || 'General',
-        isPinned: data.isPinned || data.pinned || false,
-        status: data.status || 'Published',
-        datePosted: data.datePosted || '',
-        targetAudience: data.targetAudience || 'All',
-        notify: data.notify || false
+      const apiMapped = mapToForm(data)
+      Object.assign(announcementForm, apiMapped)
+      if (apiMapped.coverImageUrl) {
+        imagePreview.value = apiMapped.coverImageUrl
       }
-      Object.assign(announcementForm, mapped)
-      if (data.coverImage) {
-        imagePreview.value = data.coverImage
-      }
-    } else {
-      console.log('Using fallback data for aid:', aid)
-      const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
-      if (fallbackFound) {
-        Object.assign(announcementForm, fallbackFound)
-        if (fallbackFound.coverImage) {
-          imagePreview.value = fallbackFound.coverImage
+      // Re-initialize initial state after API data is loaded (master source)
+      initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+      initialForm.value.coverImage = imagePreview.value || null
+    } else if (!foundInStore) {
+      console.warn('No data returned from API and not found in store for ID:', aid)
+      // Fallback only if both store and API failed
+      const fb = fallbackAnnouncements.find(a => a.id === aid)
+      if (fb) {
+        const fbMapped = mapToForm(fb)
+        Object.assign(announcementForm, fbMapped)
+        if (fbMapped.coverImageUrl) {
+          imagePreview.value = fbMapped.coverImageUrl
         }
+        initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+        initialForm.value.coverImage = imagePreview.value || null
       }
     }
-  } catch (error) {
-    console.error('Error fetching announcement:', error)
-    const fallbackFound = fallbackAnnouncements.find((a) => a.id === aid)
-    if (fallbackFound) {
-      Object.assign(announcementForm, fallbackFound)
-    }
+  } catch (err) {
+    console.error('Error fetching announcement from API:', err)
   }
-
-  // Save initial state after data is loaded
-  initialForm.value = JSON.parse(JSON.stringify(announcementForm))
-  initialForm.value.coverImage = imagePreview.value || null
 }
 
-onMounted(() => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
-  fetchAnnouncementDetail()
+onMounted(async () => {
+  window.addEventListener('resize', handleResize)
+  await Promise.all([
+    fetchCategoriesFromAnnouncements(),
+    fetchStatusesFromAnnouncements()
+  ])
+  await fetchAnnouncementDetail()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
+  window.removeEventListener('resize', handleResize)
 })
 
-const windowWidth = ref(window.innerWidth)
-const checkScreen = () => {
-  windowWidth.value = window.innerWidth
-  isCollapsed.value = windowWidth.value < 768
-}
 
 const buttonSize = computed(() => {
-  return windowWidth.value < 640 ? 'xs' : 'md'
+  return 'md'
 })
 
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 
 // Navigation Functions
 const navigateTo = (name) => {
@@ -419,9 +638,17 @@ const handleSave = async () => {
   
   let hasError = false
   if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
-  if (!announcementForm.category) { categoryError.value = true; hasError = true }
-  if (!announcementForm.datePosted) { dateError.value = true; hasError = true }
+  if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
+  if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
+  
+  if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 3) {
+    showPinLimitAlert.value = true
+    setTimeout(() => {
+    showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
   
   if (hasError) {
     setTimeout(() => {
@@ -434,47 +661,47 @@ const handleSave = async () => {
   }
   
   try {
+    isLoading.value = true
     isSubmitting.value = true
     
     // -----------------------
-    // payload
+    // payload matches UpdateAnnouncementDto
     // -----------------------
-    const body = {
+    const payload = {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
-      category: announcementForm.category,
       content: announcementForm.content,
-      datePosted: announcementForm.datePosted,
+      coverImageUrl: (imagePreview.value && typeof imagePreview.value === 'string' && imagePreview.value.startsWith('http')) ? imagePreview.value : (announcementForm.coverImageUrl || null),
+      categoryId: announcementForm.categoryId,
+      pinned: announcementForm.pinned,
+      priority: announcementForm.priority || 1,
+      sendNotification: announcementForm.status === 'PUBLISHED' ? true : announcementForm.sendNotification,
+      publishAt: announcementForm.publishAt ? (announcementForm.publishAt.includes('T') && announcementForm.publishAt.length === 16 ? announcementForm.publishAt + ':00' : announcementForm.publishAt) : null,
+      publishNow: announcementForm.status === 'PUBLISHED',
+      status: announcementForm.status,
       targetAudience: announcementForm.targetAudience,
-      isPinned: announcementForm.isPinned,
-      notify: announcementForm.notify,
-      status: announcementForm.status
-    }
-
-    if (coverImage.value) {
-      body.coverImage = coverImage.value
+      coverImage: coverImage.value // Include the File object for multipart upload
     }
 
     // -----------------------
-    // API call
+    // API call - Always use editAnnouncementWithFile to ensure multipart/form-data
+    // This resolves HttpMediaTypeNotSupportedException as the backend expects multipart
     // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
     
     if (!aid || isNaN(aid)) {
+      isLoading.value = false
       isSubmitting.value = false
       error.value = true
       return
     }
 
-    const updated = await editAnnouncementWithFile(
-      `${import.meta.env.VITE_BASE_URL}/api/announcements`,
-      aid,
-      body,
-      router
-    )
+    const url = `${import.meta.env.VITE_BASE_URL}/api/announcements`
+    const updated = await editAnnouncementWithFile(url, aid, payload, router)
 
     if (!updated) {
+      isLoading.value = false
       isSubmitting.value = false
       error.value = true
       setTimeout(() => {
@@ -483,24 +710,64 @@ const handleSave = async () => {
       return
     }
 
-    // Update the store with the new data
-    announcementStore.editAnnouncement(aid, updated)
-
-    // Save initial state after update
-    initialForm.value = JSON.parse(JSON.stringify(announcementForm))
-    if (updated.coverImage) {
-        initialForm.value.coverImage = updated.coverImage
-        imagePreview.value = updated.coverImage
+    // Refresh categories in case we need to re-map names to IDs
+    await fetchCategoriesFromAnnouncements()
+    
+    // Mapper for server response
+    const mapToFormServer = (item) => {
+      let catId = item.categoryId || item.category_id
+      if (!catId && item.category) {
+        if (typeof item.category === 'object') {
+          catId = item.category.id || item.category.categoryId
+        } else if (typeof item.category === 'string') {
+          const catObj = categories.value.find(c => 
+            (c.name && item.category && c.name.toString().toLowerCase() === item.category.toString().toLowerCase()) || 
+            c.id == item.category
+          )
+          if (catObj) catId = catObj.id
+        } else if (typeof item.category === 'number') {
+          catId = item.category
+        }
+      }
+      return {
+        title: item.title || '',
+        subtitle: item.subtitle || '',
+        content: item.content || '',
+        categoryId: catId || null,
+        pinned: !!(item.pinned || item.isPinned || item.is_pinned),
+        publishAt: ensureDateTimeLocal(item.publishAt || item.datePosted || item.date || item.created_at),
+        targetAudience: item.targetAudience || item.target_audience || 'ALL_RESIDENTS',
+        sendNotification: item.sendNotification ?? item.notify ?? item.send_notification ?? true,
+        status: (item.status || 'PUBLISHED').toUpperCase(),
+        coverImageUrl: item.coverImageUrl || item.coverImage || item.cover_image_url || null,
+        author: item.author || (item.user ? item.user.fullName : '') || (item.staff ? item.staff.fullName : '') || 'Staff Portal',
+        views: item.views || item.viewCount || item.view_count || 0
+      }
     }
 
+    // Update the store with the raw server data
+    announcementStore.editAnnouncement(aid, updated)
+
+    // Synchronize form and initial state with mapped server data
+    const serverMappedForm = mapToFormServer(updated)
+    Object.assign(announcementForm, serverMappedForm)
+    if (serverMappedForm.coverImageUrl) {
+      imagePreview.value = serverMappedForm.coverImageUrl
+    }
+    
+    // Reset initial state to match the now-synchronized form
+    initialForm.value = JSON.parse(JSON.stringify(announcementForm))
+    initialForm.value.coverImage = imagePreview.value || null
+
+    isLoading.value = false
     isSubmitting.value = false
     editSuccess.value = true
     setTimeout(() => {
       editSuccess.value = false
-      // router.push({ name: 'manageannouncement', params: { id: route.params.id } })
-    }, 10000)
+    }, 5000)
   } catch (err) {
     console.error('Update failed:', err)
+    isLoading.value = false
     isSubmitting.value = false
     error.value = true
     setTimeout(() => {
@@ -509,12 +776,6 @@ const handleSave = async () => {
   }
 }
 
-const returnLoginPage = () => {
-  showLogoutConfirm.value = true
-}
-const handleCancelLogout = () => {
-  showLogoutConfirm.value = false
-}
 const handleCancel = () => {
   router.back()
 }
@@ -531,15 +792,24 @@ const ShowManageAnnouncementPage = async function () {
 const ShowManageResidentPage = async function () {
   router.replace({ name: 'manageresident', params: { id: route.params.id } })
 }
+const showManageAnnouncementPage = async () => {
+  router.replace({ name: 'manageannouncement' , params: { id: route.params.id } })
+  showManageAnnouncement.value = true
+}
+
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels', params: { id: route.params.id } })
 }
 const showHomePageStaffWeb = async () => {
   router.replace({ name: 'homestaff', params: { id: route.params.id } })
 }
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard', params: { id: route.params.id } })
+
+const returnLoginPage = async () => {
+  try {
+    await loginManager.logoutAccount(router)
+  } catch (err) {}
 }
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff', params: { id: route.params.id } })
 }
@@ -553,7 +823,6 @@ const showProfileStaffPage = async function () {
     <WebHeader @toggle-sidebar="toggleSidebar" />
     
   <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -615,39 +884,6 @@ const showProfileStaffPage = async function () {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard" @click="showDashBoardPage">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem title="Manage Parcel" @click="showManageParcelPage">
               <template #icon>
                 <svg
@@ -686,6 +922,7 @@ const showProfileStaffPage = async function () {
 
             <SidebarItem
               title="Manage Announcements"
+              @click="showManageAnnouncementPage"
               class="bg-[#81AFEA] cursor-default"
             >
               <template #icon>
@@ -757,7 +994,6 @@ const showProfileStaffPage = async function () {
             </template>
           </SidebarItem>
         </aside>
-      </button>
 
       <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
@@ -787,13 +1023,21 @@ const showProfileStaffPage = async function () {
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
-            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 5MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
               message="Error!!"
               styleType="red"
               operate="errorMessage"
+              @closePopUp="closePopUp"
+            />
+              <AlertPopUp
+              v-if="showPinLimitAlert"
+              :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
+              message="Error!!"
+              styleType="red"
+              operate="pinLimitMessage"
               @closePopUp="closePopUp"
             />
           </div>
@@ -811,7 +1055,7 @@ const showProfileStaffPage = async function () {
                       type="text" 
                       :value="announcementForm.title"
                       @input="handleTitleInput"
-                      placeholder="Enter announcement title..."
+                      placeholder="Enter announcement title"
                       :class="[
                         'w-full px-4 py-3 rounded-xl border transition-all outline-none',
                         titleLengthError || titleThaiNumError 
@@ -855,18 +1099,21 @@ const showProfileStaffPage = async function () {
                       </div>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Status </label>
-                      <div class="relative">
-                        <select 
-                           v-model="announcementForm.status"
-                           class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none bg-white appearance-none"
-                        >
-                           <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                      </div>
+                      <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        Status
+                      </label>
+                      <SelectWeb 
+                         v-model="announcementForm.status"
+                         :options="statusOptions"
+                         :disabled="initialForm && initialForm.status === 'PUBLISHED'"
+                         placeholder="Select status"
+                         customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                       >
+                         <template #icon>
+                            <svg v-if="announcementForm.status === 'DRAFT'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                         </template>
+                       </SelectWeb>
                    </div>
                 </div>
 
@@ -874,88 +1121,90 @@ const showProfileStaffPage = async function () {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category </label>
-                      <div class="relative">
-                        <div @click="isCategoryOpen = !isCategoryOpen" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all outline-none bg-white cursor-pointer flex items-center gap-3">
-                            <span v-if="!announcementForm.category" class="text-gray-500">Select category...</span>
-                            <template v-else>
-                              <!-- General -->
-                              <svg v-if="announcementForm.category === 'General'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                              <!-- Maintenance -->
-                              <svg v-else-if="announcementForm.category === 'Maintenance'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                              <!-- Events -->
-                              <svg v-else-if="announcementForm.category === 'Events'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                              <!-- Urgent -->
-                              <svg v-else-if="announcementForm.category === 'Urgent'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                              <span class="text-gray-800">{{ announcementForm.category }}</span>
-                            </template>
-                        </div>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400" :class="isCategoryOpen ? 'rotate-180 transition-transform' : 'transition-transform'">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                        <!-- Dropdown Options -->
-                        <div v-if="isCategoryOpen" class="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 overflow-hidden py-1">
-                          <div @click="announcementForm.category = 'General'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                             General
-                          </div>
-                          <div @click="announcementForm.category = 'Maintenance'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                             Maintenance
-                          </div>
-                          <div @click="announcementForm.category = 'Events'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                             Activity/Events
-                          </div>
-                          <div @click="announcementForm.category = 'Urgent'; isCategoryOpen = false" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-gray-700">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                             Urgent
-                          </div>
-                        </div>
-                      </div>
+                      <SelectWeb 
+                        v-model="announcementForm.categoryId"
+                        :options="categoryOptions"
+                        placeholder="Select category"
+                        :error="categoryError"
+                        customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
+                      >
+                        <template #icon>
+                          <!-- Dynamic Icon mapping for SelectWeb -->
+                          <template v-if="announcementForm.categoryId">
+                            <svg v-if="getCategoryName(announcementForm.categoryId).includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <svg v-else-if="getCategoryName(announcementForm.categoryId).includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            <svg v-else-if="getCategoryName(announcementForm.categoryId).includes('Event') || getCategoryName(announcementForm.categoryId).includes('Activity')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <svg v-else-if="getCategoryName(announcementForm.categoryId).includes('Urgent')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          </template>
+                        </template>
+                      </SelectWeb>
                    </div>
                    <div class="space-y-2">
-                      <label class="text-sm font-semibold text-gray-700">Publish Date</label>
-                      <div class="relative">
-                        <input 
-                           type="text" 
-                           v-model="announcementForm.datePosted"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none"
-                           placeholder="e.g. 15 Feb 2026 - 14:00"
-                        />
+                      <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        Publish Date
+                      </label>
+                      <div class="relative flex items-center group">
+                        <!-- Icon Overlay -->
+                        <div 
+                          class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                          @click="openDatePicker"
+                        >
+                          <div 
+                            class="p-1.5 rounded-lg shadow-sm flex items-center justify-center border transition-colors"
+                            :class="announcementForm.status === 'DRAFT' ? 'bg-white text-[#0E4B90] border-gray-100' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                          >
+                            <svg v-if="announcementForm.status === 'DRAFT'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                          </div>
+                        </div>
+
+                        <!-- Display Input (Text) -->
+                         <input 
+                            type="text" 
+                            readonly
+                            :value="formatDateTimeDisplay(announcementForm.publishAt)"
+                            placeholder="DD/MM/YYYY - HH:mm"
+                            @click="announcementForm.status === 'DRAFT' && openDatePicker()"
+                            class="w-full pl-4 pr-13 py-3 rounded-xl border transition-all outline-none font-medium"
+                            :class="[
+                              announcementForm.status === 'DRAFT' 
+                              ? 'border-gray-200 bg-white text-gray-700 cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-100' 
+                              : 'border-gray-100 bg-gray-50/80 text-gray-400 cursor-not-allowed'
+                            ]"
+                         />
+
+                        <!-- Hidden Native Datetime Input -->
+                         <input
+                            ref="dateInput"
+                            type="datetime-local" 
+                            v-model="announcementForm.publishAt"
+                            :min="minDateTime"
+                            :disabled="announcementForm.status !== 'DRAFT'"
+                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                         />
                       </div>
                    </div>
                 </div>
 
                 <!-- Content -->
                 <div class="space-y-2">
-                   <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
+                   <label class="text-sm font-semibold text-gray-700">Content</label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
-                      <!-- <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1">
-                        <button @click.prevent="formatText('bold')" class="p-1.5 text-blue-600 bg-blue-50 rounded hover:bg-blue-100 font-serif font-bold transition-colors cursor-pointer">B</button>
-                        <button @click.prevent="formatText('italic')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif italic transition-colors cursor-pointer">I</button>
-                        <button @click.prevent="formatText('underline')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-serif underline transition-colors cursor-pointer">U</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('list')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        </button>
-                        <button @click.prevent="formatText('ordered')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded font-semibold text-xs transition-colors cursor-pointer">1.</button>
-                        <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                        <button @click.prevent="formatText('link')" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                        </button>
-                        <button @click.prevent="formatText('emoji')" class="p-1.5 text-amber-500 hover:bg-gray-200 rounded transition-colors cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                        </button>
-                      </div> -->
                       <textarea 
                          ref="contentArea"
                          :value="announcementForm.content"
                          @input="handleContentInput"
                          rows="6"
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
-                         placeholder="Enter announcement content... Supports text formatting."
+                         placeholder="Enter announcement content"
                       ></textarea>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
@@ -976,7 +1225,7 @@ const showProfileStaffPage = async function () {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       </div>
                       <p class="text-sm font-medium text-gray-700 mt-2">Click to replace or drag file here</p>
-                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 5MB</p>
+                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 1MB</p>
                       <input 
                         type="file" 
                         ref="fileInput" 
@@ -986,21 +1235,32 @@ const showProfileStaffPage = async function () {
                       />
                    </div>
                    <div v-else class="relative group">
-                      <img :src="imagePreview" alt="Preview" class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm" />
-                      <button 
-                        @click="removeImage" 
-                        class="absolute top-3 right-3 p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-rose-100 cursor-pointer"
-                        title="Remove image"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                      </button>
-                      <button 
-                        @click="$refs.fileInput.click()" 
-                        class="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-blue-100 cursor-pointer"
-                        title="Change image"
-                      >
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                      </button>
+                      <img 
+                        :src="imagePreview" 
+                        alt="Preview" 
+                        class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
+                        @click="toggleLightbox"
+                      />
+                      
+                      <!-- Image Actions Overlay -->
+                      <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+
+                        <button 
+                          @click="$refs.fileInput.click()" 
+                          class="p-2 bg-white/90 hover:bg-blue-500 hover:text-white text-blue-500 rounded-lg shadow-sm backdrop-blur-sm border border-blue-100 cursor-pointer"
+                          title="Change image"
+                        >
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
+                        <button 
+                          @click="removeImage" 
+                          class="p-2 bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 rounded-lg shadow-sm backdrop-blur-sm border border-rose-100 cursor-pointer"
+                          title="Remove image"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        </button>
+                      </div>
+
                       <input 
                         type="file" 
                         ref="fileInput" 
@@ -1011,43 +1271,6 @@ const showProfileStaffPage = async function () {
                    </div>
                 </div>
 
-                <!-- Target Audience -->
-                <div class="space-y-3 pt-2">
-                  <label class="text-sm font-semibold text-gray-700">Target Audience</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="All" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'All' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'All' ? 'text-gray-900' : 'text-gray-600'">All Residents</span>
-                      </div>
-                    </label>
-
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="Active" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Active' ? 'text-gray-900' : 'text-gray-600'">Active Only</span>
-                      </div>
-                    </label>
-<!-- 
-                    <label class="relative cursor-pointer h-full">
-                      <input type="radio" v-model="announcementForm.targetAudience" value="Zone" class="peer sr-only" />
-                      <div class="h-full border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50/50 hover:bg-gray-50">
-                        <div class="p-2.5 rounded-full transition-colors" :class="announcementForm.targetAudience === 'Zone' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
-                        </div>
-                        <span class="font-medium text-sm text-center" :class="announcementForm.targetAudience === 'Zone' ? 'text-gray-900' : 'text-gray-600'">Specify Floor/Zone</span>
-                      </div>
-                    </label> -->
-                  </div>
-                  </div>
-
-                <!-- Toggles -->
                 <div class="space-y-3 pt-2">
                   <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
                      <div class="flex items-center gap-4">
@@ -1059,41 +1282,26 @@ const showProfileStaffPage = async function () {
                          <p class="text-xs text-gray-500 mt-0.5">Announcement will always show at the top</p>
                        </div>
                      </div>
-                     <button @click="announcementForm.isPinned = !announcementForm.isPinned" :class="announcementForm.isPinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="announcementForm.isPinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
-                     </button>
-                  </div>
-
-                  <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                     <div class="flex items-center gap-4">
-                       <div class="p-2.5 bg-white rounded-lg shadow-sm text-blue-500 border border-gray-100">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                       </div>
-                       <div>
-                         <h4 class="font-semibold text-gray-900 text-sm">Notification</h4>
-                         <p class="text-xs text-gray-500 mt-0.5">Send notification to notify residents immediately</p>
-                       </div>
-                     </div>
-                     <button @click="announcementForm.notify = !announcementForm.notify" :class="announcementForm.notify ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
-                       <span :class="announcementForm.notify ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
+                     <button @click="announcementForm.pinned = !announcementForm.pinned" :class="announcementForm.pinned ? 'bg-blue-500' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0 cursor-pointer">
+                       <span :class="announcementForm.pinned ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white'" class="inline-block h-4 w-4 transform rounded-full transition-transform"></span>
                      </button>
                   </div>
                 </div>
-
              </div>
 
-             <!-- Actions -->
              <div class="bg-gray-50 px-4 sm:px-8 py-4 flex flex-nowrap items-center justify-end gap-2 border-t border-gray-200">
                 <ButtonWeb 
                   label="Cancel" 
-                  color="white-outline" 
+                  color="gray" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="handleCancel" 
                 />
                 <ButtonWeb 
-                  :label="windowWidth < 640 ? 'Update' : 'Update Announcement'" 
-                  color="navy" 
+                  :label="windowWidth < 640 ? 'Update' : 'Update'" 
+                  color="blue" 
                   :size="buttonSize"
+                  class="sm:w-60"
                   @click="handleSave" 
                   :disabled="!hasChanges"
                   :loading="isSubmitting"
@@ -1106,33 +1314,54 @@ const showProfileStaffPage = async function () {
                 </ButtonWeb>
              </div>
           </div>
-
-          <div class="fixed top-5 left-5 z-50">
-            <AlertPopUp
-              v-if="editSuccess"
-              :titles="'Edit Announcement is Successful.'"
-              message="Success!!"
-              styleType="green"
-              operate="editSuccessMessage"
-              @closePopUp="closePopUp"
-            />
-            <AlertPopUp
-              v-if="error"
-              :titles="'There is a problem. Please try again later.'"
-              message="Error!!"
-              styleType="red"
-              operate="errorMessage"
-              @closePopUp="closePopUp"
-            />
-          </div>
-
         </div>
       </main>
     </div>
 
-    <ConfirmLogout
-      v-if="showLogoutConfirm"
-      @cancelLogout="handleCancelLogout"
-    />
+    <LoadingPopUp v-if="isLoading" />
+
+    <Transition name="fade">
+      <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
+          <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <img 
+            :src="imagePreview" 
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full Preview"
+            @click.stop
+          />
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Animations using standard CSS as fallback for Tailwind animate */
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.zoom-in {
+  animation-name: zoomIn;
+}
+</style>

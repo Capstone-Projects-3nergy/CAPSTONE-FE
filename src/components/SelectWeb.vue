@@ -66,28 +66,45 @@ onUnmounted(() => {
       @click="toggleDropdown"
       :class="[
         'w-full text-gray-800 transition-all duration-300 flex items-center justify-between cursor-pointer',
-        !customClass ? 'bg-gray-50/50 border border-gray-200 rounded-xl px-4 py-3 hover:border-gray-300' : customClass,
+        !customClass ? 'bg-gray-50/50 border border-gray-200 rounded-2xl px-4 h-[58px] hover:border-gray-300' : customClass,
         $slots.icon && !customClass.includes('pl-') ? 'pl-10' : '',
         isOpen ? 'bg-white border-[#0E4B90] ring-4 ring-blue-100 shadow-sm' : '',
         error ? 'border-red-400 ring-4 ring-red-50' : '',
-        disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+        disabled ? 'bg-gray-100/80 border-gray-200 cursor-not-allowed opacity-75' : ''
       ]"
     >
       <div v-if="$slots.icon" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center">
         <slot name="icon" />
       </div>
-      <span :class="{ 'text-gray-400': !selectedOption }" class="flex-1 truncate text-left">
+      <span :class="[{ 'text-gray-400': !selectedOption || disabled }, 'truncate']" class="flex-1 text-left">
         {{ selectedOption ? selectedOption.label : placeholder }}
       </span>
-      <svg
-        class="w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0"
-        :class="{ 'rotate-180 text-[#0E4B90]': isOpen }"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
+      <div class="flex-shrink-0 ml-2">
+        <svg
+          v-if="disabled"
+          class="w-4 h-4 text-gray-400"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <svg
+          v-else
+          class="w-5 h-5 text-gray-400 transition-transform duration-300"
+          :class="{ 'rotate-180 text-[#0E4B90]': isOpen }"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
     </div>
 
     <!-- Dropdown Menu -->

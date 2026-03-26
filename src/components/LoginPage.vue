@@ -74,8 +74,6 @@ const loginHomePageWeb = async () => {
     return
   }
 
-  // 🔹 เช็คก่อนว่า Email นี้มีลงทะเบียนไว้ในระบบหรือไม่ (ผ่าน Firebase)
-  // ⚠️ เราใช้ข้อมูลจาก /api/staff/users ไม่ได้เพราะต้องล็อกอินก่อนถึงจะดึงได้ (จะติด 401 และเด้งหลุด)
   const isEmailExists = await authManager.checkEmailInFirebase(email.value.trim())
   if (!isEmailExists) {
     notRegisterError.value = true
@@ -222,8 +220,6 @@ const loginHomePageWeb = async () => {
       incorrect.value = true
       setTimeout(() => (incorrect.value = false), 10000)
     } else {
-      // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว (เก็บค่าไว้ที่ isEmailExists ตอนต้น)
-      // แปลว่า "มีใน Firebase แต่ล็อกอินเข้า Database ไม่ได้ หรือไม่มีข้อมูลใน Database"
       const isEmailExists = await authManager.checkEmailInFirebase(email.value.trim())
 
       if (isEmailExists) {
@@ -279,16 +275,20 @@ const showResetPasswordPageWeb = async function () {
 <template>
   <div class="min-h-screen flex flex-col md:flex-row">
     <div
-      class="hidden md:flex flex-1 bg-gradient-to-b from-[#0047b1] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 min-h-screen"
+      class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 min-h-screen relative overflow-hidden"
     >
-      <div class="max-w-md text-center md:text-center">
-        <h1 class="text-3xl font-bold mb-4 md:text-center">Welcome back!</h1>
-        <p class="text-sm text-white mb-8 md:text-left">
+      <!-- Subtle Decorative Blobs -->
+      <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-md text-center relative z-10 flex flex-col items-center">
+        <h1 class="text-3xl font-extrabold tracking-tight mb-3 drop-shadow-md">Welcome back!</h1>
+        <p class="text-sm text-blue-50 mb-6 drop-shadow px-4">
           dormitory parcel management system — manage, check status, and stay
           updated anytime with Tractify.
         </p>
 
-        <div class="flex md:justify-center">
+        <div class="flex justify-center drop-shadow-xl hover:scale-[1.02] transition-transform duration-500 ease-out">
           <svg
             class="hidden md:block w-[400px] h-[450px]"
             viewBox="0 0 490 569"
@@ -368,7 +368,7 @@ const showResetPasswordPageWeb = async function () {
           </svg>
         </div>
 
-        <h2 class="text-4xl font-bold mb-2 text-center md:text-left">
+        <h2 class="text-4xl font-bold mb-3 text-center md:text-left">
           Get Started
         </h2>
         <p class="font-medium text-[#8C8F91] mb-6 text-center md:text-left">
@@ -440,8 +440,8 @@ const showResetPasswordPageWeb = async function () {
           />
         </div>
 
-        <form @submit.prevent="loginHomePageWeb" class="space-y-4">
-          <div class="mb-1">
+        <form @submit.prevent="loginHomePageWeb" class="space-y-6">
+          <div class="mb-3">
             <div class="relative">
               <svg
                 width="22"
@@ -461,14 +461,15 @@ const showResetPasswordPageWeb = async function () {
                 v-model="email"
                 type="email"
                 placeholder="Email"
-                class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
-                :class="{ 'border-red-600 text-red-600': isEmailOverLimit }"
+                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit }"
               />
             </div>
           </div>
           <div
             style="display: flex; align-items: center"
+            class="-mt-4 mb-3"
             v-if="isEmailOverLimit"
           >
             <svg
@@ -506,9 +507,8 @@ const showResetPasswordPageWeb = async function () {
             <input
               :type="isPasswordVisible ? 'text' : 'password'"
               v-model="password"
-              type="password"
               placeholder="Password"
-              class="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
             />
             <button
@@ -541,14 +541,14 @@ const showResetPasswordPageWeb = async function () {
             </button>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex justify-end -mt-4 mb-3">
             <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"
               >Forgot your password?</a
             >
           </div>
-          <ButtonWeb
+           <ButtonWeb
             label="Sign In"
             type="submit"
             color="black"
@@ -563,7 +563,7 @@ const showResetPasswordPageWeb = async function () {
           />
         </form>
 
-        <p class="text-sm text-center text-[#8C8F91] mt-6">
+        <p class="text-sm text-center text-[#8C8F91] mt-8">
           Don’t have an account?
           <a
             class="text-[#107EFF] font-medium hover:underline cursor-pointer"

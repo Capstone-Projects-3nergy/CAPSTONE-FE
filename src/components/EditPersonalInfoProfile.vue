@@ -210,7 +210,8 @@ const emit = defineEmits([
   'room-number-error',
   'line-id-error',
   'email-invalid-chars',
-  'file-size-error'
+  'file-size-error',
+  'email-firebase'
 ])
 
 const isEdit = ref(false)
@@ -418,15 +419,6 @@ watch(
   (mode) => {
     if (mode === 'add') {
       resetFormForAdd()
-      // form.value.firstName = ''
-      // form.value.lastName = ''
-      // form.value.email = ''
-      // form.value.roomNumber = ''
-      // form.value.lineId = ''
-      // form.value.position = ''
-      // form.value.phoneNumber = ''
-      // form.value.dormId = ''
-      // form.value.dormName = props.dormName || ''
     }
 
     if (mode === 'edit') {
@@ -444,55 +436,6 @@ watch(
   { immediate: true }
 )
 
-// watch(
-//   () => props.mode,
-//   (mode) => {
-//     if (mode === 'add') {
-//       form.value = {
-//         firstName: '',
-//         lastName: '',
-//         email: '',
-//         roomNumber: '',
-//         lineId: '',
-//         position: '',
-//         phoneNumber: '',
-//         dormId: ''
-//       }
-//       // newAvatar.value = null
-//     }
-//   },
-//   { immediate: true }
-// )
-// watch(
-//   () => props.dormName,
-//   (val) => {
-//     form.value.dormName = val
-//   },
-//   { immediate: true }
-// )
-
-// watch(
-//   () => props.mode,
-//   (mode) => {
-//     if (mode === 'edit') {
-//       form.value.firstName = props.firstName
-//       form.value.lastName = props.lastName
-//       form.value.fullName = props.fullName
-//       form.value.email = props.email
-//       form.value.position = props.position
-//       form.value.roomNumber = props.roomNumber
-//       form.value.lineId = props.lineId
-//       form.value.phoneNumber = props.phoneNumber
-//       form.value.dormName = props.dormName
-//     }
-//   },
-//   { immediate: true, deep: true }
-// )
-
-// function startEdit() {
-//   isEdit.value = true
-//   emit('edit')
-// }
 
 const isFormEmpty = computed(() => {
   const hasText =
@@ -537,14 +480,11 @@ const profileImageUrlPreview = computed(() => {
   return ''
 })
 
-// function onImageChange(e) {
-//   const file = e.target.files[0]
-//   if (file) newAvatar.value = file
-// }
+
 function onImageChange(e) {
   const file = e.target.files[0]
   if (file) {
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 1 * 1024 * 1024) {
       emit('file-size-error', true)
       e.target.value = null
       return
@@ -578,21 +518,7 @@ function removeImage() {
   if (input) input.value = null
 }
 
-// function save() {
-//   const payload = {
-//     firstName: form.value.firstName,
-//     lastName: form.value.lastName,
-//     email: form.value.email,
-//     position: form.value.position,
-//     roomNumber: form.value.roomNumber,
-//     lineId: form.value.lineId,
-//     phoneNumber: form.value.phoneNumber,
-//     profileImage: newAvatar.value || null
-//   }
 
-//   emit('save', payload)
-//   isEdit.value = false
-// }
 
 function cancel() {
   isEdit.value = false
@@ -617,17 +543,14 @@ const userInitial = computed(() => {
   const currentFirst = form.value.firstName?.trim()
   const originalFirst = originalForm.value.firstName?.trim()
 
-  // ⛔ ถ้า form ว่าง → ให้ initial ว่างตาม
   if (!currentFirst) {
     return ''
   }
 
-  // ✏️ กำลังพิมพ์แก้ชื่อ → ใช้จาก form
   if (currentFirst !== originalFirst) {
     return currentFirst[0].toUpperCase()
   }
 
-  // 📌 ยังไม่แก้ / revert / ยังไม่ save → ใช้ userName
   return userName.value ? userName.value.trim()[0].toUpperCase() : ''
 })
 
@@ -791,6 +714,9 @@ const addResidents = async () => {
     router
   )
 
+  // 🔹 เช็คจาก Firebase ไว้ก่อน
+  const isFirebaseDuplicate = await loginManager.checkEmailInFirebase(form.value.email)
+
   if (dataUser) {
     const isDuplicate = dataUser.some(
       (u) => u.email?.toLowerCase() === form.value.email.toLowerCase()
@@ -833,7 +759,11 @@ const addResidents = async () => {
 
     if (!savedMember) {
       loading.value = false
-      emit('errorAddProfile')
+      if (isFirebaseDuplicate) {
+        emit('email-firebase')
+      } else {
+        emit('errorAddProfile')
+      }
       return
     }
     if (savedMember.status === 400) {
@@ -874,10 +804,7 @@ const addResidents = async () => {
 
 const saveEditProfile = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
-  // const isResident = loginManager.user?.role === 'RESIDENT'
-  // -----------------------
-  // validate name (ไทย + อังกฤษ)
-  // -----------------------
+
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
@@ -1046,16 +973,7 @@ const saveEditDetail = async () => {
     emit('room-number-required', true)
     return
   }
-  // if (isStaff && !form.value.position?.trim()) {
-  //   emit('position-required', true)
-  //   return
-  // }
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
-  // -----------------------
-  // validate phone (optional)
-  // -----------------------
+
   if (form.value.roomNumber && !/^[0-9]+$/.test(form.value.roomNumber)) {
     emit('room-number-error', true)
     return
@@ -1213,6 +1131,14 @@ const userRoleLabel = computed(() => {
   }
   return 'Resident Name'
 })
+const isLineLinked = computed(() => {
+  
+  const id = form.value.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId
+  if (!id || id === 'null' || id === 'unlinked' || id === '') {
+    return false
+  }
+  return true
+})
 </script>
 
 <template>
@@ -1220,75 +1146,39 @@ const userRoleLabel = computed(() => {
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
       <!-- LEFT : Profile Image Card -->
       <div
-        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8 flex flex-col items-center text-center"
+        class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8 flex flex-col items-center text-center"
       >
         <div class="relative inline-block group mb-6">
           <!-- Avatar -->
           <div
-            class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+            class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/avatar"
           >
-            <!-- มีรูป (add หรือ edit ก็แสดง) -->
-            <img
-              v-if="profileImageUrlPreview"
-              :src="profileImageUrlPreview"
-              alt="Profile"
-              class="w-full h-full object-cover"
-            />
+            <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90] flex items-center justify-center">
+              <img
+                v-if="profileImageUrlPreview"
+                :src="profileImageUrlPreview"
+                alt="Profile"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              />
 
-            <!-- ADD MODE + ยังไม่เลือกรูป -->
-            <div
-              v-else-if="props.mode === 'add'"
-              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
-            </div>
+              <!-- ADD MODE + ยังไม่เลือกรูป -->
+              <div
+                v-else-if="props.mode === 'add'"
+                class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
+              </div>
 
-            <!-- EDIT MODE + ไม่มีรูป -->
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
-            >
-              {{ userInitial }}
+              <!-- EDIT MODE + ไม่มีรูป -->
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#1D355E] to-[#0E4B90] text-white text-5xl"
+              >
+                {{ userInitial }}
+              </div>
             </div>
           </div>
 
-          <!-- ❌ Remove icon (only show when new image is selected) -->
-          <!-- <div
-            v-if="newAvatar"
-            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
-            @click.stop="removeImage"
-          >
-            <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18 6L6 18M6 6L18 18"
-                  stroke="#EF4444"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-            <div
-              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
-            >
-              <div
-                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
-              >
-                Remove Image
-              </div>
-            </div>
-          </div> -->
-
-          <!-- ✏️ Edit icon (อยู่นอกวง แต่ทับขอบ) -->
           <div
             class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
             @click="$refs.imageInput.click()"
@@ -1345,7 +1235,7 @@ const userRoleLabel = computed(() => {
 
       <!-- RIGHT : Edit Information Card -->
       <div
-        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-8"
+        class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8"
       >
         <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
@@ -1366,7 +1256,7 @@ const userRoleLabel = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1423,7 +1313,7 @@ const userRoleLabel = computed(() => {
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1482,7 +1372,7 @@ const userRoleLabel = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showEmailLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1525,7 +1415,7 @@ const userRoleLabel = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
                 showRoomLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1568,7 +1458,7 @@ const userRoleLabel = computed(() => {
               :disabled="mode === 'edit' && loginManager.user?.role === 'RESIDENT'"
               :value="dormName"
               :class="[
-                'w-full border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
               ]"
             />
@@ -1598,7 +1488,7 @@ const userRoleLabel = computed(() => {
               :value="form.position"
               @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPositionLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1647,33 +1537,6 @@ const userRoleLabel = computed(() => {
             </div>
           </div>
 
-          <!-- <div v-if="mode !== 'add'" class="flex flex-col">
-            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
-              Line 
-            </label>
-            <div v-if="form.lineId" class="flex items-center gap-3">
-              <div
-                @click="showLineId ? window.open(`https://line.me/ti/p/~${form.lineId}`, '_blank') : null"
-                :class="[
-                  'flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300',
-                  !showLineId ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent font-medium' : 'bg-green-50 text-green-700 cursor-pointer hover:bg-green-100 border border-green-100 font-bold'
-                ]"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" :fill="!showLineId ? '#9CA3AF' : '#00b900'"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/><g :fill="!showLineId ? '#9CA3AF' : '#00b900'"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                <span>Linked</span>
-              </div>
-            </div>
-            <div v-else class="flex items-center">
-              <div
-                @click="window.open(`https://line.me/ti/p/~${form.lineId}`, '_blank')"
-                class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white cursor-pointer hover:bg-[#009900] transition-all duration-300 font-bold shadow-md hover:shadow-lg"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                <span>Link Line Account</span>
-              </div>
-            </div>
-          </div> -->
-
           <div class="flex flex-col">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
@@ -1682,7 +1545,7 @@ const userRoleLabel = computed(() => {
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+              class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPhoneLengthError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
@@ -1714,14 +1577,14 @@ const userRoleLabel = computed(() => {
           <!-- Actions -->
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
-              class="text-[#898989] flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
-              label="Cancel Changes"
+              class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:bg-gray-100 rounded-2xl transition-all font-bold px-4 md:px-8 whitespace-nowrap"
+              label="Cancel"
               color="gray"
               @click="cancel"
             />
             <ButtonWeb
-              class="flex-1 md:flex-none text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
-              :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
+              class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:opacity-90 rounded-2xl shadow-lg transition-all font-black px-4 md:px-8 whitespace-nowrap"
+              :label="mode === 'add' ? 'Add Resident' : 'Save'"
               color="blue"
               @click="submit"
               :disabled="isSaveDisabled"
@@ -1733,7 +1596,7 @@ const userRoleLabel = computed(() => {
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
       <!-- 🔹 CARD เดียว -->
       <div
-        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-8"
+        class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-5 md:p-8"
       >
         <div class="mb-6 text-center md:hidden">
           <p class="hidden md:block text-sm font-extrabold text-[#0E4B90] pt-6">
@@ -1752,57 +1615,23 @@ const userRoleLabel = computed(() => {
             <div class="relative inline-block group mb-6">
               <!-- Avatar -->
               <div
-                class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 shadow-inner bg-gray-100 mx-auto"
+                class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/preview"
               >
-                <img
-                  v-if="profileImageUrlPreview"
-                  :src="profileImageUrlPreview"
-                  alt="Profile"
-                  class="w-full h-full object-cover"
-                />
-                <div
-                  v-else
-                  class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#185DC0] to-[#0E4B90] text-white text-5xl"
-                >
-                  {{ userInitial }}
+                <div class="w-full h-full rounded-full overflow-hidden relative from-[#1D355E] to-[#0E4B90]">
+                  <img
+                    v-if="profileImageUrlPreview"
+                    :src="profileImageUrlPreview"
+                    alt="Profile"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center font-bold text-white text-5xl"
+                  >
+                    {{ userInitial }}
+                  </div>
                 </div>
               </div>
-  <!-- ❌ Remove icon (only show when new image is selected) -->
-          <!-- <div
-            v-if="newAvatar"
-            class="absolute -bottom-2 -left-2 p-1.5 cursor-pointer group"
-            @click.stop="removeImage"
-          >
-            <div
-              class="bg-white rounded-full p-1 shadow-md border hover:bg-gray-50 flex items-center justify-center w-8 h-8"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18 6L6 18M6 6L18 18"
-                  stroke="#EF4444"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-            <div
-              class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
-            >
-              <div
-                class="rounded-lg bg-gray-400 px-3 py-1.5 text-xs text-white shadow whitespace-nowrap"
-              >
-                Remove Image
-              </div>
-            </div>
-          </div> -->
-              <!-- ✏️ Edit icon -->
               <div
                 class="absolute -bottom-2 -right-2 p-1 cursor-pointer group"
                 @click="$refs.imageInput.click()"
@@ -1878,7 +1707,7 @@ const userRoleLabel = computed(() => {
                 <input
                   v-model="form.firstName"
                   placeholder="Enter First Name"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 
@@ -1890,7 +1719,7 @@ const userRoleLabel = computed(() => {
                 <input
                   v-model="form.lastName"
                   placeholder="Enter Last Name"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 
@@ -1904,7 +1733,7 @@ const userRoleLabel = computed(() => {
                   v-model="form.email"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                     mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
@@ -1919,7 +1748,7 @@ const userRoleLabel = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300',
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                     loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]'
                   ]"
                 />
@@ -1938,47 +1767,26 @@ const userRoleLabel = computed(() => {
               </div>
               <div class="flex flex-col">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
-                  Line 
-                </label>
-                <div v-if="form.lineId || profileManager.currentProfile?.lineId || loginManager.user?.lineId" class="flex items-center h-[58px]">
-                  <div
-                    class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#00b900] text-white transition-all duration-300 font-bold shadow-md max-w-fit"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Linked</span>
-                  </div>
-                </div>
-                <div v-else class="flex items-center h-[58px]">
-                  <div
-                    class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent font-medium max-w-fit"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path d="M200.533 256H55.467C24.834 256 0 231.166 0 200.533V55.467C0 24.834 24.834 0 55.467 0h145.067C231.166 0 256 24.834 256 55.467v145.067C256 231.166 231.166 256 200.533 256" fill="#fff"/><path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#00b900"/><g fill="#fff"><path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/><path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/></g></svg>
-                    <span>Not Linked</span>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
                   Phone Number
                 </label>
                 <input
                   v-model="form.phoneNumber"
                   placeholder="Enter Phone Number"
-                  class="w-full max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                 />
               </div>
 
               <!-- Actions -->
               <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
-                  class="text-[#898989] text-sm py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-8"
-                  label="Cancel Changes"
+                  class="flex-1 md:flex-none text-[#898989] text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"
+                  label="Cancel"
                   color="gray"
                   @click="cancel"
                 />
                 <ButtonWeb
-                  class="text-sm py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-10"
-                  :label="mode === 'add' ? 'Add Resident' : 'Save Changes'"
+                  class="flex-1 md:flex-none text-xs py-2 md:text-base md:py-3 cursor-pointer hover:opacity-90 hover:shadow-blue-500/20 rounded-2xl shadow-lg shadow-blue-500/10 transition-all font-bold px-3 md:px-10 whitespace-nowrap"
+                  :label="mode === 'add' ? 'Add' : 'Save'"
                   color="blue"
                   :disabled="isSaveDisabled"
                   @click="submit"

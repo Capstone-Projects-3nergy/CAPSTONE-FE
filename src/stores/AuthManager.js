@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth'
 import { jwtDecode } from 'jwt-decode'
 import { useNotificationManager } from './NotificationManager'
+import { useSidebarManager } from './SidebarManager'
 
 export const useAuthManager = defineStore('authManager', () => {
   const user = ref(null)
@@ -359,6 +360,7 @@ export const useAuthManager = defineStore('authManager', () => {
   } finally {
     // ✅ เคลียร์ notification state & localStorage
     useNotificationManager().clearNotifications()
+    useSidebarManager().resetSidebar()
     
     // ✅ เคลียร์ state เสมอ
     user.value = null

@@ -391,6 +391,53 @@ export async function getProfile(url, router) {
   }
 }
 
+async function unlinkLineAccount(router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(
+      `${import.meta.env.VITE_BASE_URL}/api/profile/disconnect-line`,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('unlinkLineAccount error:', error)
+    return false
+  }
+}
+
+async function connectLineAccount(lineUserId, router) {
+  try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/profile/connect-line?lineUserId=${lineUserId}`
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('connectLineAccount error:', error)
+    return false
+  }
+}
+
 //Member and stadd
 async function getMembers(url, router) {
   return await getItems(url, router)
@@ -660,6 +707,26 @@ async function deleteAnnouncement(url, id, router) {
   return await deleteItemById(url, id, router)
 }
 
+async function recordAnnouncementView(url, id, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const res = await fetchWithAuth(`${url}/${id}/view`, options, router)
+    if (res && res.ok) {
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('recordAnnouncementView error:', error)
+    return false
+  }
+}
+
 async function addAnnouncementWithFile(url, payload, router) {
   const formData = new FormData()
 
@@ -667,13 +734,11 @@ async function addAnnouncementWithFile(url, payload, router) {
 
   formData.append(
     'data',
-    new Blob([JSON.stringify(announcementData)], {
-      type: 'application/json'
-    })
+    new Blob([JSON.stringify(announcementData)], { type: 'application/json' })
   )
 
   if (coverImage instanceof File || coverImage instanceof Blob) {
-    formData.append('coverImage', coverImage)
+    formData.append('image', coverImage)
   }
 
   try {
@@ -702,13 +767,11 @@ async function editAnnouncementWithFile(url, id, payload, router) {
 
   formData.append(
     'data',
-    new Blob([JSON.stringify(announcementData)], {
-      type: 'application/json'
-    })
+    new Blob([JSON.stringify(announcementData)], { type: 'application/json' })
   )
 
   if (coverImage instanceof File || coverImage instanceof Blob) {
-    formData.append('coverImage', coverImage)
+    formData.append('image', coverImage)
   }
 
   try {
@@ -736,6 +799,58 @@ async function getDashboardData(url, router) {
 }
 
 // LINE API Helpers
+async function sendParcelNotification(parcelId, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const url = `${import.meta.env.VITE_BASE_URL}/api/line/parcel-notify/${parcelId}`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('sendParcelNotification error:', error)
+    return null
+  }
+}
+
+async function sendOverdueReminder(parcelId, router) {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    const url = `${import.meta.env.VITE_BASE_URL}/api/parcels/${parcelId}/remind-overdue`
+
+    const res = await fetchWithAuth(
+      url,
+      options,
+      router
+    )
+    if (res && res.ok) {
+      return true
+    }
+    return null
+  } catch (error) {
+    console.error('sendOverdueReminder error:', error)
+    return null
+  }
+}
+
 async function sendLineNotification(payload, router, customUrl = null) {
   try {
     const options = {
@@ -763,26 +878,27 @@ async function sendLineNotification(payload, router, customUrl = null) {
   }
 }
 
-async function unlinkLineAccount(router) {
+// Previous position of LINE functions
+
+async function resendVerification(userId, router) {
   try {
+    const baseURL = import.meta.env.VITE_BASE_URL
+    const url = `${baseURL}/api/staff/users/${userId}/resend-verification`
+
     const options = {
-      method: 'DELETE',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       }
     }
 
-    const res = await fetchWithAuth(
-      `${import.meta.env.VITE_BASE_URL}/api/line/unlink`,
-      options,
-      router
-    )
+    const res = await fetchWithAuth(url, options, router)
     if (res && res.ok) {
       return true
     }
     return false
   } catch (error) {
-    console.error('unlinkLineAccount error:', error)
+    console.error('resendVerification error:', error)
     return false
   }
 }
@@ -796,7 +912,7 @@ async function linkLineAccount(code, state, router) {
     const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {
       // ตรวจสอบว่า Backend คืนค่าเป็น JSON หรือไม่
-      const contentType = res.headers.get('content-type')
+      const contentType = res.headers.get('content-type')  
       if (contentType && contentType.includes('application/json')) {
         return await res.json()
       }
@@ -812,7 +928,8 @@ async function linkLineAccount(code, state, router) {
 async function getLineConnectUrl(firebaseToken, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}`
+    const currentPath = window.location.pathname
+    const url = `${baseURL}/api/line/connect?firebaseToken=${encodeURIComponent(firebaseToken)}&returnUrl=${encodeURIComponent(currentPath)}`
 
     const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {
@@ -866,11 +983,16 @@ export {
   addAnnouncement,
   editAnnouncement,
   deleteAnnouncement,
+  recordAnnouncementView,
   addAnnouncementWithFile,
   editAnnouncementWithFile,
   getDashboardData,
   sendLineNotification,
+  sendParcelNotification,
+  sendOverdueReminder,
   unlinkLineAccount,
+  connectLineAccount,
+  resendVerification,
   linkLineAccount,
   getLineConnectUrl
 }

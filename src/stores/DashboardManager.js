@@ -1,276 +1,382 @@
 import { reactive, computed, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { getItems, getDashboardData } from '@/utils/fetchUtils'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
-  const monthsTH = [
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.'
-  ]
+  // Current state for navigation - Split for independent charts
+  const parcelRefDate = ref(new Date())
+  const parcelView = ref('daily') // 'daily' | 'weekly' | 'monthly'
+  
+  const residentRefDate = ref(new Date())
+  const residentView = ref('daily')
 
-  const packagesPerMonth = [
-    120, 95, 130, 110, 150, 170, 160, 145, 155, 180, 200, 190
-  ]
+  const parcels = reactive([])
+  const members = reactive([])
+  const announcements = reactive([])
 
+  const stats = reactive({
+    totalParcels: 0,
+    pickedUpParcels: 0,
+    awaitingParcels: 0,
+    overdueParcels: 0,
+    totalResidents: 0,
+    activeResidents: 0,
+    pendingResidents: 0,
+    inactiveResidents: 0,
+    totalAnnouncements: 0
+  })
+
+  const overallStats = reactive({
+    totalParcels: 0,
+    pickedUpParcels: 0,
+    awaitingParcels: 0,
+    overdueParcels: 0
+  })
+
+  // Chart data structure for Parcel Activity
   const chartData = reactive({
-    daily: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      received: [12, 19, 15, 8, 22, 14, 10],
-      pickedUp: [10, 15, 12, 6, 18, 11, 8],
-      overdue: [2, 4, 3, 2, 4, 3, 2]
-    },
-    weekly: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-      received: [45, 52, 38, 65, 0],
-      pickedUp: [40, 48, 32, 58, 0],
-      overdue: [5, 4, 6, 7, 0]
-    },
-    monthly: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      received: [120, 150, 180, 140, 210, 190, 230, 210, 250, 220, 280, 310],
-      pickedUp: [110, 140, 170, 130, 190, 180, 210, 195, 230, 210, 260, 290],
-      overdue: [10, 10, 10, 10, 20, 10, 20, 15, 20, 10, 20, 20]
-    },
-    // ข้อมูลสำหรับ Chart.js (จะถูกอัปเดตตาม View ที่เลือก)
     labels: [],
     datasets: [
       { 
         label: 'Received', 
         data: [], 
-        backgroundColor: '#4e73df',
-        borderColor: '#4e73df',
+        backgroundColor: 'rgba(59, 130, 246, 0.85)',
+        borderColor: 'rgba(59, 130, 246, 1)',
         borderWidth: 1 
       },
       { 
         label: 'Picked Up', 
         data: [], 
-        backgroundColor: '#1cc88a',
-        borderColor: '#1cc88a',
-        borderWidth: 1 
-      },
-      { 
-        label: 'Overdue', 
-        data: [], 
-        backgroundColor: '#e74a3b',
-        borderColor: '#e74a3b',
+        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+        borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 1 
       }
+      // Overdue removed as per previous request
     ]
   })
-  
-  const currentView = ref('monthly') // 'daily', 'weekly', 'monthly'
-  
-  const stats = reactive({
-    totalParcels: 124,
-    pickedUpParcels: 86,
-    awaitingParcels: 38,
-    overdueParcels: 5,
-    totalResidents: 4,
-    activeResidents: 1,
-    pendingResidents: 2,
-    inactiveResidents: 1,
-    totalAnnouncements: 0
+
+  // Resident Data Chart structure
+  const residentChartData = reactive({
+    labels: [],
+    data: [],
+    total: 0,
+    peak: '-'
   })
 
-  // helper functions for date mapping
-  const getDayIndex = (date) => (date.getDay() + 6) % 7 // Monday = 0, Sunday = 6
-  const getWeekIndex = (date) => {
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-    return Math.floor((date.getDate() + (firstDay === 0 ? 6 : firstDay - 1) - 1) / 7)
+  // Helper: Get start/end dates for the current view and reference date
+  const getPeriodBounds = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    const start = new Date(refDate)
+    const end = new Date(refDate)
+    
+    if (view === 'daily') {
+      start.setHours(0, 0, 0, 0)
+      end.setHours(23, 59, 59, 999)
+    } else if (view === 'weekly') {
+      const day = start.getDay() || 7 // 1-7
+      start.setDate(start.getDate() - (day - 1))
+      start.setHours(0, 0, 0, 0)
+      
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
+    } else if (view === 'monthly') {
+      start.setDate(1)
+      start.setHours(0, 0, 0, 0)
+      
+      end.setMonth(end.getMonth() + 1)
+      end.setDate(0)
+      end.setHours(23, 59, 59, 999)
+    }
+    
+    return { start, end }
   }
 
-  
-  const calculateDashboardData = (parcelsRaw = [], residentsRaw = [], announcementsRaw = []) => {
-    // Ensure we are working with arrays
-    const parcelsData = Array.isArray(parcelsRaw) ? parcelsRaw : []
-    const residentsData = Array.isArray(residentsRaw) ? residentsRaw : []
-    const announcementsData = Array.isArray(announcementsRaw) ? announcementsRaw : []
+  const setParcels = (list = []) => {
+    parcels.length = 0
+    parcels.push(...list)
+  }
 
-    // If no data is available yet, don't overwrite the mock data
-    if (parcelsData.length === 0 && residentsData.length === 0 && announcementsData.length === 0) {
-      return;
-    }
+  const setMembers = (list = []) => {
+    members.length = 0
+    members.push(...list)
+  }
 
-    // Populate Chart Data if we have parcels
-    if (parcelsData.length > 0) {
-      // Reset parcel stats
-      stats.pickedUpParcels = 0
-      stats.awaitingParcels = 0
-      stats.overdueParcels = 0
+  const setAnnouncements = (list = []) => {
+    announcements.length = 0
+    announcements.push(...list)
+  }
 
-      // Reset charts
-      chartData.daily.received.fill(0)
-      chartData.daily.pickedUp.fill(0)
-      chartData.daily.overdue.fill(0)
+  const getMappedParcels = computed(() => {
+    return parcels.map(p => ({
+      id: p.parcelId || p.id,
+      trackingNumber: p.trackingNumber || 'N/A',
+      residentName: p.ownerName || p.residentName || 'N/A',
+      roomNumber: p.roomNumber || 'N/A',
+      status: mapStatus(p.status),
+      receiveAt: p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt || new Date().toISOString(),
+      updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString()
+    }))
+  })
+
+  const mapStatus = (status) => {
+    const s = status?.toUpperCase() || ''
+    if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
+    if (s.includes('WAITING') || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s.includes('OVERDUE')) return 'Overdue'
+    if (s.includes('NOTIFIED')) return 'Notified'
+    return 'Received'
+  }
+
+  const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null) => {
+    if (Array.isArray(parcelsRaw)) setParcels(parcelsRaw)
+    if (Array.isArray(residentsRaw)) setMembers(residentsRaw)
+    if (Array.isArray(announcementsRaw)) setAnnouncements(announcementsRaw)
+
+    const today = new Date()
+    
+    // 1. Calculate OVERALL Stats (Global, not period-dependent)
+    const allParcels = parcels || []
+    overallStats.totalParcels = allParcels.length
+    overallStats.pickedUpParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       return s === 'PICKED_UP' || s === 'TAKEN'
+    }).length
+    overallStats.awaitingParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       return s !== 'PICKED_UP' && s !== 'TAKEN' && !s.includes('OVERDUE')
+    }).length
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+    overallStats.overdueParcels = allParcels.filter(p => {
+      const pStatus = p.status?.toUpperCase() || ''
+      if (pStatus === 'PICKED_UP' || pStatus === 'TAKEN') return false
       
-      chartData.weekly.received.fill(0)
-      chartData.weekly.pickedUp.fill(0)
-      chartData.weekly.overdue.fill(0)
+      const rDate = new Date(p.receivedAt || p.createdAt || p.date)
+      return (today - rDate) > threeDaysMs
+    }).length
 
-      chartData.monthly.received.fill(0)
-      chartData.monthly.pickedUp.fill(0)
-      chartData.monthly.overdue.fill(0)
+    // Separate bounds for parcel and resident
+    const parcelBounds = getPeriodBounds('parcel')
+    const residentBounds = getPeriodBounds('resident')
+    
+    // 2. Filter parcels for the current period for charts
+    const parcelsInPeriod = parcels.filter(p => {
+      const dStr = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
+      const d = new Date(dStr)
+      return d >= parcelBounds.start && d <= parcelBounds.end
+    })
 
-      const today = new Date()
-      const currentMonth = today.getMonth()
-      const currentYear = today.getFullYear()
-      const currentWeekIdx = getWeekIndex(today)
+    const periodReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
+    const periodPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
+    
+    // Update period-specific stats (based on parcel view)
+    stats.totalParcels = parcelsInPeriod.length
+    stats.pickedUpParcels = periodPickedUp.length
+    stats.awaitingParcels = periodReceived.length
+    stats.overdueParcels = parcelsInPeriod.filter(p => {
+      const pStatus = p.status?.toUpperCase() || ''
+      const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE')
+      const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
+      if (isPickedUp) return false
+      
+      const rDate = new Date(p.receivedAt || p.createdAt || p.date)
+      const diffMin = (today - rDate) / (1000 * 60)
+      return pStatus.includes('OVERDUE') || (diffMin >= 1 && isArrived)
+    }).length
 
-      parcelsData.forEach(p => {
-        // Calculate Stats
-        const pStatus = p.status?.toUpperCase() || ''
-        if (pStatus === 'PICKED UP' || pStatus === 'PICKED_UP') {
-          stats.pickedUpParcels++
-        } else if (pStatus === 'OVERDUE') {
-          stats.overdueParcels++
-        } else {
-          stats.awaitingParcels++
-        }
+    // 3. Generate Chart Data with separate bounds
+    generateParcelChart(parcelsInPeriod, parcelBounds.start, parcelBounds.end)
+    generateResidentChart(members, residentBounds.start, residentBounds.end)
+    
+    stats.totalResidents = members.length
+    stats.activeResidents = members.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
+    stats.pendingResidents = members.filter(r => r.status?.toUpperCase() === 'PENDING').length
+    stats.inactiveResidents = members.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
+    stats.totalAnnouncements = announcements.length
+  }
 
-        // Populate Chart Data
-        const date = new Date(p.createdAt || p.date || p.updateAt || p.updatedAt)
-        if (isNaN(date.getTime())) return // skip invalid dates
+  const generateParcelChart = (data, start, end) => {
+    chartData.labels = []
+    chartData.datasets[0].data = []
+    chartData.datasets[1].data = []
 
-        const isCurrentMonth = date.getMonth() === currentMonth && date.getFullYear() === currentYear
-        const isCurrentWeek = isCurrentMonth && getWeekIndex(date) === currentWeekIdx
-        
-        const monthIdx = date.getMonth()
-        const weekIdx = getWeekIndex(date)
-        const dayIdx = getDayIndex(date)
-
-        // Ensure week index bounds
-        const safeWeekIdx = weekIdx >= 0 && weekIdx <= 4 ? weekIdx : 4
-
-        // Monthly
-        if (date.getFullYear() === currentYear) {
-           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.monthly.received[monthIdx]++
-           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.monthly.pickedUp[monthIdx]++
-           else if (pStatus === 'OVERDUE') chartData.monthly.overdue[monthIdx]++
-        }
-        
-        // Weekly
-        if (isCurrentMonth) {
-           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.weekly.received[safeWeekIdx]++
-           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.weekly.pickedUp[safeWeekIdx]++
-           else if (pStatus === 'OVERDUE') chartData.weekly.overdue[safeWeekIdx]++
-        }
-
-        // Daily
-        if (isCurrentWeek) {
-           if (pStatus === 'RECEIVED' || pStatus === 'NOTIFIED' || pStatus === 'WAITING_FOR_STAFF') chartData.daily.received[dayIdx]++
-           else if (pStatus === 'PICKED_UP' || pStatus === 'PICKED UP') chartData.daily.pickedUp[dayIdx]++
-           else if (pStatus === 'OVERDUE') chartData.daily.overdue[dayIdx]++
-        }
+    if (parcelView.value === 'daily') {
+      // 24 Hours
+      for (let i = 0; i < 24; i++) {
+        chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
+        let received = 0
+        let pickedUp = 0
+        data.forEach(p => {
+          const d = new Date(p.receivedAt || p.createdAt || p.date)
+          if (d.getHours() === i) {
+            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
+            else received++
+          }
+        })
+        chartData.datasets[0].data.push(received)
+        chartData.datasets[1].data.push(pickedUp)
+      }
+    } else if (parcelView.value === 'weekly') {
+      // 7 Days (Mon-Sun)
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      chartData.labels = days
+      days.forEach((day, idx) => {
+        let received = 0
+        let pickedUp = 0
+        data.forEach(p => {
+          const d = new Date(p.receivedAt || p.createdAt || p.date)
+          const dIdx = (d.getDay() + 6) % 7 // Mon=0
+          if (dIdx === idx) {
+            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
+            else received++
+          }
+        })
+        chartData.datasets[0].data.push(received)
+        chartData.datasets[1].data.push(pickedUp)
       })
+    } else if (parcelView.value === 'monthly') {
+      // 28-31 Days
+      const daysInMonth = end.getDate()
+      for (let i = 1; i <= daysInMonth; i++) {
+        chartData.labels.push(i.toString())
+        let received = 0
+        let pickedUp = 0
+        data.forEach(p => {
+          const d = new Date(p.receivedAt || p.createdAt || p.date)
+          if (d.getDate() === i) {
+            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
+            else received++
+          }
+        })
+        chartData.datasets[0].data.push(received)
+        chartData.datasets[1].data.push(pickedUp)
+      }
     }
+  }
 
-    // Calculate Resident Stats
-    stats.totalResidents = residentsData.length
-    stats.activeResidents = residentsData.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
-    stats.pendingResidents = residentsData.filter(r => r.status?.toUpperCase() === 'PENDING').length
-    stats.inactiveResidents = residentsData.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
+  const generateResidentChart = (data, start, end) => {
+    const view = residentView.value
     
-    // Calculate Announcement Stats
-    stats.totalAnnouncements = announcementsData.length
+    // Create appropriate labels based on resident view
+    let labels = []
+    if (view === 'daily') {
+      for (let i = 0; i < 24; i++) labels.push(`${i.toString().padStart(2, '0')}:00`)
+    } else if (view === 'weekly') {
+      labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    } else if (view === 'monthly') {
+      const daysInMonth = end.getDate()
+      for (let i = 1; i <= daysInMonth; i++) labels.push(i.toString())
+    }
 
-    // Update the active chart view after calculation
-    setChartView(currentView.value)
-  }
-
-  const setChartView = (view) => {
-    if (!chartData[view]) return
-    currentView.value = view
+    residentChartData.labels = labels
+    residentChartData.data = new Array(labels.length).fill(0)
     
-    chartData.labels = chartData[view].labels
-    chartData.datasets[0].data = chartData[view].received
-    chartData.datasets[1].data = chartData[view].pickedUp
-    chartData.datasets[2].data = chartData[view].overdue
-  }
-
-  /* ---------- actions ---------- */
-  const fetchDashboardData = async (router) => {
-    try {
-      const baseURL = import.meta.env.VITE_BASE_URL
-      
-      // 1. ลองดึงข้อมูลจาก Dashboard API โดยตรงก่อน
-      // const directData = await getDashboardData(`${baseURL}/api/dashboard`, router)
-      
-      // if (directData) {
-      //   if (directData.stats) setStats(directData.stats)
-      //   if (directData.chartData) {
-      //     if (directData.chartData.labels) chartData.labels = directData.chartData.labels
-      //     if (directData.chartData.datasets) chartData.datasets = directData.chartData.datasets
-      //   }
-      // }
-
-      // 2. ดึงข้อมูลดิบมาคำนวณเองเสริม
-      // const [parcels, residents, announcements] = await Promise.all([
-      //   getItems(`${baseURL}/api/staff/parcels`, router),
-      //   getItems(`${baseURL}/api/staff/users`, router),
-      //   getItems(`${baseURL}/api/announcements`, router)
-      // ])
-
-      // calculateDashboardData(parcels || [], residents || [], announcements || [])
-      
-      return true
-    } catch (error) {
-      console.error('[DashboardManager] Fetch Error:', error)
-      return false
+    // Residents growth in period
+    data.forEach(r => {
+      const d = new Date(r.updateAt || r.createdAt)
+      if (d >= start && d <= end) {
+        if (view === 'daily') {
+          residentChartData.data[d.getHours()]++
+        } else if (view === 'weekly') {
+          const dIdx = (d.getDay() + 6) % 7
+          if (dIdx >= 0 && dIdx < 7) residentChartData.data[dIdx]++
+        } else if (view === 'monthly') {
+          const dIdx = d.getDate() - 1
+          if (dIdx >= 0 && dIdx < residentChartData.data.length) residentChartData.data[dIdx]++
+        }
+      }
+    })
+    
+    residentChartData.total = residentChartData.data.reduce((a, b) => a + b, 0)
+    const max = Math.max(...residentChartData.data)
+    if (max === 0) {
+      residentChartData.peak = '-'
+    } else {
+      const idx = residentChartData.data.indexOf(max)
+      residentChartData.peak = residentChartData.labels[idx]
     }
   }
 
-  /* ---------- getters ---------- */
-  const getMonthsTH = () => monthsTH
-  const getPackagesPerMonth = () => packagesPerMonth
-  const getChartData = () => chartData
-  const getStats = () => stats
-
-  /* ---------- setters ---------- */
-  const setChartData = (labels, datasets) => {
-    chartData.labels = labels
-    chartData.datasets = datasets
-  }
-
-  const setStats = (newStats) => {
-    Object.assign(stats, newStats)
-  }
-
-  /* ---------- updates ---------- */
-  const updateStat = (key, value) => {
-    if (stats.hasOwnProperty(key)) {
-      stats[key] = value
+  const nextPeriod = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate : residentRefDate
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    const d = new Date(refDate.value)
+    if (view === 'daily') d.setDate(d.getDate() + 1)
+    else if (view === 'weekly') d.setDate(d.getDate() + 7)
+    else if (view === 'monthly') d.setMonth(d.getMonth() + 1)
+    
+    if (d <= new Date()) {
+      refDate.value = d
+      calculateDashboardData()
     }
+  }
+
+  const previousPeriod = (type = 'parcel') => {
+    const refDate = type === 'parcel' ? parcelRefDate : residentRefDate
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    const d = new Date(refDate.value)
+    if (view === 'daily') d.setDate(d.getDate() - 1)
+    else if (view === 'weekly') d.setDate(d.getDate() - 7)
+    else if (view === 'monthly') d.setMonth(d.getMonth() - 1)
+    
+    refDate.value = d
+    calculateDashboardData()
+  }
+
+  const setPanelView = (view, type = 'parcel') => {
+    if (type === 'parcel') parcelView.value = view
+    else residentView.value = view
+    calculateDashboardData()
+  }
+
+  const isAtCurrentPeriod = (type = 'parcel') => {
+    const today = new Date()
+    const ref = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
+    const view = type === 'parcel' ? parcelView.value : residentView.value
+    
+    if (view === 'daily') {
+      return ref.toDateString() === today.toDateString()
+    } else if (view === 'weekly') {
+      const getWeek = (date) => {
+        const d = new Date(date)
+        d.setHours(0,0,0,0)
+        d.setDate(d.getDate() + 4 - (d.getDay()||7))
+        const yearStart = new Date(d.getFullYear(),0,1)
+        return Math.ceil((((d - yearStart) / 86400000) + 1)/7)
+      }
+      return getWeek(ref) === getWeek(today) && ref.getFullYear() === today.getFullYear()
+    } else if (view === 'monthly') {
+      return ref.getMonth() === today.getMonth() && ref.getFullYear() === today.getFullYear()
+    }
+    return false
   }
 
   return {
-    monthsTH,
-    packagesPerMonth,
+    parcels,
+    members,
+    announcements,
     chartData,
+    residentChartData,
     stats,
+    overallStats,
     
-    getMonthsTH,
-    getPackagesPerMonth,
-    getChartData,
-    getStats,
+    parcelView,
+    parcelRefDate,
+    residentView,
+    residentRefDate,
     
-    setChartData,
-    setStats,
-    
-    updateStat,
+    isAtCurrentPeriod,
+
+    setParcels,
+    setMembers,
+    setAnnouncements,
     calculateDashboardData,
-    fetchDashboardData,
-    currentView,
-    setChartView
+    getMappedParcels,
+    nextPeriod,
+    previousPeriod,
+    setPanelView
   }
 })
 

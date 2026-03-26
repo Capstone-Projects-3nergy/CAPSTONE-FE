@@ -3,10 +3,13 @@ import { ref, computed, onMounted, watch, reactive, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import HomePageStaff from '@/components/HomePageResident.vue'
 import SidebarItem from './SidebarItem.vue'
-import ResidentParcelsPage from '@/components/ResidentParcels.vue'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 import StaffParcelsPage from '@/components/ManageParcels.vue'
 import LoginPage from './LoginPage.vue'
-import DashBoard from './DashBoard.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import ButtonWeb from './ButtonWeb.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
@@ -60,13 +63,11 @@ import {
 import ParcelScannerPage from './ParcelScannerPage.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import EditParcels from './EditParcels.vue'
-import ConfirmLogout from './ConfirmLogout.vue'
 const parcelDataStatus = ref(null)
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const notificationManager = useNotificationManager()
 const emit = defineEmits(['add-success'])
-const showLogoutConfirm = ref(null)
 const deletedParcel = ref(null)
 const router = useRouter()
 const showHomePageStaff = ref(false)
@@ -74,10 +75,8 @@ const showParcelScanner = ref(false)
 const showStaffParcels = ref(false)
 const showAddParcels = ref(false)
 const returnLogin = ref(false)
-const showResidentParcels = ref(false)
 const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
-const showDashBoard = ref(false)
 const showProfileStaff = ref(false)
 const showParcelDetailModal = ref(false)
 const error = ref(false)
@@ -134,18 +133,10 @@ const mapStatus = (status) => {
   }
 }
 
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
 onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
 })
 onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
-  console.log('Fetching parcels/residents disabled to avoid 500 error')
-  /*
+  // Fetch parcels data
   const data = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/parcels`,
     router
@@ -164,7 +155,7 @@ onMounted(async () => {
       pickupAt: p.pickedUpAt || null
     }))
 
-    mapped.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
+    mapped.sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 
     parcelManager.setParcels(mapped)
   }
@@ -176,7 +167,6 @@ onMounted(async () => {
     )
     residents.value = res || []
   } catch (e) {}
-  */
 })
 
 const parcels = computed(() => parcelManager.getParcels())
@@ -373,20 +363,10 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const showDashBoardPage = async function () {
-  router.replace({ name: 'dashboard' })
-  showDashBoard.value = true
-}
+
 const showProfileStaffPage = async function () {
   router.replace({ name: 'profilestaff' })
   showProfileStaff.value = true
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
 }
 
 const currentPage = ref(1)
@@ -399,9 +379,6 @@ const paginatedParcels = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
   return filteredParcels.value.slice(start, end)
-})
-const canGoNext = computed(() => {
-  return paginatedParcels.value.length === perPage.value
 })
 
 const showParcelDetail = async function (id) {
@@ -423,25 +400,6 @@ const goToPage = (page) => {
 const nextPage = () => goToPage(currentPage.value + 1)
 const prevPage = () => goToPage(currentPage.value - 1)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 5) {
-    for (let i = 1; i <= total; i++) pages.push(i)
-  } else {
-    if (current <= 3) {
-      pages.push(1, 2, 3, '...', total)
-    } else if (current >= total - 2) {
-      pages.push(1, '...', total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
-})
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -541,6 +499,11 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
+// Reset to page 1 whenever filters change to avoid empty pages
+watch([searchKeyword, selectedDate], () => {
+  currentPage.value = 1
+})
+
 const handleSearchUpdate = (val) => {
   filterSearch.value = val
   searchKeyword.value = val
@@ -565,7 +528,6 @@ const handleSortUpdate = (val) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -627,39 +589,6 @@ const handleSortUpdate = (val) => {
                 </svg>
               </template>
             </SidebarItem>
-            <!-- <SidebarItem title="Home" @click="showHomePageStaffWeb">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 19V10C4 9.68333 4.071 9.38333 4.213 9.1C4.355 8.81667 4.55067 8.58333 4.8 8.4L10.8 3.9C11.15 3.63333 11.55 3.5 12 3.5C12.45 3.5 12.85 3.63333 13.2 3.9L19.2 8.4C19.45 8.58333 19.646 8.81667 19.788 9.1C19.93 9.38333 20.0007 9.68333 20 10V19C20 19.55 19.804 20.021 19.412 20.413C19.02 20.805 18.5493 21.0007 18 21H15C14.7167 21 14.4793 20.904 14.288 20.712C14.0967 20.52 14.0007 20.2827 14 20V15C14 14.7167 13.904 14.4793 13.712 14.288C13.52 14.0967 13.2827 14.0007 13 14H11C10.7167 14 10.4793 14.096 10.288 14.288C10.0967 14.48 10.0007 14.7173 10 15V20C10 20.2833 9.904 20.521 9.712 20.713C9.52 20.905 9.28267 21.0007 9 21H6C5.45 21 4.97933 20.8043 4.588 20.413C4.19667 20.0217 4.00067 19.5507 4 19Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem>
-            <SidebarItem title="Dashboard (Next Release)">
-              <template #icon>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 2V22C5.9 21.5 2 17.2 2 12C2 6.8 5.9 2.5 11 2ZM13 2V11H22C21.5 6.2 17.8 2.5 13 2ZM13 13V22C17.7 21.5 21.5 17.8 22 13H13Z"
-                    fill="white"
-                  />
-                </svg>
-              </template>
-            </SidebarItem> -->
-
             <SidebarItem
               title=" Manage Parcel"
               class="bg-[#81AFEA] cursor-default"
@@ -768,7 +697,7 @@ const handleSortUpdate = (val) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+
 
       <main class="flex-1 p-9 w-full">
         <div class="flex items-center space-x-2 mb-6">
@@ -846,11 +775,11 @@ const handleSortUpdate = (val) => {
           />
         </div>
         <ParcelTable
-          :can-next="canGoNext"
           :items="paginatedParcels"
-          :pages="visiblePages"
           :page="currentPage"
-          :total="totalPages"
+          :total="filteredParcels.length"
+          :totalPages="totalPages"
+          :showTracking="true"
           :showDelete="true"
           :hideTrash="true"
           @prev="prevPage"
@@ -950,7 +879,7 @@ const handleSortUpdate = (val) => {
         V18.6667C16.875 19.3083 16.6549 19.8578 16.2146 20.3152C15.7744 20.7725 15.2445
         21.0008 14.625 21H3.375ZM14.625 3.5H3.375V18.6667H14.625V3.5ZM5.625 16.3333H7.875
         V5.83333H5.625V16.3333ZM10.125 16.3333H12.375V5.83333H10.125V16.3333Z"
-                fill="red"
+                fill="currentColor"
               />
             </svg>
           </template>
@@ -968,9 +897,6 @@ const handleSortUpdate = (val) => {
       :isPermanent="false"
     />
   </teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
   <Teleport to="body">
     <ChangeParcelStatus
       v-bind="{ parcelDataStatus }"

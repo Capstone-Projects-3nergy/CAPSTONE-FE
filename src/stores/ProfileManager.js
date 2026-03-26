@@ -127,18 +127,13 @@ export const useProfileManager = defineStore('profileManager', () => {
   }
 
   return {
-    // state
     profiles,
     trash,
     loading,
     error,
-
-    // getters
     getProfiles,
     getProfileById,
     getTrash,
-
-    // actions
     setProfiles,
     setTrash,
     addProfile,
@@ -148,8 +143,10 @@ export const useProfileManager = defineStore('profileManager', () => {
     deletePermanent,
     clearProfiles,
     currentProfile,
+    profile: currentProfile, 
     setCurrentProfile,
-    updateCurrentProfile
+    updateCurrentProfile,
+    fetchProfile
   }
 })
 

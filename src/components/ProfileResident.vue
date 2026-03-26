@@ -6,13 +6,17 @@ import SidebarItem from './SidebarItem.vue'
 import LoginPage from './LoginPage.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import { useAuthManager } from '@/stores/AuthManager.js'
-import ConfirmLogout from './ConfirmLogout.vue'
 import PersonalInfoCard from './PersonalInfoCard.vue'
 import AlertPopUp from './AlertPopUp.vue'
 import { useProfileManager } from '@/stores/ProfileManager'
 import WebHeader from './WebHeader.vue'
 import { getProfile } from '@/utils/fetchUtils'
+import { useSidebarManager } from '@/stores/SidebarManager'
+import { storeToRefs } from 'pinia'
 import axios from 'axios'
+const sidebarManager = useSidebarManager()
+const { isCollapsed } = storeToRefs(sidebarManager)
+const { toggleSidebar } = sidebarManager
 const profileManager = useProfileManager()
 const errorAccount = ref(false)
 const successAccount = ref(false)
@@ -26,9 +30,7 @@ const router = useRouter()
 const showHomePageResident = ref(false)
 const tab = ref('event')
 const currentSlide = ref(1)
-const showResidentParcels = ref(false)
 const returnLogin = ref(false)
-const showLogoutConfirm = ref(false)
 const resident = ref({
   name: 'Somchai Suksan',
   email: 'somchai.suksan@example.com',
@@ -121,12 +123,6 @@ const showHomePageResidentWeb = async function () {
   router.replace({ name: 'home' })
   showHomePageResident.value = true
 }
-const showResidentParcelPage = async function () {
-  router.replace({
-    name: 'residentparcels'
-  })
-  showResidentParcels.value = true
-}
 const firstName = computed(() => {
   return loginManager.user?.fullName?.split(' ')[0] || ''
 })
@@ -143,24 +139,6 @@ const returnLoginPage = async () => {
     await loginManager.logoutAccount(router)
   } catch (err) {}
 }
-const returnHomepage = () => {
-  showLogoutConfirm.value = false
-}
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-const checkScreen = () => {
-  isCollapsed.value = window.innerWidth < 768
-}
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-onMounted(async () => {
-  checkScreen()
-
-  window.addEventListener('resize', checkScreen)
-})
 
 const closePopUp = () => {
   profileManager.clearAlert()
@@ -209,7 +187,6 @@ const closePopUps = (operate) => {
   >
     <WebHeader @toggle-sidebar="toggleSidebar" />
     <div class="flex flex-1">
-      <button @click="toggleSidebar" class="text-white focus:outline-none">
         <aside
           :class="[
             'fixed  flex flex-col top-0 left-0 h-screen z-50 transition-all duration-300 bg-gradient-to-b from-[#1D355E] to-blue-900 text-white',
@@ -360,7 +337,7 @@ const closePopUps = (operate) => {
             </template>
           </SidebarItem>
         </aside>
-      </button>
+      
       <main class="flex-1 p-9">
         <div class="fixed top-5 left-5 z-50">
           <AlertPopUp
@@ -436,7 +413,4 @@ const closePopUps = (operate) => {
   <Teleport to="body" v-if="returnLogin">
     <LoginPage> </LoginPage>
   </Teleport>
-  <Teleport to="body" v-if="showLogoutConfirm"
-    ><ConfirmLogout @cancelLogout="returnHomepage"></ConfirmLogout
-  ></Teleport>
 </template>
