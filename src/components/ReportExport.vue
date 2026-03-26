@@ -26,6 +26,18 @@ const props = defineProps({
   }
 })
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? '-' : d.toLocaleDateString()
+}
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? '-' : d.toLocaleString()
+}
+
 const handleExportExcel = () => {
   const stats = props.stats;
   const pending = props.pendingResidents;
@@ -33,57 +45,68 @@ const handleExportExcel = () => {
   const announcements = props.announcements.slice(0, 5);
   const parcels = props.parcels.slice(0, 10);
 
-  // 1. STATISTIC OVERVIEW
-  const statsData = [
+  // 1. MAIN HEADER
+  const finalData = [
     ['Dormitory Management System - Full Summary Report'],
     ['Generated Date', new Date().toLocaleString()],
-    [],
-    ['1. STATISTIC OVERVIEW'],
-    ['Category', 'Status Item', 'Count / Value'],
-    ['Parcels', 'Total Received', stats.totalParcels],
-    ['', 'Picked Up', stats.pickedUpParcels],
-    ['', 'Awaiting Pickup', stats.awaitingParcels],
-    ['', 'Overdue', stats.overdueParcels],
-    ['Residents', 'Total Registered', stats.totalResidents],
-    ['', 'Active Residents', stats.activeResidents],
-    ['', 'Pending Approval', stats.pendingResidents],
-    ['', 'Inactive', stats.inactiveResidents],
-    ['Communications', 'Total Announcements', stats.totalAnnouncements],
     []
   ];
+
+  let sectionNum = 1;
+
+  // 1. STATISTIC OVERVIEW (Always show)
+  finalData.push([`${sectionNum++}. STATISTIC OVERVIEW`]);
+  finalData.push(['Category', 'Status Item', 'Count / Value']);
+  finalData.push(['Parcels', 'Total Received', stats.totalParcels]);
+  finalData.push(['', 'Picked Up', stats.pickedUpParcels]);
+  finalData.push(['', 'Awaiting Pickup', stats.awaitingParcels]);
+  finalData.push(['', 'Overdue', stats.overdueParcels]);
+  finalData.push(['Residents', 'Total Registered', stats.totalResidents]);
+  finalData.push(['', 'Active Residents', stats.activeResidents]);
+  finalData.push(['', 'Pending Approval', stats.pendingResidents]);
+  finalData.push(['', 'Inactive', stats.inactiveResidents]);
+  finalData.push(['Communications', 'Total Announcements', stats.totalAnnouncements]);
+  finalData.push([]);
 
   // 2. PENDING APPROVALS
-  const pendingData = [
-    ['2. PENDING APPROVALS'],
-    ['Name', 'Room No.', 'Email', 'Updated At'],
-    ...pending.map(r => [r.fullName, r.roomNumber, r.email, r.updateAt ? new Date(r.updateAt).toLocaleString() : '-']),
-    []
-  ];
+  if (pending && pending.length > 0) {
+    finalData.push([`${sectionNum++}. PENDING APPROVALS`]);
+    finalData.push(['Name', 'Room No.', 'Email', 'Updated At']);
+    pending.forEach(r => {
+      finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
+    });
+    finalData.push([]);
+  }
 
   // 3. TOP RESIDENTS
-  const topResData = [
-    ['3. TOP RESIDENTS (Active Activity)'],
-    ['Rank', 'Name', 'Room No.', 'Parcel Count'],
-    ...topRes.map((r, i) => [i + 1, r.fullName || r.name, r.roomNumber || r.room, r.count || r.parcelCount]),
-    []
-  ];
+  if (topRes && topRes.length > 0) {
+    finalData.push([`${sectionNum++}. TOP RESIDENTS (Active Activity)`]);
+    finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
+    topRes.forEach((r, i) => {
+      finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
+    });
+    finalData.push([]);
+  }
 
   // 4. RECENT ANNOUNCEMENTS
-  const annData = [
-    ['4. RECENT ANNOUNCEMENTS'],
-    ['Title', 'Type', 'Date'],
-    ...announcements.map(a => [a.title, a.type, new Date(a.createdAt || a.date).toLocaleDateString()]),
-    []
-  ];
+  if (announcements && announcements.length > 0) {
+    finalData.push([`${sectionNum++}. RECENT ANNOUNCEMENTS`]);
+    finalData.push(['Title', 'Type', 'Date']);
+    announcements.forEach(a => {
+      finalData.push([a.title, a.type, formatDate(a.createdAt || a.date)]);
+    });
+    finalData.push([]);
+  }
 
   // 5. RECENT PARCELS 
-  const parcelData = [
-    ['5. RECENT PARCELS (Latest Activity)'],
-    ['Date', 'Resident', 'Tracking No.', 'Status'],
-    ...parcels.map(p => [new Date(p.updatedAt).toLocaleDateString(), p.residentName, p.trackingNumber, p.status.toUpperCase()])
-  ];
+  if (parcels && parcels.length > 0) {
+    finalData.push([`${sectionNum++}. RECENT PARCELS (Latest Activity)`]);
+    finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
+    parcels.forEach(p => {
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+    });
+  }
 
-  const finalData = [...statsData, ...pendingData, ...topResData, ...annData, ...parcelData];
   const ws = XLSX.utils.aoa_to_sheet(finalData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Full Summary Report");
@@ -95,13 +118,26 @@ const handleExportExcel = () => {
 const handleExportPDF = () => {
   const doc = new jsPDF();
   const stats = props.stats;
+  const pending = props.pendingResidents;
   const topRes = props.topResidents;
+  const announcements = props.announcements.slice(0, 5);
   const parcels = props.parcels.slice(0, 10);
   const brandColor = [29, 53, 94]; // Navy Blue style
 
   let y = 20;
+  let sectionNum = 1;
+
+  const checkPage = (heightNeeded) => {
+    if (y + heightNeeded > 275) {
+      doc.addPage();
+      y = 20;
+      return true;
+    }
+    return false;
+  };
 
   const drawVerticalBarHeader = (text) => {
+    checkPage(15);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
     doc.rect(15, y - 5, 3, 8, 'F');
     doc.setFont("helvetica", "bold");
@@ -128,7 +164,7 @@ const handleExportPDF = () => {
   y += 15;
 
   // 1. STATISTIC OVERVIEW Table
-  drawVerticalBarHeader("1. Statistic Overview");
+  drawVerticalBarHeader(`${sectionNum++}. Statistic Overview`);
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   
@@ -152,10 +188,10 @@ const handleExportPDF = () => {
   doc.text("STATUS ITEM", 75, y); 
   doc.text("COUNT / VALUE", 160, y);
   
-  // Table Borders (Outer and Header line)
+  // Table Borders
   doc.setDrawColor(180, 180, 180);
-  doc.rect(15, y - 5, 180, (statsItems.length * 8) + 8); // Table border box
-  doc.line(15, y + 3, 195, y + 3); // Header bottom line
+  doc.rect(15, y - 5, 180, (statsItems.length * 8) + 8);
+  doc.line(15, y + 3, 195, y + 3);
 
   // Vertical Divider Lines
   const vLine1 = 70;
@@ -170,7 +206,7 @@ const handleExportPDF = () => {
   statsItems.forEach((row, idx) => {
     doc.text(row.cat || '', 18, y);
     doc.text(row.item, 75, y);
-    doc.text(row.val.toString(), 190, y, { align: 'right' });
+    doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
     if (idx < statsItems.length - 1) {
       doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
@@ -179,90 +215,155 @@ const handleExportPDF = () => {
   });
   y += 15;
 
-  // 3. TOP RESIDENTS Table
-  if (y > 220) { doc.addPage(); y = 20; }
-  drawVerticalBarHeader("3. Top Residents (Active Activity)");
-  
-  // Header Background
-  doc.setFillColor(245, 247, 250);
-  doc.rect(15, y - 5, 180, 8, 'F');
+  // 2. Pending Approvals
+  if (pending && pending.length > 0) {
+    drawVerticalBarHeader(`${sectionNum++}. Pending Approvals`);
+    
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("NAME", 17, y); 
+    doc.text("ROOM", 72, y); 
+    doc.text("EMAIL", 97, y); 
+    doc.text("UPDATED AT", 157, y);
 
-  doc.setFont("helvetica", "bold");
-  doc.text("RANK", 17, y); 
-  doc.text("NAME", 37, y); 
-  doc.text("ROOM NO.", 102, y); 
-  doc.text("PARCELS", 162, y);
-  
-  const topTableTop = y - 5;
-  const topTableBottom = topTableTop + (topRes.length * 8) + 8;
-  doc.setDrawColor(180, 180, 180);
-  doc.rect(15, topTableTop, 180, (topRes.length * 8) + 8);
-  doc.line(15, y + 3, 195, y + 3);
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (pending.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
 
-  // Top Table Vertical Lines
-  const tv1 = 33;
-  const tv2 = 100;
-  const tv3 = 160;
-  doc.line(tv1, topTableTop, tv1, topTableBottom);
-  doc.line(tv2, topTableTop, tv2, topTableBottom);
-  doc.line(tv3, topTableTop, tv3, topTableBottom);
+    const penTableTop = y - 5;
+    const penTableBottom = penTableTop + (pending.length * 8) + 8;
+    doc.line(70, penTableTop, 70, penTableBottom);
+    doc.line(95, penTableTop, 95, penTableBottom);
+    doc.line(155, penTableTop, 155, penTableBottom);
 
-  y += 8;
-  doc.setFont("helvetica", "normal");
-  topRes.forEach((res, i) => {
-    doc.text((i + 1).toString(), 22, y, { align: 'center' });
-    doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
-    doc.text(res.roomNumber || res.room || '-', 130, y, { align: 'right' });
-    doc.text((res.count || res.parcelCount || 0).toString(), 190, y, { align: 'right' });
-    if (i < topRes.length - 1) {
-      doc.setDrawColor(230, 230, 230);
-      doc.line(15, y + 2, 195, y + 2);
-    }
     y += 8;
-  });
-  y += 15;
+    doc.setFont("helvetica", "normal");
+    pending.forEach((res, idx) => {
+      doc.text((res.fullName || '').substring(0, 25), 17, y);
+      doc.text((res.roomNumber || '-'), 72, y);
+      doc.text((res.email || '').substring(0, 30), 97, y);
+      doc.text(formatDateTime(res.updateAt), 157, y);
+      if (idx < pending.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 15;
+  }
+
+  // 3. TOP RESIDENTS Table
+  if (topRes && topRes.length > 0) {
+    drawVerticalBarHeader(`${sectionNum++}. Top Residents (Active Activity)`);
+    
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("RANK", 17, y); 
+    doc.text("NAME", 37, y); 
+    doc.text("ROOM NO.", 102, y); 
+    doc.text("PARCELS", 162, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (topRes.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+
+    const topTableTop = y - 5;
+    const topTableBottom = topTableTop + (topRes.length * 8) + 8;
+    doc.line(33, topTableTop, 33, topTableBottom);
+    doc.line(100, topTableTop, 100, topTableBottom);
+    doc.line(160, topTableTop, 160, topTableBottom);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    topRes.forEach((res, i) => {
+      doc.text((i + 1).toString(), 22, y, { align: 'center' });
+      doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
+      doc.text((res.roomNumber || res.room || '-'), 130, y, { align: 'right' });
+      doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
+      if (i < topRes.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 15;
+  }
+
+  // 4. Recent Announcements
+  if (announcements && announcements.length > 0) {
+    drawVerticalBarHeader(`${sectionNum++}. Recent Announcements`);
+    
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("TITLE", 17, y); 
+    doc.text("TYPE", 112, y); 
+    doc.text("DATE", 162, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (announcements.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
+
+    const annTableTop = y - 5;
+    const annTableBottom = annTableTop + (announcements.length * 8) + 8;
+    doc.line(110, annTableTop, 110, annTableBottom);
+    doc.line(160, annTableTop, 160, annTableBottom);
+
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    announcements.forEach((ann, idx) => {
+      doc.text((ann.title || '').substring(0, 50), 17, y);
+      doc.text((ann.type || ''), 112, y);
+      doc.text(formatDate(ann.createdAt || ann.date), 162, y);
+      if (idx < announcements.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+    y += 15;
+  }
 
   // 5. RECENT PARCELS Table
-  if (y > 220) { doc.addPage(); y = 20; }
-  drawVerticalBarHeader("5. Recent Parcels (Latest activity)");
-  
-  // Header Background
-  doc.setFillColor(245, 247, 250);
-  doc.rect(15, y - 5, 180, 8, 'F');
+  if (parcels && parcels.length > 0) {
+    drawVerticalBarHeader(`${sectionNum++}. Recent Parcels (Latest activity)`);
+    
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("DATE", 17, y); 
+    doc.text("RESIDENT", 47, y); 
+    doc.text("TRACKING NO.", 97, y); 
+    doc.text("STATUS", 163, y);
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (parcels.length * 8) + 8);
+    doc.line(15, y + 3, 195, y + 3);
 
-  doc.setFont("helvetica", "bold");
-  doc.text("DATE", 17, y); 
-  doc.text("RESIDENT", 47, y); 
-  doc.text("TRACKING NO.", 97, y); 
-  doc.text("STATUS", 163, y);
-  
-  const pTableTop = y - 5;
-  const pTableBottom = pTableTop + (parcels.length * 8) + 8;
-  doc.setDrawColor(180, 180, 180);
-  doc.rect(15, pTableTop, 180, (parcels.length * 8) + 8);
-  doc.line(15, y + 3, 195, y + 3);
+    const pTableTop = y - 5;
+    const pTableBottom = pTableTop + (parcels.length * 8) + 8;
+    doc.line(45, pTableTop, 45, pTableBottom);
+    doc.line(95, pTableTop, 95, pTableBottom);
+    doc.line(160, pTableTop, 160, pTableBottom);
 
-  // Parcel Table Vertical Lines
-  const pv1 = 45;
-  const pv2 = 95;
-  const pv3 = 160;
-  doc.line(pv1, pTableTop, pv1, pTableBottom);
-  doc.line(pv2, pTableTop, pv2, pTableBottom);
-  doc.line(pv3, pTableTop, pv3, pTableBottom);
-
-  y += 8;
-  doc.setFont("helvetica", "normal");
-  parcels.forEach((p, idx) => {
-    doc.text(new Date(p.updatedAt).toLocaleDateString(), 17, y);
-    doc.text((p.residentName || '').substring(0, 18), 47, y);
-    doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
-    doc.text((p.status || '').toUpperCase(), 163, y);
-    if (idx < parcels.length - 1) {
-      doc.setDrawColor(230, 230, 230);
-      doc.line(15, y + 2, 195, y + 2);
-    }
     y += 8;
-  });
+    doc.setFont("helvetica", "normal");
+    parcels.forEach((p, idx) => {
+      doc.text(formatDate(p.updatedAt), 17, y);
+      doc.text((p.residentName || '').substring(0, 18), 47, y);
+      doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
+      doc.text((p.status || '').toUpperCase(), 163, y);
+      if (idx < parcels.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 8;
+    });
+  }
 
   doc.save(`Dormitory_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
@@ -287,7 +388,7 @@ defineExpose({
 
     <!-- Quick Stats Table -->
     <div class="print-section">
-      <h2 class="print-section-title">1. Statistic Overview</h2>
+      <h2 class="print-section-title">Statistic Overview</h2>
       <table class="print-table">
         <thead>
           <tr>
@@ -342,7 +443,7 @@ defineExpose({
 
     <!-- Pending Approvals Table -->
     <div class="print-section" v-if="pendingResidents.length > 0">
-      <h2 class="print-section-title">2. Pending Approvals</h2>
+      <h2 class="print-section-title">Pending Approvals</h2>
       <table class="print-table">
         <thead>
           <tr>
@@ -357,7 +458,7 @@ defineExpose({
             <td>{{ res.fullName }}</td>
             <td>{{ res.roomNumber }}</td>
             <td>{{ res.email }}</td>
-            <td>{{ res.updateAt ? new Date(res.updateAt).toLocaleString() : '-' }}</td>
+            <td>{{ formatDateTime(res.updateAt) }}</td>
           </tr>
         </tbody>
       </table>
@@ -365,7 +466,7 @@ defineExpose({
 
     <!-- Top Residents (Parcel counts) -->
     <div class="print-section" v-if="topResidents.length > 0">
-      <h2 class="print-section-title">3. Top Residents (Active Activity)</h2>
+      <h2 class="print-section-title">Top Residents (Active Activity)</h2>
       <table class="print-table">
         <thead>
           <tr>
@@ -388,7 +489,7 @@ defineExpose({
 
     <!-- Recent Announcements -->
     <div class="print-section" v-if="announcements.length > 0">
-      <h2 class="print-section-title">4. Recent Announcements</h2>
+      <h2 class="print-section-title">Recent Announcements</h2>
       <table class="print-table">
         <thead>
           <tr>
@@ -401,7 +502,7 @@ defineExpose({
           <tr v-for="ann in announcements.slice(0, 5)" :key="ann.id">
             <td>{{ ann.title }}</td>
             <td>{{ ann.type }}</td>
-            <td>{{ new Date(ann.createdAt || ann.date).toLocaleDateString() }}</td>
+            <td>{{ formatDate(ann.createdAt || ann.date) }}</td>
           </tr>
         </tbody>
       </table>
@@ -409,7 +510,7 @@ defineExpose({
 
     <!-- Recent Parcels -->
     <div class="print-section" v-if="parcels.length > 0">
-      <h2 class="print-section-title">5. Recent Parcels (Latest activity)</h2>
+      <h2 class="print-section-title">Recent Parcels (Latest activity)</h2>
       <table class="print-table">
         <thead>
           <tr>
@@ -421,7 +522,7 @@ defineExpose({
         </thead>
         <tbody>
           <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
-            <td>{{ new Date(parcel.updatedAt).toLocaleDateString() }}</td>
+            <td>{{ formatDate(parcel.updatedAt) }}</td>
             <td>{{ parcel.residentName }}</td>
             <td>{{ parcel.trackingNumber }}</td>
             <td>{{ parcel.status.toUpperCase() }}</td>
@@ -472,6 +573,7 @@ defineExpose({
     margin: 0 !important;
     padding: 2.5rem !important;
     background-color: white !important;
+    counter-reset: section;
   }
 
   .print-header {
@@ -508,6 +610,11 @@ defineExpose({
     margin-bottom: 1.25rem !important;
     border-left: 5px solid #1D355E !important;
     padding-left: 1rem !important;
+  }
+
+  .print-section-title::before {
+    counter-increment: section;
+    content: counter(section) ". ";
   }
 
   .print-table {
