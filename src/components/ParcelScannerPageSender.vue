@@ -1406,23 +1406,6 @@ const closePopUp = (operate) => {
                     <span class="font-bold text-gray-800 truncate max-w-[200px]">{{ form.senderName || '-' }}</span>
                   </div>
                 </div>
-
-                <!-- <div v-if="previewUrl" class="mt-6">
-                  <span class="block text-sm font-bold text-gray-500 mb-3 ml-1">Parcel picture</span>
-                  <div class="relative group">
-                    <img
-                      :src="previewUrl"
-                      class="w-full rounded-2xl shadow-xl border-4 border-white max-h-64 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
-                    <button
-                      @click="deletePreview"
-                      class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full shadow-lg w-8 h-8 flex items-center justify-center hover:bg-red-600 cursor-pointer transition-all duration-300 border-2 border-white"
-                      title="Clear photo"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                  </div>
-                </div> -->
               </div>
 
               <div class="flex justify-end space-x-3 mt-8 flex-nowrap border-t border-gray-100 pt-8">
