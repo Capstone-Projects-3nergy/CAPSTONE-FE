@@ -32,11 +32,7 @@ defineEmits(['prev', 'next', 'go', 'view'])
 
 const sortedItems = computed(() => {
   return [...props.items].sort((a, b) => {
-    // 1. Pinned status (Pinned items first)
-    if (a.pinned && !b.pinned) return -1
-    if (!a.pinned && b.pinned) return 1
-    
-    // 2. Date (Latest first)
+    // Date (Latest first)
     const dateA = new Date(a.publishAt || a.createdAt || a.datePosted || a.date || 0)
     const dateB = new Date(b.publishAt || b.createdAt || b.datePosted || b.date || 0)
     return dateB - dateA
@@ -124,12 +120,7 @@ const formatDate = (dateString) => {
         <div class="p-6 flex-grow flex flex-col">
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-2 flex-wrap">
-              <span v-if="item.pinned" class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg bg-red-100 text-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                </svg>
-                Pinned
-              </span>
+
               <span class="px-2.5 py-1 inline-flex items-center gap-1.5 text-[10px] font-bold rounded-lg border transition-colors cursor-default" :class="getCategoryBadgeClass(item.category)">
                 <span v-html="getCategoryIcon(item.category)"></span>
                 {{ item.category }}

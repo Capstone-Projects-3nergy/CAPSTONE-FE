@@ -44,7 +44,7 @@ watch(
 const bannerContainer = ref(null)
 const bannerAnnouncements = computed(() => {
   return allPublishedAnnouncements.value
-    .filter(item => item.category === 'Events' || item.category === 'General')
+    .filter(item => item.pinned)
     .slice(0, 8)
 })
 
@@ -135,9 +135,6 @@ const allPublishedAnnouncements = computed(() => {
       }
     })
     .sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1
-      if (!a.pinned && b.pinned) return 1
-      
       const dateA = new Date(a.date)
       const dateB = new Date(b.date)
       if (isNaN(dateA.getTime())) return 1
@@ -635,8 +632,8 @@ onMounted(async () => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </div>
-              <h3 class="text-xl font-bold mb-1">No Events Scheduled</h3>
-              <p class="text-white/70">Check back later for community activities.</p>
+              <h3 class="text-xl font-bold mb-1">No Pinned Announcements</h3>
+              <p class="text-white/70">Check back later for featured updates and community news.</p>
             </div>
             </div>
           </div>
@@ -752,7 +749,7 @@ onMounted(async () => {
     :author="selectedAnnouncement?.author || 'Community Admin'"
     :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
     :status="''"
-    :pinned="selectedAnnouncement?.pinned || false"
+    :pinned="false"
     :cover-image="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
     @close="closeModal"
   />>

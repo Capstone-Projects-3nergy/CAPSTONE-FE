@@ -660,30 +660,6 @@ onMounted(async () => {
   announcementsInterval = setInterval(fetchAnnouncements, 30000)
 })
 
-//   const data = await getItems(
-//     `${import.meta.env.VITE_BASE_URL}/api/OwnerParcels`,
-//     router
-//   )
-
-//   if (data) {
-//     const mapped = data.map((p) => ({
-//       id: p.parcelId,
-//       trackingNumber: p.trackingNumber,
-//       recipientName: p.ownerName,
-//       roomNumber: p.roomNumber,
-//       email: p.contactEmail,
-//       status: mapStatus(p.status),
-//       receiveAt: p.receivedAt,
-//       updateAt: p.updatedAt || null,
-//       pickupAt: p.pickedUpAt || null
-//     }))
-
-//     mapped.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-
-//     parcelManager.setParcels(mapped)
-//   }
-// })
-
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
   return datetimeStr.replace('T', ' ')
@@ -1231,7 +1207,7 @@ function formatDateTime(datetimeStr) {
         :author="selectedAnnouncement?.author || 'Staff Portal'"
         :views="selectedAnnouncement?.viewCount || selectedAnnouncement?.views || 0"
         :status="selectedAnnouncement?.status"
-        :pinned="selectedAnnouncement?.pinned || false"
+        :pinned="false"
         :coverImage="selectedAnnouncement?.coverImageUrl || selectedAnnouncement?.coverImage || ''"
         @close="closeModal"
       />
