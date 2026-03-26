@@ -246,6 +246,15 @@ const formatDate = (dateString) => {
                   </div>
                 </div>
               </th>
+              <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">
+                <div class="inline-flex items-center justify-center gap-1">
+                  <div class="w-[18px] invisible"></div>
+                  Published Date
+                  <div class="w-[18px] flex justify-center transition-transform duration-200 ease-out hover:scale-110">
+                    <slot name="sort-date"></slot>
+                  </div>
+                </div>
+              </th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Views</th>
               <th scope="col" class="px-4 sm:px-6 py-4 text-center text-xs font-bold text-gray-500 tracking-wider">Actions</th>
             </tr>
@@ -302,6 +311,12 @@ const formatDate = (dateString) => {
                   <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Status:</span>
                   <span class="px-3 py-1 inline-flex text-xs font-bold rounded-full" :class="getStatusBadgeClass(item.status)">
                     {{ formatStatus(item.status) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:text-center md:align-middle">
+                  <span class="md:hidden font-semibold text-[#0E4B90] mr-2 text-xs">Published:</span>
+                  <span class="text-xs text-gray-600 font-medium">
+                    {{ formatDate(item.publishAt) }}
                   </span>
                 </td>
                 <td class="px-4 py-3 md:py-4 md:px-6 border-b md:border-none whitespace-nowrap align-middle md:align-middle">
