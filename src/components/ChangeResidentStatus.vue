@@ -60,7 +60,7 @@ const handleSendEmailNotification = async () => {
       lastEmailSentTime.value = now
 
       emit('showAlert', {
-        style: 'blue',
+        style: 'green',
         message: 'Success!!',
         title: 'The verification email has been sent to the resident.'
       })
