@@ -22,6 +22,7 @@ const incorrectemail = ref(false)
 const emailRequire = ref(false)
 const isEmailFirebase = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 const dormList = ref([])
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
@@ -195,6 +196,9 @@ const closePopUp = (operate) => {
     case 'emailFirebase':
       isEmailFirebase.value = false
       break
+    case 'fileTypeError':
+      fileTypeError.value = false
+      break
   }
 }
 
@@ -233,6 +237,10 @@ const showFileSizeError = () => {
 const showEmailFirebaseError = () => {
   isEmailFirebase.value = true
   setTimeout(() => (isEmailFirebase.value = false), 10000)
+}
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 10000)
 }
 </script>
 
@@ -528,6 +536,14 @@ const showEmailFirebaseError = () => {
             operate="emailFirebase"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="add"
@@ -547,6 +563,7 @@ const showEmailFirebaseError = () => {
           @line-id-error="lineIdErrorFn"
           @email-invalid-chars="showEmailInvalidCharsError"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
           @email-firebase="showEmailFirebaseError"
         />
       </main>

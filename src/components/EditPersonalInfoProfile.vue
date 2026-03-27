@@ -211,6 +211,7 @@ const emit = defineEmits([
   'line-id-error',
   'email-invalid-chars',
   'file-size-error',
+  'file-type-error',
   'email-firebase'
 ])
 
@@ -486,6 +487,13 @@ function onImageChange(e) {
   if (file) {
     if (file.size > 1 * 1024 * 1024) {
       emit('file-size-error', true)
+      e.target.value = null
+      return
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      emit('file-type-error', true)
       e.target.value = null
       return
     }

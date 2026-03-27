@@ -43,6 +43,7 @@ const positionError = ref(false)
 const positionRequired = ref(false)
 const phoneError = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -259,6 +260,10 @@ const showFileSizeError = () => {
   fileSizeError.value = true
   setTimeout(() => (fileSizeError.value = false), 10000)
 }
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 10000)
+}
 const showProfileSuccess = () => {
   editSuccess.value = true
   setTimeout(() => (editSuccess.value = false), 10000)
@@ -334,6 +339,9 @@ const closePopUp = (operate) => {
       break
     case 'fileSizeError':
       fileSizeError.value = false
+      break
+    case 'fileTypeError':
+      fileTypeError.value = false
       break
 
     default:
@@ -798,6 +806,14 @@ const closePopUp = (operate) => {
             operate="fileSizeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           v-if="loginManager.user"
@@ -831,6 +847,7 @@ const closePopUp = (operate) => {
           @room-number-required="showRoomNumberRequired"
           @line-id-error="lineIdErrorFn"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

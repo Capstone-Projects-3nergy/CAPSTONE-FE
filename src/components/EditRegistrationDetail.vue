@@ -64,6 +64,7 @@ const firstNameRequired = ref(false)
 const lastNameRequired = ref(false)
 const roomNumberRequired = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -534,7 +535,8 @@ const handleImageUpload = (event) => {
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    alert('Only JPEG, PNG, or WEBP images are allowed.')
+    event.target.value = null
+    showFileTypeError()
     return
   }
 
@@ -646,6 +648,7 @@ const closePopUp = (operate) => {
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
   if (operate === 'fileSizeError') fileSizeError.value = false
+  if (operate === 'fileTypeError') fileTypeError.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -695,6 +698,10 @@ const showRoomNumberRequired = () => {
 const showFileSizeError = () => {
   fileSizeError.value = true
   setTimeout(() => (fileSizeError.value = false), 5000)
+}
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 5000)
 }
 </script>
 
@@ -985,6 +992,14 @@ const showFileSizeError = () => {
             operate="fileSizeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1016,6 +1031,7 @@ const showFileSizeError = () => {
           @last-name-required="showLastNameRequired"
           @room-number-required="showRoomNumberRequired"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
         />
       </main>
     </div>
