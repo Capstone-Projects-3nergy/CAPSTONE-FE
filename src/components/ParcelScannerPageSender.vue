@@ -556,8 +556,6 @@ function startQuagga() {
           }
         }
         stopScan()
-
-        // Require another 5 matches to process again
         lastCode = ''
         count = 0
       }
@@ -702,11 +700,6 @@ function stopScan() {
 }
 
 const saveParcel = async () => {
-  // if (!form.value.trackingNumber) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
   if (!form.value.recipientName) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
@@ -784,17 +777,6 @@ const saveParcel = async () => {
     return
   }
 
-  // if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
-
-  // if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
   if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)

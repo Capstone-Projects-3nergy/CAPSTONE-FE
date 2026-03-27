@@ -89,23 +89,12 @@ const updateProfile = async (payload) => {
       profileManager.updateProfile({ avatar: payload.avatar })
     }
 
-    // ✅ แจ้งว่าบันทึกสำเร็จ
     profileManager.showEditSuccess()
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 10000)
-    // 4. redirect
-    // if (loginManager.user.role === 'STAFF') {
-    //   // router.replace({ name: 'profilestaff' })
-    //   editSuccess.value = true
-    // } else {
-    //   // router.replace({ name: 'profileresident' })
-    //   editSuccess.value = true
-    //    setTimeout(() => ( editSuccess.value= false), 10000)
-    // }
   } catch (e) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
-    // profileManager.showError()
   }
 }
 

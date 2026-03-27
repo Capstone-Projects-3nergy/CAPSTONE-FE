@@ -243,9 +243,6 @@ const returnLoginPage = () => {
             />
           </div>
 
-          <!-- <p v-if="isEmailInvalid" class="text-sm text-red-600">
-            Please enter a valid email address.
-          </p> -->
            <ButtonWeb
             label="Reset Password"
             :loading="loading"

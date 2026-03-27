@@ -113,7 +113,6 @@ const getParcelDetail = async (tid) => {
   } catch (err) {}
 }
 
-// Removed old resize listener and checkScreen
 onMounted(async () => {
   const tidNum = Number(route.params.tid)
   getParcelDetail(tidNum)

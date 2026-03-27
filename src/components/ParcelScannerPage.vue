@@ -710,7 +710,7 @@ async function startScan(mode) {
       })
     } catch (e) {
       console.error('ZXing Error:', e)
-      startQuagga() // Fallback to Quagga if ZXing fails
+      startQuagga()
     }
   }
 }
@@ -752,11 +752,6 @@ const saveParcel = async () => {
     return
   }
 
-  // if (!form.value.trackingNumber) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
   if (!form.value.recipientName) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
@@ -836,11 +831,7 @@ const saveParcel = async () => {
     setTimeout(() => (recipientNameLetterError.value = false), 10000)
     return
   }
-  // if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
+  
   if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -862,7 +853,6 @@ const saveParcel = async () => {
       const isDuplicate = existingParcels.some(
         (p) =>
           p.trackingNumber === form.value.trackingNumber 
-          // && p.companyId === Number(form.value.companyId)
       )
 
       if (isDuplicate) {

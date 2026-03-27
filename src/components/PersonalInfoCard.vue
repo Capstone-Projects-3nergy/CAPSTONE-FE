@@ -549,7 +549,6 @@ onUnmounted(() => {
 })
 
 const handleSendEmailNotification = async () => {
-  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
   if (safeStatus.value?.toUpperCase() !== 'PENDING') {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
@@ -562,7 +561,7 @@ const handleSendEmailNotification = async () => {
     return
   }
 
-  // ✅ ระบุ userId จาก props หรือจาก routeUser (Staff ดู Resident)
+ 
   const userId = props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
   
   if (!userId) {
@@ -610,7 +609,7 @@ const confirmUnlinkAction = async () => {
   showUnlinkConfirm.value = false
   const success = await unlinkLineAccount(router)
   if (success) {
-    // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
+  
     if (profileManager.currentProfile) {
       profileManager.currentProfile.isLineLinked = false
       profileManager.currentProfile.lineId = null
@@ -620,13 +619,10 @@ const confirmUnlinkAction = async () => {
       loginManager.user.lineId = null
     }
 
-    // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
     await profileManager.fetchProfile()
     
-    // ✅ แสดง Popup แจ้งเตือนความสำเร็จ (ระบบใหม่)
     showUnlinkSuccessPopup.value = true
     
-    // Auto hide after 5 seconds if user doesn't close
     setTimeout(() => {
       showUnlinkSuccessPopup.value = false
     }, 10000)
