@@ -43,6 +43,8 @@ const positionError = ref(false)
 const positionRequired = ref(false)
 const phoneError = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
+const whitespaceError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -60,7 +62,7 @@ const updateProfile = async (payload) => {
     // ✅ แจ้งว่าบันทึกสำเร็จ
     profileManager.showEditSuccess()
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 5000)
+    setTimeout(() => (editSuccess.value = false), 10000)
     // 4. redirect
     // if (loginManager.user.role === 'STAFF') {
     //   // router.replace({ name: 'profilestaff' })
@@ -68,11 +70,11 @@ const updateProfile = async (payload) => {
     // } else {
     //   // router.replace({ name: 'profileresident' })
     //   editSuccess.value = true
-    //    setTimeout(() => ( editSuccess.value= false), 5000)
+    //    setTimeout(() => ( editSuccess.value= false), 10000)
     // }
   } catch (e) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
     // profileManager.showError()
   }
 }
@@ -259,6 +261,10 @@ const showFileSizeError = () => {
   fileSizeError.value = true
   setTimeout(() => (fileSizeError.value = false), 10000)
 }
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 10000)
+}
 const showProfileSuccess = () => {
   editSuccess.value = true
   setTimeout(() => (editSuccess.value = false), 10000)
@@ -270,6 +276,10 @@ const showFirstNameError = () => {
 const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
+}
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 10000)
 }
 const closePopUp = (operate) => {
   switch (operate) {
@@ -334,6 +344,12 @@ const closePopUp = (operate) => {
       break
     case 'fileSizeError':
       fileSizeError.value = false
+      break
+    case 'fileTypeError':
+      fileTypeError.value = false
+      break
+    case 'whitespaceError':
+      whitespaceError.value = false
       break
 
     default:
@@ -798,6 +814,22 @@ const closePopUp = (operate) => {
             operate="fileSizeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Please enter valid text. Spaces only are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           v-if="loginManager.user"
@@ -831,6 +863,8 @@ const closePopUp = (operate) => {
           @room-number-required="showRoomNumberRequired"
           @line-id-error="lineIdErrorFn"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
+          @whitespace-error="showWhitespaceError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

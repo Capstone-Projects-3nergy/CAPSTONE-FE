@@ -64,6 +64,8 @@ const firstNameRequired = ref(false)
 const lastNameRequired = ref(false)
 const roomNumberRequired = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
+const whitespaceError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -490,7 +492,7 @@ onMounted(async () => {
 const saveEditRegistrationDetail = async () => {
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
     return
   }
 
@@ -519,10 +521,10 @@ const saveEditRegistrationDetail = async () => {
     form.value = { ...form.value, ...updatedResident }
 
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 5000)
+    setTimeout(() => (editSuccess.value = false), 10000)
   } catch (err) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
   }
 }
 
@@ -534,7 +536,8 @@ const handleImageUpload = (event) => {
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    alert('Only JPEG, PNG, or WEBP images are allowed.')
+    event.target.value = null
+    showFileTypeError()
     return
   }
 
@@ -646,6 +649,8 @@ const closePopUp = (operate) => {
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
   if (operate === 'fileSizeError') fileSizeError.value = false
+  if (operate === 'fileTypeError') fileTypeError.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -694,7 +699,15 @@ const showRoomNumberRequired = () => {
 }
 const showFileSizeError = () => {
   fileSizeError.value = true
-  setTimeout(() => (fileSizeError.value = false), 5000)
+  setTimeout(() => (fileSizeError.value = false), 10000)
+}
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 10000)
+}
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 10000)
 }
 </script>
 
@@ -985,6 +998,22 @@ const showFileSizeError = () => {
             operate="fileSizeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Please enter valid text. Spaces only are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1016,6 +1045,8 @@ const showFileSizeError = () => {
           @last-name-required="showLastNameRequired"
           @room-number-required="showRoomNumberRequired"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
+          @whitespace-error="showWhitespaceError"
         />
       </main>
     </div>

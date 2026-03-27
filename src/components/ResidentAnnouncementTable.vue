@@ -135,9 +135,6 @@ const formatDate = (dateString) => {
             <p v-if="item.subtitle" class="text-gray-900 text-xs font-bold mb-1 line-clamp-2">
               {{ item.subtitle }}
             </p>
-            <!-- <p v-if="item.content" class="text-gray-500 text-[11px] line-clamp-2">
-              {{ item.content }}
-            </p> -->
           </div>
 
           <div class="h-px bg-gray-100 w-full mb-4"></div>

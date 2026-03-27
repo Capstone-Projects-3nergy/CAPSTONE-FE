@@ -15,6 +15,7 @@ import { useSidebarManager } from '@/stores/SidebarManager.js'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import axios from 'axios'
 const emailInvalidCharsError = ref(false)
+const whitespaceError = ref(false)
 const errorAccount = ref(false)
 const emailError = ref(false)
 const successAccount = ref(false)
@@ -22,6 +23,7 @@ const incorrectemail = ref(false)
 const emailRequire = ref(false)
 const isEmailFirebase = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 const dormList = ref([])
 const profileManager = useProfileManager()
 const loginManager = useAuthManager()
@@ -195,7 +197,18 @@ const closePopUp = (operate) => {
     case 'emailFirebase':
       isEmailFirebase.value = false
       break
+    case 'fileTypeError':
+      fileTypeError.value = false
+      break
+    case 'whitespaceError':
+      whitespaceError.value = false
+      break
   }
+}
+
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 10000)
 }
 
 const showAddProfileError = () => {
@@ -233,6 +246,10 @@ const showFileSizeError = () => {
 const showEmailFirebaseError = () => {
   isEmailFirebase.value = true
   setTimeout(() => (isEmailFirebase.value = false), 10000)
+}
+const showFileTypeError = () => {
+  fileTypeError.value = true
+  setTimeout(() => (fileTypeError.value = false), 10000)
 }
 </script>
 
@@ -528,6 +545,22 @@ const showEmailFirebaseError = () => {
             operate="emailFirebase"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="fileTypeError"
+            titles="Only JPG, PNG, and WEBP formats are allowed."
+            message="Error!!"
+            styleType="red"
+            operate="fileTypeError"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="whitespaceError"
+            titles="Please enter valid text. Spaces only are not allowed."
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="add"
@@ -547,7 +580,9 @@ const showEmailFirebaseError = () => {
           @line-id-error="lineIdErrorFn"
           @email-invalid-chars="showEmailInvalidCharsError"
           @file-size-error="showFileSizeError"
+          @file-type-error="showFileTypeError"
           @email-firebase="showEmailFirebaseError"
+          @whitespace-error="showWhitespaceError"
         />
       </main>
     </div>

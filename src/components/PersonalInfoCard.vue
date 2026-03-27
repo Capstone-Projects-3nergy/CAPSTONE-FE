@@ -470,10 +470,14 @@ const currentUserId = computed(() => {
   return props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
 })
 
-const isEmailDisabled = computed(() => {
+const isResendCooldown = computed(() => {
   if (!lastEmailSentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
   return (Date.now() - lastEmailSentTime.value) < oneDay
+})
+
+const isEmailDisabled = computed(() => {
+  return initialWaitSeconds.value > 0 || isResendCooldown.value
 })
 
 const checkLastEmailSent = () => {
@@ -491,8 +495,60 @@ watch(currentUserId, () => {
   checkLastEmailSent()
 }, { immediate: true })
 
+const initialWaitSeconds = ref(0)
+let initialTimerId = null
+
+const checkInitialWait = () => {
+  const userId = currentUserId.value
+  const status = safeStatus.value ? String(safeStatus.value).trim().toUpperCase() : ''
+  
+  if (!userId || status !== 'PENDING') {
+    initialWaitSeconds.value = 0
+    if (initialTimerId) clearInterval(initialTimerId)
+    return
+  }
+
+  const key = `firstSeenPending_${userId}`
+  let firstSeen = localStorage.getItem(key)
+  
+  if (!firstSeen) {
+    firstSeen = Date.now().toString()
+    localStorage.setItem(key, firstSeen)
+  }
+
+  const firstSeenTime = parseInt(firstSeen)
+  
+  const updateTimer = () => {
+    const elapsed = Date.now() - firstSeenTime
+    const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000))
+    initialWaitSeconds.value = remaining
+    
+    if (remaining <= 0) {
+      if (initialTimerId) clearInterval(initialTimerId)
+    }
+  }
+
+  updateTimer()
+
+  if (initialWaitSeconds.value > 0) {
+    if (initialTimerId) clearInterval(initialTimerId)
+    initialTimerId = setInterval(updateTimer, 1000)
+  }
+}
+
+watch(
+  [() => currentUserId.value, () => safeStatus.value],
+  () => {
+    checkInitialWait()
+  },
+  { immediate: true }
+)
+
+onUnmounted(() => {
+  if (initialTimerId) clearInterval(initialTimerId)
+})
+
 const handleSendEmailNotification = async () => {
-  // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
   if (safeStatus.value?.toUpperCase() !== 'PENDING') {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
@@ -505,7 +561,7 @@ const handleSendEmailNotification = async () => {
     return
   }
 
-  // ✅ ระบุ userId จาก props หรือจาก routeUser (Staff ดู Resident)
+ 
   const userId = props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
   
   if (!userId) {
@@ -553,7 +609,7 @@ const confirmUnlinkAction = async () => {
   showUnlinkConfirm.value = false
   const success = await unlinkLineAccount(router)
   if (success) {
-    // ✅ อัปเดตสถานะใน Store ทันทีเพื่อให้ UI เปลี่ยนแปลง
+  
     if (profileManager.currentProfile) {
       profileManager.currentProfile.isLineLinked = false
       profileManager.currentProfile.lineId = null
@@ -563,16 +619,13 @@ const confirmUnlinkAction = async () => {
       loginManager.user.lineId = null
     }
 
-    // ✅ ดึง Profile ใหม่จาก Backend เพื่อความแม่นยำ
     await profileManager.fetchProfile()
     
-    // ✅ แสดง Popup แจ้งเตือนความสำเร็จ (ระบบใหม่)
     showUnlinkSuccessPopup.value = true
     
-    // Auto hide after 5 seconds if user doesn't close
     setTimeout(() => {
       showUnlinkSuccessPopup.value = false
-    }, 5000)
+    }, 10000)
   } else {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'
@@ -1285,7 +1338,7 @@ const confirmUnlinkAction = async () => {
                   <!-- Footer Area: Action Buttons -->
                   <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
-                      label="Send Activation Email"
+                      :label="initialWaitSeconds > 0 ? `Waiting... (${initialWaitSeconds}s)` : 'Send Activation Email'"
                       :color="isEmailDisabled ? 'gray' : 'blue'"
                       :loading="loadingEmail"
                       :disabled="isEmailDisabled"
@@ -1303,7 +1356,7 @@ const confirmUnlinkAction = async () => {
                     </ButtonWeb>
                     
                     <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
-                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
+                      <div v-if="isResendCooldown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
                         <div class="relative flex-shrink-0">
                            <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

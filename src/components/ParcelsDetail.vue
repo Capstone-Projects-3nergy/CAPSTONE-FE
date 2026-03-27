@@ -56,17 +56,17 @@ const isOverdue = computed(() => {
   const receivedDate = new Date(parcel.value.receivedAt)
   const currentDate = new Date()
   const diffTime = Math.abs(currentDate - receivedDate)
-  const diffDays = diffTime / (1000 * 60 * 60 * 24)
-  return diffDays > 3
+  const diffHours = diffTime / (1000 * 60 * 60)
+  return diffHours > 24
 })
 
-const overdueDays = computed(() => {
+const overdueHours = computed(() => {
   if (!parcel.value || !parcel.value.receivedAt) return 0
   const receivedDate = new Date(parcel.value.receivedAt)
   const now = new Date()
   const diffTime = Math.abs(now - receivedDate)
-  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  return Math.max(1, totalDays - 3)
+  const totalHours = Math.floor(diffTime / (1000 * 60 * 60))
+  return Math.max(1, totalHours - 24)
 })
 
 const activeTab = ref('info')
@@ -81,19 +81,19 @@ const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
 
-// Reminder Cooldown Logic (3 Days)
+// Reminder Cooldown Logic (1 Hour)
 const lastNotifySentTime = ref(null)
 const isNotifyDisabled = computed(() => {
   if (!lastNotifySentTime.value) return false
-  const threeDays = 3 * 24 * 60 * 60 * 1000
-  return (Date.now() - lastNotifySentTime.value) < threeDays
+  const oneHour = 1 * 60 * 60 * 1000
+  return (Date.now() - lastNotifySentTime.value) < oneHour
 })
 
-const cooldownDaysRemaining = computed(() => {
+const cooldownHoursRemaining = computed(() => {
   if (!lastNotifySentTime.value) return 0
-  const threeDays = 3 * 24 * 60 * 60 * 1000
-  const diff = threeDays - (Date.now() - lastNotifySentTime.value)
-  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+  const oneHour = 1 * 60 * 60 * 1000
+  const diff = oneHour - (Date.now() - lastNotifySentTime.value)
+  return Math.ceil(diff / (1000 * 60 * 60))
 })
 
 const checkLastNotifySent = () => {
@@ -156,7 +156,7 @@ const sendNotify = async () => {
       lineAlertVisible.value = false
       notifySuccess.value = false
       notifyError.value = false
-    }, 5000)
+    }, 10000)
   }
 }
 
@@ -714,7 +714,7 @@ function formatDateTime(datetimeStr) {
                         <div>
                            <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-1 sm:mb-2 leading-tight">Send Overdue Reminder</h5>
                            <p class="text-gray-500 font-medium text-xs sm:text-base sm:max-w-md leading-relaxed">
-                            This parcel is <strong>{{ overdueDays }} days</strong> overdue. Remind the resident now.
+                           This parcel is <strong>{{ overdueHours }} {{ overdueHours > 1 ? 'hours' : 'hour' }}</strong> overdue. Remind the resident now.
                            </p>
                         </div>
                     </div>
@@ -743,7 +743,7 @@ function formatDateTime(datetimeStr) {
                               </svg>
                            </div>
                            <span class="text-xs font-bold tracking-tight">
-                            Reminder recently sent. You can resend it again in {{ cooldownDaysRemaining }} days.
+                            Reminder recently sent. You can resend it again in {{ cooldownHoursRemaining }} {{ cooldownHoursRemaining > 1 ? 'hours' : 'hour' }}.
                            </span>
                         </div>
                       </transition>
@@ -772,8 +772,8 @@ function formatDateTime(datetimeStr) {
            </div>
            <h3 class="text-2xl font-black text-gray-900 mb-2">{{ isOverdue ? 'Send Overdue Reminder?' : 'Send Notification?' }}</h3>
            <p class="text-gray-500 font-medium mb-10 leading-relaxed">
-             {{ isOverdue 
-                ? 'Resident will be reminded that this parcel is ' + overdueDays + ' days overdue.' 
+              {{ isOverdue 
+                ? 'Resident will be reminded that this parcel is ' + overdueHours + ' ' + (overdueHours > 1 ? 'hours' : 'hour') + ' overdue.' 
                 : 'System will send a notification to the resident about this parcel.' }}
            </p>
             <div class="flex gap-3">

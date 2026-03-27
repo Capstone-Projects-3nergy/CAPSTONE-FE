@@ -51,6 +51,7 @@ const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
+const whitespaceError = ref(false)
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -65,7 +66,7 @@ const handleTrackingInput = (event) => {
     showTrackingLengthError.value = true
     setTimeout(() => {
       showTrackingLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.trackingNumber = val
   }
@@ -80,7 +81,7 @@ const handleSenderInput = (event) => {
     showSenderLengthError.value = true
     setTimeout(() => {
       showSenderLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.senderName = val
   }
@@ -121,7 +122,7 @@ const companyOptions = computed(() => {
 
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
-  return (
+  return Boolean(
     !form.value.trackingNumber ||
     !form.value.recipientName ||
     !form.value.parcelType ||
@@ -709,7 +710,7 @@ async function startScan(mode) {
       })
     } catch (e) {
       console.error('ZXing Error:', e)
-      startQuagga() // Fallback to Quagga if ZXing fails
+      startQuagga()
     }
   }
 }
@@ -751,11 +752,6 @@ const saveParcel = async () => {
     return
   }
 
-  // if (!form.value.trackingNumber) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
   if (!form.value.recipientName) {
     recipientNameError.value = true
     setTimeout(() => (recipientNameError.value = false), 10000)
@@ -770,6 +766,17 @@ const saveParcel = async () => {
   if (!form.value.companyId) {
     companyIdError.value = true
     setTimeout(() => (companyIdError.value = false), 10000)
+    return
+  }
+
+  // Whitespace check
+  if (
+    !form.value.trackingNumber.trim() ||
+    !form.value.recipientName.trim() ||
+    (form.value.senderName && !form.value.senderName.trim())
+  ) {
+    whitespaceError.value = true
+    setTimeout(() => (whitespaceError.value = false), 10000)
     return
   }
 
@@ -824,11 +831,7 @@ const saveParcel = async () => {
     setTimeout(() => (recipientNameLetterError.value = false), 10000)
     return
   }
-  // if (form.value.trackingNumber && form.value.trackingNumber.length > 60) {
-  //   trackingNumberError.value = true
-  //   setTimeout(() => (trackingNumberError.value = false), 10000)
-  //   return
-  // }
+  
   if (form.value.senderName && form.value.senderName.length > 100) {
     SenderNameError.value = true
     setTimeout(() => (SenderNameError.value = false), 10000)
@@ -850,7 +853,6 @@ const saveParcel = async () => {
       const isDuplicate = existingParcels.some(
         (p) =>
           p.trackingNumber === form.value.trackingNumber 
-          // && p.companyId === Number(form.value.companyId)
       )
 
       if (isDuplicate) {
@@ -956,10 +958,13 @@ const closePopUp = (operate) => {
   if (operate === 'companyId') companyIdError.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
   if (operate === 'senderNameMin') showSenderMinLengthError.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 function cancelParcel() {
+  recipientSearch.value = ''
+  selectedResidentId.value = null
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Received' : '')
+    (key) => (form.value[key] = key === 'status' ? 'received' : '')
   )
 }
 
@@ -1395,6 +1400,14 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="duplicateParcel"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="whitespaceError"
+              :titles="'Please enter valid text. Spaces only are not allowed.'"
+              message="Error!!"
+              styleType="red"
+              operate="whitespaceError"
               @closePopUp="closePopUp"
             />
           </div>

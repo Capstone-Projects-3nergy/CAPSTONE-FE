@@ -98,10 +98,13 @@ const error = ref(false)
 const showPinLimitAlert = ref(false)
 
 const titleError = ref(false)
+const subtitleError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const dateError = ref(false)
+const whitespaceError = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -219,7 +222,19 @@ const handleImageUpload = (event) => {
       announcementForm.coverImage = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
       setTimeout(() => {
         fileSizeError.value = false
-      }, 5000)
+      }, 10000)
+      return
+    }
+
+    const allowedExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedExtensions.includes(file.type)) {
+      fileTypeError.value = true
+      coverImage.value = null
+      imagePreview.value = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      announcementForm.coverImage = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      setTimeout(() => {
+        fileTypeError.value = false
+      }, 10000)
       return
     }
 
@@ -254,7 +269,7 @@ const handleTitleInput = (event) => {
   //   val = val.replace(/[๐-๙]/g, '')
   //   setTimeout(() => {
   //     titleThaiNumError.value = false
-  //   }, 5000)
+  //   }, 10000)
   // }
 
   if (val.length > MAX_TITLE_LENGTH) {
@@ -264,7 +279,7 @@ const handleTitleInput = (event) => {
     titleLengthError.value = true
     setTimeout(() => {
       titleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.title = val
     event.target.value = val
@@ -279,7 +294,7 @@ const handleSubtitleInput = (event) => {
     val = val.replace(/[๐-๙]/g, '')
     setTimeout(() => {
       subtitleThaiNumError.value = false
-    }, 5000)
+    }, 10000)
   }
 
   if (val.length > MAX_SUBTITLE_LENGTH) {
@@ -289,7 +304,7 @@ const handleSubtitleInput = (event) => {
     subtitleLengthError.value = true
     setTimeout(() => {
       subtitleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.subtitle = val
     event.target.value = val
@@ -305,7 +320,7 @@ const handleContentInput = (event) => {
     contentLengthError.value = true
     setTimeout(() => {
       contentLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.content = val
   }
@@ -321,6 +336,9 @@ const closePopUp = (operate) => {
   if (operate === 'titleError') {
     titleError.value = false
   }
+  if (operate === 'subtitleError') {
+    subtitleError.value = false
+  }
   if (operate === 'categoryError') {
     categoryError.value = false
   }
@@ -333,8 +351,14 @@ const closePopUp = (operate) => {
   if (operate === 'fileSizeError') {
     fileSizeError.value = false
   }
+  if (operate === 'fileTypeError') {
+    fileTypeError.value = false
+  }
   if (operate === 'pinLimitMessage') {
     showPinLimitAlert.value = false
+  }
+  if (operate === 'whitespaceError') {
+    whitespaceError.value = false
   }
 }
 
@@ -632,6 +656,7 @@ const navigateTo = (name) => {
 const handleSave = async () => {
   // Validate Required Fields
   titleError.value = false
+  subtitleError.value = false
   categoryError.value = false
   contentError.value = false
   dateError.value = false
@@ -641,6 +666,12 @@ const handleSave = async () => {
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
   if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
+
+  // Whitespace check
+  if (!announcementForm.title.trim() || !announcementForm.content.trim() || (announcementForm.subtitle && !announcementForm.subtitle.trim())) {
+    whitespaceError.value = true
+    hasError = true
+  }
   
   if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
@@ -653,10 +684,12 @@ const handleSave = async () => {
   if (hasError) {
     setTimeout(() => {
       titleError.value = false
+      subtitleError.value = false
       categoryError.value = false
       contentError.value = false
       dateError.value = false
-    }, 5000)
+      whitespaceError.value = false
+    }, 10000)
     return
   }
   
@@ -764,7 +797,7 @@ const handleSave = async () => {
     editSuccess.value = true
     setTimeout(() => {
       editSuccess.value = false
-    }, 5000)
+    }, 10000)
   } catch (err) {
     console.error('Update failed:', err)
     isLoading.value = false
@@ -1020,10 +1053,12 @@ const showProfileStaffPage = async function () {
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp v-if="editSuccess" titles="Announcement Updated Successfully." message="Success!!" styleType="green" operate="editSuccessMessage" @closePopUp="closePopUp" />
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="subtitleError" titles="Please enter an announcement subtitle." message="Error!!" styleType="red" operate="subtitleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileTypeError" titles="Only JPG, PNG, and WEBP formats are allowed." message="Error!!" styleType="red" operate="fileTypeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -1038,6 +1073,14 @@ const showProfileStaffPage = async function () {
               message="Error!!"
               styleType="red"
               operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="whitespaceError"
+              :titles="'Please enter valid text. Spaces only are not allowed.'"
+              message="Error!!"
+              styleType="red"
+              operate="whitespaceError"
               @closePopUp="closePopUp"
             />
           </div>
@@ -1225,7 +1268,7 @@ const showProfileStaffPage = async function () {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                       </div>
                       <p class="text-sm font-medium text-gray-700 mt-2">Click to replace or drag file here</p>
-                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, GIF max 1MB</p>
+                      <p class="text-xs text-gray-500 font-medium">PNG, JPG, WEBP max 1MB</p>
                       <input 
                         type="file" 
                         ref="fileInput" 
@@ -1319,6 +1362,7 @@ const showProfileStaffPage = async function () {
     </div>
 
     <LoadingPopUp v-if="isLoading" />
+
 
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">

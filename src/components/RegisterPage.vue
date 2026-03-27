@@ -66,6 +66,7 @@ const form = reactive({
 })
 const showPasswordPopup = ref(false)
 const showConfirmPasswordPopup = ref(false)
+const whitespaceError = ref(false)
 const dormList = ref([])
 
 watch(role, (newRole) => {
@@ -156,6 +157,7 @@ const clearAllErrors = () => {
   isPasswordMax.value = false
   isPasswordNotMatch.value = false
   showConfirmPasswordTooShort.value = false
+  whitespaceError.value = false
   success.value = false
 }
 
@@ -183,6 +185,18 @@ const submitForm = async () => {
     const MAX_ROOMNUMBER_LENGTH = 20
     const MIN_PASSWORD_LENGTH = 8
     const MIN_FULLNAME_LENGTH = 6
+
+    if (
+      !form.fullName.trim() ||
+      !form.email.trim() ||
+      !form.password.trim() ||
+      !form.confirmPassword.trim() ||
+      (roleType === 'RESIDENT' && !form.roomNumber.trim()) ||
+      (roleType === 'STAFF' && !form.position.trim())
+    ) {
+      triggerError(whitespaceError)
+      return
+    }
 
     if (form.fullName.trim().length > MAX_NAME_LENGTH) {
       triggerError(isNameOverLimit)
@@ -468,6 +482,7 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumberOverLimit') isRoomNumberOverLimit.value = false
   if (operate === 'fullNameWeak') isFullNameWeak.value = false
   if (operate === 'emailFirebase') isEmailFirebase.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -485,7 +500,7 @@ const toggleComfirmPasswordVisibility = () => {
     <div
       class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 relative overflow-hidden"
     >
-      <!-- Subtle Decorative Blobs -->
+     
       <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -733,6 +748,14 @@ const toggleComfirmPasswordVisibility = () => {
             message="Error!!"
             styleType="red"
             operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Please enter valid text. Spaces only are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
             @closePopUp="closePopUp"
           />
           <AlertPopUp

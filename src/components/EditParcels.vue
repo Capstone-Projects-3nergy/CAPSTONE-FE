@@ -62,6 +62,7 @@ const trackingNumberError = ref(false)
 const trackingNumberFormatError = ref(false)
 const trackingNumberRequired = ref(false)
 const recipientNameRequired = ref(false)
+const whitespaceError = ref(false)
 
 
 const parcelTypeOptions = [
@@ -91,7 +92,7 @@ const handleTrackingInput = (event) => {
     showTrackingLengthError.value = true
     setTimeout(() => {
       showTrackingLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.trackingNumber = val
   }
@@ -106,7 +107,7 @@ const handleRecipientInput = (event) => {
     showRecipientLengthError.value = true
     setTimeout(() => {
       showRecipientLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.recipientName = val
   }
@@ -121,7 +122,7 @@ const handleSenderInput = (event) => {
     showSenderLengthError.value = true
     setTimeout(() => {
       showSenderLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.senderName = val
   }
@@ -336,6 +337,17 @@ const saveEditParcel = async () => {
   if (!form.value.recipientName) {
     recipientNameRequired.value = true
     setTimeout(() => (recipientNameRequired.value = false), 10000)
+    return
+  }
+
+  // Whitespace check
+  if (
+    !form.value.trackingNumber.trim() ||
+    !form.value.recipientName.trim() ||
+    (form.value.senderName && !form.value.senderName.trim())
+  ) {
+    whitespaceError.value = true
+    setTimeout(() => (whitespaceError.value = false), 10000)
     return
   }
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName)) {
@@ -569,6 +581,7 @@ const closePopUp = (operate) => {
   if (operate === 'recipientNameRequired') recipientNameRequired.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
   if (operate === 'senderNameMin') showSenderMinLengthError.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return ''
@@ -897,6 +910,14 @@ function formatDateTime(datetimeStr) {
             operate="trackingNumberFormat"
             @closePopUp="closePopUp"
             />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Please enter valid text. Spaces only are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <form
           class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
