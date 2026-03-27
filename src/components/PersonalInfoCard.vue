@@ -471,6 +471,7 @@ const currentUserId = computed(() => {
 })
 
 const isEmailDisabled = computed(() => {
+  if (initialWaitSeconds.value > 0) return true
   if (!lastEmailSentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
   return (Date.now() - lastEmailSentTime.value) < oneDay
@@ -490,6 +491,59 @@ const checkLastEmailSent = () => {
 watch(currentUserId, () => {
   checkLastEmailSent()
 }, { immediate: true })
+
+const initialWaitSeconds = ref(0)
+let initialTimerId = null
+
+const checkInitialWait = () => {
+  const userId = currentUserId.value
+  const status = safeStatus.value ? String(safeStatus.value).trim().toUpperCase() : ''
+  
+  if (!userId || status !== 'PENDING') {
+    initialWaitSeconds.value = 0
+    if (initialTimerId) clearInterval(initialTimerId)
+    return
+  }
+
+  const key = `firstSeenPending_${userId}`
+  let firstSeen = localStorage.getItem(key)
+  
+  if (!firstSeen) {
+    firstSeen = Date.now().toString()
+    localStorage.setItem(key, firstSeen)
+  }
+
+  const firstSeenTime = parseInt(firstSeen)
+  
+  const updateTimer = () => {
+    const elapsed = Date.now() - firstSeenTime
+    const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000))
+    initialWaitSeconds.value = remaining
+    
+    if (remaining <= 0) {
+      if (initialTimerId) clearInterval(initialTimerId)
+    }
+  }
+
+  updateTimer()
+
+  if (initialWaitSeconds.value > 0) {
+    if (initialTimerId) clearInterval(initialTimerId)
+    initialTimerId = setInterval(updateTimer, 1000)
+  }
+}
+
+watch(
+  [() => currentUserId.value, () => safeStatus.value],
+  () => {
+    checkInitialWait()
+  },
+  { immediate: true }
+)
+
+onUnmounted(() => {
+  if (initialTimerId) clearInterval(initialTimerId)
+})
 
 const handleSendEmailNotification = async () => {
   // ✅ ตรวจสอบสถานะก่อนส่ง (ถ้าไม่ใช่ PENDING ห้ามส่ง)
@@ -1285,14 +1339,14 @@ const confirmUnlinkAction = async () => {
                   <!-- Footer Area: Action Buttons -->
                   <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
-                      label="Send Activation Email"
-                      :color="isEmailDisabled ? 'gray' : 'blue'"
+                      :label="initialWaitSeconds > 0 ? `Wait (${initialWaitSeconds}s)` : 'Send Activation Email'"
+                      :color="(isEmailDisabled || initialWaitSeconds > 0) ? 'gray' : 'blue'"
                       :loading="loadingEmail"
-                      :disabled="isEmailDisabled"
-                      @click="!isEmailDisabled && handleSendEmailNotification()"
+                      :disabled="isEmailDisabled || initialWaitSeconds > 0"
+                      @click="!(isEmailDisabled || initialWaitSeconds > 0) && handleSendEmailNotification()"
                       class="w-full sm:w-auto min-h-[50px] sm:min-h-[60px] group/sendbtn px-6 sm:px-12 py-3 sm:py-5 font-black shadow-lg transition-all active:scale-95 text-xs sm:text-sm border-0"
                       :class="[
-                        isEmailDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
+                        (isEmailDisabled || initialWaitSeconds > 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
                       ]"
                     >
                        <template #icon>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ButtonWeb from './ButtonWeb.vue'
@@ -91,6 +91,7 @@ const lastEmailSentTime = ref(null)
 const currentUserId = computed(() => form.value.id)
 
 const isEmailDisabled = computed(() => {
+  if (initialWaitSeconds.value > 0) return true
   if (!lastEmailSentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
   return (Date.now() - lastEmailSentTime.value) < oneDay
@@ -110,6 +111,59 @@ const checkLastEmailSent = () => {
 watch(currentUserId, () => {
   checkLastEmailSent()
 }, { immediate: true })
+
+const initialWaitSeconds = ref(0)
+let initialTimerId = null
+
+const checkInitialWait = () => {
+  const userId = currentUserId.value
+  const status = currentStatus.value ? String(currentStatus.value).trim().toUpperCase() : ''
+  
+  if (!userId || status !== 'PENDING') {
+    initialWaitSeconds.value = 0
+    if (initialTimerId) clearInterval(initialTimerId)
+    return
+  }
+
+  const key = `firstSeenPending_${userId}`
+  let firstSeen = localStorage.getItem(key)
+  
+  if (!firstSeen) {
+    firstSeen = Date.now().toString()
+    localStorage.setItem(key, firstSeen)
+  }
+
+  const firstSeenTime = parseInt(firstSeen)
+  
+  const updateTimer = () => {
+    const elapsed = Date.now() - firstSeenTime
+    const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000))
+    initialWaitSeconds.value = remaining
+    
+    if (remaining <= 0) {
+      if (initialTimerId) clearInterval(initialTimerId)
+    }
+  }
+
+  updateTimer()
+
+  if (initialWaitSeconds.value > 0) {
+    if (initialTimerId) clearInterval(initialTimerId)
+    initialTimerId = setInterval(updateTimer, 1000)
+  }
+}
+
+watch(
+  [() => currentUserId.value, () => currentStatus.value],
+  () => {
+    checkInitialWait()
+  },
+  { immediate: true }
+)
+
+onUnmounted(() => {
+  if (initialTimerId) clearInterval(initialTimerId)
+})
 
 const originalForm = ref({ ...form.value })
 
@@ -346,14 +400,14 @@ const currentStepIndex = computed(() => {
               </div>
               <div class="flex flex-col items-center gap-2">
                 <ButtonWeb
-                  label="Send Email"
-                  :color="isEmailDisabled ? 'gray' : 'blue'"
+                  :label="initialWaitSeconds > 0 ? `Wait (${initialWaitSeconds}s)` : 'Send Email'"
+                  :color="(isEmailDisabled || initialWaitSeconds > 0) ? 'gray' : 'blue'"
                   :loading="loadingEmail"
-                  :disabled="isEmailDisabled"
-                  @click="!isEmailDisabled && handleSendEmailNotification()"
+                  :disabled="isEmailDisabled || initialWaitSeconds > 0"
+                  @click="!(isEmailDisabled || initialWaitSeconds > 0) && handleSendEmailNotification()"
                   :class="[
                     'text-[11px] font-black rounded-xl shadow-lg transition-all active:scale-95 whitespace-nowrap px-4 py-2',
-                    isEmailDisabled ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
+                    (isEmailDisabled || initialWaitSeconds > 0) ? 'bg-gray-200 text-gray-600 cursor-not-allowed shadow-none' : 'shadow-blue-100 cursor-pointer'
                   ]"
                 />
                 <span v-if="isEmailDisabled" class="text-[10px] font-bold text-yellow-600 text-center leading-tight">
