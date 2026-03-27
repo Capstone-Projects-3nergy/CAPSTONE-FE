@@ -400,7 +400,7 @@ const currentStepIndex = computed(() => {
               </div>
               <div class="flex flex-col items-center gap-2">
                 <ButtonWeb
-                  :label="initialWaitSeconds > 0 ? `Wait (${initialWaitSeconds}s)` : 'Send Email'"
+                  :label="initialWaitSeconds > 0 ? `Waiting... (${initialWaitSeconds}s)` : 'Send Email'"
                   :color="(isEmailDisabled || initialWaitSeconds > 0) ? 'gray' : 'blue'"
                   :loading="loadingEmail"
                   :disabled="isEmailDisabled || initialWaitSeconds > 0"

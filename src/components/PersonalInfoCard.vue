@@ -1339,7 +1339,7 @@ const confirmUnlinkAction = async () => {
                   <!-- Footer Area: Action Buttons -->
                   <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
-                      :label="initialWaitSeconds > 0 ? `Wait (${initialWaitSeconds}s)` : 'Send Activation Email'"
+                      :label="initialWaitSeconds > 0 ? `Waiting... (${initialWaitSeconds}s)` : 'Send Activation Email'"
                       :color="(isEmailDisabled || initialWaitSeconds > 0) ? 'gray' : 'blue'"
                       :loading="loadingEmail"
                       :disabled="isEmailDisabled || initialWaitSeconds > 0"
