@@ -98,10 +98,12 @@ const error = ref(false)
 const showPinLimitAlert = ref(false)
 
 const titleError = ref(false)
+const subtitleError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const dateError = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -219,7 +221,19 @@ const handleImageUpload = (event) => {
       announcementForm.coverImage = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
       setTimeout(() => {
         fileSizeError.value = false
-      }, 5000)
+      }, 10000)
+      return
+    }
+
+    const allowedExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedExtensions.includes(file.type)) {
+      fileTypeError.value = true
+      coverImage.value = null
+      imagePreview.value = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      announcementForm.coverImage = initialForm.value && initialForm.value.coverImage ? initialForm.value.coverImage : null
+      setTimeout(() => {
+        fileTypeError.value = false
+      }, 10000)
       return
     }
 
@@ -254,7 +268,7 @@ const handleTitleInput = (event) => {
   //   val = val.replace(/[๐-๙]/g, '')
   //   setTimeout(() => {
   //     titleThaiNumError.value = false
-  //   }, 5000)
+  //   }, 10000)
   // }
 
   if (val.length > MAX_TITLE_LENGTH) {
@@ -264,7 +278,7 @@ const handleTitleInput = (event) => {
     titleLengthError.value = true
     setTimeout(() => {
       titleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.title = val
     event.target.value = val
@@ -279,7 +293,7 @@ const handleSubtitleInput = (event) => {
     val = val.replace(/[๐-๙]/g, '')
     setTimeout(() => {
       subtitleThaiNumError.value = false
-    }, 5000)
+    }, 10000)
   }
 
   if (val.length > MAX_SUBTITLE_LENGTH) {
@@ -289,7 +303,7 @@ const handleSubtitleInput = (event) => {
     subtitleLengthError.value = true
     setTimeout(() => {
       subtitleLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.subtitle = val
     event.target.value = val
@@ -305,7 +319,7 @@ const handleContentInput = (event) => {
     contentLengthError.value = true
     setTimeout(() => {
       contentLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     announcementForm.content = val
   }
@@ -321,6 +335,9 @@ const closePopUp = (operate) => {
   if (operate === 'titleError') {
     titleError.value = false
   }
+  if (operate === 'subtitleError') {
+    subtitleError.value = false
+  }
   if (operate === 'categoryError') {
     categoryError.value = false
   }
@@ -332,6 +349,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'fileSizeError') {
     fileSizeError.value = false
+  }
+  if (operate === 'fileTypeError') {
+    fileTypeError.value = false
   }
   if (operate === 'pinLimitMessage') {
     showPinLimitAlert.value = false
@@ -632,12 +652,14 @@ const navigateTo = (name) => {
 const handleSave = async () => {
   // Validate Required Fields
   titleError.value = false
+  subtitleError.value = false
   categoryError.value = false
   contentError.value = false
   dateError.value = false
   
   let hasError = false
   if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
+  if (!announcementForm.subtitle.trim()) { subtitleError.value = true; hasError = true }
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
   if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
@@ -653,10 +675,11 @@ const handleSave = async () => {
   if (hasError) {
     setTimeout(() => {
       titleError.value = false
+      subtitleError.value = false
       categoryError.value = false
       contentError.value = false
       dateError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   
@@ -764,7 +787,7 @@ const handleSave = async () => {
     editSuccess.value = true
     setTimeout(() => {
       editSuccess.value = false
-    }, 5000)
+    }, 10000)
   } catch (err) {
     console.error('Update failed:', err)
     isLoading.value = false
@@ -1020,10 +1043,12 @@ const showProfileStaffPage = async function () {
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp v-if="editSuccess" titles="Announcement Updated Successfully." message="Success!!" styleType="green" operate="editSuccessMessage" @closePopUp="closePopUp" />
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="subtitleError" titles="Please enter an announcement subtitle." message="Error!!" styleType="red" operate="subtitleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="dateError" titles="Please enter the publish date." message="Error!!" styleType="red" operate="dateError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileTypeError" titles="Only JPG, PNG, and WEBP formats are allowed." message="Error!!" styleType="red" operate="fileTypeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -1319,6 +1344,7 @@ const showProfileStaffPage = async function () {
     </div>
 
     <LoadingPopUp v-if="isLoading" />
+
 
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">

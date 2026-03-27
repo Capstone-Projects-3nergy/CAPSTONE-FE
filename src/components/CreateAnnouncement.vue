@@ -113,9 +113,11 @@ const titleThaiNumError = ref(false)
 const subtitleLengthError = ref(false)
 const subtitleThaiNumError = ref(false)
 const categoryError = ref(false)
+const subtitleError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
 const fileSizeError = ref(false)
+const fileTypeError = ref(false)
 const showDateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
@@ -180,11 +182,13 @@ const isFormValid = computed(() => {
 const closePopUp = (operate) => {
   if (operate === 'successMessage') { addSuccess.value = false }
   if (operate === 'titleError') { titleError.value = false }
+  if (operate === 'subtitleError') { subtitleError.value = false }
   if (operate === 'titleLengthError') { titleLengthError.value = false }
   if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
   if (operate === 'categoryError') { categoryError.value = false }
   if (operate === 'contentError') { contentError.value = false }
   if (operate === 'fileSizeError') { fileSizeError.value = false }
+  if (operate === 'fileTypeError') { fileTypeError.value = false }
   if (operate === 'errorMessage') { error.value = false }
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
   if (operate === 'dateError') { showDateError.value = false }
@@ -265,8 +269,14 @@ const onFileChange = (e) => {
     return
   }
   
-  if (!file.type.startsWith('image/')) {
-    alert('Please upload an image file.')
+  const allowedExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedExtensions.includes(file.type)) {
+    fileTypeError.value = true
+    imageFile.value = null
+    imagePreview.value = ''
+    setTimeout(() => {
+      fileTypeError.value = false
+    }, 10000)
     return
   }
 
@@ -314,6 +324,13 @@ const submitAnnouncement = async () => {
     titleError.value = true
     setTimeout(() => {
       titleError.value = false
+    }, 10000)
+    return
+  }
+  if (!subtitle.value.trim()) {
+    subtitleError.value = true
+    setTimeout(() => {
+      subtitleError.value = false
     }, 10000)
     return
   }
@@ -421,12 +438,14 @@ const saveDraft = async () => {
   
   let hasError = false
   if (!title.value.trim()) { titleError.value = true; hasError = true }
+  if (!subtitle.value.trim()) { subtitleError.value = true; hasError = true }
   if (categoryId.value === null) { categoryError.value = true; hasError = true }
   if (!content.value.trim()) { contentError.value = true; hasError = true }
   
   if (hasError) {
     setTimeout(() => {
       titleError.value = false
+      subtitleError.value = false
       categoryError.value = false
       contentError.value = false
     }, 10000)
@@ -740,9 +759,11 @@ const returnLoginPage = async () => {
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp v-if="addSuccess" titles="Announcement Created Successfully." message="Success!!" styleType="green" operate="successMessage" @closePopUp="closePopUp" />
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="subtitleError" titles="Please enter an announcement subtitle." message="Error!!" styleType="red" operate="subtitleError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
+            <AlertPopUp v-if="fileTypeError" titles="Only JPG, PNG, and WEBP formats are allowed." message="Error!!" styleType="red" operate="fileTypeError" @closePopUp="closePopUp" />
               <AlertPopUp
               v-if="error"
               :titles="'There is a problem. Please try again later.'"
@@ -751,7 +772,7 @@ const returnLoginPage = async () => {
               operate="errorMessage"
               @closePopUp="closePopUp"
             />
-             <AlertPopUp
+              <AlertPopUp
               v-if="showPinLimitAlert"
               :titles="'Maximum of 3 pinned announcements reached. Please unpin an existing announcement before adding a new one.'"
               message="Error!!"
@@ -1047,6 +1068,8 @@ const returnLoginPage = async () => {
       </main>
     </div>
     <LoadingPopUp v-if="isLoading" />
+
+
 
     <!-- Lightbox Overlay -->
     <Transition name="fade">
