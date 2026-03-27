@@ -123,8 +123,10 @@ const residents = ref([])
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
 function cancelParcel() {
+  recipientSearch.value = ''
+  selectedResidentId.value = null
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Waiting for staff' : '')
+    (key) => (form.value[key] = key === 'status' ? 'waiting for staff' : '')
   )
 }
 

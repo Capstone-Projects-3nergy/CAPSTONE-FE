@@ -971,8 +971,10 @@ const closePopUp = (operate) => {
   if (operate === 'whitespaceError') whitespaceError.value = false
 }
 function cancelParcel() {
+  recipientSearch.value = ''
+  selectedResidentId.value = null
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'Received' : '')
+    (key) => (form.value[key] = key === 'status' ? 'received' : '')
   )
 }
 

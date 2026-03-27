@@ -49,32 +49,32 @@ const recentParcels = computed(() => {
     .slice(0, 5)
 })
 
-const calculateOverdueDays = (receiveAt) => {
+const calculateOverdueHours = (receiveAt) => {
   if (!receiveAt) return 0
   const now = new Date()
   const receivedAt = new Date(receiveAt)
   if (isNaN(receivedAt.getTime())) return 0
   const diffTime = Math.abs(now - receivedAt)
-  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  // Return days past the 3-day threshold
-  const overdueDays = totalDays - 3
-  return Math.max(1, overdueDays) // Return at least 1 if it's in the list
+  const totalHours = Math.floor(diffTime / (1000 * 60 * 60))
+  // Return hours past the 24-hour threshold
+  const overdueHoursRemaining = totalHours - 24
+  return Math.max(1, overdueHoursRemaining) // Return at least 1 if it's in the list
 }
 
 const overdueParcelsList = computed(() => {
   if (!getMappedParcels.value) return []
   const now = new Date()
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+  const oneDayMs = 24 * 60 * 60 * 1000
   
   return [...getMappedParcels.value]
     .filter(p => {
       // Only check 'Received', 'Notified', or 'Overdue' statuses
       if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
       
-      // Use 3 days for overdue threshold
+      // Use 24 hours for overdue threshold
       const receivedDate = new Date(p.receiveAt)
       if (isNaN(receivedDate.getTime())) return false
-      return (now - receivedDate) > threeDaysMs
+      return (now - receivedDate) > oneDayMs
     })
     .sort((a, b) => new Date(b.receiveAt) - new Date(a.receiveAt))
 })
@@ -1574,8 +1574,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
                 <h3 class="text-red-600 font-bold text-base md:text-lg">
                   {{ overdueParcelsList.length }} 
-                  <!-- Overdue Parcels (>7 days) -->
-                  Overdue Parcels (>3 days)
+                  <!-- Overdue Parcels (>1 hour) -->
+                  Overdue Parcels (>1 hour)
                 </h3>
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
@@ -1593,8 +1593,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <!-- Modern Overdue Badge (Compact) -->
                     <div class="relative flex-shrink-0">
                       <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
-                        <span class="text-xs font-black leading-none">{{ calculateOverdueDays(parcel.receiveAt) }}</span>
-                        <span class="text-[7px] font-black tracking-tighter mt-1 opacity-70">days</span>
+                        <span class="text-xs font-black leading-none">{{ calculateOverdueHours(parcel.receiveAt) }}</span>
+                        <span class="text-[7px] font-black tracking-tighter mt-1 opacity-70">hours</span>
                       </div>
                     </div>
 
