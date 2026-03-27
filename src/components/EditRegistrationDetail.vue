@@ -492,7 +492,7 @@ onMounted(async () => {
 const saveEditRegistrationDetail = async () => {
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
     return
   }
 
@@ -521,10 +521,10 @@ const saveEditRegistrationDetail = async () => {
     form.value = { ...form.value, ...updatedResident }
 
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 5000)
+    setTimeout(() => (editSuccess.value = false), 10000)
   } catch (err) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
   }
 }
 
@@ -699,15 +699,15 @@ const showRoomNumberRequired = () => {
 }
 const showFileSizeError = () => {
   fileSizeError.value = true
-  setTimeout(() => (fileSizeError.value = false), 5000)
+  setTimeout(() => (fileSizeError.value = false), 10000)
 }
 const showFileTypeError = () => {
   fileTypeError.value = true
-  setTimeout(() => (fileTypeError.value = false), 5000)
+  setTimeout(() => (fileTypeError.value = false), 10000)
 }
 const showWhitespaceError = () => {
   whitespaceError.value = true
-  setTimeout(() => (whitespaceError.value = false), 5000)
+  setTimeout(() => (whitespaceError.value = false), 10000)
 }
 </script>
 

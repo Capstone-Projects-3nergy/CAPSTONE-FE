@@ -629,7 +629,7 @@ const confirmUnlinkAction = async () => {
     // Auto hide after 5 seconds if user doesn't close
     setTimeout(() => {
       showUnlinkSuccessPopup.value = false
-    }, 5000)
+    }, 10000)
   } else {
     lineAlertVisible.value = true
     lineAlertStyle.value = 'red'

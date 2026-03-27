@@ -434,6 +434,15 @@ onUnmounted(() => {
   window.removeEventListener('focus', fetchDashboardData)
   if (dateInterval) clearInterval(dateInterval)
   if (dashboardInterval) clearInterval(dashboardInterval)
+  
+  if (parcelChartInstance) {
+    parcelChartInstance.destroy()
+    parcelChartInstance = null
+  }
+  if (residentChartInstance) {
+    residentChartInstance.destroy()
+    residentChartInstance = null
+  }
 })
 let parcelChartInstance = null;
 
@@ -543,14 +552,14 @@ const approveResident = async (resident) => {
       await fetchDashboardData()
       
       approveSuccess.value = true
-      setTimeout(() => (approveSuccess.value = false), 5000)
+      setTimeout(() => (approveSuccess.value = false), 10000)
     } else {
       throw new Error('Update failed')
     }
   } catch (err) {
     console.error('Approval failed', err)
     approveError.value = true
-    setTimeout(() => (approveError.value = false), 5000)
+    setTimeout(() => (approveError.value = false), 10000)
   }
 }
 
@@ -642,6 +651,14 @@ onMounted(async () => {
     fetchDashboardData()
   }, 30000)
   const ctx = document.getElementById('parcelChart')
+  if (!ctx) return
+
+  // Prevent "Canvas is already in use" error
+  const existingParcelChart = Chart.getChart('parcelChart')
+  if (existingParcelChart) {
+    existingParcelChart.destroy()
+  }
+
   parcelChartInstance = new Chart(ctx, {
     type: 'bar',
     plugins: [dataLabelsPlugin, avgLinePlugin],
@@ -756,6 +773,12 @@ onMounted(async () => {
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {
+    // Prevent "Canvas is already in use" error
+    const existingResidentChart = Chart.getChart('residentChart')
+    if (existingResidentChart) {
+      existingResidentChart.destroy()
+    }
+
     residentChartInstance = new Chart(residentCtx, {
       type: 'bar',
       plugins: [dataLabelsPlugin, avgLinePlugin],

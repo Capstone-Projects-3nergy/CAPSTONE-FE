@@ -84,7 +84,7 @@ const handleEmailInput = (event) => {
     showEmailLengthError.value = true
     setTimeout(() => {
       showEmailLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.email = val
   }
@@ -99,7 +99,7 @@ const handleRoomInput = (event) => {
     showRoomLengthError.value = true
     setTimeout(() => {
       showRoomLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.roomNumber = val
   }
@@ -117,7 +117,7 @@ const handlePhoneInput = (event) => {
     showPhoneLengthError.value = true
     setTimeout(() => {
       showPhoneLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.phoneNumber = val
   }
@@ -132,7 +132,7 @@ const handleLineIdInput = (event) => {
     showLineIdLengthError.value = true
     setTimeout(() => {
       showLineIdLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.lineId = val
   }
@@ -147,7 +147,7 @@ const handlePositionInput = (event) => {
     showPositionLengthError.value = true
     setTimeout(() => {
       showPositionLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.position = val
   }
@@ -164,7 +164,7 @@ const handleFirstNameInput = (event) => {
     showNameLengthError.value = true
     setTimeout(() => {
       showNameLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.firstName = val
   }
@@ -181,7 +181,7 @@ const handleLastNameInput = (event) => {
     showNameLengthError.value = true
     setTimeout(() => {
       showNameLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.lastName = val
   }
@@ -586,14 +586,14 @@ const submit = async () => {
     showEmailLengthError.value = true
     setTimeout(() => {
       showEmailLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   if (form.value.roomNumber && form.value.roomNumber.length > MAX_ROOMNUMBER_LENGTH) {
     showRoomLengthError.value = true
     setTimeout(() => {
       showRoomLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   if (form.value.phoneNumber) {
@@ -602,7 +602,7 @@ const submit = async () => {
       showPhoneLengthError.value = true
       setTimeout(() => {
         showPhoneLengthError.value = false
-      }, 5000)
+      }, 10000)
       return
     }
   }
@@ -610,7 +610,7 @@ const submit = async () => {
     showLineIdLengthError.value = true
     setTimeout(() => {
       showLineIdLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   const fName = form.value.firstName || ''
@@ -619,14 +619,14 @@ const submit = async () => {
     showNameLengthError.value = true
     setTimeout(() => {
       showNameLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
   if ((fName.length + lName.length) > 0 && (fName.length + lName.length) < 6) {
     showNameMinLengthError.value = true
     setTimeout(() => {
       showNameMinLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
 
@@ -701,7 +701,7 @@ const addResidents = async () => {
     showNameMinLengthError.value = true
     setTimeout(() => {
       showNameMinLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
 
@@ -856,7 +856,7 @@ const saveEditProfile = async () => {
     showNameMinLengthError.value = true
     setTimeout(() => {
       showNameMinLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
 
@@ -904,7 +904,7 @@ const saveEditProfile = async () => {
       showPositionMinLengthError.value = true
       setTimeout(() => {
         showPositionMinLengthError.value = false
-      }, 5000)
+      }, 10000)
       return
     }
   }
@@ -992,7 +992,7 @@ const saveEditDetail = async () => {
     showNameMinLengthError.value = true
     setTimeout(() => {
       showNameMinLengthError.value = false
-    }, 5000)
+    }, 10000)
     return
   }
 

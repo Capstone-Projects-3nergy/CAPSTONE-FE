@@ -156,7 +156,7 @@ const sendNotify = async () => {
       lineAlertVisible.value = false
       notifySuccess.value = false
       notifyError.value = false
-    }, 5000)
+    }, 10000)
   }
 }
 

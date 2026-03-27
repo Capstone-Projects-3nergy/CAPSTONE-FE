@@ -62,7 +62,7 @@ const updateProfile = async (payload) => {
     // ✅ แจ้งว่าบันทึกสำเร็จ
     profileManager.showEditSuccess()
     editSuccess.value = true
-    setTimeout(() => (editSuccess.value = false), 5000)
+    setTimeout(() => (editSuccess.value = false), 10000)
     // 4. redirect
     // if (loginManager.user.role === 'STAFF') {
     //   // router.replace({ name: 'profilestaff' })
@@ -70,11 +70,11 @@ const updateProfile = async (payload) => {
     // } else {
     //   // router.replace({ name: 'profileresident' })
     //   editSuccess.value = true
-    //    setTimeout(() => ( editSuccess.value= false), 5000)
+    //    setTimeout(() => ( editSuccess.value= false), 10000)
     // }
   } catch (e) {
     error.value = true
-    setTimeout(() => (error.value = false), 5000)
+    setTimeout(() => (error.value = false), 10000)
     // profileManager.showError()
   }
 }

@@ -92,7 +92,7 @@ const handleTrackingInput = (event) => {
     showTrackingLengthError.value = true
     setTimeout(() => {
       showTrackingLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.trackingNumber = val
   }
@@ -107,7 +107,7 @@ const handleRecipientInput = (event) => {
     showRecipientLengthError.value = true
     setTimeout(() => {
       showRecipientLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.recipientName = val
   }
@@ -122,7 +122,7 @@ const handleSenderInput = (event) => {
     showSenderLengthError.value = true
     setTimeout(() => {
       showSenderLengthError.value = false
-    }, 5000)
+    }, 10000)
   } else {
     form.value.senderName = val
   }
