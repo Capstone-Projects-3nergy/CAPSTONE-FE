@@ -1008,7 +1008,7 @@ const showWhitespaceError = () => {
           />
           <AlertPopUp
             v-if="whitespaceError"
-            :titles="'Input cannot be empty or just whitespace.'"
+            :titles="'Please enter valid text. Spaces only are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="whitespaceError"
