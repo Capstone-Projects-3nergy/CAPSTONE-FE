@@ -146,13 +146,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
        const s = p.status?.toUpperCase() || ''
        return s !== 'PICKED_UP' && s !== 'TAKEN' && !s.includes('OVERDUE')
     }).length
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+    const oneDayMs = 24 * 60 * 60 * 1000
     overallStats.overdueParcels = allParcels.filter(p => {
       const pStatus = p.status?.toUpperCase() || ''
       if (pStatus === 'PICKED_UP' || pStatus === 'TAKEN') return false
       
       const rDate = new Date(p.receivedAt || p.createdAt || p.date)
-      return (today - rDate) > threeDaysMs
+      return (today - rDate) > oneDayMs
     }).length
 
     // Separate bounds for parcel and resident
@@ -180,8 +180,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       if (isPickedUp) return false
       
       const rDate = new Date(p.receivedAt || p.createdAt || p.date)
-      const diffMin = (today - rDate) / (1000 * 60)
-      return pStatus.includes('OVERDUE') || (diffMin >= 1 && isArrived)
+      const diffHours = (today - rDate) / (1000 * 60 * 60)
+      return pStatus.includes('OVERDUE') || (diffHours >= 24 && isArrived)
     }).length
 
     // 3. Generate Chart Data with separate bounds

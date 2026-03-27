@@ -1597,8 +1597,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
                 <h3 class="text-red-600 font-bold text-base md:text-lg">
                   {{ overdueParcelsList.length }} 
-                  <!-- Overdue Parcels (>1 hour) -->
-                  Overdue Parcels (>1 hour)
+                  <!-- Overdue Parcels (>1 day) -->
+                  Overdue Parcels (>1 day)
                 </h3>
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
