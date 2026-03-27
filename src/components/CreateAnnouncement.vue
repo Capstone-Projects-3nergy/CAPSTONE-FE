@@ -327,13 +327,6 @@ const submitAnnouncement = async () => {
     }, 10000)
     return
   }
-  if (!subtitle.value.trim()) {
-    subtitleError.value = true
-    setTimeout(() => {
-      subtitleError.value = false
-    }, 10000)
-    return
-  }
   if (categoryId.value === null) {
     categoryError.value = true
     setTimeout(() => {
@@ -438,7 +431,6 @@ const saveDraft = async () => {
   
   let hasError = false
   if (!title.value.trim()) { titleError.value = true; hasError = true }
-  if (!subtitle.value.trim()) { subtitleError.value = true; hasError = true }
   if (categoryId.value === null) { categoryError.value = true; hasError = true }
   if (!content.value.trim()) { contentError.value = true; hasError = true }
   

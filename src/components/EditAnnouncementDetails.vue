@@ -659,7 +659,6 @@ const handleSave = async () => {
   
   let hasError = false
   if (!announcementForm.title.trim()) { titleError.value = true; hasError = true }
-  if (!announcementForm.subtitle.trim()) { subtitleError.value = true; hasError = true }
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
   if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
