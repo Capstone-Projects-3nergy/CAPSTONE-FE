@@ -95,7 +95,7 @@ const companyOptions = computed(() => {
 const notificationManager = useNotificationManager()
 const parcelStore = useParcelManager()
 const isAllFilled = computed(() => {
-  return (
+  return Boolean(
     !form.value.trackingNumber ||
     !form.value.recipientName ||
     !form.value.parcelType ||
