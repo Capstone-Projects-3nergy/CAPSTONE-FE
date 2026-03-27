@@ -113,12 +113,12 @@ const titleThaiNumError = ref(false)
 const subtitleLengthError = ref(false)
 const subtitleThaiNumError = ref(false)
 const categoryError = ref(false)
-const subtitleError = ref(false)
 const contentError = ref(false)
 const contentLengthError = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 const showDateError = ref(false)
+const whitespaceError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
@@ -182,7 +182,6 @@ const isFormValid = computed(() => {
 const closePopUp = (operate) => {
   if (operate === 'successMessage') { addSuccess.value = false }
   if (operate === 'titleError') { titleError.value = false }
-  if (operate === 'subtitleError') { subtitleError.value = false }
   if (operate === 'titleLengthError') { titleLengthError.value = false }
   if (operate === 'titleThaiNumError') { titleThaiNumError.value = false }
   if (operate === 'categoryError') { categoryError.value = false }
@@ -192,6 +191,7 @@ const closePopUp = (operate) => {
   if (operate === 'errorMessage') { error.value = false }
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
   if (operate === 'dateError') { showDateError.value = false }
+  if (operate === 'whitespaceError') { whitespaceError.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -342,6 +342,15 @@ const submitAnnouncement = async () => {
     return
   }
 
+  // Whitespace check
+  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
+    whitespaceError.value = true
+    setTimeout(() => {
+      whitespaceError.value = false
+    }, 10000)
+    return
+  }
+
   if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
     setTimeout(() => {
@@ -428,18 +437,25 @@ const saveDraft = async () => {
   titleError.value = false
   categoryError.value = false
   contentError.value = false
+  whitespaceError.value = false
   
   let hasError = false
   if (!title.value.trim()) { titleError.value = true; hasError = true }
   if (categoryId.value === null) { categoryError.value = true; hasError = true }
   if (!content.value.trim()) { contentError.value = true; hasError = true }
   
+  // Whitespace check
+  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
+    whitespaceError.value = true
+    hasError = true
+  }
+
   if (hasError) {
     setTimeout(() => {
       titleError.value = false
-      subtitleError.value = false
       categoryError.value = false
       contentError.value = false
+      whitespaceError.value = false
     }, 10000)
     return
   }
@@ -751,7 +767,7 @@ const returnLoginPage = async () => {
           <div class="fixed top-5 left-5 z-50">
             <AlertPopUp v-if="addSuccess" titles="Announcement Created Successfully." message="Success!!" styleType="green" operate="successMessage" @closePopUp="closePopUp" />
             <AlertPopUp v-if="titleError" titles="Please enter an announcement title." message="Error!!" styleType="red" operate="titleError" @closePopUp="closePopUp" />
-            <AlertPopUp v-if="subtitleError" titles="Please enter an announcement subtitle." message="Error!!" styleType="red" operate="subtitleError" @closePopUp="closePopUp" />
+
             <AlertPopUp v-if="categoryError" titles="Please select a category." message="Error!!" styleType="red" operate="categoryError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="contentError" titles="Please enter the announcement content." message="Error!!" styleType="red" operate="contentError" @closePopUp="closePopUp" />
             <AlertPopUp v-if="fileSizeError" titles="The file size exceeds the 1MB limit." message="Error!!" styleType="red" operate="fileSizeError" @closePopUp="closePopUp" />
@@ -778,6 +794,14 @@ const returnLoginPage = async () => {
               message="Error!!"
               styleType="red"
               operate="dateError"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="whitespaceError"
+              :titles="'Input cannot be empty or just whitespace.'"
+              message="Error!!"
+              styleType="red"
+              operate="whitespaceError"
               @closePopUp="closePopUp"
             />
           </div>

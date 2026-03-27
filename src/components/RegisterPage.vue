@@ -66,6 +66,7 @@ const form = reactive({
 })
 const showPasswordPopup = ref(false)
 const showConfirmPasswordPopup = ref(false)
+const whitespaceError = ref(false)
 const dormList = ref([])
 
 watch(role, (newRole) => {
@@ -156,6 +157,7 @@ const clearAllErrors = () => {
   isPasswordMax.value = false
   isPasswordNotMatch.value = false
   showConfirmPasswordTooShort.value = false
+  whitespaceError.value = false
   success.value = false
 }
 
@@ -183,6 +185,18 @@ const submitForm = async () => {
     const MAX_ROOMNUMBER_LENGTH = 20
     const MIN_PASSWORD_LENGTH = 8
     const MIN_FULLNAME_LENGTH = 6
+
+    if (
+      !form.fullName.trim() ||
+      !form.email.trim() ||
+      !form.password.trim() ||
+      !form.confirmPassword.trim() ||
+      (roleType === 'RESIDENT' && !form.roomNumber.trim()) ||
+      (roleType === 'STAFF' && !form.position.trim())
+    ) {
+      triggerError(whitespaceError)
+      return
+    }
 
     if (form.fullName.trim().length > MAX_NAME_LENGTH) {
       triggerError(isNameOverLimit)
@@ -468,6 +482,7 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumberOverLimit') isRoomNumberOverLimit.value = false
   if (operate === 'fullNameWeak') isFullNameWeak.value = false
   if (operate === 'emailFirebase') isEmailFirebase.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -733,6 +748,14 @@ const toggleComfirmPasswordVisibility = () => {
             message="Error!!"
             styleType="red"
             operate="emailInvalidChars"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Input cannot be empty or just whitespace.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
             @closePopUp="closePopUp"
           />
           <AlertPopUp

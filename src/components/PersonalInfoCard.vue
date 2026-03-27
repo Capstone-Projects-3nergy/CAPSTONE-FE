@@ -470,11 +470,14 @@ const currentUserId = computed(() => {
   return props.userId || (props.useCurrentProfile ? (profileManager.currentProfile?.userId || profileManager.currentProfile?.id) : routeUser.value?.id)
 })
 
-const isEmailDisabled = computed(() => {
-  if (initialWaitSeconds.value > 0) return true
+const isResendCooldown = computed(() => {
   if (!lastEmailSentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
   return (Date.now() - lastEmailSentTime.value) < oneDay
+})
+
+const isEmailDisabled = computed(() => {
+  return initialWaitSeconds.value > 0 || isResendCooldown.value
 })
 
 const checkLastEmailSent = () => {
@@ -1340,13 +1343,13 @@ const confirmUnlinkAction = async () => {
                   <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
                       :label="initialWaitSeconds > 0 ? `Waiting... (${initialWaitSeconds}s)` : 'Send Activation Email'"
-                      :color="(isEmailDisabled || initialWaitSeconds > 0) ? 'gray' : 'blue'"
+                      :color="isEmailDisabled ? 'gray' : 'blue'"
                       :loading="loadingEmail"
-                      :disabled="isEmailDisabled || initialWaitSeconds > 0"
-                      @click="!(isEmailDisabled || initialWaitSeconds > 0) && handleSendEmailNotification()"
+                      :disabled="isEmailDisabled"
+                      @click="!isEmailDisabled && handleSendEmailNotification()"
                       class="w-full sm:w-auto min-h-[50px] sm:min-h-[60px] group/sendbtn px-6 sm:px-12 py-3 sm:py-5 font-black shadow-lg transition-all active:scale-95 text-xs sm:text-sm border-0"
                       :class="[
-                        (isEmailDisabled || initialWaitSeconds > 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
+                        isEmailDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700'
                       ]"
                     >
                        <template #icon>
@@ -1357,7 +1360,7 @@ const confirmUnlinkAction = async () => {
                     </ButtonWeb>
                     
                     <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
-                      <div v-if="isEmailDisabled" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
+                      <div v-if="isResendCooldown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-yellow-50 text-yellow-600 rounded-2xl border border-yellow-100 shadow-sm transition-all">
                         <div class="relative flex-shrink-0">
                            <div class="absolute inset-0 bg-yellow-500 rounded-full blur-[2px] opacity-20 animate-ping"></div>
                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

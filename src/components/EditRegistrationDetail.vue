@@ -65,6 +65,7 @@ const lastNameRequired = ref(false)
 const roomNumberRequired = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
+const whitespaceError = ref(false)
 
 const userId = computed(() => Number(route.params.id))
 const form = ref({
@@ -649,6 +650,7 @@ const closePopUp = (operate) => {
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
   if (operate === 'fileSizeError') fileSizeError.value = false
   if (operate === 'fileTypeError') fileTypeError.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 
 function formatDateTime(datetimeStr) {
@@ -702,6 +704,10 @@ const showFileSizeError = () => {
 const showFileTypeError = () => {
   fileTypeError.value = true
   setTimeout(() => (fileTypeError.value = false), 5000)
+}
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 5000)
 }
 </script>
 
@@ -1000,6 +1006,14 @@ const showFileTypeError = () => {
             operate="fileTypeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Input cannot be empty or just whitespace.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="edit"
@@ -1032,6 +1046,7 @@ const showFileTypeError = () => {
           @room-number-required="showRoomNumberRequired"
           @file-size-error="showFileSizeError"
           @file-type-error="showFileTypeError"
+          @whitespace-error="showWhitespaceError"
         />
       </main>
     </div>

@@ -15,6 +15,7 @@ import { useSidebarManager } from '@/stores/SidebarManager.js'
 import EditPersonalInfoProfile from './EditPersonalInfoProfile.vue'
 import axios from 'axios'
 const emailInvalidCharsError = ref(false)
+const whitespaceError = ref(false)
 const errorAccount = ref(false)
 const emailError = ref(false)
 const successAccount = ref(false)
@@ -199,7 +200,15 @@ const closePopUp = (operate) => {
     case 'fileTypeError':
       fileTypeError.value = false
       break
+    case 'whitespaceError':
+      whitespaceError.value = false
+      break
   }
+}
+
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 10000)
 }
 
 const showAddProfileError = () => {
@@ -544,6 +553,14 @@ const showFileTypeError = () => {
             operate="fileTypeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="whitespaceError"
+            titles="Input cannot be empty or just whitespace."
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           mode="add"
@@ -565,6 +582,7 @@ const showFileTypeError = () => {
           @file-size-error="showFileSizeError"
           @file-type-error="showFileTypeError"
           @email-firebase="showEmailFirebaseError"
+          @whitespace-error="showWhitespaceError"
         />
       </main>
     </div>

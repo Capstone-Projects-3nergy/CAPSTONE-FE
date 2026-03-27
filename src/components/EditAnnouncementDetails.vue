@@ -102,6 +102,7 @@ const subtitleError = ref(false)
 const categoryError = ref(false)
 const contentError = ref(false)
 const dateError = ref(false)
+const whitespaceError = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 
@@ -355,6 +356,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'pinLimitMessage') {
     showPinLimitAlert.value = false
+  }
+  if (operate === 'whitespaceError') {
+    whitespaceError.value = false
   }
 }
 
@@ -662,6 +666,12 @@ const handleSave = async () => {
   if (announcementForm.categoryId === null) { categoryError.value = true; hasError = true }
   if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
+
+  // Whitespace check
+  if (!announcementForm.title.trim() || !announcementForm.content.trim() || (announcementForm.subtitle && !announcementForm.subtitle.trim())) {
+    whitespaceError.value = true
+    hasError = true
+  }
   
   if (announcementForm.pinned && !initialForm.value.pinned && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
@@ -678,6 +688,7 @@ const handleSave = async () => {
       categoryError.value = false
       contentError.value = false
       dateError.value = false
+      whitespaceError.value = false
     }, 10000)
     return
   }
@@ -1062,6 +1073,14 @@ const showProfileStaffPage = async function () {
               message="Error!!"
               styleType="red"
               operate="pinLimitMessage"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="whitespaceError"
+              :titles="'Input cannot be empty or just whitespace.'"
+              message="Error!!"
+              styleType="red"
+              operate="whitespaceError"
               @closePopUp="closePopUp"
             />
           </div>

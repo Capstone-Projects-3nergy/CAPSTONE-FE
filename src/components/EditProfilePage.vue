@@ -44,6 +44,7 @@ const positionRequired = ref(false)
 const phoneError = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
+const whitespaceError = ref(false)
 const updateProfile = async (payload) => {
   try {
     // 1. update store
@@ -276,6 +277,10 @@ const showLastNameError = () => {
   lastNameError.value = true
   setTimeout(() => (lastNameError.value = false), 10000)
 }
+const showWhitespaceError = () => {
+  whitespaceError.value = true
+  setTimeout(() => (whitespaceError.value = false), 10000)
+}
 const closePopUp = (operate) => {
   switch (operate) {
     // -----------------
@@ -342,6 +347,9 @@ const closePopUp = (operate) => {
       break
     case 'fileTypeError':
       fileTypeError.value = false
+      break
+    case 'whitespaceError':
+      whitespaceError.value = false
       break
 
     default:
@@ -814,6 +822,14 @@ const closePopUp = (operate) => {
             operate="fileTypeError"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="whitespaceError"
+            :titles="'Input cannot be empty or just whitespace.'"
+            message="Error!!"
+            styleType="red"
+            operate="whitespaceError"
+            @closePopUp="closePopUp"
+          />
         </div>
         <EditPersonalInfoProfile
           v-if="loginManager.user"
@@ -848,6 +864,7 @@ const closePopUp = (operate) => {
           @line-id-error="lineIdErrorFn"
           @file-size-error="showFileSizeError"
           @file-type-error="showFileTypeError"
+          @whitespace-error="showWhitespaceError"
         ></EditPersonalInfoProfile>
       </main>
     </div>

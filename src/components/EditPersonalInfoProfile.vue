@@ -212,6 +212,7 @@ const emit = defineEmits([
   'email-invalid-chars',
   'file-size-error',
   'file-type-error',
+  'whitespace-error',
   'email-firebase'
 ])
 
@@ -563,6 +564,24 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
+  // Check for whitespace-only input in any field that is not empty
+  const fieldsToCheck = [
+    form.value.firstName,
+    form.value.lastName,
+    form.value.email,
+    form.value.roomNumber,
+    form.value.lineId,
+    form.value.position,
+    form.value.phoneNumber
+  ]
+
+  for (const field of fieldsToCheck) {
+    if (field && typeof field === 'string' && field.length > 0 && field.trim().length === 0) {
+      emit('whitespace-error', true)
+      return
+    }
+  }
+
   if (form.value.email && form.value.email.length > MAX_EMAIL_LENGTH) {
     showEmailLengthError.value = true
     setTimeout(() => {

@@ -51,6 +51,7 @@ const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
+const whitespaceError = ref(false)
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -773,6 +774,17 @@ const saveParcel = async () => {
     return
   }
 
+  // Whitespace check
+  if (
+    !form.value.trackingNumber.trim() ||
+    !form.value.recipientName.trim() ||
+    (form.value.senderName && !form.value.senderName.trim())
+  ) {
+    whitespaceError.value = true
+    setTimeout(() => (whitespaceError.value = false), 10000)
+    return
+  }
+
   const selectedCompany = companyList.value.find(
     (c) => c.companyId === Number(form.value.companyId)
   )
@@ -956,6 +968,7 @@ const closePopUp = (operate) => {
   if (operate === 'companyId') companyIdError.value = false
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
   if (operate === 'senderNameMin') showSenderMinLengthError.value = false
+  if (operate === 'whitespaceError') whitespaceError.value = false
 }
 function cancelParcel() {
   Object.keys(form.value).forEach(
@@ -1395,6 +1408,14 @@ onMounted(async () => {
               message="Error!!"
               styleType="red"
               operate="duplicateParcel"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="whitespaceError"
+              :titles="'Input cannot be empty or just whitespace.'"
+              message="Error!!"
+              styleType="red"
+              operate="whitespaceError"
               @closePopUp="closePopUp"
             />
           </div>
