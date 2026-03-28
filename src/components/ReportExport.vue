@@ -23,6 +23,18 @@ const props = defineProps({
   parcels: {
     type: Array,
     default: () => []
+  },
+  avgParcelReceived: {
+    type: Number,
+    default: 0
+  },
+  avgResidentGrowth: {
+    type: Number,
+    default: 0
+  },
+  members: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -37,6 +49,41 @@ const formatDateTime = (dateStr) => {
   const d = new Date(dateStr)
   return isNaN(d.getTime()) ? '-' : d.toLocaleString()
 }
+
+// Compute Historical Summaries from all data
+const parcelHistory = computed(() => {
+  const groups = {};
+  props.parcels.forEach(p => {
+    const d = new Date(p.receiveAt || p.createdAt || p.updatedAt);
+    if (isNaN(d.getTime())) return;
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const date = d.getDate();
+    const key = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+    const periodStr = `${date.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+    if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, received: 0, pickedUp: 0 };
+    groups[key].received++;
+    if (p.status === 'Picked Up' || p.status === 'PICKED_UP') groups[key].pickedUp++;
+  });
+  return Object.values(groups).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+});
+
+const residentHistory = computed(() => {
+  const groups = {};
+  props.members.forEach(m => {
+    const d = new Date(m.updateAt || m.createdAt);
+    if (isNaN(d.getTime())) return;
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const date = d.getDate();
+    const key = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+    const periodStr = `${date.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+    if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, joined: 0 };
+    groups[key].joined++;
+  });
+  return Object.values(groups).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+});
+
 // Compute overdue parcels based on dashboard logic (> 3 days)
 const overdueParcels = computed(() => {
   if (!props.parcels) return []
@@ -73,6 +120,7 @@ const handleExportExcel = () => {
   finalData.push(['', 'Picked Up', stats.pickedUpParcels]);
   finalData.push(['', 'Received / Awaiting', stats.awaitingParcels]);
   finalData.push(['', 'Overdue Parcels', stats.overdueParcels]);
+  finalData.push(['Analytics', 'Avg. Received per Period', props.avgParcelReceived.toFixed(2)]);
   finalData.push([]);
 
   if (recentParcels.length > 0) {
@@ -92,6 +140,16 @@ const handleExportExcel = () => {
     });
     finalData.push([]);
   }
+
+  // --- NEW: HISTORICAL DAILY BREAKDOWN (Parcels) ---
+  if (parcelHistory.value.length > 0) {
+    finalData.push(['HISTORICAL DAILY SUMMARY (Parcels)']);
+    finalData.push(['Date (DD/MM/YYYY)', 'Total Received', 'Total Picked Up']);
+    parcelHistory.value.forEach(h => {
+      finalData.push([h.period, h.received, h.pickedUp]);
+    });
+    finalData.push([]);
+  }
   mainSection++;
 
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
@@ -102,6 +160,7 @@ const handleExportExcel = () => {
   finalData.push(['', 'Pending Approvals', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
   finalData.push(['Communications', 'Total Announcements', stats.totalAnnouncements]);
+  finalData.push(['Analytics', 'Avg. New Residents per Period', props.avgResidentGrowth.toFixed(2)]);
   finalData.push([]);
 
   if (pending && pending.length > 0) {
@@ -119,6 +178,17 @@ const handleExportExcel = () => {
     topRes.forEach((r, i) => {
       finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
     });
+    finalData.push([]);
+  }
+
+  // --- NEW: HISTORICAL DAILY BREAKDOWN (Residents) ---
+  if (residentHistory.value.length > 0) {
+    finalData.push(['HISTORICAL DAILY SUMMARY (Residents)']);
+    finalData.push(['Date (DD/MM/YYYY)', 'Total Registered']);
+    residentHistory.value.forEach(h => {
+      finalData.push([h.period, h.joined]);
+    });
+    finalData.push([]);
   }
 
   const ws = XLSX.utils.aoa_to_sheet(finalData);
@@ -197,7 +267,8 @@ const handleExportPDF = () => {
     { item: 'Total Units (System)', val: stats.totalParcels },
     { item: 'Picked Up', val: stats.pickedUpParcels },
     { item: 'Received / Awaiting', val: stats.awaitingParcels },
-    { item: 'Overdue Parcels', val: stats.overdueParcels }
+    { item: 'Overdue Parcels', val: stats.overdueParcels },
+    { item: 'Avg. Received per Period', val: props.avgParcelReceived.toFixed(2) }
   ];
 
   doc.setFillColor(245, 247, 250);
@@ -259,6 +330,35 @@ const handleExportPDF = () => {
     y += 10;
   }
 
+  // 1.4 Historical Daily Table (Parcels)
+  if (parcelHistory.value.length > 0) {
+    drawSubHeader("Historical Daily Summary (Parcels)");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("DATE (DD/MM/YYYY)", 17, y);
+    doc.text("RECEIVED", 100, y, { align: 'right' });
+    doc.text("PICKED UP", 180, y, { align: 'right' });
+
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (parcelHistory.value.length * 7) + 8);
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    parcelHistory.value.forEach((h, idx) => {
+      checkPage(7);
+      doc.text(h.period, 17, y);
+      doc.text(h.received.toString(), 100, y, { align: 'right' });
+      doc.text(h.pickedUp.toString(), 180, y, { align: 'right' });
+      if (idx < parcelHistory.value.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 7;
+    });
+    y += 10;
+  }
+  y += 15;
+
   // 1.3 Overdue Parcels
   if (overdueList.length > 0) {
     drawSubHeader("Overdue Parcels (> 3 Days)");
@@ -307,7 +407,8 @@ const handleExportPDF = () => {
     { item: 'Active / Verified', val: stats.activeResidents },
     { item: 'Pending Approvals', val: stats.pendingResidents },
     { item: 'Inactive Residents', val: stats.inactiveResidents },
-    { item: 'Total System Announcements', val: stats.totalAnnouncements }
+    { item: 'Total System Announcements', val: stats.totalAnnouncements },
+    { item: 'Avg. New Residents per Period', val: props.avgResidentGrowth.toFixed(2) }
   ];
 
   doc.setFillColor(245, 247, 250);
@@ -400,6 +501,32 @@ const handleExportPDF = () => {
       }
       y += 8;
     });
+    y += 10;
+  }
+
+  // 2.3 Historical Daily Table (Residents)
+  if (residentHistory.value.length > 0) {
+    drawSubHeader("Historical Daily Summary (Residents)");
+    doc.setFillColor(245, 247, 250);
+    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("DATE (DD/MM/YYYY)", 17, y);
+    doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
+
+    doc.setDrawColor(180, 180, 180);
+    doc.rect(15, y - 5, 180, (residentHistory.value.length * 7) + 8);
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    residentHistory.value.forEach((h, idx) => {
+      checkPage(7);
+      doc.text(h.period, 17, y);
+      doc.text(h.joined.toString(), 180, y, { align: 'right' });
+      if (idx < residentHistory.value.length - 1) {
+        doc.setDrawColor(230, 230, 230);
+        doc.line(15, y + 2, 195, y + 2);
+      }
+      y += 7;
+    });
   }
 
   doc.save(`Dormitory_Dashboard_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -452,6 +579,30 @@ defineExpose({
           <tr>
             <td>Overdue Parcels</td>
             <td>{{ stats.overdueParcels }}</td>
+          </tr>
+          <tr>
+            <td class="font-bold">Avg. Received per Period</td>
+            <td>{{ avgParcelReceived.toFixed(2) }} units</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-section" v-if="parcelHistory.length > 0">
+      <h3 class="print-section-title">Historical Daily Summary (Parcels)</h3>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Date (DD/MM/YYYY)</th>
+            <th>Total Received</th>
+            <th>Total Picked Up</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="h in parcelHistory" :key="h.period">
+            <td>{{ h.period }}</td>
+            <td>{{ h.received }}</td>
+            <td>{{ h.pickedUp }}</td>
           </tr>
         </tbody>
       </table>
@@ -533,6 +684,28 @@ defineExpose({
           <tr>
             <td>Total System Announcements</td>
             <td>{{ stats.totalAnnouncements }}</td>
+          </tr>
+          <tr>
+            <td class="font-bold">Avg. New Residents per Period</td>
+            <td>{{ avgResidentGrowth.toFixed(2) }} residents</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-section" v-if="residentHistory.length > 0">
+      <h3 class="print-section-title">Historical Daily Summary (Residents)</h3>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Date (DD/MM/YYYY)</th>
+            <th>Total Registered</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="h in residentHistory" :key="h.period">
+            <td>{{ h.period }}</td>
+            <td>{{ h.joined }}</td>
           </tr>
         </tbody>
       </table>

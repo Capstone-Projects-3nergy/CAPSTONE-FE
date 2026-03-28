@@ -944,6 +944,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
       :topResidents="topResidents"
       :announcements="dashboardStore.announcements"
       :parcels="getMappedParcels"
+      :avgParcelReceived="avgParcelReceived"
+      :avgResidentGrowth="avgResidentGrowth"
+      :members="dashboardStore.members"
     />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
