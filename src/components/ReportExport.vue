@@ -58,13 +58,24 @@ const parcelHistory = computed(() => {
     if (isNaN(d.getTime())) return;
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
-    const key = `${year}-${month.toString().padStart(2, '0')}`;
-    const periodStr = `${month.toString().padStart(2, '0')}/${year}`;
-    if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, received: 0, pickedUp: 0 };
-    groups[key].received++;
-    if (p.status === 'Picked Up' || p.status === 'PICKED_UP') groups[key].pickedUp++;
+    
+    if (!groups[year]) groups[year] = { year, totalReceived: 0, totalPickedUp: 0, months: {} };
+    if (!groups[year].months[month]) {
+      groups[year].months[month] = { month: month, monthStr: `${month.toString().padStart(2, '0')}/${year}`, received: 0, pickedUp: 0 };
+    }
+    
+    groups[year].months[month].received++;
+    groups[year].totalReceived++;
+    
+    if (p.status === 'Picked Up' || p.status === 'PICKED_UP') {
+      groups[year].months[month].pickedUp++;
+      groups[year].totalPickedUp++;
+    }
   });
-  return Object.values(groups).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+  return Object.values(groups)
+    .sort((a, b) => b.year - a.year)
+    .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
 });
 
 const residentHistory = computed(() => {
@@ -74,12 +85,19 @@ const residentHistory = computed(() => {
     if (isNaN(d.getTime())) return;
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
-    const key = `${year}-${month.toString().padStart(2, '0')}`;
-    const periodStr = `${month.toString().padStart(2, '0')}/${year}`;
-    if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, joined: 0 };
-    groups[key].joined++;
+    
+    if (!groups[year]) groups[year] = { year, totalJoined: 0, months: {} };
+    if (!groups[year].months[month]) {
+      groups[year].months[month] = { month: month, monthStr: `${month.toString().padStart(2, '0')}/${year}`, joined: 0 };
+    }
+    
+    groups[year].months[month].joined++;
+    groups[year].totalJoined++;
   });
-  return Object.values(groups).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+  return Object.values(groups)
+    .sort((a, b) => b.year - a.year)
+    .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
 });
 
 // Compute overdue parcels based on dashboard logic (> 3 days)
@@ -141,12 +159,15 @@ const handleExportExcel = () => {
 
   // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Parcels) ---
   if (parcelHistory.value.length > 0) {
-    finalData.push(['HISTORICAL MONTHLY SUMMARY (Parcels)']);
-    finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up']);
-    parcelHistory.value.forEach(h => {
-      finalData.push([h.period, h.received, h.pickedUp]);
+    parcelHistory.value.forEach(yData => {
+      finalData.push([`HISTORICAL MONTHLY SUMMARY (Parcels) - YEAR ${yData.year}`]);
+      finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up']);
+      yData.months.forEach(h => {
+        finalData.push([h.monthStr, h.received, h.pickedUp]);
+      });
+      finalData.push(['TOTAL', yData.totalReceived, yData.totalPickedUp]);
+      finalData.push([]);
     });
-    finalData.push([]);
   }
   mainSection++;
 
@@ -181,12 +202,15 @@ const handleExportExcel = () => {
 
   // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Residents) ---
   if (residentHistory.value.length > 0) {
-    finalData.push(['HISTORICAL MONTHLY SUMMARY (Residents)']);
-    finalData.push(['Month (MM/YYYY)', 'Total Registered']);
-    residentHistory.value.forEach(h => {
-      finalData.push([h.period, h.joined]);
+    residentHistory.value.forEach(yData => {
+      finalData.push([`HISTORICAL MONTHLY SUMMARY (Residents) - YEAR ${yData.year}`]);
+      finalData.push(['Month (MM/YYYY)', 'Total Registered']);
+      yData.months.forEach(h => {
+        finalData.push([h.monthStr, h.joined]);
+      });
+      finalData.push(['TOTAL', yData.totalJoined]);
+      finalData.push([]);
     });
-    finalData.push([]);
   }
 
   const ws = XLSX.utils.aoa_to_sheet(finalData);
@@ -330,28 +354,39 @@ const handleExportPDF = () => {
 
   // 1.4 Historical Monthly Table (Parcels)
   if (parcelHistory.value.length > 0) {
-    drawSubHeader("Historical Monthly Summary (Parcels)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("MONTH (MM/YYYY)", 17, y);
-    doc.text("RECEIVED", 100, y, { align: 'right' });
-    doc.text("PICKED UP", 180, y, { align: 'right' });
+    parcelHistory.value.forEach((yData, yIdx) => {
+      drawSubHeader(`Historical Monthly Summary (Parcels) - ${yData.year}`);
+      doc.setFillColor(245, 247, 250);
+      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.text("MONTH (MM/YYYY)", 17, y);
+      doc.text("RECEIVED", 100, y, { align: 'right' });
+      doc.text("PICKED UP", 180, y, { align: 'right' });
 
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (parcelHistory.value.length * 7) + 8);
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    parcelHistory.value.forEach((h, idx) => {
-      checkPage(7);
-      doc.text(h.period, 17, y);
-      doc.text(h.received.toString(), 100, y, { align: 'right' });
-      doc.text(h.pickedUp.toString(), 180, y, { align: 'right' });
-      if (idx < parcelHistory.value.length - 1) {
+      doc.setDrawColor(180, 180, 180);
+      const rowsCount = yData.months.length + 1; // +1 for Total
+      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      
+      yData.months.forEach(h => {
+        checkPage(7);
+        doc.text(h.monthStr, 17, y);
+        doc.text(h.received.toString(), 100, y, { align: 'right' });
+        doc.text(h.pickedUp.toString(), 180, y, { align: 'right' });
         doc.setDrawColor(230, 230, 230);
         doc.line(15, y + 2, 195, y + 2);
-      }
+        y += 7;
+      });
+
+      // Render Total row
+      doc.setFont("helvetica", "bold");
+      doc.text("TOTAL", 17, y);
+      doc.text(yData.totalReceived.toString(), 100, y, { align: 'right' });
+      doc.text(yData.totalPickedUp.toString(), 180, y, { align: 'right' });
       y += 7;
+      
+      if (yIdx < parcelHistory.value.length - 1) y += 5;
     });
     y += 10;
   }
@@ -504,26 +539,36 @@ const handleExportPDF = () => {
 
   // 2.3 Historical Monthly Table (Residents)
   if (residentHistory.value.length > 0) {
-    drawSubHeader("Historical Monthly Summary (Residents)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("MONTH (MM/YYYY)", 17, y);
-    doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
+    residentHistory.value.forEach((yData, yIdx) => {
+      drawSubHeader(`Historical Monthly Summary (Residents) - ${yData.year}`);
+      doc.setFillColor(245, 247, 250);
+      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.text("MONTH (MM/YYYY)", 17, y);
+      doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
 
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (residentHistory.value.length * 7) + 8);
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    residentHistory.value.forEach((h, idx) => {
-      checkPage(7);
-      doc.text(h.period, 17, y);
-      doc.text(h.joined.toString(), 180, y, { align: 'right' });
-      if (idx < residentHistory.value.length - 1) {
+      doc.setDrawColor(180, 180, 180);
+      const rowsCount = yData.months.length + 1; // +1 for Total
+      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      
+      yData.months.forEach(h => {
+        checkPage(7);
+        doc.text(h.monthStr, 17, y);
+        doc.text(h.joined.toString(), 180, y, { align: 'right' });
         doc.setDrawColor(230, 230, 230);
         doc.line(15, y + 2, 195, y + 2);
-      }
+        y += 7;
+      });
+
+      // Render Total row
+      doc.setFont("helvetica", "bold");
+      doc.text("TOTAL", 17, y);
+      doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
       y += 7;
+      
+      if (yIdx < residentHistory.value.length - 1) y += 5;
     });
   }
 
@@ -586,25 +631,33 @@ defineExpose({
       </table>
     </div>
 
-    <div class="print-section" v-if="parcelHistory.length > 0">
-      <h3 class="print-section-title">Historical Monthly Summary (Parcels)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Month (MM/YYYY)</th>
-            <th>Total Received</th>
-            <th>Total Picked Up</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="h in parcelHistory" :key="h.period">
-            <td>{{ h.period }}</td>
-            <td>{{ h.received }}</td>
-            <td>{{ h.pickedUp }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-if="parcelHistory.length > 0">
+      <div class="print-section" v-for="yData in parcelHistory" :key="'parcel-' + yData.year">
+        <h3 class="print-section-title">Historical Monthly Summary (Parcels) - Year {{ yData.year }}</h3>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Month (MM/YYYY)</th>
+              <th>Total Received</th>
+              <th>Total Picked Up</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="h in yData.months" :key="h.monthStr">
+              <td>{{ h.monthStr }}</td>
+              <td>{{ h.received }}</td>
+              <td>{{ h.pickedUp }}</td>
+            </tr>
+            <!-- TOTAL ROW -->
+            <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+              <td>TOTAL</td>
+              <td>{{ yData.totalReceived }}</td>
+              <td>{{ yData.totalPickedUp }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </template>
 
     <div class="print-section" v-if="parcels.length > 0">
       <h3 class="print-section-title">Recent Parcels (Latest Activity)</h3>
@@ -691,23 +744,30 @@ defineExpose({
       </table>
     </div>
 
-    <div class="print-section" v-if="residentHistory.length > 0">
-      <h3 class="print-section-title">Historical Monthly Summary (Residents)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Month (MM/YYYY)</th>
-            <th>Total Registered</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="h in residentHistory" :key="h.period">
-            <td>{{ h.period }}</td>
-            <td>{{ h.joined }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-if="residentHistory.length > 0">
+      <div class="print-section" v-for="yData in residentHistory" :key="'resident-' + yData.year">
+        <h3 class="print-section-title">Historical Monthly Summary (Residents) - Year {{ yData.year }}</h3>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Month (MM/YYYY)</th>
+              <th>Total Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="h in yData.months" :key="h.monthStr">
+              <td>{{ h.monthStr }}</td>
+              <td>{{ h.joined }}</td>
+            </tr>
+            <!-- TOTAL ROW -->
+            <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+              <td>TOTAL</td>
+              <td>{{ yData.totalJoined }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </template>
 
     <div class="print-section" v-if="pendingResidents.length > 0">
       <h3 class="print-section-title">Pending Accounts (Awaiting Verification)</h3>
