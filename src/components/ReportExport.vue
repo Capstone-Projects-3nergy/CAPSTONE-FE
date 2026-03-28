@@ -128,10 +128,10 @@ const handleExportExcel = () => {
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. PARCEL MANAGEMENT OVERVIEW`]);
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
-  finalData.push(['Parcels', 'Total Units (System)', props.overallStats.totalParcels]);
-  finalData.push(['', 'Picked Up', props.overallStats.pickedUpParcels]);
+  finalData.push(['Parcels', 'Picked Up', props.overallStats.pickedUpParcels]);
   finalData.push(['', 'Received / Awaiting', props.overallStats.awaitingParcels]);
   finalData.push(['', 'Overdue Parcels', props.overallStats.overdueParcels]);
+  finalData.push(['', 'TOTAL UNITS (SYSTEM)', props.overallStats.totalParcels]);
   finalData.push([]);
 
   if (recentParcels.length > 0) {
@@ -171,10 +171,10 @@ const handleExportExcel = () => {
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
-  finalData.push(['Residents', 'Total Residents', stats.activeResidents + stats.inactiveResidents]);
-  finalData.push(['', 'Active / Verified', stats.activeResidents]);
+  finalData.push(['Residents', 'Active / Verified', stats.activeResidents]);
   finalData.push(['', 'Pending Approvals', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
+  finalData.push(['', 'TOTAL RESIDENTS', stats.activeResidents + stats.inactiveResidents]);
   finalData.push([]);
 
   if (pending && pending.length > 0) {
@@ -285,7 +285,6 @@ const handleExportPDF = () => {
   doc.setTextColor(0, 0, 0);
   
   const parcelStats = [
-    { item: 'Total Units (System)', val: props.overallStats.totalParcels },
     { item: 'Picked Up', val: props.overallStats.pickedUpParcels },
     { item: 'Received / Awaiting', val: props.overallStats.awaitingParcels },
     { item: 'Overdue Parcels', val: props.overallStats.overdueParcels }
@@ -298,21 +297,25 @@ const handleExportPDF = () => {
   doc.text("COUNT / VALUE", 160, y);
   
   doc.setDrawColor(180, 180, 180);
-  doc.rect(15, y - 5, 180, (parcelStats.length * 8) + 8);
+  const parcelRowsCount = parcelStats.length + 1; // +1 for Total
+  doc.rect(15, y - 5, 180, (parcelRowsCount * 8) + 8);
   doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (parcelStats.length * 8) + 8);
+  doc.line(155, y - 5, 155, y - 5 + (parcelRowsCount * 8) + 8);
 
   y += 8;
   doc.setFont("helvetica", "normal");
-  parcelStats.forEach((row, idx) => {
+  parcelStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    if (idx < parcelStats.length - 1) {
-      doc.setDrawColor(230, 230, 230);
-      doc.line(15, y + 2, 195, y + 2);
-    }
+    doc.setDrawColor(230, 230, 230);
+    doc.line(15, y + 2, 195, y + 2);
     y += 8;
   });
+
+  // Render Total row
+  doc.setFont("helvetica", "bold");
+  doc.text("TOTAL UNITS (SYSTEM)", 18, y);
+  doc.text(props.overallStats.totalParcels.toString(), 190, y, { align: 'right' });
   y += 10;
 
   // 1.2 Recent Parcels
@@ -438,7 +441,6 @@ const handleExportPDF = () => {
   doc.setTextColor(0, 0, 0);
   
   const residentStats = [
-    { item: 'Total Residents', val: stats.activeResidents + stats.inactiveResidents },
     { item: 'Active / Verified', val: stats.activeResidents },
     { item: 'Pending Approvals', val: stats.pendingResidents },
     { item: 'Inactive Residents', val: stats.inactiveResidents }
@@ -451,21 +453,24 @@ const handleExportPDF = () => {
   doc.text("COUNT / VALUE", 160, y);
   
   doc.setDrawColor(180, 180, 180);
-  doc.rect(15, y - 5, 180, (residentStats.length * 8) + 8);
+  const residentRowsCount = residentStats.length + 1; // +1 for Total
+  doc.rect(15, y - 5, 180, (residentRowsCount * 8) + 8);
   doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (residentStats.length * 8) + 8);
+  doc.line(155, y - 5, 155, y - 5 + (residentRowsCount * 8) + 8);
 
   y += 8;
   doc.setFont("helvetica", "normal");
-  residentStats.forEach((row, idx) => {
+  residentStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    if (idx < residentStats.length - 1) {
-      doc.setDrawColor(230, 230, 230);
-      doc.line(15, y + 2, 195, y + 2);
-    }
+    doc.setDrawColor(230, 230, 230);
+    doc.line(15, y + 2, 195, y + 2);
     y += 8;
   });
+
+  doc.setFont("helvetica", "bold");
+  doc.text("TOTAL RESIDENTS", 18, y);
+  doc.text((stats.activeResidents + stats.inactiveResidents).toString(), 190, y, { align: 'right' });
   y += 10;
 
   // 2.2 Pending Accounts
@@ -614,10 +619,6 @@ defineExpose({
         </thead>
         <tbody>
           <tr>
-            <td>Total Units (System)</td>
-            <td>{{ overallStats.totalParcels }}</td>
-          </tr>
-          <tr>
             <td>Picked Up</td>
             <td>{{ overallStats.pickedUpParcels }}</td>
           </tr>
@@ -628,6 +629,11 @@ defineExpose({
           <tr>
             <td>Overdue Parcels</td>
             <td>{{ overallStats.overdueParcels }}</td>
+          </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td>TOTAL UNITS (SYSTEM)</td>
+            <td>{{ overallStats.totalParcels }}</td>
           </tr>
         </tbody>
       </table>
@@ -729,10 +735,6 @@ defineExpose({
         </thead>
         <tbody>
           <tr>
-            <td>Total Residents</td>
-            <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
-          </tr>
-          <tr>
             <td>Active / Verified</td>
             <td>{{ stats.activeResidents }}</td>
           </tr>
@@ -743,6 +745,11 @@ defineExpose({
           <tr>
             <td>Inactive Residents</td>
             <td>{{ stats.inactiveResidents }}</td>
+          </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td>TOTAL RESIDENTS</td>
+            <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
           </tr>
         </tbody>
       </table>
