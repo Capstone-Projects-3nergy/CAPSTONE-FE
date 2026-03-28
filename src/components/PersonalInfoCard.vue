@@ -37,6 +37,18 @@ const showUnlinkSuccessPopup = ref(false)
 const showUnlinkConfirm = ref(false)
 const loadingEmail = ref(false)
 const lastEmailSentTime = ref(null)
+const currentTime = ref(Date.now())
+let globalTimerId = null
+
+onMounted(() => {
+  globalTimerId = setInterval(() => {
+    currentTime.value = Date.now()
+  }, 10000)
+})
+
+onUnmounted(() => {
+  if (globalTimerId) clearInterval(globalTimerId)
+})
 
 const props = defineProps({
   title: { type: String, default: 'Personal Information' },
@@ -473,7 +485,21 @@ const currentUserId = computed(() => {
 const isResendCooldown = computed(() => {
   if (!lastEmailSentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
-  return (Date.now() - lastEmailSentTime.value) < oneDay
+  return (currentTime.value - lastEmailSentTime.value) < oneDay
+})
+
+const cooldownEmailDisplay = computed(() => {
+  if (!lastEmailSentTime.value) return ''
+  const oneDay = 24 * 60 * 60 * 1000
+  const diffMs = oneDay - (currentTime.value - lastEmailSentTime.value)
+  if (diffMs <= 0) return ''
+  const mins = Math.ceil(diffMs / (1000 * 60))
+  const hrs = Math.ceil(diffMs / (1000 * 60 * 60))
+  if (diffMs < 60 * 60 * 1000) {
+    return `${mins} ${mins > 1 ? 'minutes' : 'minute'}`
+  } else {
+    return `${hrs} ${hrs > 1 ? 'hours' : 'hour'}`
+  }
 })
 
 const isEmailDisabled = computed(() => {
@@ -1364,7 +1390,7 @@ const confirmUnlinkAction = async () => {
                             <polyline points="12 6 12 12 16 14"></polyline>
                            </svg>
                         </div>
-                        <span class="text-[10px] sm:text-xs font-bold leading-snug">Activation email sent. You can resend it again on the next day</span>
+                        <span class="text-[10px] sm:text-xs font-bold leading-snug">Activation email sent. You can resend it again in {{ cooldownEmailDisplay }}</span>
                       </div>
                     </transition>
                   </div>

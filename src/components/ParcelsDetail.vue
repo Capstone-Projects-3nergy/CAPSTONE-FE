@@ -49,24 +49,52 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const parcel = ref(null)
+
+// Real-time update logic
+const currentTime = ref(Date.now())
+let timerId = null
+
+onMounted(() => {
+  timerId = setInterval(() => {
+    currentTime.value = Date.now()
+  }, 10000) // Update every 10 seconds
+})
+
+onUnmounted(() => {
+  if (timerId) clearInterval(timerId)
+})
+
 const isOverdue = computed(() => {
   if (!parcel.value || !parcel.value.receivedAt) return false
   const status = parcel.value.status?.toUpperCase() || ''
   if (!['RECEIVED', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
   const receivedDate = new Date(parcel.value.receivedAt)
-  const currentDate = new Date()
-  const diffTime = Math.abs(currentDate - receivedDate)
+  const diffTime = Math.abs(currentTime.value - receivedDate)
   const diffHours = diffTime / (1000 * 60 * 60)
   return diffHours > 24
 })
 
-const overdueHours = computed(() => {
-  if (!parcel.value || !parcel.value.receivedAt) return 0
+const overdueTimeDisplay = computed(() => {
+  if (!parcel.value || !parcel.value.receivedAt) return ''
   const receivedDate = new Date(parcel.value.receivedAt)
-  const now = new Date()
-  const diffTime = Math.abs(now - receivedDate)
-  const totalHours = Math.floor(diffTime / (1000 * 60 * 60))
-  return Math.max(1, totalHours - 24)
+  const diffTimeMs = Math.abs(currentTime.value - receivedDate)
+  const thresholdMs = 24 * 60 * 60 * 1000
+  const overdueMs = diffTimeMs - thresholdMs
+  
+  if (overdueMs <= 0) return ''
+
+  const overdueMinutes = Math.floor(overdueMs / (1000 * 60))
+  const overdueHours = Math.floor(overdueMs / (1000 * 60 * 60))
+  const overdueDays = Math.floor(overdueMs / (1000 * 60 * 60 * 24))
+
+  if (overdueDays >= 1) {
+    return `${overdueDays} ${overdueDays > 1 ? 'days' : 'day'}`
+  } else if (overdueHours >= 1) {
+    return `${overdueHours} ${overdueHours > 1 ? 'hours' : 'hour'}`
+  } else {
+    const mins = Math.max(1, overdueMinutes)
+    return `${mins} ${mins > 1 ? 'minutes' : 'minute'}`
+  }
 })
 
 const activeTab = ref('info')
@@ -86,14 +114,24 @@ const lastNotifySentTime = ref(null)
 const isNotifyDisabled = computed(() => {
   if (!lastNotifySentTime.value) return false
   const oneDay = 24 * 60 * 60 * 1000
-  return (Date.now() - lastNotifySentTime.value) < oneDay
+  return (currentTime.value - lastNotifySentTime.value) < oneDay
 })
 
-const cooldownHoursRemaining = computed(() => {
-  if (!lastNotifySentTime.value) return 0
+const cooldownTimeDisplay = computed(() => {
+  if (!lastNotifySentTime.value) return ''
   const oneDay = 24 * 60 * 60 * 1000
-  const diff = oneDay - (Date.now() - lastNotifySentTime.value)
-  return Math.ceil(diff / (1000 * 60 * 60))
+  const diffMs = oneDay - (currentTime.value - lastNotifySentTime.value)
+  
+  if (diffMs <= 0) return ''
+
+  const mins = Math.ceil(diffMs / (1000 * 60))
+  const hrs = Math.ceil(diffMs / (1000 * 60 * 60))
+
+  if (diffMs < 60 * 60 * 1000) {
+    return `${mins} ${mins > 1 ? 'minutes' : 'minute'}`
+  } else {
+    return `${hrs} ${hrs > 1 ? 'hours' : 'hour'}`
+  }
 })
 
 const checkLastNotifySent = () => {
@@ -681,7 +719,7 @@ function formatDateTime(datetimeStr) {
                         <div>
                            <h5 class="text-base sm:text-2xl font-black text-gray-900 mb-1 sm:mb-2 leading-tight">Send Overdue Reminder</h5>
                            <p class="text-gray-500 font-medium text-xs sm:text-base sm:max-w-md leading-relaxed">
-                           This parcel is <strong>{{ overdueHours }} {{ overdueHours > 1 ? 'hours' : 'hour' }}</strong> overdue. Remind the resident now.
+                           This parcel is <strong>{{ overdueTimeDisplay }}</strong> overdue. Remind the resident now.
                            </p>
                         </div>
                     </div>
@@ -710,7 +748,7 @@ function formatDateTime(datetimeStr) {
                               </svg>
                            </div>
                            <span class="text-xs font-bold tracking-tight">
-                            Reminder recently sent. You can resend it again in {{ cooldownHoursRemaining }} {{ cooldownHoursRemaining > 1 ? 'hours' : 'hour' }}.
+                            Reminder recently sent. You can resend it again in {{ cooldownTimeDisplay }}.
                            </span>
                         </div>
                       </transition>
