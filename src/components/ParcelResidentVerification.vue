@@ -290,12 +290,27 @@ const submitVerification = async () => {
             const name = selectedCompany.companyName.toLowerCase()
             const tracking = item.trackingNumber
             let isValid = true
-            if ((name.includes('thailand post') || name.includes('thailandpost')) && !/^[A-Z]{2}\d{9}TH$/.test(tracking)) isValid = false
-            else if (name.includes('kerry') && !/^(KEX)?[A-Z]\d{9,12}$/.test(tracking)) isValid = false
-            else if (name.includes('flash') && !/^TH\d{11}[A-Z]$/.test(tracking)) isValid = false
-            else if ((name.includes('j&t') || name.includes('jt')) && !/^JD\d{13}$/.test(tracking)) isValid = false
-            else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking)) isValid = false
-            else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking)) isValid = false
+            if (
+              (name.includes('thailand post') || name.includes('thailandpost')) &&
+              !/^[A-Z]{2}\d{9}TH$/.test(tracking)
+            )
+              isValid = false
+            else if (
+              name.includes('kerry') &&
+              !/^(KEX[A-Z]\d{9,12}|KEX\d{10,13}|[A-Z]\d{9,12})$/i.test(tracking)
+            )
+              isValid = false
+            else if (
+              name.includes('flash') &&
+              !/^TH\d{11}[A-Z]$/i.test(tracking)
+            )
+              isValid = false
+            else if ((name.includes('j&t') || name.includes('jt')) && !/^(JD\d{13}|\d{12})$/i.test(tracking))
+              isValid = false
+            else if (name.includes('dhl') && !/^\d{10,12}$/.test(tracking))
+              isValid = false
+            else if (name.includes('fedex') && !/^\d{12,22}$/.test(tracking))
+              isValid = false
 
             if (!isValid) {
                 trackingNumberFormatError.value = true
