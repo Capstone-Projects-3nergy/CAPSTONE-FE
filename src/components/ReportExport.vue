@@ -58,9 +58,8 @@ const parcelHistory = computed(() => {
     if (isNaN(d.getTime())) return;
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
-    const date = d.getDate();
-    const key = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-    const periodStr = `${date.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+    const key = `${year}-${month.toString().padStart(2, '0')}`;
+    const periodStr = `${month.toString().padStart(2, '0')}/${year}`;
     if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, received: 0, pickedUp: 0 };
     groups[key].received++;
     if (p.status === 'Picked Up' || p.status === 'PICKED_UP') groups[key].pickedUp++;
@@ -75,9 +74,8 @@ const residentHistory = computed(() => {
     if (isNaN(d.getTime())) return;
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
-    const date = d.getDate();
-    const key = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-    const periodStr = `${date.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+    const key = `${year}-${month.toString().padStart(2, '0')}`;
+    const periodStr = `${month.toString().padStart(2, '0')}/${year}`;
     if (!groups[key]) groups[key] = { sortKey: key, period: periodStr, joined: 0 };
     groups[key].joined++;
   });
@@ -141,10 +139,10 @@ const handleExportExcel = () => {
     finalData.push([]);
   }
 
-  // --- NEW: HISTORICAL DAILY BREAKDOWN (Parcels) ---
+  // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Parcels) ---
   if (parcelHistory.value.length > 0) {
-    finalData.push(['HISTORICAL DAILY SUMMARY (Parcels)']);
-    finalData.push(['Date (DD/MM/YYYY)', 'Total Received', 'Total Picked Up']);
+    finalData.push(['HISTORICAL MONTHLY SUMMARY (Parcels)']);
+    finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up']);
     parcelHistory.value.forEach(h => {
       finalData.push([h.period, h.received, h.pickedUp]);
     });
@@ -181,10 +179,10 @@ const handleExportExcel = () => {
     finalData.push([]);
   }
 
-  // --- NEW: HISTORICAL DAILY BREAKDOWN (Residents) ---
+  // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Residents) ---
   if (residentHistory.value.length > 0) {
-    finalData.push(['HISTORICAL DAILY SUMMARY (Residents)']);
-    finalData.push(['Date (DD/MM/YYYY)', 'Total Registered']);
+    finalData.push(['HISTORICAL MONTHLY SUMMARY (Residents)']);
+    finalData.push(['Month (MM/YYYY)', 'Total Registered']);
     residentHistory.value.forEach(h => {
       finalData.push([h.period, h.joined]);
     });
@@ -330,13 +328,13 @@ const handleExportPDF = () => {
     y += 10;
   }
 
-  // 1.4 Historical Daily Table (Parcels)
+  // 1.4 Historical Monthly Table (Parcels)
   if (parcelHistory.value.length > 0) {
-    drawSubHeader("Historical Daily Summary (Parcels)");
+    drawSubHeader("Historical Monthly Summary (Parcels)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("DATE (DD/MM/YYYY)", 17, y);
+    doc.text("MONTH (MM/YYYY)", 17, y);
     doc.text("RECEIVED", 100, y, { align: 'right' });
     doc.text("PICKED UP", 180, y, { align: 'right' });
 
@@ -504,13 +502,13 @@ const handleExportPDF = () => {
     y += 10;
   }
 
-  // 2.3 Historical Daily Table (Residents)
+  // 2.3 Historical Monthly Table (Residents)
   if (residentHistory.value.length > 0) {
-    drawSubHeader("Historical Daily Summary (Residents)");
+    drawSubHeader("Historical Monthly Summary (Residents)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("DATE (DD/MM/YYYY)", 17, y);
+    doc.text("MONTH (MM/YYYY)", 17, y);
     doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
 
     doc.setDrawColor(180, 180, 180);
@@ -589,11 +587,11 @@ defineExpose({
     </div>
 
     <div class="print-section" v-if="parcelHistory.length > 0">
-      <h3 class="print-section-title">Historical Daily Summary (Parcels)</h3>
+      <h3 class="print-section-title">Historical Monthly Summary (Parcels)</h3>
       <table class="print-table">
         <thead>
           <tr>
-            <th>Date (DD/MM/YYYY)</th>
+            <th>Month (MM/YYYY)</th>
             <th>Total Received</th>
             <th>Total Picked Up</th>
           </tr>
@@ -694,11 +692,11 @@ defineExpose({
     </div>
 
     <div class="print-section" v-if="residentHistory.length > 0">
-      <h3 class="print-section-title">Historical Daily Summary (Residents)</h3>
+      <h3 class="print-section-title">Historical Monthly Summary (Residents)</h3>
       <table class="print-table">
         <thead>
           <tr>
-            <th>Date (DD/MM/YYYY)</th>
+            <th>Month (MM/YYYY)</th>
             <th>Total Registered</th>
           </tr>
         </thead>
