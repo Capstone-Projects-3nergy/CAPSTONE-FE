@@ -119,6 +119,7 @@ const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 const showDateError = ref(false)
 const whitespaceError = ref(false)
+const titleDuplicateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
@@ -192,6 +193,7 @@ const closePopUp = (operate) => {
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
   if (operate === 'dateError') { showDateError.value = false }
   if (operate === 'whitespaceError') { whitespaceError.value = false }
+  if (operate === 'titleDuplicateError') { titleDuplicateError.value = false }
 }
 
 const MAX_TITLE_LENGTH = 100
@@ -342,6 +344,16 @@ const submitAnnouncement = async () => {
     return
   }
 
+  // Duplicate Title check
+  const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
+  if (isDuplicate) {
+    titleDuplicateError.value = true
+    setTimeout(() => {
+      titleDuplicateError.value = false
+    }, 10000)
+    return
+  }
+
   // Whitespace check
   if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
     whitespaceError.value = true
@@ -447,6 +459,13 @@ const saveDraft = async () => {
   // Whitespace check
   if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
     whitespaceError.value = true
+    hasError = true
+  }
+
+  // Duplicate Title check
+  const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
+  if (isDuplicate) {
+    titleDuplicateError.value = true
     hasError = true
   }
 
@@ -802,6 +821,14 @@ const returnLoginPage = async () => {
               message="Error!!"
               styleType="red"
               operate="whitespaceError"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="titleDuplicateError"
+              :titles="'This announcement title already exists.'"
+              message="Error!!"
+              styleType="red"
+              operate="titleDuplicateError"
               @closePopUp="closePopUp"
             />
           </div>

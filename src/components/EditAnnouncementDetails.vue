@@ -105,6 +105,7 @@ const dateError = ref(false)
 const whitespaceError = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
+const titleDuplicateError = ref(false)
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -359,6 +360,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'whitespaceError') {
     whitespaceError.value = false
+  }
+  if (operate === 'titleDuplicateError') {
+    titleDuplicateError.value = false
   }
 }
 
@@ -677,6 +681,21 @@ const handleSave = async () => {
     showPinLimitAlert.value = true
     setTimeout(() => {
     showPinLimitAlert.value = false
+    }, 10000)
+    return
+  }
+
+  // Duplicate Title check
+  const aidParam = route.params.aid
+  const currentAid = aidParam ? Number(aidParam) : null
+  const isDuplicate = announcementStore.announcements.some(a => 
+    a.id !== currentAid && 
+    a.title.trim().toLowerCase() === announcementForm.title.trim().toLowerCase()
+  )
+  if (isDuplicate) {
+    titleDuplicateError.value = true
+    setTimeout(() => {
+      titleDuplicateError.value = false
     }, 10000)
     return
   }
@@ -1081,6 +1100,14 @@ const showProfileStaffPage = async function () {
               message="Error!!"
               styleType="red"
               operate="whitespaceError"
+              @closePopUp="closePopUp"
+            />
+            <AlertPopUp
+              v-if="titleDuplicateError"
+              :titles="'This announcement title already exists.'"
+              message="Error!!"
+              styleType="red"
+              operate="titleDuplicateError"
               @closePopUp="closePopUp"
             />
           </div>
