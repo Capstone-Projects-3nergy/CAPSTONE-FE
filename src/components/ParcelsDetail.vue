@@ -710,7 +710,7 @@ function formatDateTime(datetimeStr) {
                               </svg>
                            </div>
                            <span class="text-xs font-bold tracking-tight">
-                            Reminder recently sent. You can resend it again tomorrow or in {{ cooldownHoursRemaining }} {{ cooldownHoursRemaining > 1 ? 'hours' : 'hour' }}.
+                            Reminder recently sent. You can resend it again in {{ cooldownHoursRemaining }} {{ cooldownHoursRemaining > 1 ? 'hours' : 'hour' }}.
                            </span>
                         </div>
                       </transition>
