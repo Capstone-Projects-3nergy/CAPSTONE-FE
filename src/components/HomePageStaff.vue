@@ -1540,7 +1540,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <!-- Left: Icon + Info -->
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
                     <div class="flex-shrink-0">
-                      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100/50 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-inner">
+                      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100/50 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-inner">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
@@ -1613,7 +1613,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               
               <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-y-auto pr-1">
                 <!-- Overdue Item -->
-                <div v-for="parcel in overdueParcelsList.slice(0, 4)" :key="parcel.id" 
+                <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center justify-between border border-red-50 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
                      @click="showParcelDetail(parcel.id, 'status')">
                   
@@ -1623,9 +1623,10 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
                     <!-- Modern Overdue Badge (Compact) -->
                     <div class="relative flex-shrink-0">
-                      <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
-                        <span class="text-xs font-black leading-none">{{ calculateOverdueHours(parcel.receiveAt) }}</span>
-                        <span class="text-[7px] font-black tracking-tighter mt-1 opacity-70">hours</span>
+                      <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 text-red-600 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
                       </div>
                     </div>
 
