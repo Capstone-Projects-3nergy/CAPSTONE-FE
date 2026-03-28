@@ -20,17 +20,13 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  overallStats: {
+    type: Object,
+    required: true
+  },
   parcels: {
     type: Array,
     default: () => []
-  },
-  avgParcelReceived: {
-    type: Number,
-    default: 0
-  },
-  avgResidentGrowth: {
-    type: Number,
-    default: 0
   },
   members: {
     type: Array,
@@ -104,12 +100,12 @@ const residentHistory = computed(() => {
 const overdueParcels = computed(() => {
   if (!props.parcels) return []
   const now = new Date()
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+  const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000
   return props.parcels.filter(p => {
     if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
     const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
     if (isNaN(date.getTime())) return false
-    return (now - date) > threeDaysMs
+    return (now - date) > overdueThresholdMs
   }).sort((a, b) => new Date(b.receiveAt || b.createdAt) - new Date(a.receiveAt || a.createdAt))
 })
 
@@ -132,11 +128,10 @@ const handleExportExcel = () => {
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. PARCEL MANAGEMENT OVERVIEW`]);
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
-  finalData.push(['Parcels', 'Total Units (System)', stats.totalParcels]);
-  finalData.push(['', 'Picked Up', stats.pickedUpParcels]);
-  finalData.push(['', 'Received / Awaiting', stats.awaitingParcels]);
-  finalData.push(['', 'Overdue Parcels', stats.overdueParcels]);
-  finalData.push(['Analytics', 'Avg. Received per Period', props.avgParcelReceived.toFixed(2)]);
+  finalData.push(['Parcels', 'Total Units (System)', props.overallStats.totalParcels]);
+  finalData.push(['', 'Picked Up', props.overallStats.pickedUpParcels]);
+  finalData.push(['', 'Received / Awaiting', props.overallStats.awaitingParcels]);
+  finalData.push(['', 'Overdue Parcels', props.overallStats.overdueParcels]);
   finalData.push([]);
 
   if (recentParcels.length > 0) {
@@ -145,15 +140,17 @@ const handleExportExcel = () => {
     recentParcels.forEach(p => {
       finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
     });
+    finalData.push(['TOTAL RECENT PARCELS', '', '', recentParcels.length]);
     finalData.push([]);
   }
 
   if (overdueList.length > 0) {
-    finalData.push(['OVERDUE PARCELS (> 3 Days)']);
+    finalData.push(['OVERDUE PARCELS (> 1 Day)']);
     finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
     overdueList.forEach(p => {
       finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
     });
+    finalData.push(['TOTAL OVERDUE PARCELS', '', '', overdueList.length]);
     finalData.push([]);
   }
 
@@ -174,12 +171,10 @@ const handleExportExcel = () => {
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
   finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
-  finalData.push(['Residents', 'Total Registered', stats.totalResidents]);
+  finalData.push(['Residents', 'Total Residents', stats.activeResidents + stats.inactiveResidents]);
   finalData.push(['', 'Active / Verified', stats.activeResidents]);
   finalData.push(['', 'Pending Approvals', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
-  finalData.push(['Communications', 'Total Announcements', stats.totalAnnouncements]);
-  finalData.push(['Analytics', 'Avg. New Residents per Period', props.avgResidentGrowth.toFixed(2)]);
   finalData.push([]);
 
   if (pending && pending.length > 0) {
@@ -188,15 +183,19 @@ const handleExportExcel = () => {
     pending.forEach(r => {
       finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
     });
+    finalData.push(['TOTAL PENDING ACCOUNTS', '', '', pending.length]);
     finalData.push([]);
   }
 
   if (topRes && topRes.length > 0) {
     finalData.push(['RESIDENT RANKING (Top Leaders by Volume)']);
     finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
+    let totalTopParcels = 0;
     topRes.forEach((r, i) => {
+      totalTopParcels += parseInt(r.parcelCount || r.count || 0);
       finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
     });
+    finalData.push(['TOTAL PARCELS (Top Leaders)', '', '', totalTopParcels]);
     finalData.push([]);
   }
 
@@ -286,11 +285,10 @@ const handleExportPDF = () => {
   doc.setTextColor(0, 0, 0);
   
   const parcelStats = [
-    { item: 'Total Units (System)', val: stats.totalParcels },
-    { item: 'Picked Up', val: stats.pickedUpParcels },
-    { item: 'Received / Awaiting', val: stats.awaitingParcels },
-    { item: 'Overdue Parcels', val: stats.overdueParcels },
-    { item: 'Avg. Received per Period', val: props.avgParcelReceived.toFixed(2) }
+    { item: 'Total Units (System)', val: props.overallStats.totalParcels },
+    { item: 'Picked Up', val: props.overallStats.pickedUpParcels },
+    { item: 'Received / Awaiting', val: props.overallStats.awaitingParcels },
+    { item: 'Overdue Parcels', val: props.overallStats.overdueParcels }
   ];
 
   doc.setFillColor(245, 247, 250);
@@ -330,7 +328,7 @@ const handleExportPDF = () => {
     doc.text("STATUS", 163, y);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (recentParcels.length * 8) + 8);
+    doc.rect(15, y - 5, 180, ((recentParcels.length + 1) * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
     doc.line(45, y - 5, 45, y - 5 + (recentParcels.length * 8) + 8);
     doc.line(95, y - 5, 95, y - 5 + (recentParcels.length * 8) + 8);
@@ -343,12 +341,14 @@ const handleExportPDF = () => {
       doc.text((p.residentName || '').substring(0, 18), 47, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
       doc.text((p.status || '').toUpperCase(), 163, y);
-      if (idx < recentParcels.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
+      doc.setDrawColor(230, 230, 230);
+      doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
+
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL RECENT PARCELS", 17, y);
+    doc.text(recentParcels.length.toString(), 163, y);
     y += 10;
   }
 
@@ -394,7 +394,7 @@ const handleExportPDF = () => {
 
   // 1.3 Overdue Parcels
   if (overdueList.length > 0) {
-    drawSubHeader("Overdue Parcels (> 3 Days)");
+    drawSubHeader("Overdue Parcels (> 1 Day)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
@@ -405,7 +405,7 @@ const handleExportPDF = () => {
     doc.text("STATUS", 163, y);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (overdueList.length * 8) + 8);
+    doc.rect(15, y - 5, 180, ((overdueList.length + 1) * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
     doc.line(45, y - 5, 45, y - 5 + (overdueList.length * 8) + 8);
     doc.line(95, y - 5, 95, y - 5 + (overdueList.length * 8) + 8);
@@ -418,12 +418,14 @@ const handleExportPDF = () => {
       doc.text((p.residentName || '').substring(0, 18), 47, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
       doc.text((p.status || '').toUpperCase(), 163, y);
-      if (idx < overdueList.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
+      doc.setDrawColor(230, 230, 230);
+      doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
+
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL OVERDUE PARCELS", 17, y);
+    doc.text(overdueList.length.toString(), 163, y);
   }
   y += 15;
 
@@ -431,17 +433,15 @@ const handleExportPDF = () => {
   drawMainCategoryHeader("2. RESIDENT MANAGEMENT OVERVIEW");
   
   // 2.1 Resident Statistics
-  drawSubHeader("Statistics Overview (Residents & Comms)");
+  drawSubHeader("Statistics Overview (Residents)");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   
   const residentStats = [
-    { item: 'Total Registered Residents', val: stats.totalResidents },
+    { item: 'Total Residents', val: stats.activeResidents + stats.inactiveResidents },
     { item: 'Active / Verified', val: stats.activeResidents },
     { item: 'Pending Approvals', val: stats.pendingResidents },
-    { item: 'Inactive Residents', val: stats.inactiveResidents },
-    { item: 'Total System Announcements', val: stats.totalAnnouncements },
-    { item: 'Avg. New Residents per Period', val: props.avgResidentGrowth.toFixed(2) }
+    { item: 'Inactive Residents', val: stats.inactiveResidents }
   ];
 
   doc.setFillColor(245, 247, 250);
@@ -481,7 +481,7 @@ const handleExportPDF = () => {
     doc.text("UPDATED AT", 157, y);
 
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (pending.length * 8) + 8);
+    doc.rect(15, y - 5, 180, ((pending.length + 1) * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
     doc.line(70, y - 5, 70, y - 5 + (pending.length * 8) + 8);
     doc.line(95, y - 5, 95, y - 5 + (pending.length * 8) + 8);
@@ -494,12 +494,14 @@ const handleExportPDF = () => {
       doc.text((res.roomNumber || '-'), 72, y);
       doc.text((res.email || '').substring(0, 30), 97, y);
       doc.text(formatDateTime(res.updateAt), 157, y);
-      if (idx < pending.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
+      doc.setDrawColor(230, 230, 230);
+      doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
+
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL PENDING ACCOUNTS", 17, y);
+    doc.text(pending.length.toString(), 157, y);
     y += 10;
   }
 
@@ -515,7 +517,7 @@ const handleExportPDF = () => {
     doc.text("PARCELS", 162, y);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, (topRes.length * 8) + 8);
+    doc.rect(15, y - 5, 180, ((topRes.length + 1) * 8) + 8);
     doc.line(15, y + 3, 195, y + 3);
     doc.line(33, y - 5, 33, y - 5 + (topRes.length * 8) + 8);
     doc.line(100, y - 5, 100, y - 5 + (topRes.length * 8) + 8);
@@ -523,17 +525,21 @@ const handleExportPDF = () => {
 
     y += 8;
     doc.setFont("helvetica", "normal");
+    let sumTopRank = 0;
     topRes.forEach((res, i) => {
+      sumTopRank += parseInt(res.parcelCount || res.count || 0);
       doc.text((i + 1).toString(), 22, y, { align: 'center' });
       doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
       doc.text((res.roomNumber || res.room || '-'), 130, y, { align: 'right' });
       doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
-      if (i < topRes.length - 1) {
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-      }
+      doc.setDrawColor(230, 230, 230);
+      doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
+
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL PARCELS (Top Leaders)", 17, y);
+    doc.text(sumTopRank.toString(), 190, y, { align: 'right' });
     y += 10;
   }
 
@@ -609,23 +615,19 @@ defineExpose({
         <tbody>
           <tr>
             <td>Total Units (System)</td>
-            <td>{{ stats.totalParcels }}</td>
+            <td>{{ overallStats.totalParcels }}</td>
           </tr>
           <tr>
             <td>Picked Up</td>
-            <td>{{ stats.pickedUpParcels }}</td>
+            <td>{{ overallStats.pickedUpParcels }}</td>
           </tr>
           <tr>
             <td>Received / Awaiting</td>
-            <td>{{ stats.awaitingParcels }}</td>
+            <td>{{ overallStats.awaitingParcels }}</td>
           </tr>
           <tr>
             <td>Overdue Parcels</td>
-            <td>{{ stats.overdueParcels }}</td>
-          </tr>
-          <tr>
-            <td class="font-bold">Avg. Received per Period</td>
-            <td>{{ avgParcelReceived.toFixed(2) }} units</td>
+            <td>{{ overallStats.overdueParcels }}</td>
           </tr>
         </tbody>
       </table>
@@ -677,12 +679,17 @@ defineExpose({
             <td>{{ parcel.trackingNumber }}</td>
             <td>{{ parcel.status.toUpperCase() }}</td>
           </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td colspan="3">TOTAL RECENT PARCELS</td>
+            <td>{{ parcels.slice(0, 10).length }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
     <div class="print-section" v-if="overdueParcels.length > 0">
-      <h3 class="print-section-title">Overdue Parcels (> 3 Days)</h3>
+      <h3 class="print-section-title">Overdue Parcels (> 1 Day)</h3>
       <table class="print-table">
         <thead>
           <tr>
@@ -699,6 +706,11 @@ defineExpose({
             <td>{{ parcel.trackingNumber }}</td>
             <td>{{ parcel.status.toUpperCase() }}</td>
           </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td colspan="3">TOTAL OVERDUE PARCELS</td>
+            <td>{{ overdueParcels.length }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -707,7 +719,7 @@ defineExpose({
     <div class="print-section">
       <h2 class="print-main-header">2. Resident Management Overview</h2>
       
-      <h3 class="print-section-title">Statistics Overview (Residents & Comms)</h3>
+      <h3 class="print-section-title">Statistics Overview (Residents)</h3>
       <table class="print-table">
         <thead>
           <tr>
@@ -717,8 +729,8 @@ defineExpose({
         </thead>
         <tbody>
           <tr>
-            <td>Total Registered Residents</td>
-            <td>{{ stats.totalResidents }}</td>
+            <td>Total Residents</td>
+            <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
           </tr>
           <tr>
             <td>Active / Verified</td>
@@ -731,14 +743,6 @@ defineExpose({
           <tr>
             <td>Inactive Residents</td>
             <td>{{ stats.inactiveResidents }}</td>
-          </tr>
-          <tr>
-            <td>Total System Announcements</td>
-            <td>{{ stats.totalAnnouncements }}</td>
-          </tr>
-          <tr>
-            <td class="font-bold">Avg. New Residents per Period</td>
-            <td>{{ avgResidentGrowth.toFixed(2) }} residents</td>
           </tr>
         </tbody>
       </table>
@@ -787,6 +791,11 @@ defineExpose({
             <td>{{ res.email }}</td>
             <td>{{ formatDateTime(res.updateAt) }}</td>
           </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td colspan="3">TOTAL PENDING ACCOUNTS</td>
+            <td>{{ pendingResidents.length }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -808,6 +817,11 @@ defineExpose({
             <td>{{ res.fullName || res.name }}</td>
             <td>{{ res.roomNumber || res.room }}</td>
             <td>{{ res.parcelCount || res.count }}</td>
+          </tr>
+          <!-- TOTAL ROW -->
+          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+            <td colspan="3">TOTAL PARCELS (Top Leaders)</td>
+            <td>{{ topResidents.reduce((sum, r) => sum + parseInt(r.parcelCount || r.count || 0), 0) }}</td>
           </tr>
         </tbody>
       </table>

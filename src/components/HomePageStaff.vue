@@ -216,7 +216,9 @@ const filterEndDate = ref('')
 const statusChartInstance = ref(null)
 const residentStatusChartInstance = ref(null)
 const avgParcelReceived = ref(0)
+const totalParcelReceived = ref(0)
 const avgResidentGrowth = ref(0)
+const totalResidentGrowth = ref(0)
 const activityInterval = computed(() => dashboardStore.parcelView)
 const residentYear = computed(() => dashboardStore.residentRefDate.getFullYear())
 
@@ -459,8 +461,10 @@ const updateParcelChart = () => {
   parcelChartInstance.data.datasets[1].data = pickedUp;
   
   // Calculate and Update Baseline (Average Received)
-  const avg = received.reduce((a, b) => a + b, 0) / (received.length || 1);
+  const totalReceived = received.reduce((a, b) => a + b, 0);
+  const avg = totalReceived / (received.length || 1);
   avgParcelReceived.value = avg;
+  totalParcelReceived.value = totalReceived;
   
   if (parcelChartInstance.data.datasets.length < 3) {
     parcelChartInstance.data.datasets.push({
@@ -504,8 +508,10 @@ const updateResidentChart = () => {
   residentChartInstance.data.datasets[0].data = data;
   
   // Update Baseline (Average)
-  const avg = data.reduce((a, b) => a + b, 0) / (data.length || 1);
+  const totalNewResidents = data.reduce((a, b) => a + b, 0);
+  const avg = totalNewResidents / (data.length || 1);
   avgResidentGrowth.value = avg;
+  totalResidentGrowth.value = totalNewResidents;
 
   if (residentChartInstance.data.datasets.length < 2) {
     residentChartInstance.data.datasets.push({
@@ -940,12 +946,11 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
     <ReportExport
       ref="reportExportRef"
       :stats="dashboardStore.stats"
+      :overallStats="dashboardStore.overallStats"
       :pendingResidents="pendingResidentsList"
       :topResidents="topResidents"
       :announcements="dashboardStore.announcements"
       :parcels="getMappedParcels"
-      :avgParcelReceived="avgParcelReceived"
-      :avgResidentGrowth="avgResidentGrowth"
       :members="dashboardStore.members"
     />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
