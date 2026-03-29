@@ -258,6 +258,82 @@ const residentChartRangeLabel = computed(() => {
   }
 })
 
+const parcelDateInput = ref(null)
+const residentDateInput = ref(null)
+
+const openParcelDatePicker = () => {
+  if (parcelDateInput.value?.showPicker) {
+    parcelDateInput.value.showPicker();
+  } else {
+    parcelDateInput.value?.click();
+  }
+}
+
+const openResidentDatePicker = () => {
+  if (residentDateInput.value?.showPicker) {
+    residentDateInput.value.showPicker();
+  } else {
+    residentDateInput.value?.click();
+  }
+}
+
+const formatDateForInput = (date, view) => {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  
+  if (view === 'monthly') {
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+  } else if (view === 'weekly') {
+    // ISO week calculation
+    const tempDate = new Date(d.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
+  } else {
+    // daily
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+}
+
+const getDateFromWeek = (weekStr) => {
+  const [year, week] = weekStr.split('-W').map(Number);
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const isoWeekStart = simple;
+  if (dow <= 4)
+    isoWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  else
+    isoWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  return isoWeekStart;
+}
+
+const handleDateChange = (dateStr, type) => {
+  if (!dateStr) return
+  let newDate;
+  const view = type === 'parcel' ? dashboardStore.parcelView : dashboardStore.residentView;
+  
+  if (view === 'monthly') {
+    newDate = new Date(dateStr + '-01')
+  } else if (view === 'weekly') {
+    newDate = getDateFromWeek(dateStr)
+  } else {
+    newDate = new Date(dateStr)
+  }
+
+  if (type === 'parcel') {
+    dashboardStore.parcelRefDate = newDate
+  } else {
+    dashboardStore.residentRefDate = newDate
+  }
+  dashboardStore.calculateDashboardData()
+}
+
 const dataLabelsPlugin = {
   id: 'dataLabelsPlugin',
   afterDatasetsDraw(chart) {
@@ -1411,7 +1487,14 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                        <button @click="dashboardStore.previousPeriod('parcel')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                        </button>
-                       <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ parcelChartRangeLabel }}</span>
+                       <button @click="openParcelDatePicker" class="text-sm font-bold text-gray-700 min-w-[140px] text-center hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-gray-200" :title="`Select ${dashboardStore.parcelView}`">
+                         {{ parcelChartRangeLabel }}
+                       </button>
+                       <input ref="parcelDateInput" 
+                         :type="dashboardStore.parcelView === 'monthly' ? 'month' : (dashboardStore.parcelView === 'weekly' ? 'week' : 'date')" 
+                         :value="formatDateForInput(dashboardStore.parcelRefDate, dashboardStore.parcelView)" 
+                         @input="e => handleDateChange(e.target.value, 'parcel')" 
+                         class="absolute opacity-0 w-0 h-0 pointer-events-none" />
                        <button @click="dashboardStore.nextPeriod('parcel')" :disabled="dashboardStore.isAtCurrentPeriod('parcel')" :class="dashboardStore.isAtCurrentPeriod('parcel') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                        </button>
@@ -1798,7 +1881,14 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                          <button @click="dashboardStore.previousPeriod('resident')" class="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                          </button>
-                         <span class="text-sm font-bold text-gray-700 min-w-[140px] text-center">{{ residentChartRangeLabel }}</span>
+                         <button @click="openResidentDatePicker" class="text-sm font-bold text-gray-700 min-w-[140px] text-center hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-gray-200" :title="`Select ${dashboardStore.residentView}`">
+                           {{ residentChartRangeLabel }}
+                         </button>
+                         <input ref="residentDateInput" 
+                           :type="dashboardStore.residentView === 'monthly' ? 'month' : (dashboardStore.residentView === 'weekly' ? 'week' : 'date')" 
+                           :value="formatDateForInput(dashboardStore.residentRefDate, dashboardStore.residentView)" 
+                           @input="e => handleDateChange(e.target.value, 'resident')" 
+                           class="absolute opacity-0 w-0 h-0 pointer-events-none" />
                          <button @click="dashboardStore.nextPeriod('resident')" :disabled="dashboardStore.isAtCurrentPeriod('resident')" :class="dashboardStore.isAtCurrentPeriod('resident') ? 'opacity-20 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'" class="p-2 rounded-full transition-colors text-gray-400">
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                          </button>
