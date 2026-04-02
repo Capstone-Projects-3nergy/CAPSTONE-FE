@@ -103,9 +103,14 @@ const categoryError = ref(false)
 const contentError = ref(false)
 const dateError = ref(false)
 const whitespaceError = ref(false)
+const titleWhitespaceError = ref(false)
+const subtitleWhitespaceError = ref(false)
+const contentWhitespaceError = ref(false)
 const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 const titleDuplicateError = ref(false)
+
+const hasWhitespace = (s) => s && (s !== s.trim());
 
 const titleLengthError = ref(false)
 const titleThaiNumError = ref(false)
@@ -360,6 +365,9 @@ const closePopUp = (operate) => {
   }
   if (operate === 'whitespaceError') {
     whitespaceError.value = false
+    titleWhitespaceError.value = false
+    subtitleWhitespaceError.value = false
+    contentWhitespaceError.value = false
   }
   if (operate === 'titleDuplicateError') {
     titleDuplicateError.value = false
@@ -672,8 +680,11 @@ const handleSave = async () => {
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
 
   // Whitespace check
-  if (!announcementForm.title.trim() || !announcementForm.content.trim() || (announcementForm.subtitle && !announcementForm.subtitle.trim())) {
-    whitespaceError.value = true
+  titleWhitespaceError.value = hasWhitespace(announcementForm.title)
+  subtitleWhitespaceError.value = hasWhitespace(announcementForm.subtitle)
+  contentWhitespaceError.value = hasWhitespace(announcementForm.content)
+
+  if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
     hasError = true
   }
   
@@ -708,6 +719,9 @@ const handleSave = async () => {
       contentError.value = false
       dateError.value = false
       whitespaceError.value = false
+      titleWhitespaceError.value = false
+      subtitleWhitespaceError.value = false
+      contentWhitespaceError.value = false
     }, 10000)
     return
   }
@@ -1094,14 +1108,7 @@ const showProfileStaffPage = async function () {
               operate="pinLimitMessage"
               @closePopUp="closePopUp"
             />
-            <AlertPopUp
-              v-if="whitespaceError"
-              :titles="'Please enter valid text. Spaces only are not allowed.'"
-              message="Error!!"
-              styleType="red"
-              operate="whitespaceError"
-              @closePopUp="closePopUp"
-            />
+
             <AlertPopUp
               v-if="titleDuplicateError"
               :titles="'This announcement title already exists.'"
@@ -1154,11 +1161,15 @@ const showProfileStaffPage = async function () {
                           placeholder="Brief description"
                           :class="[
                             'w-full px-4 py-3 rounded-xl border transition-all outline-none',
-                            subtitleLengthError || subtitleThaiNumError 
+                            subtitleLengthError || subtitleThaiNumError || subtitleWhitespaceError
                             ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                             : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
                           ]"
                       />
+                      <div v-if="subtitleWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Leading and trailing whitespace are not allowed.
+                      </div>
                       <div v-if="subtitleLengthError" class="flex items-center text-sm text-red-600 mt-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                         Subtitle exceeds the maximum limit of 150 characters.
@@ -1267,7 +1278,7 @@ const showProfileStaffPage = async function () {
                    <label class="text-sm font-semibold text-gray-700">Content</label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
-                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                         :class="contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
                          ref="contentArea"
                          :value="announcementForm.content"
@@ -1276,6 +1287,10 @@ const showProfileStaffPage = async function () {
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
                          placeholder="Enter announcement content"
                       ></textarea>
+                    </div>
+                    <div v-if="contentWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                      Leading and trailing whitespace are not allowed.
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>

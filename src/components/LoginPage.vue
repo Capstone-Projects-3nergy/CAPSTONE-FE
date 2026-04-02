@@ -28,6 +28,8 @@ const notRegisterError = ref(false)
 const emailRequire = ref(false)
 const passwordRequire = ref(false)
 const emailPasswordRequire = ref(false)
+const emailWhitespaceError = ref(false)
+const passwordWhitespaceError = ref(false)
 const loading = ref(false)
 const MAX_EMAIL_LENGTH = 50
 const MAX_PASSWORD_LENGTH = 14
@@ -42,6 +44,8 @@ const closePopUp = (operate) => {
   if (operate === 'passwordEmpty') passwordRequire.value = false
   if (operate === 'emailPasswordEmpty') emailPasswordRequire.value = false
   if (operate === 'emailFirebase') isEmailFirebase.value = false
+  emailWhitespaceError.value = false
+  passwordWhitespaceError.value = false
 }
 
 onMounted(async () => {
@@ -51,9 +55,25 @@ onMounted(async () => {
 })
 const loginHomePageWeb = async () => {
   loading.value = true
-  if (!email.value.trim() && !password.value.trim()) {
+  const hasWhitespace = (s) => s && (s !== s.trim())
+
+  if (!email.value && !password.value) {
     emailPasswordRequire.value = true
     setTimeout(() => (emailPasswordRequire.value = false), 10000)
+    loading.value = false
+    return
+  }
+
+  const emailWS = hasWhitespace(email.value)
+  const passwordWS = hasWhitespace(password.value)
+
+  if (emailWS || passwordWS) {
+    if (emailWS) emailWhitespaceError.value = true
+    if (passwordWS) passwordWhitespaceError.value = true
+    setTimeout(() => {
+      emailWhitespaceError.value = false
+      passwordWhitespaceError.value = false
+    }, 10000)
     loading.value = false
     return
   }
@@ -61,7 +81,6 @@ const loginHomePageWeb = async () => {
   if (!email.value.trim()) {
     emailRequire.value = true
     setTimeout(() => (emailRequire.value = false), 10000)
-
     loading.value = false
     return
   }
@@ -69,7 +88,6 @@ const loginHomePageWeb = async () => {
   if (!password.value.trim()) {
     passwordRequire.value = true
     setTimeout(() => (passwordRequire.value = false), 10000)
-
     loading.value = false
     return
   }
@@ -406,30 +424,7 @@ const showResetPasswordPageWeb = async function () {
             operate="notRegister"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
-            v-if="emailRequire"
-            :titles="'Please enter your email'"
-            message="Error!!"
-            styleType="red"
-            operate="emailEmpty"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="passwordRequire"
-            :titles="'Please enter your password'"
-            message="Error!!"
-            styleType="red"
-            operate="passwordEmpty"
-            @closePopUp="closePopUp"
-          />
-          <AlertPopUp
-            v-if="emailPasswordRequire"
-            :titles="'Please enter your email and password'"
-            message="Error!!"
-            styleType="red"
-            operate="emailPasswordEmpty"
-            @closePopUp="closePopUp"
-          />
+
           <AlertPopUp
             v-if="isEmailFirebase"
             titles="Unable to complete login. Please contact our support team for assistance."
@@ -463,8 +458,15 @@ const showResetPasswordPageWeb = async function () {
                 placeholder="Email"
                 class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
-                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit }"
+                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire }"
               />
+            </div>
+            <div v-if="emailWhitespaceError || emailRequire || emailPasswordRequire" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-xs font-medium" v-if="emailWhitespaceError">Please remove leading or trailing spaces.</span>
+              <span class="text-xs font-medium" v-else-if="emailRequire || emailPasswordRequire">Email is required.</span>
             </div>
           </div>
           <div
@@ -489,7 +491,8 @@ const showResetPasswordPageWeb = async function () {
               Limit email name to 50 characters or less.
             </div>
           </div>
-          <div class="relative">
+          <div class="mb-3">
+            <div class="relative">
             <svg
               width="24"
               height="24"
@@ -510,6 +513,7 @@ const showResetPasswordPageWeb = async function () {
               placeholder="Password"
               class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
+              :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire }"
             />
             <button
               type="button"
@@ -540,8 +544,16 @@ const showResetPasswordPageWeb = async function () {
               </svg>
             </button>
           </div>
+          <div v-if="passwordWhitespaceError || passwordRequire || emailPasswordRequire" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-xs font-medium" v-if="passwordWhitespaceError">Please remove leading or trailing spaces.</span>
+            <span class="text-xs font-medium" v-else-if="passwordRequire || emailPasswordRequire">Password is required.</span>
+          </div>
+        </div>
 
-          <div class="flex justify-end -mt-4 mb-3">
+          <div class="flex justify-end mt-2 mb-3">
             <a
               @click="showResetPasswordPageWeb"
               class="text-sm text-black hover:text-gray-600 cursor-pointer"

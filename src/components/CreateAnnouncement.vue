@@ -119,10 +119,15 @@ const fileSizeError = ref(false)
 const fileTypeError = ref(false)
 const showDateError = ref(false)
 const whitespaceError = ref(false)
+const titleWhitespaceError = ref(false)
+const subtitleWhitespaceError = ref(false)
+const contentWhitespaceError = ref(false)
 const titleDuplicateError = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
 const contentArea = ref(null)
+
+const hasWhitespace = (s) => s && (s !== s.trim());
 
 const formatText = (style) => {
   if (!contentArea.value) return
@@ -192,7 +197,12 @@ const closePopUp = (operate) => {
   if (operate === 'errorMessage') { error.value = false }
   if (operate === 'pinLimitMessage') { showPinLimitAlert.value = false }
   if (operate === 'dateError') { showDateError.value = false }
-  if (operate === 'whitespaceError') { whitespaceError.value = false }
+  if (operate === 'whitespaceError') {
+    whitespaceError.value = false
+    titleWhitespaceError.value = false
+    subtitleWhitespaceError.value = false
+    contentWhitespaceError.value = false
+  }
   if (operate === 'titleDuplicateError') { titleDuplicateError.value = false }
 }
 
@@ -344,6 +354,21 @@ const submitAnnouncement = async () => {
     return
   }
 
+  // Whitespace check
+  titleWhitespaceError.value = hasWhitespace(title.value)
+  subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
+  contentWhitespaceError.value = hasWhitespace(content.value)
+
+  if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
+    // We scroll to the top to see the errors or let them see inline
+    setTimeout(() => {
+      titleWhitespaceError.value = false
+      subtitleWhitespaceError.value = false
+      contentWhitespaceError.value = false
+    }, 10000)
+    return
+  }
+
   // Duplicate Title check
   const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
   if (isDuplicate) {
@@ -354,14 +379,7 @@ const submitAnnouncement = async () => {
     return
   }
 
-  // Whitespace check
-  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
-    whitespaceError.value = true
-    setTimeout(() => {
-      whitespaceError.value = false
-    }, 10000)
-    return
-  }
+
 
   if (pinned.value && totalPinned.value >= 3) {
     showPinLimitAlert.value = true
@@ -443,22 +461,21 @@ const resetForm = () => {
   sendNotification.value = true
   imageFile.value = null
   imagePreview.value = ''
+  titleWhitespaceError.value = false
+  subtitleWhitespaceError.value = false
+  contentWhitespaceError.value = false
 }
 
 const saveDraft = async () => {
   titleError.value = false
   categoryError.value = false
   contentError.value = false
-  whitespaceError.value = false
-  
-  let hasError = false
-  if (!title.value.trim()) { titleError.value = true; hasError = true }
-  if (categoryId.value === null) { categoryError.value = true; hasError = true }
-  if (!content.value.trim()) { contentError.value = true; hasError = true }
-  
   // Whitespace check
-  if (!title.value.trim() || !content.value.trim() || (subtitle.value && !subtitle.value.trim())) {
-    whitespaceError.value = true
+  titleWhitespaceError.value = hasWhitespace(title.value)
+  subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
+  contentWhitespaceError.value = hasWhitespace(content.value)
+
+  if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
     hasError = true
   }
 
@@ -475,6 +492,9 @@ const saveDraft = async () => {
       categoryError.value = false
       contentError.value = false
       whitespaceError.value = false
+      titleWhitespaceError.value = false
+      subtitleWhitespaceError.value = false
+      contentWhitespaceError.value = false
     }, 10000)
     return
   }
@@ -878,7 +898,7 @@ const returnLoginPage = async () => {
                       placeholder="Enter announcement title"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        titleLengthError || titleThaiNumError
+                        titleLengthError || titleThaiNumError || titleWhitespaceError
                           ? 'border-red-500 focus:ring-red-500'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
@@ -890,6 +910,10 @@ const returnLoginPage = async () => {
                    <div v-if="titleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
                       <div class="text-sm text-red-600">Announcement Title cannot contain Thai numerals</div>
+                   </div>
+                   <div v-if="titleWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                    </div>
                 </div>
 
@@ -903,7 +927,7 @@ const returnLoginPage = async () => {
                       placeholder="Enter brief description"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        subtitleLengthError 
+                        subtitleLengthError || subtitleWhitespaceError
                           ? 'border-red-500 focus:ring-red-500'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
@@ -915,6 +939,10 @@ const returnLoginPage = async () => {
                    <div v-if="subtitleThaiNumError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
                       <div class="text-sm text-red-600">Subtitle cannot contain Thai numerals</div>
+                   </div>
+                   <div v-if="subtitleWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                    </div>
                 </div>
 
@@ -985,7 +1013,7 @@ const returnLoginPage = async () => {
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
-                         :class="contentLengthError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                         :class="contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
                          ref="contentArea"
                          :value="content"
@@ -994,6 +1022,10 @@ const returnLoginPage = async () => {
                          class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
                          placeholder="Enter announcement content"
                       ></textarea>
+                    </div>
+                    <div v-if="contentWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>
+                      <div class="text-sm text-red-600">Leading and trailing whitespace are not allowed</div>
                     </div>
                     <div v-if="contentLengthError" class="flex items-center text-sm text-red-600 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" class="w-[15px] mr-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/></svg>

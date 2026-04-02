@@ -75,6 +75,16 @@ const showPositionMinLengthError = ref(false)
 const showNameLengthError = ref(false)
 const showNameMinLengthError = ref(false)
 
+const showFirstNameWhitespaceError = ref(false)
+const showLastNameWhitespaceError = ref(false)
+const showEmailWhitespaceError = ref(false)
+const showRoomWhitespaceError = ref(false)
+const showLineIdWhitespaceError = ref(false)
+const showPositionWhitespaceError = ref(false)
+const showPhoneWhitespaceError = ref(false)
+
+const hasWhitespace = (s) => s && (s !== s.trim());
+
 const handleEmailInput = (event) => {
   const val = event.target.value
   if (val.length > MAX_EMAIL_LENGTH) {
@@ -564,22 +574,34 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
-  // Check for whitespace-only input in any field that is not empty
-  const fieldsToCheck = [
-    form.value.firstName,
-    form.value.lastName,
-    form.value.email,
-    form.value.roomNumber,
-    form.value.lineId,
-    form.value.position,
-    form.value.phoneNumber
-  ]
+  // Check for leading/trailing whitespace
+  showFirstNameWhitespaceError.value = hasWhitespace(form.value.firstName)
+  showLastNameWhitespaceError.value = hasWhitespace(form.value.lastName)
+  showEmailWhitespaceError.value = hasWhitespace(form.value.email)
+  showRoomWhitespaceError.value = hasWhitespace(form.value.roomNumber)
+  showLineIdWhitespaceError.value = hasWhitespace(form.value.lineId)
+  showPositionWhitespaceError.value = hasWhitespace(form.value.position)
+  showPhoneWhitespaceError.value = hasWhitespace(form.value.phoneNumber)
 
-  for (const field of fieldsToCheck) {
-    if (field && typeof field === 'string' && field.length > 0 && field.trim().length === 0) {
-      emit('whitespace-error', true)
-      return
-    }
+  if (
+    showFirstNameWhitespaceError.value ||
+    showLastNameWhitespaceError.value ||
+    showEmailWhitespaceError.value ||
+    showRoomWhitespaceError.value ||
+    showLineIdWhitespaceError.value ||
+    showPositionWhitespaceError.value ||
+    showPhoneWhitespaceError.value
+  ) {
+    setTimeout(() => {
+      showFirstNameWhitespaceError.value = false
+      showLastNameWhitespaceError.value = false
+      showEmailWhitespaceError.value = false
+      showRoomWhitespaceError.value = false
+      showLineIdWhitespaceError.value = false
+      showPositionWhitespaceError.value = false
+      showPhoneWhitespaceError.value = false
+    }, 10000)
+    return
   }
 
   if (form.value.email && form.value.email.length > MAX_EMAIL_LENGTH) {
@@ -1285,11 +1307,15 @@ const isLineLinked = computed(() => {
               placeholder="Enter First Name"
               class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError
+                showNameLengthError || showFirstNameWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showFirstNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showNameLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1342,11 +1368,15 @@ const isLineLinked = computed(() => {
               placeholder="Enter Last Name"
               class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError
+                showNameLengthError || showLastNameWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showLastNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showNameLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1401,11 +1431,15 @@ const isLineLinked = computed(() => {
               :class="[
                 'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showEmailLengthError
+                showEmailLengthError || showEmailWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showEmailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showEmailLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1444,11 +1478,15 @@ const isLineLinked = computed(() => {
               :class="[
                 'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
                 (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showRoomLengthError
+                showRoomLengthError || showRoomWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showRoomWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showRoomLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1517,11 +1555,15 @@ const isLineLinked = computed(() => {
               placeholder="Enter Position"
               class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPositionLengthError
+                showPositionLengthError || showPositionWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showPositionWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showPositionLengthError"
               class="flex items-center text-sm text-red-600 mt-1"
@@ -1574,11 +1616,15 @@ const isLineLinked = computed(() => {
               placeholder="Enter Phone Number"
               class="w-full h-[58px] bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPhoneLengthError
+                showPhoneLengthError || showPhoneWhitespaceError
                   ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
                   : ''
               ]"
             />
+            <div v-if="showPhoneWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
             <div
               v-if="showPhoneLengthError"
               class="flex items-center text-sm text-red-600 mt-1"

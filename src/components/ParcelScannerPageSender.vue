@@ -28,7 +28,9 @@ const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
-const whitespaceError = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const recipientNameWhitespaceError = ref(false)
+const senderNameWhitespaceError = ref(false)
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -727,15 +729,31 @@ const saveParcel = async () => {
   }
 
   // Whitespace check
-  if (
-    !form.value.trackingNumber.trim() ||
-    !form.value.recipientName.trim() ||
-    (form.value.senderName && !form.value.senderName.trim())
-  ) {
-    whitespaceError.value = true
-    setTimeout(() => (whitespaceError.value = false), 10000)
-    return
+  const hasWhitespace = (s) => s && (s !== s.trim());
+  let wsError = false;
+
+  if (hasWhitespace(form.value.trackingNumber)) {
+    trackingNumberWhitespaceError.value = true;
+    wsError = true;
   }
+  if (hasWhitespace(form.value.recipientName)) {
+    recipientNameWhitespaceError.value = true;
+    wsError = true;
+  }
+  if (hasWhitespace(form.value.senderName)) {
+    senderNameWhitespaceError.value = true;
+    wsError = true;
+  }
+
+  if (wsError) {
+    setTimeout(() => {
+      trackingNumberWhitespaceError.value = false;
+      recipientNameWhitespaceError.value = false;
+      senderNameWhitespaceError.value = false;
+    }, 10000);
+    return;
+  }
+
 
   const selectedCompany = companyList.value.find(
     (c) => c.companyId === Number(form.value.companyId)
@@ -931,6 +949,9 @@ const closePopUp = (operate) => {
   if (operate === 'duplicateParcel') duplicateParcelError.value = false
   if (operate === 'senderNameMin') showSenderMinLengthError.value = false
   if (operate === 'whitespaceError') whitespaceError.value = false
+  if (operate === 'trackingNumberWhitespace') trackingNumberWhitespaceError.value = false
+  if (operate === 'recipientNameWhitespace') recipientNameWhitespaceError.value = false
+  if (operate === 'senderNameWhitespace') senderNameWhitespaceError.value = false
 }
 </script>
 
@@ -1051,14 +1072,7 @@ const closePopUp = (operate) => {
               operate="duplicateParcel"
               @closePopUp="closePopUp"
             />
-            <AlertPopUp
-              v-if="whitespaceError"
-              :titles="'Please enter valid text. Spaces only are not allowed.'"
-              message="Error!!"
-              styleType="red"
-              operate="whitespaceError"
-              @closePopUp="closePopUp"
-            />
+
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -1193,13 +1207,13 @@ const closePopUp = (operate) => {
                     placeholder="Enter tracking number"
                     class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
-                      (showTrackingLengthError || trackingNumberFormatError)
+                      (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
                         ? 'border-red-400 ring-4 ring-red-50'
                         : ''
                     ]"
                   />
                   <div
-                    v-if="showTrackingLengthError || trackingNumberFormatError"
+                    v-if="showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
@@ -1216,6 +1230,7 @@ const closePopUp = (operate) => {
                     </svg>
                     <div class="text-xs font-medium">
                       <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
+                      <span v-else-if="trackingNumberWhitespaceError">Tracking Number cannot contain leading or trailing spaces.</span>
                       <span v-else>Tracking number must be at most 22 characters</span>
                     </div>
                   </div>
@@ -1229,7 +1244,28 @@ const closePopUp = (operate) => {
                     type="text"
                     placeholder="Enter resident name / room number"
                     class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    :class="recipientNameWhitespaceError ? 'border-red-400 ring-4 ring-red-50' : ''"
                   />
+                  <div
+                    v-if="recipientNameWhitespaceError"
+                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="w-4 h-4 mr-1.5"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div class="text-xs font-medium">
+                      Recipient Name cannot contain leading or trailing spaces.
+                    </div>
+                  </div>
 
                   <ul
                     v-if="showSuggestions"
@@ -1283,13 +1319,13 @@ const closePopUp = (operate) => {
                     placeholder="Enter sender name"
                     class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
-                      showSenderLengthError || showSenderMinLengthError
+                      showSenderLengthError || showSenderMinLengthError || senderNameWhitespaceError
                         ? 'border-red-400 ring-4 ring-red-50'
                         : ''
                     ]"
                   />
                   <div
-                    v-if="showSenderLengthError"
+                    v-if="showSenderLengthError || showSenderMinLengthError || senderNameWhitespaceError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
@@ -1305,27 +1341,9 @@ const closePopUp = (operate) => {
                       />
                     </svg>
                     <div class="text-xs font-medium">
-                      Sender name must be at most 100 characters
-                    </div>
-                  </div>
-                  <div
-                    v-if="showSenderMinLengthError"
-                    class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      class="w-4 h-4 mr-1.5"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    <div class="text-xs font-medium">
-                      Sender name must be at least 2 characters
+                      <span v-if="senderNameWhitespaceError">Sender Name cannot contain leading or trailing spaces.</span>
+                      <span v-else-if="showSenderLengthError">Sender name must be at most 100 characters</span>
+                      <span v-else>Sender name must be at least 2 characters</span>
                     </div>
                   </div>
                 </div>

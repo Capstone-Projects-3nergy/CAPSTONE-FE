@@ -62,7 +62,10 @@ const trackingNumberError = ref(false)
 const trackingNumberFormatError = ref(false)
 const trackingNumberRequired = ref(false)
 const recipientNameRequired = ref(false)
-const whitespaceError = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const recipientNameWhitespaceError = ref(false)
+const senderNameWhitespaceError = ref(false)
+const hasWhitespace = (s) => s && (s !== s.trim());
 
 
 const parcelTypeOptions = [
@@ -340,14 +343,17 @@ const saveEditParcel = async () => {
     return
   }
 
-  // Whitespace check
-  if (
-    !form.value.trackingNumber.trim() ||
-    !form.value.recipientName.trim() ||
-    (form.value.senderName && !form.value.senderName.trim())
-  ) {
-    whitespaceError.value = true
-    setTimeout(() => (whitespaceError.value = false), 10000)
+  // Check for leading/trailing whitespace
+  trackingNumberWhitespaceError.value = hasWhitespace(form.value.trackingNumber)
+  recipientNameWhitespaceError.value = hasWhitespace(form.value.recipientName)
+  senderNameWhitespaceError.value = hasWhitespace(form.value.senderName)
+
+  if (trackingNumberWhitespaceError.value || recipientNameWhitespaceError.value || senderNameWhitespaceError.value) {
+    setTimeout(() => {
+      trackingNumberWhitespaceError.value = false
+      recipientNameWhitespaceError.value = false
+      senderNameWhitespaceError.value = false
+    }, 10000)
     return
   }
   if (!/^[A-Za-zก-๙\s]*$/.test(form.value.senderName)) {
@@ -903,14 +909,7 @@ function formatDateTime(datetimeStr) {
             @closePopUp="closePopUp"
           /> 
 
-          <AlertPopUp
-            v-if="whitespaceError"
-            :titles="'Please enter valid text. Spaces only are not allowed.'"
-            message="Error!!"
-            styleType="red"
-            operate="whitespaceError"
-            @closePopUp="closePopUp"
-          />
+
         </div>
         <form
           class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
@@ -930,11 +929,15 @@ function formatDateTime(datetimeStr) {
                   @input="handleTrackingInput"
                   class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
-                    (showTrackingLengthError || trackingNumberFormatError)
+                    (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
                       : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
+                <div v-if="trackingNumberWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showTrackingLengthError || trackingNumberFormatError"
                   class="flex items-center text-sm text-red-600 mt-1"
@@ -965,11 +968,15 @@ function formatDateTime(datetimeStr) {
                   @input="handleRecipientInput"
                   class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
-                    showRecipientLengthError
+                    showRecipientLengthError || recipientNameWhitespaceError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
                       : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
+                <div v-if="recipientNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showRecipientLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"
@@ -999,11 +1006,15 @@ function formatDateTime(datetimeStr) {
                   @input="handleSenderInput"
                   class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
-                    showSenderLengthError
+                    showSenderLengthError || senderNameWhitespaceError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
                       : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
+                <div v-if="senderNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Leading and trailing whitespace are not allowed.
+                </div>
                 <div
                   v-if="showSenderLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"

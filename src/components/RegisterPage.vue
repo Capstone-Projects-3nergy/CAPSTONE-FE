@@ -67,6 +67,12 @@ const form = reactive({
 const showPasswordPopup = ref(false)
 const showConfirmPasswordPopup = ref(false)
 const whitespaceError = ref(false)
+const fullNameWhitespaceError = ref(false)
+const emailWhitespaceError = ref(false)
+const passwordWhitespaceError = ref(false)
+const confirmPasswordWhitespaceError = ref(false)
+const roomNumberWhitespaceError = ref(false)
+const positionWhitespaceError = ref(false)
 const dormList = ref([])
 
 watch(role, (newRole) => {
@@ -158,6 +164,12 @@ const clearAllErrors = () => {
   isPasswordNotMatch.value = false
   showConfirmPasswordTooShort.value = false
   whitespaceError.value = false
+  fullNameWhitespaceError.value = false
+  emailWhitespaceError.value = false
+  passwordWhitespaceError.value = false
+  confirmPasswordWhitespaceError.value = false
+  roomNumberWhitespaceError.value = false
+  positionWhitespaceError.value = false
   success.value = false
 }
 
@@ -185,6 +197,28 @@ const submitForm = async () => {
     const MAX_ROOMNUMBER_LENGTH = 20
     const MIN_PASSWORD_LENGTH = 8
     const MIN_FULLNAME_LENGTH = 6
+
+    const hasWhitespace = (s) => s && (s !== s.trim());
+    let wsError = false;
+    
+    if (hasWhitespace(form.fullName)) { fullNameWhitespaceError.value = true; wsError = true; }
+    if (hasWhitespace(form.email)) { emailWhitespaceError.value = true; wsError = true; }
+    if (hasWhitespace(form.password)) { passwordWhitespaceError.value = true; wsError = true; }
+    if (hasWhitespace(form.confirmPassword)) { confirmPasswordWhitespaceError.value = true; wsError = true; }
+    if (roleType === 'RESIDENT' && hasWhitespace(form.roomNumber)) { roomNumberWhitespaceError.value = true; wsError = true; }
+    if (roleType === 'STAFF' && hasWhitespace(form.position)) { positionWhitespaceError.value = true; wsError = true; }
+
+    if (wsError) {
+      setTimeout(() => {
+        fullNameWhitespaceError.value = false;
+        emailWhitespaceError.value = false;
+        passwordWhitespaceError.value = false;
+        confirmPasswordWhitespaceError.value = false;
+        roomNumberWhitespaceError.value = false;
+        positionWhitespaceError.value = false;
+      }, 10000);
+      return;
+    }
 
     if (
       !form.fullName.trim() ||
@@ -483,6 +517,12 @@ const closePopUp = (operate) => {
   if (operate === 'fullNameWeak') isFullNameWeak.value = false
   if (operate === 'emailFirebase') isEmailFirebase.value = false
   if (operate === 'whitespaceError') whitespaceError.value = false
+  if (operate === 'fullNameWhitespaceError') fullNameWhitespaceError.value = false
+  if (operate === 'emailWhitespaceError') emailWhitespaceError.value = false
+  if (operate === 'passwordWhitespaceError') passwordWhitespaceError.value = false
+  if (operate === 'confirmPasswordWhitespaceError') confirmPasswordWhitespaceError.value = false
+  if (operate === 'roomNumberWhitespaceError') roomNumberWhitespaceError.value = false
+  if (operate === 'positionWhitespaceError') positionWhitespaceError.value = false
 }
 const returnLoginPage = async function () {
   router.replace({ name: 'login' })
@@ -750,14 +790,7 @@ const toggleComfirmPasswordVisibility = () => {
             operate="emailInvalidChars"
             @closePopUp="closePopUp"
           />
-          <AlertPopUp
-            v-if="whitespaceError"
-            :titles="'Please enter valid text. Spaces only are not allowed.'"
-            message="Error!!"
-            styleType="red"
-            operate="whitespaceError"
-            @closePopUp="closePopUp"
-          />
+
           <AlertPopUp
             v-if="isStaffPositionOverLimit"
             title="Limit Position to 50 characters or less."
@@ -874,8 +907,15 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Full Name"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="{ 'border-red-500': fullNameWhitespaceError }"
                     @input="checkInputLength('fullName')"
                   />
+                </div>
+                <div v-if="fullNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-xs font-medium">Please remove leading or trailing spaces.</span>
                 </div>
               </div>
               <div class="mb-2">
@@ -894,12 +934,19 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <input
-                    v-model.trim="form.email"
+                    v-model="form.email"
                     type="email"
                     placeholder="Email"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="{ 'border-red-500': emailWhitespaceError }"
                     @input="checkInputLength('email')"
                   />
+                </div>
+                <div v-if="emailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-xs font-medium">Please remove leading or trailing spaces.</span>
                 </div>
               </div>
                 <div class="mb-2">
@@ -947,8 +994,15 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Room Number"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="{ 'border-red-500': roomNumberWhitespaceError }"
                     @input="checkInputLength('roomNumber')"
                   />
+                </div>
+                <div v-if="roomNumberWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-xs font-medium">Please remove leading or trailing spaces.</span>
                 </div>
               </div>
               <div class="mb-2">
@@ -976,7 +1030,7 @@ const toggleComfirmPasswordVisibility = () => {
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
                     :class="{
-                      'border-red-600 text-red-600': isPasswordTooShort
+                      'border-red-600 text-red-600': isPasswordTooShort || passwordWhitespaceError
                     }"
                   />
                   <button
@@ -1013,7 +1067,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </button>
                 </div>
                 <div
-                  v-if="isPasswordTooShort"
+                  v-if="isPasswordTooShort || passwordWhitespaceError"
                   class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
@@ -1029,7 +1083,8 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-red-600">
-                    Password must be at least 8 characters.
+                    <span v-if="passwordWhitespaceError">Please remove leading or trailing spaces.</span>
+                    <span v-else>Password must be at least 8 characters.</span>
                   </div>
                 </div>
               </div>
@@ -1057,7 +1112,7 @@ const toggleComfirmPasswordVisibility = () => {
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
                     :class="{
-                      'border-red-600 text-red-600': isConfirmPasswordTooShort
+                      'border-red-600 text-red-600': isConfirmPasswordTooShort || confirmPasswordWhitespaceError
                     }"
                   />
                   <button
@@ -1140,8 +1195,15 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Full Name"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="{ 'border-red-500': fullNameWhitespaceError }"
                     @input="checkInputLength('fullName')"
                   />
+                </div>
+                <div v-if="fullNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-xs font-medium">Please remove leading or trailing spaces.</span>
                 </div>
               </div>
               <div class="mb-2">
@@ -1164,8 +1226,15 @@ const toggleComfirmPasswordVisibility = () => {
                     type="email"
                     placeholder="Staff Email"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="{ 'border-red-500': emailWhitespaceError }"
                     @input="checkInputLength('email')"
                   />
+                </div>
+                <div v-if="emailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1 ml-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-1.5">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-xs font-medium">Please remove leading or trailing spaces.</span>
                 </div>
               </div>
                <div class="mb-2">
@@ -1213,12 +1282,12 @@ const toggleComfirmPasswordVisibility = () => {
                       class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                       @input="checkInputLength('position')"
                       :class="{
-                        'border-red-600 text-red-600': isStaffPositionTooShort
+                        'border-red-600 text-red-600': isStaffPositionTooShort || positionWhitespaceError
                       }"
                     />
                   </div>
                   <div
-                    v-if="isStaffPositionTooShort"
+                    v-if="isStaffPositionTooShort || positionWhitespaceError"
                     class="flex items-center text-sm text-red-600 mt-1 mb-2"
                   >
                     <svg
@@ -1233,7 +1302,8 @@ const toggleComfirmPasswordVisibility = () => {
                         clip-rule="evenodd"
                       />
                     </svg>
-                    Position must be at least 2 characters.
+                    <span v-if="positionWhitespaceError" class="text-xs font-medium">Please remove leading or trailing spaces.</span>
+                    <span v-else>Position must be at least 2 characters.</span>
                   </div>
                 </div>
               <div class="mb-2">
@@ -1380,7 +1450,7 @@ const toggleComfirmPasswordVisibility = () => {
                   </button>
                 </div>
                 <div
-                  v-if="isConfirmPasswordTooShort"
+                  v-if="isConfirmPasswordTooShort || confirmPasswordWhitespaceError"
                   class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
@@ -1396,7 +1466,8 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-red-600">
-                    Password must be at least 8 characters.
+                    <span v-if="confirmPasswordWhitespaceError">Please remove leading or trailing spaces.</span>
+                    <span v-else>Password must be at least 8 characters.</span>
                   </div>
                 </div>
               </div>

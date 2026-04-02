@@ -51,7 +51,12 @@ const duplicateParcelError = ref(false)
 const parcelTypeErrorRequired = ref(false)
 const trackingNumberFormatError = ref(false)
 const isLoading = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const recipientNameWhitespaceError = ref(false)
+const senderNameWhitespaceError = ref(false)
 const whitespaceError = ref(false)
+
+const hasWhitespace = (s) => s && (s !== s.trim())
 
 const showTrackingLengthError = ref(false)
 const showSenderLengthError = ref(false)
@@ -770,6 +775,29 @@ const saveParcel = async () => {
   }
 
   // Whitespace check
+  let hasError = false
+  if (hasWhitespace(form.value.trackingNumber)) {
+    trackingNumberWhitespaceError.value = true
+    hasError = true
+  }
+  if (hasWhitespace(form.value.recipientName)) {
+    recipientNameWhitespaceError.value = true
+    hasError = true
+  }
+  if (hasWhitespace(form.value.senderName)) {
+    senderNameWhitespaceError.value = true
+    hasError = true
+  }
+
+  if (hasError) {
+    setTimeout(() => {
+      trackingNumberWhitespaceError.value = false
+      recipientNameWhitespaceError.value = false
+      senderNameWhitespaceError.value = false
+    }, 10000)
+    return
+  }
+
   if (
     !form.value.trackingNumber.trim() ||
     !form.value.recipientName.trim() ||
