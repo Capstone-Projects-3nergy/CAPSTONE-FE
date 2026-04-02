@@ -401,7 +401,7 @@ const deletePreview = () => (previewUrl.value = null)
 
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
-    alert('กล้องไม่รองรับ')
+    alert('Camera not supported.')
     return
   }
   try {
@@ -418,7 +418,7 @@ async function startCamera() {
       isCameraReady.value = true
     }
   } catch (err) {
-    alert('ไม่สามารถเปิดกล้องได้')
+    alert('Cannot access the camera.')
   }
 }
 
