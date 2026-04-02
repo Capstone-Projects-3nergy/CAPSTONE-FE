@@ -37,7 +37,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     labels: [],
     datasets: [
       { 
-        label: 'Received', 
+        label: 'Waiting', 
         data: [], 
         backgroundColor: 'rgba(59, 130, 246, 0.85)',
         borderColor: 'rgba(59, 130, 246, 1)',
@@ -115,7 +115,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       roomNumber: p.roomNumber || 'N/A',
       status: mapStatus(p.status),
       receiveAt: p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt || new Date().toISOString(),
-      updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString()
+      updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString(),
+      statusHistory: p.statusHistory || []
     }))
   })
 
@@ -123,10 +124,10 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     const s = status?.toUpperCase() || ''
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
     if (s === 'WAITING_FOR_STAFF' || s.includes('PENDING')) return 'Waiting for Staff'
-    if (s === 'WAITING') return 'Waiting'
+    if (s === 'WAITING' || s === 'RECEIVED') return 'Waiting'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
-    return 'Received'
+    return 'Waiting'
   }
 
   const calculateDashboardData = (parcelsRaw = null, residentsRaw = null, announcementsRaw = null) => {

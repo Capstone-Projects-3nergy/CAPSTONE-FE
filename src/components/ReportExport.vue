@@ -102,6 +102,7 @@ const overdueParcels = computed(() => {
   const now = new Date()
   const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000
   return props.parcels.filter(p => {
+    // Only check 'Waiting', 'Notified', or 'Overdue' statuses (Waiting replaces Received)
     if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
     const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
     if (isNaN(date.getTime())) return false
@@ -136,9 +137,12 @@ const handleExportExcel = () => {
 
   if (recentParcels.length > 0) {
     finalData.push(['RECENT PARCELS (Latest Activity)']);
-    finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
+    finalData.push(['Date', 'Resident', 'Tracking No.', 'Current Status', 'Status History']);
     recentParcels.forEach(p => {
-      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+      const historyStr = p.statusHistory && p.statusHistory.length > 0 
+        ? p.statusHistory.map(h => `${h.status} (${formatDate(h.updatedAt)})`).join(' -> ') 
+        : '-';
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase(), historyStr]);
     });
     finalData.push(['TOTAL RECENT PARCELS', '', '', recentParcels.length]);
     finalData.push([]);
@@ -346,7 +350,20 @@ const handleExportPDF = () => {
       doc.text((p.status || '').toUpperCase(), 163, y);
       doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
-      y += 8;
+      
+      // Add status history in small text if exists
+      if (p.statusHistory && p.statusHistory.length > 0) {
+        y += 4;
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        const historyStr = "History: " + p.statusHistory.map(h => `${h.status}(${formatDate(h.updatedAt)})`).join(' -> ');
+        doc.text(historyStr.substring(0, 100), 47, y);
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        y += 4;
+      } else {
+        y += 8;
+      }
     });
 
     doc.setFont("helvetica", "bold");
@@ -682,7 +699,14 @@ defineExpose({
           <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
             <td>{{ formatDate(parcel.updatedAt) }}</td>
             <td>{{ parcel.residentName }}</td>
-            <td>{{ parcel.trackingNumber }}</td>
+            <td>
+              <div>{{ parcel.trackingNumber }}</div>
+              <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="text-[10px] text-gray-400 mt-1">
+                History: <span v-for="(h, i) in parcel.statusHistory" :key="i">
+                  {{ h.status }} ({{ formatDate(h.updatedAt) }})<span v-if="i < parcel.statusHistory.length - 1"> → </span>
+                </span>
+              </div>
+            </td>
             <td>{{ parcel.status.toUpperCase() }}</td>
           </tr>
           <!-- TOTAL ROW -->

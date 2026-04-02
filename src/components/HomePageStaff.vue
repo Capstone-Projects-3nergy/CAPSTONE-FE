@@ -187,7 +187,6 @@ const mapStatus = (status) => {
     case 'PICKED_UP':
       return 'Picked Up'
     case 'RECEIVED':
-      return 'Received'
     case 'WAITING':
       return 'Waiting'
     default:
@@ -403,7 +402,7 @@ const initStatusChart = () => {
   statusChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Picked Up', 'Received', 'Overdue'],
+      labels: ['Picked Up', 'Waiting', 'Overdue'],
       datasets: [{
         data: [overallStats.value.pickedUpParcels, overallStats.value.awaitingParcels, overallStats.value.overdueParcels],
         backgroundColor: ['#10B981', '#3b82f6', '#EF4444'], 
@@ -1389,7 +1388,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels }}</h3>
-                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Received</p>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Waiting</p>
               </div>
             </div>
 
@@ -1524,7 +1523,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Received</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
@@ -1571,7 +1570,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform"></div>
-                          <span class="text-sm font-bold text-gray-700">Received</span>
+                          <span class="text-sm font-bold text-gray-700">Waiting</span>
                         </div>
                         <div class="flex items-center gap-4">
                           <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels }}</span>
@@ -1649,6 +1648,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           Room {{ parcel.roomNumber }}
                         </div>
                       </div>
+                      <!-- Status History Indicator -->
+                      <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
+                        <span class="text-[8px] font-black text-gray-300 uppercase tracking-tighter">History:</span>
+                        <span v-for="(h, i) in parcel.statusHistory.slice(-3)" :key="i" class="text-[8px] bg-gray-50 text-gray-400 px-1 py-0.5 rounded border border-gray-100 whitespace-nowrap">
+                          {{ h.status }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
@@ -1724,6 +1730,12 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                           <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                           Room {{ parcel.roomNumber }}
                         </div>
+                      </div>
+                      <!-- Status History for Overdue -->
+                      <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1">
+                        <span v-for="(h, i) in parcel.statusHistory.slice(-2)" :key="i" class="text-[8px] bg-red-50/50 text-red-300 px-1 py-0.5 rounded border border-red-100/30 whitespace-nowrap">
+                          {{ h.status }}
+                        </span>
                       </div>
                     </div>
                   </div>
