@@ -886,7 +886,7 @@ const handleTrackingInput = (event, index) => {
                       </div>
                       <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 transition-colors" :class="showTrackingLengthError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="h-5 w-5 transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
                           </svg>
                         </div>
@@ -894,8 +894,12 @@ const handleTrackingInput = (event, index) => {
                           :value="item.trackingNumber"
                           @input="handleTrackingInput($event, index)"
                           type="text"
-                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
-                          :class="(showTrackingLengthError || trackingNumberFormatError) ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
+                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-300 focus:outline-none focus:ring-4"
+                          :class="[
+                            (showTrackingLengthError || trackingNumberFormatError)
+                              ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
+                              : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#0E4B90]'
+                          ]"
                           placeholder="Enter tracking number"
                         />
                          <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError || trackingNumberFormatError">

@@ -1573,11 +1573,11 @@ onMounted(async () => {
                     :value="form.trackingNumber"
                     @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
                       (showTrackingLengthError || trackingNumberFormatError)
-                        ? 'border-red-400 ring-4 ring-red-50'
-                        : ''
+                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
+                        : 'border-gray-100 focus:ring-blue-50'
                     ]"
                   />
                   <div
@@ -1611,7 +1611,12 @@ onMounted(async () => {
                     v-model="recipientSearch"
                     type="text"
                     placeholder="Enter resident name/ email / room number"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
+                    :class="[
+                      (recipientNameError || recipientNameLetterError)
+                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
+                        : 'border-gray-100 focus:ring-blue-50'
+                    ]"
                   />
 
                   <ul
@@ -1678,11 +1683,11 @@ onMounted(async () => {
                     :value="form.senderName"
                     @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
                       showSenderLengthError || showSenderMinLengthError
-                        ? 'border-red-400 ring-4 ring-red-50'
-                        : ''
+                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
+                        : 'border-gray-100 focus:ring-blue-50'
                     ]"
                   />
                   <div

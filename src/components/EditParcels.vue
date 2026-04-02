@@ -927,11 +927,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.trackingNumber"
                   @input="handleTrackingInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div v-if="trackingNumberWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -966,11 +966,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.recipientName"
                   @input="handleRecipientInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
                     showRecipientLengthError || recipientNameWhitespaceError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div v-if="recipientNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1004,11 +1004,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.senderName"
                   @input="handleSenderInput"
-                  class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
-                    showSenderLengthError || senderNameWhitespaceError
+                    showSenderLengthError || senderNameWhitespaceError || showSenderMinLengthError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'focus:border-[#0E4B90] focus:bg-white'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div v-if="senderNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">

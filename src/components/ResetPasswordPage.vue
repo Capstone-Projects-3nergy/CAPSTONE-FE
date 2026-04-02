@@ -251,11 +251,11 @@ const returnLoginPage = () => {
               v-model="form.email"
               type="email"
               placeholder="Enter Your Email Account"
-              class="w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
+              class="w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
               :class="[
                 emailWhitespaceError || emailRequire || incorrectemailform || isEmailInvalidChars
-                  ? 'border-red-500 focus:ring-red-200'
-                  : 'border-gray-200 focus:ring-[#7bb8ff]'
+                  ? 'border-red-500 focus:ring-red-200 text-red-500'
+                  : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
               ]"
             />
             <div
