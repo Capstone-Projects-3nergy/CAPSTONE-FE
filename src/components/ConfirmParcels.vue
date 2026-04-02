@@ -43,7 +43,7 @@ const confirmParcelFn = async () => {
     return
   }
 
-  if (res?.parcelId || res?.status === 'RECEIVED') {
+  if (res?.parcelId || res?.status === 'RECEIVED' || res?.status === 'WAITING') {
     parcelManager.updateParcelStatus(parcel.value.id, 'PICKED_UP')
     await notificationManager.notifyParcelPickup(parcel.value, router)
     emit('confirmParcel', true)

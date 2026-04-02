@@ -67,7 +67,7 @@ onUnmounted(() => {
 const isOverdue = computed(() => {
   if (!parcel.value || !parcel.value.receivedAt) return false
   const status = parcel.value.status?.toUpperCase() || ''
-  if (!['RECEIVED', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
+  if (!['RECEIVED', 'WAITING', 'NOTIFIED', 'OVERDUE'].includes(status)) return false
   const receivedDate = new Date(parcel.value.receivedAt)
   const diffTime = Math.abs(currentTime.value - receivedDate)
   const diffHours = diffTime / (1000 * 60 * 60)
@@ -680,12 +680,12 @@ function formatDateTime(datetimeStr) {
                       class="w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all duration-500 overflow-hidden"
                       :class="{
                         'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-100': parcel?.status === 'WAITING_FOR_STAFF',
-                        'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED',
+                        'bg-gradient-to-br from-blue-400 to-indigo-600 shadow-blue-100': parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING',
                         'bg-gradient-to-br from-emerald-400 to-green-600 shadow-green-100': parcel?.status === 'PICKED_UP'
                       }"
                     >
                       <svg v-if="parcel?.status === 'PICKED_UP'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      <svg v-else-if="parcel?.status === 'RECEIVED'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                      <svg v-else-if="parcel?.status === 'RECEIVED' || parcel?.status === 'WAITING'" xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                       <svg v-else xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                   </div>

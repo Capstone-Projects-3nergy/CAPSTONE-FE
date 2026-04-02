@@ -111,7 +111,7 @@ const form = ref({
   recipientName: '',
   roomNumber: '',
   parcelType: '',
-  status: 'waiting for staff',
+  status: 'WAITING_FOR_STAFF',
   pickupAt: null,
   updateAt: null,
   senderName: null,
@@ -122,11 +122,21 @@ const residents = ref([])
 
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
+const mapStatus = (status) => {
+  switch (status) {
+    case 'WAITING_FOR_STAFF': return 'Waiting for Staff'
+    case 'PICKED_UP': return 'Picked Up'
+    case 'RECEIVED': return 'Received'
+    case 'WAITING': return 'Waiting'
+    default: return status
+  }
+}
+
 function cancelParcel() {
   recipientSearch.value = ''
   selectedResidentId.value = null
   Object.keys(form.value).forEach(
-    (key) => (form.value[key] = key === 'status' ? 'waiting for staff' : '')
+    (key) => (form.value[key] = key === 'status' ? 'WAITING_FOR_STAFF' : '')
   )
 }
 
@@ -846,7 +856,7 @@ const saveParcel = async () => {
       recipientName: '',
       roomNumber: '',
       parcelType: '',
-      status: 'waiting for staff',
+      status: 'WAITING_FOR_STAFF',
       pickupAt: null,
       updateAt: null,
       senderName: null,
@@ -1259,7 +1269,7 @@ const closePopUp = (operate) => {
                     Status <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="form.status"
+                    :value="mapStatus(form.status)"
                     class="w-full bg-gray-100/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-500 cursor-not-allowed"
                     disabled
                   />
@@ -1389,7 +1399,7 @@ const closePopUp = (operate) => {
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Status:</span>
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ form.status }}</span>
+                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ mapStatus(form.status) }}</span>
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Company:</span>

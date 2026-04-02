@@ -157,7 +157,7 @@ const statusOptions = computed(() => {
   let options = []
   if (form.value.status === 'WAITING_FOR_STAFF') {
     options = ['WAITING_FOR_STAFF', 'RECEIVED']
-  } else if (form.value.status === 'RECEIVED') {
+  } else if (form.value.status === 'RECEIVED' || form.value.status === 'WAITING') {
     options = ['RECEIVED', 'PICKED_UP']
   } else if (form.value.status === 'PICKED_UP') {
     options = ['PICKED_UP']

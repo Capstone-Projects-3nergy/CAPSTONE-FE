@@ -132,7 +132,10 @@ const cancel = () => {
 }
 
 const steps = ['RECEIVED', 'PICKED_UP']
-const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
+const currentStepIndex = computed(() => {
+  if (currentStatus.value === 'WAITING') return steps.indexOf('RECEIVED')
+  return steps.indexOf(currentStatus.value)
+})
 </script>
 
 <template>
@@ -202,17 +205,17 @@ const currentStepIndex = computed(() => steps.indexOf(currentStatus.value))
                   <div 
                     class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
                     :class="[
-                      currentStatus === step ? 'bg-white border-blue-500 scale-125' : 
+                      (currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')) ? 'bg-white border-blue-500 scale-125' : 
                       (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
                     ]"
                   >
                     <svg v-if="i < currentStepIndex" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
                       <path d="M5 13l4 4L19 7" />
                     </svg>
-                    <div v-if="currentStatus === step" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div v-if="currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
                   <span class="text-[9px] font-extrabold tracking-tight" 
-                        :class="currentStatus === step ? 'text-blue-600' : 'text-slate-400'">
+                        :class="(currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')) ? 'text-blue-600' : 'text-slate-400'">
                     {{ step.split('_')[0] }}
                   </span>
                 </div>

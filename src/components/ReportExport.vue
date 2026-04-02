@@ -102,7 +102,7 @@ const overdueParcels = computed(() => {
   const now = new Date()
   const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000
   return props.parcels.filter(p => {
-    if (!['Received', 'Notified', 'Overdue'].includes(p.status)) return false
+    if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
     const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
     if (isNaN(date.getTime())) return false
     return (now - date) > overdueThresholdMs

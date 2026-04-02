@@ -110,7 +110,7 @@ const statusOptions = computed(() => {
   if (form.value.status === 'WAITING_FOR_STAFF') {
     return ['WAITING_FOR_STAFF', 'RECEIVED']
   }
-  if (form.value.status === 'RECEIVED') {
+  if (form.value.status === 'RECEIVED' || form.value.status === 'WAITING') {
     return ['RECEIVED', 'PICKED_UP']
   }
   if (form.value.status === 'PICKED_UP') {

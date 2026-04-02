@@ -122,7 +122,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const mapStatus = (status) => {
     const s = status?.toUpperCase() || ''
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
-    if (s.includes('WAITING') || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s === 'WAITING_FOR_STAFF' || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s === 'WAITING') return 'Waiting'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
     return 'Received'
@@ -175,7 +176,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     stats.awaitingParcels = periodReceived.length
     stats.overdueParcels = parcelsInPeriod.filter(p => {
       const pStatus = p.status?.toUpperCase() || ''
-      const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE')
+      const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE') || pStatus === 'WAITING'
       const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
       if (isPickedUp) return false
       
