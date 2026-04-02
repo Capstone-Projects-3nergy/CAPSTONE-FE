@@ -401,6 +401,22 @@ const showResetPasswordPageWeb = async function () {
 
         <div class="fixed top-40 px-6 mt-2 z-[9999]">
           <AlertPopUp
+            v-if="emailWhitespaceError"
+            :titles="'Email has leading or trailing spaces'"
+            message="Error!!"
+            styleType="red"
+            operate="emailWhitespace"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="passwordWhitespaceError"
+            :titles="'Password has leading or trailing spaces'"
+            message="Error!!"
+            styleType="red"
+            operate="passwordWhitespace"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
             v-if="incorrect"
             :titles="'Email or Password is incorrect.'"
             message="Error!!"
@@ -482,7 +498,7 @@ const showResetPasswordPageWeb = async function () {
                 placeholder="Email"
                 class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
-                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire }"
+                :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect }"
               />
             </div>
             <div v-if="emailWhitespaceError || emailRequire || emailPasswordRequire" class="flex items-center text-sm text-red-600 mt-1 ml-1">
@@ -537,7 +553,7 @@ const showResetPasswordPageWeb = async function () {
               placeholder="Password"
               class="pl-10 w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
               @input="checkPasswordLength"
-              :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire }"
+              :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600': isPasswordOverLimit || passwordWhitespaceError || passwordRequire || emailPasswordRequire || incorrect || error || isEmailFirebase }"
             />
             <button
               type="button"
