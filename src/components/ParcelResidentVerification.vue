@@ -837,14 +837,7 @@ const handleTrackingInput = (event, index) => {
       operate="nameMismatch"
       @closePopUp="closePopUp"
     />
-    <AlertPopUp
-      v-if="trackingNumberFormatError"
-      :titles="'Tracking Number format is incorrect for the selected company.'"
-      message="Error!!"
-      styleType="red"
-      operate="trackingNumberFormat"
-      @closePopUp="closePopUp"
-    />
+
         <div class="max-w-4xl mx-auto mt-6">
           <div
             class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:shadow-2xl duration-300"
@@ -902,14 +895,15 @@ const handleTrackingInput = (event, index) => {
                           @input="handleTrackingInput($event, index)"
                           type="text"
                           class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-200"
-                          :class="showTrackingLengthError ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
+                          :class="(showTrackingLengthError || trackingNumberFormatError) ? 'border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0E4B90] focus:border-[#0E4B90]'"
                           placeholder="Enter tracking number"
                         />
-                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError">
+                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError || trackingNumberFormatError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
-                          Tracking number max 22 characters
+                          <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
+                          <span v-else>Tracking number max 22 characters</span>
                         </p>
                       </div>
                     </div>

@@ -997,14 +997,7 @@ const closePopUp = (operate) => {
               operate="trackingNumber"
               @closePopUp="closePopUp"
             />
-            <AlertPopUp
-              v-if="trackingNumberFormatError"
-              :titles="'Tracking Number format is incorrect for the selected company.'"
-              message="Error!!"
-              styleType="red"
-              operate="trackingNumberFormat"
-              @closePopUp="closePopUp"
-            />
+
             <AlertPopUp
               v-if="recipientNameError"
               :titles="'Recipient Name is required.'"
@@ -1190,13 +1183,13 @@ const closePopUp = (operate) => {
                     placeholder="Enter tracking number"
                     class="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]"
                     :class="[
-                      showTrackingLengthError
+                      (showTrackingLengthError || trackingNumberFormatError)
                         ? 'border-red-400 ring-4 ring-red-50'
                         : ''
                     ]"
                   />
                   <div
-                    v-if="showTrackingLengthError"
+                    v-if="showTrackingLengthError || trackingNumberFormatError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
@@ -1212,7 +1205,8 @@ const closePopUp = (operate) => {
                       />
                     </svg>
                     <div class="text-xs font-medium">
-                      Tracking number must be at most 22 characters
+                      <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
+                      <span v-else>Tracking number must be at most 22 characters</span>
                     </div>
                   </div>
                 </div>

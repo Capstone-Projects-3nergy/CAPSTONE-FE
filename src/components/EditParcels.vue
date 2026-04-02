@@ -902,14 +902,7 @@ function formatDateTime(datetimeStr) {
             operate="duplicateParcel"
             @closePopUp="closePopUp"
           /> 
-          <AlertPopUp
-            v-if="trackingNumberFormatError"
-            :titles="'Tracking Number format is incorrect for the selected company.'"
-            message="Error!!"
-            styleType="red"
-            operate="trackingNumberFormat"
-            @closePopUp="closePopUp"
-            />
+
           <AlertPopUp
             v-if="whitespaceError"
             :titles="'Please enter valid text. Spaces only are not allowed.'"
@@ -937,13 +930,13 @@ function formatDateTime(datetimeStr) {
                   @input="handleTrackingInput"
                   class="w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
                   :class="[
-                    showTrackingLengthError
+                    (showTrackingLengthError || trackingNumberFormatError)
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
                       : 'focus:border-[#0E4B90] focus:bg-white'
                   ]"
                 />
                 <div
-                  v-if="showTrackingLengthError"
+                  v-if="showTrackingLengthError || trackingNumberFormatError"
                   class="flex items-center text-sm text-red-600 mt-1"
                 >
                   <svg
@@ -959,7 +952,8 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    Tracking number must be at most 22 characters
+                    <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
+                    <span v-else>Tracking number must be at most 22 characters</span>
                   </div>
                 </div>
               </div>
