@@ -439,7 +439,7 @@ const submitVerification = async () => {
         setTimeout(() => {
           error.value = false
         }, 10000)
-        errorMessage.value = 'An unexpected error occurred.'
+        errorMessage.value = 'There is a problem. Please try again later.'
     } finally {
         isLoading.value = false
     }
