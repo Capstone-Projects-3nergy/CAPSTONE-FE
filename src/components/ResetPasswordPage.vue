@@ -216,6 +216,33 @@ const returnLoginPage = () => {
           operate="success"
           @closePopUp="closePopUp"
         />
+
+        <AlertPopUp
+          v-if="incorrectemailform"
+          :titles="'Invalid email format. Please enter a valid email address.'"
+          message="Error!!"
+          styleType="red"
+          operate="emailform"
+          @closePopUp="closePopUp"
+        />
+
+        <AlertPopUp
+          v-if="emailRequire"
+          :titles="'Email is required. Please enter your email address.'"
+          message="Error!!"
+          styleType="red"
+          operate="emailEmpty"
+          @closePopUp="closePopUp"
+        />
+
+        <AlertPopUp
+          v-if="isEmailInvalidChars"
+          titles="Sorry, only letters (a–z), numbers (0–9), and the dot (.) are allowed in email form."
+          message="Error!!"
+          styleType="red"
+          operate="emailInvalidChars"
+          @closePopUp="closePopUp"
+        />
         </div>
 
         <form @submit.prevent="sendResetEmail" class="space-y-4" novalidate>
@@ -232,7 +259,7 @@ const returnLoginPage = () => {
               ]"
             />
             <div
-              v-if="emailWhitespaceError || emailRequire || incorrectemailform || isEmailInvalidChars"
+              v-if="emailWhitespaceError"
               class="flex items-center text-xs text-red-500 mt-1.5 ml-1"
             >
               <svg
@@ -248,9 +275,6 @@ const returnLoginPage = () => {
                 />
               </svg>
               <span v-if="emailWhitespaceError">Email cannot contain leading or trailing spaces.</span>
-              <span v-else-if="emailRequire">Email is required.</span>
-              <span v-else-if="incorrectemailform">Invalid email format.</span>
-              <span v-else-if="isEmailInvalidChars">Invalid characters in email form.</span>
             </div>
           </div>
 
