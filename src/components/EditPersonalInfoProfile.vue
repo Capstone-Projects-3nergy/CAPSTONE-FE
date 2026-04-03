@@ -83,6 +83,15 @@ const showLineIdWhitespaceError = ref(false)
 const showPositionWhitespaceError = ref(false)
 const showPhoneWhitespaceError = ref(false)
 
+const showFirstNameError = ref(false)
+const showLastNameError = ref(false)
+const showEmailError = ref(false)
+const showRoomNumberError = ref(false)
+const showDormIdError = ref(false)
+const showPositionError = ref(false)
+const showPhoneError = ref(false)
+const showLineIdError = ref(false)
+
 const hasWhitespace = (s) => s && (s !== s.trim());
 
 const handleEmailInput = (event) => {
@@ -97,6 +106,9 @@ const handleEmailInput = (event) => {
     }, 10000)
   } else {
     form.value.email = val
+    showEmailError.value = false
+    showEmailLengthError.value = false
+    showEmailWhitespaceError.value = false
   }
 }
 
@@ -112,6 +124,9 @@ const handleRoomInput = (event) => {
     }, 10000)
   } else {
     form.value.roomNumber = val
+    showRoomNumberError.value = false
+    showRoomLengthError.value = false
+    showRoomWhitespaceError.value = false
   }
 }
 
@@ -130,6 +145,9 @@ const handlePhoneInput = (event) => {
     }, 10000)
   } else {
     form.value.phoneNumber = val
+    showPhoneError.value = false
+    showPhoneLengthError.value = false
+    showPhoneWhitespaceError.value = false
   }
 }
 
@@ -145,6 +163,9 @@ const handleLineIdInput = (event) => {
     }, 10000)
   } else {
     form.value.lineId = val
+    showLineIdError.value = false
+    showLineIdLengthError.value = false
+    showLineIdWhitespaceError.value = false
   }
 }
 
@@ -160,6 +181,10 @@ const handlePositionInput = (event) => {
     }, 10000)
   } else {
     form.value.position = val
+    showPositionError.value = false
+    showPositionLengthError.value = false
+    showPositionMinLengthError.value = false
+    showPositionWhitespaceError.value = false
   }
 }
 
@@ -177,6 +202,10 @@ const handleFirstNameInput = (event) => {
     }, 10000)
   } else {
     form.value.firstName = val
+    showFirstNameError.value = false
+    showNameLengthError.value = false
+    showNameMinLengthError.value = false
+    showFirstNameWhitespaceError.value = false
   }
 }
 
@@ -194,6 +223,10 @@ const handleLastNameInput = (event) => {
     }, 10000)
   } else {
     form.value.lastName = val
+    showLastNameError.value = false
+    showNameLengthError.value = false
+    showNameMinLengthError.value = false
+    showLastNameWhitespaceError.value = false
   }
 }
 
@@ -574,6 +607,16 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
+  // Reset previous errors
+  showFirstNameError.value = false
+  showLastNameError.value = false
+  showEmailError.value = false
+  showRoomNumberError.value = false
+  showDormIdError.value = false
+  showPositionError.value = false
+  showPhoneError.value = false
+  showLineIdError.value = false
+
   // Check for leading/trailing whitespace
   showFirstNameWhitespaceError.value = hasWhitespace(form.value.firstName)
   showLastNameWhitespaceError.value = hasWhitespace(form.value.lastName)
@@ -673,33 +716,40 @@ const addResidents = async () => {
   // REQUIRED FIELD CHECK
   // -----------------------
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
     emit('first-name-required', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
     emit('last-name-required', true)
     return
   }
 
   if (!form.value.email?.trim()) {
+    showEmailError.value = true
     emit('email-required', true)
     return
   }
 
   if (!form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
     emit('room-number-required', true)
     return
   }
   if (form.value.dormId === null || form.value.dormId === '') {
+    showDormIdError.value = true
     emit('dorm-id-required', true)
     return
   }
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
+    showRoomNumberError.value = true
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    showLineIdError.value = true
     emit('line-id-error', true)
     return
   }
@@ -709,11 +759,13 @@ const addResidents = async () => {
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
     emit('last-name-error', true)
     return
   }
@@ -731,10 +783,12 @@ const addResidents = async () => {
   // validate email
   // -----------------------
   if (/[^a-zA-Z0-9.@]/.test(form.email)) {
+    showEmailError.value = true
     emit('email-invalid-chars', true)
     return
   }
   if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
+    showEmailError.value = true
     emit('email-form-error')
     return
   }
@@ -743,6 +797,7 @@ const addResidents = async () => {
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
@@ -750,6 +805,7 @@ const addResidents = async () => {
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
@@ -773,6 +829,7 @@ const addResidents = async () => {
 
     if (isDuplicate) {
       loading.value = false
+      showEmailError.value = true
       emit('email-duplicate', true)
       return
     }
@@ -857,18 +914,22 @@ const saveEditProfile = async () => {
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
     emit('first-name-error', true)
     return
   }
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
     emit('last-name-error', true)
     return
   }
@@ -888,6 +949,7 @@ const saveEditProfile = async () => {
   }
 
   if (!isStaff && !form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
     emit('room-number-required', true)
     return
   }
@@ -895,12 +957,14 @@ const saveEditProfile = async () => {
   if (form.value.phoneNumber) {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
     // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
@@ -911,14 +975,17 @@ const saveEditProfile = async () => {
   // -----------------------
   if (isStaff) {
     if (!form.value.position?.trim()) {
+      showPositionError.value = true
       emit('position-required', true)
       return
     }
     if (form.value.position && form.value.position.length > MAX_STAFFPOSITION_LENGTH) {
+      showPositionError.value = true
       emit('position-error', true)
       return
     }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
+      showPositionError.value = true
       emit('position-error', true)
       return
     }
@@ -992,19 +1059,23 @@ const saveEditDetail = async () => {
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
+    showFirstNameError.value = true
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
+    showFirstNameError.value = true
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
+    showLastNameError.value = true
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
+    showLastNameError.value = true
     emit('last-name-error', true)
     return
   }
@@ -1019,25 +1090,30 @@ const saveEditDetail = async () => {
   }
 
   if (!form.value.roomNumber?.trim()) {
+    showRoomNumberError.value = true
     emit('room-number-required', true)
     return
   }
 
   if (form.value.roomNumber && !/^[0-9]+$/.test(form.value.roomNumber)) {
+    showRoomNumberError.value = true
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
+    showLineIdError.value = true
     emit('line-id-error', true)
     return
   }
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
+      showPhoneError.value = true
       emit('phone-error', true)
       return
     }
@@ -1307,8 +1383,8 @@ const isLineLinked = computed(() => {
               placeholder="Enter First Name"
               class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError || showFirstNameWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError || showFirstNameError
+                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                   : 'border-gray-100'
               ]"
             />
@@ -1368,8 +1444,8 @@ const isLineLinked = computed(() => {
               placeholder="Enter Last Name"
               class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showNameLengthError || showLastNameWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError || showLastNameError
+                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                   : 'border-gray-100'
               ]"
             />
@@ -1430,10 +1506,7 @@ const isLineLinked = computed(() => {
               placeholder="Enter Email"
               :class="[
                 'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showEmailLengthError || showEmailWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
               ]"
             />
             <div v-if="showEmailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1477,10 +1550,7 @@ const isLineLinked = computed(() => {
               placeholder="Enter Room Number"
               :class="[
                 'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]',
-                showRoomLengthError || showRoomWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : ((showRoomNumberError || showRoomLengthError || showRoomWhitespaceError) ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
               ]"
             />
             <div v-if="showRoomWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1540,6 +1610,7 @@ const isLineLinked = computed(() => {
               v-model="form.dormId"
               :options="dormOptions"
               placeholder="Select dormitory"
+              :class="[showDormIdError ? 'border-red-400 rounded-2xl' : '']"
             />
           </div>
           <div
@@ -1555,8 +1626,8 @@ const isLineLinked = computed(() => {
               placeholder="Enter Position"
               class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPositionLengthError || showPositionMinLengthError || showPositionWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                showPositionError || showPositionLengthError || showPositionMinLengthError || showPositionWhitespaceError
+                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                   : 'border-gray-100'
               ]"
             />
@@ -1616,8 +1687,8 @@ const isLineLinked = computed(() => {
               placeholder="Enter Phone Number"
               class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
-                showPhoneLengthError || showPhoneWhitespaceError
-                  ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
+                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                   : 'border-gray-100'
               ]"
             />
@@ -1643,6 +1714,47 @@ const isLineLinked = computed(() => {
               </svg>
               <div class="text-sm text-red-600">
                 Phone Number must be at most {{ MAX_PHONE_LENGTH }} digits
+              </div>
+            </div>
+          </div>
+
+          <div v-if="showLineId" class="flex flex-col">
+            <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+              Line ID
+            </label>
+            <input
+              :value="form.lineId"
+              @input="handleLineIdInput"
+              placeholder="Enter Line ID"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              :class="[
+                showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
+                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
+                  : 'border-gray-100'
+              ]"
+            />
+            <div v-if="showLineIdWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Leading and trailing whitespace are not allowed.
+            </div>
+            <div
+              v-if="showLineIdLengthError"
+              class="flex items-center text-sm text-red-600 mt-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="red"
+                class="w-[15px] mr-1"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="text-sm text-red-600">
+                Line ID must be at most {{ MAX_LINE_ID_LENGTH }} characters
               </div>
             </div>
           </div>
@@ -1783,8 +1895,8 @@ const isLineLinked = computed(() => {
                   placeholder="Enter First Name"
                   class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
-                    showNameLengthError || showFirstNameWhitespaceError
-                      ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                    showFirstNameError || showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError
+                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                       : 'border-gray-100'
                   ]"
                 />
@@ -1801,8 +1913,8 @@ const isLineLinked = computed(() => {
                   placeholder="Enter Last Name"
                   class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
-                    showNameLengthError || showLastNameWhitespaceError
-                      ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                    showLastNameError || showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError
+                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                       : 'border-gray-100'
                   ]"
                 />
@@ -1820,7 +1932,7 @@ const isLineLinked = computed(() => {
                   placeholder="Enter Email"
                   :class="[
                     'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-400 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
                   ]"
                 />
               </div>
@@ -1836,7 +1948,7 @@ const isLineLinked = computed(() => {
                   placeholder="Enter Room Number"
                   :class="[
                     'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showRoomLengthError || showRoomWhitespaceError ? 'bg-gray-50/50 border-red-400 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showRoomNumberError || showRoomLengthError || showRoomWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
                   ]"
                 />
               </div>
@@ -1850,6 +1962,7 @@ const isLineLinked = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Select Dormitory"
                   class="max-w-md"
+                  :class="[showDormIdError ? 'border-red-400 rounded-2xl' : '']"
                 />
               </div>
               <div class="flex flex-col">
@@ -1862,8 +1975,24 @@ const isLineLinked = computed(() => {
                   placeholder="Enter Phone Number"
                   class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
-                    showPhoneLengthError || showPhoneWhitespaceError
-                      ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                    showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
+                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
+                      : 'border-gray-100'
+                  ]"
+                />
+              </div>
+              <div v-if="showLineId" class="flex flex-col">
+                <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
+                  Line ID
+                </label>
+                <input
+                  v-model="form.lineId"
+                  @input="handleLineIdInput"
+                  placeholder="Enter Line ID"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  :class="[
+                    showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
+                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
                       : 'border-gray-100'
                   ]"
                 />
