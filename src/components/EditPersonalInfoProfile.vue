@@ -717,39 +717,60 @@ const addResidents = async () => {
   // -----------------------
   if (!form.value.firstName?.trim()) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
 
   if (!form.value.email?.trim()) {
     showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-required', true)
     return
   }
 
   if (!form.value.roomNumber?.trim()) {
     showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
   if (form.value.dormId === null || form.value.dormId === '') {
     showDormIdError.value = true
+    setTimeout(() => {
+      showDormIdError.value = false
+    }, 10000)
     emit('dorm-id-required', true)
     return
   }
   if (!/^[0-9]+$/.test(form.value.roomNumber)) {
     showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
     showLineIdError.value = true
+    setTimeout(() => {
+      showLineIdError.value = false
+    }, 10000)
     emit('line-id-error', true)
     return
   }
@@ -760,12 +781,18 @@ const addResidents = async () => {
 
   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName || !nameRegex.test(form.value.lastName)) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -784,11 +811,17 @@ const addResidents = async () => {
   // -----------------------
   if (/[^a-zA-Z0-9.@]/.test(form.email)) {
     showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-invalid-chars', true)
     return
   }
   if (!form.value.email || !form.value.email.endsWith('@gmail.com')) {
     showEmailError.value = true
+    setTimeout(() => {
+      showEmailError.value = false
+    }, 10000)
     emit('email-form-error')
     return
   }
@@ -798,6 +831,9 @@ const addResidents = async () => {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
@@ -806,6 +842,9 @@ const addResidents = async () => {
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
@@ -830,6 +869,9 @@ const addResidents = async () => {
     if (isDuplicate) {
       loading.value = false
       showEmailError.value = true
+      setTimeout(() => {
+        showEmailError.value = false
+      }, 10000)
       emit('email-duplicate', true)
       return
     }
@@ -866,6 +908,10 @@ const addResidents = async () => {
     if (!savedMember) {
       loading.value = false
       if (isFirebaseDuplicate) {
+        showEmailError.value = true
+        setTimeout(() => {
+          showEmailError.value = false
+        }, 10000)
         emit('email-firebase')
       } else {
         emit('errorAddProfile')
@@ -874,6 +920,10 @@ const addResidents = async () => {
     }
     if (savedMember.status === 400) {
       loading.value = false
+      showEmailError.value = true
+      setTimeout(() => {
+        showEmailError.value = false
+      }, 10000)
       emit('email-duplicate', true)
       return
     }
@@ -915,21 +965,33 @@ const saveEditProfile = async () => {
 
   if (!form.value.firstName?.trim()) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
   if (!form.value.lastName?.trim()) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -950,6 +1012,9 @@ const saveEditProfile = async () => {
 
   if (!isStaff && !form.value.roomNumber?.trim()) {
     showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
@@ -958,6 +1023,9 @@ const saveEditProfile = async () => {
     // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
@@ -965,6 +1033,9 @@ const saveEditProfile = async () => {
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
@@ -976,16 +1047,25 @@ const saveEditProfile = async () => {
   if (isStaff) {
     if (!form.value.position?.trim()) {
       showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-required', true)
       return
     }
     if (form.value.position && form.value.position.length > MAX_STAFFPOSITION_LENGTH) {
       showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-error', true)
       return
     }
     if (form.value.position && !/^[A-Za-zก-๙\s]+$/.test(form.value.position)) {
       showPositionError.value = true
+      setTimeout(() => {
+        showPositionError.value = false
+      }, 10000)
       emit('position-error', true)
       return
     }
@@ -1060,22 +1140,34 @@ const saveEditDetail = async () => {
 
   if (!form.value.firstName?.trim()) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.firstName)) {
     showFirstNameError.value = true
+    setTimeout(() => {
+      showFirstNameError.value = false
+    }, 10000)
     emit('first-name-error', true)
     return
   }
 
   if (!form.value.lastName?.trim()) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-required', true)
     return
   }
   if (!nameRegex.test(form.value.lastName)) {
     showLastNameError.value = true
+    setTimeout(() => {
+      showLastNameError.value = false
+    }, 10000)
     emit('last-name-error', true)
     return
   }
@@ -1091,29 +1183,44 @@ const saveEditDetail = async () => {
 
   if (!form.value.roomNumber?.trim()) {
     showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-required', true)
     return
   }
 
   if (form.value.roomNumber && !/^[0-9]+$/.test(form.value.roomNumber)) {
     showRoomNumberError.value = true
+    setTimeout(() => {
+      showRoomNumberError.value = false
+    }, 10000)
     emit('room-number-error', true)
     return
   }
   if (form.value.lineId && !/^[a-zA-Z0-9._]+$/.test(form.value.lineId)) {
     showLineIdError.value = true
+    setTimeout(() => {
+      showLineIdError.value = false
+    }, 10000)
     emit('line-id-error', true)
     return
   }
   if (form.value.phoneNumber) {
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       showPhoneError.value = true
+      setTimeout(() => {
+        showPhoneError.value = false
+      }, 10000)
       emit('phone-error', true)
       return
     }
