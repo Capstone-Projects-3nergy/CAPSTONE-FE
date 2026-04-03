@@ -211,12 +211,17 @@ onMounted(async () => {
 const isNameMismatch = ref(false)
 
 const submitVerification = async () => {
-    // Reset states
     error.value = false
     confirmSuccess.value = false
     errorMessage.value = ''
     isNotFound.value = false
     isNameMismatch.value = false
+    isResidentNameWrong.value = false
+    showResidentNameLengthError.value = false
+    showResidentNameMinLengthError.value = false
+    trackingNumberError.value = false
+    showTrackingLengthError.value = false
+    trackingNumberFormatError.value = false
     let hasNotFound = false
 
     const authStore = useAuthManager()
@@ -576,6 +581,10 @@ const handleResidentNameInput = (event) => {
       showResidentNameLengthError.value = false
     }
   }
+  // Reset other errors on input
+  isResidentNameWrong.value = false
+  showResidentNameMinLengthError.value = false
+  isNameMismatch.value = false
 }
 
 const handleTrackingInput = (event, index) => {
@@ -602,6 +611,9 @@ const handleTrackingInput = (event, index) => {
       showTrackingLengthError.value = false
     }
   }
+  // Reset other errors on input
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
 }
 
 </script>
@@ -787,7 +799,7 @@ const handleTrackingInput = (event, index) => {
           </div>
         </div>
 
-        <div class="fixed top-5 left-5 z-50">
+        <div class="fixed top-5 left-5 z-[100]">
           <AlertPopUp
             v-if="confirmSuccess"
             :titles="'Add Tracking Number Successful.'"
@@ -804,39 +816,39 @@ const handleTrackingInput = (event, index) => {
             operate="problem"
             @closePopUp="closePopUp"
           />
+          <AlertPopUp
+            v-if="isResidentNameWrong"
+            :titles="'Resident Name can only be typed as text.'"
+            message="Error!!"
+            styleType="red"
+            operate="nametypewrong"
+            @closePopUp="closePopUp"
+          /> 
+          <AlertPopUp
+            v-if="trackingNumberError"
+            :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+            message="Error!!"
+            styleType="red"
+            operate="trackingNumber"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNotFound"
+            :titles="'Add Tracking Number failed. Parcel record does not exist.'"
+            message="Error!!"
+            styleType="red"
+            operate="notFound"
+            @closePopUp="closePopUp"
+          />
+          <AlertPopUp
+            v-if="isNameMismatch"
+            :titles="'Resident Name must match your account name.'"
+            message="Error!!"
+            styleType="red"
+            operate="nameMismatch"
+            @closePopUp="closePopUp"
+          />
         </div>
-        <AlertPopUp
-          v-if="isResidentNameWrong"
-          :titles="'Resident Name can only be typed as text.'"
-          message="Error!!"
-          styleType="red"
-          operate="nametypewrong"
-          @closePopUp="closePopUp"
-        /> 
-        <AlertPopUp
-          v-if="trackingNumberError"
-          :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
-          message="Error!!"
-          styleType="red"
-          operate="trackingNumber"
-          @closePopUp="closePopUp"
-        />
-    <AlertPopUp
-      v-if="isNotFound"
-      :titles="'Add Tracking Number failed. Parcel record does not exist.'"
-      message="Error!!"
-      styleType="red"
-      operate="notFound"
-      @closePopUp="closePopUp"
-    />
-    <AlertPopUp
-      v-if="isNameMismatch"
-      :titles="'Resident Name must match your account name.'"
-      message="Error!!"
-      styleType="red"
-      operate="nameMismatch"
-      @closePopUp="closePopUp"
-    />
 
         <div class="max-w-4xl mx-auto mt-6">
           <div
@@ -867,7 +879,41 @@ const handleTrackingInput = (event, index) => {
 
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
               <div class="space-y-6">
-             
+                <!-- Resident Name -->
+                <div class="space-y-2">
+                  <div class="flex items-center ml-1">
+                    <label class="block text-sm font-semibold transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch) ? 'text-red-500' : 'text-gray-700'">Resident Name</label>
+                    <span class="text-red-500 ml-1">*</span>
+                  </div>
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                      </svg>
+                    </div>
+                    <input
+                      :value="form.residentName"
+                      @input="handleResidentNameInput"
+                      type="text"
+                      class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-300 focus:outline-none focus:ring-4"
+                      :class="[
+                        (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch)
+                          ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
+                          : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                      ]"
+                      placeholder="Enter resident name"
+                    />
+                    <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                      <span v-if="isResidentNameWrong">Resident Name can only be text.</span>
+                      <span v-else-if="showResidentNameLengthError">Maximum 50 characters exceeded.</span>
+                      <span v-else-if="showResidentNameMinLengthError">Minimum 6 characters required.</span>
+                      <span v-else-if="isNameMismatch">Name mismatch with account.</span>
+                    </p>
+                  </div>
+                </div>
                 <div v-for="(item, index) in form.items" :key="index" class="p-6 bg-gray-50 rounded-2xl border border-gray-200 relative group transition-all duration-200 hover:shadow-md">
                   <div class="absolute top-4 right-4" v-if="form.items.length > 1">
                     <button @click="removeParcelItem(index)" type="button" class="text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full shadow-sm border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer">
@@ -881,12 +927,12 @@ const handleTrackingInput = (event, index) => {
                     <!-- Tracking Number -->
                     <div class="col-span-1 md:col-span-2 space-y-2">
                       <div class="flex items-center ml-1">
-                        <label class="block text-sm font-semibold text-gray-700">Tracking Number</label>
+                        <label class="block text-sm font-semibold transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError || trackingNumberError) ? 'text-red-500' : 'text-gray-700'">Tracking Number</label>
                         <span class="text-red-500 ml-1">*</span>
                       </div>
                       <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="h-5 w-5 transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError || trackingNumberError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
                           </svg>
                         </div>
@@ -896,18 +942,18 @@ const handleTrackingInput = (event, index) => {
                           type="text"
                           class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-300 focus:outline-none focus:ring-4"
                           :class="[
-                            (showTrackingLengthError || trackingNumberFormatError)
+                            (showTrackingLengthError || trackingNumberFormatError || trackingNumberError)
                               ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                              : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#0E4B90]'
+                              : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
                           ]"
                           placeholder="Enter tracking number"
                         />
-                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError || trackingNumberFormatError">
+                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError ||trackingNumberFormatError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
                           <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
-                          <span v-else>Tracking number max 22 characters</span>
+                          <span v-else-if="showTrackingLengthError">Tracking number max 22 characters</span>
                         </p>
                       </div>
                     </div>
@@ -948,6 +994,8 @@ const handleTrackingInput = (event, index) => {
                         <SelectWeb
                           v-model="item.companyId"
                           :options="companyOptions"
+                          :error="trackingNumberFormatError"
+                          @change="trackingNumberFormatError = false"
                           placeholder="Select company"
                           class="pl-10"
                         />

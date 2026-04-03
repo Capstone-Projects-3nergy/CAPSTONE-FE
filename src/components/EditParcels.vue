@@ -1095,6 +1095,8 @@ function formatDateTime(datetimeStr) {
                   :options="parcelTypeOptions"
                   placeholder="Select parcel type"
                   class="w-[240px]"
+                  :error="parcelTypeError"
+                  @change="parcelTypeError = false"
                 />
               </div>
               <div>
@@ -1104,6 +1106,8 @@ function formatDateTime(datetimeStr) {
                   v-model="form.companyId"
                   :options="companyOptions"
                   placeholder="Select company"
+                  :error="companyIdError"
+                  @change="companyIdError = false"
                 />
               </div>
             </div>

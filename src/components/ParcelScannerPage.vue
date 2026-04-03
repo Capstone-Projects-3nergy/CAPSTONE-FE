@@ -64,6 +64,11 @@ const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
+  duplicateParcelError.value = false
+
   if (val.length > 22) {
     const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
@@ -79,6 +84,11 @@ const handleTrackingInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
+  SenderNameError.value = false
+  senderNameWhitespaceError.value = false
+  showSenderLengthError.value = false
+  showSenderMinLengthError.value = false
+
   if (val.length > 100) {
     const sliced = val.slice(0, 100)
     form.value.senderName = sliced
@@ -207,6 +217,11 @@ const selectResident = (resident) => {
 
 watch(recipientSearch, (val) => {
   form.value.recipientName = val // Sync manual input
+  recipientNameError.value = false
+  recipientNameLetterError.value = false
+  recipientNameWhitespaceError.value = false
+  error.value = false
+
   if (!val) {
     selectedResidentId.value = null
   }
@@ -741,6 +756,25 @@ const showHomePageStaffWeb = async () => {
 }
 
 const saveParcel = async () => {
+  // Reset all error states
+  error.value = false
+  trackingNumberError.value = false
+  recipientNameError.value = false
+  recipientNameLetterError.value = false
+  senderNameError.value = false
+  companyIdError.value = false
+  duplicateParcelError.value = false
+  parcelTypeErrorRequired.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
+  recipientNameWhitespaceError.value = false
+  senderNameWhitespaceError.value = false
+  showTrackingLengthError.value = false
+  showSenderLengthError.value = false
+  showSenderMinLengthError.value = false
+  SenderNameError.value = false
+  roomNumberError.value = false
+
   if (!selectedResidentId.value) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
@@ -1573,11 +1607,11 @@ onMounted(async () => {
                     :value="form.trackingNumber"
                     @input="handleTrackingInput"
                     placeholder="Enter tracking number"
-                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                     :class="[
-                      (showTrackingLengthError || trackingNumberFormatError)
-                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                        : 'border-gray-100 focus:ring-blue-50'
+                      (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError || trackingNumberError || duplicateParcelError)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
                     ]"
                   />
                   <div
@@ -1611,11 +1645,11 @@ onMounted(async () => {
                     v-model="recipientSearch"
                     type="text"
                     placeholder="Enter resident name/ email / room number"
-                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                     :class="[
-                      (recipientNameError || recipientNameLetterError)
-                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                        : 'border-gray-100 focus:ring-blue-50'
+                      (recipientNameError || recipientNameLetterError || recipientNameWhitespaceError || error)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
                     ]"
                   />
 
@@ -1663,6 +1697,8 @@ onMounted(async () => {
                     v-model="form.parcelType"
                     :options="parcelTypeOptions"
                     placeholder="Select parcel type"
+                    :error="parcelTypeErrorRequired"
+                    @change="parcelTypeErrorRequired = false"
                   />
                 </div>
 
@@ -1683,11 +1719,11 @@ onMounted(async () => {
                     :value="form.senderName"
                     @input="handleSenderInput"
                     placeholder="Enter sender name"
-                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:bg-white focus:border-[#0E4B90]"
+                    class="w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                     :class="[
-                      showSenderLengthError || showSenderMinLengthError
-                        ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                        : 'border-gray-100 focus:ring-blue-50'
+                      (showSenderLengthError || showSenderMinLengthError || SenderNameError || senderNameWhitespaceError)
+                        ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                        : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:bg-white focus:border-[#0E4B90]'
                     ]"
                   />
                   <div
@@ -1741,6 +1777,8 @@ onMounted(async () => {
                     :options="companyOptions"
                     placeholder="Select company"
                     direction="up"
+                    :error="companyIdError"
+                    @change="companyIdError = false"
                   />
                 </div>
               </div>
