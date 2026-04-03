@@ -75,6 +75,15 @@ const roomNumberWhitespaceError = ref(false)
 const positionWhitespaceError = ref(false)
 const dormList = ref([])
 
+// --- Centralized Error States for Icons ---
+const hasFullNameError = computed(() => isNameOverLimit.value || isFullNameWeak.value || isFullNameWrong.value || fullNameWhitespaceError.value || (whitespaceError.value && !form.fullName.trim()) || error.value)
+const hasEmailError = computed(() => isEmailOverLimit.value || isEmailInvalidChars.value || incorrectemailform.value || isEmailExist.value || isEmailDuplicate.value || isEmailFirebase.value || emailWhitespaceError.value || isEmailStaff.value || (whitespaceError.value && !form.email.trim()) || error.value)
+const hasPasswordError = computed(() => isPasswordTooShort.value || passwordWhitespaceError.value || isPasswordOverLimit.value || isPasswordWeak.value || isPasswordNotMatch.value || (whitespaceError.value && !form.password.trim()) || error.value)
+const hasConfirmPasswordError = computed(() => isConfirmPasswordTooShort.value || confirmPasswordWhitespaceError.value || isConfirmPasswordOverLimit.value || isNotMatch.value || (whitespaceError.value && !form.confirmPassword.trim()) || error.value)
+const hasRoomNumberError = computed(() => isRoomNumberOverLimit.value || roomidnotnumber.value || isRoomRequired.value || roomNumberWhitespaceError.value || (whitespaceError.value && !form.roomNumber.trim()) || error.value)
+const hasPositionError = computed(() => positionWhitespaceError.value || isStaffPositionOverLimit.value || isStaffPositionTooShort.value || isPositionRequired.value || isPositionWrong.value || (whitespaceError.value && !form.position.trim()) || error.value)
+// ------------------------------------------
+
 watch(role, (newRole) => {
   if (newRole === 'resident') {
     form.position = ''
@@ -891,7 +900,7 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Full Name"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isNameOverLimit || isFullNameWeak || isFullNameWrong || fullNameWhitespaceError || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasFullNameError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('fullName')"
                   />
                   <svg
@@ -899,12 +908,10 @@ const toggleComfirmPasswordVisibility = () => {
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isNameOverLimit || isFullNameWeak || isFullNameWrong || fullNameWhitespaceError || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasFullNameError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
                       d="M8 7C8 5.93913 8.42143 4.92172 9.17157 4.17157C9.92172 3.42143 10.9391 3 12 3C13.0609 3 14.0783 3.42143 14.8284 4.17157C15.5786 4.92172 16 5.93913 16 7C16 8.06087 15.5786 9.07828 14.8284 9.82843C14.0783 10.5786 13.0609 11 12 11C10.9391 11 9.92172 10.5786 9.17157 9.82843C8.42143 9.07828 8 8.06087 8 7ZM8 13C6.67392 13 5.40215 13.5268 4.46447 14.4645C3.52678 15.4021 3 16.6739 3 18C3 18.7956 3.31607 19.5587 3.87868 20.1213C4.44129 20.6839 5.20435 21 6 21H18C18.7956 21 19.5587 20.6839 20.1213 20.1213C20.6839 19.5587 21 18.7956 21 18C21 16.6739 20.4732 15.4021 19.5355 14.4645C18.5979 13.5268 17.3261 13 16 13H8Z"
                       fill="currentColor"
                     />
@@ -924,7 +931,7 @@ const toggleComfirmPasswordVisibility = () => {
                     type="email"
                     placeholder="Email"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isEmailOverLimit || isEmailInvalidChars || incorrectemailform || isEmailExist || isEmailDuplicate || isEmailFirebase || emailWhitespaceError || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasEmailError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('email')"
                   />
                   <svg
@@ -932,11 +939,11 @@ const toggleComfirmPasswordVisibility = () => {
                     height="22"
                     viewBox="0 0 22 22"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isEmailOverLimit || isEmailInvalidChars || incorrectemailform || isEmailExist || isEmailDuplicate || isEmailFirebase || emailWhitespaceError || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasEmailError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
-                      d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                      d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C19.3418 4.49166 18.3335 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
                       fill="currentColor"
                     />
                   </svg>
@@ -962,8 +969,8 @@ const toggleComfirmPasswordVisibility = () => {
                       height="17"
                       viewBox="0 0 21 17"
                       xmlns="http://www.w3.org/2000/svg"
-                      class="w-5 h-5 transition-colors duration-300"
-                      :class="isNoDorm || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="w-5 h-5 transition-colors duration-300 fill-current"
+                      :class="isNoDorm ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
@@ -980,21 +987,21 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Room Number"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isRoomNumberOverLimit || roomidnotnumber || isRoomRequired || roomNumberWhitespaceError || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasRoomNumberError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('roomNumber')"
                   />
                   <svg
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isRoomNumberOverLimit || roomidnotnumber || isRoomRequired || roomNumberWhitespaceError || error ? 'text-red-600' : 'text-[#8C8F91]'"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasRoomNumberError ? '!text-red-600' : 'text-[#8C8F91]'"
+                    aria-hidden="true"
                   >
                     <path
-                      fill="currentColor"
                       d="M2.535 11A3.981 3.981 0 0 0 2 13v4a1 1 0 0 0 1 1h2v1a1 1 0 1 0 2 0v-1h10v1a1 1 0 1 0 2 0v-1h2a1 1 0 0 0 1-1v-4c0-.729-.195-1.412-.535-2H2.535ZM20 9V8a4 4 0 0 0-4-4h-3v5h7Zm-9-5H8a4 4 0 0 0-4 4v1h7V4Z"
+                      fill="currentColor"
                     />
                   </svg>
                 </div>
@@ -1013,15 +1020,15 @@ const toggleComfirmPasswordVisibility = () => {
                     placeholder="Password"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasPasswordError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <svg
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
                       d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -1037,8 +1044,8 @@ const toggleComfirmPasswordVisibility = () => {
                       v-if="isPasswordVisible"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
-                      class="h-5 w-5 transition-colors duration-300 cursor-pointer"
-                      :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="h-5 w-5 transition-colors duration-300 cursor-pointer fill-current"
+                      :class="hasPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
@@ -1049,8 +1056,8 @@ const toggleComfirmPasswordVisibility = () => {
                       v-else
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
-                      class="h-5 w-5 transition-colors duration-300 cursor-pointer"
-                      :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="h-5 w-5 transition-colors duration-300 cursor-pointer fill-current"
+                      :class="hasPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"
@@ -1090,15 +1097,15 @@ const toggleComfirmPasswordVisibility = () => {
                     placeholder="Confirm Password"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasConfirmPasswordError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <svg
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
                       d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -1115,7 +1122,7 @@ const toggleComfirmPasswordVisibility = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
                       class="h-5 w-5 transition-colors duration-300"
-                      :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
@@ -1127,7 +1134,7 @@ const toggleComfirmPasswordVisibility = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
                       class="h-5 w-5 transition-colors duration-300"
-                      :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"
@@ -1168,7 +1175,7 @@ const toggleComfirmPasswordVisibility = () => {
                     type="text"
                     placeholder="Full Name"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="fullNameWhitespaceError || isNameOverLimit || isFullNameWeak || isFullNameWrong || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasFullNameError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('fullName')"
                   />
                   <svg
@@ -1176,12 +1183,10 @@ const toggleComfirmPasswordVisibility = () => {
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="fullNameWhitespaceError || isNameOverLimit || isFullNameWeak || isFullNameWrong || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasFullNameError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
                       d="M8 7C8 5.93913 8.42143 4.92172 9.17157 4.17157C9.92172 3.42143 10.9391 3 12 3C13.0609 3 14.0783 3.42143 14.8284 4.17157C15.5786 4.92172 16 5.93913 16 7C16 8.06087 15.5786 9.07828 14.8284 9.82843C14.0783 10.5786 13.0609 11 12 11C10.9391 11 9.92172 10.5786 9.17157 9.82843C8.42143 9.07828 8 8.06087 8 7ZM8 13C6.67392 13 5.40215 13.5268 4.46447 14.4645C3.52678 15.4021 3 16.6739 3 18C3 18.7956 3.31607 19.5587 3.87868 20.1213C4.44129 20.6839 5.20435 21 6 21H18C18.7956 21 19.5587 20.6839 20.1213 20.1213C20.6839 19.5587 21 18.7956 21 18C21 16.6739 20.4732 15.4021 19.5355 14.4645C18.5979 13.5268 17.3261 13 16 13H8Z"
                       fill="currentColor"
                     />
@@ -1201,7 +1206,7 @@ const toggleComfirmPasswordVisibility = () => {
                     type="email"
                     placeholder="Staff Email"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="emailWhitespaceError || isEmailOverLimit || isEmailInvalidChars || isEmailStaff || isEmailExist || isEmailDuplicate || isEmailFirebase || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasEmailError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('email')"
                   />
                   <svg
@@ -1209,11 +1214,11 @@ const toggleComfirmPasswordVisibility = () => {
                     height="22"
                     viewBox="0 0 22 22"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="emailWhitespaceError || isEmailOverLimit || isEmailInvalidChars || isEmailStaff || isEmailExist || isEmailDuplicate || isEmailFirebase || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasEmailError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
-                      d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C20.1668 4.49166 19.3418 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
+                      d="M18.3335 3.66666H3.66683C2.6585 3.66666 1.84266 4.49166 1.84266 5.49999L1.8335 16.5C1.8335 17.5083 2.6585 18.3333 3.66683 18.3333H18.3335C19.3418 18.3333 20.1668 17.5083 20.1668 16.5V5.49999C19.3418 4.49166 18.3335 3.66666 18.3335 3.66666ZM18.3335 7.33332L11.0002 11.9167L3.66683 7.33332V5.49999L11.0002 10.0833L18.3335 5.49999V7.33332Z"
                       fill="currentColor"
                     />
                   </svg>
@@ -1233,41 +1238,43 @@ const toggleComfirmPasswordVisibility = () => {
                       placeholder="Position"
                       class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                       @input="checkInputLength('position')"
-                      :class="positionWhitespaceError || isStaffPositionOverLimit || isStaffPositionTooShort || isPositionRequired || isPositionWrong || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                      :class="hasPositionError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     />
                     <svg
                       width="20"
                       height="17"
                       viewBox="0 0 20 17"
                       xmlns="http://www.w3.org/2000/svg"
-                      class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                      :class="positionWhitespaceError || isStaffPositionOverLimit || isStaffPositionTooShort || isPositionRequired || isPositionWrong || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 stroke-current"
+                      :class="hasPositionError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M14.6176 2.85294V7.08823C13.9568 7.08761 13.3033 7.22645 12.6999 7.49567C12.0964 7.7649 11.5565 8.15844 11.1155 8.65058C10.3389 9.51322 9.90993 10.6334 9.91176 11.7941C9.91239 12.0671 9.93498 12.3334 9.97953 12.5932C10.0981 13.2802 10.3677 13.9324 10.7689 14.5026C11.1701 15.0729 11.6929 15.5469 12.2995 15.8906C11.0468 16.2694 9.38376 16.5 7.55882 16.5C3.66047 16.5 0.5 15.4463 0.5 14.1471V2.85294"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        fill="none"
                       />
                       <path
                         d="M14.6176 2.85294C14.6176 4.15224 11.4572 5.20588 7.55882 5.20588C3.66047 5.20588 0.5 4.15224 0.5 2.85294C0.5 1.55365 3.66047 0.5 7.55882 0.5C11.4572 0.5 14.6176 1.55365 14.6176 2.85294Z"
-                        fill="currentColor"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        fill="none"
                       />
                       <path
                         d="M0.5 10.3824C0.5 11.6816 3.66047 12.7353 7.55882 12.7353C8.40918 12.7353 9.22471 12.6854 9.97953 12.5932M0.5 6.61765C0.5 7.91694 3.66047 8.97059 7.55882 8.97059C8.85576 8.97059 10.0713 8.85388 11.1155 8.65059"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        fill="none"
                       />
                       <path
                         d="M19.3234 11.7941C19.3234 14.3932 17.2166 16.5 14.6175 16.5C13.7752 16.5 12.9836 16.2788 12.2994 15.8906C11.5747 15.4799 10.972 14.8843 10.5525 14.1647C10.133 13.4451 9.9119 12.6271 9.91162 11.7941C9.91162 10.5857 10.3672 9.48354 11.1154 8.6506C11.5564 8.15845 12.0962 7.76491 12.6997 7.49569C13.3032 7.22647 13.9567 7.08763 14.6175 7.08824C17.2166 7.08824 19.3234 9.19507 19.3234 11.7941Z"
-                        fill="currentColor"
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        fill="none"
                       />
                     </svg>
                   </div>
@@ -1299,15 +1306,15 @@ const toggleComfirmPasswordVisibility = () => {
                     placeholder="Password"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasPasswordError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <svg
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasPasswordError ? 'text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
                       d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -1323,8 +1330,8 @@ const toggleComfirmPasswordVisibility = () => {
                       v-if="isPasswordVisible"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
-                      class="h-5 w-5 transition-colors duration-300 cursor-pointer"
-                      :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="h-5 w-5 transition-colors duration-300 cursor-pointer fill-current"
+                      :class="hasPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
@@ -1335,8 +1342,8 @@ const toggleComfirmPasswordVisibility = () => {
                       v-else
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
-                      class="h-5 w-5 transition-colors duration-300 cursor-pointer"
-                      :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      class="h-5 w-5 transition-colors duration-300 cursor-pointer fill-current"
+                      :class="hasPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"
@@ -1374,15 +1381,15 @@ const toggleComfirmPasswordVisibility = () => {
                     placeholder="Confirm Password"
                     class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
+                    :class="hasConfirmPasswordError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <svg
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 fill-current"
+                    :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
                       d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
@@ -1399,7 +1406,7 @@ const toggleComfirmPasswordVisibility = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 576 512"
                       class="h-5 w-5 transition-colors duration-300"
-                      :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
@@ -1411,7 +1418,7 @@ const toggleComfirmPasswordVisibility = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 640 512"
                       class="h-5 w-5 transition-colors duration-300"
-                      :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch || error ? 'text-red-600' : 'text-[#8C8F91]'"
+                      :class="hasConfirmPasswordError ? '!text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"
