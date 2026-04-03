@@ -906,23 +906,25 @@ const handleTrackingInput = (event, index) => {
                     <span class="text-red-500 ml-1">*</span>
                   </div>
                   <div class="relative group">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                      </svg>
+                    <div class="relative">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                        </svg>
+                      </div>
+                      <input
+                        v-model="form.residentName"
+                        @input="handleResidentNameInput"
+                        type="text"
+                        placeholder="Enter your full name"
+                        class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                        :class="[
+                          (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError)
+                            ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                            : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                        ]"
+                      />
                     </div>
-                    <input
-                      v-model="form.residentName"
-                      @input="handleResidentNameInput"
-                      type="text"
-                      placeholder="Enter your full name"
-                      class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
-                      :class="[
-                        (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError)
-                          ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
-                          : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
-                      ]"
-                    />
                     <div
                       v-if="residentNameWhitespaceError"
                       class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
@@ -969,23 +971,25 @@ const handleTrackingInput = (event, index) => {
                         <span class="text-red-500 ml-1">*</span>
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                           <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
+                            </svg>
+                          </div>
+                          <input
+                            v-model="item.trackingNumber"
+                            @input="handleTrackingInput($event, index)"
+                            type="text"
+                            placeholder="Enter tracking number"
+                            class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                            :class="[
+                              (trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
+                                ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                                : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                            ]"
+                          />
                         </div>
-                        <input
-                          v-model="item.trackingNumber"
-                          @input="handleTrackingInput($event, index)"
-                          type="text"
-                          placeholder="Enter tracking number"
-                          class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
-                          :class="[
-                            (trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
-                              ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
-                              : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
-                          ]"
-                        />
                         <div
                           v-if="trackingNumberWhitespaceError"
                           class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
@@ -1020,17 +1024,19 @@ const handleTrackingInput = (event, index) => {
                         <label class="block text-sm font-semibold text-gray-700">Parcel Type (Optional)</label>
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M20,6H15.5L14.7,5.2C14.3,4.8 13.8,4.5 13.3,4.5H5.8C4.8,4.5 4,5.3 4,6.3V17.7C4,18.7 4.8,19.5 5.8,19.5H20C21,19.5 21.8,18.7 21.8,17.7V7.8C21.8,6.8 21,6 20,6M20,17.7H5.8V6.3H13.3L14.1,7.1C14.5,7.5 15,7.8 15.5,7.8H20V17.7Z" />
+                            </svg>
+                          </div>
+                          <SelectWeb
+                            v-model="item.parcelType"
+                            :options="parcelTypeOptions"
+                            placeholder="Select parcel type"
+                            class="pl-10"
+                          />
                         </div>
-                        <SelectWeb
-                          v-model="item.parcelType"
-                          :options="parcelTypeOptions"
-                          placeholder="Select parcel type"
-                          class="pl-10"
-                        />
                       </div>
                     </div>
 
@@ -1041,20 +1047,22 @@ const handleTrackingInput = (event, index) => {
                         <!-- <span class="text-red-500 ml-1">*</span> -->
                       </div>
                       <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                             <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                             <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
-                          </svg>
+                        <div class="relative">
+                          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#0E4B90] transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                               <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                               <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.5a2.5 2.5 0 012.977-1.92l1.91-.382A3 3 0 0112 16h3a1 1 0 001-1v-5.586a1 1 0 00-.293-.707l-3.707-3.707A1 1 0 0011.293 4H3z" />
+                            </svg>
+                          </div>
+                          <SelectWeb
+                            v-model="item.companyId"
+                            :options="companyOptions"
+                            :error="trackingNumberFormatError"
+                            @change="trackingNumberFormatError = false"
+                            placeholder="Select company"
+                            class="pl-10"
+                          />
                         </div>
-                        <SelectWeb
-                          v-model="item.companyId"
-                          :options="companyOptions"
-                          :error="trackingNumberFormatError"
-                          @change="trackingNumberFormatError = false"
-                          placeholder="Select company"
-                          class="pl-10"
-                        />
                       </div>
                     </div>
 
