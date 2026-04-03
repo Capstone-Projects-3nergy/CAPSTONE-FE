@@ -499,8 +499,8 @@ const showResetPasswordPageWeb = async function () {
                 class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm"
                 @input="checkEmailLength"
                 :class="[
-                  isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect
-                    ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 !text-red-600'
+                  isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect || error || isEmailFirebase
+                    ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 text-red-600'
                     : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
                 ]"
               />
@@ -652,7 +652,7 @@ input:-webkit-autofill:focus {
 }
 
 /* Force text color when error exists even if autofilled */
-input.\!text-red-600:-webkit-autofill {
+input.text-red-600:-webkit-autofill {
   -webkit-text-fill-color: #dc2626 !important; /* red-600 */
 }
 </style>
