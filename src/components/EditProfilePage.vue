@@ -351,12 +351,11 @@ const closePopUp = (operate) => {
     case 'whitespaceError':
       whitespaceError.value = false
       break
-
-    default:
-      break
   }
+  profileRef.value?.resetErrorStates()
 }
 
+const profileRef = ref(null)
 </script>
 
 <template>
@@ -832,6 +831,7 @@ const closePopUp = (operate) => {
           />
         </div>
         <EditPersonalInfoProfile
+          ref="profileRef"
           v-if="loginManager.user"
           mode="edit"
           :firstName="firstName"

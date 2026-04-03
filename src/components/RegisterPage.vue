@@ -907,8 +907,8 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isNameOverLimit || isFullNameWeak || isFullNameWrong || fullNameWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="isNameOverLimit || isFullNameWeak || isFullNameWrong || fullNameWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -939,8 +939,8 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.email"
                     type="email"
                     placeholder="Email"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isEmailOverLimit || isEmailInvalidChars || incorrectemailform || isEmailExist || isEmailDuplicate || isEmailFirebase || emailWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="isEmailOverLimit || isEmailInvalidChars || incorrectemailform || isEmailExist || isEmailDuplicate || isEmailFirebase || emailWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('email')"
                   />
                 </div>
@@ -966,11 +966,12 @@ const toggleComfirmPasswordVisibility = () => {
                       viewBox="0 0 21 17"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
-                      class="w-5 h-5 text-[#8C8F91]"
+                      class="w-5 h-5 transition-colors duration-300"
+                      :class="isNoDorm ? 'text-red-600' : 'text-[#8C8F91]'"
                     >
                       <path
                         d="M0 16.625V7L6.5625 2.625L13.125 7V16.625H8.75V10.5H4.375V16.625H0ZM21 0V16.625H14.875V6.06375L14 5.48625V3.5H12.25V4.31375L8.75 1.98625V0H21ZM18.375 10.5H16.625V12.25H18.375V10.5ZM18.375 7H16.625V8.75H18.375V7ZM18.375 3.5H16.625V5.25H18.375V3.5Z"
-                        fill="#8C8F91"
+                        fill="currentColor"
                       />
                     </svg>
                   </template>
@@ -996,8 +997,8 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.roomNumber"
                     type="text"
                     placeholder="Room Number"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="isRoomNumberOverLimit || roomidnotnumber || isRoomRequired || roomNumberWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="isRoomNumberOverLimit || roomidnotnumber || isRoomRequired || roomNumberWhitespaceError ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('roomNumber')"
                   />
                 </div>
@@ -1029,9 +1030,9 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <button
                     type="button"
@@ -1081,11 +1082,11 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-red-600">
-                    <span v-if="passwordWhitespaceError">Please remove leading or trailing spaces.</span>
-                    <span v-else>Password must be at least 8 characters.</span>
+                    Password must be at least 8 characters.
                   </div>
                 </div>
               </div>
+
               <div class="mb-2">
                 <div class="relative">
                   <svg
@@ -1095,20 +1096,21 @@ const toggleComfirmPasswordVisibility = () => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'text-red-600' : 'text-[#918c8c]'"
+                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'text-red-600' : 'text-[#8C8F91]'"
                   >
                     <path
                       d="M12 2C9.243 2 7 4.243 7 7V10H6C5.46957 10 4.96086 10.2107 4.58579 10.5858C4.21071 10.9609 4 11.4696 4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12C20 11.4696 19.7893 10.9609 19.4142 10.5858C19.0391 10.2107 18.5304 10 18 10H17V7C17 4.243 14.757 2 12 2ZM9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H9V7ZM13 17.723V20H11V17.723C10.6504 17.5228 10.3697 17.2213 10.1948 16.8584C10.02 16.4954 9.95928 16.0879 10.0207 15.6898C10.0821 15.2916 10.2627 14.9214 10.5388 14.6279C10.8148 14.3345 11.1733 14.1316 11.567 14.046C11.8594 13.9811 12.1627 13.9828 12.4544 14.0509C12.7461 14.1189 13.0188 14.2516 13.2524 14.4392C13.4859 14.6268 13.6743 14.8644 13.8037 15.1345C13.9331 15.4047 14.0002 15.7005 14 16C13.9994 16.3497 13.9067 16.6932 13.7311 16.9956C13.5556 17.2981 13.3034 17.549 13 17.723Z"
                       fill="currentColor"
                     />
                   </svg>
+
                   <input
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <button
                     type="button"
@@ -1141,8 +1143,8 @@ const toggleComfirmPasswordVisibility = () => {
                     </svg>
                   </button>
                 </div>
-              <div
-                  v-if="isConfirmPasswordTooShort"
+                <div
+                  v-if="isConfirmPasswordTooShort || confirmPasswordWhitespaceError"
                   class="flex items-center text-sm text-red-600 mt-1 mb-2"
                 >
                   <svg
@@ -1158,7 +1160,8 @@ const toggleComfirmPasswordVisibility = () => {
                     />
                   </svg>
                   <div class="text-red-600">
-                    Password must be at least 8 characters.
+                    <span v-if="confirmPasswordWhitespaceError">Please remove leading or trailing spaces.</span>
+                    <span v-else>Password must be at least 8 characters.</span>
                   </div>
                 </div>
               </div>
@@ -1188,8 +1191,8 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.fullName"
                     type="text"
                     placeholder="Full Name"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="fullNameWhitespaceError || isNameOverLimit || isFullNameWeak || isFullNameWrong ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="fullNameWhitespaceError || isNameOverLimit || isFullNameWeak || isFullNameWrong ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('fullName')"
                   />
                 </div>
@@ -1220,8 +1223,8 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.email"
                     type="email"
                     placeholder="Staff Email"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
-                    :class="emailWhitespaceError || isEmailOverLimit || isEmailInvalidChars || isEmailStaff || isEmailExist || isEmailDuplicate || isEmailFirebase ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    :class="emailWhitespaceError || isEmailOverLimit || isEmailInvalidChars || isEmailStaff || isEmailExist || isEmailDuplicate || isEmailFirebase ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     @input="checkInputLength('email')"
                   />
                 </div>
@@ -1275,9 +1278,9 @@ const toggleComfirmPasswordVisibility = () => {
                       v-model="form.position"
                       type="text"
                       placeholder="Position"
-                      class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                      class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                       @input="checkInputLength('position')"
-                      :class="positionWhitespaceError || isStaffPositionOverLimit || isStaffPositionTooShort || isPositionRequired || isPositionWrong ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                      :class="positionWhitespaceError || isStaffPositionOverLimit || isStaffPositionTooShort || isPositionRequired || isPositionWrong ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                     />
                   </div>
                   <div
@@ -1321,9 +1324,9 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.password"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     placeholder="Password"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('password')"
-                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    :class="isPasswordTooShort || passwordWhitespaceError || isPasswordOverLimit || isPasswordWeak || isPasswordNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <button
                     type="button"
@@ -1398,9 +1401,9 @@ const toggleComfirmPasswordVisibility = () => {
                     v-model="form.confirmPassword"
                     :type="isComfirmPasswordVisible ? 'text' : 'password'"
                     placeholder="Confirm Password"
-                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border text-gray-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
+                    class="pl-10 w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7bb8ff] focus:border-transparent transition-all duration-300 shadow-sm"
                     @input="checkInputLength('confirmPassword')"
-                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200'"
+                    :class="isConfirmPasswordTooShort || confirmPasswordWhitespaceError || isConfirmPasswordOverLimit || isNotMatch ? 'border-red-600 focus:border-red-600 focus:ring-red-600 text-red-600' : 'border-gray-200 text-gray-900'"
                   />
                   <button
                     type="button"

@@ -1264,6 +1264,31 @@ const isLineLinked = computed(() => {
   }
   return true
 })
+
+// Add reset function to be called by parents when popup closes
+const resetErrorStates = () => {
+  showFirstNameError.value = false
+  showLastNameError.value = false
+  showEmailError.value = false
+  showRoomNumberError.value = false
+  showDormIdError.value = false
+  showPositionError.value = false
+  showPhoneError.value = false
+  showLineIdError.value = false
+  
+  // Also clear whitespace errors
+  showFirstNameWhitespaceError.value = false
+  showLastNameWhitespaceError.value = false
+  showEmailWhitespaceError.value = false
+  showRoomWhitespaceError.value = false
+  showLineIdWhitespaceError.value = false
+  showPositionWhitespaceError.value = false
+  showPhoneWhitespaceError.value = false
+}
+
+defineExpose({
+  resetErrorStates
+})
 </script>
 
 <template>
@@ -1381,11 +1406,11 @@ const isLineLinked = computed(() => {
               :value="form.firstName"
               @input="handleFirstNameInput"
               placeholder="Enter First Name"
-              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError || showFirstNameError
-                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
             <div v-if="showFirstNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1442,11 +1467,11 @@ const isLineLinked = computed(() => {
               :value="form.lastName"
               @input="handleLastNameInput"
               placeholder="Enter Last Name"
-              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError || showLastNameError
-                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
             <div v-if="showLastNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1505,8 +1530,8 @@ const isLineLinked = computed(() => {
               @input="handleEmailInput"
               placeholder="Enter Email"
               :class="[
-                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                'w-full h-[58px] border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
               ]"
             />
             <div v-if="showEmailWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1549,8 +1574,8 @@ const isLineLinked = computed(() => {
               @input="handleRoomInput"
               placeholder="Enter Room Number"
               :class="[
-                'w-full h-[58px] border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : ((showRoomNumberError || showRoomLengthError || showRoomWhitespaceError) ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                'w-full h-[58px] border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                (mode === 'edit' && loginManager.user?.role === 'RESIDENT') ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : ((showRoomNumberError || showRoomLengthError || showRoomWhitespaceError) ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
               ]"
             />
             <div v-if="showRoomWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1624,11 +1649,11 @@ const isLineLinked = computed(() => {
               :value="form.position"
               @input="handlePositionInput"
               placeholder="Enter Position"
-              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPositionError || showPositionLengthError || showPositionMinLengthError || showPositionWhitespaceError
-                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
             <div v-if="showPositionWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1685,11 +1710,11 @@ const isLineLinked = computed(() => {
               :value="form.phoneNumber"
               @input="handlePhoneInput"
               placeholder="Enter Phone Number"
-              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
-                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
             <div v-if="showPhoneWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1726,11 +1751,11 @@ const isLineLinked = computed(() => {
               :value="form.lineId"
               @input="handleLineIdInput"
               placeholder="Enter Line ID"
-              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+              class="w-full h-[58px] bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
               :class="[
                 showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
-                  ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                  : 'border-gray-100'
+                  ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                  : 'border-gray-100 text-gray-900'
               ]"
             />
             <div v-if="showLineIdWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1893,11 +1918,11 @@ const isLineLinked = computed(() => {
                   v-model="form.firstName"
                   @input="handleFirstNameInput"
                   placeholder="Enter First Name"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
                     showFirstNameError || showNameLengthError || showNameMinLengthError || showFirstNameWhitespaceError
-                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                      : 'border-gray-100'
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
                   ]"
                 />
               </div>
@@ -1911,11 +1936,11 @@ const isLineLinked = computed(() => {
                   v-model="form.lastName"
                   @input="handleLastNameInput"
                   placeholder="Enter Last Name"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
                     showLastNameError || showNameLengthError || showNameMinLengthError || showLastNameWhitespaceError
-                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                      : 'border-gray-100'
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
                   ]"
                 />
               </div>
@@ -1931,8 +1956,8 @@ const isLineLinked = computed(() => {
                   @input="handleEmailInput"
                   placeholder="Enter Email"
                   :class="[
-                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                    mode === 'edit' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showEmailError || showEmailLengthError || showEmailWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
                   ]"
                 />
               </div>
@@ -1947,8 +1972,8 @@ const isLineLinked = computed(() => {
                   :disabled="loginManager.user?.role === 'RESIDENT'"
                   placeholder="Enter Room Number"
                   :class="[
-                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
-                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showRoomNumberError || showRoomLengthError || showRoomWhitespaceError ? 'bg-gray-50/50 border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90]')
+                    'w-full h-[58px] max-w-md border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 truncate',
+                    loginManager.user?.role === 'RESIDENT' ? 'bg-gray-100 cursor-not-allowed border-transparent text-gray-400 font-medium' : (showRoomNumberError || showRoomLengthError || showRoomWhitespaceError ? 'bg-gray-50/50 border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600' : 'bg-gray-50/50 border-gray-100 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] text-gray-900')
                   ]"
                 />
               </div>
@@ -1973,11 +1998,11 @@ const isLineLinked = computed(() => {
                   v-model="form.phoneNumber"
                   @input="handlePhoneInput"
                   placeholder="Enter Phone Number"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
                     showPhoneError || showPhoneLengthError || showPhoneWhitespaceError
-                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                      : 'border-gray-100'
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
                   ]"
                 />
               </div>
@@ -1989,11 +2014,11 @@ const isLineLinked = computed(() => {
                   v-model="form.lineId"
                   @input="handleLineIdInput"
                   placeholder="Enter Line ID"
-                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
+                  class="w-full h-[58px] max-w-md bg-gray-50/50 border rounded-2xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white focus:border-[#0E4B90] transition-all duration-300 truncate"
                   :class="[
                     showLineIdError || showLineIdLengthError || showLineIdWhitespaceError
-                      ? 'border-red-400 text-red-600 focus:ring-red-100 focus:border-red-400'
-                      : 'border-gray-100'
+                      ? 'border-red-600 text-red-600 focus:ring-red-100 focus:border-red-600'
+                      : 'border-gray-100 text-gray-900'
                   ]"
                 />
               </div>

@@ -204,6 +204,7 @@ const closePopUp = (operate) => {
       whitespaceError.value = false
       break
   }
+  profileRef.value?.resetErrorStates()
 }
 
 const showWhitespaceError = () => {
@@ -251,6 +252,7 @@ const showFileTypeError = () => {
   fileTypeError.value = true
   setTimeout(() => (fileTypeError.value = false), 10000)
 }
+const profileRef = ref(null)
 </script>
 
 <template>
@@ -563,7 +565,10 @@ const showFileTypeError = () => {
           />
         </div>
         <EditPersonalInfoProfile
+          ref="profileRef"
           mode="add"
+          :profileImage="''"
+          :useCurrentProfile="false"
           title="Add New Resident"
           :showEdit="false"
           :userId="0"

@@ -651,6 +651,7 @@ const closePopUp = (operate) => {
   if (operate === 'fileSizeError') fileSizeError.value = false
   if (operate === 'fileTypeError') fileTypeError.value = false
   if (operate === 'whitespaceError') whitespaceError.value = false
+  profileRef.value?.resetErrorStates()
 }
 
 function formatDateTime(datetimeStr) {
@@ -709,6 +710,7 @@ const showWhitespaceError = () => {
   whitespaceError.value = true
   setTimeout(() => (whitespaceError.value = false), 10000)
 }
+const profileRef = ref(null)
 </script>
 
 <template>
@@ -1016,6 +1018,7 @@ const showWhitespaceError = () => {
           />
         </div>
         <EditPersonalInfoProfile
+          ref="profileRef"
           mode="edit"
           v-if="form.id"
           :userId="form.id"
