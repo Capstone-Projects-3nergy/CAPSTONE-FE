@@ -88,6 +88,13 @@ const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
+  // Reset error states when user types
+  trackingNumberError.value = false
+  trackingNumberFormatError.value = false
+  trackingNumberRequired.value = false
+  trackingNumberWhitespaceError.value = false
+  duplicateParcelError.value = false
+
   if (val.length > 22) {
     const sliced = val.slice(0, 22)
     form.value.trackingNumber = sliced
@@ -103,6 +110,11 @@ const handleTrackingInput = (event) => {
 
 const handleRecipientInput = (event) => {
   const val = event.target.value
+  // Reset error states when user types
+  recipientNameError.value = false
+  recipientNameRequired.value = false
+  recipientNameWhitespaceError.value = false
+
   if (val.length > 50) {
     const sliced = val.slice(0, 50)
     form.value.recipientName = sliced
@@ -118,6 +130,11 @@ const handleRecipientInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
+  // Reset error states when user types
+  SenderNameError.value = false
+  showSenderMinLengthError.value = false
+  senderNameWhitespaceError.value = false
+
   if (val.length > 100) {
     const sliced = val.slice(0, 100)
     form.value.senderName = sliced
@@ -327,6 +344,20 @@ const filteredResidents = computed(() => {
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
+  // Reset all error states before validation
+  selectName.value = false
+  trackingNumberRequired.value = false
+  recipientNameRequired.value = false
+  trackingNumberWhitespaceError.value = false
+  recipientNameWhitespaceError.value = false
+  senderNameWhitespaceError.value = false
+  SenderNameError.value = false
+  recipientNameError.value = false
+  trackingNumberError.value = false
+  showSenderMinLengthError.value = false
+  duplicateParcelError.value = false
+  trackingNumberFormatError.value = false
+
   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
     selectName.value = true
     setTimeout(() => (selectName.value = false), 10000)
@@ -927,11 +958,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.trackingNumber"
                   @input="handleTrackingInput"
-                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
+                    (showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError || trackingNumberError || trackingNumberRequired || duplicateParcelError)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
                 <div v-if="trackingNumberWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -966,11 +997,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.recipientName"
                   @input="handleRecipientInput"
-                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    showRecipientLengthError || recipientNameWhitespaceError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
+                    (showRecipientLengthError || recipientNameWhitespaceError || recipientNameError || recipientNameRequired)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
                 <div v-if="recipientNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1004,11 +1035,11 @@ function formatDateTime(datetimeStr) {
                   type="text"
                   :value="form.senderName"
                   @input="handleSenderInput"
-                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 placeholder:text-gray-300 shadow-sm"
+                  class="w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none hover:border-blue-200 shadow-sm"
                   :class="[
-                    showSenderLengthError || senderNameWhitespaceError || showSenderMinLengthError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white'
+                    (showSenderLengthError || senderNameWhitespaceError || showSenderMinLengthError || SenderNameError)
+                      ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                      : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
                   ]"
                 />
                 <div v-if="senderNameWhitespaceError" class="flex items-center text-sm text-red-600 mt-1">
@@ -1091,7 +1122,13 @@ function formatDateTime(datetimeStr) {
                 type="text"
                 v-model="recipientSearch"
                 placeholder="Type name, room or email..."
-                class="md:w-[325px] w-full border border-gray-100 bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white outline-none shadow-sm hover:border-blue-200"
+                class="md:w-[325px] w-full border bg-gray-50/30 rounded-2xl p-4 transition-all duration-300 focus:ring-4 outline-none shadow-sm hover:border-blue-200"
+                :class="[
+                  selectName
+                    ? 'border-red-400 text-red-600 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                    : 'border-gray-100 focus:ring-blue-100 focus:border-[#0E4B90] focus:bg-white placeholder:text-gray-300'
+                ]"
+                @input="selectName = false"
                 :disabled="form.status === 'PICKED_UP'"
               />
 
