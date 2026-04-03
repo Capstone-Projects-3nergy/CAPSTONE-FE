@@ -500,7 +500,7 @@ const showResetPasswordPageWeb = async function () {
                 @input="checkEmailLength"
                 :class="[
                   isEmailOverLimit || emailWhitespaceError || emailRequire || emailPasswordRequire || incorrect
-                    ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 text-red-600'
+                    ? 'border-red-600 ring-2 ring-red-100 focus:border-red-600 focus:ring-red-100 !text-red-600'
                     : 'border-gray-200 focus:ring-[#7bb8ff] text-gray-900'
                 ]"
               />
@@ -642,4 +642,17 @@ const showResetPasswordPageWeb = async function () {
   <Teleport to="body" v-if="loading"><LoadingPopUp /></Teleport>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* Standardize text color for error states and handle browser autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Force text color when error exists even if autofilled */
+input.\!text-red-600:-webkit-autofill {
+  -webkit-text-fill-color: #dc2626 !important; /* red-600 */
+}
+</style>

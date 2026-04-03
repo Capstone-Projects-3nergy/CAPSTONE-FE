@@ -467,6 +467,7 @@ const resetForm = () => {
 }
 
 const saveDraft = async () => {
+  let hasError = false
   titleError.value = false
   categoryError.value = false
   contentError.value = false
@@ -898,8 +899,8 @@ const returnLoginPage = async () => {
                       placeholder="Enter announcement title"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        titleLengthError || titleThaiNumError || titleWhitespaceError
-                          ? 'border-red-500 focus:ring-red-500'
+                        titleError || titleLengthError || titleThaiNumError || titleWhitespaceError || titleDuplicateError
+                          ? 'border-red-500 focus:ring-red-500 text-red-600'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
                    />
@@ -927,8 +928,8 @@ const returnLoginPage = async () => {
                       placeholder="Enter brief description"
                       class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all outline-none"
                       :class="[
-                        subtitleLengthError || subtitleWhitespaceError
-                          ? 'border-red-500 focus:ring-red-500'
+                        subtitleLengthError || subtitleWhitespaceError || subtitleThaiNumError
+                          ? 'border-red-500 focus:ring-red-500 text-red-600'
                           : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'
                       ]"
                    />
@@ -976,7 +977,10 @@ const returnLoginPage = async () => {
                           class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
                           @click="openDatePicker"
                         >
-                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                          <div 
+                            class="p-1.5 bg-white rounded-lg shadow-sm flex items-center justify-center border transition-all duration-200"
+                            :class="showDateError ? 'text-red-600 border-red-200' : 'text-[#0E4B90] border-gray-100'"
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cursor-pointer">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                               <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -994,6 +998,7 @@ const returnLoginPage = async () => {
                            placeholder="DD/MM/YYYY - HH:mm"
                            @click="openDatePicker"
                            class="w-full pl-4 pr-13 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-600 transition-all outline-none bg-white cursor-pointer"
+                           :class="{ 'text-red-600 border-red-500 ring-2 ring-red-100': showDateError }"
                         />
 
                         <!-- Hidden Native Datetime Input -->
@@ -1013,13 +1018,18 @@ const returnLoginPage = async () => {
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
-                         :class="contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                         :class="contentLengthError || contentWhitespaceError || contentError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
                          ref="contentArea"
                          :value="content"
                          @input="handleContentInput"
                          rows="6"
-                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         class="w-full px-4 py-3 outline-none placeholder:text-gray-400 resize-y"
+                         :class="[
+                            contentError || contentLengthError || contentWhitespaceError
+                              ? 'text-red-600'
+                              : 'text-gray-800'
+                          ]"
                          placeholder="Enter announcement content"
                       ></textarea>
                     </div>

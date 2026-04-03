@@ -1135,8 +1135,8 @@ const showProfileStaffPage = async function () {
                       placeholder="Enter announcement title"
                       :class="[
                         'w-full px-4 py-3 rounded-xl border transition-all outline-none',
-                        titleLengthError || titleThaiNumError 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
+                        titleError || titleLengthError || titleThaiNumError || titleDuplicateError || titleWhitespaceError
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 text-red-600' 
                         : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
                       ]"
                    />
@@ -1161,8 +1161,8 @@ const showProfileStaffPage = async function () {
                           placeholder="Brief description"
                           :class="[
                             'w-full px-4 py-3 rounded-xl border transition-all outline-none',
-                            subtitleLengthError || subtitleThaiNumError || subtitleWhitespaceError
-                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
+                            subtitleError || subtitleLengthError || subtitleThaiNumError || subtitleWhitespaceError
+                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100 text-red-600' 
                             : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
                           ]"
                       />
@@ -1232,8 +1232,12 @@ const showProfileStaffPage = async function () {
                           @click="openDatePicker"
                         >
                           <div 
-                            class="p-1.5 rounded-lg shadow-sm flex items-center justify-center border transition-colors"
-                            :class="announcementForm.status === 'DRAFT' ? 'bg-white text-[#0E4B90] border-gray-100' : 'bg-gray-100 text-gray-400 border-gray-200'"
+                            class="p-1.5 rounded-lg shadow-sm flex items-center justify-center border transition-all duration-200"
+                            :class="[
+                              announcementForm.status === 'DRAFT' 
+                                ? (dateError ? 'text-red-600 border-red-200 bg-white' : 'bg-white text-[#0E4B90] border-gray-100')
+                                : 'bg-gray-100 text-gray-400 border-gray-200'
+                            ]"
                           >
                             <svg v-if="announcementForm.status === 'DRAFT'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -1255,7 +1259,9 @@ const showProfileStaffPage = async function () {
                             class="w-full pl-4 pr-13 py-3 rounded-xl border transition-all outline-none font-medium"
                             :class="[
                               announcementForm.status === 'DRAFT' 
-                              ? 'border-gray-200 bg-white text-gray-700 cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-100' 
+                              ? (dateError 
+                                ? 'border-red-500 text-red-600 ring-2 ring-red-100 bg-white' 
+                                : 'border-gray-200 bg-white text-gray-700 cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-100')
                               : 'border-gray-100 bg-gray-50/80 text-gray-400 cursor-not-allowed'
                             ]"
                          />
@@ -1278,13 +1284,18 @@ const showProfileStaffPage = async function () {
                    <label class="text-sm font-semibold text-gray-700">Content</label>
                    <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
-                         :class="contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
+                         :class="contentError || contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
                          ref="contentArea"
                          :value="announcementForm.content"
                          @input="handleContentInput"
                          rows="6"
-                         class="w-full px-4 py-3 outline-none text-gray-800 placeholder:text-gray-400 resize-y"
+                         class="w-full px-4 py-3 outline-none placeholder:text-gray-400 resize-y"
+                         :class="[
+                           contentError || contentLengthError || contentWhitespaceError
+                             ? 'text-red-600'
+                             : 'text-gray-800'
+                         ]"
                          placeholder="Enter announcement content"
                       ></textarea>
                     </div>
