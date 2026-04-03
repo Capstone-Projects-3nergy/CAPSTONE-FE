@@ -1105,6 +1105,14 @@ const closePopUp = (operate) => {
               @closePopUp="closePopUp"
             />
 
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -1263,7 +1271,7 @@ const closePopUp = (operate) => {
                     <div class="text-xs font-medium">Tracking Number cannot contain leading or trailing spaces</div>
                   </div>
                   <div
-                    v-if="showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError"
+                    v-if="showTrackingLengthError || trackingNumberWhitespaceError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
@@ -1279,8 +1287,7 @@ const closePopUp = (operate) => {
                       />
                     </svg>
                     <div class="text-xs font-medium">
-                      <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
-                      <span v-else-if="trackingNumberWhitespaceError">Tracking Number cannot contain leading or trailing spaces.</span>
+                      <span v-if="trackingNumberWhitespaceError">Tracking Number cannot contain leading or trailing spaces.</span>
                       <span v-else>Tracking number must be at most 22 characters</span>
                     </div>
                   </div>

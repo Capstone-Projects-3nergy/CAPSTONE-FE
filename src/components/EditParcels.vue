@@ -941,6 +941,14 @@ function formatDateTime(datetimeStr) {
           /> 
 
 
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
+              @closePopUp="closePopUp"
+            />
         </div>
         <form
           class="bg-white p-6 md:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 space-y-12 backdrop-blur-sm"
@@ -970,7 +978,7 @@ function formatDateTime(datetimeStr) {
                   Leading and trailing whitespace are not allowed.
                 </div>
                 <div
-                  v-if="showTrackingLengthError || trackingNumberFormatError"
+                  v-if="showTrackingLengthError"
                   class="flex items-center text-sm text-red-600 mt-1"
                 >
                   <svg
@@ -986,8 +994,7 @@ function formatDateTime(datetimeStr) {
                     />
                   </svg>
                   <div class="text-sm text-red-600">
-                    <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
-                    <span v-else>Tracking number must be at most 22 characters</span>
+                    <span>Tracking number must be at most 22 characters</span>
                   </div>
                 </div>
               </div>

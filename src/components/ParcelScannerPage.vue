@@ -1474,6 +1474,14 @@ onMounted(async () => {
               operate="whitespaceError"
               @closePopUp="closePopUp"
             />
+            <AlertPopUp
+              v-if="trackingNumberFormatError"
+              :titles="'Tracking Number format is incorrect for the selected company.'"
+              message="Error!!"
+              styleType="red"
+              operate="trackingNumberFormat"
+              @closePopUp="closePopUp"
+            />
           </div>
 
           <div class="grid md:grid-cols-2 gap-6 p-6">
@@ -1633,7 +1641,7 @@ onMounted(async () => {
                     <div class="text-xs font-medium">Tracking Number cannot contain leading or trailing spaces</div>
                   </div>
                   <div
-                    v-if="showTrackingLengthError || trackingNumberFormatError"
+                    v-if="showTrackingLengthError"
                     class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
                   >
                     <svg
@@ -1649,8 +1657,7 @@ onMounted(async () => {
                       />
                     </svg>
                     <div class="text-xs font-medium">
-                      <span v-if="trackingNumberFormatError">Tracking Number format is incorrect for the selected company.</span>
-                      <span v-else>Tracking number must be at most 22 characters</span>
+                      <span>Tracking number must be at most 22 characters</span>
                     </div>
                   </div>
                 </div>
