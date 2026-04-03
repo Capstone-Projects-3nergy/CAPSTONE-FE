@@ -869,7 +869,7 @@ function formatDateTime(datetimeStr) {
           />
           <AlertPopUp
             v-if="trackingNumberError"
-       :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+       :titles="'Tracking Number must contain only A–Z, 0–9 and no leading/trailing spaces. Thai characters are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="trackingNumber"

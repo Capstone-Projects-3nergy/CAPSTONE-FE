@@ -69,6 +69,9 @@ const showResidentNameMinLengthError = ref(false)
 const showTrackingLengthError = ref(false)
 const isLoading = ref(false)
 const trackingNumberFormatError = ref(false)
+const residentNameWhitespaceError = ref(false)
+const trackingNumberWhitespaceError = ref(false)
+const hasWhitespace = (s) => s && (s !== s.trim());
 const form = ref({
   residentName: authStore.user?.fullName ,
   items: [{
@@ -226,6 +229,21 @@ const submitVerification = async () => {
 
     const authStore = useAuthManager()
     const currentUserFullName = authStore.user?.fullName || ''
+
+    // Whitespace Validation
+    if (form.value.residentName && hasWhitespace(form.value.residentName)) {
+        residentNameWhitespaceError.value = true
+        setTimeout(() => (residentNameWhitespaceError.value = false), 10000)
+        return
+    }
+
+    for (const item of form.value.items) {
+        if (item.trackingNumber && hasWhitespace(item.trackingNumber)) {
+            trackingNumberWhitespaceError.value = true
+            setTimeout(() => (trackingNumberWhitespaceError.value = false), 10000)
+            return
+        }
+    }
 
     if (form.value.residentName && currentUserFullName) {
         // Case-insensitive comparison and trimming
@@ -585,6 +603,7 @@ const handleResidentNameInput = (event) => {
   isResidentNameWrong.value = false
   showResidentNameMinLengthError.value = false
   isNameMismatch.value = false
+  residentNameWhitespaceError.value = false
 }
 
 const handleTrackingInput = (event, index) => {
@@ -614,6 +633,7 @@ const handleTrackingInput = (event, index) => {
   // Reset other errors on input
   trackingNumberError.value = false
   trackingNumberFormatError.value = false
+  trackingNumberWhitespaceError.value = false
 }
 
 </script>
@@ -826,7 +846,7 @@ const handleTrackingInput = (event, index) => {
           /> 
           <AlertPopUp
             v-if="trackingNumberError"
-            :titles="'Tracking Number must contain only English letters (A–Z) and Arabic digits (0–9). Thai characters and Thai numerals are not allowed.'"
+            :titles="'Tracking Number must contain only A–Z, 0–9 and no leading/trailing spaces. Thai characters are not allowed.'"
             message="Error!!"
             styleType="red"
             operate="trackingNumber"
@@ -887,22 +907,40 @@ const handleTrackingInput = (event, index) => {
                   </div>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <svg class="h-5 w-5 transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
                       </svg>
                     </div>
                     <input
-                      :value="form.residentName"
+                      v-model="form.residentName"
                       @input="handleResidentNameInput"
                       type="text"
-                      class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-300 focus:outline-none focus:ring-4"
+                      placeholder="Enter your full name"
+                      class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
                       :class="[
-                        (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch)
-                          ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                          : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                        (isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch || residentNameWhitespaceError)
+                          ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                          : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
                       ]"
-                      placeholder="Enter resident name"
                     />
+                    <div
+                      v-if="residentNameWhitespaceError"
+                      class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="w-4 h-4 mr-1.5"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <div class="text-xs font-medium">Full Name cannot contain leading or trailing spaces</div>
+                    </div>
                     <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -927,28 +965,46 @@ const handleTrackingInput = (event, index) => {
                     <!-- Tracking Number -->
                     <div class="col-span-1 md:col-span-2 space-y-2">
                       <div class="flex items-center ml-1">
-                        <label class="block text-sm font-semibold transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError || trackingNumberError) ? 'text-red-500' : 'text-gray-700'">Tracking Number</label>
+                        <label class="block text-sm font-semibold transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-700'">Tracking Number</label>
                         <span class="text-red-500 ml-1">*</span>
                       </div>
                       <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg class="h-5 w-5 transition-colors" :class="(showTrackingLengthError || trackingNumberFormatError || trackingNumberError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <svg class="h-5 w-5 transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-400 group-focus-within:text-[#0E4B90]'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M2,5H4V19H2V5M6,5H8V19H6V5M10,5H12V19H10V5M14,5H16V19H14V5M18,5H20V19H18V5M22,5H24V19H22V5Z" />
                           </svg>
                         </div>
                         <input
-                          :value="item.trackingNumber"
+                          v-model="item.trackingNumber"
                           @input="handleTrackingInput($event, index)"
                           type="text"
-                          class="pl-10 w-full bg-white border text-gray-900 text-sm rounded-xl block p-3 transition-all duration-300 focus:outline-none focus:ring-4"
-                          :class="[
-                            (showTrackingLengthError || trackingNumberFormatError || trackingNumberError)
-                              ? 'border-red-400 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100'
-                              : 'border-gray-200 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
-                          ]"
                           placeholder="Enter tracking number"
+                          class="pl-10 w-full bg-gray-50/50 border rounded-2xl px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-gray-300"
+                          :class="[
+                            (trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError)
+                              ? 'border-red-400 text-red-600 ring-4 ring-red-50 focus:border-red-400 focus:ring-red-100 placeholder:text-red-300'
+                              : 'border-gray-100 text-gray-800 focus:ring-blue-50 focus:border-[#0E4B90] focus:ring-[#1D355E]'
+                          ]"
                         />
-                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError ||trackingNumberFormatError">
+                        <div
+                          v-if="trackingNumberWhitespaceError"
+                          class="flex items-center text-sm text-red-600 mt-1.5 ml-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="w-4 h-4 mr-1.5"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          <div class="text-xs font-medium">Tracking Number cannot contain leading or trailing spaces</div>
+                        </div>
+                         <p class="absolute -bottom-5 left-1 text-xs text-red-500 flex items-center gap-1" v-if="showTrackingLengthError || trackingNumberFormatError">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                           </svg>
