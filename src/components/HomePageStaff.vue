@@ -188,6 +188,7 @@ const mapStatus = (status) => {
       return 'Picked Up'
     case 'RECEIVED':
     case 'WAITING':
+    case 'WAIT':
       return 'Waiting'
     default:
       return status
@@ -534,10 +535,12 @@ const updateParcelChart = () => {
   let labels = [...data.labels];
   let received = [...data.datasets[0].data];
   let pickedUp = [...data.datasets[1].data];
+  let overdue = [...data.datasets[2].data];
 
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
   parcelChartInstance.data.datasets[1].data = pickedUp;
+  parcelChartInstance.data.datasets[2].data = overdue;
   
   // Calculate and Update Baseline (Average Received)
   const totalReceived = received.reduce((a, b) => a + b, 0);
@@ -545,7 +548,7 @@ const updateParcelChart = () => {
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  if (parcelChartInstance.data.datasets.length < 3) {
+  if (parcelChartInstance.data.datasets.length < 4) {
     parcelChartInstance.data.datasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
@@ -558,8 +561,8 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[2].data = new Array(labels.length).fill(avg.toFixed(1));
-    parcelChartInstance.data.datasets[2].label = `Avg (${avg.toFixed(1)})`;
+    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avg.toFixed(1));
+    parcelChartInstance.data.datasets[3].label = `Avg (${avg.toFixed(1)})`;
   }
 
   // Update bar thickness based on interval
@@ -749,11 +752,12 @@ onMounted(async () => {
     plugins: [dataLabelsPlugin, avgLinePlugin],
     data: {
       labels: dashboardStore.chartData.labels,
-      // Filter out Overdue from this graph as per request
       datasets: dashboardStore.chartData.datasets.map(ds => ({
         ...ds,
-        backgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 0.85)' : 'rgba(16, 185, 129, 0.85)',
-        hoverBackgroundColor: ds.label === 'Received' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
+        backgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 0.85)' : 
+                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)'),
+        hoverBackgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 1)' : 
+                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)'),
         borderRadius: 4,
         borderSkipped: false,
         barThickness: dashboardStore.currentView === 'daily' ? 12 : 24
@@ -793,6 +797,7 @@ onMounted(async () => {
           cornerRadius: 8,
           boxPadding: 6,
           usePointStyle: true,
+          filter: (item) => !item.dataset.label?.toLowerCase().includes('avg'),
           callbacks: {
             title: (tooltipItems) => {
               const item = tooltipItems[0];
@@ -916,15 +921,25 @@ onMounted(async () => {
             cornerRadius: 8,
             boxPadding: 6,
             usePointStyle: true,
+            filter: (item) => !item.dataset.label?.toLowerCase().includes('avg'),
             callbacks: {
               title: (tooltipItems) => {
-                 return `Month: ${tooltipItems[0].label} ${residentYear.value}`;
+                 const refYear = residentYear.value;
+                 const view = activityInterval.value;
+                 return view === 'monthly' ? `Month: ${tooltipItems[0].label} ${refYear}` : `Timeline: ${tooltipItems[0].label}`;
               },
               label: (context) => {
+                const idx = context.dataIndex;
+                const breakdown = dashboardStore.residentChartData.statusBreakdown[idx] || { active: 0, pending: 0, inactive: 0 };
                 const val = context.parsed.y || 0;
-                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + (b || 0), 0);
-                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                return ` ${val} Joined (${pct}%)`;
+                
+                const lines = [` Total: ${val} Joined`];
+                if (val > 0) {
+                  lines.push(` • Active: ${breakdown.active}`);
+                  lines.push(` • Pending: ${breakdown.pending}`);
+                  lines.push(` • Inactive: ${breakdown.inactive}`);
+                }
+                return lines;
               }
             }
           }
@@ -1508,7 +1523,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   <canvas id="parcelChart"></canvas>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8 border-t border-gray-50">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-50">
                   <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
@@ -1525,6 +1540,15 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <div>
                       <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
+                    </div>
+                  </div>
+                  <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Overdue</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.overdueParcels }}</span>
                     </div>
                   </div>
                 </div>

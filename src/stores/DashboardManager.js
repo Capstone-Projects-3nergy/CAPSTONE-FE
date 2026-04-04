@@ -49,8 +49,14 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         backgroundColor: 'rgba(16, 185, 129, 0.85)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 1 
+      },
+      { 
+        label: 'Overdue', 
+        data: [], 
+        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+        borderColor: 'rgba(239, 68, 68, 1)',
+        borderWidth: 1 
       }
-      // Overdue removed as per previous request
     ]
   })
 
@@ -58,6 +64,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const residentChartData = reactive({
     labels: [],
     data: [],
+    statusBreakdown: [], // [{active, pending, inactive}, ...]
     total: 0,
     peak: '-'
   })
@@ -124,7 +131,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     const s = status?.toUpperCase() || ''
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
     if (s === 'WAITING_FOR_STAFF' || s.includes('PENDING')) return 'Waiting for Staff'
-    if (s === 'WAITING' || s === 'RECEIVED') return 'Waiting'
+    if (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT') return 'Waiting'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
     return 'Waiting'
@@ -199,61 +206,113 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
   const generateParcelChart = (data, start, end) => {
     chartData.labels = []
-    chartData.datasets[0].data = []
-    chartData.datasets[1].data = []
-
-    if (parcelView.value === 'daily') {
-      // 24 Hours
-      for (let i = 0; i < 24; i++) {
-        chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          if (d.getHours() === i) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      }
-    } else if (parcelView.value === 'weekly') {
-      // 7 Days (Mon-Sun)
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      chartData.labels = days
-      days.forEach((day, idx) => {
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          const dIdx = (d.getDay() + 6) % 7 // Mon=0
-          if (dIdx === idx) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      })
-    } else if (parcelView.value === 'monthly') {
-      // 28-31 Days
-      const daysInMonth = end.getDate()
-      for (let i = 1; i <= daysInMonth; i++) {
-        chartData.labels.push(i.toString())
-        let received = 0
-        let pickedUp = 0
-        data.forEach(p => {
-          const d = new Date(p.receivedAt || p.createdAt || p.date)
-          if (d.getDate() === i) {
-            if (p.status?.toUpperCase().includes('PICKED') || p.status?.toUpperCase().includes('TAKEN')) pickedUp++
-            else received++
-          }
-        })
-        chartData.datasets[0].data.push(received)
-        chartData.datasets[1].data.push(pickedUp)
-      }
+    const view = parcelView.value
+    
+    // Create slots based on view
+    let slotCount = 0
+    if (view === 'daily') {
+      slotCount = 24
+      for (let i = 0; i < 24; i++) chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
+    } else if (view === 'weekly') {
+      slotCount = 7
+      chartData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    } else if (view === 'monthly') {
+      slotCount = end.getDate()
+      for (let i = 1; i <= slotCount; i++) chartData.labels.push(i.toString())
     }
+
+    const waitingData = new Array(slotCount).fill(0)
+    const pickedUpData = new Array(slotCount).fill(0)
+    const overdueData = new Array(slotCount).fill(0)
+
+    data.forEach(p => {
+      // Handle "Waiting" occurrences (Arrivals)
+      // Extract arrival time: check history first for WAITING/RECEIVED, fallback to timestamps
+      let arrivals = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        arrivals = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase() || ''
+             return s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT'
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+      
+      // Fallback if no history or history didn't have waiting status
+      if (arrivals.length === 0) {
+        arrivals.push(new Date(p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt))
+      }
+
+      arrivals.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) waitingData[idx]++
+        }
+      })
+
+      // Handle "Picked Up" occurrences (Completions)
+      const currentStatus = (p.status || '').toUpperCase()
+      const isPickedUpNow = currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')
+      
+      let completions = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        completions = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase() || ''
+             return s === 'PICKED_UP' || s === 'TAKEN'
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+
+      // Fallback: if it is picked up now but history is missing the pick up event
+      if (isPickedUpNow && completions.length === 0) {
+        // Use updatedAt as approximate pick up time
+        completions.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt || p.date))
+      }
+
+      completions.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) pickedUpData[idx]++
+        }
+      })
+
+      // Handle "Overdue" occurrences
+      const isOverdueNow = currentStatus.includes('OVERDUE')
+      let overdues = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        overdues = p.statusHistory
+          .filter(h => h.status?.toUpperCase().includes('OVERDUE'))
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+
+      if (isOverdueNow && overdues.length === 0) {
+        overdues.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt || p.date))
+      }
+
+      overdues.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) overdueData[idx]++
+        }
+      })
+    })
+
+    chartData.datasets[0].data = waitingData
+    chartData.datasets[1].data = pickedUpData
+    chartData.datasets[2].data = overdueData
   }
 
   const generateResidentChart = (data, start, end) => {
@@ -272,19 +331,32 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
     residentChartData.labels = labels
     residentChartData.data = new Array(labels.length).fill(0)
+    residentChartData.statusBreakdown = new Array(labels.length).fill(null).map(() => ({ active: 0, pending: 0, inactive: 0 }))
     
     // Residents growth in period
     data.forEach(r => {
       const d = new Date(r.updateAt || r.createdAt)
       if (d >= start && d <= end) {
+        let idx = -1
         if (view === 'daily') {
-          residentChartData.data[d.getHours()]++
+          idx = d.getHours()
         } else if (view === 'weekly') {
-          const dIdx = (d.getDay() + 6) % 7
-          if (dIdx >= 0 && dIdx < 7) residentChartData.data[dIdx]++
+          idx = (d.getDay() + 6) % 7
         } else if (view === 'monthly') {
-          const dIdx = d.getDate() - 1
-          if (dIdx >= 0 && dIdx < residentChartData.data.length) residentChartData.data[dIdx]++
+          idx = d.getDate() - 1
+        }
+
+        if (idx >= 0 && idx < residentChartData.data.length) {
+          residentChartData.data[idx]++
+          
+          const status = (r.status || '').toUpperCase()
+          if (status === 'ACTIVE' || status === 'VERIFIED') {
+            residentChartData.statusBreakdown[idx].active++
+          } else if (status === 'PENDING') {
+            residentChartData.statusBreakdown[idx].pending++
+          } else if (status === 'INACTIVE') {
+            residentChartData.statusBreakdown[idx].inactive++
+          }
         }
       }
     })
