@@ -49,29 +49,80 @@ const formatDateTime = (dateStr) => {
 // Compute Historical Summaries from all data
 const parcelHistory = computed(() => {
   const groups = {};
-  props.parcels.forEach(p => {
-    const d = new Date(p.receiveAt || p.createdAt || p.updatedAt);
-    if (isNaN(d.getTime())) return;
-    const year = d.getFullYear();
-    const month = d.getMonth() + 1;
-    
-    if (!groups[year]) groups[year] = { year, totalReceived: 0, totalPickedUp: 0, months: {} };
-    if (!groups[year].months[month]) {
-      groups[year].months[month] = { month: month, monthStr: `${month.toString().padStart(2, '0')}/${year}`, received: 0, pickedUp: 0 };
+
+  const addEvent = (date, type) => {
+    if (!date || isNaN(date.getTime())) return;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+
+    if (!groups[year]) {
+      groups[year] = { 
+        year, 
+        totalReceived: 0, 
+        totalPickedUp: 0, 
+        totalOverdue: 0, 
+        months: {} 
+      };
     }
-    
-    groups[year].months[month].received++;
-    groups[year].totalReceived++;
-    
-    if (p.status === 'Picked Up' || p.status === 'PICKED_UP') {
+    if (!groups[year].months[month]) {
+      groups[year].months[month] = { 
+        month: month, 
+        monthStr: `${month.toString().padStart(2, '0')}/${year}`, 
+        received: 0, 
+        pickedUp: 0, 
+        overdue: 0 
+      };
+    }
+
+    if (type === 'received') {
+      groups[year].months[month].received++;
+      groups[year].totalReceived++;
+    } else if (type === 'pickedUp') {
       groups[year].months[month].pickedUp++;
       groups[year].totalPickedUp++;
+    } else if (type === 'overdue') {
+      groups[year].months[month].overdue++;
+      groups[year].totalOverdue++;
+    }
+  };
+
+  props.parcels.forEach(p => {
+    if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+      // Use status history for accurate event timing (supports Waiting/Received transition)
+      p.statusHistory.forEach(h => {
+        const s = (h.status || '').toUpperCase();
+        const d = new Date(h.timestamp || h.updatedAt || h.createdAt);
+        
+        if (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT') {
+          addEvent(d, 'received');
+        } else if (s === 'PICKED_UP' || s === 'TAKEN') {
+          addEvent(d, 'pickedUp');
+        } else if (s.includes('OVERDUE')) {
+          addEvent(d, 'overdue');
+        }
+      });
+    } else {
+      // Fallback to basic logic for backward compatibility
+      const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+      addEvent(arrivalDate, 'received');
+
+      const s = (p.status || '').toUpperCase();
+      if (s === 'PICKED_UP' || s === 'TAKEN') {
+        const pickDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
+        addEvent(pickDate, 'pickedUp');
+      } else if (s.includes('OVERDUE')) {
+        const overdueDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
+        addEvent(overdueDate, 'overdue');
+      }
     }
   });
 
   return Object.values(groups)
     .sort((a, b) => b.year - a.year)
-    .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
+    .map(y => ({ 
+      ...y, 
+      months: Object.values(y.months).sort((a, b) => a.month - b.month) 
+    }));
 });
 
 const residentHistory = computed(() => {
@@ -162,11 +213,11 @@ const handleExportExcel = () => {
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach(yData => {
       finalData.push([`HISTORICAL MONTHLY SUMMARY (Parcels) - YEAR ${yData.year}`]);
-      finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up']);
+      finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue']);
       yData.months.forEach(h => {
-        finalData.push([h.monthStr, h.received, h.pickedUp]);
+        finalData.push([h.monthStr, h.received, h.pickedUp, h.overdue]);
       });
-      finalData.push(['TOTAL', yData.totalReceived, yData.totalPickedUp]);
+      finalData.push(['TOTAL', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
       finalData.push([]);
     });
   }
@@ -380,8 +431,9 @@ const handleExportPDF = () => {
       doc.rect(15, y - 5, 180, 8, 'F');
       doc.setFont("helvetica", "bold");
       doc.text("MONTH (MM/YYYY)", 17, y);
-      doc.text("RECEIVED", 100, y, { align: 'right' });
-      doc.text("PICKED UP", 180, y, { align: 'right' });
+      doc.text("RECEIVED", 85, y, { align: 'right' });
+      doc.text("PICKED UP", 140, y, { align: 'right' });
+      doc.text("OVERDUE", 190, y, { align: 'right' });
 
       doc.setDrawColor(180, 180, 180);
       const rowsCount = yData.months.length + 1; // +1 for Total
@@ -392,8 +444,9 @@ const handleExportPDF = () => {
       yData.months.forEach(h => {
         checkPage(7);
         doc.text(h.monthStr, 17, y);
-        doc.text(h.received.toString(), 100, y, { align: 'right' });
-        doc.text(h.pickedUp.toString(), 180, y, { align: 'right' });
+        doc.text(h.received.toString(), 85, y, { align: 'right' });
+        doc.text(h.pickedUp.toString(), 140, y, { align: 'right' });
+        doc.text(h.overdue.toString(), 190, y, { align: 'right' });
         doc.setDrawColor(230, 230, 230);
         doc.line(15, y + 2, 195, y + 2);
         y += 7;
@@ -402,8 +455,9 @@ const handleExportPDF = () => {
       // Render Total row
       doc.setFont("helvetica", "bold");
       doc.text("TOTAL", 17, y);
-      doc.text(yData.totalReceived.toString(), 100, y, { align: 'right' });
-      doc.text(yData.totalPickedUp.toString(), 180, y, { align: 'right' });
+      doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
+      doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
+      doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
       y += 7;
       
       if (yIdx < parcelHistory.value.length - 1) y += 5;
@@ -665,6 +719,7 @@ defineExpose({
               <th>Month (MM/YYYY)</th>
               <th>Total Received</th>
               <th>Total Picked Up</th>
+              <th>Total Overdue</th>
             </tr>
           </thead>
           <tbody>
@@ -672,12 +727,14 @@ defineExpose({
               <td>{{ h.monthStr }}</td>
               <td>{{ h.received }}</td>
               <td>{{ h.pickedUp }}</td>
+              <td>{{ h.overdue }}</td>
             </tr>
             <!-- TOTAL ROW -->
             <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
               <td>TOTAL</td>
               <td>{{ yData.totalReceived }}</td>
               <td>{{ yData.totalPickedUp }}</td>
+              <td>{{ yData.totalOverdue }}</td>
             </tr>
           </tbody>
         </table>
