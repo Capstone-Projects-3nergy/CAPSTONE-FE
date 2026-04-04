@@ -424,10 +424,10 @@ const authStore = useAuthManager()
                 class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
                 :class="[
                   {
-                    'bg-yellow-50 text-yellow-600': p.status === 'Waiting for Staff' || p.status === 'Pending',
-                    'bg-green-50 text-green-600': p.status === 'Picked Up',
-                    'bg-blue-50 text-blue-600': p.status === 'Received' || p.status === 'Waiting',
-                    'bg-red-50 text-red-600': p.status === 'TRASH'
+                    'bg-yellow-50 text-yellow-600': ['Waiting for Staff', 'Pending', 'WAITING_FOR_STAFF', 'PENDING'].includes(p.status),
+                    'bg-green-50 text-green-600': ['Picked Up', 'PICKED_UP'].includes(p.status),
+                    'bg-blue-50 text-blue-600': ['Received', 'Waiting', 'RECEIVED', 'WAITING'].includes(p.status),
+                    'bg-red-50 text-red-600': ['TRASH', 'Trash'].includes(p.status)
                   },
                   clickableStatus ? 'cursor-pointer ' : 'cursor-default '
                 ]"

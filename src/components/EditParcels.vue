@@ -176,13 +176,13 @@ const showParcelTrashPage = async function () {
 const statusOptions = computed(() => {
   let options = []
   if (form.value.status === 'WAITING_FOR_STAFF') {
-    options = ['WAITING_FOR_STAFF', 'RECEIVED']
+    options = ['WAITING_FOR_STAFF', 'RECEIVED', 'WAITING']
   } else if (form.value.status === 'RECEIVED' || form.value.status === 'WAITING') {
-    options = ['RECEIVED', 'PICKED_UP']
+    options = ['RECEIVED', 'WAITING', 'PICKED_UP']
   } else if (form.value.status === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['RECEIVED', 'PICKED_UP']
+    options = ['RECEIVED', 'WAITING', 'PICKED_UP']
   }
   return options.map((s) => ({
     label: formatStatus(s),
@@ -1255,7 +1255,7 @@ function formatDateTime(datetimeStr) {
                     You can only update the status in order: 
                     <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                     <span class="mx-1 opacity-40">→</span> 
-                    <span class="text-[#0E4B90] font-bold">Received</span> 
+                    <span class="text-[#0E4B90] font-bold">Wating</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Picked Up</span>
                   </p>

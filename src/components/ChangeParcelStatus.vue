@@ -52,7 +52,7 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  let options = ['RECEIVED', 'PICKED_UP']
+  let options = ['RECEIVED', 'WAITING', 'PICKED_UP']
   
   return options.map(s => ({
     value: s,
@@ -133,7 +133,7 @@ const cancel = () => {
 
 const steps = ['RECEIVED', 'PICKED_UP']
 const currentStepIndex = computed(() => {
-  if (currentStatus.value === 'WAITING') return steps.indexOf('RECEIVED')
+  if (currentStatus.value === 'WAITING' || currentStatus.value === 'RECEIVED') return steps.indexOf('RECEIVED')
   return steps.indexOf(currentStatus.value)
 })
 </script>
@@ -205,7 +205,7 @@ const currentStepIndex = computed(() => {
                   <div 
                     class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
                     :class="[
-                      (currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')) ? 'bg-white border-blue-500 scale-125' : 
+                      (currentStatus === step || ((currentStatus === 'WAITING' || currentStatus === 'RECEIVED') && step === 'RECEIVED')) ? 'bg-white border-blue-500 scale-125' : 
                       (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
                     ]"
                   >
