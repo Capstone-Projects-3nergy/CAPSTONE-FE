@@ -1255,7 +1255,7 @@ function formatDateTime(datetimeStr) {
                     You can only update the status in order: 
                     <span class="text-[#0E4B90] font-bold">Waiting for Staff</span> 
                     <span class="mx-1 opacity-40">→</span> 
-                    <span class="text-[#0E4B90] font-bold">Wating</span> 
+                    <span class="text-[#0E4B90] font-bold">Waiting</span> 
                     <span class="mx-1 opacity-40">→</span> 
                     <span class="text-[#0E4B90] font-bold">Picked Up</span>
                   </p>
