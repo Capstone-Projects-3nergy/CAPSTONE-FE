@@ -455,7 +455,7 @@ export const useAuthManager = defineStore('authManager', () => {
   const updateUser = (updatedProfile) => {
     if (!user.value || !updatedProfile) return
 
-    // update name
+
     if (updatedProfile.firstName || updatedProfile.lastName) {
       user.value.fullName =
         `${updatedProfile.firstName ?? ''} ${updatedProfile.lastName ?? ''}`.trim()
