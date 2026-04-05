@@ -148,7 +148,7 @@ const currentStepIndex = computed(() => {
         class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all"
         @click.stop
       >
-        <!-- Modal Content -->
+    
         <div v-if="statusChangedSuccessfuly" class="p-8 sm:p-10 flex flex-col items-center text-center">
           <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6 animate-bounce-short">
              <svg class="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -168,7 +168,7 @@ const currentStepIndex = computed(() => {
         </div>
 
         <div v-else class="p-0">
-          <!-- Header Area -->
+     
           <div class="bg-slate-50 p-6 sm:p-8 border-b border-slate-100">
             <div class="flex items-center justify-between mb-6">
               <div>
@@ -179,7 +179,6 @@ const currentStepIndex = computed(() => {
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
 
-            <!-- Parcel Summary Card -->
             <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
               <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>

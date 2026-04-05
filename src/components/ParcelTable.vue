@@ -520,27 +520,6 @@ const authStore = useAuthManager()
             >
             {{ formatDateTime(p.deletedAt) }}
           </td>
-          <!-- <td
-            v-if="showActionStatus"
-            class="px-4 py-2 md:py-4 text-sm text-gray-700 border-b md:border-none"
-          >
-            <span class="md:hidden font-semibold text-[#185DC0]">Status:</span>
-
-            <span
-              class="px-3 py-1 rounded-full text-xs font-semibold text-white"
-              :class="[
-                {
-                  'bg-green-400': p.status === 'ACTIVE',
-                  'bg-gray-400': p.status === 'INACTIVE',
-                  'bg-red-400': p.status === 'DELETED',
-                  'bg-yellow-400': p.status === 'PENDING'
-                },
-                clickableStatus ? 'cursor-pointer ' : 'cursor-default '
-              ]"
-            >
-              {{ p.status }}
-            </span>
-          </td> -->
           <td
             v-if="showAction"
             class="px-4 py-2 md:py-4 md:px-6 text-xs text-gray-700 flex items-center md:table-cell md:align-middle text-center whitespace-nowrap"

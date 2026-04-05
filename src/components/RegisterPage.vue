@@ -808,14 +808,6 @@ const toggleComfirmPasswordVisibility = () => {
             operate="positionOverLimit"
             @closePopUp="closePopUp"
           />
-          <!-- <AlertPopUp
-            v-if="isStaffPositionTooShort"
-            titles="Position must be at least 2 characters."
-            message="Error!!"
-            styleType="red"
-            operate="positionTooShort"
-            @closePopUp="closePopUp"
-          /> -->
           <AlertPopUp
             v-if="isPasswordOverLimit"
             titles="Limit Password to 100 characters or less."

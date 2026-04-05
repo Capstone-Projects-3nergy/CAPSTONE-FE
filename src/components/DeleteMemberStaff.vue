@@ -101,7 +101,7 @@ const cancelAction = () => {
         class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all"
         @click.stop
       >
-        <!-- Header -->
+   
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <h1 class="text-xl font-bold text-gray-800">
             <template v-if="isPermanent"> Delete Resident </template>
@@ -109,7 +109,6 @@ const cancelAction = () => {
           </h1>
         </div>
 
-        <!-- Body -->
         <div class="px-6 py-8">
           <div class="flex flex-col items-center text-center">
             
@@ -148,7 +147,6 @@ const cancelAction = () => {
           </div>
         </div>
 
-        <!-- Footer -->
         <div class="px-6 py-6 bg-gray-50 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-gray-100">
           <ButtonWeb
             label="Cancel"

@@ -662,7 +662,6 @@ const confirmUnlinkAction = async () => {
 </script>
 <template>
   <div class="w-full mx-auto px-4 relative"> 
-    <!-- Beautiful LINE Feedback Alert -->
     <div v-if="lineAlertVisible" class="fixed top-5 left-5 z-50 w-full max-w-sm animate-in fade-in slide-in-from-right-4 duration-500">
       <AlertPopUp
         v-if="lineAlertVisible"

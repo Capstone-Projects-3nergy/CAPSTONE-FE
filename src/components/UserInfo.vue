@@ -179,33 +179,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Quick Info Hover Tooltip 
-    <teleport to="body">
-      <transition
-        enter-active-class="transition ease-out duration-200"
-        enter-from-class="opacity-0 translate-y-2 scale-95"
-        enter-to-class="opacity-100 translate-y-0 scale-100"
-        leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100 translate-y-0 scale-100"
-        leave-to-class="opacity-0 translate-y-2 scale-95"
-      >
-        <div
-          v-if="showHoverInfo && !showDropdown"
-          class="fixed bg-[#1D355E]/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-xl border border-white/10 z-[70] pointer-events-none flex flex-col min-w-[120px]"
-          :style="align === 'left' ? { 
-            top: `${popoverStyle.rowCenter - (windowWidth < 640 ? 40 : 22)}px`, 
-            left: `${popoverStyle.left}px` 
-          } : {}"
-          :class="align === 'right' ? 'absolute right-0 top-14 items-end text-right' : 'items-start text-left'"
-        >
-          <p class="font-bold text-xs text-white leading-none mb-1">{{ userName }}</p>
-          <p class="text-[9px] text-blue-200 font-medium tracking-wide opacity-80">{{ userEmail }}</p>
-        </div>
-      </transition>
-    </teleport>
-    -->
-
-    <!-- Detailed Dropdown Menu -->
     <teleport to="body">
       <transition
         enter-active-class="transition ease-out duration-200"
@@ -297,7 +270,6 @@ defineExpose({
     </transition>
     </teleport>
 
-    <!-- Overlay Close Background -->
     <teleport to="body">
       <div
         v-if="showDropdown"

@@ -1925,7 +1925,6 @@ defineExpose({
         </div>
         <!-- 🔹 WRAPPER -->
         <div class="flex flex-col md:flex-row gap-10">
-          <!-- ================= LEFT : Profile Image ================= -->
           <div
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
@@ -2130,7 +2129,6 @@ defineExpose({
                 />
               </div>
 
-              <!-- Actions -->
               <div class="md:col-span-2 flex gap-3 mt-6 justify-end pt-6 border-t border-gray-50">
                 <ButtonWeb
                   class="flex-1 md:flex-none text-[#898989] text-xs py-2 md:text-base md:py-3 cursor-pointer hover:bg-gray-100 hover:text-gray-600 rounded-2xl transition-all font-bold px-3 md:px-8 whitespace-nowrap"

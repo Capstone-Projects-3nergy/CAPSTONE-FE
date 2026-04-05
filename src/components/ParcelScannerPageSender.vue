@@ -1538,7 +1538,6 @@ const closePopUp = (operate) => {
               </div>
 
               <div class="mt-8">
-                <!-- <span class="block text-sm font-bold text-gray-400 mb-4 ml-1">Saved parcels</span> -->
                 <ul class="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                   <li
                     v-for="(p, i) in savedParcels"

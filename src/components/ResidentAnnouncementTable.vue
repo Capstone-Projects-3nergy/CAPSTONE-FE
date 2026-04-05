@@ -74,7 +74,6 @@ const formatDate = (dateString) => {
 
 <template>
   <div class="min-h-[400px]">
-    <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div v-if="items.length === 0" class="col-span-1 md:col-span-2 lg:col-span-3 py-20 px-4 text-center bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
         <div class="w-20 h-20 bg-[#F8FAFC] rounded-full flex items-center justify-center mb-5 text-[#0E4B90]/20 border border-[#0E4B90]/5 shadow-inner">
@@ -94,21 +93,17 @@ const formatDate = (dateString) => {
         class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer flex flex-col"
       >
         <div class="h-48 bg-gray-100 relative overflow-hidden group/img">
-          <!-- Background Image -->
           <img 
             v-if="item.coverImageUrl || item.coverImage"
             :src="item.coverImageUrl || item.coverImage"
             alt="Announcement Cover"
             class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
           />
-          <!-- Placeholder for Image -->
           <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
             <svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          
-          <!-- Hover Overlay -->
           <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
             <div class="bg-white/20 border border-white/40 px-4 py-2 rounded-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
               <span class="text-white text-xs font-bold tracking-wider">Read Full Details</span>
@@ -171,8 +166,6 @@ const formatDate = (dateString) => {
         </div>
       </div>
     </div>
-
-    <!-- List View (Resident styled) -->
     <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-100">
@@ -217,7 +210,6 @@ const formatDate = (dateString) => {
       </div>
     </div>
 
-    <!-- Pagination (Reusable style) -->
     <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
       <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1">
         <button 

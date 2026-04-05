@@ -294,7 +294,6 @@ const showResetPasswordPageWeb = async function () {
     <div
       class="hidden md:flex flex-1 bg-gradient-to-br from-[#0047b1] via-[#338FFF] to-[#7bb8ff] text-white flex-col justify-center items-center p-4 min-h-screen relative overflow-hidden"
     >
-      <!-- Subtle Decorative Blobs -->
       <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#002266]/30 rounded-full blur-3xl pointer-events-none"></div>
 

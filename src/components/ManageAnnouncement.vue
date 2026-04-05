@@ -569,11 +569,8 @@ const showProfileStaffPage = async function () {
           </SidebarItem>
         </aside>
      
-
-      <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-7xl mx-auto">
-          <!-- Header & Actions -->
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -591,7 +588,6 @@ const showProfileStaffPage = async function () {
             </div>
           </div>
 
-          <!-- Stats Cards -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
               <div class="flex items-center gap-4">
@@ -641,8 +637,6 @@ const showProfileStaffPage = async function () {
               </div>
             </div>
           </div>
-
-          <!-- Announcement Filters -->
           <AnnouncementFilterBar
             v-model:search="searchQuery"
             v-model:category="selectedCategory"
@@ -651,8 +645,6 @@ const showProfileStaffPage = async function () {
             v-model:viewMode="viewMode"
             @new-announcement="showNewAnnouncementPage"
           />
-
-          <!-- Category Filter -->
           <div class="mb-6 w-full">
             <div class="flex flex-wrap sm:flex-nowrap bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80 gap-1 sm:gap-1.5 items-center w-full sm:w-fit">
               
@@ -714,8 +706,6 @@ const showProfileStaffPage = async function () {
               </button>
             </div>
           </div>
-
-          <!-- Announcement Table -->
           <AnnouncementTable
             :items="paginatedAnnouncements"
             :pages="pages"

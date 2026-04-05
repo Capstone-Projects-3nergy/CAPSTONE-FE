@@ -869,10 +869,7 @@ const showResidentDetail = async function (id) {
                   {{ tab }}
                 </button>
               </div>
-
-              <!-- Status Stats Cards -->
               <div class="flex flex-wrap sm:flex-nowrap items-center justify-start sm:justify-end gap-1.5 sm:gap-3 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
-                <!-- Total Users Card -->
                 <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-blue-50 flex items-center justify-center text-[#1D355E] transition-colors duration-300 group-hover:bg-blue-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -887,8 +884,6 @@ const showResidentDetail = async function (id) {
                     </div>
                   </div>
                 </div>
-
-                <!-- Currently Active Card -->
                 <div class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-emerald-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -903,8 +898,6 @@ const showResidentDetail = async function (id) {
                     </div>
                   </div>
                 </div>
-
-                <!-- Pending Approval Card (Only for Residents tab) -->
                 <div v-if="activeTab === 'Residents'" class="flex-1 min-w-[30%] sm:min-w-0 sm:flex-initial flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl border border-amber-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-200 group">
                   <div class="w-6 h-6 sm:w-10 sm:h-10 rounded-md sm:rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 transition-colors duration-300 group-hover:bg-amber-100 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -998,7 +991,6 @@ const showResidentDetail = async function (id) {
             operate="problem"
             @closePopUp="closePopUp"
           />
-          <!-- Unified Popup for Child Component Events -->
           <AlertPopUp
             v-if="childAlert.visible"
             :titles="childAlert.title"
