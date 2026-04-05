@@ -461,7 +461,7 @@ export const useAuthManager = defineStore('authManager', () => {
         `${updatedProfile.firstName ?? ''} ${updatedProfile.lastName ?? ''}`.trim()
     }
 
-    // update email
+ 
     if (updatedProfile.email) {
       user.value.email = updatedProfile.email
     }
