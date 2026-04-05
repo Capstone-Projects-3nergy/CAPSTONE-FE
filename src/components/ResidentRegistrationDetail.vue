@@ -135,7 +135,6 @@ const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
 onUnmounted(() => {
-  // Removed resize listener to allow global state persistence
 })
 
 onMounted(async () => {
