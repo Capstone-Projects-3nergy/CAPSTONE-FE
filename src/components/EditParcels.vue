@@ -175,15 +175,22 @@ const showParcelTrashPage = async function () {
 }
 const statusOptions = computed(() => {
   let options = []
-  if (form.value.status === 'WAITING_FOR_STAFF') {
-    options = ['WAITING_FOR_STAFF', 'RECEIVED', 'WAITING']
-  } else if (form.value.status === 'RECEIVED' || form.value.status === 'WAITING') {
-    options = ['RECEIVED', 'WAITING', 'PICKED_UP']
-  } else if (form.value.status === 'PICKED_UP') {
+  const s = form.value.status?.toUpperCase() || ''
+
+  if (s === 'WAITING_FOR_STAFF') {
+    // Current intake is labeled RECEIVED
+    options = ['WAITING_FOR_STAFF', 'RECEIVED']
+  } else if (s === 'RECEIVED') {
+    options = ['RECEIVED', 'PICKED_UP']
+  } else if (s === 'WAITING') {
+    // In future, intake will be WAITING
+    options = ['WAITING', 'PICKED_UP']
+  } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['RECEIVED', 'WAITING', 'PICKED_UP']
+    options = ['RECEIVED', 'PICKED_UP']
   }
+  
   return options.map((s) => ({
     label: formatStatus(s),
     value: s

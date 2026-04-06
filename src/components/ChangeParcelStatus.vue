@@ -56,8 +56,8 @@ const statusOptions = computed(() => {
   
   if (s === 'WAITING_FOR_STAFF') {
     return [
-      { value: 'RECEIVED', label: 'Received' },
-      { value: 'WAITING', label: 'Waiting' }
+      { value: 'WAITING_FOR_STAFF', label: 'Waiting for Staff' },
+      { value: 'RECEIVED', label: 'Received' }
     ]
   }
   
@@ -75,7 +75,7 @@ const statusOptions = computed(() => {
     ]
   }
 
-  // Fallback for Picked Up or others
+  // Fallback
   return [
     { value: s, label: s.replace(/_/g, ' ') }
   ]
@@ -154,7 +154,7 @@ const cancel = () => {
 
 const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
 const getStepLabel = (step) => {
-  if (step === 'WAITING_FOR_STAFF') return 'STAFF' 
+  if (step === 'WAITING_FOR_STAFF') return 'WAITING FOR STAFF' 
   if (step === 'WAITING') {
     return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
   }
@@ -245,9 +245,9 @@ const currentStepIndex = computed(() => {
                     </svg>
                     <div v-if="currentStepIndex === i" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
-                  <span class="text-[9px] font-extrabold tracking-tight uppercase" 
+                  <span class="text-[8px] font-extrabold tracking-tighter uppercase text-center leading-none" 
                         :class="currentStepIndex === i ? 'text-blue-600' : 'text-slate-400'">
-                    {{ getStepLabel(step).split(' ')[0] }}
+                    {{ getStepLabel(step) }}
                   </span>
                 </div>
               </div>

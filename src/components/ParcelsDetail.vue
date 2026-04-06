@@ -695,12 +695,16 @@ function formatDateTime(datetimeStr) {
                     <span v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-100 animate-pulse">Overdue</span>
                   </div>
                   <p class="mt-3 text-sm text-gray-500 font-medium max-w-[250px]">
-                    {{ parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 'Waiting for resident to pick up.' }}
+                    {{ 
+                      parcel?.status === 'PICKED_UP' ? 'Resident already received the parcel.' : 
+                      parcel?.status === 'WAITING_FOR_STAFF' ? 'Waiting for staff to verify with the courier.' : 
+                      'Waiting for resident to pick up.' 
+                    }}
                   </p>
                </div>
 
                <!-- Send Overdue Reminder UI -->
-               <div v-if="parcel?.status !== 'PICKED_UP' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
+               <div v-if="parcel?.status !== 'PICKED_UP' && parcel?.status !== 'WAITING_FOR_STAFF' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
                   <!-- Decorative blur -->
                   <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
 
