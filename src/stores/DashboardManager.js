@@ -1,5 +1,6 @@
 import { reactive, computed, ref } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { fetchDashboardData } from '@/utils/fetchUtils'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
   // Current state for navigation - Split for independent charts
@@ -427,6 +428,27 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     return false
   }
 
+  const loadDetailedDashboard = async (router) => {
+    try {
+      const url = `${import.meta.env.VITE_BASE_URL}/api/dashboard/detailed`
+      const data = await fetchDashboardData(url, router)
+      
+      if (data && data.parcels) {
+        // If backend provides consolidated dashboard data
+        calculateDashboardData(
+          data.parcels,
+          data.members || data.residents,
+          data.announcements
+        )
+        return true
+      }
+      return false
+    } catch (err) {
+      console.warn('loadDetailedDashboard failed, using fallback', err)
+      return false
+    }
+  }
+
   return {
     parcels,
     members,
@@ -447,6 +469,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     setMembers,
     setAnnouncements,
     calculateDashboardData,
+    loadDetailedDashboard,
     getMappedParcels,
     nextPeriod,
     previousPeriod,

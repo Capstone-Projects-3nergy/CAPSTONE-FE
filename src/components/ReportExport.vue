@@ -93,11 +93,15 @@ const parcelHistory = computed(() => {
         const s = (h.status || '').toUpperCase();
         const d = new Date(h.timestamp || h.updatedAt || h.createdAt);
         
-        if (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT') {
+        const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'WAITING_FOR_STAFF';
+        const isPickedUp = s === 'PICKED_UP' || s === 'TAKEN';
+        const isOverdue = s.includes('OVERDUE');
+
+        if (isWaiting) {
           addEvent(d, 'received');
-        } else if (s === 'PICKED_UP' || s === 'TAKEN') {
+        } else if (isPickedUp) {
           addEvent(d, 'pickedUp');
-        } else if (s.includes('OVERDUE')) {
+        } else if (isOverdue) {
           addEvent(d, 'overdue');
         }
       });
@@ -153,8 +157,13 @@ const overdueParcels = computed(() => {
   const now = new Date()
   const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000
   return props.parcels.filter(p => {
-    // Only check 'Waiting', 'Notified', or 'Overdue' statuses (Waiting replaces Received)
-    if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
+    const s = (p.status || '').toUpperCase()
+    // Define intake/active statuses that can become overdue
+    const isIntake = ['RECEIVED', 'WAITING', 'WAIT', 'NOTIFIED', 'OVERDUE', 'WAITING_FOR_STAFF'].some(status => s.includes(status))
+    const isPickedUp = s.includes('PICKED') || s.includes('TAKEN')
+    
+    if (!isIntake || isPickedUp) return false
+    
     const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
     if (isNaN(date.getTime())) return false
     return (now - date) > overdueThresholdMs

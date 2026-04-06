@@ -798,6 +798,24 @@ async function getDashboardData(url, router) {
   return await getItems(url, router)
 }
 
+async function fetchDashboardData(url, router) {
+  try {
+    const options = {
+      method: 'GET',
+      headers: {}
+    }
+
+    const res = await fetchWithAuth(url, options, router)
+    if (res && res.ok) {
+      return await res.json()
+    }
+    return null
+  } catch (error) {
+    console.error('fetchDashboardData error:', error)
+    return null
+  }
+}
+
 // LINE API Helpers
 async function sendParcelNotification(parcelId, router) {
   try {
@@ -987,6 +1005,7 @@ export {
   addAnnouncementWithFile,
   editAnnouncementWithFile,
   getDashboardData,
+  fetchDashboardData,
   sendLineNotification,
   sendParcelNotification,
   sendOverdueReminder,

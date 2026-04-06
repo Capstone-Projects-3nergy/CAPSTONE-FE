@@ -661,6 +661,17 @@ const pendingResidentsList = computed(() => {
 
 const fetchDashboardData = async () => {
   try {
+    // 1. Try to fetch unified detailed dashboard data first (future-proofing)
+    const success = await dashboardStore.loadDetailedDashboard(router)
+    if (success) {
+      updateResidentChart()
+      updateParcelChart()
+      // Still need to update userManager for potential other uses
+      userManager.setMembers(dashboardStore.members)
+      return
+    }
+
+    // 2. Fallback to existing manual fetching if unified API isn't ready
     const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
     const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
     const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
