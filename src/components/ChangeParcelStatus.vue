@@ -154,7 +154,7 @@ const cancel = () => {
 
 const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
 const getStepLabel = (step) => {
-  if (step === 'WAITING_FOR_STAFF') return 'PENDING' 
+  if (step === 'WAITING_FOR_STAFF') return 'STAFF' 
   if (step === 'WAITING') {
     return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
   }

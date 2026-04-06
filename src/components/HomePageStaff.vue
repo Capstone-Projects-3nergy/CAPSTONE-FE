@@ -1423,7 +1423,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
                   </span>
                   <span v-if="overallStats.waitingForStaffParcels > 0" class="text-amber-600 text-[9px] font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 animate-pulse">
-                    {{ overallStats.waitingForStaffParcels }} pending action
+                    {{ overallStats.waitingForStaffParcels }} Waiting for Staff
                   </span>
                 </div>
               </div>
@@ -1567,7 +1567,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <div class="flex items-center gap-2 mb-0.5">
                         <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
                         <span v-if="stats.waitingForStaffParcels > 0" class="text-amber-500 text-[9px] font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 animate-pulse">
-                          {{ stats.waitingForStaffParcels }} Pending
+                          {{ stats.waitingForStaffParcels }} Waiting for Staff
                         </span>
                       </div>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
