@@ -18,6 +18,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     totalParcels: 0,
     pickedUpParcels: 0,
     awaitingParcels: 0,
+    waitingForStaffParcels: 0,
     overdueParcels: 0,
     totalResidents: 0,
     activeResidents: 0,
@@ -30,6 +31,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     totalParcels: 0,
     pickedUpParcels: 0,
     awaitingParcels: 0,
+    waitingForStaffParcels: 0,
     overdueParcels: 0
   })
 
@@ -42,6 +44,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         data: [], 
         backgroundColor: 'rgba(59, 130, 246, 0.85)',
         borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 1 
+      },
+      { 
+        label: 'Waiting for Staff', 
+        data: [], 
+        backgroundColor: 'rgba(234, 179, 8, 0.85)', // Yellow-500
+        borderColor: 'rgba(234, 179, 8, 1)',
         borderWidth: 1 
       },
       { 
@@ -129,12 +138,14 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   })
 
   const mapStatus = (status) => {
-    const s = status?.toUpperCase() || ''
+    const s = status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+    
     if (s.includes('PICKED') || s.includes('TAKEN')) return 'Picked Up'
-    if (s === 'WAITING_FOR_STAFF' || s.includes('PENDING')) return 'Waiting for Staff'
+    if (s.includes('STAFF') || s.includes('PENDING')) return 'Waiting for Staff'
     if (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT') return 'Waiting'
     if (s.includes('OVERDUE')) return 'Overdue'
     if (s.includes('NOTIFIED')) return 'Notified'
+    
     return 'Waiting'
   }
 
@@ -152,9 +163,15 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
        const s = p.status?.toUpperCase() || ''
        return s === 'PICKED_UP' || s === 'TAKEN'
     }).length
+    overallStats.waitingForStaffParcels = allParcels.filter(p => {
+       const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+       return s.includes('STAFF') || s.includes('PENDING')
+    }).length
     overallStats.awaitingParcels = allParcels.filter(p => {
-       const s = p.status?.toUpperCase() || ''
-       return s !== 'PICKED_UP' && s !== 'TAKEN' && !s.includes('OVERDUE')
+       const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+       const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s.includes('NOTIFIED')
+       const isStaff = s.includes('STAFF') || s.includes('PENDING')
+       return isWaiting && !isStaff && !s.includes('OVERDUE')
     }).length
     const oneDayMs = 24 * 60 * 60 * 1000
     overallStats.overdueParcels = allParcels.filter(p => {
@@ -182,7 +199,15 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     // Update period-specific stats (based on parcel view)
     stats.totalParcels = parcelsInPeriod.length
     stats.pickedUpParcels = periodPickedUp.length
-    stats.awaitingParcels = periodReceived.length
+    stats.waitingForStaffParcels = parcelsInPeriod.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       return s === 'WAITING_FOR_STAFF' || s.includes('PENDING')
+    }).length
+    stats.awaitingParcels = parcelsInPeriod.filter(p => {
+       const s = p.status?.toUpperCase() || ''
+       const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'NOTIFIED'
+       return isWaiting && !s.includes('OVERDUE')
+    }).length
     stats.overdueParcels = parcelsInPeriod.filter(p => {
       const pStatus = p.status?.toUpperCase() || ''
       const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE') || pStatus === 'WAITING'
@@ -223,24 +248,29 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     }
 
     const waitingData = new Array(slotCount).fill(0)
+    const staffWaitingData = new Array(slotCount).fill(0)
     const pickedUpData = new Array(slotCount).fill(0)
     const overdueData = new Array(slotCount).fill(0)
 
     data.forEach(p => {
+      const sRaw = (p.status || '').toUpperCase().replace(/[\s_-]/g, '')
+      const isWaitingForStaffStatus = sRaw.includes('STAFF') || sRaw.includes('PENDING')
+      const isWaitingResidentStatus = (sRaw === 'WAITING' || sRaw === 'RECEIVED' || sRaw === 'WAIT' || sRaw.includes('NOTIFIED')) && !isWaitingForStaffStatus
+
       // Handle "Waiting" occurrences (Arrivals)
       // Extract arrival time: check history first for WAITING/RECEIVED, fallback to timestamps
       let arrivals = []
       if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
         arrivals = p.statusHistory
           .filter(h => {
-             const s = h.status?.toUpperCase() || ''
-             return s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT'
+             const s = h.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+             return (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s.includes('NOTIFIED')) && !s.includes('STAFF')
           })
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
       }
       
-      // Fallback if no history or history didn't have waiting status
-      if (arrivals.length === 0) {
+      // Fallback if no history: only count as "Waiting" if currently in a waiting status
+      if (isWaitingResidentStatus && arrivals.length === 0) {
         arrivals.push(new Date(p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt))
       }
 
@@ -252,6 +282,33 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
           else if (view === 'monthly') idx = d.getDate() - 1
           
           if (idx >= 0 && idx < slotCount) waitingData[idx]++
+        }
+      })
+
+      // Handle "Waiting for Staff" occurrences
+      let staffArrivals = []
+      if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
+        staffArrivals = p.statusHistory
+          .filter(h => {
+             const s = h.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+             return s.includes('STAFF') || s.includes('PENDING')
+          })
+          .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+      
+      // Fallback if current status is waiting for staff and no history
+      if (isWaitingForStaffStatus && staffArrivals.length === 0) {
+        staffArrivals.push(new Date(p.receivedAt || p.createdAt || p.date))
+      }
+
+      staffArrivals.forEach(d => {
+        if (d >= start && d <= end) {
+          let idx = -1
+          if (view === 'daily') idx = d.getHours()
+          else if (view === 'weekly') idx = (d.getDay() + 6) % 7
+          else if (view === 'monthly') idx = d.getDate() - 1
+          
+          if (idx >= 0 && idx < slotCount) staffWaitingData[idx]++
         }
       })
 
@@ -312,8 +369,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     })
 
     chartData.datasets[0].data = waitingData
-    chartData.datasets[1].data = pickedUpData
-    chartData.datasets[2].data = overdueData
+    chartData.datasets[1].data = staffWaitingData
+    chartData.datasets[2].data = pickedUpData
+    chartData.datasets[3].data = overdueData
   }
 
   const generateResidentChart = (data, start, end) => {

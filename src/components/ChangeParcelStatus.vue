@@ -52,12 +52,33 @@ const form = ref({
 const originalForm = ref({ ...form.value })
 
 const statusOptions = computed(() => {
-  let options = ['RECEIVED', 'WAITING', 'PICKED_UP']
+  const s = currentStatus.value?.toUpperCase() || ''
   
-  return options.map(s => ({
-    value: s,
-    label: s.replace(/_/g, ' ')
-  }))
+  if (s === 'WAITING_FOR_STAFF') {
+    return [
+      { value: 'RECEIVED', label: 'Received' },
+      { value: 'WAITING', label: 'Waiting' }
+    ]
+  }
+  
+  if (s === 'WAITING') {
+    return [
+      { value: 'WAITING', label: 'Waiting' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
+  if (s === 'RECEIVED') {
+    return [
+      { value: 'RECEIVED', label: 'Received' },
+      { value: 'PICKED_UP', label: 'Picked Up' }
+    ]
+  }
+
+  // Fallback for Picked Up or others
+  return [
+    { value: s, label: s.replace(/_/g, ' ') }
+  ]
 })
 
 const isPickUp = computed(() => currentStatus.value === 'PICKED_UP')
@@ -131,10 +152,21 @@ const cancel = () => {
   router.replace({ name: 'staffparcels' })
 }
 
-const steps = ['RECEIVED', 'PICKED_UP']
+const steps = ['WAITING_FOR_STAFF', 'WAITING', 'PICKED_UP']
+const getStepLabel = (step) => {
+  if (step === 'WAITING_FOR_STAFF') return 'PENDING' 
+  if (step === 'WAITING') {
+    return currentStatus.value === 'RECEIVED' ? 'RECEIVED' : 'WAITING'
+  }
+  if (step === 'PICKED_UP') return 'PICKED UP'
+  return step.replace(/_/g, ' ')
+}
+
 const currentStepIndex = computed(() => {
-  if (currentStatus.value === 'WAITING' || currentStatus.value === 'RECEIVED') return steps.indexOf('RECEIVED')
-  return steps.indexOf(currentStatus.value)
+  const s = currentStatus.value?.toUpperCase() || ''
+  if (s === 'RECEIVED' || s === 'WAITING') return 1
+  if (s === 'PICKED_UP') return 2
+  return 0 // WAITING_FOR_STAFF or anything else
 })
 </script>
 
@@ -204,18 +236,18 @@ const currentStepIndex = computed(() => {
                   <div 
                     class="w-[25px] h-[25px] rounded-full border-[3px] flex items-center justify-center transition-all duration-500"
                     :class="[
-                      (currentStatus === step || ((currentStatus === 'WAITING' || currentStatus === 'RECEIVED') && step === 'RECEIVED')) ? 'bg-white border-blue-500 scale-125' : 
+                      (currentStepIndex === i) ? 'bg-white border-blue-500 scale-125' : 
                       (i < currentStepIndex ? 'bg-blue-500 border-blue-500' : 'bg-white border-slate-200')
                     ]"
                   >
                     <svg v-if="i < currentStepIndex" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
                       <path d="M5 13l4 4L19 7" />
                     </svg>
-                    <div v-if="currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <div v-if="currentStepIndex === i" class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                   </div>
-                  <span class="text-[9px] font-extrabold tracking-tight" 
-                        :class="(currentStatus === step || (currentStatus === 'WAITING' && step === 'RECEIVED')) ? 'text-blue-600' : 'text-slate-400'">
-                    {{ step.split('_')[0] }}
+                  <span class="text-[9px] font-extrabold tracking-tight uppercase" 
+                        :class="currentStepIndex === i ? 'text-blue-600' : 'text-slate-400'">
+                    {{ getStepLabel(step).split(' ')[0] }}
                   </span>
                 </div>
               </div>

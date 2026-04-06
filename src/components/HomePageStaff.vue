@@ -403,10 +403,15 @@ const initStatusChart = () => {
   statusChartInstance.value = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Picked Up', 'Waiting', 'Overdue'],
+      labels: ['Picked Up', 'Waiting', 'Waiting for Staff', 'Overdue'],
       datasets: [{
-        data: [overallStats.value.pickedUpParcels, overallStats.value.awaitingParcels, overallStats.value.overdueParcels],
-        backgroundColor: ['#10B981', '#3b82f6', '#EF4444'], 
+        data: [
+          overallStats.value.pickedUpParcels, 
+          overallStats.value.awaitingParcels, 
+          overallStats.value.waitingForStaffParcels,
+          overallStats.value.overdueParcels
+        ],
+        backgroundColor: ['#10B981', '#3b82f6', '#FACC15', '#EF4444'], 
         borderWidth: 0,
         hoverOffset: 4
       }]
@@ -468,11 +473,12 @@ const initResidentStatusChart = () => {
   })
 }
 
-watch([() => overallStats.value.pickedUpParcels, () => overallStats.value.awaitingParcels, () => overallStats.value.overdueParcels], () => {
+watch([() => overallStats.value.pickedUpParcels, () => overallStats.value.awaitingParcels, () => overallStats.value.waitingForStaffParcels, () => overallStats.value.overdueParcels], () => {
   if (statusChartInstance.value) {
     statusChartInstance.value.data.datasets[0].data = [
       overallStats.value.pickedUpParcels, 
       overallStats.value.awaitingParcels, 
+      overallStats.value.waitingForStaffParcels,
       overallStats.value.overdueParcels
     ]
     statusChartInstance.value.update()
@@ -534,21 +540,23 @@ const updateParcelChart = () => {
   const data = dashboardStore.chartData;
   let labels = [...data.labels];
   let received = [...data.datasets[0].data];
-  let pickedUp = [...data.datasets[1].data];
-  let overdue = [...data.datasets[2].data];
+  let staffWaiting = [...data.datasets[1].data];
+  let pickedUp = [...data.datasets[2].data];
+  let overdue = [...data.datasets[3].data];
 
   parcelChartInstance.data.labels = labels;
   parcelChartInstance.data.datasets[0].data = received;
-  parcelChartInstance.data.datasets[1].data = pickedUp;
-  parcelChartInstance.data.datasets[2].data = overdue;
+  parcelChartInstance.data.datasets[1].data = staffWaiting;
+  parcelChartInstance.data.datasets[2].data = pickedUp;
+  parcelChartInstance.data.datasets[3].data = overdue;
   
-  // Calculate and Update Baseline (Average Received)
-  const totalReceived = received.reduce((a, b) => a + b, 0);
+  // Calculate and Update Baseline (Average Received - combining intake statuses)
+  const totalReceived = received.reduce((a, b) => a + b, 0) + staffWaiting.reduce((a, b) => a + b, 0);
   const avg = totalReceived / (received.length || 1);
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  if (parcelChartInstance.data.datasets.length < 4) {
+  if (parcelChartInstance.data.datasets.length < 5) {
     parcelChartInstance.data.datasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
@@ -561,8 +569,8 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    parcelChartInstance.data.datasets[3].data = new Array(labels.length).fill(avg.toFixed(1));
-    parcelChartInstance.data.datasets[3].label = `Avg (${avg.toFixed(1)})`;
+    parcelChartInstance.data.datasets[4].data = new Array(labels.length).fill(avg.toFixed(1));
+    parcelChartInstance.data.datasets[4].label = `Avg (${avg.toFixed(1)})`;
   }
 
   // Update bar thickness based on interval
@@ -766,9 +774,11 @@ onMounted(async () => {
       datasets: dashboardStore.chartData.datasets.map(ds => ({
         ...ds,
         backgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 0.85)' : 
-                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)'),
+                        (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 0.85)' :
+                        (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)')),
         hoverBackgroundColor: ds.label === 'Waiting' ? 'rgba(59, 130, 246, 1)' : 
-                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)'),
+                             (ds.label === 'Waiting for Staff' ? 'rgba(234, 179, 8, 1)' :
+                             (ds.label === 'Picked Up' ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)')),
         borderRadius: 4,
         borderSkipped: false,
         barThickness: dashboardStore.currentView === 'daily' ? 12 : 24
@@ -1408,9 +1418,14 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <path d="M12 12l-8 -4.5" />
                   </svg>
                 </div>
-                <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
-                  {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
-                </span>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
+                    {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
+                  </span>
+                  <span v-if="overallStats.waitingForStaffParcels > 0" class="text-amber-600 text-[9px] font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 animate-pulse">
+                    {{ overallStats.waitingForStaffParcels }} pending action
+                  </span>
+                </div>
               </div>
               <div class="mt-2 md:mt-4">
                 <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels }}</h3>
@@ -1548,8 +1563,13 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
-                    <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Waiting</span>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
+                        <span v-if="stats.waitingForStaffParcels > 0" class="text-amber-500 text-[9px] font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 animate-pulse">
+                          {{ stats.waitingForStaffParcels }} Pending
+                        </span>
+                      </div>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
