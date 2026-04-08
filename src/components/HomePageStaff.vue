@@ -669,50 +669,78 @@ const pendingResidentsList = computed(() => {
 
 const fetchDashboardData = async () => {
   try {
+    let parcels = []
+    let residentList = []
+    let staffList = []
+    let announcements = []
+    let dataLoaded = false
+
     // 1. Try to fetch unified detailed dashboard data first (future-proofing)
-    const success = await dashboardStore.loadDetailedDashboard(router)
-    if (success) {
-      updateResidentChart()
-      updateParcelChart()
-      // Still need to update userManager for potential other uses
-      userManager.setMembers(dashboardStore.members)
-      return
+    const unifiedLoaded = await dashboardStore.loadDetailedDashboard(router)
+    
+    // If unified API succeeded and provided items to show in graphs
+    if (unifiedLoaded && (dashboardStore.parcels.length > 0 || dashboardStore.members.length > 0)) {
+      parcels = [...dashboardStore.parcels]
+      announcements = [...dashboardStore.announcements]
+      
+      // Separate roles from combined members and map them if they don't have expected fields
+      // Ensure we preserve the structure needed for the UI
+      const allMembers = dashboardStore.members || []
+      const mappedMembers = allMembers.map(u => ({
+        id: u.userId || u.id,
+        fullName: u.fullName || u.name || '-',
+        email: u.email || '-',
+        dormName: u.dormName || '-',
+        roomNumber: u.roomNumber || '-',
+        role: u.role,
+        status: u.status,
+        updateAt: u.updatedAt || u.updateAt || new Date().toISOString(),
+        photo: u.profileImageUrl || u.photo
+      }))
+
+      residentList = mappedMembers.filter((u) => u.role === 'RESIDENT' || !u.role)
+      staffList = mappedMembers.filter((u) => u.role === 'STAFF')
+      
+      dataLoaded = true
     }
 
-    // 2. Fallback to existing manual fetching if unified API isn't ready
-    const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
-    const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
-    const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
+    // 2. Fallback to existing manual fetching if unified API isn't ready or returned empty data
+    if (!dataLoaded) {
+      const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
+      const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
+      const rawAnnouncements = await getItems(`${import.meta.env.VITE_BASE_URL}/api/announcements`, router)
 
-    const parcels = Array.isArray(rawParcels) ? rawParcels : []
-    const users = Array.isArray(rawUsers) ? rawUsers : []
-    const announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
+      parcels = Array.isArray(rawParcels) ? rawParcels : []
+      const users = Array.isArray(rawUsers) ? rawUsers : []
+      announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
 
-    // Map users as in ManageResident.vue
-    const mappedUsers = users.map((u) => ({
-      id: u.userId,
-      fullName: u.fullName || '-',
-      email: u.email || '-',
-      dormName: u.dormName || '-',
-      roomNumber: u.roomNumber || '-',
-      role: u.role, // "RESIDENT" | "STAFF"
-      status: u.status,
-      updateAt: u.updatedAt || new Date().toISOString(),
-      photo: u.profileImageUrl
-    }))
+      // Map users as in the original manual logic
+      const mappedUsers = users.map((u) => ({
+        id: u.userId,
+        fullName: u.fullName || '-',
+        email: u.email || '-',
+        dormName: u.dormName || '-',
+        roomNumber: u.roomNumber || '-',
+        role: u.role, // "RESIDENT" | "STAFF"
+        status: u.status,
+        updateAt: u.updatedAt || new Date().toISOString(),
+        photo: u.profileImageUrl
+      }))
 
-    // Separate roles as in ManageResident.vue
-    const residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
-    const staffList = mappedUsers.filter((u) => u.role === 'STAFF')
+      residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
+      staffList = mappedUsers.filter((u) => u.role === 'STAFF')
+    }
+
+    // 3. Finalize and Sync (Common processing for data from either source)
     
-    // Sort by latest update as in ManageResident.vue
+    // Sort by latest update as in the old code
     residentList.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     // Sync with User Manager store
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
 
-    // Update Dashboard store for status overview stats with date range
+    // Update Dashboard store statistics and charts with the finalized lists
     dashboardStore.calculateDashboardData(
       parcels, 
       residentList, 
