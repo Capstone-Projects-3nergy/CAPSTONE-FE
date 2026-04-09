@@ -289,11 +289,19 @@ const onDeleteConfirm = () => {
   if (selectedAnnouncement.value) {
     announcementManager.moveAnnouncementToTrash(selectedAnnouncement.value.id)
     deleteSuccess.value = true
+    setTimeout(() => {
+      deleteSuccess.value = false
+    }, 10000)
   }
   showDeleteModal.value = false
   selectedAnnouncement.value = null
 }
-
+const openErrorPopup = () => {
+  error.value = true
+  setTimeout(() => (error.value = false), 10000)
+  showDeleteModal.value = false
+  selectedAnnouncement.value = null
+}
 const fetchAnnouncementData = async () => {
   const data = await getAnnouncements(
     `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
@@ -375,6 +383,7 @@ const showProfileStaffPage = async function () {
       :is-permanent="false"
       @confirm-detail="onDeleteConfirm"
       @cancel-detail="showDeleteModal = false"
+      @redAlert="openErrorPopup"
     />
 
     <teleport to="body">
@@ -395,6 +404,14 @@ const showProfileStaffPage = async function () {
           operate="pinLimitMessage"
           @closePopUp="closePopUp"
         />
+        <AlertPopUp
+          v-if="error"
+          :titles="'There is a problem. Please try again later.'"
+          message="Error!!"
+          styleType="red"
+          operate="problem"
+          @closePopUp="closePopUp"
+          />
       </div>
     </teleport>
     <div class="flex flex-1">
