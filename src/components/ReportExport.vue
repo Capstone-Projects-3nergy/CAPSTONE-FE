@@ -161,7 +161,11 @@ const businessInsights = computed(() => {
   // calc rates
   const pickupRate = ((os.pickedUpParcels || 0) / total) * 100;
   const awaitingRate = ((os.awaitingParcels || 0) / total) * 100;
-  const overdueRate = ((os.overdueParcels || 0) / total) * 100;
+  
+  // Align overdue calculation with dashboard logic (excluding Waiting for Staff)
+  const overdueCount = overdueParcels.value.length;
+  const overdueRate = (overdueCount / total) * 100;
+  
   const staffBacklogRate = ((os.waitingForStaffParcels || 0) / total) * 100;
   
   // Resident Verification Insights
@@ -197,27 +201,41 @@ const businessInsights = computed(() => {
 
   // Operational Appraisal
   let healthStatus = 'STABLE';
-  let efficiencyColor = 'text-green-600';
   let insights = [];
   
+  // 1. Storage Integrity (Overdue)
   if (overdueRate > 15) {
-    healthStatus = 'ACTION REQUIRED';
-    efficiencyColor = 'text-red-600';
-    insights.push(`Caution: ${overdueRate.toFixed(1)}% of total parcels are overdue.`);
+    healthStatus = 'CRITICAL BACKLOG';
+    insights.push(`Storage Efficiency Alert: ${overdueRate.toFixed(1)}% of inventory is overdue, risking space saturation.`);
+  } else if (overdueRate > 5) {
+    insights.push(`Monitor Overdue: ${overdueCount} items are currently exceeding the 24h pickup window.`);
   }
   
+  // 2. Staff Processing Speed
   if (staffBacklogRate > 10) {
-    insights.push(`Staff processing backlog is significant (${staffBacklogRate.toFixed(1)}%).`);
+    healthStatus = healthStatus === 'STABLE' ? 'OPERATIONAL DELAY' : healthStatus;
+    insights.push(`Processing Bottleneck: Staff intake backlog is currently at ${staffBacklogRate.toFixed(1)}%.`);
+  } else if (staffBacklogRate > 0) {
+    insights.push(`Staff processing is maintaining an active flow (${staffBacklogRate.toFixed(1)}% pending intake).`);
   }
 
-  if (pickupRate > 75) {
-    insights.push("Excellent resident pickup turnaround this period.");
+  // 3. Resident Pickup Engagement
+  if (pickupRate > 80) {
+    insights.push("High Efficiency: Resident pickup response is excellent for this reporting period.");
+  } else if (pickupRate < 40 && total > 20) {
+    insights.push("Engagement Warning: Low clearing rate detected. Residents may be unaware of pending items.");
+  }
+
+  // 4. Verification Health
+  if (verificationRate < 80) {
+    insights.push(`Administrative Note: resident verification health is at ${verificationRate.toFixed(1)}%. Recommend vetting pending accounts.`);
   }
 
   return {
     pickupRate: pickupRate.toFixed(1),
     awaitingRate: awaitingRate.toFixed(1),
     overdueRate: overdueRate.toFixed(1),
+    overdueCount,
     staffBacklogRate: staffBacklogRate.toFixed(1),
     verificationRate: verificationRate.toFixed(1),
     avgLeadTime,
@@ -234,10 +252,13 @@ const overdueParcels = computed(() => {
   return props.parcels.filter(p => {
     const s = (p.status || '').toUpperCase()
     // Define intake/active statuses that can become overdue
-    const isIntake = ['RECEIVED', 'WAITING', 'WAIT', 'NOTIFIED', 'OVERDUE', 'WAITING_FOR_STAFF'].some(status => s.includes(status))
+    // Dashboard Logic: RECEIVED, WAITING, WAIT, NOTIFIED, OVERDUE are overdue candidates
+    // EXCLUDE: WAITING_FOR_STAFF
+    const isOverdueCandidate = ['RECEIVED', 'WAITING', 'WAIT', 'NOTIFIED', 'OVERDUE'].some(status => s.includes(status))
     const isPickedUp = s.includes('PICKED') || s.includes('TAKEN')
+    const isWaitingForStaff = s.includes('WAITING_FOR_STAFF') || s.includes('STAFF')
     
-    if (!isIntake || isPickedUp) return false
+    if (!isOverdueCandidate || isPickedUp || isWaitingForStaff) return false
     
     const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
     if (isNaN(date.getTime())) return false
@@ -836,41 +857,41 @@ defineExpose({
               <p class="text-gray-600">Report Issue Date: {{ new Date().toLocaleString() }}</p>
             </div>
 
-            <!-- --- EXECUTIVE SUMMARY: BUSINESS LOGIC SECTION --- -->
+            <!-- --- PERFORMANCE SUMMARY SECTION --- -->
             <div v-if="businessInsights" class="print-section">
-              <h2 class="print-main-header">EXECUTIVE SUMMARY & PERFORMANCE</h2>
+              <h2 class="print-main-header">Summary of dormitory performance</h2>
               
               <div class="kpi-grid">
                 <div class="kpi-card">
-                  <span class="kpi-label">Clearing Rate</span>
+                  <span class="kpi-label">Clearing efficiency</span>
                   <span class="kpi-value">{{ businessInsights.pickupRate }}%</span>
-                  <span class="kpi-sublabel">Total parcels picked up</span>
+                  <span class="kpi-sublabel">Parcels successfully picked up</span>
                 </div>
                 <div class="kpi-card">
-                  <span class="kpi-label">Awaiting Cleanup</span>
+                  <span class="kpi-label">Overdue inventory ratio</span>
                   <span class="kpi-value">{{ businessInsights.overdueRate }}%</span>
-                  <span class="kpi-sublabel">Overdue units ratio</span>
+                  <span class="kpi-sublabel">Units exceeding 24h threshold</span>
                 </div>
                 <div class="kpi-card">
-                  <span class="kpi-label">Turnaround</span>
-                  <span class="kpi-value">{{ businessInsights.avgLeadTime }}h</span>
-                  <span class="kpi-sublabel">Avg. time from entry to exit</span>
+                  <span class="kpi-label">Staff processing load</span>
+                  <span class="kpi-value">{{ businessInsights.staffBacklogRate }}%</span>
+                  <span class="kpi-sublabel">Parcels awaiting intake verification</span>
                 </div>
                 <div class="kpi-card">
-                  <span class="kpi-label">Verification</span>
+                  <span class="kpi-label">Resident verification</span>
                   <span class="kpi-value">{{ businessInsights.verificationRate }}%</span>
-                  <span class="kpi-sublabel">Registered resident health</span>
+                  <span class="kpi-sublabel">Active versus total accounts</span>
                 </div>
               </div>
 
               <div class="insights-box mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <h4 class="font-bold text-gray-800 mb-2">Staff Operational Insights:</h4>
+                <h4 class="font-bold text-gray-800 mb-2">Operational Analytics:</h4>
                 <ul class="list-disc pl-5 space-y-1">
-                  <li v-if="businessInsights.insights.length === 0" class="text-gray-600 text-sm">Flow is optimal. No staff-level interventions required at this volume.</li>
+                  <li v-if="businessInsights.insights.length === 0" class="text-gray-600 text-sm">Operation is flowing normally. No interventions required.</li>
                   <li v-for="(msg, i) in businessInsights.insights" :key="i" class="text-sm text-gray-700 font-medium">
                     {{ msg }}
                   </li>
-                  <li class="text-sm text-gray-600">Overall Activity Level: {{ $props.overallStats.totalParcels > 100 ? 'HEAVY' : 'STABLE' }}</li>
+                  <li class="text-sm text-gray-600">Current activity state: {{ businessInsights.healthStatus }}</li>
                 </ul>
               </div>
             </div>
@@ -963,7 +984,7 @@ defineExpose({
                         </span>
                       </div>
                     </td>
-                    <td>{{ parcel.status.toUpperCase() }}</td>
+                    <td>{{ parcel.status }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
@@ -990,7 +1011,7 @@ defineExpose({
                     <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
                     <td>{{ parcel.residentName }}</td>
                     <td>{{ parcel.trackingNumber }}</td>
-                    <td>{{ parcel.status.toUpperCase() }}</td>
+                    <td>{{ parcel.status }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
@@ -1224,7 +1245,6 @@ defineExpose({
     background-color: #1D355E !important;
     padding: 10px 15px !important;
     margin-bottom: 1.5rem !important;
-    text-transform: uppercase !important;
     text-align: center !important;
   }
 
@@ -1254,7 +1274,6 @@ defineExpose({
     color: #374151 !important;
     font-weight: 700 !important;
     font-size: 14px !important;
-    text-transform: uppercase !important;
     border: 1px solid #e5e7eb !important;
     padding: 12px 16px !important;
     text-align: left !important;
@@ -1309,7 +1328,6 @@ defineExpose({
 .kpi-label {
   display: block !important;
   font-size: 11px !important;
-  text-transform: uppercase !important;
   color: #64748b !important;
   margin-bottom: 5px !important;
 }
