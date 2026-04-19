@@ -349,7 +349,7 @@ const dataLabelsPlugin = {
       meta.data.forEach((bar, index) => {
         const value = dataset.data[index];
         if (value > 0) {
-          ctx.fillStyle = i === 2 ? '#EF4444' : '#111827';
+          ctx.fillStyle = '#111827';
           ctx.font = 'black 10px Inter';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
@@ -1949,7 +1949,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     Resident Insights
                     <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 tracking-widest">Growth & Status</span>
                   </h3>
-                  <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and member status</p>
+                  <p class="text-xs text-gray-500 font-medium mt-0.5">Tracking registration trends and resident status</p>
                 </div>
 
                 <div class="flex items-center gap-1 bg-gray-100/60 p-1.5 rounded-2xl w-full sm:w-auto shadow-inner">
@@ -2029,7 +2029,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     <!-- Center Display -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
-                        <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Members</span>
+                        <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Residents</span>
                         <span class="text-5xl font-black text-[#1D355E] leading-none">{{ stats.totalResidents }}</span>
                         <div class="w-8 h-1 bg-emerald-500 rounded-full mt-3"></div>
                       </div>

@@ -187,50 +187,103 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     const parcelBounds = getPeriodBounds('parcel')
     const residentBounds = getPeriodBounds('resident')
     
-    // 2. Filter parcels for the current period for charts
-    const parcelsInPeriod = parcels.filter(p => {
-      const dStr = p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt
-      const d = new Date(dStr)
-      return d >= parcelBounds.start && d <= parcelBounds.end
+    // 2. Identify parcels with activity in the current period for charts/stats
+    const parcelsWithActivity = parcels.filter(p => {
+      const start = parcelBounds.start;
+      const end = parcelBounds.end;
+      
+      // Check arrival
+      const dArrival = new Date(p.receivedAt || p.createdAt || p.date)
+      const isArrivalInRange = !isNaN(dArrival.getTime()) && dArrival >= start && dArrival <= end
+      if (isArrivalInRange) return true
+      
+      // Check last update
+      const dUpdate = new Date(p.updatedAt || p.updateAt)
+      const isUpdateInRange = !isNaN(dUpdate.getTime()) && dUpdate >= start && dUpdate <= end
+      if (isUpdateInRange) return true
+      
+      // Check history
+      if (p.statusHistory && Array.isArray(p.statusHistory)) {
+        return p.statusHistory.some(h => {
+          const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
+          return !isNaN(d.getTime()) && d >= start && d <= end
+        })
+      }
+      return false
     })
 
-    const periodReceived = parcelsInPeriod.filter(p => p.status?.toUpperCase() !== 'PICKED_UP' && p.status?.toUpperCase() !== 'TAKEN')
-    const periodPickedUp = parcelsInPeriod.filter(p => p.status?.toUpperCase() === 'PICKED_UP' || p.status?.toUpperCase() === 'TAKEN')
-    
-    // Update period-specific stats (based on parcel view)
-    stats.totalParcels = parcelsInPeriod.length
-    stats.pickedUpParcels = periodPickedUp.length
-    stats.waitingForStaffParcels = parcelsInPeriod.filter(p => {
-       const s = p.status?.toUpperCase() || ''
-       return s === 'WAITING_FOR_STAFF' || s.includes('PENDING')
-    }).length
-    stats.awaitingParcels = parcelsInPeriod.filter(p => {
-       const s = p.status?.toUpperCase() || ''
-       const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'NOTIFIED'
-       return isWaiting && !s.includes('OVERDUE')
-    }).length
-    stats.overdueParcels = parcelsInPeriod.filter(p => {
-      const pStatus = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
-      const isStaff = pStatus.includes('STAFF') || pStatus.includes('PENDING')
-      if (isStaff) return false
-
-      const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE') || pStatus === 'WAITING'
-      const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
-      if (isPickedUp) return false
+    const getEventsInRange = (parcel, category) => {
+      const history = parcel.statusHistory || []
+      const start = parcelBounds.start
+      const end = parcelBounds.end
       
-      const rDate = new Date(p.receivedAt || p.createdAt || p.date)
-      const diffHours = (today - rDate) / (1000 * 60 * 60)
-      return pStatus.includes('OVERDUE') || (diffHours >= 24 && isArrived)
-    }).length
+      // 1. Check history for event of this category in range
+      const hasHistoryEvent = history.some(h => {
+        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '')
+        const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
+        const inRange = !isNaN(d.getTime()) && d >= start && d <= end
+        
+        if (category === 'pickedUp') return inRange && (s === 'PICKEDUP' || s === 'TAKEN')
+        if (category === 'staff') return inRange && (s.includes('STAFF') || s.includes('PENDING'))
+        if (category === 'overdue') return inRange && s.includes('OVERDUE')
+        if (category === 'waiting') return inRange && (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'NOTIFIED') && !s.includes('STAFF')
+        return false
+      })
+      
+      if (hasHistoryEvent) return true
+      
+      // 2. Fallback: If history empty, check current status + timestamps
+      const currentStatus = (parcel.status || '').toUpperCase().replace(/[\s_-]/g, '')
+      const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+      const isArrivalInRange = !isNaN(arrivalDate.getTime()) && arrivalDate >= start && arrivalDate <= end
+      const updateDate = new Date(parcel.updatedAt || parcel.updateAt)
+      const isUpdateInRange = !isNaN(updateDate.getTime()) && updateDate >= start && updateDate <= end
+
+      if (category === 'pickedUp') return (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange
+      if (category === 'staff') return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
+      if (category === 'overdue') return currentStatus.includes('OVERDUE') && isUpdateInRange
+      if (category === 'waiting') return (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus === 'NOTIFIED') && !currentStatus.includes('STAFF') && isArrivalInRange
+      
+      return false
+    }
+    
+    // Update period-specific stats (based on lifecycle/activity)
+    stats.totalParcels = parcelsWithActivity.length
+    stats.pickedUpParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'pickedUp')).length
+    stats.waitingForStaffParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'staff')).length
+    stats.awaitingParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'waiting')).length
+    stats.overdueParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'overdue')).length
 
     // 3. Generate Chart Data with separate bounds
-    generateParcelChart(parcelsInPeriod, parcelBounds.start, parcelBounds.end)
-    generateResidentChart(members, residentBounds.start, residentBounds.end)
+    // Filtering for residents only for stats and growth
+    const allResidents = members.filter(m => (m.role || '').toUpperCase() === 'RESIDENT')
     
-    stats.totalResidents = members.length
-    stats.activeResidents = members.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
-    stats.pendingResidents = members.filter(r => r.status?.toUpperCase() === 'PENDING').length
-    stats.inactiveResidents = members.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
+    generateParcelChart(parcelsWithActivity, parcelBounds.start, parcelBounds.end)
+    generateResidentChart(allResidents, residentBounds.start, residentBounds.end)
+    
+    // Deduplicate residents to count each person only once for CURRENT stats
+    // We keep the latest record based on updatedAt/createdAt
+    const uniqueResidentsMap = new Map()
+    allResidents.forEach(r => {
+      const email = r.email || `${r.firstName}_${r.lastName}`
+      if (!uniqueResidentsMap.has(email)) {
+        uniqueResidentsMap.set(email, r)
+      } else {
+        const existing = uniqueResidentsMap.get(email)
+        const existingDate = new Date(existing.updateAt || existing.createdAt || 0)
+        const currentDate = new Date(r.updateAt || r.createdAt || 0)
+        if (currentDate > existingDate) {
+          uniqueResidentsMap.set(email, r)
+        }
+      }
+    })
+    
+    const uniqueResidents = Array.from(uniqueResidentsMap.values())
+    
+    stats.totalResidents = uniqueResidents.length
+    stats.activeResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'VERIFIED' || r.status?.toUpperCase() === 'ACTIVE').length
+    stats.pendingResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'PENDING').length
+    stats.inactiveResidents = uniqueResidents.filter(r => r.status?.toUpperCase() === 'INACTIVE').length
     stats.totalAnnouncements = announcements.length
   }
 
