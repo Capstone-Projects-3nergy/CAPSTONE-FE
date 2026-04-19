@@ -151,7 +151,82 @@ const residentHistory = computed(() => {
     .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
 });
 
-// Compute overdue parcels based on dashboard logic (> 3 days)
+// Compute Business Insights for Executive Reporting
+const businessInsights = computed(() => {
+  const os = props.overallStats || {}
+  const total = os.totalParcels || 0
+  
+  if (total === 0) return null;
+
+  // calc rates
+  const pickupRate = ((os.pickedUpParcels || 0) / total) * 100;
+  const awaitingRate = ((os.awaitingParcels || 0) / total) * 100;
+  const overdueRate = ((os.overdueParcels || 0) / total) * 100;
+  const staffBacklogRate = ((os.waitingForStaffParcels || 0) / total) * 100;
+  
+  // Resident Verification Insights
+  const s = props.stats || {}
+  const totalRes = (s.activeResidents || 0) + (s.pendingResidents || 0) + (s.inactiveResidents || 0) || 1;
+  const verificationRate = ((s.activeResidents || 0) / totalRes) * 100;
+  
+  // Processing Lead Time (Received -> Picked Up)
+  let totalLeadTimeHours = 0;
+  let completedCount = 0;
+  
+  props.parcels.forEach(p => {
+    if (p.statusHistory && Array.isArray(p.statusHistory)) {
+      const receiveEvent = p.statusHistory.find(h => 
+        ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase())
+      );
+      const pickupEvent = p.statusHistory.find(h => 
+        ['PICKED_UP', 'TAKEN'].includes(h.status?.toUpperCase())
+      );
+      
+      if (receiveEvent && pickupEvent) {
+        const start = new Date(receiveEvent.timestamp || receiveEvent.updatedAt);
+        const end = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
+        if (end > start) {
+          totalLeadTimeHours += (end - start) / (1000 * 60 * 60);
+          completedCount++;
+        }
+      }
+    }
+  });
+  
+  const avgLeadTime = completedCount > 0 ? (totalLeadTimeHours / completedCount).toFixed(1) : '-';
+
+  // Operational Appraisal
+  let healthStatus = 'STABLE';
+  let efficiencyColor = 'text-green-600';
+  let insights = [];
+  
+  if (overdueRate > 15) {
+    healthStatus = 'ACTION REQUIRED';
+    efficiencyColor = 'text-red-600';
+    insights.push(`Caution: ${overdueRate.toFixed(1)}% of total parcels are overdue.`);
+  }
+  
+  if (staffBacklogRate > 10) {
+    insights.push(`Staff processing backlog is significant (${staffBacklogRate.toFixed(1)}%).`);
+  }
+
+  if (pickupRate > 75) {
+    insights.push("Excellent resident pickup turnaround this period.");
+  }
+
+  return {
+    pickupRate: pickupRate.toFixed(1),
+    awaitingRate: awaitingRate.toFixed(1),
+    overdueRate: overdueRate.toFixed(1),
+    staffBacklogRate: staffBacklogRate.toFixed(1),
+    verificationRate: verificationRate.toFixed(1),
+    avgLeadTime,
+    healthStatus,
+    insights
+  };
+});
+
+// Compute overdue parcels based on dashboard logic (> 1 days)
 const overdueParcels = computed(() => {
   if (!props.parcels) return []
   const now = new Date()
@@ -180,9 +255,23 @@ const handleExportExcel = () => {
   // 1. MAIN FILE HEADER
   const finalData = [
     ['Dormitory Management System - Full Dashboard Report'],
-    ['Generated Date', new Date().toLocaleString()],
+    ['Report Issue Date:', new Date().toLocaleString()],
     []
   ];
+
+  const insights = businessInsights.value;
+  if (insights) {
+    finalData.push(['EXECUTIVE SUMMARY & BUSINESS KPI']);
+    finalData.push(['KPI METRIC', 'VALUE (%)', 'OPINION / INSIGHT']);
+    finalData.push(['Parcel Clearing Rate (Picked Up)', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
+    finalData.push(['Backlog Rate (Awaiting Pickup)', insights.awaitingRate + '%', '-']);
+    finalData.push(['System Efficiency (Staff Processing)', (100 - insights.staffBacklogRate) + '%', insights.staffBacklogRate > 10 ? 'Bottleneck Detected' : 'Excellent']);
+    finalData.push(['Average Pickup Turnaround', insights.avgLeadTime + ' Hours', 'Average per unit']);
+    finalData.push(['Overdue Risk Level', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Normal']);
+    finalData.push(['Resident Verification Health', insights.verificationRate + '%', '-']);
+    finalData.push(['Operational Status', '', insights.healthStatus]);
+    finalData.push([]);
+  }
 
   let mainSection = 1;
 
@@ -333,12 +422,63 @@ const handleExportPDF = () => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
+  doc.text(`Report Issue Date: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
   y += 6;
   doc.setDrawColor(29, 53, 94);
   doc.setLineWidth(0.5);
   doc.line(15, y, 195, y);
-  y += 15;
+  y += 12;
+
+  // --- EXECUTIVE SUMMARY SECTION ---
+  const insights = businessInsights.value;
+  if (insights) {
+    drawMainCategoryHeader("EXECUTIVE SUMMARY & KEY RATIOS");
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    
+    // Grid style for KPIs
+    const kpiY = y;
+    const boxW = 85;
+    const boxH = 20;
+
+    const drawKPIBox = (label, value, x, py) => {
+      doc.setDrawColor(220, 220, 220);
+      doc.rect(x, py, boxW, boxH);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(value, x + 5, py + 8);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(label, x + 5, py + 14);
+      doc.setTextColor(0, 0, 0);
+    };
+
+    drawKPIBox("Parcel Clearing Rate", insights.pickupRate + "%", 15, y);
+    drawKPIBox("Staff Efficiency Rate", (100 - insights.staffBacklogRate) + "%", 110, y);
+    y += boxH + 5;
+    drawKPIBox("Resident Verification", insights.verificationRate + "%", 15, y);
+    drawKPIBox("Avg. Time to Pickup", insights.avgLeadTime + " hrs", 110, y);
+    y += boxH + 8;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Operational Insights:", 15, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Current operational health: ${insights.healthStatus}`, 15, y);
+    y += 5;
+    if (insights.insights.length > 0) {
+      insights.insights.forEach(msg => {
+        doc.text("• " + msg, 15, y);
+        y += 4;
+      });
+    } else {
+      doc.text("• No critical anomalies detected in the current activity flow.", 15, y);
+      y += 4;
+    }
+    y += 10;
+  }
 
   // --- 1. PARCEL MANAGEMENT OVERVIEW ---
   drawMainCategoryHeader("1. PARCEL MANAGEMENT OVERVIEW");
@@ -680,254 +820,335 @@ defineExpose({
 
 <template>
   <div class="print-report">
-    <div class="print-header">
-      <h1>Dormitory Management System - Summary Report</h1>
-      <p class="text-gray-600">Generated on: {{ new Date().toLocaleString() }}</p>
-    </div>
+    <!-- 
+      TABLE HACK: Used to force margins on every page when @page { margin: 0 } is used. 
+      thead and tfoot will repeat on each page, creating a visual margin.
+    -->
+    <table class="report-table-wrapper">
+      <thead>
+        <tr><td><div class="report-page-margin-top"></div></td></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="print-header">
+              <h1>Dormitory Management System - Summary Report</h1>
+              <p class="text-gray-600">Report Issue Date: {{ new Date().toLocaleString() }}</p>
+            </div>
 
-    <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
-    <div class="print-section">
-      <h2 class="print-main-header">1. Parcel Management Overview</h2>
-      
-      <h3 class="print-section-title">Statistics Overview (Parcels)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Status Item</th>
-            <th>Count / Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Picked Up</td>
-            <td>{{ overallStats.pickedUpParcels }}</td>
-          </tr>
-          <tr>
-            <td>Received / Awaiting</td>
-            <td>{{ overallStats.awaitingParcels }}</td>
-          </tr>
-          <tr>
-            <td>Overdue Parcels</td>
-            <td>{{ overallStats.overdueParcels }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td>TOTAL UNITS (SYSTEM)</td>
-            <td>{{ overallStats.totalParcels }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <template v-if="parcelHistory.length > 0">
-      <div class="print-section" v-for="yData in parcelHistory" :key="'parcel-' + yData.year">
-        <h3 class="print-section-title">Historical Monthly Summary (Parcels) - Year {{ yData.year }}</h3>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Month (MM/YYYY)</th>
-              <th>Total Received</th>
-              <th>Total Picked Up</th>
-              <th>Total Overdue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="h in yData.months" :key="h.monthStr">
-              <td>{{ h.monthStr }}</td>
-              <td>{{ h.received }}</td>
-              <td>{{ h.pickedUp }}</td>
-              <td>{{ h.overdue }}</td>
-            </tr>
-            <!-- TOTAL ROW -->
-            <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-              <td>TOTAL</td>
-              <td>{{ yData.totalReceived }}</td>
-              <td>{{ yData.totalPickedUp }}</td>
-              <td>{{ yData.totalOverdue }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </template>
-
-    <div class="print-section" v-if="parcels.length > 0">
-      <h3 class="print-section-title">Recent Parcels (Latest Activity)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Resident</th>
-            <th>Tracking No.</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
-            <td>{{ formatDate(parcel.updatedAt) }}</td>
-            <td>{{ parcel.residentName }}</td>
-            <td>
-              <div>{{ parcel.trackingNumber }}</div>
-              <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="text-[10px] text-gray-400 mt-1">
-                History: <span v-for="(h, i) in parcel.statusHistory" :key="i">
-                  {{ h.status }} ({{ formatDate(h.updatedAt) }})<span v-if="i < parcel.statusHistory.length - 1"> → </span>
-                </span>
+            <!-- --- EXECUTIVE SUMMARY: BUSINESS LOGIC SECTION --- -->
+            <div v-if="businessInsights" class="print-section">
+              <h2 class="print-main-header">EXECUTIVE SUMMARY & PERFORMANCE</h2>
+              
+              <div class="kpi-grid">
+                <div class="kpi-card">
+                  <span class="kpi-label">Clearing Rate</span>
+                  <span class="kpi-value">{{ businessInsights.pickupRate }}%</span>
+                  <span class="kpi-sublabel">Total parcels picked up</span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Awaiting Cleanup</span>
+                  <span class="kpi-value">{{ businessInsights.overdueRate }}%</span>
+                  <span class="kpi-sublabel">Overdue units ratio</span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Turnaround</span>
+                  <span class="kpi-value">{{ businessInsights.avgLeadTime }}h</span>
+                  <span class="kpi-sublabel">Avg. time from entry to exit</span>
+                </div>
+                <div class="kpi-card">
+                  <span class="kpi-label">Verification</span>
+                  <span class="kpi-value">{{ businessInsights.verificationRate }}%</span>
+                  <span class="kpi-sublabel">Registered resident health</span>
+                </div>
               </div>
-            </td>
-            <td>{{ parcel.status.toUpperCase() }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td colspan="3">TOTAL RECENT PARCELS</td>
-            <td>{{ parcels.slice(0, 10).length }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <div class="print-section" v-if="overdueParcels.length > 0">
-      <h3 class="print-section-title">Overdue Parcels (> 1 Day)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Received At</th>
-            <th>Resident</th>
-            <th>Tracking No.</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="parcel in overdueParcels" :key="parcel.id">
-            <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
-            <td>{{ parcel.residentName }}</td>
-            <td>{{ parcel.trackingNumber }}</td>
-            <td>{{ parcel.status.toUpperCase() }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td colspan="3">TOTAL OVERDUE PARCELS</td>
-            <td>{{ overdueParcels.length }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              <div class="insights-box mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <h4 class="font-bold text-gray-800 mb-2">Staff Operational Insights:</h4>
+                <ul class="list-disc pl-5 space-y-1">
+                  <li v-if="businessInsights.insights.length === 0" class="text-gray-600 text-sm">Flow is optimal. No staff-level interventions required at this volume.</li>
+                  <li v-for="(msg, i) in businessInsights.insights" :key="i" class="text-sm text-gray-700 font-medium">
+                    {{ msg }}
+                  </li>
+                  <li class="text-sm text-gray-600">Overall Activity Level: {{ $props.overallStats.totalParcels > 100 ? 'HEAVY' : 'STABLE' }}</li>
+                </ul>
+              </div>
+            </div>
 
-    <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
-    <div class="print-section">
-      <h2 class="print-main-header">2. Resident Management Overview</h2>
-      
-      <h3 class="print-section-title">Statistics Overview (Residents)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Status Item</th>
-            <th>Count / Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Active / Verified</td>
-            <td>{{ stats.activeResidents }}</td>
-          </tr>
-          <tr>
-            <td>Pending Approvals</td>
-            <td>{{ stats.pendingResidents }}</td>
-          </tr>
-          <tr>
-            <td>Inactive Residents</td>
-            <td>{{ stats.inactiveResidents }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td>TOTAL RESIDENTS</td>
-            <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
+            <div class="print-section">
+              <h2 class="print-main-header">1. Parcel Management Overview</h2>
+              
+              <h3 class="print-section-title">Statistics Overview (Parcels)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Status Item</th>
+                    <th>Count / Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Picked Up</td>
+                    <td>{{ overallStats.pickedUpParcels }}</td>
+                  </tr>
+                  <tr>
+                    <td>Received / Awaiting</td>
+                    <td>{{ overallStats.awaitingParcels }}</td>
+                  </tr>
+                  <tr>
+                    <td>Overdue Parcels</td>
+                    <td>{{ overallStats.overdueParcels }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td>TOTAL UNITS (SYSTEM)</td>
+                    <td>{{ overallStats.totalParcels }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-    <template v-if="residentHistory.length > 0">
-      <div class="print-section" v-for="yData in residentHistory" :key="'resident-' + yData.year">
-        <h3 class="print-section-title">Historical Monthly Summary (Residents) - Year {{ yData.year }}</h3>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>Month (MM/YYYY)</th>
-              <th>Total Registered</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="h in yData.months" :key="h.monthStr">
-              <td>{{ h.monthStr }}</td>
-              <td>{{ h.joined }}</td>
-            </tr>
-            <!-- TOTAL ROW -->
-            <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-              <td>TOTAL</td>
-              <td>{{ yData.totalJoined }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </template>
+            <template v-if="parcelHistory.length > 0">
+              <div class="print-section" v-for="yData in parcelHistory" :key="'parcel-' + yData.year">
+                <h3 class="print-section-title">Historical Monthly Summary (Parcels) - Year {{ yData.year }}</h3>
+                <table class="print-table">
+                  <thead>
+                    <tr>
+                      <th>Month (MM/YYYY)</th>
+                      <th>Total Received</th>
+                      <th>Total Picked Up</th>
+                      <th>Total Overdue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="h in yData.months" :key="h.monthStr">
+                      <td>{{ h.monthStr }}</td>
+                      <td>{{ h.received }}</td>
+                      <td>{{ h.pickedUp }}</td>
+                      <td>{{ h.overdue }}</td>
+                    </tr>
+                    <!-- TOTAL ROW -->
+                    <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                      <td>TOTAL</td>
+                      <td>{{ yData.totalReceived }}</td>
+                      <td>{{ yData.totalPickedUp }}</td>
+                      <td>{{ yData.totalOverdue }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
 
-    <div class="print-section" v-if="pendingResidents.length > 0">
-      <h3 class="print-section-title">Pending Accounts (Awaiting Verification)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Room No.</th>
-            <th>Email</th>
-            <th>Updated At</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="res in pendingResidents" :key="res.id">
-            <td>{{ res.fullName }}</td>
-            <td>{{ res.roomNumber }}</td>
-            <td>{{ res.email }}</td>
-            <td>{{ formatDateTime(res.updateAt) }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td colspan="3">TOTAL PENDING ACCOUNTS</td>
-            <td>{{ pendingResidents.length }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            <div class="print-section" v-if="parcels.length > 0">
+              <h3 class="print-section-title">Recent Parcels (Latest Activity)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Resident</th>
+                    <th>Tracking No.</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
+                    <td>{{ formatDate(parcel.updatedAt) }}</td>
+                    <td>{{ parcel.residentName }}</td>
+                    <td>
+                      <div>{{ parcel.trackingNumber }}</div>
+                      <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="text-[10px] text-gray-400 mt-1">
+                        History: <span v-for="(h, i) in parcel.statusHistory" :key="i">
+                          {{ h.status }} ({{ formatDate(h.updatedAt) }})<span v-if="i < parcel.statusHistory.length - 1"> → </span>
+                        </span>
+                      </div>
+                    </td>
+                    <td>{{ parcel.status.toUpperCase() }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td colspan="3">TOTAL RECENT PARCELS</td>
+                    <td>{{ parcels.slice(0, 10).length }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-    <div class="print-section" v-if="topResidents.length > 0">
-      <h3 class="print-section-title">Resident Ranking (Top Leaders by Volume)</h3>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Name</th>
-            <th>Room</th>
-            <th>Parcels</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(res, idx) in topResidents" :key="idx">
-            <td>{{ idx + 1 }}</td>
-            <td>{{ res.fullName || res.name }}</td>
-            <td>{{ res.roomNumber || res.room }}</td>
-            <td>{{ res.parcelCount || res.count }}</td>
-          </tr>
-          <!-- TOTAL ROW -->
-          <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-            <td colspan="3">TOTAL PARCELS (Top Leaders)</td>
-            <td>{{ topResidents.reduce((sum, r) => sum + parseInt(r.parcelCount || r.count || 0), 0) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            <div class="print-section" v-if="overdueParcels.length > 0">
+              <h3 class="print-section-title">Overdue Parcels (> 1 Day)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Received At</th>
+                    <th>Resident</th>
+                    <th>Tracking No.</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="parcel in overdueParcels" :key="parcel.id">
+                    <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
+                    <td>{{ parcel.residentName }}</td>
+                    <td>{{ parcel.trackingNumber }}</td>
+                    <td>{{ parcel.status.toUpperCase() }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td colspan="3">TOTAL OVERDUE PARCELS</td>
+                    <td>{{ overdueParcels.length }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
+            <div class="print-section">
+              <h2 class="print-main-header">2. Resident Management Overview</h2>
+              
+              <h3 class="print-section-title">Statistics Overview (Residents)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Status Item</th>
+                    <th>Count / Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Active / Verified</td>
+                    <td>{{ stats.activeResidents }}</td>
+                  </tr>
+                  <tr>
+                    <td>Pending Approvals</td>
+                    <td>{{ stats.pendingResidents }}</td>
+                  </tr>
+                  <tr>
+                    <td>Inactive Residents</td>
+                    <td>{{ stats.inactiveResidents }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td>TOTAL RESIDENTS</td>
+                    <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <template v-if="residentHistory.length > 0">
+              <div class="print-section" v-for="yData in residentHistory" :key="'resident-' + yData.year">
+                <h3 class="print-section-title">Historical Monthly Summary (Residents) - Year {{ yData.year }}</h3>
+                <table class="print-table">
+                  <thead>
+                    <tr>
+                      <th>Month (MM/YYYY)</th>
+                      <th>Total Registered</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="h in yData.months" :key="h.monthStr">
+                      <td>{{ h.monthStr }}</td>
+                      <td>{{ h.joined }}</td>
+                    </tr>
+                    <!-- TOTAL ROW -->
+                    <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                      <td>TOTAL</td>
+                      <td>{{ yData.totalJoined }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+
+            <div class="print-section" v-if="pendingResidents.length > 0">
+              <h3 class="print-section-title">Pending Accounts (Awaiting Verification)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Room No.</th>
+                    <th>Email</th>
+                    <th>Updated At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="res in pendingResidents" :key="res.id">
+                    <td>{{ res.fullName }}</td>
+                    <td>{{ res.roomNumber }}</td>
+                    <td>{{ res.email }}</td>
+                    <td>{{ formatDateTime(res.updateAt) }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td colspan="3">TOTAL PENDING ACCOUNTS</td>
+                    <td>{{ pendingResidents.length }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="print-section" v-if="topResidents.length > 0">
+              <h3 class="print-section-title">Resident Ranking (Top Leaders by Volume)</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Room</th>
+                    <th>Parcels</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(res, idx) in topResidents" :key="idx">
+                    <td>{{ idx + 1 }}</td>
+                    <td>{{ res.fullName || res.name }}</td>
+                    <td>{{ res.roomNumber || res.room }}</td>
+                    <td>{{ res.parcelCount || res.count }}</td>
+                  </tr>
+                  <!-- TOTAL ROW -->
+                  <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
+                    <td colspan="3">TOTAL PARCELS (Top Leaders)</td>
+                    <td>{{ topResidents.reduce((sum, r) => sum + parseInt(r.parcelCount || r.count || 0), 0) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr><td><div class="report-page-margin-bottom"></div></td></tr>
+      </tfoot>
+    </table>
   </div>
 </template>
 
 <style>
+/* Global @page rule to hide browser headers/footers */
+@page {
+  margin: 0;
+}
+
 @media print {
+  /* Hides browser headers but table logic below manages the fake margins */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .report-table-wrapper {
+    width: 100% !important;
+    border: none !important;
+  }
+
+  .report-page-margin-top {
+    height: 1.5cm; /* THIS CREATES THE TOP MARGIN ON EVERY PAGE */
+  }
+
+  .report-page-margin-bottom {
+    height: 1cm; /* THIS CREATES THE BOTTOM MARGIN ON EVERY PAGE */
+  }
   /* Critical cleanup: Hide all UI elements outside the print report */
   .no-print,
   aside, 
@@ -964,7 +1185,7 @@ defineExpose({
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 2.5rem !important;
+    padding: 1cm !important; /* Internal buffer */
     background-color: white !important;
     counter-reset: section;
   }
@@ -1068,5 +1289,42 @@ defineExpose({
   .print-report, .print-header {
     display: none !important;
   }
+}
+
+.kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 15px !important;
+  margin-top: 20px !important;
+}
+
+.kpi-card {
+  padding: 15px !important;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #fff !important;
+  text-align: center !important;
+  border-radius: 8px !important;
+}
+
+.kpi-label {
+  display: block !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  color: #64748b !important;
+  margin-bottom: 5px !important;
+}
+
+.kpi-value {
+  display: block !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+}
+
+.kpi-sublabel {
+  display: block !important;
+  font-size: 10px !important;
+  color: #94a3b8 !important;
+  margin-top: 4px !important;
 }
 </style>
