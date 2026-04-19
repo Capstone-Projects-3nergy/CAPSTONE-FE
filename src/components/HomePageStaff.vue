@@ -1649,6 +1649,18 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                         </div>
                       </div>
                       
+                      <!-- Waiting for Staff Detail -->
+                      <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                          <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
+                          <span class="text-sm font-bold text-gray-700">Waiting for Staff</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.waitingForStaffParcels }}</span>
+                          <span class="text-xs font-bold text-yellow-600 px-2 py-0.5 bg-yellow-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.waitingForStaffParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
+                        </div>
+                      </div>
+
                       <!-- Received Detail -->
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">

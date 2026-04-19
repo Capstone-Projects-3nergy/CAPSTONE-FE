@@ -175,8 +175,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     }).length
     const oneDayMs = 24 * 60 * 60 * 1000
     overallStats.overdueParcels = allParcels.filter(p => {
-      const pStatus = p.status?.toUpperCase() || ''
-      if (pStatus === 'PICKED_UP' || pStatus === 'TAKEN') return false
+      const s = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+      if (s.includes('PICKED') || s.includes('TAKEN')) return false
+      if (s.includes('STAFF') || s.includes('PENDING')) return false
       
       const rDate = new Date(p.receivedAt || p.createdAt || p.date)
       return (today - rDate) > oneDayMs
@@ -209,7 +210,10 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
        return isWaiting && !s.includes('OVERDUE')
     }).length
     stats.overdueParcels = parcelsInPeriod.filter(p => {
-      const pStatus = p.status?.toUpperCase() || ''
+      const pStatus = p.status?.toUpperCase().replace(/[\s_-]/g, '') || ''
+      const isStaff = pStatus.includes('STAFF') || pStatus.includes('PENDING')
+      if (isStaff) return false
+
       const isArrived = pStatus.includes('RECEIVED') || pStatus.includes('NOTIFIED') || pStatus.includes('OVERDUE') || pStatus === 'WAITING'
       const isPickedUp = pStatus.includes('PICKED') || pStatus.includes('TAKEN')
       if (isPickedUp) return false
