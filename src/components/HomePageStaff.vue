@@ -925,7 +925,7 @@ onMounted(async () => {
         labels: dashboardStore.residentChartData.labels,
         datasets: [
           {
-            label: 'New Residents',
+            label: 'Registered Residents',
             data: dashboardStore.residentChartData.data,
             backgroundColor: (context) => {
               const data = context.dataset.data;
@@ -982,7 +982,7 @@ onMounted(async () => {
                 const breakdown = dashboardStore.residentChartData.statusBreakdown[idx] || { active: 0, pending: 0, inactive: 0 };
                 const val = context.parsed.y || 0;
                 
-                const lines = [` Total: ${val} Joined`];
+                const lines = [` Total: ${val} Residents`];
                 if (val > 0) {
                   lines.push(` • Active: ${breakdown.active}`);
                   lines.push(` • Pending: ${breakdown.pending}`);
@@ -1020,7 +1020,7 @@ onMounted(async () => {
             title: {
                display: true,
                align: 'end',
-               text: 'Residents Joined',
+               text: 'Residents',
                font: { family: "'Inter', sans-serif", size: 12, weight: 'bold' },
                color: '#6B7280',
                padding: 0
@@ -2008,7 +2008,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                   </div>
                   
                   <div class="flex items-center gap-3 sm:gap-4 mt-2">
-                     <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total: {{ dashboardStore.residentChartData.total }} residents</span>
+                     <span class="text-[12px] sm:text-sm font-black text-gray-800 whitespace-nowrap">Total Residents: {{ dashboardStore.residentChartData.total }}</span>
                      <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                      <span class="text-[11px] sm:text-xs text-gray-500 font-bold whitespace-nowrap">Peak: {{ dashboardStore.residentChartData.peak }}</span>
                      <span class="w-1 h-1 rounded-full bg-gray-300"></span>
