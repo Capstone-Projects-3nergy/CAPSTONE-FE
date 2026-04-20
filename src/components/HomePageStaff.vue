@@ -805,6 +805,9 @@ onMounted(async () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: 35, bottom: 0, left: 0, right: 0 }
+      },
       interaction: {
         mode: 'index',
         intersect: false,
@@ -877,6 +880,7 @@ onMounted(async () => {
           stacked: false,
           beginAtZero: true,
           suggestedMax: 10,
+          grace: '15%',
           grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
           ticks: { 
             font: { family: "'Inter', sans-serif", size: 11 }, 
@@ -940,6 +944,9 @@ onMounted(async () => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: { top: 35, bottom: 0, left: 0, right: 0 }
+        },
         interaction: {
           mode: 'index',
           intersect: false,
@@ -990,6 +997,7 @@ onMounted(async () => {
           y: {
             beginAtZero: true,
             suggestedMax: 5,
+            grace: '15%',
             grid: { color: '#F3F4F6', borderDash: [5, 5], drawBorder: false },
             ticks: { 
               font: { family: "'Inter', sans-serif", size: 11 }, 
@@ -1996,7 +2004,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                      <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Period: {{ avgResidentGrowth.toFixed(1) }}</span>
                   </div>
                   
-                  <div class="h-[250px] w-full relative">
+                  <div class="h-[300px] w-full relative">
                     <canvas id="residentChart"></canvas>
                   </div>
                 </div>
