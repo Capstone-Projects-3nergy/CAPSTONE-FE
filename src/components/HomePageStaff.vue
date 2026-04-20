@@ -413,22 +413,17 @@ const initStatusChart = () => {
         ],
         backgroundColor: ['#10B981', '#3b82f6', '#FACC15', '#EF4444'], 
         borderWidth: 0,
-        hoverOffset: 4
+        hoverOffset: 0
       }]
     },
     options: {
+      events: [],
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)',
-          padding: 12,
-          cornerRadius: 8,
-          callbacks: {
-            label: (context) => ` ${context.label}: ${context.parsed} parcels`
-          }
+          enabled: false
         }
       },
       cutout: '70%'
@@ -450,22 +445,17 @@ const initResidentStatusChart = () => {
         data: [stats.value.activeResidents, stats.value.pendingResidents, stats.value.inactiveResidents],
         backgroundColor: ['#10B981', '#FACC15', '#F97316'], 
         borderWidth: 0,
-        hoverOffset: 4
+        hoverOffset: 0
       }]
     },
     options: {
+      events: [],
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)',
-          padding: 12,
-          cornerRadius: 8,
-          callbacks: {
-            label: (context) => ` ${context.label}: ${context.parsed} residents`
-          }
+          enabled: false
         }
       },
       cutout: '70%'
