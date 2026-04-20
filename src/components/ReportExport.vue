@@ -298,7 +298,7 @@ const handleExportExcel = () => {
 
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. PARCEL MANAGEMENT OVERVIEW`]);
-  finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
+  finalData.push(['CATEGORY', 'Status', 'Amount']);
   finalData.push(['Parcels', 'Picked Up', props.overallStats.pickedUpParcels]);
   finalData.push(['', 'Received / Awaiting', props.overallStats.awaitingParcels]);
   finalData.push(['', 'Overdue Parcels', props.overallStats.overdueParcels]);
@@ -344,9 +344,9 @@ const handleExportExcel = () => {
 
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
-  finalData.push(['CATEGORY', 'STATUS ITEM', 'COUNT / VALUE']);
-  finalData.push(['Residents', 'Active / Verified', stats.activeResidents]);
-  finalData.push(['', 'Pending Approvals', stats.pendingResidents]);
+  finalData.push(['CATEGORY', 'Status', 'Amount']);
+  finalData.push(['Residents', 'Active', stats.activeResidents]);
+  finalData.push(['', 'Pending', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
   finalData.push(['', 'TOTAL RESIDENTS', stats.activeResidents + stats.inactiveResidents]);
   finalData.push([]);
@@ -518,8 +518,8 @@ const handleExportPDF = () => {
   doc.setFillColor(245, 247, 250);
   doc.rect(15, y - 5, 180, 8, 'F');
   doc.setFont("helvetica", "bold");
-  doc.text("PARCEL STATUS ITEM", 18, y); 
-  doc.text("COUNT / VALUE", 160, y);
+  doc.text("Status", 18, y); 
+  doc.text("Amount", 160, y);
   
   doc.setDrawColor(180, 180, 180);
   const parcelRowsCount = parcelStats.length + 1; // +1 for Total
@@ -682,16 +682,16 @@ const handleExportPDF = () => {
   doc.setTextColor(0, 0, 0);
   
   const residentStats = [
-    { item: 'Active / Verified', val: stats.activeResidents },
-    { item: 'Pending Approvals', val: stats.pendingResidents },
-    { item: 'Inactive Residents', val: stats.inactiveResidents }
+    { item: 'Active', val: stats.activeResidents },
+    { item: 'Pending', val: stats.pendingResidents },
+    { item: 'Inactive', val: stats.inactiveResidents }
   ];
 
   doc.setFillColor(245, 247, 250);
   doc.rect(15, y - 5, 180, 8, 'F');
   doc.setFont("helvetica", "bold");
-  doc.text("RESIDENT STATUS ITEM", 18, y); 
-  doc.text("COUNT / VALUE", 160, y);
+  doc.text("Status", 18, y); 
+  doc.text("Amount", 160, y);
   
   doc.setDrawColor(180, 180, 180);
   const residentRowsCount = residentStats.length + 1; // +1 for Total
@@ -904,8 +904,8 @@ defineExpose({
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Status Item</th>
-                    <th>Count / Value</th>
+                    <th>Status</th>
+                    <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1030,21 +1030,21 @@ defineExpose({
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Status Item</th>
-                    <th>Count / Value</th>
+                    <th>Status</th>
+                    <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Active / Verified</td>
+                    <td>Active</td>
                     <td>{{ stats.activeResidents }}</td>
                   </tr>
                   <tr>
-                    <td>Pending Approvals</td>
+                    <td>Pending</td>
                     <td>{{ stats.pendingResidents }}</td>
                   </tr>
                   <tr>
-                    <td>Inactive Residents</td>
+                    <td>Inactive</td>
                     <td>{{ stats.inactiveResidents }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
