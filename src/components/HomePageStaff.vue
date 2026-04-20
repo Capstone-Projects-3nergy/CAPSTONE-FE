@@ -978,17 +978,8 @@ onMounted(async () => {
                  return view === 'monthly' ? `Month: ${tooltipItems[0].label} ${refYear}` : `Timeline: ${tooltipItems[0].label}`;
               },
               label: (context) => {
-                const idx = context.dataIndex;
-                const breakdown = dashboardStore.residentChartData.statusBreakdown[idx] || { active: 0, pending: 0, inactive: 0 };
                 const val = context.parsed.y || 0;
-                
-                const lines = [` Total: ${val} Residents`];
-                if (val > 0) {
-                  lines.push(` • Active: ${breakdown.active}`);
-                  lines.push(` • Pending: ${breakdown.pending}`);
-                  lines.push(` • Inactive: ${breakdown.inactive}`);
-                }
-                return lines;
+                return ` Total: ${val} Residents`;
               }
             }
           }
