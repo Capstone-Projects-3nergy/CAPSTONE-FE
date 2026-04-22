@@ -491,7 +491,7 @@ const handleExportExcel = () => {
   let mainSection = 1;
 
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. Parcel Management Overview (Daily Activity)`]);
+  finalData.push([`${mainSection}. Parcel Management Overview`]);
   finalData.push(['Daily Statistics (Parcels)', 'Daily Status (Activity)', 'Amount']);
   finalData.push(['', 'Received', stats.received]);
   finalData.push(['', 'Picked Up', stats.pickedUp]);
@@ -535,7 +535,7 @@ const handleExportExcel = () => {
   mainSection++;
 
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. Resident Management Overview (Daily Activity)`]);
+  finalData.push([`${mainSection}. Resident Management Overview`]);
   finalData.push(['Daily Statistics (Residents)', 'Daily Status (Activity)', 'Amount']);
   finalData.push(['', 'Joined', stats.joined]);
   finalData.push(['', 'Verified', stats.verified]);
@@ -583,7 +583,7 @@ const handleExportExcel = () => {
   XLSX.utils.book_append_sheet(wb, ws, "Summary Report");
 
   ws['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 15 }];
-  XLSX.writeFile(wb, `Dormitory_Dashboard_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `Dormitory_Dashboard_${props.selectedDate}.xlsx`);
 };
 
 const handleExportPDF = () => {
@@ -795,7 +795,7 @@ const handleExportPDF = () => {
   }
 
   // --- 1. Parcel Management Overview ---
-  drawMainCategoryHeader("1. Parcel Management Overview (Daily Activity)", true);
+  drawMainCategoryHeader("1. Parcel Management Overview", true);
   
   // 1.1 Daily Statistics
   drawSubHeader("1. Daily Statistics (Parcels)");
@@ -863,7 +863,7 @@ const handleExportPDF = () => {
   }
 
   // --- 2. Resident Management Overview ---
-  drawMainCategoryHeader("2. Resident Management Overview (Daily Activity)", true);
+  drawMainCategoryHeader("2. Resident Management Overview", true);
   
   // 2.1 Daily Residents
   drawSubHeader("1. Daily Statistics (Residents)");
@@ -935,7 +935,7 @@ const handleExportPDF = () => {
     );
   }
 
-  doc.save(`Dormitory_Summary_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Dormitory_Summary_Report_${props.selectedDate}.pdf`);
 };
 
 const handlePrintSummary = () => {
@@ -1008,7 +1008,7 @@ defineExpose({
 
             <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
-              <h2 class="print-main-header">1. Parcel Management Overview (Daily Activity)</h2>
+              <h2 class="print-main-header">1. Parcel Management Overview</h2>
               
               <h3 class="print-section-title">Daily Statistics (Parcels)</h3>
               <table class="print-table">
@@ -1134,7 +1134,7 @@ defineExpose({
 
             <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
-              <h2 class="print-main-header">2. Resident Management Overview (Daily Activity)</h2>
+              <h2 class="print-main-header">2. Resident Management Overview</h2>
               
               <h3 class="print-section-title">Daily Statistics (Residents)</h3>
               <table class="print-table">
