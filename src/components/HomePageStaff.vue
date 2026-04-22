@@ -1498,8 +1498,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
 
-            <!-- Card Header with Tabs -->
-            <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-50 gap-6">
               <div class="flex flex-col">
                 <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                   Analytics Center
@@ -1931,7 +1930,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600"></div>
 
               <!-- Card Header with Tabs -->
-              <div class="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-50 gap-6">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-50 gap-6">
                 <div class="flex flex-col">
                   <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
                     Resident Insights
