@@ -286,6 +286,11 @@ const filteredOverdue = computed(() => {
   });
 });
 
+const filteredPendingResidents = computed(() => {
+  const date = snapshotDate.value;
+  return props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= date);
+});
+
 // Compute Historical Summaries from all data
 const parcelHistory = computed(() => {
   const groups = {};
@@ -445,7 +450,7 @@ const handleExportExcel = () => {
   const stats = dailyStats.value;
   const snapshot = dynamicStats.value;
   const overdueList = filteredOverdue.value;
-  const pending = props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= snapshotDate.value);
+  const pending = filteredPendingResidents.value;
   const topRes = props.topResidents;
   const recentParcels = filteredParcels.value.slice(0, 10);
 
@@ -581,7 +586,7 @@ const handleExportPDF = () => {
   const stats = dailyStats.value;
   const snapshot = dynamicStats.value;
   const overdueList = filteredOverdue.value;
-  const pending = props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= snapshotDate.value);
+  const pending = filteredPendingResidents.value;
   const topRes = props.topResidents;
   const recentParcels = filteredParcels.value.slice(0, 10);
   const brandColor = [29, 53, 94]; // Navy Blue style (#1D355E)
@@ -1242,7 +1247,7 @@ defineExpose({
               </div>
             </template>
 
-            <div class="print-section" v-if="pendingResidents.length > 0">
+            <div class="print-section" v-if="filteredPendingResidents.length > 0">
               <h3 class="print-section-title">Pending Accounts (Awaiting Verification)</h3>
               <table class="print-table">
                 <thead>
@@ -1254,7 +1259,7 @@ defineExpose({
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="res in pendingResidents" :key="res.id">
+                  <tr v-for="res in filteredPendingResidents" :key="res.id">
                     <td>{{ res.fullName }}</td>
                     <td>{{ res.roomNumber }}</td>
                     <td>{{ res.email }}</td>
@@ -1263,7 +1268,7 @@ defineExpose({
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total pending accounts</td>
-                    <td>{{ pendingResidents.length }}</td>
+                    <td>{{ filteredPendingResidents.length }}</td>
                   </tr>
                 </tbody>
               </table>
