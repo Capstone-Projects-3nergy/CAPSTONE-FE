@@ -431,99 +431,99 @@ const handleExportPDF = () => {
   };
 
   const drawMainCategoryHeader = (text) => {
-    checkPage(25);
+    checkPage(20);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 6, 180, 10, 'F');
+    doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setTextColor(255, 255, 255);
-    doc.text(text, 105, y, { align: 'center' });
-    y += 15;
+    doc.text(text, 105, y + 1.5, { align: 'center' });
+    y += 12;
   };
 
   const drawSubHeader = (text) => {
-    checkPage(15);
+    checkPage(12);
     // Left-accent border like Print style
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 4.5, 1.5, 6, 'F');
+    doc.rect(15, y - 3.5, 1.2, 4.5, 'F');
     
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.text(text, 19, y);
-    y += 8;
+    doc.text(text, 18, y);
+    y += 6;
   };
 
   // Main Header
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
+  doc.setFontSize(18);
   doc.setTextColor(29, 53, 94);
   doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
-  y += 8;
-  doc.setFontSize(10);
+  y += 6;
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
   doc.text(`Report Issue Date: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
-  y += 6;
+  y += 5;
   doc.setDrawColor(29, 53, 94);
-  doc.setLineWidth(0.5);
+  doc.setLineWidth(0.4);
   doc.line(15, y, 195, y);
-  y += 15;
+  y += 12;
 
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
     drawMainCategoryHeader("Summary of dormitory performance");
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     
     // KPI Grid logic
     const boxW = 85;
-    const boxH = 20;
+    const boxH = 18;
 
     const drawKPIBox = (label, value, subLabel, x, py) => {
       doc.setDrawColor(226, 232, 240);
       doc.rect(x, py, boxW, boxH);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text(value, x + boxW/2, py + 8, { align: 'center' });
+      doc.setFontSize(11);
+      doc.text(value, x + boxW/2, py + 7, { align: 'center' });
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setTextColor(100, 100, 100);
-      doc.text(label, x + boxW/2, py + 12, { align: 'center' });
-      doc.setFontSize(7);
-      doc.text(subLabel, x + boxW/2, py + 16, { align: 'center' });
+      doc.text(label, x + boxW/2, py + 11, { align: 'center' });
+      doc.setFontSize(6.5);
+      doc.text(subLabel, x + boxW/2, py + 15, { align: 'center' });
       doc.setTextColor(0, 0, 0);
     };
 
     drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Parcels successfully picked up", 15, y);
     drawKPIBox("Overdue inventory ratio", insights.overdueRate + "%", "Units exceeding 24h threshold", 110, y);
-    y += boxH + 5;
+    y += boxH + 4;
     drawKPIBox("Staff processing load", insights.staffBacklogRate + "%", "Parcels awaiting intake verification", 15, y);
     drawKPIBox("Resident verification", insights.verificationRate + "%", "Active versus total accounts", 110, y);
-    y += boxH + 10;
+    y += boxH + 8;
 
     // Insights Box
     doc.setFillColor(249, 250, 251); 
     doc.setDrawColor(229, 231, 235);
-    doc.rect(15, y, 180, 25, 'FD');
+    doc.rect(15, y, 180, 22, 'FD');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("Operational Analytics:", 20, y + 6);
-    y += 10;
-    doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
+    doc.text("Operational Analytics:", 20, y + 5);
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
     if (insights.insights.length > 0) {
       insights.insights.forEach(msg => {
         doc.text("• " + msg, 20, y);
-        y += 4;
+        y += 3.5;
       });
     } else {
       doc.text("• Operation is flowing normally. No interventions required.", 20, y);
-      y += 4;
+      y += 3.5;
     }
     doc.text(`Current activity state: ${insights.healthStatus}`, 20, y);
-    y += 15;
+    y += 12;
   }
 
   // --- 1. Parcel Management Overview ---
@@ -531,7 +531,7 @@ const handleExportPDF = () => {
   
   // 1.1 Statistics
   drawSubHeader("Statistics Overview (Parcels)");
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.setTextColor(0, 0, 0);
   
   const parcelStats = [
@@ -546,49 +546,49 @@ const handleExportPDF = () => {
   
   doc.setDrawColor(180, 180, 180);
   const pRows = parcelStats.length + 1;
-  doc.rect(15, y - 5, 180, (pRows * 8) + 8);
-  doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (pRows * 8) + 8);
+  doc.rect(15, y - 4, 180, (pRows * 7) + 6);
+  doc.line(15, y + 2, 195, y + 2);
+  doc.line(155, y - 4, 155, y - 4 + (pRows * 7) + 6);
 
-  y += 8;
+  y += 7;
   doc.setFont("helvetica", "normal");
   parcelStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    y += 8;
+    y += 7;
   });
 
   doc.setFont("helvetica", "bold");
   doc.text("TOTAL UNITS (SYSTEM)", 18, y);
   doc.text(props.overallStats.totalParcels.toString(), 190, y, { align: 'right' });
-  y += 15;
+  y += 12;
 
   // 1.2 Historical Monthly Table (Parcels) - Moved before lists
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach((yData) => {
       drawSubHeader(`Historical Monthly Summary (Parcels) - Year ${yData.year}`);
       doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.rect(15, y - 4, 180, 7, 'F');
       doc.setFont("helvetica", "bold");
-      doc.text("Month (MM/YYYY)", 17, y);
-      doc.text("RECEIVED", 85, y, { align: 'right' });
-      doc.text("PICKED UP", 140, y, { align: 'right' });
-      doc.text("OVERDUE", 190, y, { align: 'right' });
+      doc.text("Month (MM/YYYY)", 17, y + 1);
+      doc.text("RECEIVED", 85, y + 1, { align: 'right' });
+      doc.text("PICKED UP", 140, y + 1, { align: 'right' });
+      doc.text("OVERDUE", 190, y + 1, { align: 'right' });
 
       doc.setDrawColor(180, 180, 180);
       const rowsCount = yData.months.length + 1;
-      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
-      y += 8;
+      doc.rect(15, y - 4, 180, (rowsCount * 6) + 7);
+      y += 7;
       doc.setFont("helvetica", "normal");
       
       yData.months.forEach(h => {
-        checkPage(7);
+        checkPage(6);
         doc.text(h.monthStr, 17, y);
         doc.text(h.received.toString(), 85, y, { align: 'right' });
         doc.text(h.pickedUp.toString(), 140, y, { align: 'right' });
         doc.text(h.overdue.toString(), 190, y, { align: 'right' });
         doc.line(15, y + 1, 195, y + 1);
-        y += 7;
+        y += 6;
       });
 
       doc.setFont("helvetica", "bold");
@@ -596,7 +596,7 @@ const handleExportPDF = () => {
       doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
       doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
       doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
-      y += 15;
+      y += 12;
     });
   }
 
@@ -604,70 +604,74 @@ const handleExportPDF = () => {
   if (recentParcels.length > 0) {
     drawSubHeader("Recent Parcels (Latest Activity)");
     doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.rect(15, y - 4, 180, 7, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("DATE", 17, y); 
-    doc.text("RESIDENT", 47, y); 
-    doc.text("TRACKING NO.", 97, y); 
-    doc.text("STATUS", 163, y);
+    doc.setFontSize(8);
+    doc.text("DATE", 17, y + 1); 
+    doc.text("RESIDENT", 45, y + 1); 
+    doc.text("TRACKING NO.", 95, y + 1); 
+    doc.text("STATUS", 160, y + 1);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, ((recentParcels.length + 1) * 8) + 8);
+    doc.rect(15, y - 4, 180, ((recentParcels.length + 1) * 7) + 7);
     doc.line(15, y + 3, 195, y + 3);
-    doc.line(45, y - 5, 45, y - 5 + (recentParcels.length * 8) + 8);
-    doc.line(95, y - 5, 95, y - 5 + (recentParcels.length * 8) + 8);
-    doc.line(160, y - 5, 160, y - 5 + (recentParcels.length * 8) + 8);
+    doc.line(43, y - 4, 43, y - 4 + (recentParcels.length * 7) + 7);
+    doc.line(93, y - 4, 93, y - 4 + (recentParcels.length * 7) + 7);
+    doc.line(158, y - 4, 158, y - 4 + (recentParcels.length * 7) + 7);
 
-    y += 8;
+    y += 7;
     doc.setFont("helvetica", "normal");
     recentParcels.forEach((p) => {
+      checkPage(7);
       doc.text(formatDate(p.updatedAt), 17, y);
-      doc.text((p.residentName || '').substring(0, 18), 47, y);
-      doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
-      doc.text((p.status || '').toUpperCase(), 163, y);
-      doc.line(15, y + 2, 195, y + 2);
-      y += 8;
+      doc.text((p.residentName || '').substring(0, 18), 45, y);
+      doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
+      doc.text((p.status || '').toUpperCase(), 160, y);
+      doc.line(15, y + 1.5, 195, y + 1.5);
+      y += 7;
     });
 
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL RECENT PARCELS", 17, y);
-    doc.text(recentParcels.length.toString(), 163, y);
-    y += 15;
+    doc.text(recentParcels.length.toString(), 160, y);
+    y += 12;
   }
 
   // 1.4 Overdue Parcels
   if (overdueList.length > 0) {
     drawSubHeader("Overdue Parcels (> 1 Day)");
     doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.rect(15, y - 4, 180, 7, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("RECEIVED AT", 17, y); 
-    doc.text("RESIDENT", 47, y); 
-    doc.text("TRACKING NO.", 97, y); 
-    doc.text("STATUS", 163, y);
+    doc.setFontSize(8);
+    doc.text("RECEIVED AT", 17, y + 1); 
+    doc.text("RESIDENT", 45, y + 1); 
+    doc.text("TRACKING NO.", 95, y + 1); 
+    doc.text("STATUS", 160, y + 1);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, ((overdueList.length + 1) * 8) + 8);
+    doc.rect(15, y - 4, 180, ((overdueList.length + 1) * 7) + 7);
     doc.line(15, y + 3, 195, y + 3);
-    doc.line(45, y - 5, 45, y - 5 + (overdueList.length * 8) + 8);
-    doc.line(95, y - 5, 95, y - 5 + (overdueList.length * 8) + 8);
-    doc.line(160, y - 5, 160, y - 5 + (overdueList.length * 8) + 8);
+    doc.line(43, y - 4, 43, y - 4 + (overdueList.length * 7) + 7);
+    doc.line(93, y - 4, 93, y - 4 + (overdueList.length * 7) + 7);
+    doc.line(158, y - 4, 158, y - 4 + (overdueList.length * 7) + 7);
 
-    y += 8;
+    y += 7;
     doc.setFont("helvetica", "normal");
     overdueList.forEach((p) => {
+      checkPage(7);
       doc.text(formatDate(p.receiveAt || p.createdAt), 17, y);
-      doc.text((p.residentName || '').substring(0, 18), 47, y);
-      doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
-      doc.text((p.status || '').toUpperCase(), 163, y);
-      doc.line(15, y + 2, 195, y + 2);
-      y += 8;
+      doc.text((p.residentName || '').substring(0, 18), 45, y);
+      doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
+      doc.text((p.status || '').toUpperCase(), 160, y);
+      doc.line(15, y + 1.5, 195, y + 1.5);
+      y += 7;
     });
 
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL OVERDUE PARCELS", 17, y);
-    doc.text(overdueList.length.toString(), 163, y);
-    y += 15;
+    doc.text(overdueList.length.toString(), 160, y);
+    y += 12;
   }
 
   // --- 2. Resident Management Overview ---
@@ -675,7 +679,7 @@ const handleExportPDF = () => {
   
   // 2.1 Statistics
   drawSubHeader("Statistics Overview (Residents)");
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.setTextColor(0, 0, 0);
   
   const resStats = [
@@ -685,58 +689,58 @@ const handleExportPDF = () => {
   ];
 
   doc.setFillColor(245, 247, 250);
-  doc.rect(15, y - 5, 180, 8, 'F');
+  doc.rect(15, y - 4, 180, 7, 'F');
   doc.setFont("helvetica", "bold");
-  doc.text("Status", 18, y); 
-  doc.text("Amount", 160, y);
+  doc.text("Status", 18, y + 1); 
+  doc.text("Amount", 160, y + 1);
   
   doc.setDrawColor(180, 180, 180);
   const rRows = resStats.length + 1;
-  doc.rect(15, y - 5, 180, (rRows * 8) + 8);
-  doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (rRows * 8) + 8);
+  doc.rect(15, y - 4, 180, (rRows * 7) + 6);
+  doc.line(15, y + 2, 195, y + 2);
+  doc.line(155, y - 4, 155, y - 4 + (rRows * 7) + 6);
 
-  y += 8;
+  y += 7;
   doc.setFont("helvetica", "normal");
   resStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    y += 8;
+    y += 7;
   });
 
   doc.setFont("helvetica", "bold");
   doc.text("TOTAL RESIDENTS", 18, y);
   doc.text((stats.activeResidents + stats.inactiveResidents).toString(), 190, y, { align: 'right' });
-  y += 15;
+  y += 12;
 
   // 2.2 Historical Monthly Table (Residents) - Before lists
   if (residentHistory.value.length > 0) {
     residentHistory.value.forEach((yData) => {
       drawSubHeader(`Historical Monthly Summary (Residents) - Year ${yData.year}`);
       doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.rect(15, y - 4, 180, 7, 'F');
       doc.setFont("helvetica", "bold");
-      doc.text("Month (MM/YYYY)", 17, y);
-      doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
+      doc.text("Month (MM/YYYY)", 17, y + 1);
+      doc.text("TOTAL REGISTERED", 180, y + 1, { align: 'right' });
 
       doc.setDrawColor(180, 180, 180);
       const rowCount = yData.months.length + 1;
-      doc.rect(15, y - 5, 180, (rowCount * 7) + 8);
-      y += 8;
+      doc.rect(15, y - 4, 180, (rowCount * 6) + 7);
+      y += 7;
       doc.setFont("helvetica", "normal");
       
       yData.months.forEach(h => {
-        checkPage(7);
+        checkPage(6);
         doc.text(h.monthStr, 17, y);
         doc.text(h.joined.toString(), 180, y, { align: 'right' });
         doc.line(15, y + 1, 195, y + 1);
-        y += 7;
+        y += 6;
       });
 
       doc.setFont("helvetica", "bold");
       doc.text("TOTAL", 17, y);
       doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
-      y += 15;
+      y += 12;
     });
   }
 
@@ -744,66 +748,70 @@ const handleExportPDF = () => {
   if (pending && pending.length > 0) {
     drawSubHeader("Pending Accounts (Awaiting Verification)");
     doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.rect(15, y - 4, 180, 7, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("NAME", 17, y); 
-    doc.text("ROOM", 72, y); 
-    doc.text("EMAIL", 97, y); 
-    doc.text("UPDATED AT", 157, y);
+    doc.setFontSize(8);
+    doc.text("NAME", 17, y + 1); 
+    doc.text("ROOM", 70, y + 1); 
+    doc.text("EMAIL", 95, y + 1); 
+    doc.text("UPDATED AT", 155, y + 1);
 
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, ((pending.length + 1) * 8) + 8);
+    doc.rect(15, y - 4, 180, ((pending.length + 1) * 7) + 7);
     doc.line(15, y + 3, 195, y + 3);
-    doc.line(70, y - 5, 70, y - 5 + (pending.length * 8) + 8);
-    doc.line(95, y - 5, 95, y - 5 + (pending.length * 8) + 8);
-    doc.line(155, y - 5, 155, y - 5 + (pending.length * 8) + 8);
+    doc.line(68, y - 4, 68, y - 4 + (pending.length * 7) + 7);
+    doc.line(93, y - 4, 93, y - 4 + (pending.length * 7) + 7);
+    doc.line(153, y - 4, 153, y - 4 + (pending.length * 7) + 7);
 
-    y += 8;
+    y += 7;
     doc.setFont("helvetica", "normal");
     pending.forEach((res) => {
+      checkPage(7);
       doc.text((res.fullName || '').substring(0, 25), 17, y);
-      doc.text((res.roomNumber || '-'), 72, y);
-      doc.text((res.email || '').substring(0, 30), 97, y);
-      doc.text(formatDateTime(res.updateAt), 157, y);
-      doc.line(15, y + 2, 195, y + 2);
-      y += 8;
+      doc.text((res.roomNumber || '-'), 70, y);
+      doc.text((res.email || '').substring(0, 30), 95, y);
+      doc.text(formatDateTime(res.updateAt), 155, y);
+      doc.line(15, y + 1.5, 195, y + 1.5);
+      y += 7;
     });
 
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL PENDING ACCOUNTS", 17, y);
-    doc.text(pending.length.toString(), 157, y);
-    y += 15;
+    doc.text(pending.length.toString(), 155, y);
+    y += 12;
   }
 
   // 2.4 Resident Ranking
   if (topRes && topRes.length > 0) {
     drawSubHeader("Resident Ranking (Top Leaders by Volume)");
     doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 5, 180, 8, 'F');
+    doc.rect(15, y - 4, 180, 7, 'F');
     doc.setFont("helvetica", "bold");
-    doc.text("RANK", 17, y); 
-    doc.text("NAME", 37, y); 
-    doc.text("ROOM NO.", 102, y); 
-    doc.text("PARCELS", 162, y);
+    doc.setFontSize(8);
+    doc.text("RANK", 17, y + 1); 
+    doc.text("NAME", 37, y + 1); 
+    doc.text("ROOM NO.", 102, y + 1); 
+    doc.text("PARCELS", 162, y + 1);
     
     doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 5, 180, ((topRes.length + 1) * 8) + 8);
+    doc.rect(15, y - 4, 180, ((topRes.length + 1) * 7) + 7);
     doc.line(15, y + 3, 195, y + 3);
-    doc.line(33, y - 5, 33, y - 5 + (topRes.length * 8) + 8);
-    doc.line(100, y - 5, 100, y - 5 + (topRes.length * 8) + 8);
-    doc.line(160, y - 5, 160, y - 5 + (topRes.length * 8) + 8);
+    doc.line(33, y - 4, 33, y - 4 + (topRes.length * 7) + 7);
+    doc.line(100, y - 4, 100, y - 4 + (topRes.length * 7) + 7);
+    doc.line(160, y - 4, 160, y - 4 + (topRes.length * 7) + 7);
 
-    y += 8;
+    y += 7;
     doc.setFont("helvetica", "normal");
     let totalTop = 0;
     topRes.forEach((res, i) => {
+      checkPage(7);
       totalTop += parseInt(res.parcelCount || res.count || 0);
       doc.text((i + 1).toString(), 22, y, { align: 'center' });
       doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
       doc.text((res.room || res.roomNumber || '-'), 130, y, { align: 'right' });
       doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
-      doc.line(15, y + 2, 195, y + 2);
-      y += 8;
+      doc.line(15, y + 1.5, 195, y + 1.5);
+      y += 7;
     });
 
     doc.setFont("helvetica", "bold");
