@@ -142,7 +142,7 @@ const yearlyStats = computed(() => {
   const date = props.selectedDate ? new Date(props.selectedDate) : new Date();
   const year = date.getFullYear();
   const startOfYear = new Date(year, 0, 1, 0, 0, 0, 0);
-  const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
+  const endLimit = snapshotDate.value;
 
   const res = {
     total: 0,
@@ -158,12 +158,10 @@ const yearlyStats = computed(() => {
 
   props.parcels.forEach(p => {
     const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
-    if (arrivalDate >= startOfYear && arrivalDate <= endOfYear) {
+    if (arrivalDate >= startOfYear && arrivalDate <= endLimit) {
       res.total++;
       
-      // Check status as of end of year (or today if year is current)
-      const limit = endOfYear > new Date() ? new Date() : endOfYear;
-      const status = getStatusAtDate(p, limit);
+      const status = getStatusAtDate(p, endLimit);
       if (!status) return;
 
       const s = status.toUpperCase().replace(/_/g, ' ');
@@ -173,7 +171,12 @@ const yearlyStats = computed(() => {
         // Lead time calculation
         if (p.statusHistory) {
           const receiveEvent = p.statusHistory.find(h => ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase()));
-          const pickupEvent = p.statusHistory.find(h => ['PICKED_UP', 'TAKEN'].includes(h.status?.toUpperCase()));
+          const pickupEvent = p.statusHistory.find(h => {
+            const st = (h.status || '').toUpperCase().replace(/_/g, ' ');
+            const ts = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
+            return (st.includes('PICKED UP') || st.includes('TAKEN')) && ts <= endLimit;
+          });
+
           if (receiveEvent && pickupEvent) {
             const start = new Date(receiveEvent.timestamp || receiveEvent.updatedAt);
             const end = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
@@ -188,7 +191,7 @@ const yearlyStats = computed(() => {
         res.awaiting++;
       } else {
         const overdueThresholdMs = 24 * 60 * 60 * 1000;
-        if ((limit - arrivalDate) > overdueThresholdMs) {
+        if ((endLimit - arrivalDate) > overdueThresholdMs) {
           res.overdue++;
         } else {
           res.awaiting++;
@@ -199,7 +202,7 @@ const yearlyStats = computed(() => {
 
   props.members.forEach(m => {
     const joinDate = new Date(m.createdAt || m.updateAt);
-    if (joinDate >= startOfYear && joinDate <= endOfYear) {
+    if (joinDate >= startOfYear && joinDate <= endLimit) {
       res.totalResidents++;
       if (m.status === 'active' || m.status === 'Verified') res.activeResidents++;
     }
@@ -431,7 +434,8 @@ const businessInsights = computed(() => {
     avgLeadTime,
     healthStatus,
     insights,
-    year: yearStr
+    year: yearStr,
+    dateLabel: displayDate.value
   };
 });
 
@@ -454,14 +458,14 @@ const handleExportExcel = () => {
 
   const insights = businessInsights.value;
   if (insights) {
-    finalData.push([`Performance Summary for Full Year ${insights.year}`]);
+    finalData.push([`Performance Summary as of ${insights.dateLabel}`]);
     finalData.push(['KPI METRIC', 'YEARLY VALUE (%)', 'OPINION / INSIGHT']);
-    finalData.push(['Yearly clearing efficiency', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
-    finalData.push(['Yearly overdue ratio', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Stable']);
-    finalData.push(['Yearly staff workload', insights.staffBacklogRate + '%', insights.staffBacklogRate > 10 ? 'Bottleneck' : 'Excellent']);
-    finalData.push(['Yearly resident verification', insights.verificationRate + '%', '-']);
+    finalData.push(['Clearing efficiency', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
+    finalData.push(['Overdue ratio', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Stable']);
+    finalData.push(['Staff load', insights.staffBacklogRate + '%', insights.staffBacklogRate > 10 ? 'Bottleneck' : 'Excellent']);
+    finalData.push(['Resident verification', insights.verificationRate + '%', '-']);
     finalData.push(['Average Pickup Turnaround', insights.avgLeadTime + ' Hours', 'Average for ' + insights.year]);
-    finalData.push(['Operational Status', '', insights.healthStatus]);
+    finalData.push(['Current annual state', '', insights.healthStatus]);
     
     finalData.push(['Yearly Analytics:']);
     if (insights.insights.length > 0) {
@@ -525,9 +529,8 @@ const handleExportExcel = () => {
   finalData.push(['Daily Statistics (Residents)', 'Daily Status (Activity)', 'Amount']);
   finalData.push(['', 'Joined', stats.joined]);
   finalData.push(['', 'Verified', stats.verified]);
-  finalData.push(['', 'Active Members', snapshot.activeResidents]);
-  finalData.push(['', 'Pending Residents', snapshot.pendingResidents]);
-  finalData.push(['', 'Inactive Residents', snapshot.inactiveResidents]);
+  finalData.push(['', 'Total Active Members', snapshot.activeResidents]);
+  finalData.push(['', 'Total registered', snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents]);
   finalData.push([]);
 
   // Historical Summary (Residents) - Moved before lists
@@ -637,7 +640,7 @@ const handleExportPDF = () => {
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
-    drawMainCategoryHeader(`Performance Summary for Full Year ${insights.year}`);
+    drawMainCategoryHeader(`Performance Summary as of ${insights.dateLabel}`);
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     
@@ -686,7 +689,7 @@ const handleExportPDF = () => {
       doc.text("• Annual operation is flowing normally.", 20, y);
       y += 3.5;
     }
-    doc.text(`Current activity state: ${insights.healthStatus}`, 20, y);
+    doc.text(`Current annual state: ${insights.healthStatus}`, 20, y);
     y += 12;
   }
 
@@ -849,7 +852,7 @@ const handleExportPDF = () => {
   const resStats = [
     { item: 'Joined', val: stats.joined },
     { item: 'Verified', val: stats.verified },
-    { item: 'Total Active', val: snapshot.activeResidents }
+    { item: 'Total Active Members', val: snapshot.activeResidents }
   ];
 
   doc.setFillColor(245, 247, 250);
@@ -873,8 +876,8 @@ const handleExportPDF = () => {
   });
 
   doc.setFont("helvetica", "bold");
-  doc.text("Cumulative Pending", 18, y);
-  doc.text(snapshot.pendingResidents.toString(), 190, y, { align: 'right' });
+  doc.text("Total registered", 18, y);
+  doc.text((snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents).toString(), 190, y, { align: 'right' });
   y += 12;
 
   // 2.2 Historical Monthly Table (Residents) - Before lists
@@ -1017,7 +1020,7 @@ defineExpose({
 
             <!-- --- PERFORMANCE SUMMARY SECTION --- -->
             <div v-if="businessInsights" class="print-section">
-              <h2 class="print-main-header">Summary of performance for full year {{ businessInsights.year }}</h2>
+              <h2 class="print-main-header">Summary of performance as of {{ displayDate }}</h2>
               
               <div class="kpi-grid">
                 <div class="kpi-card">
