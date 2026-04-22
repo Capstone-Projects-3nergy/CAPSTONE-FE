@@ -127,9 +127,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const getMappedParcels = computed(() => {
     return parcels.map(p => ({
       id: p.parcelId || p.id,
-      trackingNumber: p.trackingNumber || 'N/A',
-      residentName: p.ownerName || p.residentName || 'N/A',
-      roomNumber: p.roomNumber || 'N/A',
+      trackingNumber: p.trackingNumber || 'Awaiting Staff',
+      residentName: p.ownerName || p.residentName || 'Awaiting Staff',
+      roomNumber: p.roomNumber || 'Awaiting Staff',
       status: mapStatus(p.status),
       receiveAt: p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt || new Date().toISOString(),
       updatedAt: p.updatedAt || p.updateAt || p.createdAt || p.date || new Date().toISOString(),

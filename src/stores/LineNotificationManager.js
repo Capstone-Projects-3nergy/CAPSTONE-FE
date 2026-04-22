@@ -35,7 +35,7 @@ class LineNotificationManager {
   }
 
   async notifyNewParcel(parcel, router = null) {
-    const message = `📦 New Parcel Arrived!\n📌 Tracking: ${parcel.trackingNumber}\n👤 Recipient: ${parcel.receiverName || 'N/A'}\n🏠 Room: ${parcel.roomNumber || 'N/A'}\n🚚 Courier: ${parcel.courier || 'N/A'}`
+    const message = `📦 New Parcel Arrived!\n📌 Tracking: ${parcel.trackingNumber}\n👤 Recipient: ${parcel.receiverName || 'Awaiting Staff'}\n🏠 Room: ${parcel.roomNumber || 'Awaiting Staff'}\n🚚 Courier: ${parcel.courier || 'Awaiting Staff'}`
     return this.notifyAdmin(message, router)
   }
 
@@ -61,7 +61,7 @@ class LineNotificationManager {
   }
 
   async notifyParcelRecipient(userId, parcel, router = null) {
-    const message = `📦 Your parcel has arrived!\n📌 Tracking: ${parcel.trackingNumber}\n🚚 Courier: ${parcel.courier || 'N/A'}\n📍 You can pick it up at the juristic office.`
+    const message = `📦 Your parcel has arrived!\n📌 Tracking: ${parcel.trackingNumber}\n🚚 Courier: ${parcel.courier || 'Awaiting Staff'}\n📍 You can pick it up at the juristic office.`
     return this.sendToUser(userId, message, router)
   }
 

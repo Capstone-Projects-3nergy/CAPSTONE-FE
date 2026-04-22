@@ -147,10 +147,10 @@ onMounted(async () => {
   if (data) {
     const mapped = data.map((p) => ({
       id: p.parcelId,
-      trackingNumber: p.trackingNumber,
-      recipientName: p.ownerName,
-      roomNumber: p.roomNumber,
-      email: p.contactEmail,
+      trackingNumber: p.trackingNumber || 'Awaiting Staff',
+      recipientName: p.ownerName || 'Awaiting Staff',
+      roomNumber: p.roomNumber || 'Awaiting Staff',
+      email: p.contactEmail || 'Awaiting Staff',
       status: mapStatus(p.status),
       receiveAt: p.receivedAt,
       updateAt: p.updatedAt || null,
