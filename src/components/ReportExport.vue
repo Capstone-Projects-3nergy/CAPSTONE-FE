@@ -275,63 +275,48 @@ const handleExportExcel = () => {
 
   // 1. MAIN FILE HEADER
   const finalData = [
-    ['Dormitory Management System - Full Dashboard Report'],
+    ['Dormitory Management System - Summary Report'],
     ['Report Issue Date:', new Date().toLocaleString()],
     []
   ];
 
   const insights = businessInsights.value;
   if (insights) {
-    finalData.push(['EXECUTIVE SUMMARY & BUSINESS KPI']);
+    finalData.push(['Summary of dormitory performance']);
     finalData.push(['KPI METRIC', 'VALUE (%)', 'OPINION / INSIGHT']);
-    finalData.push(['Parcel Clearing Rate (Picked Up)', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
-    finalData.push(['Backlog Rate (Awaiting Pickup)', insights.awaitingRate + '%', '-']);
-    finalData.push(['System Efficiency (Staff Processing)', (100 - insights.staffBacklogRate) + '%', insights.staffBacklogRate > 10 ? 'Bottleneck Detected' : 'Excellent']);
+    finalData.push(['Clearing efficiency', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
+    finalData.push(['Overdue inventory ratio', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Stable']);
+    finalData.push(['Staff processing load', insights.staffBacklogRate + '%', insights.staffBacklogRate > 10 ? 'Bottleneck' : 'Excellent']);
+    finalData.push(['Resident verification', insights.verificationRate + '%', '-']);
     finalData.push(['Average Pickup Turnaround', insights.avgLeadTime + ' Hours', 'Average per unit']);
-    finalData.push(['Overdue Risk Level', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Normal']);
-    finalData.push(['Resident Verification Health', insights.verificationRate + '%', '-']);
     finalData.push(['Operational Status', '', insights.healthStatus]);
+    
+    finalData.push(['Operational Analytics:']);
+    if (insights.insights.length > 0) {
+      insights.insights.forEach(msg => {
+        finalData.push(['', '', '• ' + msg]);
+      });
+    } else {
+      finalData.push(['', '', '• Operation is flowing normally. No interventions required.']);
+    }
     finalData.push([]);
   }
 
   let mainSection = 1;
 
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. PARCEL MANAGEMENT OVERVIEW`]);
+  finalData.push([`${mainSection}. Parcel Management Overview`]);
   finalData.push(['CATEGORY', 'Status', 'Amount']);
-  finalData.push(['Parcels', 'Picked Up', props.overallStats.pickedUpParcels]);
+  finalData.push(['Statistics Overview (Parcels)', 'Picked Up', props.overallStats.pickedUpParcels]);
   finalData.push(['', 'Received / Awaiting', props.overallStats.awaitingParcels]);
   finalData.push(['', 'Overdue Parcels', props.overallStats.overdueParcels]);
   finalData.push(['', 'TOTAL UNITS (SYSTEM)', props.overallStats.totalParcels]);
   finalData.push([]);
 
-  if (recentParcels.length > 0) {
-    finalData.push(['RECENT PARCELS (Latest Activity)']);
-    finalData.push(['Date', 'Resident', 'Tracking No.', 'Current Status', 'Status History']);
-    recentParcels.forEach(p => {
-      const historyStr = p.statusHistory && p.statusHistory.length > 0 
-        ? p.statusHistory.map(h => `${h.status} (${formatDate(h.updatedAt)})`).join(' -> ') 
-        : '-';
-      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase(), historyStr]);
-    });
-    finalData.push(['TOTAL RECENT PARCELS', '', '', recentParcels.length]);
-    finalData.push([]);
-  }
-
-  if (overdueList.length > 0) {
-    finalData.push(['OVERDUE PARCELS (> 1 Day)']);
-    finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
-    overdueList.forEach(p => {
-      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
-    });
-    finalData.push(['TOTAL OVERDUE PARCELS', '', '', overdueList.length]);
-    finalData.push([]);
-  }
-
-  // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Parcels) ---
+  // Historical Summary (Parcels) - Moved before lists to match Print
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach(yData => {
-      finalData.push([`HISTORICAL MONTHLY SUMMARY (Parcels) - YEAR ${yData.year}`]);
+      finalData.push([`Historical Monthly Summary (Parcels) - Year ${yData.year}`]);
       finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue']);
       yData.months.forEach(h => {
         finalData.push([h.monthStr, h.received, h.pickedUp, h.overdue]);
@@ -340,43 +325,42 @@ const handleExportExcel = () => {
       finalData.push([]);
     });
   }
+
+  if (recentParcels.length > 0) {
+    finalData.push(['Recent Parcels (Latest Activity)']);
+    finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
+    recentParcels.forEach(p => {
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+    });
+    finalData.push(['TOTAL RECENT PARCELS', '', '', recentParcels.length]);
+    finalData.push([]);
+  }
+
+  if (overdueList.length > 0) {
+    finalData.push(['Overdue Parcels (> 1 Day)']);
+    finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
+    overdueList.forEach(p => {
+      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+    });
+    finalData.push(['TOTAL OVERDUE PARCELS', '', '', overdueList.length]);
+    finalData.push([]);
+  }
+
   mainSection++;
 
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. RESIDENT MANAGEMENT OVERVIEW`]);
+  finalData.push([`${mainSection}. Resident Management Overview`]);
   finalData.push(['CATEGORY', 'Status', 'Amount']);
-  finalData.push(['Residents', 'Active', stats.activeResidents]);
+  finalData.push(['Statistics Overview (Residents)', 'Active', stats.activeResidents]);
   finalData.push(['', 'Pending', stats.pendingResidents]);
   finalData.push(['', 'Inactive', stats.inactiveResidents]);
   finalData.push(['', 'TOTAL RESIDENTS', stats.activeResidents + stats.inactiveResidents]);
   finalData.push([]);
 
-  if (pending && pending.length > 0) {
-    finalData.push(['PENDING ACCOUNTS (Awaiting Verification)']);
-    finalData.push(['Name', 'Room No.', 'Email', 'Updated At']);
-    pending.forEach(r => {
-      finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
-    });
-    finalData.push(['TOTAL PENDING ACCOUNTS', '', '', pending.length]);
-    finalData.push([]);
-  }
-
-  if (topRes && topRes.length > 0) {
-    finalData.push(['RESIDENT RANKING (Top Leaders by Volume)']);
-    finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
-    let totalTopParcels = 0;
-    topRes.forEach((r, i) => {
-      totalTopParcels += parseInt(r.parcelCount || r.count || 0);
-      finalData.push([i + 1, r.fullName || r.name, r.roomNumber || r.room, r.parcelCount || r.count]);
-    });
-    finalData.push(['TOTAL PARCELS (Top Leaders)', '', '', totalTopParcels]);
-    finalData.push([]);
-  }
-
-  // --- NEW: HISTORICAL MONTHLY BREAKDOWN (Residents) ---
+  // Historical Summary (Residents) - Moved before lists
   if (residentHistory.value.length > 0) {
     residentHistory.value.forEach(yData => {
-      finalData.push([`HISTORICAL MONTHLY SUMMARY (Residents) - YEAR ${yData.year}`]);
+      finalData.push([`Historical Monthly Summary (Residents) - Year ${yData.year}`]);
       finalData.push(['Month (MM/YYYY)', 'Total Registered']);
       yData.months.forEach(h => {
         finalData.push([h.monthStr, h.joined]);
@@ -386,11 +370,33 @@ const handleExportExcel = () => {
     });
   }
 
+  if (pending && pending.length > 0) {
+    finalData.push(['Pending Accounts (Awaiting Verification)']);
+    finalData.push(['Name', 'Room No.', 'Email', 'Updated At']);
+    pending.forEach(r => {
+      finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
+    });
+    finalData.push(['TOTAL PENDING ACCOUNTS', '', '', pending.length]);
+    finalData.push([]);
+  }
+
+  if (topRes && topRes.length > 0) {
+    finalData.push(['Resident Ranking (Top Leaders by Volume)']);
+    finalData.push(['Rank', 'Name', 'Room No.', 'Parcel Count']);
+    let totalTopParcels = 0;
+    topRes.forEach((r, i) => {
+      totalTopParcels += parseInt(r.parcelCount || r.count || 0);
+      finalData.push([i + 1, r.fullName || r.name, r.room || r.roomNumber || '-', r.parcelCount || r.count]);
+    });
+    finalData.push(['TOTAL PARCELS (Top Leaders)', '', '', totalTopParcels]);
+    finalData.push([]);
+  }
+
   const ws = XLSX.utils.aoa_to_sheet(finalData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Dashboard Report");
+  XLSX.utils.book_append_sheet(wb, ws, "Summary Report");
 
-  ws['!cols'] = [{ wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 20 }];
+  ws['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 15 }];
   XLSX.writeFile(wb, `Dormitory_Dashboard_${new Date().toISOString().slice(0, 10)}.xlsx`);
 };
 
@@ -401,7 +407,7 @@ const handleExportPDF = () => {
   const topRes = props.topResidents;
   const recentParcels = props.parcels.slice(0, 10);
   const overdueList = overdueParcels.value;
-  const brandColor = [29, 53, 94]; // Navy Blue style
+  const brandColor = [29, 53, 94]; // Navy Blue style (#1D355E)
 
   let y = 20;
 
@@ -415,30 +421,34 @@ const handleExportPDF = () => {
   };
 
   const drawMainCategoryHeader = (text) => {
-    checkPage(20);
+    checkPage(25);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
     doc.rect(15, y - 6, 180, 10, 'F');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(255, 255, 255);
     doc.text(text, 105, y, { align: 'center' });
-    y += 12;
+    y += 15;
   };
 
   const drawSubHeader = (text) => {
-    checkPage(12);
+    checkPage(15);
+    // Left-accent border like Print style
+    doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
+    doc.rect(15, y - 4.5, 1.5, 6, 'F');
+    
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.text(text, 15, y);
-    y += 6;
+    doc.text(text, 19, y);
+    y += 8;
   };
 
   // Main Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(29, 53, 94);
-  doc.text("Dormitory Management System - Full Dashboard Report", 105, y, { align: 'center' });
+  doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
   y += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -448,63 +458,68 @@ const handleExportPDF = () => {
   doc.setDrawColor(29, 53, 94);
   doc.setLineWidth(0.5);
   doc.line(15, y, 195, y);
-  y += 12;
+  y += 15;
 
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
-    drawMainCategoryHeader("EXECUTIVE SUMMARY & KEY RATIOS");
+    drawMainCategoryHeader("Summary of dormitory performance");
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
     
-    // Grid style for KPIs
-    const kpiY = y;
+    // KPI Grid logic
     const boxW = 85;
     const boxH = 20;
 
-    const drawKPIBox = (label, value, x, py) => {
-      doc.setDrawColor(220, 220, 220);
+    const drawKPIBox = (label, value, subLabel, x, py) => {
+      doc.setDrawColor(226, 232, 240);
       doc.rect(x, py, boxW, boxH);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(value, x + 5, py + 8);
+      doc.setFontSize(12);
+      doc.text(value, x + boxW/2, py + 8, { align: 'center' });
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text(label, x + 5, py + 14);
+      doc.text(label, x + boxW/2, py + 12, { align: 'center' });
+      doc.setFontSize(7);
+      doc.text(subLabel, x + boxW/2, py + 16, { align: 'center' });
       doc.setTextColor(0, 0, 0);
     };
 
-    drawKPIBox("Parcel Clearing Rate", insights.pickupRate + "%", 15, y);
-    drawKPIBox("Staff Efficiency Rate", (100 - insights.staffBacklogRate) + "%", 110, y);
+    drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Parcels successfully picked up", 15, y);
+    drawKPIBox("Overdue inventory ratio", insights.overdueRate + "%", "Units exceeding 24h threshold", 110, y);
     y += boxH + 5;
-    drawKPIBox("Resident Verification", insights.verificationRate + "%", 15, y);
-    drawKPIBox("Avg. Time to Pickup", insights.avgLeadTime + " hrs", 110, y);
-    y += boxH + 8;
+    drawKPIBox("Staff processing load", insights.staffBacklogRate + "%", "Parcels awaiting intake verification", 15, y);
+    drawKPIBox("Resident verification", insights.verificationRate + "%", "Active versus total accounts", 110, y);
+    y += boxH + 10;
 
+    // Insights Box
+    doc.setFillColor(249, 250, 251); 
+    doc.setDrawColor(229, 231, 235);
+    doc.rect(15, y, 180, 25, 'FD');
     doc.setFont("helvetica", "bold");
-    doc.text("Operational Insights:", 15, y);
-    y += 5;
+    doc.setFontSize(10);
+    doc.text("Operational Analytics:", 20, y + 6);
+    y += 10;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(`Current operational health: ${insights.healthStatus}`, 15, y);
-    y += 5;
     if (insights.insights.length > 0) {
       insights.insights.forEach(msg => {
-        doc.text("• " + msg, 15, y);
+        doc.text("• " + msg, 20, y);
         y += 4;
       });
     } else {
-      doc.text("• No critical anomalies detected in the current activity flow.", 15, y);
+      doc.text("• Operation is flowing normally. No interventions required.", 20, y);
       y += 4;
     }
-    y += 10;
+    doc.text(`Current activity state: ${insights.healthStatus}`, 20, y);
+    y += 15;
   }
 
-  // --- 1. PARCEL MANAGEMENT OVERVIEW ---
-  drawMainCategoryHeader("1. PARCEL MANAGEMENT OVERVIEW");
+  // --- 1. Parcel Management Overview ---
+  drawMainCategoryHeader("1. Parcel Management Overview");
   
-  // 1.1 Parcel Statistics
+  // 1.1 Statistics
   drawSubHeader("Statistics Overview (Parcels)");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
@@ -515,41 +530,72 @@ const handleExportPDF = () => {
     { item: 'Overdue Parcels', val: props.overallStats.overdueParcels }
   ];
 
-  doc.setFillColor(245, 247, 250);
-  doc.rect(15, y - 5, 180, 8, 'F');
   doc.setFont("helvetica", "bold");
   doc.text("Status", 18, y); 
   doc.text("Amount", 160, y);
   
   doc.setDrawColor(180, 180, 180);
-  const parcelRowsCount = parcelStats.length + 1; // +1 for Total
-  doc.rect(15, y - 5, 180, (parcelRowsCount * 8) + 8);
+  const pRows = parcelStats.length + 1;
+  doc.rect(15, y - 5, 180, (pRows * 8) + 8);
   doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (parcelRowsCount * 8) + 8);
+  doc.line(155, y - 5, 155, y - 5 + (pRows * 8) + 8);
 
   y += 8;
   doc.setFont("helvetica", "normal");
   parcelStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    doc.setDrawColor(230, 230, 230);
-    doc.line(15, y + 2, 195, y + 2);
     y += 8;
   });
 
-  // Render Total row
   doc.setFont("helvetica", "bold");
   doc.text("TOTAL UNITS (SYSTEM)", 18, y);
   doc.text(props.overallStats.totalParcels.toString(), 190, y, { align: 'right' });
-  y += 10;
+  y += 15;
 
-  // 1.2 Recent Parcels
+  // 1.2 Historical Monthly Table (Parcels) - Moved before lists
+  if (parcelHistory.value.length > 0) {
+    parcelHistory.value.forEach((yData) => {
+      drawSubHeader(`Historical Monthly Summary (Parcels) - Year ${yData.year}`);
+      doc.setFillColor(245, 247, 250);
+      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.text("Month (MM/YYYY)", 17, y);
+      doc.text("RECEIVED", 85, y, { align: 'right' });
+      doc.text("PICKED UP", 140, y, { align: 'right' });
+      doc.text("OVERDUE", 190, y, { align: 'right' });
+
+      doc.setDrawColor(180, 180, 180);
+      const rowsCount = yData.months.length + 1;
+      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      
+      yData.months.forEach(h => {
+        checkPage(7);
+        doc.text(h.monthStr, 17, y);
+        doc.text(h.received.toString(), 85, y, { align: 'right' });
+        doc.text(h.pickedUp.toString(), 140, y, { align: 'right' });
+        doc.text(h.overdue.toString(), 190, y, { align: 'right' });
+        doc.line(15, y + 1, 195, y + 1);
+        y += 7;
+      });
+
+      doc.setFont("helvetica", "bold");
+      doc.text("TOTAL", 17, y);
+      doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
+      doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
+      doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
+      y += 15;
+    });
+  }
+
+  // 1.3 Recent Parcels
   if (recentParcels.length > 0) {
     drawSubHeader("Recent Parcels (Latest Activity)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
     doc.text("DATE", 17, y); 
     doc.text("RESIDENT", 47, y); 
     doc.text("TRACKING NO.", 97, y); 
@@ -564,85 +610,27 @@ const handleExportPDF = () => {
 
     y += 8;
     doc.setFont("helvetica", "normal");
-    recentParcels.forEach((p, idx) => {
+    recentParcels.forEach((p) => {
       doc.text(formatDate(p.updatedAt), 17, y);
       doc.text((p.residentName || '').substring(0, 18), 47, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
       doc.text((p.status || '').toUpperCase(), 163, y);
-      doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
-      
-      // Add status history in small text if exists
-      if (p.statusHistory && p.statusHistory.length > 0) {
-        y += 4;
-        doc.setFontSize(7);
-        doc.setTextColor(120, 120, 120);
-        const historyStr = "History: " + p.statusHistory.map(h => `${h.status}(${formatDate(h.updatedAt)})`).join(' -> ');
-        doc.text(historyStr.substring(0, 100), 47, y);
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      } else {
-        y += 8;
-      }
+      y += 8;
     });
 
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL RECENT PARCELS", 17, y);
     doc.text(recentParcels.length.toString(), 163, y);
-    y += 10;
+    y += 15;
   }
 
-  // 1.4 Historical Monthly Table (Parcels)
-  if (parcelHistory.value.length > 0) {
-    parcelHistory.value.forEach((yData, yIdx) => {
-      drawSubHeader(`Historical Monthly Summary (Parcels) - ${yData.year}`);
-      doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 5, 180, 8, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.text("MONTH (MM/YYYY)", 17, y);
-      doc.text("RECEIVED", 85, y, { align: 'right' });
-      doc.text("PICKED UP", 140, y, { align: 'right' });
-      doc.text("OVERDUE", 190, y, { align: 'right' });
-
-      doc.setDrawColor(180, 180, 180);
-      const rowsCount = yData.months.length + 1; // +1 for Total
-      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
-      y += 8;
-      doc.setFont("helvetica", "normal");
-      
-      yData.months.forEach(h => {
-        checkPage(7);
-        doc.text(h.monthStr, 17, y);
-        doc.text(h.received.toString(), 85, y, { align: 'right' });
-        doc.text(h.pickedUp.toString(), 140, y, { align: 'right' });
-        doc.text(h.overdue.toString(), 190, y, { align: 'right' });
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-        y += 7;
-      });
-
-      // Render Total row
-      doc.setFont("helvetica", "bold");
-      doc.text("TOTAL", 17, y);
-      doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
-      doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
-      doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
-      y += 7;
-      
-      if (yIdx < parcelHistory.value.length - 1) y += 5;
-    });
-    y += 10;
-  }
-  y += 15;
-
-  // 1.3 Overdue Parcels
+  // 1.4 Overdue Parcels
   if (overdueList.length > 0) {
     drawSubHeader("Overdue Parcels (> 1 Day)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
     doc.text("RECEIVED AT", 17, y); 
     doc.text("RESIDENT", 47, y); 
     doc.text("TRACKING NO.", 97, y); 
@@ -657,12 +645,11 @@ const handleExportPDF = () => {
 
     y += 8;
     doc.setFont("helvetica", "normal");
-    overdueList.forEach((p, idx) => {
+    overdueList.forEach((p) => {
       doc.text(formatDate(p.receiveAt || p.createdAt), 17, y);
       doc.text((p.residentName || '').substring(0, 18), 47, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 97, y);
       doc.text((p.status || '').toUpperCase(), 163, y);
-      doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
@@ -670,18 +657,18 @@ const handleExportPDF = () => {
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL OVERDUE PARCELS", 17, y);
     doc.text(overdueList.length.toString(), 163, y);
+    y += 15;
   }
-  y += 15;
 
-  // --- 2. RESIDENT MANAGEMENT OVERVIEW ---
-  drawMainCategoryHeader("2. RESIDENT MANAGEMENT OVERVIEW");
+  // --- 2. Resident Management Overview ---
+  drawMainCategoryHeader("2. Resident Management Overview");
   
-  // 2.1 Resident Statistics
+  // 2.1 Statistics
   drawSubHeader("Statistics Overview (Residents)");
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   
-  const residentStats = [
+  const resStats = [
     { item: 'Active', val: stats.activeResidents },
     { item: 'Pending', val: stats.pendingResidents },
     { item: 'Inactive', val: stats.inactiveResidents }
@@ -694,33 +681,61 @@ const handleExportPDF = () => {
   doc.text("Amount", 160, y);
   
   doc.setDrawColor(180, 180, 180);
-  const residentRowsCount = residentStats.length + 1; // +1 for Total
-  doc.rect(15, y - 5, 180, (residentRowsCount * 8) + 8);
+  const rRows = resStats.length + 1;
+  doc.rect(15, y - 5, 180, (rRows * 8) + 8);
   doc.line(15, y + 3, 195, y + 3);
-  doc.line(155, y - 5, 155, y - 5 + (residentRowsCount * 8) + 8);
+  doc.line(155, y - 5, 155, y - 5 + (rRows * 8) + 8);
 
   y += 8;
   doc.setFont("helvetica", "normal");
-  residentStats.forEach(row => {
+  resStats.forEach(row => {
     doc.text(row.item, 18, y);
     doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    doc.setDrawColor(230, 230, 230);
-    doc.line(15, y + 2, 195, y + 2);
     y += 8;
   });
 
   doc.setFont("helvetica", "bold");
   doc.text("TOTAL RESIDENTS", 18, y);
   doc.text((stats.activeResidents + stats.inactiveResidents).toString(), 190, y, { align: 'right' });
-  y += 10;
+  y += 15;
 
-  // 2.2 Pending Accounts
+  // 2.2 Historical Monthly Table (Residents) - Before lists
+  if (residentHistory.value.length > 0) {
+    residentHistory.value.forEach((yData) => {
+      drawSubHeader(`Historical Monthly Summary (Residents) - Year ${yData.year}`);
+      doc.setFillColor(245, 247, 250);
+      doc.rect(15, y - 5, 180, 8, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.text("Month (MM/YYYY)", 17, y);
+      doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
+
+      doc.setDrawColor(180, 180, 180);
+      const rowCount = yData.months.length + 1;
+      doc.rect(15, y - 5, 180, (rowCount * 7) + 8);
+      y += 8;
+      doc.setFont("helvetica", "normal");
+      
+      yData.months.forEach(h => {
+        checkPage(7);
+        doc.text(h.monthStr, 17, y);
+        doc.text(h.joined.toString(), 180, y, { align: 'right' });
+        doc.line(15, y + 1, 195, y + 1);
+        y += 7;
+      });
+
+      doc.setFont("helvetica", "bold");
+      doc.text("TOTAL", 17, y);
+      doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
+      y += 15;
+    });
+  }
+
+  // 2.3 Pending Accounts
   if (pending && pending.length > 0) {
     drawSubHeader("Pending Accounts (Awaiting Verification)");
     doc.setFillColor(245, 247, 250);
     doc.rect(15, y - 5, 180, 8, 'F');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
     doc.text("NAME", 17, y); 
     doc.text("ROOM", 72, y); 
     doc.text("EMAIL", 97, y); 
@@ -735,12 +750,11 @@ const handleExportPDF = () => {
 
     y += 8;
     doc.setFont("helvetica", "normal");
-    pending.forEach((res, idx) => {
+    pending.forEach((res) => {
       doc.text((res.fullName || '').substring(0, 25), 17, y);
       doc.text((res.roomNumber || '-'), 72, y);
       doc.text((res.email || '').substring(0, 30), 97, y);
       doc.text(formatDateTime(res.updateAt), 157, y);
-      doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
@@ -748,10 +762,10 @@ const handleExportPDF = () => {
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL PENDING ACCOUNTS", 17, y);
     doc.text(pending.length.toString(), 157, y);
-    y += 10;
+    y += 15;
   }
 
-  // 2.3 Resident Ranking
+  // 2.4 Resident Ranking
   if (topRes && topRes.length > 0) {
     drawSubHeader("Resident Ranking (Top Leaders by Volume)");
     doc.setFillColor(245, 247, 250);
@@ -771,62 +785,24 @@ const handleExportPDF = () => {
 
     y += 8;
     doc.setFont("helvetica", "normal");
-    let sumTopRank = 0;
+    let totalTop = 0;
     topRes.forEach((res, i) => {
-      sumTopRank += parseInt(res.parcelCount || res.count || 0);
+      totalTop += parseInt(res.parcelCount || res.count || 0);
       doc.text((i + 1).toString(), 22, y, { align: 'center' });
       doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
-      doc.text((res.roomNumber || res.room || '-'), 130, y, { align: 'right' });
+      doc.text((res.room || res.roomNumber || '-'), 130, y, { align: 'right' });
       doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
-      doc.setDrawColor(230, 230, 230);
       doc.line(15, y + 2, 195, y + 2);
       y += 8;
     });
 
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL PARCELS (Top Leaders)", 17, y);
-    doc.text(sumTopRank.toString(), 190, y, { align: 'right' });
-    y += 10;
+    doc.text(totalTop.toString(), 190, y, { align: 'right' });
   }
 
-  // 2.3 Historical Monthly Table (Residents)
-  if (residentHistory.value.length > 0) {
-    residentHistory.value.forEach((yData, yIdx) => {
-      drawSubHeader(`Historical Monthly Summary (Residents) - ${yData.year}`);
-      doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 5, 180, 8, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.text("MONTH (MM/YYYY)", 17, y);
-      doc.text("TOTAL REGISTERED", 180, y, { align: 'right' });
-
-      doc.setDrawColor(180, 180, 180);
-      const rowsCount = yData.months.length + 1; // +1 for Total
-      doc.rect(15, y - 5, 180, (rowsCount * 7) + 8);
-      y += 8;
-      doc.setFont("helvetica", "normal");
-      
-      yData.months.forEach(h => {
-        checkPage(7);
-        doc.text(h.monthStr, 17, y);
-        doc.text(h.joined.toString(), 180, y, { align: 'right' });
-        doc.setDrawColor(230, 230, 230);
-        doc.line(15, y + 2, 195, y + 2);
-        y += 7;
-      });
-
-      // Render Total row
-      doc.setFont("helvetica", "bold");
-      doc.text("TOTAL", 17, y);
-      doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
-      y += 7;
-      
-      if (yIdx < residentHistory.value.length - 1) y += 5;
-    });
-  }
-
-  doc.save(`Dormitory_Dashboard_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Dormitory_Summary_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
 };
-
 
 const handlePrintSummary = () => {
   window.print();
@@ -1123,7 +1099,7 @@ defineExpose({
                   <tr v-for="(res, idx) in topResidents" :key="idx">
                     <td>{{ idx + 1 }}</td>
                     <td>{{ res.fullName || res.name }}</td>
-                    <td>{{ res.roomNumber || res.room }}</td>
+                    <td>{{ res.room || res.roomNumber || '-' }}</td>
                     <td>{{ res.parcelCount || res.count }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
