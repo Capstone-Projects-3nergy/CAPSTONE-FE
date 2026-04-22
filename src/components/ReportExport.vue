@@ -31,7 +31,18 @@ const props = defineProps({
   members: {
     type: Array,
     default: () => []
+  },
+  selectedDate: {
+    type: String,
+    default: () => new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
   }
+})
+
+const displayDate = computed(() => {
+  if (!props.selectedDate) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const d = new Date(props.selectedDate);
+  if (isNaN(d.getTime())) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 })
 
 const formatDate = (dateStr) => {
@@ -46,12 +57,239 @@ const formatDateTime = (dateStr) => {
   return isNaN(d.getTime()) ? '-' : d.toLocaleString()
 }
 
+// Base date for calculations (end of selected day)
+const snapshotDate = computed(() => {
+  const d = props.selectedDate ? new Date(props.selectedDate) : new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+})
+
+// Helper to get parcel status at specific date
+const getStatusAtDate = (parcel, date) => {
+  if (!parcel.statusHistory || !Array.isArray(parcel.statusHistory) || parcel.statusHistory.length === 0) {
+    const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
+    return createdAt <= date ? (parcel.status || 'RECEIVED') : null;
+  }
+
+  // Find the last status update before or on the target date
+  const validHistory = parcel.statusHistory
+    .map(h => ({ ...h, ts: new Date(h.timestamp || h.updatedAt || h.createdAt || h.date) }))
+    .filter(h => h.ts <= date)
+    .sort((a, b) => b.ts - a.ts);
+
+  if (validHistory.length > 0) return validHistory[0].status;
+  
+  // If no history before date, check if it was created before date
+  const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
+  return createdAt <= date ? 'RECEIVED' : null;
+}
+
+// Calculate Daily Activity Stats (What happened ON the selected date)
+const dailyStats = computed(() => {
+  const dateStr = props.selectedDate || new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+  const targetDate = new Date(dateStr);
+  const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+
+  const res = {
+    received: 0,
+    pickedUp: 0,
+    overdueToday: 0, // Items that became overdue on this day? No, usually just total currently overdue on this day.
+    joined: 0,
+    verified: 0
+  };
+
+  props.parcels.forEach(p => {
+    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+    if (arrivalDate >= startOfDay && arrivalDate <= endOfDay) {
+      res.received++;
+    }
+
+    let isPickedUpOnDay = false;
+    if (p.statusHistory && Array.isArray(p.statusHistory)) {
+      isPickedUpOnDay = p.statusHistory.some(h => {
+        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
+        const ts = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
+        return (s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startOfDay && ts <= endOfDay);
+      });
+    }
+
+    // Fallback: if not found in history, check current status and last update time
+    if (!isPickedUpOnDay) {
+      const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
+      const ts = new Date(p.updatedAt || p.date);
+      if ((s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startOfDay && ts <= endOfDay)) {
+        isPickedUpOnDay = true;
+      }
+    }
+
+    if (isPickedUpOnDay) res.pickedUp++;
+  });
+
+  props.members.forEach(m => {
+    const joinDate = new Date(m.createdAt || m.updateAt);
+    if (joinDate >= startOfDay && joinDate <= endOfDay) {
+      res.joined++;
+      if (m.status === 'active' || m.status === 'Verified') res.verified++;
+    }
+  });
+
+  return res;
+});
+
+// Calculate Yearly Stats for the year of selectedDate (for KPI Summary)
+const yearlyStats = computed(() => {
+  const date = props.selectedDate ? new Date(props.selectedDate) : new Date();
+  const year = date.getFullYear();
+  const startOfYear = new Date(year, 0, 1, 0, 0, 0, 0);
+  const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
+
+  const res = {
+    total: 0,
+    pickedUp: 0,
+    awaiting: 0,
+    overdue: 0,
+    waitingForStaff: 0,
+    activeResidents: 0,
+    totalResidents: 0,
+    totalLeadTimeHours: 0,
+    completedCount: 0
+  };
+
+  props.parcels.forEach(p => {
+    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+    if (arrivalDate >= startOfYear && arrivalDate <= endOfYear) {
+      res.total++;
+      
+      // Check status as of end of year (or today if year is current)
+      const limit = endOfYear > new Date() ? new Date() : endOfYear;
+      const status = getStatusAtDate(p, limit);
+      if (!status) return;
+
+      const s = status.toUpperCase().replace(/_/g, ' ');
+      if (s.includes('PICKED UP') || s.includes('TAKEN')) {
+        res.pickedUp++;
+        
+        // Lead time calculation
+        if (p.statusHistory) {
+          const receiveEvent = p.statusHistory.find(h => ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase()));
+          const pickupEvent = p.statusHistory.find(h => ['PICKED_UP', 'TAKEN'].includes(h.status?.toUpperCase()));
+          if (receiveEvent && pickupEvent) {
+            const start = new Date(receiveEvent.timestamp || receiveEvent.updatedAt);
+            const end = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
+            if (end > start) {
+              res.totalLeadTimeHours += (end - start) / (1000 * 60 * 60);
+              res.completedCount++;
+            }
+          }
+        }
+      } else if (s.includes('WAITING FOR STAFF') || s.includes('STAFF')) {
+        res.waitingForStaff++;
+        res.awaiting++;
+      } else {
+        const overdueThresholdMs = 24 * 60 * 60 * 1000;
+        if ((limit - arrivalDate) > overdueThresholdMs) {
+          res.overdue++;
+        } else {
+          res.awaiting++;
+        }
+      }
+    }
+  });
+
+  props.members.forEach(m => {
+    const joinDate = new Date(m.createdAt || m.updateAt);
+    if (joinDate >= startOfYear && joinDate <= endOfYear) {
+      res.totalResidents++;
+      if (m.status === 'active' || m.status === 'Verified') res.activeResidents++;
+    }
+  });
+
+  return res;
+});
+
+// Calculate Dynamic Stats for the Snapshot Date (Cumulative up to that date)
+const dynamicStats = computed(() => {
+  const date = snapshotDate.value;
+  const result = {
+    total: 0,
+    pickedUp: 0,
+    awaiting: 0,
+    overdue: 0,
+    waitingForStaff: 0,
+    activeResidents: 0,
+    pendingResidents: 0,
+    inactiveResidents: 0
+  };
+
+  // Parcel Stats at Date
+  props.parcels.forEach(p => {
+    const status = getStatusAtDate(p, date);
+    if (!status) return;
+
+    result.total++;
+    const s = status.toUpperCase().replace(/_/g, ' ');
+    
+    if (s.includes('PICKED UP') || s.includes('TAKEN')) {
+      result.pickedUp++;
+    } else if (s.includes('WAITING FOR STAFF') || s.includes('STAFF')) {
+      result.waitingForStaff++;
+      result.awaiting++;
+    } else {
+      // Check if it's overdue at that point in time (matching HomePageStaff logic)
+      const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
+      const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000;
+      if ((date - receiveDate) > overdueThresholdMs) {
+        result.overdue++;
+      } else {
+        result.awaiting++;
+      }
+    }
+  });
+
+  // Resident Stats at Date
+  props.members.forEach(m => {
+    const joinDate = new Date(m.createdAt || m.updateAt);
+    if (joinDate > date) return;
+
+    if (m.status === 'active' || m.status === 'Verified') result.activeResidents++;
+    else if (m.status === 'pending') result.pendingResidents++;
+    else result.inactiveResidents++;
+  });
+
+  return result;
+});
+
+// Filtered Lists for the Snapshot Date
+const filteredParcels = computed(() => {
+  const date = snapshotDate.value;
+  return props.parcels
+    .filter(p => new Date(p.createdAt || p.receiveAt || p.date) <= date)
+    .map(p => ({ ...p, currentStatus: getStatusAtDate(p, date) }))
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+});
+
+const filteredOverdue = computed(() => {
+  const date = snapshotDate.value;
+  const overdueThresholdMs = 24 * 60 * 60 * 1000;
+  return filteredParcels.value.filter(p => {
+    const s = (p.currentStatus || '').toUpperCase();
+    // Allow 'Received', 'Waiting', 'Notified', or 'Overdue' statuses to be in overdue list
+    // Exclude Picked Up and Waiting for Staff (matching HomePageStaff logic)
+    if (s.includes('PICKED UP') || s.includes('TAKEN') || s.includes('STAFF')) return false;
+    
+    const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
+    return (date - receiveDate) > overdueThresholdMs;
+  });
+});
+
 // Compute Historical Summaries from all data
 const parcelHistory = computed(() => {
   const groups = {};
+  const limitDate = snapshotDate.value;
 
   const addEvent = (date, type) => {
-    if (!date || isNaN(date.getTime())) return;
+    if (!date || isNaN(date.getTime()) || date > limitDate) return;
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
 
@@ -87,46 +325,35 @@ const parcelHistory = computed(() => {
   };
 
   props.parcels.forEach(p => {
-    if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
-      // Use status history for accurate event timing (supports Waiting/Received transition)
-      p.statusHistory.forEach(h => {
-        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
-        const d = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
-        
-        const isWaiting = s.includes('WAITING') || s.includes('RECEIVED') || s === 'WAIT' || s.includes('NOTIFIED');
-        const isPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
-        const isOverdue = s.includes('OVERDUE');
-
-        if (isWaiting) {
-          addEvent(d, 'received');
-        } else if (isPickedUp) {
-          addEvent(d, 'pickedUp');
-        } else if (isOverdue) {
-          addEvent(d, 'overdue');
-        }
-      });
-    } else {
-      // Fallback to basic logic for backward compatibility
-      const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
-
-      // Time-based Overdue Detection (Consistent with Dashboard logic)
-      const now = new Date();
-      const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
-      const isWaitingForStaff = s.includes('WAITING FOR STAFF') || s.includes('STAFF');
-      const isPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
-      const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000;
-      const isOverdueByTime = (now - arrivalDate) > overdueThresholdMs && !isPickedUp && !isWaitingForStaff;
-
+    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+    if (!isNaN(arrivalDate.getTime()) && arrivalDate <= limitDate) {
       addEvent(arrivalDate, 'received');
+    }
 
-      if (isPickedUp) {
-        const pickDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
-        addEvent(pickDate, 'pickedUp');
+    // Check when it was picked up
+    if (p.statusHistory && Array.isArray(p.statusHistory)) {
+      const pickupEvent = p.statusHistory.find(h => {
+        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
+        return s.includes('PICKED UP') || s.includes('TAKEN');
+      });
+      if (pickupEvent) {
+        const d = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
+        if (d <= limitDate) addEvent(d, 'pickedUp');
       }
+    }
+    // Calculate if it became overdue before limitDate
+    const overdueThresholdMs = 24 * 60 * 60 * 1000;
+    const becomesOverdueAt = new Date(arrivalDate.getTime() + overdueThresholdMs);
+    
+    if (becomesOverdueAt <= limitDate) {
+      // Check if it was already picked up or in staff verification before it became overdue
+      const statusAtOverdue = getStatusAtDate(p, becomesOverdueAt);
+      const s = (statusAtOverdue || '').toUpperCase();
+      const isAlreadyPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
+      const isStaff = s.includes('STAFF');
       
-      if (s.includes('OVERDUE') || isOverdueByTime) {
-        const overdueDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
-        addEvent(overdueDate, 'overdue');
+      if (!isAlreadyPickedUp && !isStaff) {
+        addEvent(becomesOverdueAt, 'overdue');
       }
     }
   });
@@ -141,9 +368,10 @@ const parcelHistory = computed(() => {
 
 const residentHistory = computed(() => {
   const groups = {};
+  const limitDate = snapshotDate.value;
   props.members.forEach(m => {
-    const d = new Date(m.updateAt || m.createdAt);
-    if (isNaN(d.getTime())) return;
+    const d = new Date(m.createdAt || m.updateAt);
+    if (isNaN(d.getTime()) || d > limitDate) return;
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
     
@@ -161,147 +389,81 @@ const residentHistory = computed(() => {
     .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
 });
 
-// Compute Business Insights for Executive Reporting
+// Compute Business Insights for Executive Reporting (YEARLY performance)
 const businessInsights = computed(() => {
-  const os = props.overallStats || {}
-  const total = os.totalParcels || 0
+  const ys = yearlyStats.value;
+  const total = ys.total;
   
   if (total === 0) return null;
 
-  // calc rates
-  const pickupRate = ((os.pickedUpParcels || 0) / total) * 100;
-  const awaitingRate = ((os.awaitingParcels || 0) / total) * 100;
+  const pickupRate = (ys.pickedUp / total) * 100;
+  const overdueRate = (ys.overdue / total) * 100;
+  const staffBacklogRate = (ys.waitingForStaff / total) * 100;
   
-  // Align overdue calculation with dashboard logic (excluding Waiting for Staff)
-  const overdueCount = overdueParcels.value.length;
-  const overdueRate = (overdueCount / total) * 100;
+  const totalRes = ys.totalResidents || 1;
+  const verificationRate = (ys.activeResidents / totalRes) * 100;
   
-  const staffBacklogRate = ((os.waitingForStaffParcels || 0) / total) * 100;
-  
-  // Resident Verification Insights
-  const s = props.stats || {}
-  const totalRes = (s.activeResidents || 0) + (s.pendingResidents || 0) + (s.inactiveResidents || 0) || 1;
-  const verificationRate = ((s.activeResidents || 0) / totalRes) * 100;
-  
-  // Processing Lead Time (Received -> Picked Up)
-  let totalLeadTimeHours = 0;
-  let completedCount = 0;
-  
-  props.parcels.forEach(p => {
-    if (p.statusHistory && Array.isArray(p.statusHistory)) {
-      const receiveEvent = p.statusHistory.find(h => 
-        ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase())
-      );
-      const pickupEvent = p.statusHistory.find(h => 
-        ['PICKED_UP', 'TAKEN'].includes(h.status?.toUpperCase())
-      );
-      
-      if (receiveEvent && pickupEvent) {
-        const start = new Date(receiveEvent.timestamp || receiveEvent.updatedAt);
-        const end = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
-        if (end > start) {
-          totalLeadTimeHours += (end - start) / (1000 * 60 * 60);
-          completedCount++;
-        }
-      }
-    }
-  });
-  
-  const avgLeadTime = completedCount > 0 ? (totalLeadTimeHours / completedCount).toFixed(1) : '-';
+  const avgLeadTime = ys.completedCount > 0 ? (ys.totalLeadTimeHours / ys.completedCount).toFixed(1) : '-';
 
-  // Operational Appraisal
   let healthStatus = 'STABLE';
   let insights = [];
   
-  // 1. Storage Integrity (Overdue)
+  const yearStr = props.selectedDate ? new Date(props.selectedDate).getFullYear() : new Date().getFullYear();
+
   if (overdueRate > 15) {
     healthStatus = 'CRITICAL BACKLOG';
-    insights.push(`Storage Efficiency Alert: ${overdueRate.toFixed(1)}% of inventory is overdue, risking space saturation.`);
-  } else if (overdueRate > 5) {
-    insights.push(`Monitor Overdue: ${overdueCount} items are currently exceeding the 24h pickup window.`);
+    insights.push(`[${yearStr} Year] Efficiency Alert: ${overdueRate.toFixed(1)}% yearly inventory became overdue.`);
   }
   
-  // 2. Staff Processing Speed
   if (staffBacklogRate > 10) {
-    healthStatus = healthStatus === 'STABLE' ? 'OPERATIONAL DELAY' : healthStatus;
-    insights.push(`Processing Bottleneck: Staff intake backlog is currently at ${staffBacklogRate.toFixed(1)}%.`);
-  } else if (staffBacklogRate > 0) {
-    insights.push(`Staff processing is maintaining an active flow (${staffBacklogRate.toFixed(1)}% pending intake).`);
+    insights.push(`[${yearStr} Year] Note: Intake verification backlog average is ${staffBacklogRate.toFixed(1)}%.`);
   }
 
-  // 3. Resident Pickup Engagement
   if (pickupRate > 80) {
-    insights.push("High Efficiency: Resident pickup response is excellent for this reporting period.");
-  } else if (pickupRate < 40 && total > 20) {
-    insights.push("Engagement Warning: Low clearing rate detected. Residents may be unaware of pending items.");
-  }
-
-  // 4. Verification Health
-  if (verificationRate < 80) {
-    insights.push(`Administrative Note: resident verification health is at ${verificationRate.toFixed(1)}%. Recommend vetting pending accounts.`);
+    insights.push(`[${yearStr} Year] High Performance: Yearly pickup response is excellent.`);
   }
 
   return {
     pickupRate: pickupRate.toFixed(1),
-    awaitingRate: awaitingRate.toFixed(1),
     overdueRate: overdueRate.toFixed(1),
-    overdueCount,
     staffBacklogRate: staffBacklogRate.toFixed(1),
     verificationRate: verificationRate.toFixed(1),
     avgLeadTime,
     healthStatus,
-    insights
+    insights,
+    year: yearStr
   };
 });
 
-// Compute overdue parcels based on dashboard logic (> 1 days)
-const overdueParcels = computed(() => {
-  if (!props.parcels) return []
-  const now = new Date()
-  const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000
-  return props.parcels.filter(p => {
-    const s = (p.status || '').toUpperCase()
-    // Define intake/active statuses that can become overdue
-    // Dashboard Logic: RECEIVED, WAITING, WAIT, NOTIFIED, OVERDUE are overdue candidates
-    // EXCLUDE: WAITING_FOR_STAFF
-    const isOverdueCandidate = ['RECEIVED', 'WAITING', 'WAIT', 'NOTIFIED', 'OVERDUE'].some(status => s.includes(status))
-    const isPickedUp = s.includes('PICKED') || s.includes('TAKEN')
-    const isWaitingForStaff = s.includes('WAITING_FOR_STAFF') || s.includes('STAFF')
-    
-    if (!isOverdueCandidate || isPickedUp || isWaitingForStaff) return false
-    
-    const date = new Date(p.receiveAt || p.createdAt || p.updatedAt)
-    if (isNaN(date.getTime())) return false
-    return (now - date) > overdueThresholdMs
-  }).sort((a, b) => new Date(b.receiveAt || b.createdAt) - new Date(a.receiveAt || a.createdAt))
-})
+// (Removed overdueParcels computed property in favor of dynamic filteredOverdue)
 
 const handleExportExcel = () => {
-  const stats = props.stats;
-  const pending = props.pendingResidents;
+  const stats = dailyStats.value;
+  const snapshot = dynamicStats.value;
+  const overdueList = filteredOverdue.value;
+  const pending = props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= snapshotDate.value);
   const topRes = props.topResidents;
-  const recentParcels = props.parcels.slice(0, 10);
-  const overdueList = overdueParcels.value;
+  const recentParcels = filteredParcels.value.slice(0, 10);
 
   // 1. MAIN FILE HEADER
   const finalData = [
     ['Dormitory Management System - Summary Report'],
-    ['Report Issue Date:', new Date().toLocaleString()],
+    ['Report Issue Date:', displayDate.value],
     []
   ];
 
   const insights = businessInsights.value;
   if (insights) {
-    finalData.push(['Summary of dormitory performance']);
-    finalData.push(['KPI METRIC', 'VALUE (%)', 'OPINION / INSIGHT']);
-    finalData.push(['Clearing efficiency', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
-    finalData.push(['Overdue inventory ratio', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Stable']);
-    finalData.push(['Staff processing load', insights.staffBacklogRate + '%', insights.staffBacklogRate > 10 ? 'Bottleneck' : 'Excellent']);
-    finalData.push(['Resident verification', insights.verificationRate + '%', '-']);
-    finalData.push(['Average Pickup Turnaround', insights.avgLeadTime + ' Hours', 'Average per unit']);
+    finalData.push([`Performance Summary for Full Year ${insights.year}`]);
+    finalData.push(['KPI METRIC', 'YEARLY VALUE (%)', 'OPINION / INSIGHT']);
+    finalData.push(['Yearly clearing efficiency', insights.pickupRate + '%', insights.pickupRate > 80 ? 'Optimal' : 'Standard']);
+    finalData.push(['Yearly overdue ratio', insights.overdueRate + '%', insights.overdueRate > 15 ? 'CRITICAL' : 'Stable']);
+    finalData.push(['Yearly staff workload', insights.staffBacklogRate + '%', insights.staffBacklogRate > 10 ? 'Bottleneck' : 'Excellent']);
+    finalData.push(['Yearly resident verification', insights.verificationRate + '%', '-']);
+    finalData.push(['Average Pickup Turnaround', insights.avgLeadTime + ' Hours', 'Average for ' + insights.year]);
     finalData.push(['Operational Status', '', insights.healthStatus]);
     
-    finalData.push(['Operational Analytics:']);
+    finalData.push(['Yearly Analytics:']);
     if (insights.insights.length > 0) {
       insights.insights.forEach(msg => {
         finalData.push(['', '', '• ' + msg]);
@@ -315,12 +477,12 @@ const handleExportExcel = () => {
   let mainSection = 1;
 
   // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. Parcel Management Overview`]);
-  finalData.push(['CATEGORY', 'Status', 'Amount']);
-  finalData.push(['Statistics Overview (Parcels)', 'Picked Up', props.overallStats.pickedUpParcels]);
-  finalData.push(['', 'Received / Awaiting', props.overallStats.awaitingParcels]);
-  finalData.push(['', 'Overdue Parcels', props.overallStats.overdueParcels]);
-  finalData.push(['', 'TOTAL UNITS (SYSTEM)', props.overallStats.totalParcels]);
+  finalData.push([`${mainSection}. Parcel Management Overview (Daily Activity)`]);
+  finalData.push(['Daily Statistics (Parcels)', 'Daily Status (Activity)', 'Amount']);
+  finalData.push(['', 'Received', stats.received]);
+  finalData.push(['', 'Picked Up', stats.pickedUp]);
+  finalData.push(['', 'Overdue', overdueList.length]);
+  finalData.push(['', 'Total', snapshot.total]);
   finalData.push([]);
 
   // Historical Summary (Parcels) - Moved before lists to match Print
@@ -331,7 +493,7 @@ const handleExportExcel = () => {
       yData.months.forEach(h => {
         finalData.push([h.monthStr, h.received, h.pickedUp, h.overdue]);
       });
-      finalData.push(['TOTAL', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
+      finalData.push(['Total', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
       finalData.push([]);
     });
   }
@@ -340,9 +502,9 @@ const handleExportExcel = () => {
     finalData.push(['Recent Parcels (Latest Activity)']);
     finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
     recentParcels.forEach(p => {
-      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)]);
     });
-    finalData.push(['TOTAL RECENT PARCELS', '', '', recentParcels.length]);
+    finalData.push(['Total recent parcels', '', '', recentParcels.length]);
     finalData.push([]);
   }
 
@@ -350,21 +512,22 @@ const handleExportExcel = () => {
     finalData.push(['Overdue Parcels (> 1 Day)']);
     finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
     overdueList.forEach(p => {
-      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, p.status?.toUpperCase()]);
+      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)]);
     });
-    finalData.push(['TOTAL OVERDUE PARCELS', '', '', overdueList.length]);
+    finalData.push(['Total overdue parcels', '', '', overdueList.length]);
     finalData.push([]);
   }
 
   mainSection++;
 
   // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
-  finalData.push([`${mainSection}. Resident Management Overview`]);
-  finalData.push(['CATEGORY', 'Status', 'Amount']);
-  finalData.push(['Statistics Overview (Residents)', 'Active', stats.activeResidents]);
-  finalData.push(['', 'Pending', stats.pendingResidents]);
-  finalData.push(['', 'Inactive', stats.inactiveResidents]);
-  finalData.push(['', 'TOTAL RESIDENTS', stats.activeResidents + stats.inactiveResidents]);
+  finalData.push([`${mainSection}. Resident Management Overview (Daily Activity)`]);
+  finalData.push(['Daily Statistics (Residents)', 'Daily Status (Activity)', 'Amount']);
+  finalData.push(['', 'Joined', stats.joined]);
+  finalData.push(['', 'Verified', stats.verified]);
+  finalData.push(['', 'Active Members', snapshot.activeResidents]);
+  finalData.push(['', 'Pending Residents', snapshot.pendingResidents]);
+  finalData.push(['', 'Inactive Residents', snapshot.inactiveResidents]);
   finalData.push([]);
 
   // Historical Summary (Residents) - Moved before lists
@@ -375,7 +538,7 @@ const handleExportExcel = () => {
       yData.months.forEach(h => {
         finalData.push([h.monthStr, h.joined]);
       });
-      finalData.push(['TOTAL', yData.totalJoined]);
+      finalData.push(['Total', yData.totalJoined]);
       finalData.push([]);
     });
   }
@@ -386,7 +549,7 @@ const handleExportExcel = () => {
     pending.forEach(r => {
       finalData.push([r.fullName, r.roomNumber, r.email, formatDateTime(r.updateAt)]);
     });
-    finalData.push(['TOTAL PENDING ACCOUNTS', '', '', pending.length]);
+    finalData.push(['Total pending accounts', '', '', pending.length]);
     finalData.push([]);
   }
 
@@ -398,7 +561,7 @@ const handleExportExcel = () => {
       totalTopParcels += parseInt(r.parcelCount || r.count || 0);
       finalData.push([i + 1, r.fullName || r.name, r.room || r.roomNumber || '-', r.parcelCount || r.count]);
     });
-    finalData.push(['TOTAL PARCELS (Top Leaders)', '', '', totalTopParcels]);
+    finalData.push(['Total parcels (Top Leaders)', '', '', totalTopParcels]);
     finalData.push([]);
   }
 
@@ -412,11 +575,12 @@ const handleExportExcel = () => {
 
 const handleExportPDF = () => {
   const doc = new jsPDF();
-  const stats = props.stats;
-  const pending = props.pendingResidents;
+  const stats = dailyStats.value;
+  const snapshot = dynamicStats.value;
+  const overdueList = filteredOverdue.value;
+  const pending = props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= snapshotDate.value);
   const topRes = props.topResidents;
-  const recentParcels = props.parcels.slice(0, 10);
-  const overdueList = overdueParcels.value;
+  const recentParcels = filteredParcels.value.slice(0, 10);
   const brandColor = [29, 53, 94]; // Navy Blue style (#1D355E)
 
   let y = 20;
@@ -463,7 +627,7 @@ const handleExportPDF = () => {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
-  doc.text(`Report Issue Date: ${new Date().toLocaleString()}`, 105, y, { align: 'center' });
+  doc.text(`Report Issue Date: ${displayDate.value}`, 105, y, { align: 'center' });
   y += 5;
   doc.setDrawColor(29, 53, 94);
   doc.setLineWidth(0.4);
@@ -473,7 +637,7 @@ const handleExportPDF = () => {
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
-    drawMainCategoryHeader("Summary of dormitory performance");
+    drawMainCategoryHeader(`Performance Summary for Full Year ${insights.year}`);
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     
@@ -496,11 +660,11 @@ const handleExportPDF = () => {
       doc.setTextColor(0, 0, 0);
     };
 
-    drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Parcels successfully picked up", 15, y);
-    drawKPIBox("Overdue inventory ratio", insights.overdueRate + "%", "Units exceeding 24h threshold", 110, y);
+    drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Annual pickup performance", 15, y);
+    drawKPIBox("Overdue ratio", insights.overdueRate + "%", "Annual overdue percentage", 110, y);
     y += boxH + 4;
-    drawKPIBox("Staff processing load", insights.staffBacklogRate + "%", "Parcels awaiting intake verification", 15, y);
-    drawKPIBox("Resident verification", insights.verificationRate + "%", "Active versus total accounts", 110, y);
+    drawKPIBox("Staff load", insights.staffBacklogRate + "%", "Annual average intake backlog", 15, y);
+    drawKPIBox("Resident verification", insights.verificationRate + "%", "Annual verification health", 110, y);
     y += boxH + 8;
 
     // Insights Box
@@ -509,7 +673,7 @@ const handleExportPDF = () => {
     doc.rect(15, y, 180, 22, 'FD');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.text("Operational Analytics:", 20, y + 5);
+    doc.text("Yearly Analytics:", 20, y + 5);
     y += 8;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -519,7 +683,7 @@ const handleExportPDF = () => {
         y += 3.5;
       });
     } else {
-      doc.text("• Operation is flowing normally. No interventions required.", 20, y);
+      doc.text("• Annual operation is flowing normally.", 20, y);
       y += 3.5;
     }
     doc.text(`Current activity state: ${insights.healthStatus}`, 20, y);
@@ -527,21 +691,21 @@ const handleExportPDF = () => {
   }
 
   // --- 1. Parcel Management Overview ---
-  drawMainCategoryHeader("1. Parcel Management Overview");
+  drawMainCategoryHeader("1. Parcel Management Overview (Daily)");
   
   // 1.1 Statistics
-  drawSubHeader("Statistics Overview (Parcels)");
+  drawSubHeader("Statistics Overview (Daily Parcels)");
   doc.setFontSize(8);
   doc.setTextColor(0, 0, 0);
   
   const parcelStats = [
-    { item: 'Picked Up', val: props.overallStats.pickedUpParcels },
-    { item: 'Received / Awaiting', val: props.overallStats.awaitingParcels },
-    { item: 'Overdue Parcels', val: props.overallStats.overdueParcels }
+    { item: 'Received', val: stats.received },
+    { item: 'Picked Up', val: stats.pickedUp },
+    { item: 'Overdue', val: overdueList.length }
   ];
 
   doc.setFont("helvetica", "bold");
-  doc.text("Status", 18, y); 
+  doc.text("Daily Status (Activity)", 18, y); 
   doc.text("Amount", 160, y);
   
   doc.setDrawColor(180, 180, 180);
@@ -559,8 +723,8 @@ const handleExportPDF = () => {
   });
 
   doc.setFont("helvetica", "bold");
-  doc.text("TOTAL UNITS (SYSTEM)", 18, y);
-  doc.text(props.overallStats.totalParcels.toString(), 190, y, { align: 'right' });
+  doc.text("Total", 18, y);
+  doc.text(snapshot.total.toString(), 190, y, { align: 'right' });
   y += 12;
 
   // 1.2 Historical Monthly Table (Parcels) - Moved before lists
@@ -592,7 +756,7 @@ const handleExportPDF = () => {
       });
 
       doc.setFont("helvetica", "bold");
-      doc.text("TOTAL", 17, y);
+      doc.text("Total", 17, y);
       doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
       doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
       doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
@@ -626,13 +790,13 @@ const handleExportPDF = () => {
       doc.text(formatDate(p.updatedAt), 17, y);
       doc.text((p.residentName || '').substring(0, 18), 45, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
-      doc.text((p.status || '').toUpperCase(), 160, y);
+      doc.text((p.currentStatus || p.status || ''), 160, y);
       doc.line(15, y + 1.5, 195, y + 1.5);
       y += 7;
     });
 
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL RECENT PARCELS", 17, y);
+    doc.text("Total recent parcels", 17, y);
     doc.text(recentParcels.length.toString(), 160, y);
     y += 12;
   }
@@ -663,35 +827,35 @@ const handleExportPDF = () => {
       doc.text(formatDate(p.receiveAt || p.createdAt), 17, y);
       doc.text((p.residentName || '').substring(0, 18), 45, y);
       doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
-      doc.text((p.status || '').toUpperCase(), 160, y);
+      doc.text((p.currentStatus || p.status || ''), 160, y);
       doc.line(15, y + 1.5, 195, y + 1.5);
       y += 7;
     });
 
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL OVERDUE PARCELS", 17, y);
+    doc.text("Total overdue parcels", 17, y);
     doc.text(overdueList.length.toString(), 160, y);
     y += 12;
   }
 
   // --- 2. Resident Management Overview ---
-  drawMainCategoryHeader("2. Resident Management Overview");
+  drawMainCategoryHeader("2. Resident Management Overview (Daily)");
   
   // 2.1 Statistics
-  drawSubHeader("Statistics Overview (Residents)");
+  drawSubHeader("Statistics Overview (Daily Residents)");
   doc.setFontSize(8);
   doc.setTextColor(0, 0, 0);
   
   const resStats = [
-    { item: 'Active', val: stats.activeResidents },
-    { item: 'Pending', val: stats.pendingResidents },
-    { item: 'Inactive', val: stats.inactiveResidents }
+    { item: 'Joined', val: stats.joined },
+    { item: 'Verified', val: stats.verified },
+    { item: 'Total Active', val: snapshot.activeResidents }
   ];
 
   doc.setFillColor(245, 247, 250);
   doc.rect(15, y - 4, 180, 7, 'F');
   doc.setFont("helvetica", "bold");
-  doc.text("Status", 18, y + 1); 
+  doc.text("Daily Status (Activity)", 18, y + 1); 
   doc.text("Amount", 160, y + 1);
   
   doc.setDrawColor(180, 180, 180);
@@ -709,8 +873,8 @@ const handleExportPDF = () => {
   });
 
   doc.setFont("helvetica", "bold");
-  doc.text("TOTAL RESIDENTS", 18, y);
-  doc.text((stats.activeResidents + stats.inactiveResidents).toString(), 190, y, { align: 'right' });
+  doc.text("Cumulative Pending", 18, y);
+  doc.text(snapshot.pendingResidents.toString(), 190, y, { align: 'right' });
   y += 12;
 
   // 2.2 Historical Monthly Table (Residents) - Before lists
@@ -738,7 +902,7 @@ const handleExportPDF = () => {
       });
 
       doc.setFont("helvetica", "bold");
-      doc.text("TOTAL", 17, y);
+      doc.text("Total", 17, y);
       doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
       y += 12;
     });
@@ -776,7 +940,7 @@ const handleExportPDF = () => {
     });
 
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL PENDING ACCOUNTS", 17, y);
+    doc.text("Total pending accounts", 17, y);
     doc.text(pending.length.toString(), 155, y);
     y += 12;
   }
@@ -815,7 +979,7 @@ const handleExportPDF = () => {
     });
 
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL PARCELS (Top Leaders)", 17, y);
+    doc.text("Total parcels (Top Leaders)", 17, y);
     doc.text(totalTop.toString(), 190, y, { align: 'right' });
   }
 
@@ -848,77 +1012,77 @@ defineExpose({
           <td>
             <div class="print-header">
               <h1>Dormitory Management System - Summary Report</h1>
-              <p class="text-gray-600">Report Issue Date: {{ new Date().toLocaleString() }}</p>
+              <p class="text-gray-600">Report Issue Date: {{ displayDate }}</p>
             </div>
 
             <!-- --- PERFORMANCE SUMMARY SECTION --- -->
             <div v-if="businessInsights" class="print-section">
-              <h2 class="print-main-header">Summary of dormitory performance</h2>
+              <h2 class="print-main-header">Summary of performance for full year {{ businessInsights.year }}</h2>
               
               <div class="kpi-grid">
                 <div class="kpi-card">
                   <span class="kpi-label">Clearing efficiency</span>
                   <span class="kpi-value">{{ businessInsights.pickupRate }}%</span>
-                  <span class="kpi-sublabel">Parcels successfully picked up</span>
+                  <span class="kpi-sublabel">Yearly pickup performance</span>
                 </div>
                 <div class="kpi-card">
-                  <span class="kpi-label">Overdue inventory ratio</span>
+                  <span class="kpi-label">Overdue ratio</span>
                   <span class="kpi-value">{{ businessInsights.overdueRate }}%</span>
-                  <span class="kpi-sublabel">Units exceeding 24h threshold</span>
+                  <span class="kpi-sublabel">Yearly overdue percentage</span>
                 </div>
                 <div class="kpi-card">
-                  <span class="kpi-label">Staff processing load</span>
+                  <span class="kpi-label">Staff load</span>
                   <span class="kpi-value">{{ businessInsights.staffBacklogRate }}%</span>
-                  <span class="kpi-sublabel">Parcels awaiting intake verification</span>
+                  <span class="kpi-sublabel">Yearly intake backlog avg</span>
                 </div>
                 <div class="kpi-card">
                   <span class="kpi-label">Resident verification</span>
                   <span class="kpi-value">{{ businessInsights.verificationRate }}%</span>
-                  <span class="kpi-sublabel">Active versus total accounts</span>
+                  <span class="kpi-sublabel">Yearly verification health</span>
                 </div>
               </div>
 
               <div class="insights-box mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <h4 class="font-bold text-gray-800 mb-2">Operational Analytics:</h4>
+                <h4 class="font-bold text-gray-800 mb-2">Yearly Operational Analytics:</h4>
                 <ul class="list-disc pl-5 space-y-1">
-                  <li v-if="businessInsights.insights.length === 0" class="text-gray-600 text-sm">Operation is flowing normally. No interventions required.</li>
+                  <li v-if="businessInsights.insights.length === 0" class="text-gray-600 text-sm">Annual operation is flowing normally.</li>
                   <li v-for="(msg, i) in businessInsights.insights" :key="i" class="text-sm text-gray-700 font-medium">
                     {{ msg }}
                   </li>
-                  <li class="text-sm text-gray-600">Current activity state: {{ businessInsights.healthStatus }}</li>
+                  <li class="text-sm text-gray-600">Current annual state: {{ businessInsights.healthStatus }}</li>
                 </ul>
               </div>
             </div>
 
             <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
-              <h2 class="print-main-header">1. Parcel Management Overview</h2>
+              <h2 class="print-main-header">1. Parcel Management Overview (Daily Activity)</h2>
               
-              <h3 class="print-section-title">Statistics Overview (Parcels)</h3>
+              <h3 class="print-section-title">Daily Statistics (Parcels)</h3>
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Status</th>
+                    <th>Daily Status (Activity)</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td>Received</td>
+                    <td>{{ dailyStats.received }}</td>
+                  </tr>
+                  <tr>
                     <td>Picked Up</td>
-                    <td>{{ overallStats.pickedUpParcels }}</td>
+                    <td>{{ dailyStats.pickedUp }}</td>
                   </tr>
                   <tr>
-                    <td>Received / Awaiting</td>
-                    <td>{{ overallStats.awaitingParcels }}</td>
-                  </tr>
-                  <tr>
-                    <td>Overdue Parcels</td>
-                    <td>{{ overallStats.overdueParcels }}</td>
+                    <td>Overdue</td>
+                    <td>{{ filteredOverdue.length }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td>TOTAL UNITS (SYSTEM)</td>
-                    <td>{{ overallStats.totalParcels }}</td>
+                    <td>Total</td>
+                    <td>{{ dynamicStats.total }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -945,7 +1109,7 @@ defineExpose({
                     </tr>
                     <!-- TOTAL ROW -->
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                      <td>TOTAL</td>
+                      <td>Total</td>
                       <td>{{ yData.totalReceived }}</td>
                       <td>{{ yData.totalPickedUp }}</td>
                       <td>{{ yData.totalOverdue }}</td>
@@ -967,7 +1131,7 @@ defineExpose({
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="parcel in parcels.slice(0, 10)" :key="parcel.id">
+                  <tr v-for="parcel in filteredParcels.slice(0, 10)" :key="parcel.id">
                     <td>{{ formatDate(parcel.updatedAt) }}</td>
                     <td>{{ parcel.residentName }}</td>
                     <td>
@@ -978,18 +1142,18 @@ defineExpose({
                         </span>
                       </div>
                     </td>
-                    <td>{{ parcel.status }}</td>
+                    <td>{{ parcel.currentStatus || parcel.status }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td colspan="3">TOTAL RECENT PARCELS</td>
-                    <td>{{ parcels.slice(0, 10).length }}</td>
+                    <td colspan="3">Total recent parcels</td>
+                    <td>{{ filteredParcels.slice(0, 10).length }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div class="print-section" v-if="overdueParcels.length > 0">
+            <div class="print-section" v-if="filteredOverdue.length > 0">
               <h3 class="print-section-title">Overdue Parcels (> 1 Day)</h3>
               <table class="print-table">
                 <thead>
@@ -1001,16 +1165,16 @@ defineExpose({
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="parcel in overdueParcels" :key="parcel.id">
+                  <tr v-for="parcel in filteredOverdue" :key="parcel.id">
                     <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
                     <td>{{ parcel.residentName }}</td>
                     <td>{{ parcel.trackingNumber }}</td>
-                    <td>{{ parcel.status }}</td>
+                    <td>{{ parcel.currentStatus || parcel.status }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td colspan="3">TOTAL OVERDUE PARCELS</td>
-                    <td>{{ overdueParcels.length }}</td>
+                    <td colspan="3">Total overdue parcels</td>
+                    <td>{{ filteredOverdue.length }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1018,33 +1182,33 @@ defineExpose({
 
             <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
-              <h2 class="print-main-header">2. Resident Management Overview</h2>
+              <h2 class="print-main-header">2. Resident Management Overview (Daily Activity)</h2>
               
-              <h3 class="print-section-title">Statistics Overview (Residents)</h3>
+              <h3 class="print-section-title">Daily Statistics (Residents)</h3>
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Status</th>
+                    <th>Daily Status (Activity)</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Active</td>
-                    <td>{{ stats.activeResidents }}</td>
+                    <td>Joined</td>
+                    <td>{{ dailyStats.joined }}</td>
                   </tr>
                   <tr>
-                    <td>Pending</td>
-                    <td>{{ stats.pendingResidents }}</td>
+                    <td>Verified</td>
+                    <td>{{ dailyStats.verified }}</td>
                   </tr>
                   <tr>
-                    <td>Inactive</td>
-                    <td>{{ stats.inactiveResidents }}</td>
+                    <td>Total Active Members</td>
+                    <td>{{ dynamicStats.activeResidents }}</td>
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td>TOTAL RESIDENTS</td>
-                    <td>{{ stats.activeResidents + stats.inactiveResidents }}</td>
+                    <td>Total registered</td>
+                    <td>{{ dynamicStats.activeResidents + dynamicStats.pendingResidents + dynamicStats.inactiveResidents }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1067,7 +1231,7 @@ defineExpose({
                     </tr>
                     <!-- TOTAL ROW -->
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                      <td>TOTAL</td>
+                      <td>Total</td>
                       <td>{{ yData.totalJoined }}</td>
                     </tr>
                   </tbody>
@@ -1095,7 +1259,7 @@ defineExpose({
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td colspan="3">TOTAL PENDING ACCOUNTS</td>
+                    <td colspan="3">Total pending accounts</td>
                     <td>{{ pendingResidents.length }}</td>
                   </tr>
                 </tbody>
@@ -1122,7 +1286,7 @@ defineExpose({
                   </tr>
                   <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td colspan="3">TOTAL PARCELS (Top Leaders)</td>
+                    <td colspan="3">Total parcels (Top Leaders)</td>
                     <td>{{ topResidents.reduce((sum, r) => sum + parseInt(r.parcelCount || r.count || 0), 0) }}</td>
                   </tr>
                 </tbody>

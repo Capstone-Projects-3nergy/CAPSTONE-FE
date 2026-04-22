@@ -27,6 +27,7 @@ const { toggleSidebar } = sidebarManager
 
 
 const reportExportRef = ref(null)
+const selectedReportDate = ref(new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0])
 
 const loginManager = useAuthManager()
 const userManager = useUserManager()
@@ -1087,6 +1088,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
       :announcements="dashboardStore.announcements"
       :parcels="getMappedParcels"
       :members="dashboardStore.members"
+      :selectedDate="selectedReportDate"
     />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
@@ -1356,16 +1358,29 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
           
-          <!-- Export Actions -->
-          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
             <div class="flex flex-wrap items-center gap-3">
-              <span class="text-sm font-medium text-gray-500">Export:</span>
+              <div class="flex items-center gap-2 mr-2">
+                <span class="text-xs font-bold text-gray-400 tracking-wider">Report Date:</span>
+                <div class="relative group">
+                  <input 
+                    type="date" 
+                    v-model="selectedReportDate"
+                    :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
+                    class="block w-full px-3 py-1.5 text-sm font-bold text-[#0E4B90] bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div class="h-8 w-[1px] bg-gray-200 hidden sm:block mx-1"></div>
+
+              <span class="text-sm font-bold text-gray-700 hidden sm:inline">Export:</span>
               <button 
                 @click="handleExportExcel"
                 class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
-                <span class="hidden sm:inline">Export Excel (.xlsx)</span>
+                <span class="hidden sm:inline">Export Excel</span>
                 <span class="sm:hidden">Excel</span>
               </button>
               <button 
