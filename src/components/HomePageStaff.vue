@@ -1560,7 +1560,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                     </div>
                   </div>
                 
-                <div class="h-[300px] w-full relative">
+                <div class="h-[300px] w-full relative -mt-6">
                   <canvas id="parcelChart"></canvas>
                 </div>
 
@@ -2002,7 +2002,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                      <span class="text-[11px] sm:text-xs text-indigo-600 font-bold whitespace-nowrap bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Avg/Period: {{ avgResidentGrowth.toFixed(1) }}</span>
                   </div>
                   
-                  <div class="h-[300px] w-full relative">
+                  <div class="h-[300px] w-full relative -mt-6">
                     <canvas id="residentChart"></canvas>
                   </div>
                 </div>
