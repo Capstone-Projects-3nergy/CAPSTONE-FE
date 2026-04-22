@@ -778,7 +778,6 @@ onMounted(async () => {
   const ctx = document.getElementById('parcelChart')
   if (!ctx) return
 
-  // Prevent "Canvas is already in use" error
   const existingParcelChart = Chart.getChart('parcelChart')
   if (existingParcelChart) {
     existingParcelChart.destroy()
@@ -832,7 +831,7 @@ onMounted(async () => {
         },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
           titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
           bodyFont: { family: "'Inter', sans-serif", size: 12 },
           padding: 12,
