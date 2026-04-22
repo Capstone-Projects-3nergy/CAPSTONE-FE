@@ -595,6 +595,10 @@ const handleExportPDF = () => {
   const topRes = props.topResidents;
   const recentParcels = filteredParcels.value.slice(0, 10);
   const brandColor = [29, 53, 94]; // Navy Blue style (#1D355E)
+  const textColor = [31, 41, 55];
+  const mutedColor = [100, 100, 100];
+  const lightGray = [249, 250, 251];
+  const borderGray = [229, 231, 235];
 
   let y = 20;
 
@@ -607,16 +611,21 @@ const handleExportPDF = () => {
     return false;
   };
 
-  const drawMainCategoryHeader = (text) => {
-    checkPage(25);
+  const drawMainCategoryHeader = (text, forceNewPage = false) => {
+    if (forceNewPage) {
+      doc.addPage();
+      y = 20;
+    } else {
+      checkPage(25);
+    }
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    // Taller header like Print style
     doc.rect(15, y - 6, 180, 10, 'F');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(255, 255, 255);
     doc.text(text.toUpperCase(), 105, y + 0.5, { align: 'center' });
     y += 14;
+    doc.setTextColor(0, 0, 0);
   };
 
   const drawSubHeader = (text) => {
@@ -628,21 +637,84 @@ const handleExportPDF = () => {
     doc.setFontSize(10.5);
     doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
     doc.text(text, 18, y);
-    y += 7;
+    y += 8;
+    doc.setTextColor(0, 0, 0);
+  };
+
+  // Helper for Zebra Tables
+  const drawTable = (headers, data, columnWidths, hasTotal = false) => {
+    const rowHeight = 8;
+    const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+    
+    checkPage(rowHeight * (data.length + 2));
+
+    // Header
+    doc.setFillColor(243, 244, 246);
+    doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
+    doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+    doc.rect(15, y - 5, tableWidth, rowHeight, 'D');
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    let currentX = 15;
+    headers.forEach((h, i) => {
+      const align = (i === headers.length - 1 && i !== 0) ? 'right' : 'left';
+      const textX = align === 'right' ? currentX + columnWidths[i] - 3 : currentX + 3;
+      doc.text(h, textX, y, { align });
+      if (i < headers.length - 1) {
+        doc.line(currentX + columnWidths[i], y - 5, currentX + columnWidths[i], y + 3);
+      }
+      currentX += columnWidths[i];
+    });
+    
+    y += rowHeight;
+
+    // Data Rows
+    doc.setFont("helvetica", "normal");
+    data.forEach((row, rowIndex) => {
+      checkPage(rowHeight);
+      if (rowIndex % 2 === 1) {
+        doc.setFillColor(251, 252, 253);
+        doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
+      }
+      doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+      doc.rect(15, y - 5, tableWidth, rowHeight, 'D');
+
+      let rowX = 15;
+      row.forEach((cell, i) => {
+        const align = (i === headers.length - 1 && i !== 0) ? 'right' : 'left';
+        const textX = align === 'right' ? rowX + columnWidths[i] - 3 : rowX + 3;
+        doc.text(String(cell || '-'), textX, y, { align });
+        if (i < headers.length - 1) {
+          doc.line(rowX + columnWidths[i], y - 5, rowX + columnWidths[i], y + 3);
+        }
+        rowX += columnWidths[i];
+      });
+      y += rowHeight;
+    });
+
+    if (hasTotal) {
+      doc.setFont("helvetica", "bold");
+      doc.setFillColor(243, 244, 246);
+      doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
+      doc.rect(15, y - 5, tableWidth, rowHeight, 'D');
+      // Logic for total row is usually passed in data or handled here
+    }
+    y += 5;
   };
 
   // Main Header
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(29, 53, 94);
+  doc.setFontSize(22);
+  doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
   doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
-  y += 7;
+  y += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(100, 100, 100);
+  doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2]);
   doc.text(`Report Issue Date: ${displayDate.value}`, 105, y, { align: 'center' });
   y += 6;
-  doc.setDrawColor(29, 53, 94);
+  doc.setDrawColor(brandColor[0], brandColor[1], brandColor[2]);
   doc.setLineWidth(0.5);
   doc.line(15, y, 195, y);
   y += 15;
@@ -650,360 +722,197 @@ const handleExportPDF = () => {
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
-    drawMainCategoryHeader(`Performance Summary as of ${insights.dateLabel}`);
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
+    drawMainCategoryHeader(`Summary of performance as of ${insights.dateLabel}`);
     
-    // KPI Grid logic - Adjusted for better spacing
-    const boxW = 87;
-    const boxH = 22; // Taller boxes
-    const gap = 6;
+    // KPI Grid
+    const boxW = 43;
+    const boxH = 22;
+    const gap = 3;
+    let startX = 15;
 
     const drawKPIBox = (label, value, subLabel, x, py) => {
       doc.setDrawColor(226, 232, 240);
       doc.setFillColor(255, 255, 255);
       doc.rect(x, py, boxW, boxH, 'FD');
       
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(label, x + boxW/2, py + 6, { align: 'center' });
+
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(29, 53, 94);
-      doc.text(value, x + boxW/2, py + 8, { align: 'center' });
+      doc.setFontSize(13);
+      doc.setTextColor(30, 41, 59);
+      doc.text(value, x + boxW/2, py + 13, { align: 'center' });
       
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      doc.setTextColor(71, 85, 105);
-      doc.text(label, x + boxW/2, py + 13, { align: 'center' });
-      
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor(148, 163, 184);
       doc.text(subLabel, x + boxW/2, py + 18, { align: 'center' });
-      doc.setTextColor(0, 0, 0);
     };
 
-    drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Annual pickup performance", 15, y);
-    drawKPIBox("Overdue ratio", insights.overdueRate + "%", "Annual overdue percentage", 15 + boxW + gap, y);
-    y += boxH + gap;
-    drawKPIBox("Staff load", insights.staffBacklogRate + "%", "Annual average intake backlog", 15, y);
-    drawKPIBox("Resident verification", insights.verificationRate + "%", "Annual verification health", 15 + boxW + gap, y);
+    drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Yearly pickup performance", startX, y);
+    drawKPIBox("Overdue ratio", insights.overdueRate + "%", "Yearly overdue percentage", startX + boxW + gap, y);
+    drawKPIBox("Staff load", insights.staffBacklogRate + "%", "Yearly intake backlog avg", startX + (boxW + gap)*2, y);
+    drawKPIBox("Resident verification", insights.verificationRate + "%", "Yearly verification health", startX + (boxW + gap)*3, y);
     y += boxH + 10;
 
-    // Insights Box - Improved padding
-    doc.setFillColor(248, 250, 252); 
-    doc.setDrawColor(226, 232, 240);
-    doc.rect(15, y, 180, 26, 'FD');
+    // Insights Box
+    doc.setFillColor(249, 250, 251); 
+    doc.setDrawColor(229, 231, 235);
+    doc.rect(15, y, 180, 25, 'FD');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
-    doc.setTextColor(30, 41, 59);
-    doc.text("Yearly Operational Analytics:", 22, y + 7);
-    y += 11;
+    doc.setFontSize(9);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Yearly Operational Analytics:", 20, y + 7);
+    y += 12;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(51, 65, 85);
+    doc.setFontSize(8);
     if (insights.insights.length > 0) {
       insights.insights.forEach(msg => {
-        doc.text("• " + msg, 22, y);
+        doc.text("• " + msg, 20, y);
         y += 4.5;
       });
     } else {
-      doc.text("• Annual operation is flowing normally.", 22, y);
+      doc.text("• Annual operation is flowing normally.", 20, y);
       y += 4.5;
     }
     doc.setFont("helvetica", "bold");
-    doc.text(`Current annual state: ${insights.healthStatus}`, 22, y);
-    y += 15;
+    doc.text(`Current annual state: ${insights.healthStatus}`, 20, y);
+    y += 12;
   }
 
   // --- 1. Parcel Management Overview ---
-  drawMainCategoryHeader("1. Parcel Management Overview (Daily)");
+  drawMainCategoryHeader("1. Parcel Management Overview (Daily Activity)", true);
   
-  // 1.1 Statistics
-  drawSubHeader("Statistics Overview (Daily Parcels)");
-  doc.setFontSize(8);
-  doc.setTextColor(0, 0, 0);
-  
-  const parcelStats = [
-    { item: 'Received', val: stats.received },
-    { item: 'Picked Up', val: stats.pickedUp },
-    { item: 'Overdue', val: overdueList.length }
-  ];
+  // 1.1 Daily Statistics
+  drawSubHeader("1. Daily Statistics (Parcels)");
+  drawTable(
+    ['Daily Status (Activity)', 'Amount'],
+    [
+      ['Received', stats.received],
+      ['Picked Up', stats.pickedUp],
+      ['Overdue', overdueList.length],
+      ['Total', snapshot.total]
+    ],
+    [130, 50]
+  );
 
-  doc.setFont("helvetica", "bold");
-  doc.text("Daily Status (Activity)", 18, y); 
-  doc.text("Amount", 160, y);
-  
-  doc.setDrawColor(180, 180, 180);
-  const pRows = parcelStats.length + 1;
-  doc.rect(15, y - 4, 180, (pRows * 7) + 6);
-  doc.line(15, y + 2, 195, y + 2);
-  doc.line(155, y - 4, 155, y - 4 + (pRows * 7) + 6);
-
-  y += 7;
-  doc.setFont("helvetica", "normal");
-  parcelStats.forEach(row => {
-    doc.text(row.item, 18, y);
-    doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    y += 7;
-  });
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Total", 18, y);
-  doc.text(snapshot.total.toString(), 190, y, { align: 'right' });
-  y += 12;
-
-  // 1.2 Historical Monthly Table (Parcels) - Moved before lists
+  // 1.2 Historical Monthly Table (Parcels)
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach((yData) => {
-      drawSubHeader(`Historical Monthly Summary (Parcels) - Year ${yData.year}`);
-      doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 4, 180, 7, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.text("Month (MM/YYYY)", 17, y + 1);
-      doc.text("RECEIVED", 85, y + 1, { align: 'right' });
-      doc.text("PICKED UP", 140, y + 1, { align: 'right' });
-      doc.text("OVERDUE", 190, y + 1, { align: 'right' });
-
-      doc.setDrawColor(180, 180, 180);
-      const rowsCount = yData.months.length + 1;
-      doc.rect(15, y - 4, 180, (rowsCount * 6) + 7);
-      y += 7;
-      doc.setFont("helvetica", "normal");
-      
-      yData.months.forEach(h => {
-        checkPage(6);
-        doc.text(h.monthStr, 17, y);
-        doc.text(h.received.toString(), 85, y, { align: 'right' });
-        doc.text(h.pickedUp.toString(), 140, y, { align: 'right' });
-        doc.text(h.overdue.toString(), 190, y, { align: 'right' });
-        doc.line(15, y + 1, 195, y + 1);
-        y += 6;
-      });
-
-      doc.setFont("helvetica", "bold");
-      doc.text("Total", 17, y);
-      doc.text(yData.totalReceived.toString(), 85, y, { align: 'right' });
-      doc.text(yData.totalPickedUp.toString(), 140, y, { align: 'right' });
-      doc.text(yData.totalOverdue.toString(), 190, y, { align: 'right' });
-      y += 12;
+      drawSubHeader(`2. Historical Monthly Summary (Parcels) - Year ${yData.year}`);
+      const hData = yData.months.map(h => [h.monthStr, h.received, h.pickedUp, h.overdue]);
+      hData.push(['Total', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
+      drawTable(
+        ['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue'],
+        hData,
+        [60, 40, 40, 40]
+      );
     });
   }
 
   // 1.3 Recent Parcels
   if (recentParcels.length > 0) {
-    drawSubHeader("Recent Parcels (Latest Activity)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 4, 180, 7, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("DATE", 17, y + 1); 
-    doc.text("RESIDENT", 45, y + 1); 
-    doc.text("TRACKING NO.", 95, y + 1); 
-    doc.text("STATUS", 160, y + 1);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 4, 180, ((recentParcels.length + 1) * 7) + 7);
-    doc.line(15, y + 3, 195, y + 3);
-    doc.line(43, y - 4, 43, y - 4 + (recentParcels.length * 7) + 7);
-    doc.line(93, y - 4, 93, y - 4 + (recentParcels.length * 7) + 7);
-    doc.line(158, y - 4, 158, y - 4 + (recentParcels.length * 7) + 7);
-
-    y += 7;
-    doc.setFont("helvetica", "normal");
-    recentParcels.forEach((p) => {
-      checkPage(7);
-      doc.text(formatDate(p.updatedAt), 17, y);
-      doc.text((p.residentName || '').substring(0, 18), 45, y);
-      doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
-      doc.text((p.currentStatus || p.status || ''), 160, y);
-      doc.line(15, y + 1.5, 195, y + 1.5);
-      y += 7;
-    });
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Total recent parcels", 17, y);
-    doc.text(recentParcels.length.toString(), 160, y);
-    y += 12;
+    drawSubHeader("3. Recent Parcels (Latest Activity)");
+    const rData = recentParcels.map(p => [
+      formatDate(p.updatedAt), 
+      (p.residentName || '').substring(0, 20), 
+      p.trackingNumber, 
+      (p.currentStatus || p.status || '')
+    ]);
+    rData.push(['Total recent parcels', '', '', recentParcels.length]);
+    drawTable(
+      ['Date', 'Resident', 'Tracking No.', 'Status'],
+      rData,
+      [35, 50, 55, 40]
+    );
   }
 
   // 1.4 Overdue Parcels
   if (overdueList.length > 0) {
-    drawSubHeader("Overdue Parcels (> 1 Day)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 4, 180, 7, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("RECEIVED AT", 17, y + 1); 
-    doc.text("RESIDENT", 45, y + 1); 
-    doc.text("TRACKING NO.", 95, y + 1); 
-    doc.text("STATUS", 160, y + 1);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 4, 180, ((overdueList.length + 1) * 7) + 7);
-    doc.line(15, y + 3, 195, y + 3);
-    doc.line(43, y - 4, 43, y - 4 + (overdueList.length * 7) + 7);
-    doc.line(93, y - 4, 93, y - 4 + (overdueList.length * 7) + 7);
-    doc.line(158, y - 4, 158, y - 4 + (overdueList.length * 7) + 7);
-
-    y += 7;
-    doc.setFont("helvetica", "normal");
-    overdueList.forEach((p) => {
-      checkPage(7);
-      doc.text(formatDate(p.receiveAt || p.createdAt), 17, y);
-      doc.text((p.residentName || '').substring(0, 18), 45, y);
-      doc.text((p.trackingNumber || '').substring(0, 20), 95, y);
-      doc.text((p.currentStatus || p.status || ''), 160, y);
-      doc.line(15, y + 1.5, 195, y + 1.5);
-      y += 7;
-    });
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Total overdue parcels", 17, y);
-    doc.text(overdueList.length.toString(), 160, y);
-    y += 12;
+    drawSubHeader("4. Overdue Parcels (> 1 Day)");
+    const oData = overdueList.map(p => [
+      formatDate(p.receiveAt || p.createdAt), 
+      (p.residentName || '').substring(0, 20), 
+      p.trackingNumber, 
+      (p.currentStatus || p.status || '')
+    ]);
+    oData.push(['Total overdue parcels', '', '', overdueList.length]);
+    drawTable(
+      ['Received At', 'Resident', 'Tracking No.', 'Status'],
+      oData,
+      [35, 50, 55, 40]
+    );
   }
 
   // --- 2. Resident Management Overview ---
-  drawMainCategoryHeader("2. Resident Management Overview (Daily)");
+  drawMainCategoryHeader("2. Resident Management Overview (Daily Activity)", true);
   
-  // 2.1 Statistics
-  drawSubHeader("Statistics Overview (Daily Residents)");
-  doc.setFontSize(8);
-  doc.setTextColor(0, 0, 0);
-  
-  const resStats = [
-    { item: 'Joined', val: stats.joined },
-    { item: 'Verified', val: stats.verified },
-    { item: 'Total Active Members', val: snapshot.activeResidents }
-  ];
+  // 2.1 Daily Residents
+  drawSubHeader("1. Daily Statistics (Residents)");
+  drawTable(
+    ['Daily Status (Activity)', 'Amount'],
+    [
+      ['Joined', stats.joined],
+      ['Verified', stats.verified],
+      ['Total Active Members', snapshot.activeResidents],
+      ['Total registered', (snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents)]
+    ],
+    [130, 50]
+  );
 
-  doc.setFillColor(245, 247, 250);
-  doc.rect(15, y - 4, 180, 7, 'F');
-  doc.setFont("helvetica", "bold");
-  doc.text("Daily Status (Activity)", 18, y + 1); 
-  doc.text("Amount", 160, y + 1);
-  
-  doc.setDrawColor(180, 180, 180);
-  const rRows = resStats.length + 1;
-  doc.rect(15, y - 4, 180, (rRows * 7) + 6);
-  doc.line(15, y + 2, 195, y + 2);
-  doc.line(155, y - 4, 155, y - 4 + (rRows * 7) + 6);
-
-  y += 7;
-  doc.setFont("helvetica", "normal");
-  resStats.forEach(row => {
-    doc.text(row.item, 18, y);
-    doc.text((row.val ?? 0).toString(), 190, y, { align: 'right' });
-    y += 7;
-  });
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Total registered", 18, y);
-  doc.text((snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents).toString(), 190, y, { align: 'right' });
-  y += 12;
-
-  // 2.2 Historical Monthly Table (Residents) - Before lists
+  // 2.2 Historical Monthly Summary (Residents)
   if (residentHistory.value.length > 0) {
     residentHistory.value.forEach((yData) => {
-      drawSubHeader(`Historical Monthly Summary (Residents) - Year ${yData.year}`);
-      doc.setFillColor(245, 247, 250);
-      doc.rect(15, y - 4, 180, 7, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.text("Month (MM/YYYY)", 17, y + 1);
-      doc.text("TOTAL REGISTERED", 180, y + 1, { align: 'right' });
-
-      doc.setDrawColor(180, 180, 180);
-      const rowCount = yData.months.length + 1;
-      doc.rect(15, y - 4, 180, (rowCount * 6) + 7);
-      y += 7;
-      doc.setFont("helvetica", "normal");
-      
-      yData.months.forEach(h => {
-        checkPage(6);
-        doc.text(h.monthStr, 17, y);
-        doc.text(h.joined.toString(), 180, y, { align: 'right' });
-        doc.line(15, y + 1, 195, y + 1);
-        y += 6;
-      });
-
-      doc.setFont("helvetica", "bold");
-      doc.text("Total", 17, y);
-      doc.text(yData.totalJoined.toString(), 180, y, { align: 'right' });
-      y += 12;
+      drawSubHeader(`2. Historical Monthly Summary (Residents) - Year ${yData.year}`);
+      const rhData = yData.months.map(h => [h.monthStr, h.joined]);
+      rhData.push(['Total', yData.totalJoined]);
+      drawTable(
+        ['Month (MM/YYYY)', 'Total Registered'],
+        rhData,
+        [130, 50]
+      );
     });
   }
 
   // 2.3 Pending Accounts
   if (pending && pending.length > 0) {
-    drawSubHeader("Pending Accounts (Awaiting Verification)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 4, 180, 7, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("NAME", 17, y + 1); 
-    doc.text("ROOM", 70, y + 1); 
-    doc.text("EMAIL", 95, y + 1); 
-    doc.text("UPDATED AT", 155, y + 1);
-
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 4, 180, ((pending.length + 1) * 7) + 7);
-    doc.line(15, y + 3, 195, y + 3);
-    doc.line(68, y - 4, 68, y - 4 + (pending.length * 7) + 7);
-    doc.line(93, y - 4, 93, y - 4 + (pending.length * 7) + 7);
-    doc.line(153, y - 4, 153, y - 4 + (pending.length * 7) + 7);
-
-    y += 7;
-    doc.setFont("helvetica", "normal");
-    pending.forEach((res) => {
-      checkPage(7);
-      doc.text((res.fullName || '').substring(0, 25), 17, y);
-      doc.text((res.roomNumber || '-'), 70, y);
-      doc.text((res.email || '').substring(0, 30), 95, y);
-      doc.text(formatDateTime(res.updateAt), 155, y);
-      doc.line(15, y + 1.5, 195, y + 1.5);
-      y += 7;
-    });
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Total pending accounts", 17, y);
-    doc.text(pending.length.toString(), 155, y);
-    y += 12;
+    drawSubHeader("3. Pending Accounts (Awaiting Verification)");
+    const pData = pending.map(res => [
+      (res.fullName || '').substring(0, 25), 
+      (res.roomNumber || '-'), 
+      (res.email || '').substring(0, 25), 
+      formatDateTime(res.updateAt)
+    ]);
+    pData.push(['Total pending accounts', '', '', pending.length]);
+    drawTable(
+      ['Name', 'Room', 'Email', 'Updated At'],
+      pData,
+      [50, 30, 60, 40]
+    );
   }
 
   // 2.4 Resident Ranking
   if (topRes && topRes.length > 0) {
-    drawSubHeader("Resident Ranking (Top Leaders by Volume)");
-    doc.setFillColor(245, 247, 250);
-    doc.rect(15, y - 4, 180, 7, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("RANK", 17, y + 1); 
-    doc.text("NAME", 37, y + 1); 
-    doc.text("ROOM NO.", 102, y + 1); 
-    doc.text("PARCELS", 162, y + 1);
-    
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(15, y - 4, 180, ((topRes.length + 1) * 7) + 7);
-    doc.line(15, y + 3, 195, y + 3);
-    doc.line(33, y - 4, 33, y - 4 + (topRes.length * 7) + 7);
-    doc.line(100, y - 4, 100, y - 4 + (topRes.length * 7) + 7);
-    doc.line(160, y - 4, 160, y - 4 + (topRes.length * 7) + 7);
-
-    y += 7;
-    doc.setFont("helvetica", "normal");
+    drawSubHeader("4. Resident Ranking (Top Leaders by Volume)");
     let totalTop = 0;
-    topRes.forEach((res, i) => {
-      checkPage(7);
-      totalTop += parseInt(res.parcelCount || res.count || 0);
-      doc.text((i + 1).toString(), 22, y, { align: 'center' });
-      doc.text((res.fullName || res.name || '').substring(0, 25), 37, y);
-      doc.text((res.room || res.roomNumber || '-'), 130, y, { align: 'right' });
-      doc.text((res.parcelCount || res.count || 0).toString(), 190, y, { align: 'right' });
-      doc.line(15, y + 1.5, 195, y + 1.5);
-      y += 7;
+    const trData = topRes.map((res, i) => {
+      const count = parseInt(res.parcelCount || res.count || 0);
+      totalTop += count;
+      return [
+        (i + 1).toString(),
+        (res.fullName || res.name || '').substring(0, 30),
+        (res.room || res.roomNumber || '-'),
+        count
+      ];
     });
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Total parcels (Top Leaders)", 17, y);
-    doc.text(totalTop.toString(), 190, y, { align: 'right' });
+    trData.push(['Total parcels (Top Leaders)', '', '', totalTop]);
+    drawTable(
+      ['Rank', 'Name', 'Room No.', 'Parcels'],
+      trData,
+      [20, 80, 40, 40]
+    );
   }
 
   doc.save(`Dormitory_Summary_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
