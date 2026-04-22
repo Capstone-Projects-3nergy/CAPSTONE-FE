@@ -225,7 +225,16 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         
         if (category === 'pickedUp') return inRange && (s === 'PICKEDUP' || s === 'TAKEN')
         if (category === 'staff') return inRange && (s.includes('STAFF') || s.includes('PENDING'))
-        if (category === 'overdue') return inRange && s.includes('OVERDUE')
+        if (category === 'overdue') {
+          if (inRange && s.includes('OVERDUE')) return true
+          // 24 hour rule
+          const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+          if (!isNaN(arrivalDate.getTime())) {
+            const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+            return overdueDate >= start && overdueDate <= end && !(s.includes('PICKED') || s.includes('TAKEN')) && !(s.includes('STAFF') || s.includes('PENDING'))
+          }
+          return false
+        }
         if (category === 'waiting') return inRange && (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'NOTIFIED') && !s.includes('STAFF')
         return false
       })
@@ -241,8 +250,17 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
       if (category === 'pickedUp') return (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange
       if (category === 'staff') return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
-      if (category === 'overdue') return currentStatus.includes('OVERDUE') && isUpdateInRange
-      if (category === 'waiting') return (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus === 'NOTIFIED') && !currentStatus.includes('STAFF') && isArrivalInRange
+      if (category === 'overdue') {
+        if (currentStatus.includes('OVERDUE') && isUpdateInRange) return true
+        // 24 hour rule fallback
+        const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
+        if (!isNaN(arrivalDate.getTime())) {
+          const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+          return overdueDate >= start && overdueDate <= end && !(currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')) && !(currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))
+        }
+        return false
+      }
+      if (category === 'waiting') return (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus === 'NOTIFIED') && !currentStatus.includes('STAFF') && isArrivalInRange && !currentStatus.includes('OVERDUE')
       
       return false
     }
@@ -407,6 +425,21 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         overdues = p.statusHistory
           .filter(h => h.status?.toUpperCase().includes('OVERDUE'))
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
+      }
+
+      // Add 24h threshold check for chart consistency
+      const arrivalDate = new Date(p.receivedAt || p.createdAt || p.date)
+      if (!isNaN(arrivalDate.getTime()) && overdues.length === 0) {
+        const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
+        const isNotPickedUp = !currentStatus.includes('PICKED') && !currentStatus.includes('TAKEN')
+        const isNotStaff = !currentStatus.includes('STAFF') && !currentStatus.includes('PENDING')
+        
+        if (isNotPickedUp && isNotStaff) {
+          const now = new Date()
+          if ((now - arrivalDate) > (24 * 60 * 60 * 1000)) {
+            overdues.push(overdueDate)
+          }
+        }
       }
 
       if (isOverdueNow && overdues.length === 0) {
