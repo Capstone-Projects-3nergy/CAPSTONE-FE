@@ -1839,9 +1839,9 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                 </div>
                 
                 <!-- Remaining Count Message -->
-                <div v-if="overdueParcelsList.length > 4" class="text-center py-1.5 mt-1">
+                <div v-if="overdueParcelsList.length > 3" class="text-center py-1.5 mt-1">
                   <p class="text-[10px] md:text-xs font-semibold text-red-600 bg-red-50/40 py-2 rounded-lg border border-dashed border-red-200">
-                    {{ (overdueParcelsList.length - 4) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 4) }} more overdue parcels
+                    {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
                   </p>
                 </div>
               </div>
