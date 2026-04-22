@@ -130,7 +130,8 @@ const dailyStats = computed(() => {
     const joinDate = new Date(m.createdAt || m.updateAt);
     if (joinDate >= startOfDay && joinDate <= endOfDay) {
       res.joined++;
-      if (m.status === 'active' || m.status === 'Verified') res.verified++;
+      const s = (m.status || '').toUpperCase();
+      if (s !== 'PENDING') res.verified++;
     }
   });
 
@@ -204,7 +205,8 @@ const yearlyStats = computed(() => {
     const joinDate = new Date(m.createdAt || m.updateAt);
     if (joinDate >= startOfYear && joinDate <= endLimit) {
       res.totalResidents++;
-      if (m.status === 'active' || m.status === 'Verified') res.activeResidents++;
+      const s = (m.status || '').toUpperCase();
+      if (s !== 'PENDING') res.activeResidents++;
     }
   });
 
@@ -255,9 +257,12 @@ const dynamicStats = computed(() => {
     const joinDate = new Date(m.createdAt || m.updateAt);
     if (joinDate > date) return;
 
-    if (m.status === 'active' || m.status === 'Verified') result.activeResidents++;
-    else if (m.status === 'pending') result.pendingResidents++;
-    else result.inactiveResidents++;
+    const s = (m.status || '').toUpperCase();
+    if (s !== 'PENDING') result.activeResidents++;
+    else result.pendingResidents++;
+    // Note: inactiveResidents is now essentially merged into activeResidents for KPI purposes
+    // but if we need a separate count for lists, we can keep the logic consistent.
+    if (s === 'INACTIVE') result.inactiveResidents++;
   });
 
   return result;
