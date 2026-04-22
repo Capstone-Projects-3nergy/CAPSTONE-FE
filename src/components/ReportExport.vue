@@ -90,11 +90,11 @@ const parcelHistory = computed(() => {
     if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
       // Use status history for accurate event timing (supports Waiting/Received transition)
       p.statusHistory.forEach(h => {
-        const s = (h.status || '').toUpperCase();
-        const d = new Date(h.timestamp || h.updatedAt || h.createdAt);
+        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
+        const d = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
         
-        const isWaiting = s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s === 'WAITING_FOR_STAFF';
-        const isPickedUp = s === 'PICKED_UP' || s === 'TAKEN';
+        const isWaiting = s.includes('WAITING') || s.includes('RECEIVED') || s === 'WAIT' || s.includes('NOTIFIED');
+        const isPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
         const isOverdue = s.includes('OVERDUE');
 
         if (isWaiting) {
@@ -107,14 +107,24 @@ const parcelHistory = computed(() => {
       });
     } else {
       // Fallback to basic logic for backward compatibility
+      const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
+
+      // Time-based Overdue Detection (Consistent with Dashboard logic)
+      const now = new Date();
       const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+      const isWaitingForStaff = s.includes('WAITING FOR STAFF') || s.includes('STAFF');
+      const isPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
+      const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000;
+      const isOverdueByTime = (now - arrivalDate) > overdueThresholdMs && !isPickedUp && !isWaitingForStaff;
+
       addEvent(arrivalDate, 'received');
 
-      const s = (p.status || '').toUpperCase();
-      if (s === 'PICKED_UP' || s === 'TAKEN') {
+      if (isPickedUp) {
         const pickDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
         addEvent(pickDate, 'pickedUp');
-      } else if (s.includes('OVERDUE')) {
+      }
+      
+      if (s.includes('OVERDUE') || isOverdueByTime) {
         const overdueDate = new Date(p.updatedAt || p.updateAt || p.receiveAt || p.createdAt);
         addEvent(overdueDate, 'overdue');
       }
