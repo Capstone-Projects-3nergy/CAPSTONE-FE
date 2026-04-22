@@ -1571,7 +1571,7 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                     <div>
-                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest">Picked Up</span>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Picked Up</span>
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
                     </div>
                   </div>
