@@ -93,18 +93,22 @@ const topResidents = computed(() => {
   getMappedParcels.value.forEach(p => {
     const name = p.residentName || 'Unknown'
     if (!counts[name]) {
-      // Find resident from store members
+      // Find resident from store members to get accurate profile data
       const resident = dashboardStore.members.find(m => 
         m.fullName === name || m.residentName === name || `${m.firstName} ${m.lastName}` === name
       )
       
       counts[name] = {
         name,
-        room: p.roomNumber || 'N/A',
+        // Priority: Resident profile room > Parcel record room > fallback N/A
+        room: resident?.roomNumber || p.roomNumber || 'N/A',
         count: 0,
         photo: resident?.photo || resident?.profileImageUrl || '',
         status: resident?.status || 'Active'
       }
+    } else if (counts[name].room === 'N/A' && p.roomNumber) {
+      // If we initially set N/A but find a room number in a subsequent parcel
+      counts[name].room = p.roomNumber;
     }
     counts[name].count++
   })
