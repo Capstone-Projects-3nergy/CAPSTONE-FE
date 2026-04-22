@@ -608,44 +608,44 @@ const handleExportPDF = () => {
   };
 
   const drawMainCategoryHeader = (text) => {
-    checkPage(20);
+    checkPage(25);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 5, 180, 8, 'F');
+    // Taller header like Print style
+    doc.rect(15, y - 6, 180, 10, 'F');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setTextColor(255, 255, 255);
-    doc.text(text, 105, y + 1.5, { align: 'center' });
-    y += 12;
+    doc.text(text.toUpperCase(), 105, y + 0.5, { align: 'center' });
+    y += 14;
   };
 
   const drawSubHeader = (text) => {
-    checkPage(12);
-    // Left-accent border like Print style
+    checkPage(15);
     doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
-    doc.rect(15, y - 3.5, 1.2, 4.5, 'F');
+    doc.rect(15, y - 4, 1.5, 5.5, 'F');
     
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(10.5);
     doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
     doc.text(text, 18, y);
-    y += 6;
+    y += 7;
   };
 
   // Main Header
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(20);
   doc.setTextColor(29, 53, 94);
   doc.text("Dormitory Management System - Summary Report", 105, y, { align: 'center' });
-  y += 6;
-  doc.setFontSize(9);
+  y += 7;
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
   doc.text(`Report Issue Date: ${displayDate.value}`, 105, y, { align: 'center' });
-  y += 5;
+  y += 6;
   doc.setDrawColor(29, 53, 94);
-  doc.setLineWidth(0.4);
+  doc.setLineWidth(0.5);
   doc.line(15, y, 195, y);
-  y += 12;
+  y += 15;
 
   // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
@@ -654,53 +654,63 @@ const handleExportPDF = () => {
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     
-    // KPI Grid logic
-    const boxW = 85;
-    const boxH = 18;
+    // KPI Grid logic - Adjusted for better spacing
+    const boxW = 87;
+    const boxH = 22; // Taller boxes
+    const gap = 6;
 
     const drawKPIBox = (label, value, subLabel, x, py) => {
       doc.setDrawColor(226, 232, 240);
-      doc.rect(x, py, boxW, boxH);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(x, py, boxW, boxH, 'FD');
+      
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(value, x + boxW/2, py + 7, { align: 'center' });
+      doc.setFontSize(14);
+      doc.setTextColor(29, 53, 94);
+      doc.text(value, x + boxW/2, py + 8, { align: 'center' });
+      
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 100, 100);
-      doc.text(label, x + boxW/2, py + 11, { align: 'center' });
-      doc.setFontSize(6.5);
-      doc.text(subLabel, x + boxW/2, py + 15, { align: 'center' });
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(label, x + boxW/2, py + 13, { align: 'center' });
+      
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(subLabel, x + boxW/2, py + 18, { align: 'center' });
       doc.setTextColor(0, 0, 0);
     };
 
     drawKPIBox("Clearing efficiency", insights.pickupRate + "%", "Annual pickup performance", 15, y);
-    drawKPIBox("Overdue ratio", insights.overdueRate + "%", "Annual overdue percentage", 110, y);
-    y += boxH + 4;
+    drawKPIBox("Overdue ratio", insights.overdueRate + "%", "Annual overdue percentage", 15 + boxW + gap, y);
+    y += boxH + gap;
     drawKPIBox("Staff load", insights.staffBacklogRate + "%", "Annual average intake backlog", 15, y);
-    drawKPIBox("Resident verification", insights.verificationRate + "%", "Annual verification health", 110, y);
-    y += boxH + 8;
+    drawKPIBox("Resident verification", insights.verificationRate + "%", "Annual verification health", 15 + boxW + gap, y);
+    y += boxH + 10;
 
-    // Insights Box
-    doc.setFillColor(249, 250, 251); 
-    doc.setDrawColor(229, 231, 235);
-    doc.rect(15, y, 180, 22, 'FD');
+    // Insights Box - Improved padding
+    doc.setFillColor(248, 250, 252); 
+    doc.setDrawColor(226, 232, 240);
+    doc.rect(15, y, 180, 26, 'FD');
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text("Yearly Analytics:", 20, y + 5);
-    y += 8;
+    doc.setFontSize(9.5);
+    doc.setTextColor(30, 41, 59);
+    doc.text("Yearly Operational Analytics:", 22, y + 7);
+    y += 11;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
+    doc.setTextColor(51, 65, 85);
     if (insights.insights.length > 0) {
       insights.insights.forEach(msg => {
-        doc.text("• " + msg, 20, y);
-        y += 3.5;
+        doc.text("• " + msg, 22, y);
+        y += 4.5;
       });
     } else {
-      doc.text("• Annual operation is flowing normally.", 20, y);
-      y += 3.5;
+      doc.text("• Annual operation is flowing normally.", 22, y);
+      y += 4.5;
     }
-    doc.text(`Current annual state: ${insights.healthStatus}`, 20, y);
-    y += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Current annual state: ${insights.healthStatus}`, 22, y);
+    y += 15;
   }
 
   // --- 1. Parcel Management Overview ---
