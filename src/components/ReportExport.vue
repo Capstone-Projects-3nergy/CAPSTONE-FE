@@ -646,7 +646,8 @@ const handleExportPDF = () => {
     const rowHeight = 8;
     const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
     
-    checkPage(rowHeight * (data.length + 2));
+    // Only check if header + first row fits to prevent huge gaps after subheaders
+    checkPage(rowHeight * 2);
 
     // Header
     doc.setFillColor(243, 244, 246);
@@ -673,10 +674,17 @@ const handleExportPDF = () => {
     doc.setFont("helvetica", "normal");
     data.forEach((row, rowIndex) => {
       checkPage(rowHeight);
-      if (rowIndex % 2 === 1) {
+      const isTotalRow = hasTotal && rowIndex === data.length - 1;
+
+      if (isTotalRow) {
+        doc.setFillColor(243, 244, 246); // Gray background for total
+        doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
+        doc.setFont("helvetica", "bold");
+      } else if (rowIndex % 2 === 1) {
         doc.setFillColor(251, 252, 253);
         doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
       }
+
       doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
       doc.rect(15, y - 5, tableWidth, rowHeight, 'D');
 
@@ -684,23 +692,27 @@ const handleExportPDF = () => {
       row.forEach((cell, i) => {
         const align = (i === headers.length - 1 && i !== 0) ? 'right' : 'left';
         const textX = align === 'right' ? rowX + columnWidths[i] - 3 : rowX + 3;
-        doc.text(String(cell || '-'), textX, y, { align });
-        if (i < headers.length - 1) {
+        
+        // Don't show '-' for empty cells in total row or generally
+        const cellValue = (cell === null || cell === undefined || cell === '') ? '' : String(cell);
+        doc.text(cellValue, textX, y, { align });
+        
+        // In Total row, only show the divider line if the NEXT cell has a value
+        // This preserves lines for multi-column totals but hides them for "spanned" labels
+        const nextCell = row[i+1];
+        const nextHasValue = nextCell !== null && nextCell !== undefined && nextCell !== '';
+        const shouldShowDivider = isTotalRow ? nextHasValue : (i < headers.length - 1);
+        
+        if (shouldShowDivider && i < headers.length - 1) {
           doc.line(rowX + columnWidths[i], y - 5, rowX + columnWidths[i], y + 3);
         }
         rowX += columnWidths[i];
       });
       y += rowHeight;
+      if (isTotalRow) doc.setFont("helvetica", "normal");
     });
 
-    if (hasTotal) {
-      doc.setFont("helvetica", "bold");
-      doc.setFillColor(243, 244, 246);
-      doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
-      doc.rect(15, y - 5, tableWidth, rowHeight, 'D');
-      // Logic for total row is usually passed in data or handled here
-    }
-    y += 5;
+    y += 4;
   };
 
   // Main Header
@@ -795,7 +807,8 @@ const handleExportPDF = () => {
       ['Overdue', overdueList.length],
       ['Total', snapshot.total]
     ],
-    [130, 50]
+    [130, 50],
+    true
   );
 
   // 1.2 Historical Monthly Table (Parcels)
@@ -807,7 +820,8 @@ const handleExportPDF = () => {
       drawTable(
         ['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue'],
         hData,
-        [60, 40, 40, 40]
+        [60, 40, 40, 40],
+        true
       );
     });
   }
@@ -825,7 +839,8 @@ const handleExportPDF = () => {
     drawTable(
       ['Date', 'Resident', 'Tracking No.', 'Status'],
       rData,
-      [35, 50, 55, 40]
+      [35, 50, 55, 40],
+      true
     );
   }
 
@@ -842,7 +857,8 @@ const handleExportPDF = () => {
     drawTable(
       ['Received At', 'Resident', 'Tracking No.', 'Status'],
       oData,
-      [35, 50, 55, 40]
+      [35, 50, 55, 40],
+      true
     );
   }
 
@@ -859,7 +875,8 @@ const handleExportPDF = () => {
       ['Total Active Members', snapshot.activeResidents],
       ['Total registered', (snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents)]
     ],
-    [130, 50]
+    [130, 50],
+    true
   );
 
   // 2.2 Historical Monthly Summary (Residents)
@@ -871,7 +888,8 @@ const handleExportPDF = () => {
       drawTable(
         ['Month (MM/YYYY)', 'Total Registered'],
         rhData,
-        [130, 50]
+        [130, 50],
+        true
       );
     });
   }
@@ -889,7 +907,8 @@ const handleExportPDF = () => {
     drawTable(
       ['Name', 'Room', 'Email', 'Updated At'],
       pData,
-      [50, 30, 60, 40]
+      [50, 30, 60, 40],
+      true
     );
   }
 
@@ -911,7 +930,8 @@ const handleExportPDF = () => {
     drawTable(
       ['Rank', 'Name', 'Room No.', 'Parcels'],
       trData,
-      [20, 80, 40, 40]
+      [20, 80, 40, 40],
+      true
     );
   }
 
