@@ -286,6 +286,22 @@ const openResidentDatePicker = () => {
   }
 }
 
+const reportDateInput = ref(null)
+
+const openReportDatePicker = () => {
+  if (reportDateInput.value?.showPicker) {
+    reportDateInput.value.showPicker();
+  } else {
+    reportDateInput.value?.click();
+  }
+}
+
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 const formatDateForInput = (date, view) => {
   if (!date) return ''
   const d = new Date(date)
@@ -1360,14 +1376,40 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
           
           <div class="flex flex-wrap items-center gap-x-4 gap-y-3 px-1 py-2 mt-2">
             <!-- Date Selector -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap">Report Date:</span>
-              <div class="relative group">
-                <input 
-                  type="date" 
+              <div class="relative flex items-center group">
+                <!-- Premium Icon Overlay -->
+                <div 
+                  class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
+                  @click="openReportDatePicker"
+                >
+                  <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </div>
+                </div>
+                
+                <!-- Display Input (Text) with English Placeholder -->
+                <input
+                  type="text"
+                  readonly
+                  :value="selectedReportDate ? formatDateDisplay(selectedReportDate) : ''"
+                  placeholder="DD/MM/YYYY"
+                  @click="openReportDatePicker"
+                  class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[165px] sm:w-[185px] cursor-pointer relative z-0"
+                />
+                <!-- Hidden Native Date Input for Picker functionality -->
+                <input
+                  ref="reportDateInput"
+                  type="date"
                   v-model="selectedReportDate"
                   :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
-                  class="block w-full px-3 py-1.5 text-sm font-bold text-[#0E4B90] bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all cursor-pointer"
+                  class="absolute opacity-0 w-0 h-0 pointer-events-none"
                 />
               </div>
             </div>
