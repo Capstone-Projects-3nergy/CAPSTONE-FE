@@ -75,7 +75,6 @@ const statusOptions = computed(() => {
     ]
   }
 
-  // Fallback
   return [
     { value: s, label: s.replace(/_/g, ' ') }
   ]
@@ -166,7 +165,7 @@ const currentStepIndex = computed(() => {
   const s = currentStatus.value?.toUpperCase() || ''
   if (s === 'RECEIVED' || s === 'WAITING') return 1
   if (s === 'PICKED_UP') return 2
-  return 0 // WAITING_FOR_STAFF or anything else
+  return 0
 })
 </script>
 

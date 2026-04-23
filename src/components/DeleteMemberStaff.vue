@@ -21,7 +21,6 @@ const deletedProfile = ref(null)
 
 const resident = computed(() => props.residentData || {})
 
-/* ---------- move to trash ---------- */
 const moveToTrash = async () => {
   if (!resident.value.id) {
     console.error('No resident ID found')
@@ -37,13 +36,10 @@ const moveToTrash = async () => {
 
 
     if (!response || response === '404') {
-      console.error('❌ Delete failed')
       emit('redAlert')
       emit('cancelDetail', true)
       return
     }
-
-    // ✅ สำเร็จ
     userManager.moveMemberToTrash(resident.value.id)
     emit('confirmDetail', true)
   } catch (error) {

@@ -18,7 +18,6 @@ const router = useRouter()
 
 const announcement = computed(() => props.announcementData || {})
 
-/* ---------- move to trash ---------- */
 const moveToTrash = async () => {
   if (!announcement.value.id) {
     console.error('No announcement ID found')
@@ -33,7 +32,6 @@ const moveToTrash = async () => {
     )
 
     if (!response || response === '404') {
-      console.error('❌ Delete failed')
       emit('redAlert')
       emit('cancelDetail', true)
       return

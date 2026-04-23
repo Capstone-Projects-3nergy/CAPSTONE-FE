@@ -353,14 +353,11 @@ const submitAnnouncement = async () => {
     }, 10000)
     return
   }
-
-  // Whitespace check
   titleWhitespaceError.value = hasWhitespace(title.value)
   subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
   contentWhitespaceError.value = hasWhitespace(content.value)
 
   if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
-    // We scroll to the top to see the errors or let them see inline
     setTimeout(() => {
       titleWhitespaceError.value = false
       subtitleWhitespaceError.value = false
@@ -369,7 +366,6 @@ const submitAnnouncement = async () => {
     return
   }
 
-  // Duplicate Title check
   const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
   if (isDuplicate) {
     titleDuplicateError.value = true
@@ -402,7 +398,7 @@ const submitAnnouncement = async () => {
       priority: 1,
       publishAt: publishAt.value ? (publishAt.value.includes('T') && publishAt.value.length === 16 ? publishAt.value + ':00' : publishAt.value) : null,
       publishNow: true,
-      coverImageUrl: "" // Backend คาดหวังฟิลด์นี้ (ใส่ว่างไว้ก่อนถ้ายังไม่ได้ upload ภาพแยก)
+      coverImageUrl: ""
     }
 
     if (imageFile.value) {
@@ -471,7 +467,6 @@ const saveDraft = async () => {
   titleError.value = false
   categoryError.value = false
   contentError.value = false
-  // Whitespace check
   titleWhitespaceError.value = hasWhitespace(title.value)
   subtitleWhitespaceError.value = hasWhitespace(subtitle.value)
   contentWhitespaceError.value = hasWhitespace(content.value)
@@ -479,8 +474,6 @@ const saveDraft = async () => {
   if (titleWhitespaceError.value || subtitleWhitespaceError.value || contentWhitespaceError.value) {
     hasError = true
   }
-
-  // Duplicate Title check
   const isDuplicate = announcementManager.announcements.some(a => a.title.trim().toLowerCase() === title.value.trim().toLowerCase())
   if (isDuplicate) {
     titleDuplicateError.value = true
@@ -959,7 +952,6 @@ const returnLoginPage = async () => {
                         customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                       >
                         <template v-if="currentCategory" #icon>
-                          <!-- Dynamic Icon Mapping for SelectWeb -->
                           <svg v-if="currentCategory.name.includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                           <svg v-else-if="currentCategory.name.includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                           <svg v-else-if="currentCategory.name.includes('Event') || currentCategory.name.includes('Activity')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -968,7 +960,6 @@ const returnLoginPage = async () => {
                         </template>
                       </SelectWeb>
                    </div>
-                   <!-- Publish Date (Conditional) -->
                    <div v-if="activeTab === 'draft'" class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date</label>
                       <div class="relative flex items-center group">
@@ -990,7 +981,6 @@ const returnLoginPage = async () => {
                           </div>
                         </div>
                         
-                        <!-- Display Input (Text) -->
                         <input 
                            type="text" 
                            readonly
@@ -1001,7 +991,6 @@ const returnLoginPage = async () => {
                            :class="{ 'text-red-600 border-red-500 ring-2 ring-red-100': showDateError }"
                         />
 
-                        <!-- Hidden Native Datetime Input -->
                         <input
                            ref="dateInput"
                            type="datetime-local" 
@@ -1012,11 +1001,8 @@ const returnLoginPage = async () => {
                       </div>
                    </div>
                 </div>
-
-                <!-- Content -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Content <span class="text-red-500">*</span></label>
-                   <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentLengthError || contentWhitespaceError || contentError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
@@ -1043,7 +1029,6 @@ const returnLoginPage = async () => {
                     </div>
                 </div>
 
-                <!-- Cover Image Upload -->
                 <div class="space-y-2">
                   <label class="text-sm font-semibold text-gray-700">Cover Image (Optional)</label>
                   
@@ -1072,8 +1057,6 @@ const returnLoginPage = async () => {
                        class="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm cursor-zoom-in" 
                        @click="toggleLightbox"
                      />
-                     
-                     <!-- Image Actions Overlay -->
                      <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                        <button 
                          @click="removeImage" 
@@ -1154,9 +1137,6 @@ const returnLoginPage = async () => {
     </div>
     <LoadingPopUp v-if="isLoading" />
 
-
-
-    <!-- Lightbox Overlay -->
     <Transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-10" @click="toggleLightbox">
           <button class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 cursor-pointer z-[210]">
