@@ -35,14 +35,37 @@ const props = defineProps({
   selectedDate: {
     type: String,
     default: () => new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
+  },
+  endDate: {
+    type: String,
+    default: ''
+  },
+  mode: {
+    type: String,
+    default: 'daily'
   }
 })
 
 const displayDate = computed(() => {
-  if (!props.selectedDate) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const d = new Date(props.selectedDate);
-  if (isNaN(d.getTime())) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (props.mode === 'daily') {
+    const d = new Date(props.selectedDate || new Date());
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  if (props.mode === 'range') {
+    const d1 = new Date(props.selectedDate);
+    const d2 = new Date(props.endDate);
+    return `${d1.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${d2.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  }
+  if (props.mode === 'weekly') {
+    const { start, end } = dateRange.value;
+    return `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  }
+  if (props.mode === 'monthly') {
+    const [year, month] = props.selectedDate.split('-');
+    const date = new Date(year, month - 1);
+    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  return props.selectedDate;
 })
 
 const formatDate = (dateStr) => {
@@ -57,12 +80,37 @@ const formatDateTime = (dateStr) => {
   return isNaN(d.getTime()) ? '-' : d.toLocaleString()
 }
 
-// Base date for calculations (end of selected day)
-const snapshotDate = computed(() => {
-  const d = props.selectedDate ? new Date(props.selectedDate) : new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
+// Date range for activity calculations
+const dateRange = computed(() => {
+  let start = new Date(props.selectedDate);
+  let end = new Date(props.endDate || props.selectedDate);
+
+  if (props.mode === 'daily') {
+    start = new Date(props.selectedDate);
+    end = new Date(props.selectedDate);
+  } else if (props.mode === 'weekly') {
+    // Parse YYYY-Www
+    const [year, week] = props.selectedDate.split('-W').map(Number);
+    const simple = new Date(year, 0, 1 + (week - 1) * 7);
+    const dow = simple.getDay();
+    start = new Date(simple);
+    if (dow <= 4) start.setDate(simple.getDate() - simple.getDay() + 1);
+    else start.setDate(simple.getDate() + 8 - simple.getDay());
+    
+    end = new Date(start);
+    end.setDate(start.getDate() + 6);
+  } else if (props.mode === 'monthly') {
+    const [year, month] = props.selectedDate.split('-').map(Number);
+    start = new Date(year, month - 1, 1);
+    end = new Date(year, month, 0);
+  }
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
 })
+
+const snapshotDate = computed(() => dateRange.value.end)
 
 // Helper to get parcel status at specific date
 const getStatusAtDate = (parcel, date) => {
@@ -84,12 +132,9 @@ const getStatusAtDate = (parcel, date) => {
   return createdAt <= date ? 'RECEIVED' : null;
 }
 
-// Calculate Daily Activity Stats (What happened ON the selected date)
+// Calculate Activity Stats (What happened WITHIN the selected range)
 const dailyStats = computed(() => {
-  const dateStr = props.selectedDate || new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
-  const targetDate = new Date(dateStr);
-  const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+  const { start: startRange, end: endRange } = dateRange.value;
 
   const res = {
     received: 0,
@@ -101,7 +146,7 @@ const dailyStats = computed(() => {
 
   props.parcels.forEach(p => {
     const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
-    if (arrivalDate >= startOfDay && arrivalDate <= endOfDay) {
+    if (arrivalDate >= startRange && arrivalDate <= endRange) {
       res.received++;
     }
 
@@ -110,7 +155,7 @@ const dailyStats = computed(() => {
       isPickedUpOnDay = p.statusHistory.some(h => {
         const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
         const ts = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
-        return (s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startOfDay && ts <= endOfDay);
+        return (s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startRange && ts <= endRange);
       });
     }
 
@@ -118,7 +163,7 @@ const dailyStats = computed(() => {
     if (!isPickedUpOnDay) {
       const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
       const ts = new Date(p.updatedAt || p.date);
-      if ((s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startOfDay && ts <= endOfDay)) {
+      if ((s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startRange && ts <= endRange)) {
         isPickedUpOnDay = true;
       }
     }
@@ -128,7 +173,7 @@ const dailyStats = computed(() => {
 
   props.members.forEach(m => {
     const joinDate = new Date(m.createdAt || m.updateAt);
-    if (joinDate >= startOfDay && joinDate <= endOfDay) {
+    if (joinDate >= startRange && joinDate <= endRange) {
       res.joined++;
       const s = (m.status || '').toUpperCase();
       if (s !== 'PENDING') res.verified++;
@@ -140,10 +185,9 @@ const dailyStats = computed(() => {
 
 // Calculate Yearly Stats for the year of selectedDate (for KPI Summary)
 const yearlyStats = computed(() => {
-  const date = props.selectedDate ? new Date(props.selectedDate) : new Date();
-  const year = date.getFullYear();
-  const startOfYear = new Date(year, 0, 1, 0, 0, 0, 0);
   const endLimit = snapshotDate.value;
+  const year = endLimit.getFullYear();
+  const startOfYear = new Date(year, 0, 1, 0, 0, 0, 0);
 
   const res = {
     total: 0,
@@ -421,7 +465,7 @@ const businessInsights = computed(() => {
   let healthStatus = 'STABLE';
   let insights = [];
   
-  const yearStr = props.selectedDate ? new Date(props.selectedDate).getFullYear() : new Date().getFullYear();
+  const yearStr = snapshotDate.value.getFullYear();
 
   if (overdueRate > 15) {
     healthStatus = 'CRITICAL BACKLOG';
@@ -462,7 +506,7 @@ const handleExportExcel = () => {
   // 1. MAIN FILE HEADER
   const finalData = [
     ['Dormitory Management System - Summary Report'],
-    ['Report Issue Date:', displayDate.value],
+    ['Reporting Period:', displayDate.value],
     []
   ];
 
@@ -583,7 +627,8 @@ const handleExportExcel = () => {
   XLSX.utils.book_append_sheet(wb, ws, "Summary Report");
 
   ws['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 15 }];
-  XLSX.writeFile(wb, `Dormitory_Dashboard_${props.selectedDate}.xlsx`);
+  const sanitizedDate = displayDate.value.replace(/ /g, '_').replace(/\//g, '-');
+  XLSX.writeFile(wb, `Dormitory_Dashboard_${sanitizedDate}.xlsx`);
 };
 
 const handleExportPDF = () => {
@@ -724,7 +769,7 @@ const handleExportPDF = () => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2]);
-  doc.text(`Report Issue Date: ${displayDate.value}`, 105, y, { align: 'center' });
+  doc.text(`Reporting Period: ${displayDate.value}`, 105, y, { align: 'center' });
   y += 6;
   doc.setDrawColor(brandColor[0], brandColor[1], brandColor[2]);
   doc.setLineWidth(0.5);
@@ -935,7 +980,8 @@ const handleExportPDF = () => {
     );
   }
 
-  doc.save(`Dormitory_Summary_Report_${props.selectedDate}.pdf`);
+  const sanitizedDate = displayDate.value.replace(/ /g, '_').replace(/\//g, '-');
+  doc.save(`Dormitory_Summary_Report_${sanitizedDate}.pdf`);
 };
 
 const handlePrintSummary = () => {
@@ -964,7 +1010,7 @@ defineExpose({
           <td>
             <div class="print-header">
               <h1>Dormitory Management System - Summary Report</h1>
-              <p class="text-gray-600">Report Issue Date: {{ displayDate }}</p>
+              <p class="text-gray-600">Reporting Period: {{ displayDate }}</p>
             </div>
 
             <!-- --- PERFORMANCE SUMMARY SECTION --- -->

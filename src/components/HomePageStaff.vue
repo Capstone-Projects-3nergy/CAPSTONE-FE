@@ -20,6 +20,43 @@ import { useSidebarManager } from '@/stores/SidebarManager'
 
 import { useUserManager } from '@/stores/MemberAndStaffManager'
 import ReportExport from './ReportExport.vue'
+import SelectWeb from './SelectWeb.vue'
+
+const formatDateForInput = (date, view) => {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  
+  if (view === 'monthly') {
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+  } else if (view === 'weekly') {
+    // ISO week calculation
+    const tempDate = new Date(d.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
+  } else {
+    // daily
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+}
+
+const getDateFromWeek = (weekStr) => {
+  const [year, week] = weekStr.split('-W').map(Number);
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  const isoWeekStart = simple;
+  if (dow <= 4)
+    isoWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  else
+    isoWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  return isoWeekStart;
+}
 
 const sidebarManager = useSidebarManager()
 const { isCollapsed } = storeToRefs(sidebarManager)
@@ -28,6 +65,39 @@ const { toggleSidebar } = sidebarManager
 
 const reportExportRef = ref(null)
 const selectedReportDate = ref(new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0])
+const reportEndDate = ref(new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0])
+const reportMode = ref('daily')
+
+const maxReportDate = computed(() => {
+  const localNow = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+  return formatDateForInput(localNow, reportMode.value)
+})
+
+const reportModeOptions = [
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Custom Range', value: 'range' }
+]
+
+watch(reportMode, (newMode) => {
+  rangeError.value = false
+  if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+  const localNow = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+  const localDateStr = localNow.toISOString().split('T')[0]
+  
+  if (newMode === 'range') {
+    selectedReportDate.value = ''
+    reportEndDate.value = ''
+  } else if (newMode === 'daily') {
+    selectedReportDate.value = localDateStr
+    reportEndDate.value = localDateStr
+  } else if (newMode === 'weekly') {
+    selectedReportDate.value = formatDateForInput(localNow, 'weekly')
+  } else if (newMode === 'monthly') {
+    selectedReportDate.value = formatDateForInput(localNow, 'monthly')
+  }
+})
 
 const loginManager = useAuthManager()
 const userManager = useUserManager()
@@ -296,47 +366,39 @@ const openReportDatePicker = () => {
   }
 }
 
-const formatDateDisplay = (dateStr) => {
+const formatDateDisplay = (dateStr, mode = 'daily') => {
   if (!dateStr) return '';
+  
+  if (mode === 'monthly') {
+    const [year, month] = dateStr.split('-');
+    const date = new Date(year, month - 1);
+    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  
+  if (mode === 'weekly') {
+    // Assuming dateStr is YYYY-Www
+    const start = getDateFromWeek(dateStr);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    
+    const startStr = start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const endStr = end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${startStr} - ${endStr}`;
+  }
+
   const [year, month, day] = dateStr.split('-');
   return `${day}/${month}/${year}`;
 }
 
-const formatDateForInput = (date, view) => {
-  if (!date) return ''
-  const d = new Date(date)
-  const year = d.getFullYear()
-  
-  if (view === 'monthly') {
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    return `${year}-${month}`
-  } else if (view === 'weekly') {
-    // ISO week calculation
-    const tempDate = new Date(d.getTime());
-    tempDate.setHours(0, 0, 0, 0);
-    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
-    const week1 = new Date(tempDate.getFullYear(), 0, 4);
-    const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
+const reportEndDateInput = ref(null)
+const openReportEndDatePicker = () => {
+  if (reportEndDateInput.value?.showPicker) {
+    reportEndDateInput.value.showPicker();
   } else {
-    // daily
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
+    reportEndDateInput.value?.click();
   }
 }
 
-const getDateFromWeek = (weekStr) => {
-  const [year, week] = weekStr.split('-W').map(Number);
-  const simple = new Date(year, 0, 1 + (week - 1) * 7);
-  const dow = simple.getDay();
-  const isoWeekStart = simple;
-  if (dow <= 4)
-    isoWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
-  else
-    isoWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
-  return isoWeekStart;
-}
 
 const handleDateChange = (dateStr, type) => {
   if (!dateStr) return
@@ -1082,10 +1144,45 @@ const showProfileStaffPage = async function () {
 }
 const activeTab = ref('parcel')
 
-const handleExportExcel = () => reportExportRef.value?.handleExportExcel();
+const rangeError = ref(false)
+let rangeErrorTimeout = null
 
-const handleExportPDF = () => reportExportRef.value?.handleExportPDF();
-const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
+const validateReportRange = () => {
+  if (reportMode.value === 'range') {
+    if (!selectedReportDate.value || !reportEndDate.value) {
+      rangeError.value = true
+      if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+      rangeErrorTimeout = setTimeout(() => {
+        rangeError.value = false
+      }, 10000)
+      return false
+    }
+  }
+  rangeError.value = false
+  return true
+}
+
+const handleExportExcel = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handleExportExcel()
+}
+
+const handleExportPDF = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handleExportPDF()
+}
+
+const handlePrintSummary = () => {
+  if (!validateReportRange()) return
+  reportExportRef.value?.handlePrintSummary()
+}
+
+watch([selectedReportDate, reportEndDate], () => {
+  if (rangeError.value) {
+    rangeError.value = false
+    if (rangeErrorTimeout) clearTimeout(rangeErrorTimeout)
+  }
+})
 </script>
 
 <template>
@@ -1105,6 +1202,8 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
       :parcels="getMappedParcels"
       :members="dashboardStore.members"
       :selectedDate="selectedReportDate"
+      :endDate="reportEndDate"
+      :mode="reportMode"
     />
      <div class="fixed top-20 px-6 mt-4 z-[9999] no-print">
       <AlertPopUp
@@ -1374,79 +1473,139 @@ const handlePrintSummary = () => reportExportRef.value?.handlePrintSummary();
             </div>
           </div>
           
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-3 px-1 py-2 mt-2">
-            <!-- Date Selector -->
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap">Report Date:</span>
-              <div class="relative flex items-center group">
-                <!-- Premium Icon Overlay -->
-                <div 
-                  class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
-                  @click="openReportDatePicker"
-                >
-                  <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
+          <!-- Report Control Panel -->
+          <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2 px-2 py-3 mt-2 bg-gray-50/30 rounded-2xl border border-gray-100/50">
+            <!-- Period Selection Row -->
+            <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2">
+              <!-- Mode Selector -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Filter By:</span>
+                <div class="w-[160px]">
+                  <SelectWeb
+                    v-model="reportMode"
+                    :options="reportModeOptions"
+                    customClass="bg-white border border-gray-200 rounded-xl px-2 h-[40px] hover:border-blue-400 transition-all font-bold text-sm text-[#0E4B90]"
+                  />
+                </div>
+              </div>
+
+              <!-- Date Selector(s) -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Period:</span>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-col relative">
+                    <div class="flex flex-nowrap items-center gap-1.5 sm:gap-2">
+                      <!-- Start Date / Main Picker -->
+                      <div class="relative flex items-center group">
+                        <div class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer" @click="openReportDatePicker">
+                          <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100" :class="{'border-red-200 text-red-500': rangeError && !selectedReportDate}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          readonly
+                          :value="formatDateDisplay(selectedReportDate, reportMode)"
+                          :placeholder="reportMode === 'weekly' ? 'Select Week' : (reportMode === 'monthly' ? 'Select Month' : 'DD/MM/YYYY')"
+                          @click="openReportDatePicker"
+                          class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-10 sm:pl-13 pr-2 sm:pr-4 py-2 font-bold text-xs sm:text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[130px] sm:w-[210px] min-w-0 flex-1 sm:flex-none cursor-pointer relative z-0"
+                          :class="{'border-red-400 bg-red-50/30 text-red-600 placeholder-red-300': rangeError && !selectedReportDate}"
+                        />
+                        <input
+                          ref="reportDateInput"
+                          :type="reportMode === 'weekly' ? 'week' : (reportMode === 'monthly' ? 'month' : 'date')"
+                          v-model="selectedReportDate"
+                          :max="maxReportDate"
+                          class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                        />
+                      </div>
+
+                      <!-- End Date (Only for Range mode) -->
+                      <template v-if="reportMode === 'range'">
+                        <span class="text-xs font-black text-gray-400 mx-1" :class="{'text-red-500': rangeError && (!selectedReportDate || !reportEndDate)}">to</span>
+                        <div class="relative flex items-center group">
+                          <div class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer" @click="openReportEndDatePicker">
+                            <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100" :class="{'border-red-200 text-red-500': rangeError && !reportEndDate}">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                              </svg>
+                            </div>
+                          </div>
+                          <input
+                            type="text"
+                            readonly
+                            :value="formatDateDisplay(reportEndDate)"
+                            placeholder="DD/MM/YYYY"
+                            @click="openReportEndDatePicker"
+                            class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-10 sm:pl-13 pr-2 sm:pr-4 py-2 font-bold text-xs sm:text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[130px] sm:w-[185px] min-w-0 flex-1 sm:flex-none cursor-pointer relative z-0"
+                            :class="{'border-red-400 bg-red-50/30 text-red-600 placeholder-red-300': rangeError && !reportEndDate}"
+                          />
+                          <input
+                            ref="reportEndDateInput"
+                            type="date"
+                            v-model="reportEndDate"
+                            :min="selectedReportDate"
+                            :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
+                            class="absolute opacity-0 w-0 h-0 pointer-events-none"
+                          />
+                        </div>
+                      </template>
+                    </div>
+
+                    <!-- Error Message (Positioned absolutely to prevent layout shift) -->
+                    <div v-if="rangeError" class="absolute -bottom-4 left-0 flex items-center text-[10px] text-red-600 font-bold animate-in fade-in slide-in-from-top-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 mr-1">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                      </svg>
+                      Please select both start and end dates for Custom Range.
+                    </div>
                   </div>
                 </div>
-                
-                <!-- Display Input (Text) with English Placeholder -->
-                <input
-                  type="text"
-                  readonly
-                  :value="selectedReportDate ? formatDateDisplay(selectedReportDate) : ''"
-                  placeholder="DD/MM/YYYY"
-                  @click="openReportDatePicker"
-                  class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[165px] sm:w-[185px] cursor-pointer relative z-0"
-                />
-                <!-- Hidden Native Date Input for Picker functionality -->
-                <input
-                  ref="reportDateInput"
-                  type="date"
-                  v-model="selectedReportDate"
-                  :max="new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]"
-                  class="absolute opacity-0 w-0 h-0 pointer-events-none"
-                />
               </div>
             </div>
 
-            <div class="h-8 w-[1px] bg-gray-200 hidden xs:block"></div>
+            <div class="h-[1px] w-full bg-gray-100 lg:hidden my-2"></div>
+            <div class="h-8 w-[1px] bg-gray-200 hidden lg:block"></div>
 
             <!-- Export & Print Actions -->
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap">Export:</span>
-              <button 
-                @click="handleExportExcel"
-                class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
-                <span class="hidden xs:inline">Excel</span>
-                <span class="xs:hidden text-[10px]">XLS</span>
-              </button>
-              <button 
-                @click="handleExportPDF"
-                class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
-                <span class="hidden xs:inline">PDF</span>
-                <span class="xs:hidden text-[10px]">PDF</span>
-              </button>
-              <button 
-                @click="handlePrintSummary"
-                class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span class="hidden xs:inline">Print</span>
-                <span class="xs:hidden text-[10px]">Print</span>
-              </button>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Export:</span>
+              <div class="flex flex-wrap items-center gap-2 flex-1">
+                <button 
+                  @click="handleExportExcel"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-green-400 cursor-pointer transition-all shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M4 10l16 0" /><path d="M10 4l0 16" /></svg>
+                  <span>XLS</span>
+                </button>
+                <button 
+                  @click="handleExportPDF"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-red-400 cursor-pointer transition-all shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 15l2 0" /><path d="M13 17v-4" /></svg>
+                  <span>PDF</span>
+                </button>
+                <button 
+                  @click="handlePrintSummary"
+                  class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#1D355E] hover:bg-gray-50 hover:border-[#0E4B90] cursor-pointer transition-all shadow-sm"
+                >
+                  <svg class="w-4 h-4 text-[#0E4B90]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                  <span>Print</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Welcome Banner & Date -->
+        <!-- Welcome Banner & Date -->
           <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-2 sm:gap-4 transition-all duration-300 hover:shadow-md">
             <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
               <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105 flex-shrink-0">
