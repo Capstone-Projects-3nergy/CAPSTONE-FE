@@ -75,12 +75,12 @@ const roomNumberWhitespaceError = ref(false)
 const positionWhitespaceError = ref(false)
 const dormList = ref([])
 
-const hasFullNameError = computed(() => isNameOverLimit.value || isFullNameWeak.value || isFullNameWrong.value || fullNameWhitespaceError.value || (whitespaceError.value && !form.fullName.trim()) || error.value)
-const hasEmailError = computed(() => isEmailOverLimit.value || isEmailInvalidChars.value || incorrectemailform.value || isEmailExist.value || isEmailDuplicate.value || isEmailFirebase.value || emailWhitespaceError.value || isEmailStaff.value || (whitespaceError.value && !form.email.trim()) || error.value)
-const hasPasswordError = computed(() => isPasswordTooShort.value || passwordWhitespaceError.value || isPasswordOverLimit.value || isPasswordWeak.value || isPasswordNotMatch.value || (whitespaceError.value && !form.password.trim()) || error.value)
-const hasConfirmPasswordError = computed(() => isConfirmPasswordTooShort.value || confirmPasswordWhitespaceError.value || isConfirmPasswordOverLimit.value || isNotMatch.value || (whitespaceError.value && !form.confirmPassword.trim()) || error.value)
-const hasRoomNumberError = computed(() => isRoomNumberOverLimit.value || roomidnotnumber.value || isRoomRequired.value || roomNumberWhitespaceError.value || (whitespaceError.value && !form.roomNumber.trim()) || error.value)
-const hasPositionError = computed(() => positionWhitespaceError.value || isStaffPositionOverLimit.value || isStaffPositionTooShort.value || isPositionRequired.value || isPositionWrong.value || (whitespaceError.value && !form.position.trim()) || error.value)
+const hasFullNameError = computed(() => isNameOverLimit.value || isFullNameWeak.value || isFullNameWrong.value || fullNameWhitespaceError.value || (whitespaceError.value && !form.fullName.trim()) )
+const hasEmailError = computed(() => isEmailOverLimit.value || isEmailInvalidChars.value || incorrectemailform.value || isEmailExist.value || isEmailDuplicate.value || isEmailFirebase.value || emailWhitespaceError.value || isEmailStaff.value || (whitespaceError.value && !form.email.trim()) )
+const hasPasswordError = computed(() => isPasswordTooShort.value || passwordWhitespaceError.value || isPasswordOverLimit.value || isPasswordWeak.value || isPasswordNotMatch.value || (whitespaceError.value && !form.password.trim()) )
+const hasConfirmPasswordError = computed(() => isConfirmPasswordTooShort.value || confirmPasswordWhitespaceError.value || isConfirmPasswordOverLimit.value || isNotMatch.value || (whitespaceError.value && !form.confirmPassword.trim()) )
+const hasRoomNumberError = computed(() => isRoomNumberOverLimit.value || roomidnotnumber.value || isRoomRequired.value || roomNumberWhitespaceError.value || (whitespaceError.value && !form.roomNumber.trim()) )
+const hasPositionError = computed(() => positionWhitespaceError.value || isStaffPositionOverLimit.value || isStaffPositionTooShort.value || isPositionRequired.value || isPositionWrong.value || (whitespaceError.value && !form.position.trim()) )
 
 watch(role, (newRole) => {
   if (newRole === 'resident') {
