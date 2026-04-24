@@ -81,12 +81,20 @@ const formatDateTime = (dateStr) => {
 }
 
 const dateRange = computed(() => {
-  let start = new Date(props.selectedDate);
-  let end = new Date(props.endDate || props.selectedDate);
+  const parse = (s) => {
+    if (!s) return new Date();
+    const parts = s.split('-');
+    if (parts.length === 3) return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    if (parts.length === 2) return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+    return new Date(s);
+  };
+
+  let start = parse(props.selectedDate);
+  let end = parse(props.endDate || props.selectedDate);
 
   if (props.mode === 'daily') {
-    start = new Date(props.selectedDate);
-    end = new Date(props.selectedDate);
+    start = parse(props.selectedDate);
+    end = parse(props.selectedDate);
   } else if (props.mode === 'weekly') {
     const [year, week] = props.selectedDate.split('-W').map(Number);
     const simple = new Date(year, 0, 1 + (week - 1) * 7);
@@ -104,76 +112,65 @@ const dateRange = computed(() => {
   }
 
   start.setHours(0, 0, 0, 0);
-  end.setHours(23, 59, 59, 999);
+  
+  const now = new Date();
+  const compareEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  const compareToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  if (compareEnd >= compareToday) {
+    end = now;
+  } else {
+    end.setHours(23, 59, 59, 999);
+  }
+  
   return { start, end };
 })
 
 const snapshotDate = computed(() => dateRange.value.end)
 
 const getStatusAtDate = (parcel, date) => {
-  if (!parcel.statusHistory || !Array.isArray(parcel.statusHistory) || parcel.statusHistory.length === 0) {
-    const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
-    return createdAt <= date ? (parcel.status || 'WAITING') : null;
+  const arrivalDate = new Date(parcel.receiveAt || parcel.createdAt || parcel.date);
+  if (arrivalDate > date) return null;
+
+  if (parcel.statusHistory && Array.isArray(parcel.statusHistory) && parcel.statusHistory.length > 0) {
+    const validHistory = parcel.statusHistory
+      .map(h => ({ ...h, ts: new Date(h.timestamp || h.updatedAt || h.createdAt || h.date) }))
+      .filter(h => h.ts <= date)
+      .sort((a, b) => b.ts - a.ts);
+
+    if (validHistory.length > 0) return validHistory[0].status;
   }
 
-  const validHistory = parcel.statusHistory
-    .map(h => ({ ...h, ts: new Date(h.timestamp || h.updatedAt || h.createdAt || h.date) }))
-    .filter(h => h.ts <= date)
-    .sort((a, b) => b.ts - a.ts);
-
-  if (validHistory.length > 0) return validHistory[0].status;
+  const currentStatus = (parcel.status || '').toUpperCase().replace(/_/g, ' ');
   
-  const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
-  return createdAt <= date ? 'WAITING' : null;
-}
-const dailyStats = computed(() => {
-  const { start: startRange, end: endRange } = dateRange.value;
-
-  const res = {
-    waiting: 0,
-    pickedUp: 0,
-    overdueToday: 0, 
-    joined: 0,
-    verified: 0
-  };
-
-  props.parcels.forEach(p => {
-    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
-    if (arrivalDate >= startRange && arrivalDate <= endRange) {
-      res.waiting++;
-    }
-
-    let isPickedUpOnDay = false;
-    if (p.statusHistory && Array.isArray(p.statusHistory)) {
-      isPickedUpOnDay = p.statusHistory.some(h => {
-        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
-        const ts = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
-        return (s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startRange && ts <= endRange);
-      });
-    }
-
-    if (!isPickedUpOnDay) {
-      const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
-      const ts = new Date(p.updatedAt || p.date);
-      if ((s.includes('PICKED UP') || s.includes('TAKEN')) && (ts >= startRange && ts <= endRange)) {
-        isPickedUpOnDay = true;
+  if (currentStatus.includes('PICKED UP') || currentStatus.includes('TAKEN')) {
+    const pickupDate = new Date(parcel.pickedUpAt || parcel.updatedAt);
+    if (pickupDate > date) {
+      const verifiedDate = new Date(parcel.updatedAt);
+      if (verifiedDate > date) {
+         return 'WAITING FOR STAFF';
       }
+      return 'WAITING';
     }
+    return 'PICKED UP';
+  }
 
-    if (isPickedUpOnDay) res.pickedUp++;
-  });
-
-  props.members.forEach(m => {
-    const joinDate = new Date(m.createdAt || m.updateAt);
-    if (joinDate >= startRange && joinDate <= endRange) {
-      res.joined++;
-      const s = (m.status || '').toUpperCase();
-      if (s !== 'PENDING') res.verified++;
+  if (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus.includes('NOTIFIED')) {
+    const verifiedDate = new Date(parcel.updatedAt);
+    if (verifiedDate > date) {
+      return 'WAITING FOR STAFF';
     }
-  });
+    return 'WAITING';
+  }
+  
+  if (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) {
+    return 'WAITING FOR STAFF';
+  }
+  
+  return parcel.status || 'WAITING';
+}
 
-  return res;
-});
+
 
 const yearlyStats = computed(() => {
   const endLimit = snapshotDate.value;
@@ -248,7 +245,7 @@ const yearlyStats = computed(() => {
 });
 
 const dynamicStats = computed(() => {
-  const date = snapshotDate.value;
+  const { start, end } = dateRange.value;
   const result = {
     total: 0,
     pickedUp: 0,
@@ -261,33 +258,51 @@ const dynamicStats = computed(() => {
   };
 
   props.parcels.forEach(p => {
-    const status = getStatusAtDate(p, date);
-    if (!status) return;
-
-    result.total++;
-    const s = status.toUpperCase().replace(/_/g, ' ');
+    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+    const updateDate = new Date(p.updatedAt || p.updateAt);
+    const currentStatus = (p.status || '').toUpperCase().replace(/[\s_-]/g, '');
     
-    if (s.includes('PICKED UP') || s.includes('TAKEN')) {
-      result.pickedUp++;
-    } else if (s.includes('WAITING FOR STAFF') || s.includes('STAFF')) {
-      result.waitingForStaff++;
-      result.awaiting++;
-    } else {
-      const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
-      const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000;
-      if ((date - receiveDate) > overdueThresholdMs) {
-        result.overdue++;
-      } else {
-        result.awaiting++;
+    const isArrivalInRange = !isNaN(arrivalDate.getTime()) && arrivalDate >= start && arrivalDate <= end;
+    const isUpdateInRange = !isNaN(updateDate.getTime()) && updateDate >= start && updateDate <= end;
+    
+    const history = p.statusHistory || [];
+    const hasStatusInRange = (keywords) => history.some(h => {
+      const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+      const d = new Date(h.timestamp || h.updatedAt || h.createdAt);
+      return !isNaN(d.getTime()) && d >= start && d <= end && keywords.some(kw => s.includes(kw));
+    });
+
+    const isPickedUpInRange = hasStatusInRange(['PICKEDUP', 'TAKEN']) || 
+                             ((currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange);
+    if (isPickedUpInRange) result.pickedUp++;
+    const isStaffInRange = hasStatusInRange(['STAFF', 'PENDING']) ||
+                          ((currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange);
+    if (isStaffInRange) result.waitingForStaff++;
+
+    const isWaitingInRange = (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus.includes('NOTIFIED')) && 
+                             !currentStatus.includes('STAFF') && isArrivalInRange && !currentStatus.includes('OVERDUE');
+    if (isWaitingInRange) result.awaiting++;
+
+    let isOverdueInRange = hasStatusInRange(['OVERDUE']);
+    if (!isOverdueInRange && !isNaN(arrivalDate.getTime())) {
+      const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000));
+      if (overdueDate >= start && overdueDate <= end && 
+          !(currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')) && 
+          !(currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))) {
+        isOverdueInRange = true;
       }
+    }
+    if (isOverdueInRange) result.overdue++;
+
+    if (isArrivalInRange || isUpdateInRange || isPickedUpInRange || isStaffInRange || isOverdueInRange) {
+      result.total++;
     }
   });
 
   props.members.forEach(m => {
     const joinDate = new Date(m.createdAt || m.updateAt);
-    if (joinDate > date) return;
+    if (joinDate > end) return;
 
-    // Filter to count only RESIDENTS, not STAFF
     const role = (m.role || m.Role || '').toUpperCase();
     if (role !== 'RESIDENT') return;
 
@@ -297,7 +312,6 @@ const dynamicStats = computed(() => {
     } else if (s === 'INACTIVE') {
       result.inactiveResidents++;
     } else {
-      // Any other status that is not PENDING or INACTIVE is considered ACTIVE
       result.activeResidents++;
     }
   });
@@ -316,18 +330,29 @@ const filteredParcels = computed(() => {
 const filteredOverdue = computed(() => {
   const date = snapshotDate.value;
   const overdueThresholdMs = 24 * 60 * 60 * 1000;
-  return filteredParcels.value.filter(p => {
-    const s = (p.currentStatus || '').toUpperCase();
-    if (s.includes('PICKED UP') || s.includes('TAKEN') || s.includes('STAFF')) return false;
+  
+  return props.parcels.filter(p => {
+    const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
+    if (isNaN(arrivalDate.getTime()) || arrivalDate > date) return false;
+
+    // Check status at the snapshot date
+    const statusAtDate = getStatusAtDate(p, date);
+    if (!statusAtDate) return false;
+
+    const s = statusAtDate.toUpperCase().replace(/[\s_-]/g, '');
     
-    const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
-    return (date - receiveDate) > overdueThresholdMs;
+    // It's overdue if it's not picked up, not staff, and older than 24h as of 'date'
+    const isPickedUp = s.includes('PICKEDUP') || s.includes('TAKEN');
+    const isStaff = s.includes('STAFF') || s.includes('PENDING');
+    const isOverdueAtDate = (date - arrivalDate) > overdueThresholdMs;
+
+    return !isPickedUp && !isStaff && isOverdueAtDate;
   });
 });
 
 const filteredPendingResidents = computed(() => {
-  const date = snapshotDate.value;
-  return props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= date);
+  const { end } = dateRange.value;
+  return props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= end);
 });
 
 const parcelHistory = computed(() => {
@@ -345,6 +370,7 @@ const parcelHistory = computed(() => {
         totalWaiting: 0, 
         totalPickedUp: 0, 
         totalOverdue: 0, 
+        totalStaff: 0,
         months: {} 
       };
     }
@@ -354,7 +380,8 @@ const parcelHistory = computed(() => {
         monthStr: `${month.toString().padStart(2, '0')}/${year}`, 
         waiting: 0, 
         pickedUp: 0, 
-        overdue: 0 
+        overdue: 0,
+        staff: 0
       };
     }
 
@@ -367,6 +394,9 @@ const parcelHistory = computed(() => {
     } else if (type === 'overdue') {
       groups[year].months[month].overdue++;
       groups[year].totalOverdue++;
+    } else if (type === 'staff') {
+      groups[year].months[month].staff++;
+      groups[year].totalStaff++;
     }
   };
 
@@ -376,15 +406,26 @@ const parcelHistory = computed(() => {
       addEvent(arrivalDate, 'waiting');
     }
 
+    let pDate = null;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       const pickupEvent = p.statusHistory.find(h => {
         const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
         return s.includes('PICKED UP') || s.includes('TAKEN');
       });
       if (pickupEvent) {
-        const d = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
-        if (d <= limitDate) addEvent(d, 'pickedUp');
+        pDate = new Date(pickupEvent.timestamp || pickupEvent.updatedAt || pickupEvent.createdAt || pickupEvent.date);
       }
+    }
+    
+    if (!pDate) {
+      const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
+      if (s.includes('PICKED UP') || s.includes('TAKEN')) {
+        pDate = new Date(p.pickedUpAt || p.updatedAt);
+      }
+    }
+
+    if (pDate && !isNaN(pDate.getTime()) && pDate <= limitDate) {
+      addEvent(pDate, 'pickedUp');
     }
     const overdueThresholdMs = 24 * 60 * 60 * 1000;
     const becomesOverdueAt = new Date(arrivalDate.getTime() + overdueThresholdMs);
@@ -398,6 +439,26 @@ const parcelHistory = computed(() => {
       if (!isAlreadyPickedUp && !isStaff) {
         addEvent(becomesOverdueAt, 'overdue');
       }
+    }
+
+    // Waiting for Staff events
+    const currentStatus = (p.status || '').toUpperCase().replace(/[\s_-]/g, '');
+    let staffDate = null;
+    if (p.statusHistory && Array.isArray(p.statusHistory)) {
+      const staffEvent = p.statusHistory.find(h => {
+        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+        return s.includes('STAFF') || s.includes('PENDING');
+      });
+      if (staffEvent) {
+        staffDate = new Date(staffEvent.timestamp || staffEvent.updatedAt || staffEvent.createdAt);
+      }
+    }
+    if (!staffDate && (currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))) {
+      staffDate = arrivalDate;
+    }
+
+    if (staffDate && !isNaN(staffDate.getTime()) && staffDate <= limitDate) {
+      addEvent(staffDate, 'staff');
     }
   });
 
@@ -518,21 +579,21 @@ const handleExportExcel = () => {
 
   finalData.push([`${mainSection}. Parcel Management Overview`]);
   finalData.push(['Parcel Statistics', 'Status', 'Amount']);
-  finalData.push(['', 'Waiting', snapshot.awaiting - snapshot.waitingForStaff]);
+  finalData.push(['', 'Waiting', snapshot.awaiting]);
   finalData.push(['', 'Waiting for Staff', snapshot.waitingForStaff]);
   finalData.push(['', 'Picked Up', snapshot.pickedUp]);
-  finalData.push(['', 'Overdue', overdueList.length]);
-  finalData.push(['', 'Total', snapshot.total]);
+  finalData.push(['', 'Overdue', snapshot.overdue]);
+  finalData.push(['', 'Total Activity', snapshot.total]);
   finalData.push([]);
 
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach(yData => {
       finalData.push([`Historical Monthly Summary (Parcels) - Year ${yData.year}`]);
-      finalData.push(['Month (MM/YYYY)', 'Total Waiting', 'Total Picked Up', 'Total Overdue']);
+      finalData.push(['Month (MM/YYYY)', 'Total Waiting', 'Waiting for Staff', 'Total Picked Up', 'Total Overdue']);
       yData.months.forEach(h => {
-        finalData.push([h.monthStr, h.waiting, h.pickedUp, h.overdue]);
+        finalData.push([h.monthStr, h.waiting, h.staff, h.pickedUp, h.overdue]);
       });
-      finalData.push(['Total', yData.totalWaiting, yData.totalPickedUp, yData.totalOverdue]);
+      finalData.push(['Total', yData.totalWaiting, yData.totalStaff, yData.totalPickedUp, yData.totalOverdue]);
       finalData.push([]);
     });
   }
@@ -612,7 +673,6 @@ const handleExportExcel = () => {
 
 const handleExportPDF = () => {
   const doc = new jsPDF();
-  const stats = dailyStats.value;
   const snapshot = dynamicStats.value;
   const overdueList = filteredOverdue.value;
   const pending = filteredPendingResidents.value;
@@ -810,11 +870,11 @@ const handleExportPDF = () => {
   drawTable(
     ['Status', 'Amount'],
     [
-      ['Waiting', snapshot.awaiting - snapshot.waitingForStaff],
+      ['Waiting', snapshot.awaiting],
       ['Waiting for Staff', snapshot.waitingForStaff],
       ['Picked Up', snapshot.pickedUp],
-      ['Overdue', overdueList.length],
-      ['Total', snapshot.total]
+      ['Overdue', snapshot.overdue],
+      ['Total Activity', snapshot.total]
     ],
     [130, 50],
     true
@@ -823,12 +883,12 @@ const handleExportPDF = () => {
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach((yData) => {
       drawSubHeader(`2. Historical Monthly Summary (Parcels) - Year ${yData.year}`);
-      const hData = yData.months.map(h => [h.monthStr, h.waiting, h.pickedUp, h.overdue]);
-      hData.push(['Total', yData.totalWaiting, yData.totalPickedUp, yData.totalOverdue]);
+      const hData = yData.months.map(h => [h.monthStr, h.waiting, h.staff, h.pickedUp, h.overdue]);
+      hData.push(['Total', yData.totalWaiting, yData.totalStaff, yData.totalPickedUp, yData.totalOverdue]);
       drawTable(
-        ['Month (MM/YYYY)', 'Total Waiting', 'Total Picked Up', 'Total Overdue'],
+        ['Month (MM/YYYY)', 'Total Waiting', 'Waiting for Staff', 'Total Picked Up', 'Total Overdue'],
         hData,
-        [60, 40, 40, 40],
+        [45, 30, 35, 35, 35],
         true
       );
     });
@@ -1016,7 +1076,7 @@ defineExpose({
                 <tbody>
                   <tr>
                     <td>Waiting</td>
-                    <td>{{ dynamicStats.awaiting - dynamicStats.waitingForStaff }}</td>
+                    <td>{{ dynamicStats.awaiting }}</td>
                   </tr>
                   <tr>
                     <td>Waiting for Staff</td>
@@ -1028,10 +1088,10 @@ defineExpose({
                   </tr>
                   <tr>
                     <td>Overdue</td>
-                    <td>{{ filteredOverdue.length }}</td>
+                    <td>{{ dynamicStats.overdue }}</td>
                   </tr>
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td>Total</td>
+                    <td>Total Activity</td>
                     <td>{{ dynamicStats.total }}</td>
                   </tr>
                 </tbody>
@@ -1046,6 +1106,7 @@ defineExpose({
                     <tr>
                       <th>Month (MM/YYYY)</th>
                       <th>Total Waiting</th>
+                      <th>Waiting for Staff</th>
                       <th>Total Picked Up</th>
                       <th>Total Overdue</th>
                     </tr>
@@ -1054,12 +1115,14 @@ defineExpose({
                     <tr v-for="h in yData.months" :key="h.monthStr">
                       <td>{{ h.monthStr }}</td>
                       <td>{{ h.waiting }}</td>
+                      <td>{{ h.staff }}</td>
                       <td>{{ h.pickedUp }}</td>
                       <td>{{ h.overdue }}</td>
                     </tr>
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                       <td>Total</td>
                       <td>{{ yData.totalWaiting }}</td>
+                      <td>{{ yData.totalStaff }}</td>
                       <td>{{ yData.totalPickedUp }}</td>
                       <td>{{ yData.totalOverdue }}</td>
                     </tr>
