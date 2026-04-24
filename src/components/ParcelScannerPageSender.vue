@@ -1478,7 +1478,7 @@ const closePopUp = (operate) => {
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Status:</span>
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#185DC0]">{{ mapStatus(form.status) }}</span>
+                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-[#D97706]">{{ mapStatus(form.status) }}</span>
                   </div>
                   <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-sm font-bold text-gray-400">Company:</span>

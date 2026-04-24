@@ -113,7 +113,7 @@ const snapshotDate = computed(() => dateRange.value.end)
 const getStatusAtDate = (parcel, date) => {
   if (!parcel.statusHistory || !Array.isArray(parcel.statusHistory) || parcel.statusHistory.length === 0) {
     const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
-    return createdAt <= date ? (parcel.status || 'RECEIVED') : null;
+    return createdAt <= date ? (parcel.status || 'WAITING') : null;
   }
 
   const validHistory = parcel.statusHistory
@@ -124,13 +124,13 @@ const getStatusAtDate = (parcel, date) => {
   if (validHistory.length > 0) return validHistory[0].status;
   
   const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
-  return createdAt <= date ? 'RECEIVED' : null;
+  return createdAt <= date ? 'WAITING' : null;
 }
 const dailyStats = computed(() => {
   const { start: startRange, end: endRange } = dateRange.value;
 
   const res = {
-    received: 0,
+    waiting: 0,
     pickedUp: 0,
     overdueToday: 0, 
     joined: 0,
@@ -140,7 +140,7 @@ const dailyStats = computed(() => {
   props.parcels.forEach(p => {
     const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
     if (arrivalDate >= startRange && arrivalDate <= endRange) {
-      res.received++;
+      res.waiting++;
     }
 
     let isPickedUpOnDay = false;
@@ -205,15 +205,15 @@ const yearlyStats = computed(() => {
         res.pickedUp++;
         
         if (p.statusHistory) {
-          const receiveEvent = p.statusHistory.find(h => ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase()));
+          const waitingEvent = p.statusHistory.find(h => ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase()));
           const pickupEvent = p.statusHistory.find(h => {
             const st = (h.status || '').toUpperCase().replace(/_/g, ' ');
             const ts = new Date(h.timestamp || h.updatedAt || h.createdAt || h.date);
             return (st.includes('PICKED UP') || st.includes('TAKEN')) && ts <= endLimit;
           });
 
-          if (receiveEvent && pickupEvent) {
-            const start = new Date(receiveEvent.timestamp || receiveEvent.updatedAt);
+          if (waitingEvent && pickupEvent) {
+            const start = new Date(waitingEvent.timestamp || waitingEvent.updatedAt);
             const end = new Date(pickupEvent.timestamp || pickupEvent.updatedAt);
             if (end > start) {
               res.totalLeadTimeHours += (end - start) / (1000 * 60 * 60);
@@ -287,10 +287,19 @@ const dynamicStats = computed(() => {
     const joinDate = new Date(m.createdAt || m.updateAt);
     if (joinDate > date) return;
 
+    // Filter to count only RESIDENTS, not STAFF
+    const role = (m.role || m.Role || '').toUpperCase();
+    if (role !== 'RESIDENT') return;
+
     const s = (m.status || '').toUpperCase();
-    if (s !== 'PENDING') result.activeResidents++;
-    else result.pendingResidents++;
-    if (s === 'INACTIVE') result.inactiveResidents++;
+    if (s === 'PENDING') {
+      result.pendingResidents++;
+    } else if (s === 'INACTIVE') {
+      result.inactiveResidents++;
+    } else {
+      // Any other status that is not PENDING or INACTIVE is considered ACTIVE
+      result.activeResidents++;
+    }
   });
 
   return result;
@@ -333,7 +342,7 @@ const parcelHistory = computed(() => {
     if (!groups[year]) {
       groups[year] = { 
         year, 
-        totalReceived: 0, 
+        totalWaiting: 0, 
         totalPickedUp: 0, 
         totalOverdue: 0, 
         months: {} 
@@ -343,15 +352,15 @@ const parcelHistory = computed(() => {
       groups[year].months[month] = { 
         month: month, 
         monthStr: `${month.toString().padStart(2, '0')}/${year}`, 
-        received: 0, 
+        waiting: 0, 
         pickedUp: 0, 
         overdue: 0 
       };
     }
 
-    if (type === 'received') {
-      groups[year].months[month].received++;
-      groups[year].totalReceived++;
+    if (type === 'waiting') {
+      groups[year].months[month].waiting++;
+      groups[year].totalWaiting++;
     } else if (type === 'pickedUp') {
       groups[year].months[month].pickedUp++;
       groups[year].totalPickedUp++;
@@ -364,7 +373,7 @@ const parcelHistory = computed(() => {
   props.parcels.forEach(p => {
     const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
     if (!isNaN(arrivalDate.getTime()) && arrivalDate <= limitDate) {
-      addEvent(arrivalDate, 'received');
+      addEvent(arrivalDate, 'waiting');
     }
 
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
@@ -508,9 +517,10 @@ const handleExportExcel = () => {
   let mainSection = 1;
 
   finalData.push([`${mainSection}. Parcel Management Overview`]);
-  finalData.push(['Daily Statistics (Parcels)', 'Daily Status (Activity)', 'Amount']);
-  finalData.push(['', 'Received', stats.received]);
-  finalData.push(['', 'Picked Up', stats.pickedUp]);
+  finalData.push(['Parcel Statistics', 'Status', 'Amount']);
+  finalData.push(['', 'Waiting', snapshot.awaiting - snapshot.waitingForStaff]);
+  finalData.push(['', 'Waiting for Staff', snapshot.waitingForStaff]);
+  finalData.push(['', 'Picked Up', snapshot.pickedUp]);
   finalData.push(['', 'Overdue', overdueList.length]);
   finalData.push(['', 'Total', snapshot.total]);
   finalData.push([]);
@@ -518,11 +528,11 @@ const handleExportExcel = () => {
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach(yData => {
       finalData.push([`Historical Monthly Summary (Parcels) - Year ${yData.year}`]);
-      finalData.push(['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue']);
+      finalData.push(['Month (MM/YYYY)', 'Total Waiting', 'Total Picked Up', 'Total Overdue']);
       yData.months.forEach(h => {
-        finalData.push([h.monthStr, h.received, h.pickedUp, h.overdue]);
+        finalData.push([h.monthStr, h.waiting, h.pickedUp, h.overdue]);
       });
-      finalData.push(['Total', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
+      finalData.push(['Total', yData.totalWaiting, yData.totalPickedUp, yData.totalOverdue]);
       finalData.push([]);
     });
   }
@@ -531,7 +541,7 @@ const handleExportExcel = () => {
     finalData.push(['Recent Parcels (Latest Activity)']);
     finalData.push(['Date', 'Resident', 'Tracking No.', 'Status']);
     recentParcels.forEach(p => {
-      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)]);
+      finalData.push([formatDate(p.updatedAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)?.replace('RECEIVED', 'WAITING')]);
     });
     finalData.push(['Total recent parcels', '', '', recentParcels.length]);
     finalData.push([]);
@@ -539,9 +549,9 @@ const handleExportExcel = () => {
 
   if (overdueList.length > 0) {
     finalData.push(['Overdue Parcels (> 1 Day)']);
-    finalData.push(['Received At', 'Resident', 'Tracking No.', 'Status']);
+    finalData.push(['Waiting At', 'Resident', 'Tracking No.', 'Status']);
     overdueList.forEach(p => {
-      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)]);
+      finalData.push([formatDate(p.receiveAt || p.createdAt), p.residentName, p.trackingNumber, (p.currentStatus || p.status)?.replace('RECEIVED', 'WAITING')]);
     });
     finalData.push(['Total overdue parcels', '', '', overdueList.length]);
     finalData.push([]);
@@ -550,11 +560,11 @@ const handleExportExcel = () => {
   mainSection++;
 
   finalData.push([`${mainSection}. Resident Management Overview`]);
-  finalData.push(['Daily Statistics (Residents)', 'Daily Status (Activity)', 'Amount']);
-  finalData.push(['', 'Joined', stats.joined]);
-  finalData.push(['', 'Verified', stats.verified]);
-  finalData.push(['', 'Total Active Members', snapshot.activeResidents]);
-  finalData.push(['', 'Total registered', snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents]);
+  finalData.push(['Residents Statistics', 'Status', 'Amount']);
+  finalData.push(['', 'Active', snapshot.activeResidents]);
+  finalData.push(['', 'Pending', snapshot.pendingResidents]);
+  finalData.push(['', 'Inactive', snapshot.inactiveResidents]);
+  finalData.push(['', 'Total Registered', snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents]);
   finalData.push([]);
 
   if (residentHistory.value.length > 0) {
@@ -796,12 +806,13 @@ const handleExportPDF = () => {
   }
 
   drawMainCategoryHeader("1. Parcel Management Overview", true);
-  drawSubHeader("1. Daily Statistics (Parcels)");
+  drawSubHeader("1. Parcel Statistics");
   drawTable(
-    ['Daily Status (Activity)', 'Amount'],
+    ['Status', 'Amount'],
     [
-      ['Received', stats.received],
-      ['Picked Up', stats.pickedUp],
+      ['Waiting', snapshot.awaiting - snapshot.waitingForStaff],
+      ['Waiting for Staff', snapshot.waitingForStaff],
+      ['Picked Up', snapshot.pickedUp],
       ['Overdue', overdueList.length],
       ['Total', snapshot.total]
     ],
@@ -812,10 +823,10 @@ const handleExportPDF = () => {
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach((yData) => {
       drawSubHeader(`2. Historical Monthly Summary (Parcels) - Year ${yData.year}`);
-      const hData = yData.months.map(h => [h.monthStr, h.received, h.pickedUp, h.overdue]);
-      hData.push(['Total', yData.totalReceived, yData.totalPickedUp, yData.totalOverdue]);
+      const hData = yData.months.map(h => [h.monthStr, h.waiting, h.pickedUp, h.overdue]);
+      hData.push(['Total', yData.totalWaiting, yData.totalPickedUp, yData.totalOverdue]);
       drawTable(
-        ['Month (MM/YYYY)', 'Total Received', 'Total Picked Up', 'Total Overdue'],
+        ['Month (MM/YYYY)', 'Total Waiting', 'Total Picked Up', 'Total Overdue'],
         hData,
         [60, 40, 40, 40],
         true
@@ -829,7 +840,7 @@ const handleExportPDF = () => {
       formatDate(p.updatedAt), 
       (p.residentName || '').substring(0, 20), 
       p.trackingNumber, 
-      (p.currentStatus || p.status || '')
+      (p.currentStatus || p.status || '').replace('RECEIVED', 'WAITING')
     ]);
     rData.push(['Total recent parcels', '', '', recentParcels.length]);
     drawTable(
@@ -846,11 +857,11 @@ const handleExportPDF = () => {
       formatDate(p.receiveAt || p.createdAt), 
       (p.residentName || '').substring(0, 20), 
       p.trackingNumber, 
-      (p.currentStatus || p.status || '')
+      (p.currentStatus || p.status || '').replace('RECEIVED', 'WAITING')
     ]);
     oData.push(['Total overdue parcels', '', '', overdueList.length]);
     drawTable(
-      ['Received At', 'Resident', 'Tracking No.', 'Status'],
+      ['Waiting At', 'Resident', 'Tracking No.', 'Status'],
       oData,
       [35, 50, 55, 40],
       true
@@ -858,14 +869,14 @@ const handleExportPDF = () => {
   }
 
   drawMainCategoryHeader("2. Resident Management Overview", true);
-  drawSubHeader("1. Daily Statistics (Residents)");
+  drawSubHeader("1. Residents Statistics");
   drawTable(
-    ['Daily Status (Activity)', 'Amount'],
+    ['Status', 'Amount'],
     [
-      ['Joined', stats.joined],
-      ['Verified', stats.verified],
-      ['Total Active Members', snapshot.activeResidents],
-      ['Total registered', (snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents)]
+      ['Active', snapshot.activeResidents],
+      ['Pending', snapshot.pendingResidents],
+      ['Inactive', snapshot.inactiveResidents],
+      ['Total Registered', (snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents)]
     ],
     [130, 50],
     true
@@ -994,22 +1005,26 @@ defineExpose({
             <div class="print-section">
               <h2 class="print-main-header">1. Parcel Management Overview</h2>
               
-              <h3 class="print-section-title">Daily Statistics (Parcels)</h3>
+              <h3 class="print-section-title">Parcel Statistics</h3>
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Daily Status (Activity)</th>
+                    <th>Status</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Received</td>
-                    <td>{{ dailyStats.received }}</td>
+                    <td>Waiting</td>
+                    <td>{{ dynamicStats.awaiting - dynamicStats.waitingForStaff }}</td>
+                  </tr>
+                  <tr>
+                    <td>Waiting for Staff</td>
+                    <td>{{ dynamicStats.waitingForStaff }}</td>
                   </tr>
                   <tr>
                     <td>Picked Up</td>
-                    <td>{{ dailyStats.pickedUp }}</td>
+                    <td>{{ dynamicStats.pickedUp }}</td>
                   </tr>
                   <tr>
                     <td>Overdue</td>
@@ -1030,7 +1045,7 @@ defineExpose({
                   <thead>
                     <tr>
                       <th>Month (MM/YYYY)</th>
-                      <th>Total Received</th>
+                      <th>Total Waiting</th>
                       <th>Total Picked Up</th>
                       <th>Total Overdue</th>
                     </tr>
@@ -1038,13 +1053,13 @@ defineExpose({
                   <tbody>
                     <tr v-for="h in yData.months" :key="h.monthStr">
                       <td>{{ h.monthStr }}</td>
-                      <td>{{ h.received }}</td>
+                      <td>{{ h.waiting }}</td>
                       <td>{{ h.pickedUp }}</td>
                       <td>{{ h.overdue }}</td>
                     </tr>
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                       <td>Total</td>
-                      <td>{{ yData.totalReceived }}</td>
+                      <td>{{ yData.totalWaiting }}</td>
                       <td>{{ yData.totalPickedUp }}</td>
                       <td>{{ yData.totalOverdue }}</td>
                     </tr>
@@ -1091,7 +1106,7 @@ defineExpose({
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Received At</th>
+                    <th>Waiting At</th>
                     <th>Resident</th>
                     <th>Tracking No.</th>
                     <th>Status</th>
@@ -1102,7 +1117,7 @@ defineExpose({
                     <td>{{ formatDate(parcel.receiveAt || parcel.createdAt) }}</td>
                     <td>{{ parcel.residentName }}</td>
                     <td>{{ parcel.trackingNumber }}</td>
-                    <td>{{ parcel.currentStatus || parcel.status }}</td>
+                    <td>{{ (parcel.currentStatus || parcel.status)?.replace('RECEIVED', 'WAITING') }}</td>
                   </tr>
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total overdue parcels</td>
@@ -1115,29 +1130,29 @@ defineExpose({
             <div class="print-section">
               <h2 class="print-main-header">2. Resident Management Overview</h2>
               
-              <h3 class="print-section-title">Daily Statistics (Residents)</h3>
+              <h3 class="print-section-title">Residents Statistics</h3>
               <table class="print-table">
                 <thead>
                   <tr>
-                    <th>Daily Status (Activity)</th>
+                    <th>Status</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Joined</td>
-                    <td>{{ dailyStats.joined }}</td>
-                  </tr>
-                  <tr>
-                    <td>Verified</td>
-                    <td>{{ dailyStats.verified }}</td>
-                  </tr>
-                  <tr>
-                    <td>Total Active Members</td>
+                    <td>Active</td>
                     <td>{{ dynamicStats.activeResidents }}</td>
                   </tr>
+                  <tr>
+                    <td>Pending</td>
+                    <td>{{ dynamicStats.pendingResidents }}</td>
+                  </tr>
+                  <tr>
+                    <td>Inactive</td>
+                    <td>{{ dynamicStats.inactiveResidents }}</td>
+                  </tr>
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
-                    <td>Total registered</td>
+                    <td>Total Registered</td>
                     <td>{{ dynamicStats.activeResidents + dynamicStats.pendingResidents + dynamicStats.inactiveResidents }}</td>
                   </tr>
                 </tbody>

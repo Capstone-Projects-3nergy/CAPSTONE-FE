@@ -314,7 +314,7 @@ const authStore = useAuthManager()
             <span class="md:hidden font-semibold text-[#0E4B90]"
               >Tracking:
             </span>
-            <span :class="(p.trackingNumber === 'Awaiting Staff' || !p.trackingNumber) && ['Waiting for Staff', 'WAITING_FOR_STAFF'].includes(p.status) ? 'text-amber-500 font-bold' : ''">
+            <span>
               {{ p.trackingNumber || 'Awaiting Staff' }}
             </span>
           </td>
@@ -324,7 +324,7 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Name:</span>
-            <span :class="(p.recipientName === 'Awaiting Staff' || !p.recipientName) && ['Waiting for Staff', 'WAITING_FOR_STAFF'].includes(p.status) ? 'text-amber-500 font-bold' : ''">
+            <span>
               {{ p.recipientName || 'Awaiting Staff' }}
             </span>
           </td>
@@ -369,7 +369,7 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:text-center md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Room: </span>
-            <span :class="(p.roomNumber === 'Awaiting Staff' || !p.roomNumber) && ['Waiting for Staff', 'WAITING_FOR_STAFF'].includes(p.status) ? 'text-amber-500 font-bold' : ''">
+            <span>
               {{ p.roomNumber || 'Awaiting Staff' }}
             </span>
           </td>
@@ -379,7 +379,7 @@ const authStore = useAuthManager()
             class="px-4 py-3 md:py-4 md:px-6 text-xs text-gray-700 border-b md:border-none md:align-middle whitespace-nowrap"
           >
             <span class="md:hidden font-semibold text-[#0E4B90]">Email: </span>
-            <span :class="(p.email === 'Awaiting Staff' || !p.email) && ['Waiting for Staff', 'WAITING_FOR_STAFF'].includes(p.status) ? 'text-amber-500 font-bold' : ''">
+            <span>
               {{ p.email || 'Awaiting Staff' }}
             </span>
           </td>
