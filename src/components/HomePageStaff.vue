@@ -1587,7 +1587,7 @@ watch([selectedReportDate, reportEndDate], () => {
    
           <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
        
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
 
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
@@ -1595,7 +1595,7 @@ watch([selectedReportDate, reportEndDate], () => {
                   <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">
-                  {{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}% success
+                  {{ overallStats.totalParcels ? Math.round((overallStats.pickedUpParcels / overallStats.totalParcels) * 100) : 0 }}% Success Rate
                 </span>
               </div>
               <div class="mt-2 md:mt-4">
@@ -1605,6 +1605,24 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
 
           
+            <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-amber-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
+              <div class="flex items-start justify-between mb-2 md:mb-4">
+                <div class="p-1.5 md:p-2.5 bg-amber-100 rounded-lg md:rounded-xl text-amber-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 8v4l3 3" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                </div>
+                <span class="text-amber-600 text-[10px] font-bold bg-amber-50 px-2 py-1 rounded">
+                  {{ overallStats.totalParcels ? Math.round((overallStats.waitingForStaffParcels / overallStats.totalParcels) * 100) : 0 }}% Awaiting Staff
+                </span>
+              </div>
+              <div class="mt-2 md:mt-4">
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.waitingForStaffParcels }}</h3>
+                <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Waiting for Staff</p>
+              </div>
+            </div>
+
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-blue-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1615,17 +1633,12 @@ watch([selectedReportDate, reportEndDate], () => {
                     <path d="M12 12l-8 -4.5" />
                   </svg>
                 </div>
-                <div class="flex flex-col items-end gap-1">
-                  <span class="hidden md:block text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
-                    {{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}% awaiting
-                  </span>
-                  <span v-if="overallStats.waitingForStaffParcels > 0" class="text-amber-600 text-[9px] font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100 animate-pulse">
-                    {{ overallStats.waitingForStaffParcels }} Waiting for Staff
-                  </span>
-                </div>
+                <span class="text-blue-600 text-[10px] font-bold bg-blue-50 px-2 py-1 rounded">
+                  {{ overallStats.totalParcels ? Math.round(((overallStats.awaitingParcels - overallStats.waitingForStaffParcels) / overallStats.totalParcels) * 100) : 0 }}% Ready for Pickup
+                </span>
               </div>
               <div class="mt-2 md:mt-4">
-                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels }}</h3>
+                <h3 class="text-xl md:text-4xl font-black text-gray-900 tracking-tight">{{ overallStats.awaitingParcels - overallStats.waitingForStaffParcels }}</h3>
                 <p class="text-gray-500 font-medium mt-1 tracking-wider text-[9px] md:text-[11px]">Waiting</p>
               </div>
             </div>
@@ -1664,7 +1677,7 @@ watch([selectedReportDate, reportEndDate], () => {
                     <path d="M12 12l-8-4.5" />
                   </svg>
                 </div>
-                <span class="hidden md:flex items-center text-indigo-500 text-[10px] font-bold bg-indigo-50 px-2 py-1 rounded">
+                <span class="flex items-center text-indigo-500 text-[10px] font-bold bg-indigo-50 px-2 py-1 rounded">
                    Summary
                 </span>
               </div>
@@ -1745,7 +1758,7 @@ watch([selectedReportDate, reportEndDate], () => {
                   <canvas id="parcelChart"></canvas>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-50">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-8 border-t border-gray-50">
                   <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"></path></svg>
@@ -1755,18 +1768,22 @@ watch([selectedReportDate, reportEndDate], () => {
                       <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.pickedUpParcels }}</span>
                     </div>
                   </div>
+                  <div class="bg-amber-50/30 p-4 rounded-2xl border border-amber-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3" stroke-width="3" stroke-linecap="round"></path><circle cx="12" cy="12" r="9" stroke-width="2" stroke-linecap="round"></circle></svg>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting for Staff</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.waitingForStaffParcels }}</span>
+                    </div>
+                  </div>
                   <div class="bg-blue-50/30 p-4 rounded-2xl border border-blue-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
                     <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </div>
-                    <div class="flex flex-col">
-                      <div class="flex items-center gap-2 mb-0.5">
-                        <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
-                        <span v-if="stats.waitingForStaffParcels > 0" class="text-amber-500 text-[9px] font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 animate-pulse">
-                          {{ stats.waitingForStaffParcels }} Waiting for Staff
-                        </span>
-                      </div>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
+                    <div>
+                      <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels - stats.waitingForStaffParcels }}</span>
                     </div>
                   </div>
                   <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
@@ -1833,11 +1850,11 @@ watch([selectedReportDate, reportEndDate], () => {
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform"></div>
-                          <span class="text-sm font-bold text-gray-700">Waiting</span>
+                          <span class="text-sm font-bold text-gray-700">Ready for Pickup</span>
                         </div>
                         <div class="flex items-center gap-4">
-                          <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels }}</span>
-                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ overallStats.totalParcels ? Math.round((overallStats.awaitingParcels / overallStats.totalParcels) * 100) : 0 }}%</span>
+                          <span class="text-sm font-black text-gray-900">{{ overallStats.awaitingParcels - overallStats.waitingForStaffParcels }}</span>
+                          <span class="text-xs font-bold text-blue-500 px-2 py-0.5 bg-blue-50 rounded-md">{{ overallStats.totalParcels ? Math.round(((overallStats.awaitingParcels - overallStats.waitingForStaffParcels) / overallStats.totalParcels) * 100) : 0 }}%</span>
                         </div>
                       </div>
                       
