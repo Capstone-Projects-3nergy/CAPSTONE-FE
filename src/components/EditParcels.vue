@@ -172,7 +172,7 @@ const showParcelTrashPage = async function () {
 }
 const statusOptions = computed(() => {
   let options = []
-  const s = form.value.status?.toUpperCase() || ''
+  const s = originalForm.value.status?.toUpperCase() || ''
 
   if (s === 'WAITING_FOR_STAFF') {
     options = ['WAITING_FOR_STAFF', 'RECEIVED']
@@ -1240,7 +1240,7 @@ function formatDateTime(datetimeStr) {
                 <SelectWeb
                   v-model="form.status"
                   :options="statusOptions"
-                  :disabled="form.status === 'PICKED_UP'"
+                  :disabled="originalForm.status === 'PICKED_UP'"
                   class="w-[240px]"
                 />
 
