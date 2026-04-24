@@ -335,13 +335,11 @@ const filteredOverdue = computed(() => {
     const arrivalDate = new Date(p.receiveAt || p.createdAt || p.date);
     if (isNaN(arrivalDate.getTime()) || arrivalDate > date) return false;
 
-    // Check status at the snapshot date
+   
     const statusAtDate = getStatusAtDate(p, date);
     if (!statusAtDate) return false;
 
     const s = statusAtDate.toUpperCase().replace(/[\s_-]/g, '');
-    
-    // It's overdue if it's not picked up, not staff, and older than 24h as of 'date'
     const isPickedUp = s.includes('PICKEDUP') || s.includes('TAKEN');
     const isStaff = s.includes('STAFF') || s.includes('PENDING');
     const isOverdueAtDate = (date - arrivalDate) > overdueThresholdMs;
@@ -441,7 +439,7 @@ const parcelHistory = computed(() => {
       }
     }
 
-    // Waiting for Staff events
+   
     const currentStatus = (p.status || '').toUpperCase().replace(/[\s_-]/g, '');
     let staffDate = null;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
