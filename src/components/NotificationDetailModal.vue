@@ -60,7 +60,6 @@ const badgeIcon = (type) => {
     `
   }
 
-  // parcel / notification
   return `
     <svg
       width="25"

@@ -89,7 +89,6 @@ const residentStatusDetail = ref(null)
 const showDeleteMemberSuccess = ref(false)
 const showDeleteMemberError = ref(false)
 
-// Generic State for Alerts from Child Components
 const childAlert = ref({
   visible: false,
   message: '',
@@ -161,11 +160,7 @@ const mapStatus = (status) => {
   }
 }
 const showAddParcelPage = () => {
-  // If this is meant to go to the add member page:
   router.push({ name: 'addmember' })
-
-  // OR if you have a specific 'addparcel' route:
-  // router.push({ name: 'addparcel' })
 }
 const mapActiveStatus = (status) => {
   if (!status) return ''
@@ -221,16 +216,14 @@ onMounted(async () => {
       email: p.email,
       dormName: p.dormName,
       roomNumber: p.roomNumber,
-      role: p.role, // "RESIDENT" | "STAFF"
+      role: p.role, 
       status: p.status,
-      updateAt: p.updatedAt, // 🔥 เปลี่ยนชื่อให้ตรง table
-      photo: p.profileImageUrl // 🔥 table ใช้ photo
+      updateAt: p.updatedAt, 
+      photo: p.profileImageUrl 
     }))
 
-    // เรียงตาม update ล่าสุด
     mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
-    // 🔹 แยก role
     const residentList = mapped.filter((u) => u.role === 'RESIDENT')
     const staffList = mapped.filter((u) => u.role === 'STAFF')
 
@@ -263,7 +256,6 @@ const confirmStatusChange = () => {
 }
 
 const showRegistrationDetail = (id) => {
-  // id = user.id (จาก mapped)
   router.push({
     name: 'detailregistration',
     params: {
@@ -372,7 +364,6 @@ const clearDeleteMemPopUp = () => {
   showDeleteMember.value = false
   MemberDetail.value = null
 }
-// เพิ่ม function สำหรับ refresh ข้อมูล
 const refreshUserData = async () => {
   try {
     const dataUser = await getItems(
@@ -406,15 +397,12 @@ const refreshUserData = async () => {
   }
 }
 
-// แก้ไข showDelMemComplete
 const isLoading = ref(false)
 
 const showDelMemComplete = async () => {
   isLoading.value = true
   showDeleteMember.value = false
   MemberDetail.value = null
-
-  // ✅ fetch ข้อมูลใหม่
   await refreshUserData()
 
   isLoading.value = false
@@ -442,8 +430,6 @@ const isRoomAsc = ref(true)
 const isStatusAsc = ref(true)
 const isDateAsc = ref(true)
 
-// const sortRoomAsc = () => sortByRoomNumber(parcels.value)
-// const sortRoomDesc = () => sortByRoomNumberReverse(parcels.value)
 const sortStatusAsc = () => sortByStatus(usersByTab.value)
 const sortStatusDesc = () => sortByStatusReverse(usersByTab.value)
 const sortDateAsc = () => sortByDate(usersByTab.value)
@@ -598,7 +584,6 @@ const filterDate = ref('')
 const filterSearch = ref('')
 const filterSort = ref('')
 
-// Reset to page 1 whenever filters change to avoid empty pages
 watch([searchKeyword, selectedDate, activeTab], () => {
   currentPage.value = 1
 })

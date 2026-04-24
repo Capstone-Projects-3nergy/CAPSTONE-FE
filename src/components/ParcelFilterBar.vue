@@ -92,7 +92,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
   >
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div v-if="props.showDate" class="relative flex items-center group">
-        <!-- Premium Icon Overlay -->
+        
         <div 
           class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
           @click="openDatePicker"
@@ -107,7 +107,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           </div>
         </div>
         
-        <!-- Display Input (Text) with English Placeholder -->
+       
         <input
           type="text"
           readonly
@@ -116,7 +116,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           @click="openDatePicker"
           class="bg-[#F8FAFC] text-[#1D355E] border border-gray-200/80 rounded-xl pl-13 pr-4 py-2.5 font-bold text-sm shadow-inner outline-none focus:ring-2 focus:ring-[#0E4B90]/20 transition-all hover:bg-gray-100/50 whitespace-nowrap w-[165px] sm:w-[190px] cursor-pointer relative z-0"
         />
-        <!-- Hidden Native Date Input for Picker functionality -->
+      
         <input
           ref="dateInput"
           type="date"
@@ -127,7 +127,7 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
       </div>
 
       <div class="flex flex-wrap items-center gap-2 w-full md:w-auto ml-auto">
-        <!-- Search Input -->
+     
         <div 
           class="relative flex-1 min-w-[140px] w-full"
           :class="[anyAddButtonVisible ? 'md:w-[240px]' : 'sm:w-[300px]']"
@@ -154,7 +154,6 @@ defineEmits(['update:date', 'update:search', 'update:sort', 'add', 'trash', 'add
           />
         </div>
 
-        <!-- Group: Sort Select + Add Button (Keep together on mobile) -->
         <div 
           class="flex items-center gap-3 sm:gap-4 sm:flex-initial"
           :class="anyAddButtonVisible ? 'flex-1' : 'flex-none'"

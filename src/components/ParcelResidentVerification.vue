@@ -55,7 +55,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)
@@ -142,8 +141,6 @@ const showNotificationPage = async () => {
 
 
 const showVerifyParcelPage = async () => {
-  // Stay on current page or navigate if needed
-  // Since we are already on ParcelResidentVerification, maybe just ensure state is correct
 }
 
 const currentParcelStatus = computed(() => {
@@ -168,7 +165,6 @@ const getParcelDetail = async (tid) => {
   const localParcel = parcelStore.getParcels().find((p) => p.parcelId === tid)
   if (localParcel) {
     parcel.value = localParcel
-    // Pre-fill form if viewing a specific parcel
     form.value.items[0].trackingNumber = localParcel.trackingNumber
     form.value.residentName = localParcel.recipientName
     form.value.items[0].companyId = localParcel.companyId
@@ -187,7 +183,6 @@ const getParcelDetail = async (tid) => {
       const mapped = mapParcelData(data)
       parcel.value = mapped
       parcelStore.addParcel(mapped)
-       // Pre-fill form
       form.value.items[0].trackingNumber = mapped.trackingNumber
       form.value.residentName = mapped.recipientName
       form.value.items[0].trackingNumber = mapped.trackingNumber
@@ -198,12 +193,10 @@ const getParcelDetail = async (tid) => {
   } catch (err) {}
 }
 
-// Remove checkScreen resize listener logic
 onMounted(async () => {
   const tidNum = Number(route.params.tid)
   await getCompanies()
   if (tidNum) {
-      // Ensure the first item has parcelType initialized if it wasn't
       if (form.value.items[0] && !form.value.items[0].parcelType) {
           form.value.items[0].parcelType = ''
       }
@@ -230,7 +223,7 @@ const submitVerification = async () => {
     const authStore = useAuthManager()
     const currentUserFullName = authStore.user?.fullName || ''
 
-    // Whitespace Validation
+
     if (form.value.residentName && hasWhitespace(form.value.residentName)) {
         residentNameWhitespaceError.value = true
         setTimeout(() => (residentNameWhitespaceError.value = false), 10000)
@@ -246,7 +239,7 @@ const submitVerification = async () => {
     }
 
     if (form.value.residentName && currentUserFullName) {
-        // Case-insensitive comparison and trimming
+       
         if (form.value.residentName.trim().toLowerCase() !== currentUserFullName.trim().toLowerCase()) {
             isNameMismatch.value = true
             setTimeout(() => isNameMismatch.value = false, 10000)
@@ -289,7 +282,7 @@ const submitVerification = async () => {
     return
   }
     
-    // Explicit number check redundant due to regex above but keeping for flow consistency if user code had it
+    
     const numberRegex = /\d/
     if (numberRegex.test(form.value.residentName)) {
         error.value = true
@@ -307,7 +300,7 @@ const submitVerification = async () => {
             return
         }
         
-        // Company Format Validation
+    
         const selectedCompany = companyList.value.find(c => c.companyId === item.companyId)
         if (selectedCompany) {
             const name = selectedCompany.companyName.toLowerCase()
@@ -356,9 +349,7 @@ const submitVerification = async () => {
         const senderName = authStore.user?.fullName || 'Courier'
 
         for (const item of form.value.items) {
-            // -----------------------
-            // payload - simplified (trackingNumber & residentName only)
-            // -----------------------
+          
             const body = {
                 trackingNumber: item.trackingNumber,
                 residentName: form.value.residentName,
@@ -366,16 +357,13 @@ const submitVerification = async () => {
                 parcelType: item.parcelType
             }
 
-            // -----------------------
-            // API call
-            // -----------------------
+           
             const result = await verifyParcelItem(url, body, router)
 
-            // Check if result is success
+        
             if (result && result.success) {
                 successCount++
-                
-                // Construct verified parcel object for store (since backend returns void)
+              
                 const verifiedParcel = {
                     parcelId: `verified-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     trackingNumber: item.trackingNumber,
@@ -391,29 +379,24 @@ const submitVerification = async () => {
                 await notificationStore.notifyParcelSaved(mapped, router)
 
             } else {
-                // Backend returns 500 for unique constraint violation (duplicate)
-                // Treat this as a "soft success" - item is already processed
+            
                 if (result?.status === 500) {
                     duplicateCount++
                 } else {
                     failCount++
-                     // Check for Not Found (404)
                     if (result?.status === 404) {
                         isNotFound.value = true
                     }
                     console.error(`Failed to Add Tracking Number ${item.trackingNumber}:`, result?.message || result?.status)
                     failedItems.push(item.trackingNumber)
-                    nextItems.push(item) // Keep failed item to retry
+                    nextItems.push(item)
                 }
             }
         }
 
-        // Summary handling
-        // Show success if we had any successes OR duplicates (meaning work is done for those)
         if (successCount > 0 || duplicateCount > 0) {
             if (failCount > 0) {
-                // Partial success (some failures)
-                
+              
                 if (hasNotFound) {
                     isNotFound.value = true
                     setTimeout(() => isNotFound.value = false, 10000)
@@ -425,10 +408,8 @@ const submitVerification = async () => {
                     errorMessage.value = `Add Tracking Number failed for ${successCount + duplicateCount} parcels. Failed: ${failedItems.join(', ')}`
                 }
                 
-                // Update form to show only failed items
                 form.value.items = nextItems
             } else {
-                // All success (including duplicates)
                 confirmSuccess.value = true
                 setTimeout(() => {
                   confirmSuccess.value = false
@@ -436,13 +417,12 @@ const submitVerification = async () => {
 
                 errorMessage.value = '' 
                 
-                // Reset form completely
                 form.value.items = [{ trackingNumber: '', companyId: '', description: '', parcelType: '' }]
             }
 
-            // Auto hide success msg is handled above
+           
         } else if (failCount > 0) {
-            // All failed (no successes, no duplicates)
+           
             
             if (hasNotFound) {
                 isNotFound.value = true
@@ -599,7 +579,6 @@ const handleResidentNameInput = (event) => {
       showResidentNameLengthError.value = false
     }
   }
-  // Reset other errors on input
   isResidentNameWrong.value = false
   showResidentNameMinLengthError.value = false
   isNameMismatch.value = false
@@ -614,7 +593,6 @@ const handleTrackingInput = (event, index) => {
     if (index !== undefined) {
        form.value.items[index].trackingNumber = sliced
     } else {
-       // fallback if referenced directly (though likely used in v-for)
        form.value.items[0].trackingNumber = sliced
     }
     event.target.value = sliced
@@ -630,7 +608,6 @@ const handleTrackingInput = (event, index) => {
       showTrackingLengthError.value = false
     }
   }
-  // Reset other errors on input
   trackingNumberError.value = false
   trackingNumberFormatError.value = false
   trackingNumberWhitespaceError.value = false

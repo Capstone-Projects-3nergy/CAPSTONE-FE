@@ -105,8 +105,6 @@ const parcelsResidentDetail = ref(null)
 const route = useRoute()
 const recipientSearch = ref('')
 const selectedResidentId = ref(null)
-
-// Modal State
 const isModalOpen = ref(false)
 const selectedAnnouncement = ref(null)
 
@@ -469,7 +467,6 @@ const openRedPopup = () => {
 }
 
 const openStatusPopup = () => {
-  // Placeholder for status popup logic
 }
 
 const closePopUp = (operate) => {
@@ -591,14 +588,12 @@ const openModal = async (item) => {
   if (!item || !item.id) return
 
   try {
-    // 1. Record the view first to ensure the standard view count is updated on server
     await recordAnnouncementView(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
       router
     )
 
-    // 2. Fetch the announcement details (which now has the updated view count)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -654,11 +649,7 @@ const fetchAnnouncements = async () => {
 
 onMounted(async () => {
   window.addEventListener('focus', fetchAnnouncements)
-
-  // Initial fetch
   await fetchAnnouncements()
-
-  // Set up periodic fetch for latest updates
   announcementsInterval = setInterval(fetchAnnouncements, 30000)
 })
 

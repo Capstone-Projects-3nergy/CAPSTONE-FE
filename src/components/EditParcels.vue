@@ -88,7 +88,6 @@ const showSenderMinLengthError = ref(false)
 
 const handleTrackingInput = (event) => {
   const val = event.target.value
-  // Reset error states when user types
   trackingNumberError.value = false
   trackingNumberFormatError.value = false
   trackingNumberRequired.value = false
@@ -110,7 +109,6 @@ const handleTrackingInput = (event) => {
 
 const handleRecipientInput = (event) => {
   const val = event.target.value
-  // Reset error states when user types
   recipientNameError.value = false
   recipientNameRequired.value = false
   recipientNameWhitespaceError.value = false
@@ -130,7 +128,6 @@ const handleRecipientInput = (event) => {
 
 const handleSenderInput = (event) => {
   const val = event.target.value
-  // Reset error states when user types
   SenderNameError.value = false
   showSenderMinLengthError.value = false
   senderNameWhitespaceError.value = false
@@ -178,12 +175,10 @@ const statusOptions = computed(() => {
   const s = form.value.status?.toUpperCase() || ''
 
   if (s === 'WAITING_FOR_STAFF') {
-    // Current intake is labeled RECEIVED
     options = ['WAITING_FOR_STAFF', 'RECEIVED']
   } else if (s === 'RECEIVED') {
     options = ['RECEIVED', 'PICKED_UP']
   } else if (s === 'WAITING') {
-    // In future, intake will be WAITING
     options = ['WAITING', 'PICKED_UP']
   } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
@@ -351,7 +346,6 @@ const filteredResidents = computed(() => {
 
 const emit = defineEmits(['edit-success', 'edit-error'])
 const saveEditParcel = async () => {
-  // Reset all error states before validation
   selectName.value = false
   trackingNumberRequired.value = false
   recipientNameRequired.value = false
@@ -381,7 +375,6 @@ const saveEditParcel = async () => {
     return
   }
 
-  // Check for leading/trailing whitespace
   trackingNumberWhitespaceError.value = hasWhitespace(form.value.trackingNumber)
   recipientNameWhitespaceError.value = hasWhitespace(form.value.recipientName)
   senderNameWhitespaceError.value = hasWhitespace(form.value.senderName)

@@ -50,14 +50,14 @@ const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const parcel = ref(null)
 
-// Real-time update logic
+
 const currentTime = ref(Date.now())
 let timerId = null
 
 onMounted(() => {
   timerId = setInterval(() => {
     currentTime.value = Date.now()
-  }, 10000) // Update every 10 seconds
+  }, 10000) 
 })
 
 onUnmounted(() => {
@@ -98,8 +98,6 @@ const overdueTimeDisplay = computed(() => {
 })
 
 const activeTab = ref('info')
-
-// Notification states
 const showNotifyPopup = ref(false)
 const lineAlertStyle = ref('green')
 const isSending = ref(false)
@@ -108,8 +106,6 @@ const notifyError = ref(false)
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
-
-// Reminder Cooldown Logic (1 Day)
 const lastNotifySentTime = ref(null)
 const isNotifyDisabled = computed(() => {
   if (!lastNotifySentTime.value) return false
@@ -163,7 +159,6 @@ const sendNotify = async () => {
   
   isSending.value = true
   try {
-    // If it's overdue, use the remind-overdue api, otherwise use standard notify
     const result = isOverdue.value 
       ? await sendOverdueReminder(parcel.value.parcelId, router)
       : await sendParcelNotification(parcel.value.parcelId, router)

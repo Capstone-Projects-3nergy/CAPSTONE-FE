@@ -18,7 +18,7 @@ const userInitial = computed(() =>
 const props = defineProps({
   align: {
     type: String,
-    default: 'right' // 'right' aligns right edge (pops left), 'left' aligns left edge (pops right)
+    default: 'right' 
   },
   manualTrigger: {
     type: Boolean,
@@ -71,7 +71,6 @@ const handleMouseLeave = () => {
 const closeDropdown = () => {
   showDropdown.value = false
 }
-// Existing profile image preview logic...
 const profileImageUrlPreview = computed(() => {
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)

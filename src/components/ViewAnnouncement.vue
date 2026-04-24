@@ -45,7 +45,7 @@ const closeModal = () => {
         class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         @click.stop
       >
-        <!-- Modal Header -->
+     
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 class="text-xl font-bold text-gray-800 px-2 border-l-4 border-[#185DC0]">
             Announcement Details
@@ -57,9 +57,8 @@ const closeModal = () => {
           </button>
         </div>
 
-        <!-- Modal Body -->
         <div class="px-6 py-6 overflow-y-auto flex-1 custom-scrollbar">
-          <!-- Featured Image Placeholder -->
+        
           <div class="w-full h-48 sm:h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl mb-6 relative overflow-hidden flex items-center justify-center border border-gray-100">
             <div class="absolute inset-0 bg-[#0E4B90]/5"></div>
             <svg class="w-16 h-16 text-[#185DC0]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,7 +77,7 @@ const closeModal = () => {
             </span>
           </div>
 
-          <!-- Metadata row -->
+    
           <div class="flex flex-wrap items-center gap-3 mb-6">
             <span class="px-3 py-1 inline-flex text-xs font-bold rounded-xl" :class="getCategoryBadgeClass(announcement.category)">
               {{ announcement.category }}
@@ -95,14 +94,14 @@ const closeModal = () => {
             </div>
           </div>
 
-          <!-- Content section -->
+   
           <div class="prose max-w-none text-gray-700 leading-relaxed mb-8">
             <p class="whitespace-pre-line text-[15px]">{{ announcement.subtitle }}</p>
           </div>
           
           <div class="h-px bg-gray-100 w-full mb-6"></div>
 
-          <!-- Author Info -->
+   
           <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-blue-100 transition-colors">
             <div class="h-12 w-12 flex-shrink-0 bg-blue-100 text-[#185DC0] rounded-full flex items-center justify-center font-bold text-lg shadow-inner">
               SP
@@ -118,8 +117,6 @@ const closeModal = () => {
             </div>
           </div>
         </div>
-
-        <!-- Modal Footer -->
         <div class="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end">
           <button
             @click="closeModal"

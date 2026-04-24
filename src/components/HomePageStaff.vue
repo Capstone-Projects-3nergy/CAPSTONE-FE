@@ -31,7 +31,6 @@ const formatDateForInput = (date, view) => {
     const month = String(d.getMonth() + 1).padStart(2, '0')
     return `${year}-${month}`
   } else if (view === 'weekly') {
-    // ISO week calculation
     const tempDate = new Date(d.getTime());
     tempDate.setHours(0, 0, 0, 0);
     tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
@@ -39,7 +38,6 @@ const formatDateForInput = (date, view) => {
     const weekNo = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
     return `${tempDate.getFullYear()}-W${String(weekNo).padStart(2, '0')}`
   } else {
-    // daily
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
@@ -127,9 +125,8 @@ const calculateOverdueHours = (receiveAt) => {
   if (isNaN(receivedAt.getTime())) return 0
   const diffTime = Math.abs(now - receivedAt)
   const totalHours = Math.floor(diffTime / (1000 * 60 * 60))
-  // Return hours past the 24-hour threshold
   const overdueHoursRemaining = totalHours - 24
-  return Math.max(1, overdueHoursRemaining) // Return at least 1 if it's in the list
+  return Math.max(1, overdueHoursRemaining)
 }
 
 const overdueParcelsList = computed(() => {
@@ -139,10 +136,7 @@ const overdueParcelsList = computed(() => {
   
   return [...getMappedParcels.value]
     .filter(p => {
-      // Only check 'Received', 'Waiting', 'Notified', or 'Overdue' statuses
       if (!['Received', 'Waiting', 'Notified', 'Overdue'].includes(p.status)) return false
-      
-      // Use 24 hours for overdue threshold
       const receivedDate = new Date(p.receiveAt)
       if (isNaN(receivedDate.getTime())) return false
       return (now - receivedDate) > oneDayMs
@@ -164,22 +158,19 @@ const topResidents = computed(() => {
   getMappedParcels.value.forEach(p => {
     const name = p.residentName || 'Unknown'
     if (!counts[name]) {
-      // Find resident from store members to get accurate profile data
       const resident = dashboardStore.members.find(m => 
         m.fullName === name || m.residentName === name || `${m.firstName} ${m.lastName}` === name
       )
       
       counts[name] = {
         name,
-        // Priority: Resident profile room > Parcel record room > fallback Awaiting Staff
         room: resident?.roomNumber || p.roomNumber || 'Awaiting Staff',
         count: 0,
         photo: resident?.photo || resident?.profileImageUrl || '',
         status: resident?.status || 'Active'
       }
     } else if (counts[name].room === 'Awaiting Staff' && p.roomNumber) {
-      // If we initially set N/A but find a room number in a subsequent parcel
-      counts[name].room = p.roomNumber;
+      counts[name].room = p.roomNumber
     }
     counts[name].count++
   })
@@ -236,7 +227,6 @@ const getStatusIconPath = (status) => {
   }
 }
 const showRegistrationDetail = (id) => {
-  // id = user.id (จาก mapped)
   router.push({
     name: 'detailregistration',
     params: {
@@ -270,7 +260,6 @@ const mapStatus = (status) => {
   }
 }
 
-// const loginStore = useLoginManager()
 const router = useRouter()
 const route = useRoute()
 const showHomePageStaff = ref(false)
@@ -287,8 +276,8 @@ const packagesPerMonth = [
 ]
 
 const currentDate = ref('')
-const dashboardViewTab = ref('activity') // 'activity' | 'status'
-const residentViewTab = ref('growth') // 'growth' | 'status'
+const dashboardViewTab = ref('activity')
+const residentViewTab = ref('growth')
 const hoveredParcelId = ref(null)
 const filterStartDate = ref('')
 const filterEndDate = ref('')
@@ -376,7 +365,6 @@ const formatDateDisplay = (dateStr, mode = 'daily') => {
   }
   
   if (mode === 'weekly') {
-    // Assuming dateStr is YYYY-Www
     const start = getDateFromWeek(dateStr);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
@@ -480,7 +468,6 @@ const initStatusChart = () => {
   const ctx = document.getElementById('statusChart')
   if (!ctx) return
   
-  // Destroy existing if any
   if (statusChartInstance.value) statusChartInstance.value.destroy()
 
   statusChartInstance.value = new Chart(ctx, {
@@ -623,7 +610,6 @@ const updateParcelChart = () => {
   parcelChartInstance.data.datasets[2].data = pickedUp;
   parcelChartInstance.data.datasets[3].data = overdue;
   
-  // Calculate and Update Baseline (Average Received - combining intake statuses)
   const totalReceived = received.reduce((a, b) => a + b, 0) + staffWaiting.reduce((a, b) => a + b, 0);
   const avg = totalReceived / (received.length || 1);
   avgParcelReceived.value = avg;
@@ -646,7 +632,6 @@ const updateParcelChart = () => {
     parcelChartInstance.data.datasets[4].label = `Avg (${avg.toFixed(1)})`;
   }
 
-  // Update bar thickness based on interval
   const interval = dashboardStore.parcelView;
   let thickness = interval === 'monthly' ? 12 : interval === 'daily' ? 32 : 28;
 
@@ -670,7 +655,6 @@ const updateResidentChart = () => {
   residentChartInstance.data.labels = labels;
   residentChartInstance.data.datasets[0].data = data;
   
-  // Update Baseline (Average)
   const totalNewResidents = data.reduce((a, b) => a + b, 0);
   const avg = totalNewResidents / (data.length || 1);
   avgResidentGrowth.value = avg;
@@ -701,8 +685,6 @@ const approveError = ref(false)
 
 const approveResident = async (resident) => {
   try {
-    // Calling API to approve resident by updating status to ACTIVE
-    // We use /api/members as found in other components for member updates
     const body = {
       userId: resident.id,
       status: 'ACTIVE'
@@ -716,7 +698,6 @@ const approveResident = async (resident) => {
     )
 
     if (updatedMember) {
-      // Update local stores and refresh dashboard data
       userManager.updateMember(updatedMember)
       await fetchDashboardData()
       
@@ -748,16 +729,12 @@ const fetchDashboardData = async () => {
     let announcements = []
     let dataLoaded = false
 
-    // 1. Try to fetch unified detailed dashboard data first (future-proofing)
     const unifiedLoaded = await dashboardStore.loadDetailedDashboard(router)
     
-    // If unified API succeeded and provided items to show in graphs
     if (unifiedLoaded && (dashboardStore.parcels.length > 0 || dashboardStore.members.length > 0)) {
       parcels = [...dashboardStore.parcels]
       announcements = [...dashboardStore.announcements]
       
-      // Separate roles from combined members and map them if they don't have expected fields
-      // Ensure we preserve the structure needed for the UI
       const allMembers = dashboardStore.members || []
       const mappedMembers = allMembers.map(u => ({
         id: u.userId || u.id,
@@ -777,7 +754,6 @@ const fetchDashboardData = async () => {
       dataLoaded = true
     }
 
-    // 2. Fallback to existing manual fetching if unified API isn't ready or returned empty data
     if (!dataLoaded) {
       const rawParcels = await getItems(`${import.meta.env.VITE_BASE_URL}/api/parcels`, router)
       const rawUsers = await getItems(`${import.meta.env.VITE_BASE_URL}/api/staff/users`, router)
@@ -787,14 +763,13 @@ const fetchDashboardData = async () => {
       const users = Array.isArray(rawUsers) ? rawUsers : []
       announcements = Array.isArray(rawAnnouncements) ? rawAnnouncements : []
 
-      // Map users as in the original manual logic
       const mappedUsers = users.map((u) => ({
         id: u.userId,
         fullName: u.fullName || '-',
         email: u.email || '-',
         dormName: u.dormName || '-',
         roomNumber: u.roomNumber || '-',
-        role: u.role, // "RESIDENT" | "STAFF"
+        role: u.role,
         status: u.status,
         updateAt: u.updatedAt || new Date().toISOString(),
         photo: u.profileImageUrl
@@ -803,28 +778,20 @@ const fetchDashboardData = async () => {
       residentList = mappedUsers.filter((u) => u.role === 'RESIDENT')
       staffList = mappedUsers.filter((u) => u.role === 'STAFF')
     }
-
-    // 3. Finalize and Sync (Common processing for data from either source)
     
-    // Sort by latest update as in the old code
     residentList.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
-
-    // Sync with User Manager store
     userManager.setMembers(residentList)
     userManager.setStaffs(staffList)
 
-    // Update Dashboard store statistics and charts with the finalized lists
     dashboardStore.calculateDashboardData(
       parcels, 
       residentList, 
       announcements
     )
     
-    // Refresh chart displaying current data
     updateResidentChart()
     updateParcelChart()
     
-    // Also update parcels store for other pages
     if (parcels.length > 0) {
       parcelManager.setParcels(getMappedParcels.value)
     }
@@ -847,14 +814,11 @@ watch([() => dashboardStore.residentView, () => dashboardStore.residentRefDate],
 
 onMounted(async () => {
   window.addEventListener('focus', fetchDashboardData)
-  // sidebarManager.checkScreenSize()
   updateDate()
   dateInterval = setInterval(updateDate, 60000)
 
-  // Fetch all dashboard stats and charts using the store action
   await fetchDashboardData()
 
-  // Set up periodic polling for fresh stats every 30 seconds
   dashboardInterval = setInterval(() => {
     fetchDashboardData()
   }, 30000)
@@ -983,12 +947,10 @@ onMounted(async () => {
     }
   })
 
-  // Ensure chart reflects current interval data
   updateParcelChart()
 
   const residentCtx = document.getElementById('residentChart')
   if (residentCtx) {
-    // Prevent "Canvas is already in use" error
     const existingResidentChart = Chart.getChart('residentChart')
     if (existingResidentChart) {
       existingResidentChart.destroy()
@@ -1007,8 +969,8 @@ onMounted(async () => {
               const data = context.dataset.data;
               const max = Math.max(...data);
               return context.parsed.y === max && max > 0
-                ? 'rgba(99, 102, 241, 0.85)' // Indigo peak
-                : 'rgba(129, 140, 248, 0.4)' // Indigo lighter
+                ? 'rgba(99, 102, 241, 0.85)' 
+                : 'rgba(129, 140, 248, 0.4)' 
             },
             hoverBackgroundColor: (context) => {
               const data = context.dataset.data;
@@ -1019,7 +981,7 @@ onMounted(async () => {
             },
             borderRadius: 6,
             borderSkipped: false,
-            barThickness: 45 // Increased thickness since we have fewer months
+            barThickness: 45 
           }
         ]
       },
@@ -1042,7 +1004,7 @@ onMounted(async () => {
           },
           tooltip: {
             enabled: true,
-            backgroundColor: 'rgba(17, 24, 39, 0.9)', // gray-900
+            backgroundColor: 'rgba(17, 24, 39, 0.9)',
             titleFont: { family: "'Inter', sans-serif", size: 13, weight: 'bold' },
             bodyFont: { family: "'Inter', sans-serif", size: 12 },
             padding: 12,
@@ -1100,7 +1062,6 @@ onMounted(async () => {
         }
       }
     })
-    // Explicitly update to apply filtering and baseline on first load
     updateResidentChart()
   }
 })

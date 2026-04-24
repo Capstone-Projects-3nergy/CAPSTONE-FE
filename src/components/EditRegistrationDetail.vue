@@ -82,27 +82,6 @@ const form = ref({
 })
 
 const loading = ref(false)
-
-// const loadParcel = async () => {
-//   loading.value = true
-//   try {
-//     const res = await getItemById(parcelId)
-
-//     // แยกชื่อจาก recipientName
-//     const [first, ...rest] = (res.recipientName || '').split(' ')
-
-//     form.value.firstName = first || ''
-//     form.value.lastName = rest.join(' ') || ''
-//     form.value.email = res.email || ''
-//     form.value.roomNumber = res.roomNumber || ''
-//     form.value.dormitoryId = res.dormitoryId || ''
-//     form.value.lineId = res.lineId || ''
-//     form.value.phoneNumber = res.phoneNumber || ''
-//   } finally {
-//     loading.value = false
-//   }
-// }
-
 const showParcelTrashPage = async function () {
   router.replace({ name: 'trashparcels' })
 }
@@ -366,11 +345,8 @@ const lastName = computed({
   }
 })
 
-// Remove checkScreen resize listener logic
 onMounted(async () => {
   loadDom()
-  // loadMemberForEdit()
-  // loadResidents()
   const tid = route.params.tid
   getMemberDetail(tid)
 })
@@ -395,69 +371,6 @@ const filteredResidents = computed(() => {
 })
 
 const emit = defineEmits(['edit-success', 'edit-error'])
-
-// const saveEditRegistrationDetail = async () => {
-//   if (!form.value.residentName || !form.value.roomNumber || !form.value.email) {
-//     selectName.value = true
-//     setTimeout(() => (selectName.value = false), 10000)
-//     return
-//   }
-//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.senderName)) {
-//     SenderNameError.value = true
-//     setTimeout(() => (SenderNameError.value = false), 10000)
-//     return
-//   }
-//   if (!/^[A-Za-zก-๙\s]+$/.test(form.value.recipientName)) {
-//     recipientNameError.value = true
-//     setTimeout(() => (recipientNameError.value = false), 10000)
-//     return
-//   }
-
-//   if (!/^[A-Za-z0-9]+$/.test(form.value.trackingNumber)) {
-//     trackingNumberError.value = true
-//     setTimeout(() => (trackingNumberError.value = false), 10000)
-//     return
-//   }
-//   try {
-//     const body = {
-//       trackingNumber: form.value.trackingNumber,
-//       recipientName: form.value.recipientName,
-//       parcelType: form.value.parcelType,
-//       senderName: form.value.senderName,
-//       status: form.value.status,
-//       companyId: form.value.companyId ? Number(form.value.companyId) : null,
-//       profileImage: form.value.profileImage,
-//       userId: form.value.userId || null
-//     }
-
-//     const updatedParcel = await editItem(
-//       `${import.meta.env.VITE_BASE_URL}/api/parcels`,
-//       form.value.parcelId,
-//       body,
-//       router
-//     )
-
-//     if (!updatedParcel) {
-//       error.value = true
-//       setTimeout(() => (error.value = false), 10000)
-//       return
-//     }
-
-//     userStore.editParcel(form.value.parcelId, updatedParcel)
-
-//     form.value = {
-//       ...form.value,
-//       ...updatedParcel
-//     }
-//     originalForm.value = { ...form.value }
-
-//     editSuccess.value = true
-//     setTimeout(() => (editSuccess.value = false), 10000)
-//   } catch (err) {
-//     error.value = true
-//     setTimeout(() => (error.value = false), 10000)
-//   }
-// }
 onMounted(async () => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
@@ -609,32 +522,18 @@ const isAllEmpty = computed(() => {
   )
 })
 const closePopUp = (operate) => {
-  // -----------------
-  // general
-  // -----------------
   if (operate === 'problem') error.value = false
   if (operate === 'editSuccessMessage') editSuccess.value = false
   if (operate === 'roomNumberError') roomNumberError.value = false
-  // -----------------
-  // format error
-  // -----------------
   if (operate === 'firstNameErrorMessage') firstNameError.value = false
   if (operate === 'lastNameErrorMessage') lastNameError.value = false
   if (operate === 'positionMessage') positionError.value = false
   if (operate === 'phoneMessage') phoneError.value = false
-
-  // -----------------
-  // required field
-  // -----------------
   if (operate === 'firstNameRequired') firstNameRequired.value = false
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'emailRequired') emailRequired.value = false
   if (operate === 'dormRequired') dormRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false
-
-  // -----------------
-  // parcel / registration (จากของเดิม)
-  // -----------------
   if (operate === 'roomNumber') roomNumberError.value = false
   if (operate === 'senderName') SenderNameError.value = false
   if (operate === 'parcelType') parcelTypeError.value = false
@@ -642,9 +541,6 @@ const closePopUp = (operate) => {
   if (operate === 'recipientName') recipientNameError.value = false
   if (operate === 'select') selectName.value = false
   if (operate === 'lineId') lineIdError.value = false
-  // -----------------
-  // new required fields
-  // -----------------
   if (operate === 'firstNameRequired') firstNameRequired.value = false
   if (operate === 'lastNameRequired') lastNameRequired.value = false
   if (operate === 'roomNumberRequired') roomNumberRequired.value = false

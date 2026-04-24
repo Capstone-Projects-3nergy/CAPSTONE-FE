@@ -100,7 +100,6 @@ const userRole = computed(() => {
 </template>
 
 <style scoped>
-/* Ensure the container transitions smoothly */
 .user-info-wrapper {
   transition: all 0.3s ease-in-out;
 }

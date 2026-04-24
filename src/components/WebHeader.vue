@@ -24,7 +24,6 @@ const showNotification = computed(
   () => role.value === 'STAFF' || role.value === 'RESIDENT'
 )
 
-// Watch for role changes to fetch notifications when user is identified as RESIDENT
 import { watch, onMounted, onUnmounted } from 'vue'
 
 const syncNotifications = async () => {
@@ -37,8 +36,6 @@ const currentTime = ref('')
 const currentDate = ref('')
 const updateTime = () => {
   const now = new Date()
-  
-  // Format: 20:36:31
   currentTime.value = new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -46,7 +43,6 @@ const updateTime = () => {
     hour12: false
   }).format(now)
 
-  // Format: Sun, 15 Mar 2026
   currentDate.value = new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
     day: 'numeric',
@@ -60,7 +56,6 @@ let timeInterval = null
 
 onMounted(() => {
   window.addEventListener('focus', syncNotifications)
-  // Poll fallback once a minute
   pollInterval = setInterval(syncNotifications, 60000)
   
   updateTime()

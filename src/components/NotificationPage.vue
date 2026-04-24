@@ -77,14 +77,11 @@ const profileManager = useProfileManager()
 
 const updateProfile = async (payload) => {
   try {
-    // 1. update store
     profileManager.updateProfile(payload)
 
-    // 2. sync auth
     loginManager.user.fullName = payload.firstName + ' ' + payload.lastName
     loginManager.user.email = payload.email
 
-    // 3. avatar
     if (payload.avatar) {
       profileManager.updateProfile({ avatar: payload.avatar })
     }
@@ -158,7 +155,6 @@ const displayStatus = (value) => {
   return value.toUpperCase()
 }
 
-// กำหนดสีตามสถานะ
 const statusClass = (value) => {
   const status = displayStatus(value)
 
@@ -204,9 +200,9 @@ const filteredNotifications = computed(() => {
 })
 
 const badgeClass = (item) => {
-  if (item.type === 'overdue') return 'bg-amber-500' // Overdue
-  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' // Parcel
-  return 'bg-green-500' // Announcement
+  if (item.type === 'overdue') return 'bg-amber-500' 
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'bg-blue-500' 
+  return 'bg-green-500' 
 }
 
 const displayType = (item) => {
@@ -217,7 +213,6 @@ const displayType = (item) => {
 }
 
 const badgeIcon = (item) => {
-  // Overdue icon
   if (item.type === 'overdue') {
     return `
       <svg
@@ -237,7 +232,6 @@ const badgeIcon = (item) => {
     `
   }
 
-  // Announcement / Message
   if (!item.parcelId && (item.type === 'announcement' || item.type === 'message')) {
     return `
       <svg
@@ -255,7 +249,6 @@ const badgeIcon = (item) => {
     `
   }
 
-  // Parcel / Notification
   return `
     <svg
       width="25"
@@ -300,7 +293,6 @@ const closeDetail = () => {
   }, 300)
 }
 
-// Pagination Logic
 const currentPage = ref(1)
 const itemsPerPage = 10
 

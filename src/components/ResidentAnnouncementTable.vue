@@ -32,7 +32,6 @@ defineEmits(['prev', 'next', 'go', 'view'])
 
 const sortedItems = computed(() => {
   return [...props.items].sort((a, b) => {
-    // Date (Latest first)
     const dateA = new Date(a.publishAt || a.createdAt || a.datePosted || a.date || 0)
     const dateB = new Date(b.publishAt || b.createdAt || b.datePosted || b.date || 0)
     return dateB - dateA

@@ -96,7 +96,7 @@ onMounted(async () => {
   if (profile) {
     profileManager.setCurrentProfile(profile)
 
-    // sync form    form.value = { ...profile }
+     form.value = { ...profile }
     originalForm.value = { ...profile }
   }
 })

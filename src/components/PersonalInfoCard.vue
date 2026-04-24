@@ -27,8 +27,6 @@ const activeTab = ref('profile')
 const newEmail = ref('')
 const trimmedEmail = newEmail.value?.trim()
 const showLineSuccessPopup = ref(false)
-
-// Dynamic Feedback & Modals state
 const lineAlertVisible = ref(false)
 const lineAlertMessage = ref('')
 const lineAlertTitle = ref('')
@@ -98,7 +96,6 @@ const safeFullName = computed(() => {
 
 const safeStatus = computed(() => {
   return props.status || routeUser.value?.status || null
-  // return 'PENDING'
 })
 
 function display(value) {
@@ -185,7 +182,7 @@ onMounted(async () => {
       photo: p.profileImageUrl
     }))
 
-    // เรียงล่าสุด
+
     mapped.sort((a, b) => new Date(b.updateAt) - new Date(a.updateAt))
 
     userManager.setMembers(mapped.filter((u) => u.role === 'RESIDENT'))
@@ -193,7 +190,6 @@ onMounted(async () => {
   }
 })
 
-// ✅ Detect LINE Connection results from URL redirect
 watch(
   () => route.query.line,
   (status) => {
@@ -210,13 +206,13 @@ watch(
       lineAlertMessage.value = 'LINE Connection Failed'
       lineAlertTitle.value = errorMsg || 'Please try again or contact support'
       
-      // Auto-hide alert after 8 seconds
+  
       setTimeout(() => {
         lineAlertVisible.value = false
       }, 8000)
     }
 
-    // Clean up query string after processing
+
     setTimeout(() => {
       const newQuery = { ...route.query }
       delete newQuery.line
@@ -228,7 +224,6 @@ watch(
 )
 
 const addLineOA = () => {
-  // 👈 ไอดีบอทจริง @788eafre
   window.open('https://lin.ee/kCqc35o/@446subfw', '_blank')
   showLineSuccessPopup.value = false
 }
@@ -331,7 +326,6 @@ const badgeClass = (type) => {
 }
 
 const badgeIcon = (type) => {
-  // account / message
   if (type === 'message') {
     return `
       <svg
@@ -348,8 +342,6 @@ const badgeIcon = (type) => {
       </svg>
     `
   }
-
-  // parcel / notification
   return `
     <svg
       width="25"
@@ -384,23 +376,14 @@ const notifyTabClass = (tab) => {
   }
 }
 const newAvatar = ref(null)
-// const profileImageUrlPreview = computed(() => {
-//   if (newAvatar.value) return URL.createObjectURL(newAvatar.value)
-//   return props.profileImage
-// })
 const profileImageUrlPreview = computed(() => {
-  // 1️⃣ รูปใหม่ (ตอน edit)
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
   }
-
-  // 2️⃣ หน้า profile (user login)
   if (props.useCurrentProfile) {
     const url = profileManager.currentProfile?.profileImageUrl
     return url && url.startsWith('http') ? url : ''
   }
-
-  // 3️⃣ หน้า resident / staff detail
   return props.profileImage && props.profileImage.startsWith('http')
     ? props.profileImage
     : ''
@@ -1329,9 +1312,9 @@ const confirmUnlinkAction = async () => {
 
             <div class="space-y-8">
 
-              <!-- Section 2: Account Features & Verification (Separate Card) -->
+             
               <div class="space-y-6">
-                <!-- Verified Status Card -->
+               
                 <div v-if="safeStatus?.toUpperCase() === 'ACTIVE' || safeStatus?.toUpperCase() === 'INACTIVE'" 
                      class="flex items-center gap-6 px-8 py-8 bg-white rounded-[32px] border border-emerald-100 shadow-[0_15px_40px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-500">
                   <div class="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0">
@@ -1343,10 +1326,10 @@ const confirmUnlinkAction = async () => {
                   </div>
                 </div>
 
-                <!-- Account Verification Action Card -->
+              
                 <div v-else-if="safeStatus?.toUpperCase() === 'PENDING'" 
                      class="bg-white rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 border border-blue-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-2 flex flex-col items-start text-left">
-                  <!-- Header Area: Icon + Info (Row on all screens) -->
+                 
                   <div class="flex flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 sm:mb-10 w-full text-left">
                     <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[28px] bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-100 transform -rotate-1 sm:-rotate-2 hover:rotate-0 transition-transform duration-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-10 sm:h-10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1360,7 +1343,7 @@ const confirmUnlinkAction = async () => {
                     </div>
                   </div>
 
-                  <!-- Footer Area: Action Buttons -->
+              
                   <div class="flex flex-col items-center gap-4 w-full">
                     <ButtonWeb
                       :label="initialWaitSeconds > 0 ? `Waiting... (${initialWaitSeconds}s)` : 'Send Activation Email'"
@@ -1412,14 +1395,14 @@ const confirmUnlinkAction = async () => {
     leave-to-class="opacity-0 scale-95"
   >
     <div v-if="showLineSuccessPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <!-- Backdrop -->
+     
       <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showLineSuccessPopup = false"></div>
       
-      <!-- Modal Content -->
+    
       <div class="relative bg-white rounded-[40px] p-8 sm:p-10 max-w-sm w-full text-center shadow-[0_30px_100px_rgba(0,0,0,0.25)] border border-white/20">
-        <!-- Success Icon -->
+      
         <div class="w-24 h-24 bg-gradient-to-br from-[#00d500] to-[#00b900] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_20px_40px_rgba(0,185,0,0.3)] animate-bounce relative">
-          <!-- Glassy inner glow for better contrast -->
+       
           <div class="absolute inset-0 bg-white/10 rounded-full blur-sm scale-90"></div>
           
           <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="relative z-10 drop-shadow-sm">

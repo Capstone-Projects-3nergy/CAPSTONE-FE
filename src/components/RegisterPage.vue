@@ -75,14 +75,12 @@ const roomNumberWhitespaceError = ref(false)
 const positionWhitespaceError = ref(false)
 const dormList = ref([])
 
-// --- Centralized Error States for Icons ---
 const hasFullNameError = computed(() => isNameOverLimit.value || isFullNameWeak.value || isFullNameWrong.value || fullNameWhitespaceError.value || (whitespaceError.value && !form.fullName.trim()) || error.value)
 const hasEmailError = computed(() => isEmailOverLimit.value || isEmailInvalidChars.value || incorrectemailform.value || isEmailExist.value || isEmailDuplicate.value || isEmailFirebase.value || emailWhitespaceError.value || isEmailStaff.value || (whitespaceError.value && !form.email.trim()) || error.value)
 const hasPasswordError = computed(() => isPasswordTooShort.value || passwordWhitespaceError.value || isPasswordOverLimit.value || isPasswordWeak.value || isPasswordNotMatch.value || (whitespaceError.value && !form.password.trim()) || error.value)
 const hasConfirmPasswordError = computed(() => isConfirmPasswordTooShort.value || confirmPasswordWhitespaceError.value || isConfirmPasswordOverLimit.value || isNotMatch.value || (whitespaceError.value && !form.confirmPassword.trim()) || error.value)
 const hasRoomNumberError = computed(() => isRoomNumberOverLimit.value || roomidnotnumber.value || isRoomRequired.value || roomNumberWhitespaceError.value || (whitespaceError.value && !form.roomNumber.trim()) || error.value)
 const hasPositionError = computed(() => positionWhitespaceError.value || isStaffPositionOverLimit.value || isStaffPositionTooShort.value || isPositionRequired.value || isPositionWrong.value || (whitespaceError.value && !form.position.trim()) || error.value)
-// ------------------------------------------
 
 watch(role, (newRole) => {
   if (newRole === 'resident') {
@@ -312,17 +310,7 @@ const submitForm = async () => {
       triggerError(isFullNameWrong)
       return
     }
-    // if (!form.password || form.password.length > 20) {
-    //   isPasswordMax.value = true
-    //   setTimeout(() => (isPasswordMax.value = false), 10000)
-    //   return
-    // }
-
-    // if (!form.email || !form.email.endsWith('@gmail.com')) {
-    //   incorrectemailform.value = true
-    //   setTimeout(() => (incorrectemailform.value = false), 10000)
-    //   return
-    // }
+    
     if (roleType === 'STAFF') {
       if (
         form.email.endsWith('@gmail.com') ||
@@ -393,10 +381,7 @@ const submitForm = async () => {
 
     loading.value = true
     
-    // 🔹 เช็คจาก Firebase ไว้ก่อน 
     const isFirebaseDuplicate = await authManager.checkEmailInFirebase(payload.email)
-
-    // ลองให้ระบบ Register เพื่อเช็ค Database ให้ หากคืนค่า 409 แปลว่ามีใน DB แล้ว
     const res = await authManager.registerAccount(payload)
     loading.value = false
 
@@ -412,11 +397,9 @@ const submitForm = async () => {
     } else if (res.status === 404) {
       triggerError(isEmailExist)
     } else if (res.status === 409) {
-      // 📌 มีอีเมลซ้ำอยู่ใน Database แล้ว
+    
       triggerError(isEmailDuplicate)
     } else {
-      // 📌 หากเกิด Error อื่นๆ (เช่น 500) และเช็คพบว่าอีเมลมีใน Firebase ไปแล้ว
-      // แปลว่า "มีใน Firebase แต่ไม่มีใน Database"
       if (isFirebaseDuplicate) {
         triggerError(isEmailFirebase)
       } else {

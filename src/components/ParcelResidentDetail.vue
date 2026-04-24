@@ -46,7 +46,6 @@ const showManageAnnouncement = ref(false)
 const showManageResident = ref(false)
 const showProfileStaff = ref(false)
 const showHomePageResident = ref(false)
-// Removed local isCollapsed
 const parcelConfirmDetail = ref(null)
 const parcel = ref(null)
 const confirmSuccess = ref(false)

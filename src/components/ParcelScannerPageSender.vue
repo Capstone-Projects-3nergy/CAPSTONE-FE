@@ -183,7 +183,7 @@ const selectResident = (resident) => {
 }
 
 watch(recipientSearch, (val) => {
-  form.value.recipientName = val // Sync manual input
+  form.value.recipientName = val 
   recipientNameError.value = false
   recipientNameWhitespaceError.value = false
   error.value = false
@@ -196,7 +196,7 @@ watch(recipientSearch, (val) => {
 const savedParcels = ref([])
 const scanningMode = ref('')
 const isSuccessScan = ref(false)
-const isOcrLoading = ref(false) // Added for OCR status
+const isOcrLoading = ref(false) 
 let qrScanner = null
 const videoStream = ref(null)
 const videoRef = ref(null)
@@ -218,7 +218,7 @@ async function extractParcelInfo(imageDataUrl) {
     let text = result?.data?.text?.trim()
     if (!text) return null
 
-    // Pre-processing: Normalize some common OCR errors in tracking-like strings
+   
     const normalizedText = text.replace(/[OD]/g, '0').replace(/[IL]/g, '1')
 
     const info = {
@@ -232,7 +232,6 @@ async function extractParcelInfo(imageDataUrl) {
 
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0)
 
-    // 👤 Recipient Search
     const recipientKeywords = ['ชื่อผู้รับ', 'ผู้รับ', 'ถึง', 'To', 'Recipient', 'ชือผู้รับ', 'ชื่อ']
     for (const line of lines) {
       for (const kw of recipientKeywords) {
@@ -251,7 +250,7 @@ async function extractParcelInfo(imageDataUrl) {
       if (info.recipientName) break
     }
 
-    // 📤 Sender Search
+
     const senderKeywords = ['ชื่อผู้ส่ง', 'ผู้ส่ง', 'จาก', 'From', 'Sender', 'ชือผู้ส่ง']
     for (const line of lines) {
       for (const kw of senderKeywords) {
@@ -270,20 +269,16 @@ async function extractParcelInfo(imageDataUrl) {
       if (info.senderName) break
     }
 
-    // 📦 Tracking & Company Detection
+
     const trackingPatterns = [
-      // 🔹 Priority 1: Clear Prefixes (Check these first)
+   
       { id: 'Flash', regex: /TH\d{11}[A-Z]/i },
       { id: 'Kerry', regex: /KEX[A-Z]\d{9,12}/i, altRegex: /KEX\d{10,13}/i },
       { id: 'Thaipost', regex: /[A-Z]{2}\d{9}TH/i },
       { id: 'JT_Prefix', idMap: 'JT', regex: /JD\d{13}/i },
-      
-      // 🔹 Priority 2: Purely Numeric (Check these last)
-      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, // DHL usually 10 or 12 digits
-      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, // FedEx often longer
-      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, // J&T also uses 12 digits numeric
-      
-      // Fallback
+      { id: 'DHL', regex: /\d{10}/, altRegex: /\d{12}/ }, 
+      { id: 'FedEx', regex: /\d{15}/, altRegex: /\d{20,22}/ }, 
+      { id: 'JT_Numeric', idMap: 'JT', regex: /\d{12}/ }, 
       { id: 'Generic', regex: /[A-Z0-9]{8,22}/ }
     ]
 
@@ -293,7 +288,6 @@ async function extractParcelInfo(imageDataUrl) {
     for (const pattern of trackingPatterns) {
       let match = searchString.match(pattern.regex) || (pattern.altRegex && searchString.match(pattern.altRegex))
       
-      // If no match in raw text, try in sanitized text (useful for messy OCR with dots/slashes)
       if (!match && pattern.id !== 'Generic' && pattern.id !== 'DHL' && pattern.id !== 'FedEx') {
         match = sanitizedSearchString.match(pattern.regex)
       }
@@ -326,12 +320,9 @@ async function extractParcelInfo(imageDataUrl) {
         }
       }
     }
-
-    // 🏠 Room Number
     const roomMatch = text.match(/(ห้อง|Room|เลขที่ห้อง|No|Unit)[:\s]*(\d+[\/\d]*)/i)
     if (roomMatch) info.roomNumber = roomMatch[2]
 
-    // 📦 Parcel Type
     const typeText = text.toLowerCase()
     if (typeText.match(/(กล่อง|box|package)/)) info.parcelType = 'BOX'
     else if (typeText.match(/(ซอง|document|letter|envelope|จดหมาย|เอกสาร)/)) info.parcelType = 'DOCUMENT'
@@ -350,16 +341,13 @@ const processScanResult = (text) => {
   scanResult.value = text
 
   try {
-    // Try to parse as JSON first
     const data = JSON.parse(text)
     
-    // If it's an object, map fields
     if (typeof data === 'object' && data !== null) {
       if (data.trackingNumber) form.value.trackingNumber = data.trackingNumber
       if (data.recipientName) {
         form.value.recipientName = data.recipientName
         recipientSearch.value = data.recipientName
-        // Try to find resident by name if available
         const resident = residents.value.find(r => {
            const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
            return fullName === data.recipientName.toLowerCase()
@@ -373,24 +361,21 @@ const processScanResult = (text) => {
       if (data.companyId) form.value.companyId = data.companyId
       if (data.roomNumber) form.value.roomNumber = data.roomNumber
       
-      return // Successfully processed as JSON
+      return 
     }
   } catch (e) {
-    // Not JSON, fall back to simple string (tracking number)
+   
   }
 
-  // Fallback: Treat as tracking number
+
   form.value.trackingNumber = text
 
-  // Carrier Pattern Detection - Auto select company
+ 
   const trackingPatterns = [
-    // 🔹 Priority 1: Clear Prefixes
     { id: 'Flash', regex: /^TH\d{11}[A-Z]$/i },
     { id: 'Kerry', regex: /^KEX[A-Z]\d{9,12}$/i, altRegex: /^KEX\d{10,13}$/i },
     { id: 'Thaipost', regex: /^[A-Z]{2}\d{9}TH$/i },
     { id: 'JT_Prefix', idMap: 'JT', regex: /^JD\d{13}$/i },
-    
-    // 🔹 Priority 2: Purely Numeric (Ordered by specific length hints)
     { id: 'DHL', regex: /^\d{10}$/ },
     { id: 'FedEx', regex: /^\d{15}$/ },
     { id: 'JT_Numeric', idMap: 'JT', regex: /^\d{12}$/ },
@@ -479,8 +464,6 @@ async function capturePhoto() {
       if (info.recipientName) {
         form.value.recipientName = info.recipientName
         recipientSearch.value = info.recipientName
-
-        // Try to find resident by name if available
         const resident = residents.value.find(r => {
            const fullName = (r.fullName || `${r.firstName} ${r.lastName}`).toLowerCase()
            return fullName.includes(info.recipientName.toLowerCase()) || 
@@ -726,7 +709,6 @@ function stopScan() {
 }
 
 const saveParcel = async () => {
-  // Reset all error states
   error.value = false
   trackingNumberError.value = false
   recipientNameError.value = false
@@ -760,7 +742,6 @@ const saveParcel = async () => {
     return
   }
 
-  // Whitespace check
   const hasWhitespace = (s) => s && (s !== s.trim());
   let wsError = false;
 
@@ -858,7 +839,6 @@ const saveParcel = async () => {
       const isDuplicate = existingParcels.some(
         (p) =>
           p.trackingNumber === form.value.trackingNumber 
-          // && p.companyId === Number(form.value.companyId)
       )
 
       if (isDuplicate) {
@@ -1139,18 +1119,18 @@ const closePopUp = (operate) => {
                     v-if="scanningMode === 'barcode'"
                     class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
                   >
-                    <!-- Shadow overlay -->
+                  
                     <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"></div>
                     
-                    <!-- Scanner Frame -->
+                
                     <div class="relative w-64 h-32 md:w-80 md:h-40 z-20">
-                      <!-- Corners -->
+                     
                       <div class="absolute top-0 left-0 w-10 h-10 border-t-[4px] border-l-[4px] transition-colors duration-300 rounded-tl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute top-0 right-0 w-10 h-10 border-t-[4px] border-r-[4px] transition-colors duration-300 rounded-tr-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 left-0 w-10 h-10 border-b-[4px] border-l-[4px] transition-colors duration-300 rounded-bl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 right-0 w-10 h-10 border-b-[4px] border-r-[4px] transition-colors duration-300 rounded-br-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       
-                      <!-- Scan Line animation -->
+                   
                       <div class="absolute left-0 top-0 w-full h-[3px] animate-scan-line" :class="isSuccessScan ? 'bg-green-400 shadow-[0_0_20px_5px_rgba(74,222,128,0.5)]' : 'bg-[#185DC0] shadow-[0_0_15px_3px_rgba(24,93,192,0.6)]'"></div>
                     </div>
                   </div>

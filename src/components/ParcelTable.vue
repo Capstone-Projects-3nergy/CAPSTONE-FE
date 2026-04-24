@@ -68,8 +68,6 @@ const props = defineProps({
 
 const internalPages = computed(() => {
   if (props.totalPages <= 0) return []
-  
-  // If parent component still provides pages prop, use it (for transition)
   if (props.pages && props.pages.length > 0) return props.pages
 
   const pages = []
@@ -498,7 +496,7 @@ const authStore = useAuthManager()
                 {{ formatStatus(p.status) }}
               </span>
 
-              <!-- Tooltip -->
+             
               <div
                 v-if="
                   authStore.user?.role === 'STAFF' &&
@@ -831,7 +829,7 @@ const authStore = useAuthManager()
     </table>
     </div>
 
-    <!-- Pagination -->
+
     <div class="px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 sm:justify-end gap-3" v-if="total > 0">
         <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 inline-flex items-center gap-1 w-full sm:w-auto justify-center">
             <button 
@@ -892,7 +890,7 @@ const authStore = useAuthManager()
   }
 }
 
-/* Tooltip overrides */
+
 .shrink-table-wrapper table td .pointer-events-none > div.bg-gray-400 {
   white-space: nowrap !important;
   word-break: normal !important;

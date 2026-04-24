@@ -171,15 +171,12 @@ const loginHomePageWeb = async () => {
           localStorage.setItem(key, 'true')
         }
 
-        // Fetch notifications from backend
         try {
             await notificationManager.fetchNotifications(router)
         } catch (e) {
              console.error('Failed to fetch notifications', e)
         }
       }
-
-      // Manual Redirect
       if (currentUser) {
         switch (currentUser.role) {
           case 'RESIDENT':

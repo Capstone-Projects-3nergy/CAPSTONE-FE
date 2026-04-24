@@ -63,7 +63,6 @@ const closePopUp = (operate) => {
   }
 }
 
-// Announcement Data & Logic
 const { announcements } = storeToRefs(announcementManager)
 const categories = ref([])
 
@@ -89,7 +88,6 @@ const currentPage = ref(1)
 const viewMode = ref('grid')
 const itemsPerPage = 6
 
-// Reset to page 1 whenever filters change to avoid empty pages
 watch([searchQuery, selectedCategory, selectedDate], () => {
   currentPage.value = 1
 })
@@ -100,7 +98,7 @@ const totalDrafts = computed(() => announcements.value.filter(a => a.status?.toL
 const totalViews = computed(() => announcements.value.reduce((sum, a) => sum + (a.views || 0), 0))
 
 const isCategoryAsc = ref(true)
-const isDateAsc = ref(false) // Default newest first for announcements
+const isDateAsc = ref(false) 
 const isStatusAsc = ref(true)
 const currentSort = ref('pinned')
 
@@ -126,10 +124,9 @@ const filteredAnnouncements = computed(() => {
   const filtered = announcements.value.filter(item => {
     const matchesCategory = selectedCategory.value ? item.category === selectedCategory.value : true
     
-    // Date Filtering Logic
     let matchesDate = true
     if (selectedDate.value) {
-      const targetDate = selectedDate.value // format: YYYY-MM-DD
+      const targetDate = selectedDate.value 
       const rawDateStr = item.publishAt || item.datePosted || ''
       
       if (rawDateStr && rawDateStr !== 'Just now') {
@@ -151,10 +148,8 @@ const filteredAnnouncements = computed(() => {
     return matchesCategory && matchesDate
   })
 
-  // Start with searched results
   let result = searchAnnouncements(filtered, searchQuery.value)
 
-  // Apply sorting
   if (currentSort.value === 'category') {
     isCategoryAsc.value ? sortByCategory(result) : sortByCategoryReverse(result)
   } else if (currentSort.value === 'date') {
@@ -217,7 +212,6 @@ const handleEdit = (item) => {
 
 const handleView = async (item) => {
   try {
-    // 1. Fetch fresh announcement details (without recording a view for staff)
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements`,
       item.id,
@@ -249,14 +243,13 @@ const handlePin = async (item) => {
     return
   }
 
-  // Construct payload focusing on necessary fields for UpdateAnnouncementDto
   const payload = {
     title: item.title,
     subtitle: item.subtitle || '',
     content: item.content || '',
     categoryId: item.categoryId || (item.category ? item.category.id : item.category),
     pinned: newPinnedStatus,
-    sendNotification: false, // Don't re-notify when just pinning
+    sendNotification: false, 
     priority: item.priority || 1,
     publishAt: item.publishAt || null,
     targetAudience: item.targetAudience || 'ALL_RESIDENTS',
@@ -269,7 +262,6 @@ const handlePin = async (item) => {
     const updated = await editAnnouncementWithFile(url, item.id, payload, router)
     
     if (updated) {
-      // Update local state and manager
       item.pinned = newPinnedStatus
       announcementManager.updateAnnouncement(updated)
     } else {
@@ -325,7 +317,6 @@ onMounted(async () => {
     fetchCategoriesFromAnnouncements()
   ])
 
-  // Set up auto-refresh every 30 seconds to keep stats and view counts fresh for staff
   statsInterval = setInterval(() => {
     fetchAnnouncementData()
   }, 30000)

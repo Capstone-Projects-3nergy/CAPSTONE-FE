@@ -40,7 +40,7 @@ const props = defineProps({
   },
   mode: {
     type: String,
-    default: 'edit' // 'edit' | 'add'
+    default: 'edit' 
   },
   title: { type: String, default: 'Edit Personal Information' },
   showEdit: { type: Boolean, default: true },
@@ -351,19 +351,12 @@ onMounted(async () => {
     if (props.mode === 'add') {
       return
     }
-    // -------------------------
-    // 2. โหลด profile
-    // -------------------------
     const profile = await getProfile(`${baseURL}/api/profile`, router)
 
     if (!profile) return
 
     profileManager.setCurrentProfile(profile)
 
-    // -------------------------
-    // 3. หา dormName จาก dormId
-    // -------------------------
-    // const dorm = dormList.value.find((d) => d.dormId === profile.dormId)
     const dormName = computed(() => {
       if (!loginManager.user?.dormId) return ''
 
@@ -374,11 +367,9 @@ onMounted(async () => {
       return dorm ? dorm.dormName : ''
     })
     if (props.mode === 'add') {
-      return // ⛔ ห้ามโหลด profile ต่อ
+      return 
     }
-    // -------------------------
-    // 4. set ค่าเริ่มต้นให้ form
-    // -------------------------
+
     if (props.editResidentDetail) {
       Object.assign(form.value, {
         userId: props.userId,
@@ -394,7 +385,6 @@ onMounted(async () => {
       return
     }
 
-    // ✅ แก้ profile login เท่านั้น
     if (props.editProfile) {
       const profile = await getProfile(
         `${import.meta.env.VITE_BASE_URL}/api/profile`,
@@ -424,7 +414,6 @@ onMounted(async () => {
   }
 })
 
-// ✅ Sync form with store when profile is updated (e.g. after LINE linking)
 watch(
   () => profileManager.currentProfile,
   (newProfile) => {
@@ -435,7 +424,6 @@ watch(
   { deep: true, immediate: true }
 )
 
-// ✅ เพิ่ม watch ที่ loginManager ด้วยเพื่อความชัวร์
 watch(
   () => loginManager.user?.lineId,
   (newLineId) => {
@@ -449,7 +437,7 @@ watch(
   () => [props.mode, props.dormName, dormList.value],
   ([mode, dormName]) => {
     if (mode !== 'edit') return
-    if (form.value.dormId) return // ⭐ สำคัญ
+    if (form.value.dormId) return
     if (!dormName || !dormList.value.length) return
 
     const dorm = dormList.value.find((d) => d.dormName === dormName)
@@ -458,7 +446,6 @@ watch(
   { immediate: true }
 )
 
-// load props → form
 watch(
   () => props.mode,
   (mode) => {
@@ -475,7 +462,7 @@ watch(
       form.value.roomNumber = props.roomNumber
       form.value.lineId = props.lineId
       form.value.phoneNumber = props.phoneNumber
-      // form.value.dormName = props.dormName
+      form.value.dormName = props.dormName
     }
   },
   { immediate: true }
@@ -499,24 +486,20 @@ const isFormEmpty = computed(() => {
 })
 
 const profileImageUrlPreview = computed(() => {
-  // ⭐ ADD MODE : ไม่ดึงรูปเก่าเด็ดขาด
   if (props.mode === 'add') {
     if (newAvatar.value) {
       return URL.createObjectURL(newAvatar.value)
     }
     return ''
   }
-  // 1️⃣ รูปใหม่
+
   if (newAvatar.value) {
     return URL.createObjectURL(newAvatar.value)
   }
-
-  // 2️⃣ แก้ resident → ใช้รูปจาก props
   if (props.editResidentDetail && props.profileImage) {
     return props.profileImage
   }
 
-  // 3️⃣ แก้ profile login
   if (props.editProfile) {
     const url = profileManager.currentProfile?.profileImageUrl
     if (url && url.startsWith('http')) return url
@@ -542,19 +525,16 @@ function onImageChange(e) {
       return
     }
 
-    // Open Cropper
     tempImageSrc.value = URL.createObjectURL(file)
     showCropper.value = true
-    e.target.value = null // Reset input to allow re-selecting same file
+    e.target.value = null
   }
 }
 
 function onCrop(blob) {
-  // Convert blob to File
   const file = new File([blob], "avatar.jpg", { type: "image/jpeg" })
   newAvatar.value = file
   showCropper.value = false
-  // URL.revokeObjectURL(tempImageSrc.value) // Clean up
   tempImageSrc.value = ''
 }
 
@@ -565,7 +545,6 @@ function closeCropper() {
 
 function removeImage() {
   newAvatar.value = null
-  // Reset input if exists
   const input = document.querySelector('input[type="file"]')
   if (input) input.value = null
 }
@@ -584,14 +563,12 @@ const getInitial = (name) => {
   return name.trim()[0].toUpperCase()
 }
 const userInitial = computed(() => {
-  // 🟢 edit resident detail → ใช้ firstName ของ resident เสมอ
   if (props.editResidentDetail) {
     return form.value.firstName
       ? form.value.firstName.trim()[0].toUpperCase()
       : ''
   }
 
-  // 🔵 profile login
   const currentFirst = form.value.firstName?.trim()
   const originalFirst = originalForm.value.firstName?.trim()
 
@@ -607,7 +584,6 @@ const userInitial = computed(() => {
 })
 
 const submit = async () => {
-  // Reset previous errors
   showFirstNameError.value = false
   showLastNameError.value = false
   showEmailError.value = false
@@ -616,8 +592,6 @@ const submit = async () => {
   showPositionError.value = false
   showPhoneError.value = false
   showLineIdError.value = false
-
-  // Check for leading/trailing whitespace
   showFirstNameWhitespaceError.value = hasWhitespace(form.value.firstName)
   showLastNameWhitespaceError.value = hasWhitespace(form.value.lastName)
   showEmailWhitespaceError.value = hasWhitespace(form.value.email)
@@ -712,9 +686,6 @@ const submit = async () => {
 }
 
 const addResidents = async () => {
-  // -----------------------
-  // REQUIRED FIELD CHECK
-  // -----------------------
   if (!form.value.firstName?.trim()) {
     showFirstNameError.value = true
     setTimeout(() => {
@@ -774,9 +745,6 @@ const addResidents = async () => {
     emit('line-id-error', true)
     return
   }
-  // -----------------------
-  // validate name (ไทย + อังกฤษ)
-  // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName || !nameRegex.test(form.value.firstName)) {
@@ -805,10 +773,6 @@ const addResidents = async () => {
     }, 10000)
     return
   }
-
-  // -----------------------
-  // validate email
-  // -----------------------
   if (/[^a-zA-Z0-9.@]/.test(form.email)) {
     showEmailError.value = true
     setTimeout(() => {
@@ -828,7 +792,6 @@ const addResidents = async () => {
 
 
   if (form.value.phoneNumber) {
-    // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       showPhoneError.value = true
       setTimeout(() => {
@@ -838,7 +801,6 @@ const addResidents = async () => {
       return
     }
     
-    // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       showPhoneError.value = true
@@ -849,16 +811,13 @@ const addResidents = async () => {
       return
     }
   }
-  // -----------------------
-  // CHECK DUPLICATE EMAIL
-  // -----------------------
+
   loading.value = true
   const dataUser = await getItems(
     `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
     router
   )
 
-  // 🔹 เช็คจาก Firebase ไว้ก่อน
   const isFirebaseDuplicate = await loginManager.checkEmailInFirebase(form.value.email)
 
   if (dataUser) {
@@ -878,9 +837,6 @@ const addResidents = async () => {
   }
 
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       userId: selectedResidentId.value,
       firstName: form.value.firstName,
@@ -896,9 +852,6 @@ const addResidents = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     const savedMember = await addMemberWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
       body,
@@ -927,17 +880,8 @@ const addResidents = async () => {
       emit('email-duplicate', true)
       return
     }
-    // ✅ เพิ่มเข้า Pinia store (เหมือน parcel)
     userManager.addMember(savedMember)
-
-
-
-    // -----------------------
-    // success
-    // -----------------------
     emit('successAddProfile')
-
-    // reset form
     Object.assign(form.value, {
       firstName: '',
       lastName: '',
@@ -1020,7 +964,6 @@ const saveEditProfile = async () => {
   }
 
   if (form.value.phoneNumber) {
-    // รูปแบบตัวเลข + -
     if (!/^[0-9-]+$/.test(form.value.phoneNumber)) {
       showPhoneError.value = true
       setTimeout(() => {
@@ -1029,7 +972,6 @@ const saveEditProfile = async () => {
       emit('phone-error', true)
       return
     }
-    // เช็คจำนวนตัวเลข 9–10
     const digits = form.value.phoneNumber.replace(/-/g, '')
     if (digits.length < 9 || digits.length > 10) {
       showPhoneError.value = true
@@ -1041,9 +983,6 @@ const saveEditProfile = async () => {
     }
   }
 
-  // -----------------------
-  // validate position (staff only)
-  // -----------------------
   if (isStaff) {
     if (!form.value.position?.trim()) {
       showPositionError.value = true
@@ -1078,9 +1017,6 @@ const saveEditProfile = async () => {
     }
   }
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
@@ -1098,9 +1034,6 @@ const saveEditProfile = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     loading.value = true
     const updated = await updateProfileWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/profile`,
@@ -1114,11 +1047,9 @@ const saveEditProfile = async () => {
       return
     }
     loading.value = false
-    // profileManager.setCurrentProfile(profile)
-    // 🔥 sync ทุก store
+    profileManager.setCurrentProfile(profile)
     profileManager.setCurrentProfile(updated)
     loginManager.updateUser(updated)
-    // reset local state
     newAvatar.value = null
     originalForm.value = { ...form.value }
 
@@ -1133,9 +1064,6 @@ const saveEditProfile = async () => {
 const saveEditDetail = async () => {
   const isStaff = loginManager.user?.role === 'STAFF'
 
-  // -----------------------
-  // validate name (ไทย + อังกฤษ)
-  // -----------------------
   const nameRegex = /^[A-Za-zก-๙\s]+$/
 
   if (!form.value.firstName?.trim()) {
@@ -1227,9 +1155,6 @@ const saveEditDetail = async () => {
   }
 
   try {
-    // -----------------------
-    // payload
-    // -----------------------
     const body = {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
@@ -1247,9 +1172,6 @@ const saveEditDetail = async () => {
       body.profileImage = newAvatar.value
     }
 
-    // -----------------------
-    // API call
-    // -----------------------
     loading.value = true
     const updated = await updateDetailWithFile(
       `${import.meta.env.VITE_BASE_URL}/api/staff/users`,
@@ -1264,7 +1186,6 @@ const saveEditDetail = async () => {
       return
     }
 
-    // ⭐ sync userManager
     if (isStaff) {
       userManager.updateStaff({
         id: updated.id,
@@ -1328,7 +1249,6 @@ const isAddFormValid = computed(() => {
   if (!form.value.email?.trim()) return false
   if (!form.value.roomNumber?.trim()) return false
 
-  // dormId บังคับเฉพาะ STAFF ตอน add
   if (
     props.mode === 'add' &&
     loginManager.user.role === 'STAFF' &&
@@ -1341,16 +1261,9 @@ const isAddFormValid = computed(() => {
 })
 
 const isSaveDisabled = computed(() => {
-  // -------------------------
-  // ADD MODE
-  // -------------------------
   if (props.mode === 'add') {
     return !isAddFormValid.value
   }
-
-  // -------------------------
-  // EDIT MODE
-  // -------------------------
   return isFormUnchanged.value && !isAvatarChanged.value
 })
 
@@ -1372,7 +1285,6 @@ const isLineLinked = computed(() => {
   return true
 })
 
-// Add reset function to be called by parents when popup closes
 const resetErrorStates = () => {
   showFirstNameError.value = false
   showLastNameError.value = false
@@ -1382,8 +1294,6 @@ const resetErrorStates = () => {
   showPositionError.value = false
   showPhoneError.value = false
   showLineIdError.value = false
-  
-  // Also clear whitespace errors
   showFirstNameWhitespaceError.value = false
   showLastNameWhitespaceError.value = false
   showEmailWhitespaceError.value = false
@@ -1401,12 +1311,10 @@ defineExpose({
 <template>
   <div class="w-full mx-auto px-4">
     <div v-if="editProfile" class="flex flex-col md:flex-row gap-2">
-      <!-- LEFT : Profile Image Card -->
       <div
         class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8 flex flex-col items-center text-center"
       >
         <div class="relative inline-block group mb-6">
-          <!-- Avatar -->
           <div
             class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/avatar"
           >
@@ -1418,7 +1326,6 @@ defineExpose({
                 class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
               />
 
-              <!-- ADD MODE + ยังไม่เลือกรูป -->
               <div
                 v-else-if="props.mode === 'add'"
                 class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400"
@@ -1426,7 +1333,6 @@ defineExpose({
                 <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M12 13c2.396 0 4.575.694 6.178 1.672c.8.488 1.484 1.064 1.978 1.69c.486.615.844 1.351.844 2.138c0 .845-.411 1.511-1.003 1.986c-.56.45-1.299.748-2.084.956c-1.578.417-3.684.558-5.913.558s-4.335-.14-5.913-.558c-.785-.208-1.524-.506-2.084-.956C3.41 20.01 3 19.345 3 18.5c0-.787.358-1.523.844-2.139c.494-.625 1.177-1.2 1.978-1.69C7.425 13.695 9.605 13 12 13m0-11a5 5 0 1 1 0 10a5 5 0 0 1 0-10"/></g></svg>
               </div>
 
-              <!-- EDIT MODE + ไม่มีรูป -->
               <div
                 v-else
                 class="w-full h-full flex items-center justify-center font-bold bg-gradient-to-br from-[#1D355E] to-[#0E4B90] text-white text-5xl"
@@ -1459,7 +1365,6 @@ defineExpose({
                 />
               </svg>
             </div>
-            <!-- Tooltip -->
             <div
               class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
             >
@@ -1472,7 +1377,6 @@ defineExpose({
           </div>
         </div>
 
-        <!-- hidden input -->
         <input
           type="file"
           accept="image/*"
@@ -1490,11 +1394,9 @@ defineExpose({
         </div>
       </div>
 
-      <!-- RIGHT : Edit Information Card -->
       <div
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-5 md:p-8"
       >
-        <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
           <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
           <h3 class="font-extrabold text-xl text-black tracking-tight">
@@ -1502,7 +1404,6 @@ defineExpose({
           </h3>
         </div>
 
-        <!-- Form Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
           <div class="flex flex-col">
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">

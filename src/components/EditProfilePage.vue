@@ -47,35 +47,20 @@ const fileTypeError = ref(false)
 const whitespaceError = ref(false)
 const updateProfile = async (payload) => {
   try {
-    // 1. update store
     profileManager.updateProfile(payload)
 
-    // 2. sync auth
     loginManager.user.fullName = payload.firstName + ' ' + payload.lastName
     loginManager.user.email = payload.email
 
-    // 3. profileImageUrl
     if (payload.profileImageUrl) {
       profileManager.updateProfile({ profileImageUrl: payload.profileImageUrl })
     }
-
-    // ✅ แจ้งว่าบันทึกสำเร็จ
     profileManager.showEditSuccess()
     editSuccess.value = true
     setTimeout(() => (editSuccess.value = false), 10000)
-    // 4. redirect
-    // if (loginManager.user.role === 'STAFF') {
-    //   // router.replace({ name: 'profilestaff' })
-    //   editSuccess.value = true
-    // } else {
-    //   // router.replace({ name: 'profileresident' })
-    //   editSuccess.value = true
-    //    setTimeout(() => ( editSuccess.value= false), 10000)
-    // }
   } catch (e) {
     error.value = true
     setTimeout(() => (error.value = false), 10000)
-    // profileManager.showError()
   }
 }
 
@@ -203,7 +188,6 @@ const ShowManageResidentPage = async function () {
 }
 
 onUnmounted(() => {
-  // Removed resize listener to allow global state persistence
 })
 onMounted(async () => {
   try {
@@ -235,8 +219,6 @@ onMounted(async () => {
     dormList.value = parsedDorms
   } catch (err) {}
 
-  // Sidebar responsive logic is now handled by SidebarManager
-
   const profile = await getProfile(
     `${import.meta.env.VITE_BASE_URL}/api/profile`,
     router
@@ -244,7 +226,7 @@ onMounted(async () => {
 
   if (profile) {
     profileManager.setCurrentProfile(profile)
-    // sync form    form.value = { ...profile }
+    form.value = { ...profile }
     originalForm.value = { ...profile }
   }
 })
@@ -283,9 +265,6 @@ const showWhitespaceError = () => {
 }
 const closePopUp = (operate) => {
   switch (operate) {
-    // -----------------
-    // general
-    // -----------------
     case 'problem':
       error.value = false
       break
@@ -294,9 +273,6 @@ const closePopUp = (operate) => {
       editSuccess.value = false
       break
 
-    // -----------------
-    // format error
-    // -----------------
     case 'firstNameErrorMessage':
       firstNameError.value = false
       break
@@ -314,9 +290,6 @@ const closePopUp = (operate) => {
       phoneError.value = false
       break
 
-    // -----------------
-    // required field
-    // -----------------
     case 'firstNameRequired':
       firstNameRequired.value = false
       break

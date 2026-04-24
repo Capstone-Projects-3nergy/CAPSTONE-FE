@@ -47,14 +47,11 @@ const restoreParcelFn = async () => {
     router
   )
 
-  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
   if (!res || !res.ok) {
     emit('redAlert')
     emit('cancelDetail', true)
     return
   }
-
-  // ✅ backend restore สำเร็จจริง
   parcelManager.restoreFromTrash(parcel.value.id)
   emit('confirmDetail', true)
 }
@@ -67,7 +64,6 @@ const restoreMemberFn = async () => {
     router
   )
 
-  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
   if (!res || !res.ok) {
     emit('redAlert')
     emit('cancelDetail', true)
@@ -78,9 +74,7 @@ const restoreMemberFn = async () => {
   emit('confirmMemberDetail', true)
 }
 
-// ==============================
-// restore staff
-// ==============================
+
 const restoreStaffFn = async () => {
   if (!resident.value?.id) return
 
@@ -90,7 +84,7 @@ const restoreStaffFn = async () => {
     router
   )
 
-  // ❌ backend ไม่ success (status ไม่ใช่ 2xx)
+ 
   if (!res || !res.ok) {
     emit('redAlert')
     emit('cancelDetail', true)
