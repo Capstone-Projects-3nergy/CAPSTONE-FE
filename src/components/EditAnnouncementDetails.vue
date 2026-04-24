@@ -34,10 +34,8 @@ const openDatePicker = () => {
 
 const formatDateTimeDisplay = (dateTimeStr) => {
   if (!dateTimeStr) return '';
-  // Remove "Z" if it exists in the raw data string
   const sanitized = dateTimeStr.toString().replace(/\s*Z$/i, '');
   
-  // Handle native datetime-local format: YYYY-MM-DDTHH:mm
   if (sanitized.includes('T')) {
     const parts = sanitized.split('T');
     const datePart = parts[0];
@@ -45,7 +43,6 @@ const formatDateTimeDisplay = (dateTimeStr) => {
     const dateParts = datePart.split('-');
     if (dateParts.length === 3) {
       const [year, month, day] = dateParts;
-      // Convert YYYY-MM-DD to DD/MM/YYYY
       return `${day}/${month}/${year}${timePart ? ' - ' + timePart : ''}`;
     }
   }
@@ -56,13 +53,10 @@ const ensureDateTimeLocal = (dateStr) => {
   if (!dateStr) return '';
   try {
     const str = dateStr.toString()
-    // Remove "Z" and any suffix like " - Staff Portal" or " - Draft"
     let sanitized = str.replace(/\s*Z$/i, '').split(' - ')[0];
     
-    // If already in YYYY-MM-DDTHH:mm, return it
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(sanitized)) return sanitized.substring(0, 16);
     
-    // Try parsing to Date object
     const d = new Date(sanitized);
     if (isNaN(d.getTime())) {
       console.warn('Invalid date string:', dateStr);
@@ -80,7 +74,6 @@ const ensureDateTimeLocal = (dateStr) => {
     return '';
   }
 }
-// No external icon library available, using inline SVGs
 
 const loginManager = useAuthManager()
 const announcementStore = useAnnouncementManager()
@@ -89,7 +82,6 @@ const notificationManager = useNotificationManager()
 const router = useRouter()
 const route = useRoute()
 
-// State
 const isCategoryOpen = ref(false)
 const isSubmitting = ref(false)
 const isLoading = ref(false)
@@ -122,7 +114,6 @@ const MAX_TITLE_LENGTH = 100
 const MAX_SUBTITLE_LENGTH = 150
 const MAX_CONTENT_LENGTH = 2000
 
-// Categories mapping
 const categories = ref([])
 
 const fetchCategoriesFromAnnouncements = async () => {
@@ -137,9 +128,7 @@ const fetchCategoriesFromAnnouncements = async () => {
       const map = new Map()
       
       for (const item of data) {
-        // รองรับทั้ง id และ categoryId
         const id = item.categoryId || item.id
-        // รองรับชื่อฟิลด์ที่หลากหลาย
         const name = item.categoryName || item.name || item.category
         
         if (id && name && !map.has(id)) {
@@ -167,7 +156,6 @@ const categoryOptions = computed(() => {
   }))
 })
 
-// Image State
 const coverImage = ref(null)
 const imagePreview = ref(null)
 const contentArea = ref(null)
@@ -210,7 +198,6 @@ const formatText = (style) => {
 
   announcementForm.content = before + newText + after
   
-  // Set cursor position after formatting
   setTimeout(() => {
     textarea.focus()
     const newPos = start + newText.length
@@ -256,7 +243,6 @@ const handleImageUpload = (event) => {
 const removeImage = () => {
   coverImage.value = null
   imagePreview.value = null
-  // Reset announcementForm.coverImage if it was there
   announcementForm.coverImage = null
 }
 
@@ -269,15 +255,6 @@ const toggleLightbox = () => {
 
 const handleTitleInput = (event) => {
   let val = event.target.value
-  
-  // if (/[๐-๙]/.test(val)) {
-  //   titleThaiNumError.value = true
-  //   val = val.replace(/[๐-๙]/g, '')
-  //   setTimeout(() => {
-  //     titleThaiNumError.value = false
-  //   }, 10000)
-  // }
-
   if (val.length > MAX_TITLE_LENGTH) {
     const sliced = val.slice(0, MAX_TITLE_LENGTH)
     announcementForm.title = sliced
@@ -374,7 +351,6 @@ const closePopUp = (operate) => {
   }
 }
 
-// Announcement Data Data will be fetched from the backend.
 const announcementForm = reactive({
   title: '',
   subtitle: '',
@@ -395,11 +371,9 @@ const currentCategory = computed(() => {
   return categories.value.find(c => c.id === announcementForm.categoryId) || null
 })
 
-// Statuses
 const statuses = ref([])
 
 const fetchStatusesFromAnnouncements = async () => {
-  // Backend doesn't have a specific statuses endpoint, so we use common ones
   statuses.value = ['DRAFT', 'PUBLISHED']
 }
 
@@ -420,13 +394,11 @@ const minDateTime = computed(() => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 })
 
-// Initial Form State
 const initialForm = ref(null)
 
 const hasChanges = computed(() => {
   if (!initialForm.value || !announcementForm) return false
   
-  // Normalization helper for more accurate comparison
   const normalize = (val) => {
     if (val === undefined || val === null) return ''
     if (typeof val === 'boolean') return val
@@ -445,7 +417,6 @@ const hasChanges = computed(() => {
     return current !== initial
   })
 
-  // Compare images - handle both string URLs and empty values
   const currentImage = imagePreview.value || ''
   const initialImage = initialForm.value.coverImage || ''
   const imageChanged = currentImage !== initialImage
@@ -538,16 +509,12 @@ const fetchAnnouncementDetail = async () => {
     return
   }
 
-  // Ensure categories are loaded for lookup
   if (!categories.value.length) {
     await fetchCategoriesFromAnnouncements()
   }
-
-  // Helper to map any incoming data to our internal form structure
   const mapToForm = (item) => {
     if (!item) return null
     
-    // Find category ID if only name is present
     let catId = item.categoryId || item.category_id
     if (!catId && item.category) {
       if (typeof item.category === 'object') {
@@ -586,7 +553,6 @@ const fetchAnnouncementDetail = async () => {
     }
   }
 
-  // 1) Load from Pinia store first for perceived speed and persistence
   const existingAnnouncements = [
     ...(announcementStore.announcements || []),
     ...(announcementStore.trash || [])
@@ -599,14 +565,10 @@ const fetchAnnouncementDetail = async () => {
     if (storeMapped.coverImageUrl) {
       imagePreview.value = storeMapped.coverImageUrl
     }
-    // Set initial state from store immediately
     initialForm.value = JSON.parse(JSON.stringify(announcementForm))
     initialForm.value.coverImage = imagePreview.value || null
   }
-
-  // 2) Load from Backend to ensure data is correct/up-to-date
   try {
-    // Note: Use /api/announcements/staff/{id} to support viewing Drafts
     const data = await getAnnouncementById(
       `${import.meta.env.VITE_BASE_URL}/api/announcements/staff`,
       aid,
@@ -619,12 +581,10 @@ const fetchAnnouncementDetail = async () => {
       if (apiMapped.coverImageUrl) {
         imagePreview.value = apiMapped.coverImageUrl
       }
-      // Re-initialize initial state after API data is loaded (master source)
       initialForm.value = JSON.parse(JSON.stringify(announcementForm))
       initialForm.value.coverImage = imagePreview.value || null
     } else if (!foundInStore) {
       console.warn('No data returned from API and not found in store for ID:', aid)
-      // Fallback only if both store and API failed
       const fb = fallbackAnnouncements.find(a => a.id === aid)
       if (fb) {
         const fbMapped = mapToForm(fb)
@@ -659,14 +619,11 @@ const buttonSize = computed(() => {
   return 'md'
 })
 
-
-// Navigation Functions
 const navigateTo = (name) => {
   router.push({ name, params: { id: route.params.id } })
 }
 
 const handleSave = async () => {
-  // Validate Required Fields
   titleError.value = false
   subtitleError.value = false
   categoryError.value = false
@@ -679,7 +636,6 @@ const handleSave = async () => {
   if (announcementForm.status === 'PUBLISHED' && !announcementForm.publishAt) { dateError.value = true; hasError = true }
   if (!announcementForm.content.trim()) { contentError.value = true; hasError = true }
 
-  // Whitespace check
   titleWhitespaceError.value = hasWhitespace(announcementForm.title)
   subtitleWhitespaceError.value = hasWhitespace(announcementForm.subtitle)
   contentWhitespaceError.value = hasWhitespace(announcementForm.content)
@@ -696,7 +652,6 @@ const handleSave = async () => {
     return
   }
 
-  // Duplicate Title check
   const aidParam = route.params.aid
   const currentAid = aidParam ? Number(aidParam) : null
   const isDuplicate = announcementStore.announcements.some(a => 
@@ -730,9 +685,6 @@ const handleSave = async () => {
     isLoading.value = true
     isSubmitting.value = true
     
-    // -----------------------
-    // payload matches UpdateAnnouncementDto
-    // -----------------------
     const payload = {
       title: announcementForm.title,
       subtitle: announcementForm.subtitle,
@@ -746,13 +698,9 @@ const handleSave = async () => {
       publishNow: announcementForm.status === 'PUBLISHED',
       status: announcementForm.status,
       targetAudience: announcementForm.targetAudience,
-      coverImage: coverImage.value // Include the File object for multipart upload
+      coverImage: coverImage.value 
     }
 
-    // -----------------------
-    // API call - Always use editAnnouncementWithFile to ensure multipart/form-data
-    // This resolves HttpMediaTypeNotSupportedException as the backend expects multipart
-    // -----------------------
     const aidParam = route.params.aid
     const aid = aidParam ? Number(aidParam) : null
     
@@ -776,10 +724,8 @@ const handleSave = async () => {
       return
     }
 
-    // Refresh categories in case we need to re-map names to IDs
     await fetchCategoriesFromAnnouncements()
     
-    // Mapper for server response
     const mapToFormServer = (item) => {
       let catId = item.categoryId || item.category_id
       if (!catId && item.category) {
@@ -811,17 +757,14 @@ const handleSave = async () => {
       }
     }
 
-    // Update the store with the raw server data
     announcementStore.editAnnouncement(aid, updated)
 
-    // Synchronize form and initial state with mapped server data
     const serverMappedForm = mapToFormServer(updated)
     Object.assign(announcementForm, serverMappedForm)
     if (serverMappedForm.coverImageUrl) {
       imagePreview.value = serverMappedForm.coverImageUrl
     }
     
-    // Reset initial state to match the now-synchronized form
     initialForm.value = JSON.parse(JSON.stringify(announcementForm))
     initialForm.value.coverImage = imagePreview.value || null
 
@@ -845,7 +788,7 @@ const handleSave = async () => {
 const handleCancel = () => {
   router.back()
 }
-// Sidebar Navigation (copied from ManageAnnouncement for consistency)
+
 const showParcelScannerPage = async function () {
   router.replace({ name: 'parcelscanner', params: { id: route.params.id } })
 }
@@ -1061,11 +1004,9 @@ const showProfileStaffPage = async function () {
           </SidebarItem>
         </aside>
 
-      <!-- Main Content -->
       <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-10 bg-[#F5F7FA] min-h-screen font-sans">
         <div class="max-w-4xl mx-auto space-y-6">
           
-          <!-- Header -->
           <div class="flex items-center gap-4">
               <div class="flex items-center gap-4">
                 <button @click="handleCancel" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 cursor-pointer">
@@ -1121,11 +1062,9 @@ const showProfileStaffPage = async function () {
 
           <LoadingPopUp v-if="isSubmitting" />
 
-          <!-- Edit Form Card -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
              <div class="p-6 md:p-8 space-y-6">
                 
-                <!-- Title Input -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Announcement Title </label>
                    <input 
@@ -1150,7 +1089,6 @@ const showProfileStaffPage = async function () {
                    </div>
                 </div>
 
-                <!-- Subtitle / Status Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Subtitle</label>
@@ -1198,7 +1136,6 @@ const showProfileStaffPage = async function () {
                    </div>
                 </div>
 
-                <!-- Category & Date Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Category </label>
@@ -1210,7 +1147,6 @@ const showProfileStaffPage = async function () {
                         customClass="w-full px-4 h-[50px] rounded-xl border border-gray-200 hover:border-gray-300 bg-white"
                       >
                         <template #icon>
-                          <!-- Dynamic Icon mapping for SelectWeb -->
                           <template v-if="announcementForm.categoryId">
                             <svg v-if="getCategoryName(announcementForm.categoryId).includes('General')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             <svg v-else-if="getCategoryName(announcementForm.categoryId).includes('Maintenance')" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
@@ -1226,7 +1162,6 @@ const showProfileStaffPage = async function () {
                         Publish Date
                       </label>
                       <div class="relative flex items-center group">
-                        <!-- Icon Overlay -->
                         <div 
                           class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
                           @click="openDatePicker"
@@ -1249,7 +1184,6 @@ const showProfileStaffPage = async function () {
                           </div>
                         </div>
 
-                        <!-- Display Input (Text) -->
                          <input 
                             type="text" 
                             readonly
@@ -1266,7 +1200,6 @@ const showProfileStaffPage = async function () {
                             ]"
                          />
 
-                        <!-- Hidden Native Datetime Input -->
                          <input
                             ref="dateInput"
                             type="datetime-local" 
@@ -1279,10 +1212,8 @@ const showProfileStaffPage = async function () {
                    </div>
                 </div>
 
-                <!-- Content -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Content</label>
-                   <!-- Mock Rich Text Toolbar -->
                     <div class="border rounded-xl overflow-hidden focus-within:ring-2 transition-all"
                          :class="contentError || contentLengthError || contentWhitespaceError ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:border-blue-500 focus-within:ring-blue-100'">
                       <textarea 
@@ -1309,7 +1240,6 @@ const showProfileStaffPage = async function () {
                     </div>
                 </div>
 
-                <!-- Cover Image -->
                 <div class="space-y-2">
                    <label class="text-sm font-semibold text-gray-700">Cover Image</label>
                    <div 
@@ -1338,7 +1268,6 @@ const showProfileStaffPage = async function () {
                         @click="toggleLightbox"
                       />
                       
-                      <!-- Image Actions Overlay -->
                       <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
 
                         <button 
@@ -1443,7 +1372,6 @@ const showProfileStaffPage = async function () {
   opacity: 0;
 }
 
-/* Animations using standard CSS as fallback for Tailwind animate */
 .animate-in {
   animation-duration: 300ms;
   animation-fill-mode: both;

@@ -80,7 +80,6 @@ const formatDateTime = (dateStr) => {
   return isNaN(d.getTime()) ? '-' : d.toLocaleString()
 }
 
-// Date range for activity calculations
 const dateRange = computed(() => {
   let start = new Date(props.selectedDate);
   let end = new Date(props.endDate || props.selectedDate);
@@ -89,7 +88,6 @@ const dateRange = computed(() => {
     start = new Date(props.selectedDate);
     end = new Date(props.selectedDate);
   } else if (props.mode === 'weekly') {
-    // Parse YYYY-Www
     const [year, week] = props.selectedDate.split('-W').map(Number);
     const simple = new Date(year, 0, 1 + (week - 1) * 7);
     const dow = simple.getDay();
@@ -112,14 +110,12 @@ const dateRange = computed(() => {
 
 const snapshotDate = computed(() => dateRange.value.end)
 
-// Helper to get parcel status at specific date
 const getStatusAtDate = (parcel, date) => {
   if (!parcel.statusHistory || !Array.isArray(parcel.statusHistory) || parcel.statusHistory.length === 0) {
     const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
     return createdAt <= date ? (parcel.status || 'RECEIVED') : null;
   }
 
-  // Find the last status update before or on the target date
   const validHistory = parcel.statusHistory
     .map(h => ({ ...h, ts: new Date(h.timestamp || h.updatedAt || h.createdAt || h.date) }))
     .filter(h => h.ts <= date)
@@ -127,19 +123,16 @@ const getStatusAtDate = (parcel, date) => {
 
   if (validHistory.length > 0) return validHistory[0].status;
   
-  // If no history before date, check if it was created before date
   const createdAt = new Date(parcel.createdAt || parcel.receiveAt || parcel.date);
   return createdAt <= date ? 'RECEIVED' : null;
 }
-
-// Calculate Activity Stats (What happened WITHIN the selected range)
 const dailyStats = computed(() => {
   const { start: startRange, end: endRange } = dateRange.value;
 
   const res = {
     received: 0,
     pickedUp: 0,
-    overdueToday: 0, // Items that became overdue on this day? No, usually just total currently overdue on this day.
+    overdueToday: 0, 
     joined: 0,
     verified: 0
   };
@@ -159,7 +152,6 @@ const dailyStats = computed(() => {
       });
     }
 
-    // Fallback: if not found in history, check current status and last update time
     if (!isPickedUpOnDay) {
       const s = (p.status || '').toUpperCase().replace(/_/g, ' ');
       const ts = new Date(p.updatedAt || p.date);
@@ -183,7 +175,6 @@ const dailyStats = computed(() => {
   return res;
 });
 
-// Calculate Yearly Stats for the year of selectedDate (for KPI Summary)
 const yearlyStats = computed(() => {
   const endLimit = snapshotDate.value;
   const year = endLimit.getFullYear();
@@ -213,7 +204,6 @@ const yearlyStats = computed(() => {
       if (s.includes('PICKED UP') || s.includes('TAKEN')) {
         res.pickedUp++;
         
-        // Lead time calculation
         if (p.statusHistory) {
           const receiveEvent = p.statusHistory.find(h => ['RECEIVED', 'WAITING', 'WAIT'].includes(h.status?.toUpperCase()));
           const pickupEvent = p.statusHistory.find(h => {
@@ -257,7 +247,6 @@ const yearlyStats = computed(() => {
   return res;
 });
 
-// Calculate Dynamic Stats for the Snapshot Date (Cumulative up to that date)
 const dynamicStats = computed(() => {
   const date = snapshotDate.value;
   const result = {
@@ -271,7 +260,6 @@ const dynamicStats = computed(() => {
     inactiveResidents: 0
   };
 
-  // Parcel Stats at Date
   props.parcels.forEach(p => {
     const status = getStatusAtDate(p, date);
     if (!status) return;
@@ -285,7 +273,6 @@ const dynamicStats = computed(() => {
       result.waitingForStaff++;
       result.awaiting++;
     } else {
-      // Check if it's overdue at that point in time (matching HomePageStaff logic)
       const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
       const overdueThresholdMs = 1 * 24 * 60 * 60 * 1000;
       if ((date - receiveDate) > overdueThresholdMs) {
@@ -296,7 +283,6 @@ const dynamicStats = computed(() => {
     }
   });
 
-  // Resident Stats at Date
   props.members.forEach(m => {
     const joinDate = new Date(m.createdAt || m.updateAt);
     if (joinDate > date) return;
@@ -304,15 +290,12 @@ const dynamicStats = computed(() => {
     const s = (m.status || '').toUpperCase();
     if (s !== 'PENDING') result.activeResidents++;
     else result.pendingResidents++;
-    // Note: inactiveResidents is now essentially merged into activeResidents for KPI purposes
-    // but if we need a separate count for lists, we can keep the logic consistent.
     if (s === 'INACTIVE') result.inactiveResidents++;
   });
 
   return result;
 });
 
-// Filtered Lists for the Snapshot Date
 const filteredParcels = computed(() => {
   const date = snapshotDate.value;
   return props.parcels
@@ -326,8 +309,6 @@ const filteredOverdue = computed(() => {
   const overdueThresholdMs = 24 * 60 * 60 * 1000;
   return filteredParcels.value.filter(p => {
     const s = (p.currentStatus || '').toUpperCase();
-    // Allow 'Received', 'Waiting', 'Notified', or 'Overdue' statuses to be in overdue list
-    // Exclude Picked Up and Waiting for Staff (matching HomePageStaff logic)
     if (s.includes('PICKED UP') || s.includes('TAKEN') || s.includes('STAFF')) return false;
     
     const receiveDate = new Date(p.receiveAt || p.createdAt || p.date);
@@ -340,7 +321,6 @@ const filteredPendingResidents = computed(() => {
   return props.pendingResidents.filter(r => new Date(r.createdAt || r.updateAt) <= date);
 });
 
-// Compute Historical Summaries from all data
 const parcelHistory = computed(() => {
   const groups = {};
   const limitDate = snapshotDate.value;
@@ -387,7 +367,6 @@ const parcelHistory = computed(() => {
       addEvent(arrivalDate, 'received');
     }
 
-    // Check when it was picked up
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       const pickupEvent = p.statusHistory.find(h => {
         const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
@@ -398,12 +377,10 @@ const parcelHistory = computed(() => {
         if (d <= limitDate) addEvent(d, 'pickedUp');
       }
     }
-    // Calculate if it became overdue before limitDate
     const overdueThresholdMs = 24 * 60 * 60 * 1000;
     const becomesOverdueAt = new Date(arrivalDate.getTime() + overdueThresholdMs);
     
     if (becomesOverdueAt <= limitDate) {
-      // Check if it was already picked up or in staff verification before it became overdue
       const statusAtOverdue = getStatusAtDate(p, becomesOverdueAt);
       const s = (statusAtOverdue || '').toUpperCase();
       const isAlreadyPickedUp = s.includes('PICKED UP') || s.includes('TAKEN');
@@ -446,7 +423,6 @@ const residentHistory = computed(() => {
     .map(y => ({ ...y, months: Object.values(y.months).sort((a, b) => a.month - b.month) }));
 });
 
-// Compute Business Insights for Executive Reporting (YEARLY performance)
 const businessInsights = computed(() => {
   const ys = yearlyStats.value;
   const total = ys.total;
@@ -493,8 +469,6 @@ const businessInsights = computed(() => {
   };
 });
 
-// (Removed overdueParcels computed property in favor of dynamic filteredOverdue)
-
 const handleExportExcel = () => {
   const stats = dailyStats.value;
   const snapshot = dynamicStats.value;
@@ -503,7 +477,6 @@ const handleExportExcel = () => {
   const topRes = props.topResidents;
   const recentParcels = filteredParcels.value.slice(0, 10);
 
-  // 1. MAIN FILE HEADER
   const finalData = [
     ['Dormitory Management System - Summary Report'],
     ['Reporting Period:', displayDate.value],
@@ -534,7 +507,6 @@ const handleExportExcel = () => {
 
   let mainSection = 1;
 
-  // --- SECTION 1: PARCEL MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. Parcel Management Overview`]);
   finalData.push(['Daily Statistics (Parcels)', 'Daily Status (Activity)', 'Amount']);
   finalData.push(['', 'Received', stats.received]);
@@ -543,7 +515,6 @@ const handleExportExcel = () => {
   finalData.push(['', 'Total', snapshot.total]);
   finalData.push([]);
 
-  // Historical Summary (Parcels) - Moved before lists to match Print
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach(yData => {
       finalData.push([`Historical Monthly Summary (Parcels) - Year ${yData.year}`]);
@@ -578,7 +549,6 @@ const handleExportExcel = () => {
 
   mainSection++;
 
-  // --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW ---
   finalData.push([`${mainSection}. Resident Management Overview`]);
   finalData.push(['Daily Statistics (Residents)', 'Daily Status (Activity)', 'Amount']);
   finalData.push(['', 'Joined', stats.joined]);
@@ -587,7 +557,6 @@ const handleExportExcel = () => {
   finalData.push(['', 'Total registered', snapshot.activeResidents + snapshot.pendingResidents + snapshot.inactiveResidents]);
   finalData.push([]);
 
-  // Historical Summary (Residents) - Moved before lists
   if (residentHistory.value.length > 0) {
     residentHistory.value.forEach(yData => {
       finalData.push([`Historical Monthly Summary (Residents) - Year ${yData.year}`]);
@@ -639,7 +608,7 @@ const handleExportPDF = () => {
   const pending = filteredPendingResidents.value;
   const topRes = props.topResidents;
   const recentParcels = filteredParcels.value.slice(0, 10);
-  const brandColor = [29, 53, 94]; // Navy Blue style (#1D355E)
+  const brandColor = [29, 53, 94]; 
   const textColor = [31, 41, 55];
   const mutedColor = [100, 100, 100];
   const lightGray = [249, 250, 251];
@@ -686,15 +655,11 @@ const handleExportPDF = () => {
     doc.setTextColor(0, 0, 0);
   };
 
-  // Helper for Zebra Tables
   const drawTable = (headers, data, columnWidths, hasTotal = false) => {
     const rowHeight = 8;
     const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
     
-    // Only check if header + first row fits to prevent huge gaps after subheaders
     checkPage(rowHeight * 2);
-
-    // Header
     doc.setFillColor(243, 244, 246);
     doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
     doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -715,14 +680,13 @@ const handleExportPDF = () => {
     
     y += rowHeight;
 
-    // Data Rows
     doc.setFont("helvetica", "normal");
     data.forEach((row, rowIndex) => {
       checkPage(rowHeight);
       const isTotalRow = hasTotal && rowIndex === data.length - 1;
 
       if (isTotalRow) {
-        doc.setFillColor(243, 244, 246); // Gray background for total
+        doc.setFillColor(243, 244, 246); 
         doc.rect(15, y - 5, tableWidth, rowHeight, 'F');
         doc.setFont("helvetica", "bold");
       } else if (rowIndex % 2 === 1) {
@@ -737,13 +701,9 @@ const handleExportPDF = () => {
       row.forEach((cell, i) => {
         const align = (i === headers.length - 1 && i !== 0) ? 'right' : 'left';
         const textX = align === 'right' ? rowX + columnWidths[i] - 3 : rowX + 3;
-        
-        // Don't show '-' for empty cells in total row or generally
         const cellValue = (cell === null || cell === undefined || cell === '') ? '' : String(cell);
         doc.text(cellValue, textX, y, { align });
         
-        // In Total row, only show the divider line if the NEXT cell has a value
-        // This preserves lines for multi-column totals but hides them for "spanned" labels
         const nextCell = row[i+1];
         const nextHasValue = nextCell !== null && nextCell !== undefined && nextCell !== '';
         const shouldShowDivider = isTotalRow ? nextHasValue : (i < headers.length - 1);
@@ -760,7 +720,6 @@ const handleExportPDF = () => {
     y += 4;
   };
 
-  // Main Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(brandColor[0], brandColor[1], brandColor[2]);
@@ -776,12 +735,10 @@ const handleExportPDF = () => {
   doc.line(15, y, 195, y);
   y += 15;
 
-  // --- EXECUTIVE SUMMARY SECTION ---
   const insights = businessInsights.value;
   if (insights) {
     drawMainCategoryHeader(`Summary of performance as of ${insights.dateLabel}`);
     
-    // KPI Grid
     const boxW = 43;
     const boxH = 22;
     const gap = 3;
@@ -814,7 +771,6 @@ const handleExportPDF = () => {
     drawKPIBox("Resident verification", insights.verificationRate + "%", "Yearly verification health", startX + (boxW + gap)*3, y);
     y += boxH + 10;
 
-    // Insights Box
     doc.setFillColor(249, 250, 251); 
     doc.setDrawColor(229, 231, 235);
     doc.rect(15, y, 180, 25, 'FD');
@@ -839,10 +795,7 @@ const handleExportPDF = () => {
     y += 12;
   }
 
-  // --- 1. Parcel Management Overview ---
   drawMainCategoryHeader("1. Parcel Management Overview", true);
-  
-  // 1.1 Daily Statistics
   drawSubHeader("1. Daily Statistics (Parcels)");
   drawTable(
     ['Daily Status (Activity)', 'Amount'],
@@ -856,7 +809,6 @@ const handleExportPDF = () => {
     true
   );
 
-  // 1.2 Historical Monthly Table (Parcels)
   if (parcelHistory.value.length > 0) {
     parcelHistory.value.forEach((yData) => {
       drawSubHeader(`2. Historical Monthly Summary (Parcels) - Year ${yData.year}`);
@@ -871,7 +823,6 @@ const handleExportPDF = () => {
     });
   }
 
-  // 1.3 Recent Parcels
   if (recentParcels.length > 0) {
     drawSubHeader("3. Recent Parcels (Latest Activity)");
     const rData = recentParcels.map(p => [
@@ -889,7 +840,6 @@ const handleExportPDF = () => {
     );
   }
 
-  // 1.4 Overdue Parcels
   if (overdueList.length > 0) {
     drawSubHeader("4. Overdue Parcels (> 1 Day)");
     const oData = overdueList.map(p => [
@@ -907,10 +857,7 @@ const handleExportPDF = () => {
     );
   }
 
-  // --- 2. Resident Management Overview ---
   drawMainCategoryHeader("2. Resident Management Overview", true);
-  
-  // 2.1 Daily Residents
   drawSubHeader("1. Daily Statistics (Residents)");
   drawTable(
     ['Daily Status (Activity)', 'Amount'],
@@ -924,7 +871,6 @@ const handleExportPDF = () => {
     true
   );
 
-  // 2.2 Historical Monthly Summary (Residents)
   if (residentHistory.value.length > 0) {
     residentHistory.value.forEach((yData) => {
       drawSubHeader(`2. Historical Monthly Summary (Residents) - Year ${yData.year}`);
@@ -939,7 +885,6 @@ const handleExportPDF = () => {
     });
   }
 
-  // 2.3 Pending Accounts
   if (pending && pending.length > 0) {
     drawSubHeader("3. Pending Accounts (Awaiting Verification)");
     const pData = pending.map(res => [
@@ -957,7 +902,6 @@ const handleExportPDF = () => {
     );
   }
 
-  // 2.4 Resident Ranking
   if (topRes && topRes.length > 0) {
     drawSubHeader("4. Resident Ranking (Top Leaders by Volume)");
     let totalTop = 0;
@@ -997,10 +941,6 @@ defineExpose({
 
 <template>
   <div class="print-report">
-    <!-- 
-      TABLE HACK: Used to force margins on every page when @page { margin: 0 } is used. 
-      thead and tfoot will repeat on each page, creating a visual margin.
-    -->
     <table class="report-table-wrapper">
       <thead>
         <tr><td><div class="report-page-margin-top"></div></td></tr>
@@ -1013,7 +953,6 @@ defineExpose({
               <p class="text-gray-600">Reporting Period: {{ displayDate }}</p>
             </div>
 
-            <!-- --- PERFORMANCE SUMMARY SECTION --- -->
             <div v-if="businessInsights" class="print-section">
               <h2 class="print-main-header">Summary of performance as of {{ displayDate }}</h2>
               
@@ -1052,7 +991,6 @@ defineExpose({
               </div>
             </div>
 
-            <!-- --- SECTION 1: PARCEL MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
               <h2 class="print-main-header">1. Parcel Management Overview</h2>
               
@@ -1077,7 +1015,6 @@ defineExpose({
                     <td>Overdue</td>
                     <td>{{ filteredOverdue.length }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td>Total</td>
                     <td>{{ dynamicStats.total }}</td>
@@ -1105,7 +1042,6 @@ defineExpose({
                       <td>{{ h.pickedUp }}</td>
                       <td>{{ h.overdue }}</td>
                     </tr>
-                    <!-- TOTAL ROW -->
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                       <td>Total</td>
                       <td>{{ yData.totalReceived }}</td>
@@ -1142,7 +1078,6 @@ defineExpose({
                     </td>
                     <td>{{ parcel.currentStatus || parcel.status }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total recent parcels</td>
                     <td>{{ filteredParcels.slice(0, 10).length }}</td>
@@ -1169,7 +1104,6 @@ defineExpose({
                     <td>{{ parcel.trackingNumber }}</td>
                     <td>{{ parcel.currentStatus || parcel.status }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total overdue parcels</td>
                     <td>{{ filteredOverdue.length }}</td>
@@ -1178,7 +1112,6 @@ defineExpose({
               </table>
             </div>
 
-            <!-- --- SECTION 2: RESIDENT MANAGEMENT OVERVIEW --- -->
             <div class="print-section">
               <h2 class="print-main-header">2. Resident Management Overview</h2>
               
@@ -1203,7 +1136,6 @@ defineExpose({
                     <td>Total Active Members</td>
                     <td>{{ dynamicStats.activeResidents }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td>Total registered</td>
                     <td>{{ dynamicStats.activeResidents + dynamicStats.pendingResidents + dynamicStats.inactiveResidents }}</td>
@@ -1227,7 +1159,6 @@ defineExpose({
                       <td>{{ h.monthStr }}</td>
                       <td>{{ h.joined }}</td>
                     </tr>
-                    <!-- TOTAL ROW -->
                     <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                       <td>Total</td>
                       <td>{{ yData.totalJoined }}</td>
@@ -1255,7 +1186,6 @@ defineExpose({
                     <td>{{ res.email }}</td>
                     <td>{{ formatDateTime(res.updateAt) }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total pending accounts</td>
                     <td>{{ filteredPendingResidents.length }}</td>
@@ -1282,7 +1212,6 @@ defineExpose({
                     <td>{{ res.room || res.roomNumber || '-' }}</td>
                     <td>{{ res.parcelCount || res.count }}</td>
                   </tr>
-                  <!-- TOTAL ROW -->
                   <tr class="font-bold bg-gray-100" style="background-color: #f3f4f6 !important;">
                     <td colspan="3">Total parcels (Top Leaders)</td>
                     <td>{{ topResidents.reduce((sum, r) => sum + parseInt(r.parcelCount || r.count || 0), 0) }}</td>
@@ -1301,13 +1230,11 @@ defineExpose({
 </template>
 
 <style>
-/* Global @page rule to hide browser headers/footers */
 @page {
   margin: 0;
 }
 
 @media print {
-  /* Hides browser headers but table logic below manages the fake margins */
   body {
     margin: 0 !important;
     padding: 0 !important;
@@ -1320,13 +1247,12 @@ defineExpose({
   }
 
   .report-page-margin-top {
-    height: 1.5cm; /* THIS CREATES THE TOP MARGIN ON EVERY PAGE */
+    height: 1.5cm;
   }
 
   .report-page-margin-bottom {
-    height: 1cm; /* THIS CREATES THE BOTTOM MARGIN ON EVERY PAGE */
+    height: 1cm;
   }
-  /* Critical cleanup: Hide all UI elements outside the print report */
   .no-print,
   aside, 
   header, 
@@ -1340,7 +1266,6 @@ defineExpose({
     display: none !important;
   }
 
-  /* Reset body and main containers for clean printing */
   html, body {
     height: auto !important;
     overflow: visible !important;
@@ -1356,13 +1281,12 @@ defineExpose({
     position: static !important;
   }
 
-  /* Force the report to show during print */
   .print-report {
     display: block !important;
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 1cm !important; /* Internal buffer */
+    padding: 1cm !important;
     background-color: white !important;
     counter-reset: section;
   }
@@ -1452,14 +1376,12 @@ defineExpose({
     color: #111827 !important;
   }
 
-  /* Color adjustments for print quality */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
 
-/* Hide report on screen */
 @media screen {
   .print-report, .print-header {
     display: none !important;
