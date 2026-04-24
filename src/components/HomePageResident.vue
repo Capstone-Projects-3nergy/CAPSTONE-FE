@@ -64,19 +64,8 @@ import AnnouncementDetailModal from './AnnouncementDetailModal.vue'
 import DeleteParcels from './DeleteParcels.vue'
 import ConfirmParcels from './ConfirmParcels.vue'
 import ParcelFilterBar from './ParcelFilterBar.vue'
-import package1 from '@/assets/images/Package1.png'
-import package2 from '@/assets/images/Package2.png'
-import package3 from '@/assets/images/Package3.png'
-import parcels1 from '@/assets/images/parcels.jpg'
-import parcels2 from '@/assets/images/parcels2.jpg'
-import parcels3 from '@/assets/images/parcels3.jpg'
-import parcels4 from '@/assets/images/parcels4.jpg'
-import newsImg from '@/assets/images/New.png'
-import eventImg from '@/assets/images/Event.png'
-import communityImg from '@/assets/images/COMMUNITY.png'
 
 const authStore = useAuthManager()
-
 const loginManager = useAuthManager()
 const parcelManager = useParcelManager()
 const announcementManager = useAnnouncementManager()
@@ -538,17 +527,8 @@ const handleSortUpdate = (val) => {
 }
 //
 const userName = computed(() => loginStore.user?.name || 'Guest')
-
-const slides = [parcels1, parcels2, parcels3, parcels4]
 const currentIndex = ref(0)
 const registerStore = useAuthManager()
-function prevSlide() {
-  currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
-}
-
-function nextSlide() {
-  currentIndex.value = (currentIndex.value + 1) % slides.length
-}
 
 const latestAnnouncements = computed(() => {
   return announcements.value
