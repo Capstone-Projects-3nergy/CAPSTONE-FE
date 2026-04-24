@@ -1915,17 +1915,18 @@ watch([selectedReportDate, reportEndDate], () => {
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2 mb-1">
-                        <p :class="['font-bold text-[13px] truncate leading-tight transition-colors tracking-tight', parcel.trackingNumber === 'Awaiting Staff' ? 'text-amber-500' : 'text-gray-900 group-hover:text-[#0E4B90]']">{{ parcel.trackingNumber }}</p>
+                        <p :class="['font-bold text-[13px] truncate leading-tight transition-colors tracking-tight', parcel.trackingNumber === 'Awaiting Staff' ? 'text-gray-400' : 'text-gray-900 group-hover:text-[#0E4B90]']">{{ parcel.trackingNumber }}</p>
                         <span :class="['flex-shrink-0 flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-lg border shadow-sm bg-white', getStatusClass(parcel.status)]">
                           {{ parcel.status }}
                         </span>
                       </div>
                       <div class="flex items-center gap-2">
-                        <span :class="['text-[10px] font-medium truncate max-w-[120px]', parcel.residentName === 'Awaiting Staff' ? 'text-amber-500 font-bold' : 'text-gray-500']">{{ parcel.residentName }}</span>
+                        <span :class="['text-[10px] font-medium truncate max-w-[120px]', parcel.residentName === 'Awaiting Staff' ? 'text-gray-400 font-bold' : 'text-gray-500']">{{ parcel.residentName }}</span>
                         <span class="text-gray-300">•</span>
                         <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400">
                           <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                          Room <span :class="parcel.roomNumber === 'Awaiting Staff' ? 'text-amber-500' : ''">{{ parcel.roomNumber }}</span>
+                          <span v-if="parcel.roomNumber !== 'Awaiting Staff'">Room </span>
+                          <span :class="parcel.roomNumber === 'Awaiting Staff' ? 'text-gray-400' : ''">{{ parcel.roomNumber }}</span>
                         </div>
                       </div>
                      
