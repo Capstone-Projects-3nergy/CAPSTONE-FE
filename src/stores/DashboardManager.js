@@ -3,9 +3,8 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 import { fetchDashboardData } from '@/utils/fetchUtils'
 
 export const useDashboardManager = defineStore('dashboardManager', () => {
-  // Current state for navigation - Split for independent charts
   const parcelRefDate = ref(new Date())
-  const parcelView = ref('daily') // 'daily' | 'weekly' | 'monthly'
+  const parcelView = ref('daily') 
   
   const residentRefDate = ref(new Date())
   const residentView = ref('daily')
@@ -35,7 +34,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     overdueParcels: 0
   })
 
-  // Chart data structure for Parcel Activity
   const chartData = reactive({
     labels: [],
     datasets: [
@@ -49,7 +47,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       { 
         label: 'Waiting for Staff', 
         data: [], 
-        backgroundColor: 'rgba(234, 179, 8, 0.85)', // Yellow-500
+        backgroundColor: 'rgba(234, 179, 8, 0.85)', 
         borderColor: 'rgba(234, 179, 8, 1)',
         borderWidth: 1 
       },
@@ -70,16 +68,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     ]
   })
 
-  // Resident Data Chart structure
   const residentChartData = reactive({
     labels: [],
     data: [],
-    statusBreakdown: [], // [{active, pending, inactive}, ...]
+    statusBreakdown: [], 
     total: 0,
     peak: '-'
   })
-
-  // Helper: Get start/end dates for the current view and reference date
   const getPeriodBounds = (type = 'parcel') => {
     const refDate = type === 'parcel' ? parcelRefDate.value : residentRefDate.value
     const view = type === 'parcel' ? parcelView.value : residentView.value
@@ -91,7 +86,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       start.setHours(0, 0, 0, 0)
       end.setHours(23, 59, 59, 999)
     } else if (view === 'weekly') {
-      const day = start.getDay() || 7 // 1-7
+      const day = start.getDay() || 7 
       start.setDate(start.getDate() - (day - 1))
       start.setHours(0, 0, 0, 0)
       
@@ -156,7 +151,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
 
     const today = new Date()
     
-    // 1. Calculate OVERALL Stats (Global, not period-dependent)
     const allParcels = parcels || []
     overallStats.totalParcels = allParcels.length
     overallStats.pickedUpParcels = allParcels.filter(p => {
@@ -183,26 +177,21 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       return (today - rDate) > oneDayMs
     }).length
 
-    // Separate bounds for parcel and resident
     const parcelBounds = getPeriodBounds('parcel')
     const residentBounds = getPeriodBounds('resident')
     
-    // 2. Identify parcels with activity in the current period for charts/stats
     const parcelsWithActivity = parcels.filter(p => {
       const start = parcelBounds.start;
       const end = parcelBounds.end;
       
-      // Check arrival
       const dArrival = new Date(p.receivedAt || p.createdAt || p.date)
       const isArrivalInRange = !isNaN(dArrival.getTime()) && dArrival >= start && dArrival <= end
       if (isArrivalInRange) return true
       
-      // Check last update
       const dUpdate = new Date(p.updatedAt || p.updateAt)
       const isUpdateInRange = !isNaN(dUpdate.getTime()) && dUpdate >= start && dUpdate <= end
       if (isUpdateInRange) return true
       
-      // Check history
       if (p.statusHistory && Array.isArray(p.statusHistory)) {
         return p.statusHistory.some(h => {
           const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
@@ -217,7 +206,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const start = parcelBounds.start
       const end = parcelBounds.end
       
-      // 1. Check history for event of this category in range
       const hasHistoryEvent = history.some(h => {
         const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '')
         const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
@@ -227,7 +215,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         if (category === 'staff') return inRange && (s.includes('STAFF') || s.includes('PENDING'))
         if (category === 'overdue') {
           if (inRange && s.includes('OVERDUE')) return true
-          // 24 hour rule
           const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
           if (!isNaN(arrivalDate.getTime())) {
             const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
@@ -241,7 +228,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       
       if (hasHistoryEvent) return true
       
-      // 2. Fallback: If history empty, check current status + timestamps
       const currentStatus = (parcel.status || '').toUpperCase().replace(/[\s_-]/g, '')
       const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
       const isArrivalInRange = !isNaN(arrivalDate.getTime()) && arrivalDate >= start && arrivalDate <= end
@@ -252,7 +238,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       if (category === 'staff') return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
       if (category === 'overdue') {
         if (currentStatus.includes('OVERDUE') && isUpdateInRange) return true
-        // 24 hour rule fallback
         const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
         if (!isNaN(arrivalDate.getTime())) {
           const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
@@ -265,22 +250,17 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       return false
     }
     
-    // Update period-specific stats (based on lifecycle/activity)
     stats.totalParcels = parcelsWithActivity.length
     stats.pickedUpParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'pickedUp')).length
     stats.waitingForStaffParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'staff')).length
     stats.awaitingParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'waiting')).length
     stats.overdueParcels = parcelsWithActivity.filter(p => getEventsInRange(p, 'overdue')).length
 
-    // 3. Generate Chart Data with separate bounds
-    // Filtering for residents only for stats and growth
     const allResidents = members.filter(m => (m.role || '').toUpperCase() === 'RESIDENT')
     
     generateParcelChart(parcelsWithActivity, parcelBounds.start, parcelBounds.end)
     generateResidentChart(allResidents, residentBounds.start, residentBounds.end)
     
-    // Deduplicate residents to count each person only once for CURRENT stats
-    // We keep the latest record based on updatedAt/createdAt
     const uniqueResidentsMap = new Map()
     allResidents.forEach(r => {
       const email = r.email || `${r.firstName}_${r.lastName}`
@@ -309,7 +289,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     chartData.labels = []
     const view = parcelView.value
     
-    // Create slots based on view
     let slotCount = 0
     if (view === 'daily') {
       slotCount = 24
@@ -332,8 +311,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const isWaitingForStaffStatus = sRaw.includes('STAFF') || sRaw.includes('PENDING')
       const isWaitingResidentStatus = (sRaw === 'WAITING' || sRaw === 'RECEIVED' || sRaw === 'WAIT' || sRaw.includes('NOTIFIED')) && !isWaitingForStaffStatus
 
-      // Handle "Waiting" occurrences (Arrivals)
-      // Extract arrival time: check history first for WAITING/RECEIVED, fallback to timestamps
       let arrivals = []
       if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
         arrivals = p.statusHistory
@@ -344,7 +321,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
       }
       
-      // Fallback if no history: only count as "Waiting" if currently in a waiting status
       if (isWaitingResidentStatus && arrivals.length === 0) {
         arrivals.push(new Date(p.receivedAt || p.createdAt || p.date || p.updateAt || p.updatedAt))
       }
@@ -360,7 +336,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         }
       })
 
-      // Handle "Waiting for Staff" occurrences
       let staffArrivals = []
       if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
         staffArrivals = p.statusHistory
@@ -371,7 +346,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
       }
       
-      // Fallback if current status is waiting for staff and no history
       if (isWaitingForStaffStatus && staffArrivals.length === 0) {
         staffArrivals.push(new Date(p.receivedAt || p.createdAt || p.date))
       }
@@ -387,7 +361,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         }
       })
 
-      // Handle "Picked Up" occurrences (Completions)
       const currentStatus = (p.status || '').toUpperCase()
       const isPickedUpNow = currentStatus.includes('PICKED') || currentStatus.includes('TAKEN')
       
@@ -401,9 +374,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
       }
 
-      // Fallback: if it is picked up now but history is missing the pick up event
       if (isPickedUpNow && completions.length === 0) {
-        // Use updatedAt as approximate pick up time
         completions.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt || p.date))
       }
 
@@ -418,7 +389,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
         }
       })
 
-      // Handle "Overdue" occurrences
       const isOverdueNow = currentStatus.includes('OVERDUE')
       let overdues = []
       if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
@@ -427,7 +397,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
           .map(h => new Date(h.timestamp || h.updatedAt || h.createdAt || h.date))
       }
 
-      // Add 24h threshold check for chart consistency
       const arrivalDate = new Date(p.receivedAt || p.createdAt || p.date)
       if (!isNaN(arrivalDate.getTime()) && overdues.length === 0) {
         const overdueDate = new Date(arrivalDate.getTime() + (24 * 60 * 60 * 1000))
@@ -467,7 +436,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const generateResidentChart = (data, start, end) => {
     const view = residentView.value
     
-    // Create appropriate labels based on resident view
     let labels = []
     if (view === 'daily') {
       for (let i = 0; i < 24; i++) labels.push(`${i.toString().padStart(2, '0')}:00`)
@@ -482,7 +450,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     residentChartData.data = new Array(labels.length).fill(0)
     residentChartData.statusBreakdown = new Array(labels.length).fill(null).map(() => ({ active: 0, pending: 0, inactive: 0 }))
     
-    // Residents growth in period
     data.forEach(r => {
       const d = new Date(r.updateAt || r.createdAt)
       if (d >= start && d <= end) {
@@ -582,7 +549,6 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const data = await fetchDashboardData(url, router)
       
       if (data && data.parcels) {
-        // If backend provides consolidated dashboard data
         calculateDashboardData(
           data.parcels,
           data.members || data.residents,

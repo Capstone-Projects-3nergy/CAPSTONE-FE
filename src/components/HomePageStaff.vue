@@ -1175,7 +1175,7 @@ watch([selectedReportDate, reportEndDate], () => {
         @closePopUp="closeWelcomePopup"
       />
       
-      <!-- Approval Alerts -->
+
       <AlertPopUp
         v-if="approveSuccess"
         :titles="'The resident is now an active member of the dormitory.'"
@@ -1368,7 +1368,7 @@ watch([selectedReportDate, reportEndDate], () => {
 
       <main class="flex-1 min-w-0 p-4 sm:p-6 md:p-8 bg-[#F5F8FA] min-h-screen font-sans overflow-x-hidden">
         <div class="max-w-7xl mx-auto space-y-6">
-               <!-- Header & Actions -->
+
           <div class="flex flex-wrap items-center justify-between gap-6 mb-8">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-blue-100 rounded-xl text-[#0E4B90] shadow-sm">
@@ -1393,7 +1393,6 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
           </div>
-          <!-- Tabs Navigation (Premium Framed Style) -->
           <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8 mt-2">
             <div class="inline-flex p-1 bg-white rounded-2xl border border-gray-200/50 shadow-inner w-full lg:w-auto overflow-x-auto no-scrollbar">
               <button 
@@ -1434,11 +1433,11 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
           </div>
           
-          <!-- Report Control Panel -->
+          
           <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2 px-2 py-3 mt-2 bg-gray-50/30 rounded-2xl border border-gray-100/50">
-            <!-- Period Selection Row -->
+            
             <div class="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-2">
-              <!-- Mode Selector -->
+
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Filter By:</span>
                 <div class="w-[160px]">
@@ -1450,14 +1449,14 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Date Selector(s) -->
+      
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Period:</span>
                 
                 <div class="flex flex-wrap items-center gap-2">
                   <div class="flex flex-col relative">
                     <div class="flex flex-nowrap items-center gap-1.5 sm:gap-2">
-                      <!-- Start Date / Main Picker -->
+              
                       <div class="relative flex items-center group">
                         <div class="absolute left-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer" @click="openReportDatePicker">
                           <div class="p-1.5 bg-white rounded-lg text-[#0E4B90] shadow-sm flex items-center justify-center border border-gray-100" :class="{'border-red-200 text-red-500': rangeError && !selectedReportDate}">
@@ -1487,7 +1486,7 @@ watch([selectedReportDate, reportEndDate], () => {
                         />
                       </div>
 
-                      <!-- End Date (Only for Range mode) -->
+                   
                       <template v-if="reportMode === 'range'">
                         <span class="text-xs font-black text-gray-400 mx-1" :class="{'text-red-500': rangeError && (!selectedReportDate || !reportEndDate)}">to</span>
                         <div class="relative flex items-center group">
@@ -1522,7 +1521,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       </template>
                     </div>
 
-                    <!-- Error Message (Positioned absolutely to prevent layout shift) -->
+             
                     <div v-if="rangeError" class="absolute -bottom-4 left-0 flex items-center text-[10px] text-red-600 font-bold animate-in fade-in slide-in-from-top-1">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 mr-1">
                         <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
@@ -1537,7 +1536,7 @@ watch([selectedReportDate, reportEndDate], () => {
             <div class="h-[1px] w-full bg-gray-100 lg:hidden my-2"></div>
             <div class="h-8 w-[1px] bg-gray-200 hidden lg:block"></div>
 
-            <!-- Export & Print Actions -->
+
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold text-gray-400 tracking-wider whitespace-nowrap min-w-[60px]">Export:</span>
               <div class="flex flex-wrap items-center gap-2 flex-1">
@@ -1566,7 +1565,6 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
           </div>
 
-        <!-- Welcome Banner & Date -->
           <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between bg-white px-5 py-4 rounded-2xl shadow-sm border border-gray-100 mt-6 gap-2 sm:gap-4 transition-all duration-300 hover:shadow-md">
             <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
               <div class="p-3 bg-gradient-to-br from-blue-500 to-[#1D355E] rounded-xl text-white shadow-lg transform transition-transform hover:scale-105 flex-shrink-0">
@@ -1586,11 +1584,11 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
           </div>
 
-          <!-- Tab Content: Parcel Dashboard -->
+   
           <div v-show="activeTab === 'parcel'" class="space-y-6 mt-8">
-            <!-- Stats Grid -->
+       
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            <!-- Picked Up -->
+
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-emerald-100 rounded-lg md:rounded-xl text-emerald-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1606,7 +1604,7 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Received (Awaiting) -->
+          
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-blue-100 rounded-lg md:rounded-xl text-blue-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1632,7 +1630,7 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Overdue -->
+          
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-red-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-red-100 rounded-lg md:rounded-xl text-red-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1655,7 +1653,7 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Total Parcels -->
+         
             <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-indigo-500 border-x border-b border-gray-100 relative group hover:shadow-md transition-all h-full">
               <div class="flex items-start justify-between mb-2 md:mb-4">
                 <div class="p-1.5 md:p-2.5 bg-indigo-100 rounded-lg md:rounded-xl text-indigo-600 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1677,7 +1675,7 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
           </div>
 
-          <!-- Integrated Chart Dashboard -->
+       
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-600"></div>
 
@@ -1710,9 +1708,9 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Card Body -->
+          
             <div class="p-6 md:p-8">
-              <!-- Parcel Activity Tab (Bar Chart) -->
+            
               <div v-show="dashboardViewTab === 'activity'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-4">
@@ -1783,13 +1781,13 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Status Distribution Tab (Donut Chart) -->
+            
               <div v-show="dashboardViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
                 <div class="h-[300px] w-full relative flex items-center justify-center">
                   <div class="w-full h-full relative">
                     <canvas id="statusChart"></canvas>
                   </div>
-                  <!-- Enhanced Data Display in Center -->
+               
                   <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
                       <span class="text-xs font-black text-gray-400 tracking-widest mb-1">In System</span>
@@ -1807,7 +1805,7 @@ watch([selectedReportDate, reportEndDate], () => {
                     </h4>
                     
                     <div class="space-y-4">
-                      <!-- Picked Up Detail -->
+                  
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-emerald-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform"></div>
@@ -1819,7 +1817,7 @@ watch([selectedReportDate, reportEndDate], () => {
                         </div>
                       </div>
                       
-                      <!-- Waiting for Staff Detail -->
+                     
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-yellow-400 shadow-lg shadow-yellow-400/30 group-hover:scale-110 transition-transform"></div>
@@ -1831,7 +1829,7 @@ watch([selectedReportDate, reportEndDate], () => {
                         </div>
                       </div>
 
-                      <!-- Received Detail -->
+                     
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform"></div>
@@ -1843,7 +1841,7 @@ watch([selectedReportDate, reportEndDate], () => {
                         </div>
                       </div>
                       
-                      <!-- Overdue Detail -->
+                     
                       <div class="flex items-center justify-between group">
                         <div class="flex items-center gap-3">
                           <div class="w-4 h-4 rounded-lg bg-red-500 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform"></div>
@@ -1867,9 +1865,9 @@ watch([selectedReportDate, reportEndDate], () => {
             </div>
           </div>
 
-          <!-- Charts Grid 2 -->
+          
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-            <!-- Recent Parcels -->
+       
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-[450px] flex flex-col">
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
@@ -1880,7 +1878,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </h3>
               </div>
 
-              <!-- List -->
+    
               <div class="space-y-3 flex-1 overflow-y-auto pr-1">
                 <div v-for="parcel in recentParcels.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center border border-blue-50 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 cursor-pointer relative overflow-hidden"
@@ -1888,7 +1886,7 @@ watch([selectedReportDate, reportEndDate], () => {
                   
                   <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
-                  <!-- Left: Icon + Info -->
+               
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
                     <div class="flex-shrink-0">
                       <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100/50 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-inner">
@@ -1913,7 +1911,7 @@ watch([selectedReportDate, reportEndDate], () => {
                           Room <span :class="parcel.roomNumber === 'Awaiting Staff' ? 'text-amber-500' : ''">{{ parcel.roomNumber }}</span>
                         </div>
                       </div>
-                      <!-- Status History Indicator -->
+                     
                       <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
                         <span class="text-[8px] font-black text-gray-300 uppercase tracking-tighter">History:</span>
                         <span v-for="(h, i) in parcel.statusHistory.slice(-3)" :key="i" class="text-[8px] bg-gray-50 text-gray-400 px-1 py-0.5 rounded border border-gray-100 whitespace-nowrap">
@@ -1923,7 +1921,7 @@ watch([selectedReportDate, reportEndDate], () => {
                     </div>
                   </div>
                   
-                  <!-- Right: Action -->
+                
                   <div class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-50/20 text-gray-300 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm border border-gray-100 group-hover:border-blue-400 group-hover:scale-110 ml-3 relative z-10">
                     <svg class="w-4 h-4 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -1931,14 +1929,14 @@ watch([selectedReportDate, reportEndDate], () => {
                   </div>
                 </div>
 
-                <!-- Remaining Count Message -->
+             
                 <div v-if="recentParcels.length > 3" class="text-center py-1 mt-1">
                   <p class="text-[10px] font-semibold text-[#0E4B90] bg-blue-50/40 py-1.5 rounded-lg border border-dashed border-blue-200">
                     {{ (recentParcels.length - 3) > 99 ? '+99' : '+ ' + (recentParcels.length - 3) }} more active parcels
                   </p>
                 </div>
 
-                <!-- Empty State -->
+              
                 <div v-if="recentParcels.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/50 py-10 opacity-40">
                   <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                   <p class="text-xs font-medium">No recent activity</p>
@@ -1950,7 +1948,7 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Overdue Parcels Section -->
+          
             <div class="bg-red-50/50 rounded-2xl border border-red-200 p-5 flex flex-col h-[450px]">
               <div class="flex items-center gap-3 mb-3">
                 <div class="p-2 bg-red-100 rounded-xl text-red-600 shadow-sm flex items-center justify-center">
@@ -1963,23 +1961,22 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
                 <h3 class="text-red-600 font-bold text-base md:text-lg">
                   {{ overdueParcelsList.length }} 
-                  <!-- Overdue Parcels (>1 day) -->
+               
                   Overdue Parcels (>1 day)
                 </h3>
               </div>
               <p class="text-red-400 text-[11px] md:text-xs mb-3 italic">Please contact residents immediately</p>
               
               <div v-if="overdueParcelsList.length > 0" class="space-y-3 flex-1 overflow-y-auto pr-1">
-                <!-- Overdue Item -->
+             
                 <div v-for="parcel in overdueParcelsList.slice(0, 3)" :key="parcel.id" 
                      class="group bg-white rounded-2xl py-2.5 px-4 flex items-center justify-between border border-red-50 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
                      @click="showParcelDetail(parcel.id, 'status')">
                   
-                  <!-- Subtle background accent on hover -->
                   <div class="absolute inset-0 bg-gradient-to-r from-red-50/0 to-red-50/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
                   <div class="flex items-center gap-4 min-w-0 flex-1 relative z-10">
-                    <!-- Modern Overdue Badge (Compact) -->
+                 
                     <div class="relative flex-shrink-0">
                       <div class="w-10 h-10 rounded-xl bg-red-50 flex flex-col items-center justify-center border border-red-100/50 text-red-600 group-hover:bg-red-500 group-hover:text-white group-hover:border-red-500 transition-all duration-300 shadow-inner group-hover:shadow-lg group-hover:shadow-red-500/20">
                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1996,7 +1993,7 @@ watch([selectedReportDate, reportEndDate], () => {
                           Room {{ parcel.roomNumber }}
                         </div>
                       </div>
-                      <!-- Status History for Overdue -->
+                     
                       <div v-if="parcel.statusHistory && parcel.statusHistory.length > 0" class="mt-1 flex items-center gap-1">
                         <span v-for="(h, i) in parcel.statusHistory.slice(-2)" :key="i" class="text-[8px] bg-red-50/50 text-red-300 px-1 py-0.5 rounded border border-red-100/30 whitespace-nowrap">
                           {{ h.status }}
@@ -2021,7 +2018,7 @@ watch([selectedReportDate, reportEndDate], () => {
                   </div>
                 </div>
                 
-                <!-- Remaining Count Message -->
+        
                 <div v-if="overdueParcelsList.length > 3" class="text-center py-1.5 mt-1">
                   <p class="text-[10px] md:text-xs font-semibold text-red-600 bg-red-50/40 py-2 rounded-lg border border-dashed border-red-200">
                     {{ (overdueParcelsList.length - 3) > 99 ? '+99' : '+ ' + (overdueParcelsList.length - 3) }} more overdue parcels
@@ -2029,7 +2026,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Empty State -->
+            
               <div v-else class="flex-1 flex flex-col items-center justify-center py-10 opacity-50">
                 <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mb-3">
                   <svg class="w-8 h-8 text-red-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2039,7 +2036,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 <p class="text-xs font-bold text-red-300">No parcel overdue</p>
               </div>
 
-              <!-- View All Button -->
+           
               <div v-if="overdueParcelsList.length > 0" class="mt-auto border-t border-red-100/50 pt-3 text-center">
                 <button @click="showManageParcelPage" class="text-xs font-medium text-red-500 hover:text-red-700 cursor-pointer transition-colors">
                   View all parcels →
@@ -2049,12 +2046,12 @@ watch([selectedReportDate, reportEndDate], () => {
           </div>
         </div>
           
-          <!-- Tab Content: Resident Dashboard -->
+       
           <div v-show="activeTab === 'resident'" class="space-y-6 mt-8">
             
-            <!-- Stats Grid -->
+          
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-              <!-- Active Residents -->
+          
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-emerald-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 border border-emerald-100">
@@ -2068,7 +2065,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!--   Pending Accounts -->
+           
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-yellow-400 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-400 border border-orange-100">
@@ -2081,7 +2078,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Inactive Residents -->
+          
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-orange-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100">
@@ -2094,7 +2091,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Total Residents (Active + Inactive) -->
+           
               <div class="bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-sm border-t-4 border-t-blue-500 border-x border-b border-gray-100 relative">
                 <div class="flex items-start justify-between mb-2 md:mb-4">
                   <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 border border-blue-100">
@@ -2108,11 +2105,11 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Integrated Resident Chart Dashboard -->
+          
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
               <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600"></div>
 
-              <!-- Card Header with Tabs -->
+           
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-gray-50 gap-6">
                 <div class="flex flex-col">
                   <h3 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
@@ -2142,9 +2139,9 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!-- Card Body -->
+           
               <div class="p-6 md:p-8">
-                <!-- Resident Growth Tab (Bar Chart) -->
+           
                 <div v-show="residentViewTab === 'growth'" class="space-y-8 animate-in fade-in duration-500">
                   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2 sm:mb-0">
                     <div class="flex flex-col gap-1">
@@ -2190,13 +2187,13 @@ watch([selectedReportDate, reportEndDate], () => {
                   </div>
                 </div>
 
-                <!-- Resident Status Tab (Donut Chart) -->
+         
                 <div v-show="residentViewTab === 'status'" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center min-h-[350px] animate-in slide-in-from-right-4 duration-500">
                   <div class="h-[300px] w-full relative flex items-center justify-center">
                     <div class="w-full h-full relative">
                       <canvas id="residentStatusChart"></canvas>
                     </div>
-                    <!-- Center Display -->
+              
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <div class="bg-white/80 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-xl border border-gray-100">
                         <span class="text-xs font-black text-gray-400 tracking-widest mb-1">Total Residents</span>
@@ -2252,12 +2249,12 @@ watch([selectedReportDate, reportEndDate], () => {
               </div>
             </div>
 
-            <!-- Detailed Grid Row 3 -->
+      
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               
-              <!-- Most Parcels Received -->
+            
               <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10 flex flex-col h-full hover:shadow-md transition-shadow relative overflow-hidden">
-                <!-- Background Accent decoration -->
+           
                 <div class="absolute top-0 right-0 w-48 h-48 bg-yellow-50/50 rounded-full -mr-24 -mt-24 blur-3xl"></div>
 
                 <div class="mb-10 relative z-10">
@@ -2286,7 +2283,7 @@ watch([selectedReportDate, reportEndDate], () => {
                             <img v-if="resident.photo" :src="resident.photo" class="w-full h-full object-cover">
                             <span v-else>{{ resident.name.charAt(0) }}</span>
                           </div>
-                          <!-- Ranking Medal Badge -->
+
                           <div :class="[
                             'absolute -top-2 -left-2 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white',
                             index === 0 ? 'bg-yellow-500 text-white' : 
@@ -2320,7 +2317,7 @@ watch([selectedReportDate, reportEndDate], () => {
                       </div>
                     </div>
                     
-                    <!-- Volume Progress Bar (Enhanced) -->
+                 
                     <div class="w-full h-2.5 bg-gray-50 rounded-full overflow-hidden border border-gray-100 shadow-inner p-[1.5px]">
                       <div 
                         class="h-full rounded-full transition-all duration-1000 ease-out"
@@ -2333,7 +2330,7 @@ watch([selectedReportDate, reportEndDate], () => {
                     </div>
                   </div>
 
-                  <!-- Empty State -->
+                
                   <div v-if="topResidents.length === 0" class="flex flex-col items-center justify-center h-full text-blue-600/30 py-20 opacity-40">
                     <svg class="w-20 h-20 mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -2343,7 +2340,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
               </div>
 
-              <!--   Pending Accounts List -->
+   
               <div class="bg-amber-50/50 rounded-2xl border border-amber-200 p-6 flex flex-col h-full">
                 <div class="mb-6 flex justify-between items-start">
                   <div>
@@ -2358,7 +2355,7 @@ watch([selectedReportDate, reportEndDate], () => {
                 </div>
 
                 <div class="space-y-2 flex-1 overflow-y-auto">
-                  <!-- Dynamic Items -->
+            
                   <div v-for="resident in pendingResidentsList" :key="resident.id" class="bg-white rounded-xl p-3 border border-yellow-100 shadow-sm relative group hover:border-yellow-300 transition-colors">
                     <span class="absolute top-3 right-3 text-[9px] font-bold text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded border border-yellow-200">Pending</span>
                     <div class="flex items-center gap-2.5 mb-2">
@@ -2387,14 +2384,11 @@ watch([selectedReportDate, reportEndDate], () => {
                     </div>
                   </div>
 
-                  <!-- Remaining Count Message -->
                   <div v-if="stats.pendingResidents > 4" class="text-center py-1">
                     <p class="text-[10px] font-semibold text-yellow-600 bg-yellow-50/50 py-1.5 rounded-lg border border-dashed border-yellow-200">
                       {{ (stats.pendingResidents - 4) > 99 ? '+99' : '+ ' + (stats.pendingResidents - 4) }} more residents awaiting approval
                     </p>
                   </div>
-
-                  <!-- Empty State -->
                   <div v-if="pendingResidentsList.length === 0" class="flex flex-col items-center justify-center h-full text-yellow-600/50 py-10">
                     <div class="w-16 h-16 mb-3 opacity-20">
                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">

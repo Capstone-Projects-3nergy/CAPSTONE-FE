@@ -1792,7 +1792,7 @@ defineExpose({
             </div>
           </div>
 
-          <!-- Actions -->
+       
           <div class="md:col-span-2 flex gap-3 mt-6 flex-row md:justify-end border-t border-gray-50 pt-6">
             <ButtonWeb
               class="flex-1 md:flex-none md:min-w-[160px] text-xs py-2 md:text-base md:py-3.5 cursor-pointer hover:bg-gray-100 rounded-2xl transition-all font-bold px-4 md:px-8 whitespace-nowrap"
@@ -1812,7 +1812,7 @@ defineExpose({
       </div>
     </div>
     <div v-if="editResidentDetail" class="max-w-5xl mx-auto">
-      <!-- 🔹 CARD เดียว -->
+    
       <div
         class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(14,75,144,0.05)] border border-blue-50/50 p-5 md:p-8"
       >
@@ -1824,13 +1824,13 @@ defineExpose({
             {{ displayFullName }}
           </h2>
         </div>
-        <!-- 🔹 WRAPPER -->
+      
         <div class="flex flex-col md:flex-row gap-10">
           <div
             class="md:w-1/3 flex flex-col items-center text-center pt-2 sm:pt-6 md:pt-8 lg:pt-10"
           >
             <div class="relative inline-block group mb-6">
-              <!-- Avatar -->
+            
               <div
                 class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative mx-auto group/preview"
               >
@@ -1873,7 +1873,7 @@ defineExpose({
                   </svg>
                 </div>
 
-                <!-- Tooltip -->
+              
                 <div
                   class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0"
                 >
@@ -1886,7 +1886,7 @@ defineExpose({
               </div>
             </div>
 
-            <!-- hidden input -->
+          
             <input
               type="file"
               accept="image/*"
@@ -1906,7 +1906,7 @@ defineExpose({
           </div>
 
           <div class="md:w-2/3">
-            <!-- Header -->
+          
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
               <h3 class="font-extrabold text-xl text-black tracking-tight">
@@ -1914,7 +1914,7 @@ defineExpose({
               </h3>
             </div>
 
-            <!-- Form Grid -->
+         
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 items-start">
               <div class="flex flex-col">
                 <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">

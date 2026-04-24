@@ -16,10 +16,10 @@ export const useResetPasswordManager = defineStore(
       errorMessage.value = ''
 
       try {
-        // Firebase handles email sending
+        
         await sendPasswordResetEmail(auth, email)
 
-        // Optional: notify backend (log / audit)
+       
         const baseURL = import.meta.env.VITE_BASE_URL
         if (baseURL) {
           await axios.post(`${baseURL}/public/auth/reset-password-request`, {
@@ -48,10 +48,10 @@ export const useResetPasswordManager = defineStore(
       errorMessage.value = ''
 
       try {
-        // Firebase resets password
+        
         await confirmPasswordReset(auth, oobCode, newPassword)
 
-        // Optional: notify backend (NO PASSWORD)
+     
         const baseURL = import.meta.env.VITE_BASE_URL
         if (baseURL) {
           await axios.post(`${baseURL}/public/auth/reset-password-success`, {

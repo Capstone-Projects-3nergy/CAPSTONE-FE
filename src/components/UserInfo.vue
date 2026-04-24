@@ -152,7 +152,7 @@ defineExpose({
 </script>
 <template>
   <div class="relative">
-    <!-- Main Avatar Circle -->
+  
     <div
       ref="triggerRef"
       class="flex items-center justify-center group"
@@ -196,16 +196,15 @@ defineExpose({
         } : {}"
         :class="align === 'right' ? 'absolute right-0 mt-4 w-72' : 'w-[240px] sm:w-[260px] mx-0'"
       >
-        <!-- Dropdown Header & Content Container -->
+       
         <div class="flex flex-col max-h-[90vh] overflow-y-auto">
           
-          <!-- Profile Section (Avatar + Basic Info) -->
+    
           <div 
             class="relative flex flex-col items-center bg-gradient-to-b from-gray-50/50 to-white transition-all px-4 py-4 text-center border-b border-gray-100"
           >
-            <!-- (Close button removed from here) -->
             
-            <!-- Avatar -->
+
             <div class="relative mb-2 group/avatar">
               <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-2 ring-white">
                 <div class="w-full h-full rounded-full overflow-hidden relative">
@@ -226,7 +225,7 @@ defineExpose({
             </template>
           </div>
 
-          <!-- Menu Actions Section -->
+         
           <div class="flex-1 p-2 bg-white flex flex-col justify-center gap-1">
             <button
               class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group"

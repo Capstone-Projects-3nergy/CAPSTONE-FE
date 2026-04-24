@@ -63,7 +63,7 @@ export const useParcelManager = defineStore('parcelManager', () => {
       const removed = parcel.splice(index, 1)[0]
       trash.push({
         ...removed,
-        original: { ...removed }, // เก็บสภาพก่อนลบ
+        original: { ...removed }, 
         deletedAt: new Date().toISOString()
       })
     }

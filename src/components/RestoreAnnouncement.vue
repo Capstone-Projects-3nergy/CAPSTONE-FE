@@ -89,7 +89,7 @@ const confirmRestore = () => {
           </div>
         </div>
 
-        <!-- Footer -->
+ 
         <div class="px-6 py-6 bg-gray-50 flex flex-col-reverse sm:flex-row justify-end gap-3 border-t border-gray-100">
           <ButtonWeb
             label="Cancel"

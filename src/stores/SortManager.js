@@ -6,7 +6,6 @@ function getSortableDate(item) {
   if (!item) return 0;
   const rawDate = item.date || item.createdAt || item.datePosted || item.announcementDate || item.updateAt || item.updatedAt || item.postedAt || item.deletedAt || item.joinedAt;
   if (!rawDate) return 0;
-  // Handle formatted dates like '28 Jan 2026 - Draft'
   const cleanDateStr = rawDate.toString().split(' - ')[0];
   const parsed = new Date(cleanDateStr).getTime();
   return isNaN(parsed) ? 0 : parsed;
@@ -39,9 +38,6 @@ function extractDisplayDates(item) {
   };
 }
 
-// -----------------------------------------
-// Parcel Sorting
-// -----------------------------------------
 function sortByRoomNumber(parcels) {
   parcels.sort((a, b) => (a.roomNumber || 0) - (b.roomNumber || 0))
 }
@@ -142,9 +138,6 @@ function sortByLastNameReverse(parcels) {
   })
 }
 
-// -----------------------------------------
-// Announcement Sorting
-// -----------------------------------------
 function sortByTitle(items) {
   items.sort((a, b) =>
     (a.title || a.header || '').localeCompare(b.title || b.header || '', 'th', {
@@ -177,9 +170,7 @@ function sortByCategoryReverse(items) {
   )
 }
 
-// -----------------------------------------
-// User Sorting
-// -----------------------------------------
+
 function sortByLineId(items) {
   items.sort((a, b) =>
     (a.lineId || '').localeCompare(b.lineId || '', 'th', {
@@ -308,9 +299,7 @@ function sortByRoomNumberUserReverse(users) {
   users.sort((a, b) => (b.roomNumber || 0) - (a.roomNumber || 0))
 }
 
-// -----------------------------------------
-// Global Date Sorting (Supports Backend and Frontend)
-// -----------------------------------------
+
 function sortByDate(items) {
   items.sort((a, b) => getSortableDate(a) - getSortableDate(b))
 }
@@ -336,9 +325,7 @@ function sortByUserDateReverse(items) {
 }
 
 
-// -----------------------------------------
-// Searching
-// -----------------------------------------
+
 function searchParcels(parcels, keyword) {
   if (!keyword) return parcels
 
@@ -368,14 +355,11 @@ function searchParcels(parcels, keyword) {
     if(originalDate) fields.push(normalize(originalDate));
     if(originalDateClean) fields.push(normalize(originalDateClean));
 
-    // Full name fallback
     const fullNameSplice = normalize(`${p.firstName ?? ''} ${p.lastName ?? ''}`)
     fields.push(fullNameSplice)
 
-    // exact match
     const isExact = fields.some((f) => f === key)
 
-    // partial match
     const isPartial = fields.some((f) => f.includes(key))
 
     if (isExact) {
@@ -385,7 +369,6 @@ function searchParcels(parcels, keyword) {
     }
   })
 
-  // If there are exact matches, prioritize them
   return exactMatches.length > 0 ? exactMatches : partialMatches
 }
 
@@ -489,9 +472,7 @@ function searchUsers(users, keyword) {
   return exactMatches.length > 0 ? exactMatches : partialMatches
 }
 
-// -----------------------------------------
-// Date Filters (Supports Backend and Frontend)
-// -----------------------------------------
+
 function filterByDay(items, targetDate = new Date()) {
   const filtered = items.filter((p) => {
     const sortable = getSortableDate(p);

@@ -1151,17 +1151,17 @@ const closePopUp = (operate) => {
                   "
                 ></video>
 
-                <!-- OCR Scanner Focus Frame -->
+              
                 <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
-                  <!-- Focus Frame with Shadow Overlay -->
+                  
                   <div class="relative w-[85%] h-[60%] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
-                    <!-- Corner Brackets -->
+                  
                     <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
                     <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-xl shadow-lg"></div>
                     
-                    <!-- Helper Text -->
+             
                     <div class="absolute -top-12 left-0 right-0 text-center">
                       <span class="bg-[#185DC0] text-white text-[11px] px-4 py-1.5 rounded-full font-bold tracking-widest shadow-xl scale-110">Align text within frame</span>
                     </div>

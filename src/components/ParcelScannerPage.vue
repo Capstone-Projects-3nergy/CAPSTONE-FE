@@ -1453,18 +1453,14 @@ onMounted(async () => {
                     v-if="scanningMode === 'barcode'"
                     class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
                   >
-                    <!-- Shadow overlay -->
                     <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"></div>
                     
-                    <!-- Scanner Frame -->
                     <div class="relative w-64 h-32 md:w-80 md:h-40 z-20">
-                      <!-- Corners -->
                       <div class="absolute top-0 left-0 w-10 h-10 border-t-[4px] border-l-[4px] transition-colors duration-300 rounded-tl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute top-0 right-0 w-10 h-10 border-t-[4px] border-r-[4px] transition-colors duration-300 rounded-tr-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 left-0 w-10 h-10 border-b-[4px] border-l-[4px] transition-colors duration-300 rounded-bl-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       <div class="absolute bottom-0 right-0 w-10 h-10 border-b-[4px] border-r-[4px] transition-colors duration-300 rounded-br-xl" :class="isSuccessScan ? 'border-green-400' : 'border-white/80'"></div>
                       
-                      <!-- Scan Line animation -->
                       <div class="absolute left-0 top-0 w-full h-[3px] animate-scan-line" :class="isSuccessScan ? 'bg-green-400 shadow-[0_0_20px_5px_rgba(74,222,128,0.5)]' : 'bg-[#185DC0] shadow-[0_0_15px_3px_rgba(24,93,192,0.6)]'"></div>
                     </div>
                   </div>
@@ -1485,17 +1481,17 @@ onMounted(async () => {
                   "
                 ></video>
 
-                <!-- OCR Scanner Focus Frame -->
+       
                 <div v-if="videoStream" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden">
-                  <!-- Focus Frame with Shadow Overlay -->
+                 
                   <div class="relative w-[85%] h-[60%] rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
-                    <!-- Corner Brackets -->
+                
                     <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-xl shadow-lg"></div>
                     <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-xl shadow-lg"></div>
                     <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-xl shadow-lg"></div>
                     
-                    <!-- Helper Text -->
+            
                     <div class="absolute -top-12 left-0 right-0 text-center">
                       <span class="bg-[#185DC0] text-white text-[11px] px-4 py-1.5 rounded-full font-bold tracking-widest shadow-xl scale-110">Align text within frame</span>
                     </div>
@@ -1518,7 +1514,7 @@ onMounted(async () => {
                     :loading="isOcrLoading"
                   />
                 </div>
-                <!-- OCR Processing State Overlay -->
+           
                 <div v-if="isOcrLoading" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-30">
                   <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mb-4"></div>
                   <p class="text-white font-bold">Extracting text...</p>
@@ -1892,7 +1888,7 @@ onMounted(async () => {
               </div>
 
               <div class="mt-8">
-                <!-- <span class="block text-sm font-bold text-gray-400 mb-4 ml-1">Saved parcels</span> -->
+                
                 <ul class="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                   <li
                     v-for="(p, i) in savedParcels"

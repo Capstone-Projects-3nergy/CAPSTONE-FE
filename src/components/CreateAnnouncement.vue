@@ -963,7 +963,7 @@ const returnLoginPage = async () => {
                    <div v-if="activeTab === 'draft'" class="space-y-2">
                       <label class="text-sm font-semibold text-gray-700">Publish Date</label>
                       <div class="relative flex items-center group">
-                        <!-- Icon Overlay -->
+
                         <div 
                           class="absolute right-3 z-20 transition-transform duration-200 group-hover:scale-105 cursor-pointer"
                           @click="openDatePicker"

@@ -1007,9 +1007,9 @@ function formatDateTime(datetimeStr) {
                 </ParcelTable>
             </div>
           </div>
-        <!-- Latest News Section -->
+      
         <div class="px-3 md:px-6 pb-20 overflow-hidden">
-          <!-- Balanced Header Section -->
+       
           <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
             <div class="space-y-4">
               <div class="flex items-center gap-4">
@@ -1043,16 +1043,13 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
 
-          <!-- Dynamic Stories Grid -->
           <div v-if="latestAnnouncements.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-4 items-stretch anim-fade-in">
             
-            <!-- Featured Story (Left Large Card) -->
             <div 
               @click="openModal(latestAnnouncements[0])"
               class="lg:col-span-7 group cursor-pointer bg-white rounded-2xl p-3 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
             >
               <div class="relative aspect-video lg:aspect-[2.4/1] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 md:mb-5 group/img flex-shrink-0">
-                <!-- Image with fallback to Placeholder -->
                 <img 
                   v-if="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
                   :src="latestAnnouncements[0].coverImageUrl || latestAnnouncements[0].coverImage"
@@ -1065,7 +1062,7 @@ function formatDateTime(datetimeStr) {
                   </svg>
                 </div>
                 
-                <!-- Hover Overlay -->
+             
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                   <div class="bg-white/20 border border-white/40 px-6 py-3 rounded-2xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-2xl flex items-center gap-2">
                     <span class="text-white text-sm font-bold tracking-wider">Read Full Details</span>
@@ -1117,7 +1114,6 @@ function formatDateTime(datetimeStr) {
               </div>
             </div>
 
-            <!-- Small Stories List (Right) -->
             <div class="lg:col-span-5 flex flex-col gap-6">
               <div 
                 v-for="(news, index) in latestAnnouncements.slice(1)" 
@@ -1138,7 +1134,6 @@ function formatDateTime(datetimeStr) {
                     </svg>
                   </div>
 
-                  <!-- Hover Overlay -->
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
                     <div class="bg-white/20 border border-white/40 px-2 py-1.5 rounded-lg backdrop-blur-md transform scale-90 group-hover:scale-100 transition-all duration-500 shadow-xl flex items-center gap-1.5">
                       <span class="text-white text-[7px] font-black tracking-wider leading-none whitespace-nowrap">Read Full Details</span>
@@ -1178,7 +1173,7 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
 
-          <!-- Empty State -->
+        
           <div v-else class="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-100">
              <div class="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

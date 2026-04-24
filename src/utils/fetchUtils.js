@@ -7,7 +7,7 @@ async function fetchWithAuth(url, optionsOrFactory, router) {
         ? optionsOrFactory()
         : { ...optionsOrFactory }
 
-    // 🔥 บังคับมี headers เสมอ
+
     options.headers = {
       Accept: 'application/json',
       ...(options.headers || {}),
@@ -32,38 +32,6 @@ async function fetchWithAuth(url, optionsOrFactory, router) {
 
   return res
 }
-
-// async function fetchWithAuth(url, options, router) {
-//   const authManager = useAuthManager()
-//   const token = authManager.user?.accessToken
-
-//   if (token) {
-//     options.headers = {
-//       ...options.headers,
-//       Authorization: `Bearer ${token}`
-//     }
-//   }
-
-//   const res = await fetch(url, options)
-
-//   if (res.status === 401) {
-//     const newToken = await authManager.refreshToken()
-
-//     if (newToken) {
-//       options.headers.Authorization = `Bearer ${newToken}`
-//       const retryRes = await fetch(url, options)
-
-//       if (retryRes.ok) return retryRes
-
-//       return retryRes
-//     }
-
-//     authManager.logoutAccount(router)
-//     return null
-//   }
-
-//   return res
-// }
 
 export async function getItems(url, router) {
   try {
@@ -455,9 +423,7 @@ async function getStaffById(url, id, router) {
   return await getItemById(url, id, router)
 }
 
-// วิธีใช้
-// getMembers('/api/members', router)
-// getStaffs('/api/staffs', router)
+
 async function addMember(url, member, router) {
   return await addItem(url, member, router)
 }
@@ -466,8 +432,6 @@ async function addStaff(url, staff, router) {
   return await addItem(url, staff, router)
 }
 
-// addMember('/api/members', newMember, router)
-// addStaff('/api/staffs', newStaff, router)
 async function editMember(url, id, editedMember, router) {
   return await editItem(url, id, editedMember, router)
 }
@@ -493,7 +457,7 @@ async function updateUserRole(url, id, role, router) {
   if (res?.ok) return await res.json()
   return null
 }
-// updateUserRole('/api/staffs', staffId, 'ADMIN', router)
+
 async function toggleUserActive(url, id, isActive, router) {
   const options = {
     method: 'PATCH',
@@ -526,8 +490,8 @@ async function updateProfileWithFile(url, payload, router) {
       url,
       () => ({
         method: 'PUT',
-        body: formData // ✅ ต้องส่ง
-        // ❌ ห้ามตั้ง Content-Type เอง
+        body: formData 
+        
       }),
       router
     )
@@ -542,7 +506,7 @@ async function updateProfileWithFile(url, payload, router) {
 async function updateDetailWithFile(url, userId, body, router) {
   const formData = new FormData()
 
-  // ✅ สร้าง plain object เอง
+
   const data = {
     firstName: body.firstName,
     lastName: body.lastName,
@@ -595,8 +559,8 @@ async function addMemberWithFile(url, payload, router) {
       url,
       () => ({
         method: 'POST',
-        body: formData // ✅ ต้องส่ง
-        // ❌ ห้ามตั้ง Content-Type เอง
+        body: formData 
+        
       }),
       router
     )
@@ -613,7 +577,7 @@ async function getNotifications(url, router) {
   return await getItems(url, router)
 }
 
-// used by ParcelResidentVerification
+
 async function verifyParcelItem(url, payload, router) {
   try {
     const options = {
@@ -631,7 +595,7 @@ async function verifyParcelItem(url, payload, router) {
       return { success: true }
     }
 
-    // Attempt to read error message
+
     try {
       const errData = await res.json()
       return { success: false, status: res.status, message: errData.message }
@@ -650,11 +614,11 @@ async function markNotificationAsRead(url, id, router) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({}) // Explicitly send empty body
+      body: JSON.stringify({}) 
     }
 
     const res = await fetchWithAuth(`${url}/${id}/read`, options, router)
-    if (!res) return null // Auth failed or network error
+    if (!res) return null 
 
     if (res.ok) {
         return { success: true }
@@ -666,31 +630,7 @@ async function markNotificationAsRead(url, id, router) {
   }
 }
 
-// async function createWelcomeNotification(url, router) {
-//   try {
-//     const options = {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify({})
-//     }
 
-//     const res = await fetchWithAuth(`${url}/welcome`, options, router)
-//     if (!res) return null
-
-//     if (res.ok) {
-//         return { success: true }
-//     }
-//     return { success: false, status: res.status, statusText: res.statusText }
-//   } catch (error) {
-//     console.error('createWelcomeNotification error:', error)
-//     return { success: false, error }
-//   }
-// }
-
-
-// Announcement
 async function getAnnouncements(url, router) {
   return await getItems(url, router)
 }
@@ -746,8 +686,7 @@ async function addAnnouncementWithFile(url, payload, router) {
       url,
       () => ({
         method: 'POST',
-        body: formData // ✅ ต้องส่ง
-        // ❌ ห้ามตั้ง Content-Type เอง
+        body: formData 
       }),
       router
     )
@@ -779,8 +718,7 @@ async function editAnnouncementWithFile(url, id, payload, router) {
       `${url}/${id}`,
       () => ({
         method: 'PUT',
-        body: formData // ✅ ต้องส่ง
-        // ❌ ห้ามตั้ง Content-Type เอง
+        body: formData 
       }),
       router
     )
@@ -793,7 +731,7 @@ async function editAnnouncementWithFile(url, id, payload, router) {
   }
 }
 
-// Dashboard
+
 async function getDashboardData(url, router) {
   return await getItems(url, router)
 }
@@ -816,7 +754,7 @@ async function fetchDashboardData(url, router) {
   }
 }
 
-// LINE API Helpers
+
 async function sendParcelNotification(parcelId, router) {
   try {
     const options = {
@@ -896,7 +834,7 @@ async function sendLineNotification(payload, router, customUrl = null) {
   }
 }
 
-// Previous position of LINE functions
+
 
 async function resendVerification(userId, router) {
   try {
@@ -924,12 +862,11 @@ async function resendVerification(userId, router) {
 async function linkLineAccount(code, state, router) {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL
-    // ตามโค้ด Java Backend ของคุณที่ใช้ @GetMapping("/callback") และรับ code, state
+
     const url = `${baseURL}/api/line/callback?code=${code}&state=${encodeURIComponent(state)}`
 
     const res = await fetchWithAuth(url, { method: 'GET' }, router)
     if (res && res.ok) {
-      // ตรวจสอบว่า Backend คืนค่าเป็น JSON หรือไม่
       const contentType = res.headers.get('content-type')  
       if (contentType && contentType.includes('application/json')) {
         return await res.json()

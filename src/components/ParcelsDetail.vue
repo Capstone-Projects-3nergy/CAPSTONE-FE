@@ -541,7 +541,6 @@ function formatDateTime(datetimeStr) {
         </div>
 
         <div class="flex flex-col md:flex-row gap-6 items-stretch">
-          <!-- LEFT : Menu Sidebar -->
           <div class="w-full md:w-1/3 flex">
             <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div class="flex flex-col items-center text-center">
@@ -577,8 +576,6 @@ function formatDateTime(datetimeStr) {
             </div>
           </div>
         </div>
-
-        <!-- RIGHT : Content Area -->
         <div class="w-full md:w-2/3 flex">
             <div class="w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8 flex flex-col">
             <div v-if="activeTab === 'info'" class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -698,9 +695,7 @@ function formatDateTime(datetimeStr) {
                   </p>
                </div>
 
-               <!-- Send Overdue Reminder UI -->
                <div v-if="parcel?.status !== 'PICKED_UP' && parcel?.status !== 'WAITING_FOR_STAFF' && isOverdue" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-50 shadow-[0_15px_45px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 relative overflow-hidden group">
-                  <!-- Decorative blur -->
                   <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -z-0"></div>
 
                   <div class="relative z-10">
@@ -737,7 +732,7 @@ function formatDateTime(datetimeStr) {
                         ]"
                       />
                       
-                      <!-- Status Message (Cooldown) -->
+            
                       <transition enter-active-class="transition duration-300 ease-out" enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100">
                         <div v-if="isNotifyDisabled" class="flex items-center gap-2 bg-yellow-50 text-yellow-600 px-6 py-2.5 rounded-full border border-yellow-100 shadow-sm">
                            <div class="relative">
@@ -765,7 +760,6 @@ function formatDateTime(datetimeStr) {
     </div>
   </main>
 
-      <!-- Notification Confirmation Modal -->
       <div v-if="showNotifyPopup" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showNotifyPopup = false"></div>
         <div class="relative bg-white rounded-[2.5rem] w-full max-w-md p-10 text-center shadow-2xl animate-in zoom-in-95 duration-300">

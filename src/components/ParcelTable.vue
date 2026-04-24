@@ -442,7 +442,6 @@ const authStore = useAuthManager()
                 {{ p.status }}
               </span>
 
-              <!-- Tooltip -->
               <div
                 v-if="
                   authStore.user?.role === 'STAFF' &&

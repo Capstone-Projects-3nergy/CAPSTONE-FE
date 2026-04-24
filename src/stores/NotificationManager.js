@@ -30,12 +30,12 @@ export const useNotificationManager = defineStore('notificationManager', () => {
 
   const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
 
-  // Helper to save to localStorage
+
   const saveToLocalStorage = () => {
     localStorage.setItem('notifications', JSON.stringify(notifications.value))
   }
 
-  // ✅ WebSocket logic
+
   const connectWebSocket = async () => {
     if (connected.value || stompClient.value) return
 
@@ -48,8 +48,7 @@ export const useNotificationManager = defineStore('notificationManager', () => {
     try {
       const socket = new SockJS(`${import.meta.env.VITE_BASE_URL}/ws`)
       stompClient.value = Stomp.over(socket)
-      stompClient.value.debug = null // (Optional) Hide logs
-
+      stompClient.value.debug = null 
       stompClient.value.connect(
         { Authorization: `Bearer ${token}` },
         (frame) => {
