@@ -183,7 +183,7 @@ const statusOptions = computed(() => {
   } else if (s === 'PICKED_UP') {
     options = ['PICKED_UP']
   } else {
-    options = ['RECEIVED', 'PICKED_UP']
+    options = ['WAITING', 'PICKED_UP']
   }
   
   return options.map((s) => ({
