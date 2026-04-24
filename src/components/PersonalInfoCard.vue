@@ -655,7 +655,7 @@ const confirmUnlinkAction = async () => {
       />
     </div>
 
-    <!-- Confirm Disconnect Modal -->
+   
     <ConfirmPopUp
       v-if="showUnlinkConfirm"
       title="Disconnect LINE?"
@@ -667,7 +667,7 @@ const confirmUnlinkAction = async () => {
       @cancel="showUnlinkConfirm = false"
     />
 
-    <!-- Unlink Success Modal -->
+    
     <div v-if="showUnlinkSuccessPopup" class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="showUnlinkSuccessPopup = false"></div>
       
@@ -692,11 +692,11 @@ const confirmUnlinkAction = async () => {
     </div>
 
     <div v-if="profile" class="flex flex-col md:flex-row gap-2">
-      <!-- LEFT : Profile Card -->
+     
       <div
         class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
-        <!-- Avatar -->
+  
         <div class="flex flex-col items-center text-center">
           <div
             class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar"
@@ -723,7 +723,7 @@ const confirmUnlinkAction = async () => {
           </p>
         </div>
 
-        <!-- Menu -->
+  
         <div v-if="showMenu" class="mt-8 space-y-2">
           <button
             @click="activeTab = 'profile'"
@@ -768,12 +768,12 @@ const confirmUnlinkAction = async () => {
           </button>
         </div>
       </div>
-      <!-- RIGHT : Information Card -->
+   
       <div
         v-if="activeTab === 'profile'"
         class="w-full md:w-2/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
       >
-        <!-- Header -->
+      
         <div class="flex items-center justify-between mb-8">
           <div class="flex items-center gap-4">
             <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
@@ -816,7 +816,7 @@ const confirmUnlinkAction = async () => {
         </div>
       </div>
 
-        <!-- Info Grid -->
+     
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-7">
           <div>
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
@@ -900,8 +900,6 @@ const confirmUnlinkAction = async () => {
             </div>
           </div>
 
-          <!-- line removed from here and moved to a new tab -->
-
           <div>
             <label class="block text-sm font-bold text-gray-500 mb-2 ml-1">
               Phone Number
@@ -927,19 +925,15 @@ const confirmUnlinkAction = async () => {
 
         <div class="space-y-6">
           <div class="relative overflow-hidden bg-white rounded-3xl border border-gray-100 p-4 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] group">
-            <!-- Header section -->
+           
             <div class="flex items-center gap-5 mb-8 relative z-10">
               <div class="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#06C755] via-[#05B34B] to-[#05A344] flex items-center justify-center shadow-[0_12px_30px_rgba(6,199,85,0.3)] relative overflow-hidden">
-                <!-- Glossy overlay -->
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 pointer-events-none"></div>
-                <!-- Inner Glow -->
                 <div class="absolute inset-px rounded-[21px] border border-white/20 pointer-events-none"></div>
                 
                 <div class="w-11 h-11 flex items-center justify-center relative z-10">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256" class="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                    <!-- Chat Bubble (White) -->
                     <path d="M220.792 116.744c0-41.707-41.81-75.64-93.207-75.64-51.4 0-93.205 33.933-93.205 75.64 0 37.39 33.158 68.704 77.95 74.624 3.036.655 7.166 2.003 8.21 4.597.94 2.355.614 6.048.3 8.43l-1.33 7.98c-.407 2.355-1.875 9.216 8.073 5.024s53.68-31.607 73.233-54.116h-.004c13.508-14.812 19.98-29.845 19.98-46.537" fill="#fff"/>
-                    <!-- "LINE" Text (Branded Green) -->
                     <g fill="#06C755">
                       <path d="M108.647 96.6h-6.54c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.54c1.003 0 1.815-.8 1.815-1.8V98.403c0-1-.813-1.813-1.815-1.813m45 .01H147.1c-1.005 0-1.815.813-1.815 1.813v24.128l-18.613-25.135c-.043-.064-.092-.126-.14-.183l-.01-.013-.143-.143-.098-.08c-.015-.013-.03-.026-.047-.036l-.094-.064c-.017-.013-.036-.02-.055-.032l-.096-.055-.058-.028-.105-.045-.058-.02a.83.83 0 0 0-.11-.036l-.064-.017-.102-.02c-.026-.006-.053-.01-.077-.01-.032-.006-.064-.01-.096-.013l-.094-.006c-.023 0-.043-.002-.064-.002h-6.537c-1.003 0-1.815.813-1.815 1.813v40.612c0 .998.813 1.8 1.815 1.8h6.537c1.005 0 1.818-.8 1.818-1.8v-24.122l18.633 25.167a1.81 1.81 0 0 0 .463.448c.004.004.01.01.017.015l.113.066.05.03a1.1 1.1 0 0 0 .087.041l.087.038.053.02.126.038c.006.002.017.004.026.006a1.75 1.75 0 0 0 .465.06h6.537c1.003 0 1.815-.8 1.815-1.8V98.402c0-1-.813-1.813-1.815-1.813"/>
                       <path d="M92.887 130.657H75.122V98.403c0-1.003-.813-1.815-1.813-1.815h-6.54c-1.003 0-1.815.813-1.815 1.815v40.6a1.8 1.8 0 0 0 .508 1.254.09.09 0 0 0 .024.028c.01.008.02.017.028.026a1.81 1.81 0 0 0 1.252.506h26.12c1.003 0 1.813-.815 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815m96.864-23.897c1.003 0 1.813-.813 1.813-1.815v-6.54c0-1.003-.8-1.815-1.813-1.815h-26.12a1.8 1.8 0 0 0-1.259.512c-.006.006-.015.013-.02.02s-.02.02-.028.032c-.3.324-.503.764-.503 1.25v40.613c0 .486.194.928.508 1.254l.023.026.026.024c.326.314.768.508 1.254.508h26.12c1.003 0 1.813-.813 1.813-1.813v-6.54c0-1.003-.8-1.815-1.813-1.815H172v-6.865h17.762a1.81 1.81 0 0 0 1.813-1.815v-6.537c0-1.003-.8-1.818-1.813-1.818H172v-6.863h17.762z"/>
@@ -951,7 +945,7 @@ const confirmUnlinkAction = async () => {
                 <div class="flex flex-wrap items-center gap-3 mb-2">
                   <h3 class="font-extrabold text-lg sm:text-xl text-gray-800 tracking-tight leading-none">LINE Notification</h3>
                   
-                  <!-- Compact Status Badge -->
+                
                   <div :class="[
                     'flex items-center gap-2 px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300',
                     effectiveLineId ? 'bg-green-50/50 border-green-100' : 'bg-gray-50/50 border-gray-100'
@@ -1009,10 +1003,8 @@ const confirmUnlinkAction = async () => {
                       @click="handleUnlink"
                       class="group/line-disconnect-btn relative w-full sm:min-w-[200px] overflow-hidden rounded-2xl p-px transition-all duration-500 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-[0_15px_30px_-10px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(239,68,68,0.4)]"
                     >
-                      <!-- Background Gradient (Red theme) -->
+                    
                       <div class="absolute inset-0 bg-gradient-to-r from-red-500 via-rose-500 to-red-600"></div>
-                      
-                      <!-- Content Layer -->
                       <div class="relative flex items-center justify-center gap-3 px-8 py-4 bg-transparent text-white">
                         <span class="text-sm sm:text-base font-black text-white tracking-tight cursor-pointer">Disconnect LINE</span>
                         <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover/line-disconnect-btn:rotate-90 transition-transform duration-500">
@@ -1028,12 +1020,9 @@ const confirmUnlinkAction = async () => {
               </div>
             </div>
 
-            <!-- Background Decoration -->
             <div class="absolute -top-12 -right-12 w-40 h-40 bg-green-50/80 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-50/50 rounded-full blur-3xl pointer-events-none"></div>
           </div>
-
-          <!-- Helper Banner -->
           <div class="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-2xl border border-blue-100/50 relative overflow-hidden group/tip">
             <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-500 shadow-sm shadow-blue-200/50 shrink-0">
                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1059,7 +1048,7 @@ const confirmUnlinkAction = async () => {
             Notifications
           </h3>
         </div>
-        <!-- Tabs -->
+       
         <div class="flex gap-2 mb-6">
           <button
             @click="activeNotifyTab = 'all'"
@@ -1086,14 +1075,12 @@ const confirmUnlinkAction = async () => {
           </button>
         </div>
 
-        <!-- Notification list -->
         <div class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
           <div
             v-for="(item, index) in filteredNotifications"
             :key="index"
             class="flex items-start gap-4 bg-white border border-gray-50 rounded-2xl px-5 py-4 cursor-pointer hover:shadow-md hover:border-blue-100 transition-all duration-300 group shadow-sm"
           >
-            <!-- LEFT ICON -->
             <div class="mt-1">
               <span
                 class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110"
@@ -1102,7 +1089,6 @@ const confirmUnlinkAction = async () => {
               />
             </div>
 
-            <!-- CONTENT -->
             <div class="flex-1">
               <div class="flex items-center justify-between mb-0.5">
                 <p class="text-sm font-bold text-gray-800">
@@ -1130,11 +1116,9 @@ const confirmUnlinkAction = async () => {
     </div>
     <div v-else-if="residentDetail" class="w-full mx-auto px-4 relative">
       <div class="flex flex-col md:flex-row gap-6">
-        <!-- LEFT : Profile Card -->
         <div
           class="w-full md:w-1/3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-8"
         >
-          <!-- Avatar Section -->
           <div class="flex flex-col items-center text-center">
             <div
               class="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-[#1D355E] to-[#0E4B90] p-1 shadow-lg ring-4 ring-white relative group/avatar mx-auto"
@@ -1161,7 +1145,6 @@ const confirmUnlinkAction = async () => {
             </p>
           </div>
 
-          <!-- Menu Navigation -->
           <div class="mt-8 space-y-2 border-t border-gray-100 pt-6">
             <button
               @click="activeTab = 'profile'"
@@ -1202,9 +1185,7 @@ const confirmUnlinkAction = async () => {
           </div>
         </div>
 
-        <!-- RIGHT : Content Area -->
         <div class="w-full md:w-2/3">
-          <!-- Tab 1: Personal Information -->
           <div v-if="activeTab === 'profile'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex items-center gap-4 mb-8">
               <div class="w-2 h-8 bg-gradient-to-b from-[#0E4B90] to-blue-400 rounded-full"></div>
@@ -1257,7 +1238,6 @@ const confirmUnlinkAction = async () => {
               </div>
             </div>
 
-            <!-- Bottom Actions -->
             <div class="flex justify-between sm:justify-end gap-x-2 sm:gap-x-3 mt-6 sm:mt-12 pt-4 sm:pt-6 border-t border-gray-50">
               <ButtonWeb
                 class="flex-1 sm:flex-none justify-center px-4 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl sm:rounded-2xl transition-all active:scale-95 flex items-center cursor-pointer"
@@ -1274,7 +1254,6 @@ const confirmUnlinkAction = async () => {
             </div>
           </div>
 
-          <!-- Tab 2: Resident Status -->
           <div v-if="activeTab === 'status'" class="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-blue-50/50 p-6 sm:p-10 h-full">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
               <div class="flex items-center gap-4">
@@ -1284,7 +1263,7 @@ const confirmUnlinkAction = async () => {
                 </h3>
               </div>
               
-              <!-- Compact Status Badge (Moved from Body) -->
+             
               <div :class="[
                 'px-5 py-2.5 rounded-2xl border flex items-center gap-3 transition-all duration-500 shadow-sm grow-0',
                 safeStatus?.toUpperCase() === 'ACTIVE' ? 'bg-emerald-50 border-emerald-100' : 

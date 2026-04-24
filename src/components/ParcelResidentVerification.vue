@@ -884,7 +884,6 @@ const handleTrackingInput = (event, index) => {
 
             <form class="p-8 space-y-8" @submit.prevent="submitVerification">
               <div class="space-y-6">
-                <!-- Resident Name -->
                 <div class="space-y-2">
                   <div class="flex items-center ml-1">
                     <label class="block text-sm font-semibold transition-colors" :class="(isResidentNameWrong || showResidentNameLengthError || showResidentNameMinLengthError || isNameMismatch) ? 'text-red-500' : 'text-gray-700'">Resident Name</label>
@@ -949,7 +948,7 @@ const handleTrackingInput = (event, index) => {
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tracking Number -->
+                   
                     <div class="col-span-1 md:col-span-2 space-y-2">
                       <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold transition-colors" :class="(trackingNumberError || showTrackingLengthError || trackingNumberFormatError || trackingNumberWhitespaceError) ? 'text-red-500' : 'text-gray-700'">Tracking Number</label>
@@ -1002,7 +1001,7 @@ const handleTrackingInput = (event, index) => {
                       </div>
                     </div>
 
-                    <!-- Parcel Type (Optional) -->
+                   
                     <div class="space-y-2">
                        <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold text-gray-700">Parcel Type (Optional)</label>
@@ -1024,11 +1023,11 @@ const handleTrackingInput = (event, index) => {
                       </div>
                     </div>
 
-                    <!-- Company -->
+                   
                     <div class="space-y-2">
                       <div class="flex items-center ml-1">
                         <label class="block text-sm font-semibold text-gray-700">Transport Company</label>
-                        <!-- <span class="text-red-500 ml-1">*</span> -->
+                       
                       </div>
                       <div class="relative group">
                         <div class="relative">
@@ -1054,7 +1053,7 @@ const handleTrackingInput = (event, index) => {
                   </div>
                 </div>
 
-                <!-- Add Button -->
+               
                 <button
                   @click="addParcelItem"
                   type="button"
