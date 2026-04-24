@@ -106,8 +106,8 @@ const showAnnouncementPage = () => {
 const displayType = computed(() => {
   if (!props.notification) return ''
   if (props.notification.type === 'announcement' || props.notification.type === 'message') return 'New Announcement'
-  if (props.notification.type === 'overdue') return 'Parcel Overdue'
-  if (props.notification.parcelId || ['new', 'comment', 'connect'].includes(props.notification.type)) return 'New Parcel'
+  if (props.notification.type === 'overdue') return 'Awaiting Collection'
+  if (props.notification.parcelId || ['new', 'comment', 'connect'].includes(props.notification.type)) return 'Parcel Arrived'
   return props.notification.type || 'Notification'
 })
 </script>

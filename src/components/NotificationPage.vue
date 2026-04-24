@@ -207,8 +207,8 @@ const badgeClass = (item) => {
 
 const displayType = (item) => {
   if (item.type === 'announcement' || item.type === 'message') return 'New Announcement'
-  if (item.type === 'overdue') return 'Parcel Overdue'
-  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'New Parcel'
+  if (item.type === 'overdue') return 'Awaiting Collection'
+  if (item.parcelId || ['new', 'comment', 'connect'].includes(item.type)) return 'Parcel Arrived'
   return item.type || 'Notification'
 }
 
