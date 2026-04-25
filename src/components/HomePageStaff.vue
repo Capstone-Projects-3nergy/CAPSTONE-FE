@@ -418,10 +418,25 @@ const dataLabelsPlugin = {
         const value = dataset.data[index];
         if (value > 0) {
           ctx.fillStyle = '#111827';
-          ctx.font = 'black 10px Inter';
+          ctx.font = 'bold 10px Inter';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(value, bar.x, bar.y - 4);
+
+          // Check if this is the topmost segment for this bar index
+          let isTopmost = true;
+          for (let j = i + 1; j < data.datasets.length; j++) {
+            if (data.datasets[j].type !== 'line' && !chart.getDatasetMeta(j).hidden && data.datasets[j].data[index] > 0) {
+              isTopmost = false;
+              break;
+            }
+          }
+
+          if (isTopmost) {
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(value, bar.x, bar.y - 4);
+          } else {
+            ctx.textBaseline = 'top';
+            ctx.fillText(value, bar.x, bar.y + 2);
+          }
         }
       });
     });
@@ -594,27 +609,38 @@ let parcelChartInstance = null;
 const updateParcelChart = () => {
   if (!parcelChartInstance) return;
 
-  const data = dashboardStore.chartData;
-  let labels = [...data.labels];
-  let received = [...data.datasets[0].data];
-  let staffWaiting = [...data.datasets[1].data];
-  let pickedUp = [...data.datasets[2].data];
-  let overdue = [...data.datasets[3].data];
+  const storeData = dashboardStore.chartData;
+  const labels = [...storeData.labels];
+  
+  // Prepare datasets and calculate their totals for sorting
+  // Note: We keep the original labels but sort the data to put "higher numbers higher"
+  const datasets = storeData.datasets.map(ds => ({
+    ...ds,
+    sum: ds.data.reduce((a, b) => a + b, 0)
+  }));
+
+  // Sort: Smaller totals at the bottom (index 0), Larger totals at the top
+  // This satisfies "เลขมากกว่าอยู่สูงกว่า" in a general sense for the whole chart
+  datasets.sort((a, b) => a.sum - b.sum);
 
   parcelChartInstance.data.labels = labels;
-  parcelChartInstance.data.datasets[0].data = received;
-  parcelChartInstance.data.datasets[1].data = staffWaiting;
-  parcelChartInstance.data.datasets[2].data = pickedUp;
-  parcelChartInstance.data.datasets[3].data = overdue;
+  parcelChartInstance.data.datasets = datasets;
   
-  const totalReceived = received.reduce((a, b) => a + b, 0) + staffWaiting.reduce((a, b) => a + b, 0);
-  const avg = totalReceived / (received.length || 1);
+  const totalReceived = datasets.reduce((acc, ds) => {
+    if (ds.label === 'Waiting' || ds.label === 'Waiting for Staff') {
+        return acc + ds.data.reduce((a, b) => a + b, 0);
+    }
+    return acc;
+  }, 0);
+  
+  const avg = totalReceived / (labels.length || 1);
   avgParcelReceived.value = avg;
   totalParcelReceived.value = totalReceived;
   
-  const datasets = parcelChartInstance.data.datasets;
-  if (datasets.length < 5) {
-    datasets.push({
+  // Handle Avg line separately
+  const currentDatasets = parcelChartInstance.data.datasets;
+  if (!currentDatasets.some(ds => ds.type === 'line')) {
+    currentDatasets.push({
       label: `Avg (${avg.toFixed(1)})`,
       data: new Array(labels.length).fill(avg.toFixed(1)),
       type: 'line',
@@ -626,7 +652,7 @@ const updateParcelChart = () => {
       order: 0
     });
   } else {
-    const avgDs = datasets.find(ds => ds.type === 'line' && (ds.label.includes('Avg') || ds.label.includes('AVG')));
+    const avgDs = currentDatasets.find(ds => ds.type === 'line');
     if (avgDs) {
       avgDs.data = new Array(labels.length).fill(avg.toFixed(1));
       avgDs.label = `Avg (${avg.toFixed(1)})`;
@@ -913,7 +939,7 @@ onMounted(async () => {
       },
       scales: {
         x: { 
-          stacked: false,
+          stacked: true,
           grid: { display: false, drawBorder: false },
           ticks: { font: { family: "'Inter', sans-serif", size: 10 }, color: '#9CA3AF' },
           title: {
@@ -926,7 +952,7 @@ onMounted(async () => {
           }
         },
         y: {
-          stacked: false,
+          stacked: true,
           beginAtZero: true,
           suggestedMax: 10,
           grace: '15%',

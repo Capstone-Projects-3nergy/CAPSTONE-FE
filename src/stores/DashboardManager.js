@@ -135,11 +135,24 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
   const parseDate = (dStr) => {
     if (!dStr) return null
     if (dStr instanceof Date) return dStr
-    let normalized = String(dStr).trim()
-    if (normalized.includes(' ') && !normalized.includes('T')) {
-      normalized = normalized.replace(' ', 'T')
+    
+    let s = String(dStr).trim()
+    
+    const match = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|\s)(\d{2}):(\d{2}):(\d{2})/)
+    if (match) {
+      const [_, year, month, day, hour, min, sec] = match
+      return new Date(
+        parseInt(year, 10), 
+        parseInt(month, 10) - 1, 
+        parseInt(day, 10), 
+        parseInt(hour, 10), 
+        parseInt(min, 10), 
+        parseInt(sec, 10)
+      )
     }
     
+  
+    const normalized = s.includes(' ') && !s.includes('T') ? s.replace(' ', 'T') : s
     const d = new Date(normalized)
     return isNaN(d.getTime()) ? null : d
   }
@@ -192,18 +205,20 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       const start = parcelBounds.start;
       const end = parcelBounds.end;
       
-      const dArrival = new Date(p.receivedAt || p.createdAt || p.date)
-      const isArrivalInRange = !isNaN(dArrival.getTime()) && dArrival >= start && dArrival <= end
+      const arrivalRaw = p.receivedAt || p.receiveAt || p.received_at || p.createdAt || p.date
+      const dArrival = parseDate(arrivalRaw)
+      const isArrivalInRange = dArrival && dArrival >= start && dArrival <= end
       if (isArrivalInRange) return true
       
-      const dUpdate = new Date(p.updatedAt || p.updateAt)
-      const isUpdateInRange = !isNaN(dUpdate.getTime()) && dUpdate >= start && dUpdate <= end
+      const updateRaw = p.updatedAt || p.updateAt || p.updated_at
+      const dUpdate = parseDate(updateRaw)
+      const isUpdateInRange = dUpdate && dUpdate >= start && dUpdate <= end
       if (isUpdateInRange) return true
       
       if (p.statusHistory && Array.isArray(p.statusHistory)) {
         return p.statusHistory.some(h => {
-          const d = new Date(h.timestamp || h.updatedAt || h.createdAt)
-          return !isNaN(d.getTime()) && d >= start && d <= end
+          const d = parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt)
+          return d && d >= start && d <= end
         })
       }
       return false
@@ -293,9 +308,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     
     let slotCount = 0
     if (view === 'daily') {
-      slotCount = 25
+      slotCount = 24
       for (let i = 0; i < 24; i++) chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
-      chartData.labels.push("23:59")
     } else if (view === 'weekly') {
       slotCount = 7
       chartData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -326,7 +340,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       }
       
       if (arrivals.length === 0 && (isWaitingResidentStatus || sRaw.includes('PICKED') || sRaw.includes('TAKEN') || sRaw.includes('OVERDUE'))) {
-        const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+        const arrivalRaw = p.receivedAt || p.receiveAt || p.received_at || p.createdAt || p.date
+        const arrivalDate = parseDate(arrivalRaw)
         if (arrivalDate) {
           const hasSpecificStaffHistory = p.statusHistory?.some(h => (h.newStatus || h.status || '').toUpperCase().includes('STAFF'))
           if (!hasSpecificStaffHistory && !isWaitingForStaffStatus) {
@@ -358,12 +373,14 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       }
       
       if (staffArrivals.length === 0 && (isWaitingForStaffStatus || (p.statusHistory?.some(h => (h.newStatus || h.status || '').toUpperCase().includes('STAFF'))))) {
-        const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+        const arrivalRaw = p.receivedAt || p.receiveAt || p.received_at || p.createdAt || p.date
+        const arrivalDate = parseDate(arrivalRaw)
         if (arrivalDate) {
           staffArrivals.push(arrivalDate)
         }
       } else if (staffArrivals.length === 0 && isWaitingForStaffStatus) {
-         const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+         const arrivalRaw = p.receivedAt || p.receiveAt || p.received_at || p.createdAt || p.date
+         const arrivalDate = parseDate(arrivalRaw)
          if (arrivalDate) staffArrivals.push(arrivalDate)
       }
 
