@@ -132,6 +132,18 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     }))
   })
 
+  const parseDate = (dStr) => {
+    if (!dStr) return null
+    if (dStr instanceof Date) return dStr
+    let normalized = String(dStr).trim()
+    if (normalized.includes(' ') && !normalized.includes('T')) {
+      normalized = normalized.replace(' ', 'T')
+    }
+    
+    const d = new Date(normalized)
+    return isNaN(d.getTime()) ? null : d
+  }
+
   const mapStatus = (status) => {
     const s = status?.toUpperCase().replace(/[\s_-]/g, '') || ''
     
@@ -204,8 +216,8 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       
       const hasHistoryEvent = history.some(h => {
         const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '')
-        const d = new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt)
-        const inRange = !isNaN(d.getTime()) && d >= start && d <= end
+        const d = parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt)
+        const inRange = d && d >= start && d <= end
         
         if (category === 'pickedUp') return inRange && (s === 'PICKEDUP' || s === 'TAKEN')
         if (category === 'staff') return inRange && (s.includes('STAFF') || s.includes('PENDING'))
@@ -217,15 +229,25 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       if (hasHistoryEvent) return true
       
       const currentStatus = (parcel.status || '').toUpperCase().replace(/[\s_-]/g, '')
-      const arrivalDate = new Date(parcel.receivedAt || parcel.createdAt || parcel.date)
-      const isArrivalInRange = !isNaN(arrivalDate.getTime()) && arrivalDate >= start && arrivalDate <= end
-      const updateDate = new Date(parcel.updatedAt || parcel.updateAt)
-      const isUpdateInRange = !isNaN(updateDate.getTime()) && updateDate >= start && updateDate <= end
+      const arrivalDate = parseDate(parcel.receivedAt || parcel.createdAt || parcel.date)
+      const isArrivalInRange = arrivalDate && arrivalDate >= start && arrivalDate <= end
+      const updateDate = parseDate(parcel.updatedAt || parcel.updateAt)
+      const isUpdateInRange = updateDate && updateDate >= start && updateDate <= end
 
-      if (category === 'pickedUp') return (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange
-      if (category === 'staff') return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
-      if (category === 'overdue') return currentStatus.includes('OVERDUE') && isUpdateInRange
-      if (category === 'waiting') return (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus.includes('NOTIFIED')) && !currentStatus.includes('STAFF') && isArrivalInRange && !currentStatus.includes('OVERDUE')
+      if (category === 'pickedUp') {
+        return (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN') && isUpdateInRange
+      }
+      if (category === 'staff') {
+        return (currentStatus.includes('STAFF') || currentStatus.includes('PENDING')) && isArrivalInRange
+      }
+      if (category === 'overdue') {
+        return currentStatus.includes('OVERDUE') && isUpdateInRange
+      }
+      if (category === 'waiting') {
+        const isWaitingNow = (currentStatus === 'WAITING' || currentStatus === 'RECEIVED' || currentStatus === 'WAIT' || currentStatus.includes('NOTIFIED')) && !currentStatus.includes('STAFF') && !currentStatus.includes('OVERDUE')
+        const wasWaitingBefore = (currentStatus === 'PICKEDUP' || currentStatus === 'TAKEN' || currentStatus.includes('OVERDUE')) && !currentStatus.includes('STAFF')
+        return (isWaitingNow || wasWaitingBefore) && isArrivalInRange
+      }
       
       return false
     }
@@ -299,12 +321,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
              const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '') || ''
              return (s === 'WAITING' || s === 'RECEIVED' || s === 'WAIT' || s.includes('NOTIFIED')) && !s.includes('STAFF')
           })
-          .map(h => new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .map(h => parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .filter(d => d !== null)
       }
       
       if (arrivals.length === 0 && (isWaitingResidentStatus || sRaw.includes('PICKED') || sRaw.includes('TAKEN') || sRaw.includes('OVERDUE'))) {
-        const arrivalDate = new Date(p.receivedAt || p.createdAt || p.date)
-        if (!isNaN(arrivalDate.getTime())) {
+        const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+        if (arrivalDate) {
           const hasSpecificStaffHistory = p.statusHistory?.some(h => (h.newStatus || h.status || '').toUpperCase().includes('STAFF'))
           if (!hasSpecificStaffHistory && !isWaitingForStaffStatus) {
             arrivals.push(arrivalDate)
@@ -330,16 +353,18 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
              const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '') || ''
              return s.includes('STAFF') || s.includes('PENDING')
           })
-          .map(h => new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .map(h => parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .filter(d => d !== null)
       }
       
       if (staffArrivals.length === 0 && (isWaitingForStaffStatus || (p.statusHistory?.some(h => (h.newStatus || h.status || '').toUpperCase().includes('STAFF'))))) {
-        const arrivalDate = new Date(p.receivedAt || p.createdAt || p.date)
-        if (!isNaN(arrivalDate.getTime())) {
+        const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+        if (arrivalDate) {
           staffArrivals.push(arrivalDate)
         }
       } else if (staffArrivals.length === 0 && isWaitingForStaffStatus) {
-         staffArrivals.push(new Date(p.receivedAt || p.createdAt || p.date))
+         const arrivalDate = parseDate(p.receivedAt || p.createdAt || p.date)
+         if (arrivalDate) staffArrivals.push(arrivalDate)
       }
 
       staffArrivals.forEach(d => {
@@ -363,11 +388,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
              const s = (h.newStatus || h.status || '').toUpperCase() || ''
              return s === 'PICKED_UP' || s === 'TAKEN' || s === 'PICKEDUP'
           })
-          .map(h => new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .map(h => parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .filter(d => d !== null)
       }
 
       if (isPickedUpNow && completions.length === 0) {
-        completions.push(new Date(p.updatedAt || p.updateAt || p.pickedUpAt || p.receivedAt || p.createdAt))
+        const pDate = parseDate(p.updatedAt || p.updateAt || p.pickedUpAt || p.receivedAt || p.createdAt)
+        if (pDate) completions.push(pDate)
       }
 
       completions.forEach(d => {
@@ -386,11 +413,13 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
       if (p.statusHistory && Array.isArray(p.statusHistory) && p.statusHistory.length > 0) {
         overdues = p.statusHistory
           .filter(h => (h.newStatus || h.status || '').toUpperCase().includes('OVERDUE'))
-          .map(h => new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .map(h => parseDate(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date))
+          .filter(d => d !== null)
       }
 
       if (isOverdueNow && overdues.length === 0) {
-        overdues.push(new Date(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt))
+        const oDate = parseDate(p.updatedAt || p.updateAt || p.receivedAt || p.createdAt)
+        if (oDate) overdues.push(oDate)
       }
 
       overdues.forEach(d => {
