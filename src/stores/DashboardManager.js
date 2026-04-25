@@ -271,8 +271,9 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     
     let slotCount = 0
     if (view === 'daily') {
-      slotCount = 24
+      slotCount = 25
       for (let i = 0; i < 24; i++) chartData.labels.push(`${i.toString().padStart(2, '0')}:00`)
+      chartData.labels.push("23:59")
     } else if (view === 'weekly') {
       slotCount = 7
       chartData.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -407,6 +408,7 @@ export const useDashboardManager = defineStore('dashboardManager', () => {
     let labels = []
     if (view === 'daily') {
       for (let i = 0; i < 24; i++) labels.push(`${i.toString().padStart(2, '0')}:00`)
+      labels.push("23:59")
     } else if (view === 'weekly') {
       labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     } else if (view === 'monthly') {
