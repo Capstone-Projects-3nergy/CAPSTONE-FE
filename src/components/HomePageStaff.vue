@@ -1799,7 +1799,7 @@ watch([selectedReportDate, reportEndDate], () => {
                     </div>
                     <div>
                       <span class="block text-[10px] font-bold text-gray-400 tracking-widest uppercase">Waiting</span>
-                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels - stats.waitingForStaffParcels }}</span>
+                      <span class="text-xl font-black text-gray-900 leading-tight">{{ stats.awaitingParcels }}</span>
                     </div>
                   </div>
                   <div class="bg-red-50/30 p-4 rounded-2xl border border-red-50 flex items-center gap-4 transition-transform hover:scale-[1.02]">
