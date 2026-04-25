@@ -319,7 +319,7 @@ const currentStepIndex = computed(() => {
               />
               <ButtonWeb
                 v-if="!isPickUp"
-                label="Confirm Change"
+                label="Confirm"
                 color="blue"
                 class="flex-[1.5] py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 @click="saveStatusChange"

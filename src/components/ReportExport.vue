@@ -134,11 +134,15 @@ const getStatusAtDate = (parcel, date) => {
 
   if (parcel.statusHistory && Array.isArray(parcel.statusHistory) && parcel.statusHistory.length > 0) {
     const validHistory = parcel.statusHistory
-      .map(h => ({ ...h, ts: new Date(h.timestamp || h.updatedAt || h.createdAt || h.date) }))
+      .map(h => ({ 
+        ...h, 
+        ts: new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt || h.date),
+        st: (h.newStatus || h.status || '').toUpperCase().replace(/_/g, ' ')
+      }))
       .filter(h => h.ts <= date)
       .sort((a, b) => b.ts - a.ts);
 
-    if (validHistory.length > 0) return validHistory[0].status;
+    if (validHistory.length > 0) return validHistory[0].st;
   }
 
   const currentStatus = (parcel.status || '').toUpperCase().replace(/_/g, ' ');
@@ -268,8 +272,8 @@ const dynamicStats = computed(() => {
     
     const history = p.statusHistory || [];
     const hasStatusInRange = (keywords) => history.some(h => {
-      const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
-      const d = new Date(h.timestamp || h.updatedAt || h.createdAt);
+      const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+      const d = new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt);
       return !isNaN(d.getTime()) && d >= start && d <= end && keywords.some(kw => s.includes(kw));
     });
 
@@ -398,11 +402,11 @@ const parcelHistory = computed(() => {
     let pDate = null;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       const pickupEvent = p.statusHistory.find(h => {
-        const s = (h.status || '').toUpperCase().replace(/_/g, ' ');
-        return s.includes('PICKED UP') || s.includes('TAKEN');
+        const s = (h.newStatus || h.status || '').toUpperCase().replace(/_/g, ' ');
+        return s.includes('PICKED UP') || s.includes('TAKEN') || s === 'PICKEDUP';
       });
       if (pickupEvent) {
-        pDate = new Date(pickupEvent.timestamp || pickupEvent.updatedAt || pickupEvent.createdAt || pickupEvent.date);
+        pDate = new Date(pickupEvent.changedAt || pickupEvent.timestamp || pickupEvent.updatedAt || pickupEvent.createdAt || pickupEvent.date);
       }
     }
     
@@ -421,9 +425,9 @@ const parcelHistory = computed(() => {
     let overdueFoundInHistory = false;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       p.statusHistory.forEach(h => {
-        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+        const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '');
         if (s.includes('OVERDUE')) {
-          const oDate = new Date(h.timestamp || h.updatedAt || h.createdAt);
+          const oDate = new Date(h.changedAt || h.timestamp || h.updatedAt || h.createdAt);
           if (!isNaN(oDate.getTime()) && oDate <= limitDate) {
             addEvent(oDate, 'overdue');
             overdueFoundInHistory = true;
@@ -447,11 +451,11 @@ const parcelHistory = computed(() => {
     let staffDate = null;
     if (p.statusHistory && Array.isArray(p.statusHistory)) {
       const staffEvent = p.statusHistory.find(h => {
-        const s = (h.status || '').toUpperCase().replace(/[\s_-]/g, '');
+        const s = (h.newStatus || h.status || '').toUpperCase().replace(/[\s_-]/g, '');
         return s.includes('STAFF') || s.includes('PENDING');
       });
       if (staffEvent) {
-        staffDate = new Date(staffEvent.timestamp || staffEvent.updatedAt || staffEvent.createdAt);
+        staffDate = new Date(staffEvent.changedAt || staffEvent.timestamp || staffEvent.updatedAt || staffEvent.createdAt);
       }
     }
     if (!staffDate && (currentStatus.includes('STAFF') || currentStatus.includes('PENDING'))) {
