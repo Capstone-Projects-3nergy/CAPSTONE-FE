@@ -406,7 +406,6 @@ async function connectLineAccount(lineUserId, router) {
   }
 }
 
-//Member and stadd
 async function getMembers(url, router) {
   return await getItems(url, router)
 }
